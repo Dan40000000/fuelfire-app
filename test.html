@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelFire Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4B9CD3;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FuelFire App - Display Test</h1>
+        
+        <div class="test-section">
+            <h2>File Check</h2>
+            <p>Testing if all files are properly linked...</p>
+            <div id="file-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>JavaScript Test</h2>
+            <p>Testing if JavaScript is working...</p>
+            <div id="js-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>CSS Test</h2>
+            <p>Testing if CSS is loading...</p>
+            <div id="css-status" style="padding: 10px; border-radius: 4px;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>App Links</h2>
+            <ul>
+                <li><a href="index.html">Main App (index.html)</a></li>
+                <li><a href="index_fixed.html">Fixed Version (index_fixed.html)</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Test JavaScript
+        document.getElementById('js-status').innerHTML = '<span class="success">✓ JavaScript is working correctly!</span>';
+        
+        // Test CSS
+        const testDiv = document.createElement('div');
+        testDiv.className = 'test-css';
+        document.body.appendChild(testDiv);
+        
+        // Check if external CSS would load
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'css/style.css';
+        link.onload = function() {
+            document.getElementById('css-status').innerHTML = '<span class="success">✓ CSS file found and loaded!</span>';
+            document.getElementById('css-status').style.backgroundColor = '#e8f5e9';
+        };
+        link.onerror = function() {
+            document.getElementById('css-status').innerHTML = '<span class="error">✗ CSS file not loading properly</span>';
+            document.getElementById('css-status').style.backgroundColor = '#ffebee';
+        };
+        document.head.appendChild(link);
+        
+        // Check files
+        const files = ['index.html', 'css/style.css', 'js/app.js'];
+        let fileStatus = '<ul>';
+        files.forEach(file => {
+            fileStatus += `<li>Checking ${file}...</li>`;
+        });
+        fileStatus += '</ul>';
+        document.getElementById('file-status').innerHTML = fileStatus;
+        
+        // Test if the app would work
+        console.log('Test page loaded successfully!');
+    </script>
+</body>
+</html>
