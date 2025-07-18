@@ -355,6 +355,98 @@ const workoutPrograms = {
                 ]
             }
         }
+    },
+    'chloe': {
+        name: 'Chloe Ting Summer Shred',
+        weeks: 4,
+        daysPerWeek: 6,
+        schedule: {
+            'Monday': {
+                name: 'Abs & Core Killer',
+                exercises: [
+                    { name: 'Dead Bug', sets: '3', reps: '10 each side', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Slow and controlled, core engaged' },
+                    { name: 'Bicycle Crunches', sets: '3', reps: '20 each side', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Touch elbow to opposite knee' },
+                    { name: 'Russian Twists', sets: '3', reps: '20 each side', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Lean back, twist with control' },
+                    { name: 'Plank', sets: '3', reps: '30-60 sec', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Keep hips level, breathe normally' },
+                    { name: 'Mountain Climbers', sets: '3', reps: '20 each leg', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Drive knees to chest quickly' },
+                    { name: 'Reverse Crunches', sets: '3', reps: '15-20', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Pull knees to chest' },
+                    { name: 'Flutter Kicks', sets: '3', reps: '20 each leg', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Small, quick kicks' }
+                ]
+            },
+            'Tuesday': {
+                name: 'Full Body Tone',
+                exercises: [
+                    { name: 'Squat Pulses', sets: '3', reps: '15-20', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Small pulses at bottom of squat' },
+                    { name: 'Push-ups', sets: '3', reps: '10-15', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Knee variation if needed' },
+                    { name: 'Lunge Pulses', sets: '3', reps: '15 each leg', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Stay low, pulse up and down' },
+                    { name: 'Tricep Dips', sets: '3', reps: '10-15', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Use chair or bench' },
+                    { name: 'Glute Bridges', sets: '3', reps: '15-20', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Squeeze glutes at top' },
+                    { name: 'Burpees', sets: '3', reps: '5-10', rest: '45 sec', suggestedWeight: 'Bodyweight', notes: 'Full body movement' }
+                ]
+            },
+            'Wednesday': {
+                name: 'Lower Body Shred',
+                exercises: [
+                    { name: 'Squats', sets: '4', reps: '15-20', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Deep squat, chest up' },
+                    { name: 'Jumping Lunges', sets: '3', reps: '10 each leg', rest: '45 sec', suggestedWeight: 'Bodyweight', notes: 'Explosive jump between legs' },
+                    { name: 'Wall Sit', sets: '3', reps: '30-60 sec', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Back against wall, thighs parallel' },
+                    { name: 'Calf Raises', sets: '3', reps: '20-25', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'Rise up on toes, hold briefly' },
+                    { name: 'Single Leg Glute Bridges', sets: '3', reps: '10 each leg', rest: '30 sec', suggestedWeight: 'Bodyweight', notes: 'One leg extended, bridge with other' },
+                    { name: 'Jump Squats', sets: '3', reps: '10-15', rest: '45 sec', suggestedWeight: 'Bodyweight', notes: 'Explosive jump from squat' }
+                ]
+            }
+        }
+    },
+    'amateur': {
+        name: 'Amateur Strength Foundation',
+        weeks: 16,
+        daysPerWeek: 4,
+        schedule: {
+            'Monday': {
+                name: 'Chest & Triceps',
+                exercises: [
+                    { name: 'Bench Press', sets: '4', reps: '8-10', rest: '3 min', suggestedWeight: '135-185', notes: 'Compound movement - focus on form over weight' },
+                    { name: 'Incline Dumbbell Press', sets: '3', reps: '10-12', rest: '2 min', suggestedWeight: '35-55', notes: 'Upper chest focus, 30-45 degree incline' },
+                    { name: 'Dumbbell Flyes', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '20-35', notes: 'Stretch and squeeze, control the weight' },
+                    { name: 'Tricep Dips', sets: '3', reps: '10-15', rest: '90 sec', suggestedWeight: 'Bodyweight', notes: 'Use dip bar or bench, full range of motion' },
+                    { name: 'Close-Grip Bench Press', sets: '3', reps: '10-12', rest: '2 min', suggestedWeight: '95-135', notes: 'Hands shoulder-width apart, elbows tucked' },
+                    { name: 'Overhead Cable Extension', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '50-70', notes: 'Keep elbows stationary, full extension' }
+                ]
+            },
+            'Tuesday': {
+                name: 'Back & Biceps',
+                exercises: [
+                    { name: 'Deadlifts', sets: '4', reps: '6-8', rest: '3 min', suggestedWeight: '185-225', notes: 'King of exercises - perfect form essential' },
+                    { name: 'Pull-ups/Lat Pulldowns', sets: '3', reps: '8-12', rest: '2 min', suggestedWeight: '100-140', notes: 'Wide grip, pull to upper chest' },
+                    { name: 'Bent-Over Rows', sets: '3', reps: '10-12', rest: '2 min', suggestedWeight: '115-155', notes: 'Pull to lower chest, squeeze shoulder blades' },
+                    { name: 'Cable Rows', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '100-140', notes: 'Sit tall, pull to abdomen' },
+                    { name: 'Barbell Curls', sets: '3', reps: '10-12', rest: '90 sec', suggestedWeight: '60-85', notes: 'Strict form, no swinging' },
+                    { name: 'Hammer Curls', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '25-40', notes: 'Neutral grip, control the weight' }
+                ]
+            },
+            'Thursday': {
+                name: 'Legs & Glutes',
+                exercises: [
+                    { name: 'Squats', sets: '4', reps: '10-12', rest: '3 min', suggestedWeight: '155-205', notes: 'Below parallel, chest up, knees track over toes' },
+                    { name: 'Romanian Deadlifts', sets: '3', reps: '12-15', rest: '2 min', suggestedWeight: '115-155', notes: 'Hip hinge, feel stretch in hamstrings' },
+                    { name: 'Leg Press', sets: '3', reps: '15-20', rest: '2 min', suggestedWeight: '270-360', notes: 'Full range of motion, controlled descent' },
+                    { name: 'Walking Lunges', sets: '3', reps: '10 each leg', rest: '90 sec', suggestedWeight: '25-40', notes: 'Big steps, knee to floor, alternate legs' },
+                    { name: 'Leg Curls', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '70-100', notes: 'Hamstring isolation, control the negative' },
+                    { name: 'Calf Raises', sets: '4', reps: '15-20', rest: '90 sec', suggestedWeight: '45-90', notes: 'Full range of motion, pause at top' }
+                ]
+            },
+            'Friday': {
+                name: 'Shoulders & Core',
+                exercises: [
+                    { name: 'Overhead Press', sets: '4', reps: '8-10', rest: '3 min', suggestedWeight: '85-115', notes: 'Core tight, press straight up, no back arch' },
+                    { name: 'Lateral Raises', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '15-25', notes: 'Lead with elbows, slight forward lean' },
+                    { name: 'Rear Delt Flyes', sets: '3', reps: '15-20', rest: '90 sec', suggestedWeight: '10-20', notes: 'Bent over, squeeze shoulder blades' },
+                    { name: 'Upright Rows', sets: '3', reps: '12-15', rest: '90 sec', suggestedWeight: '65-95', notes: 'Wide grip, pull to chest level' },
+                    { name: 'Plank', sets: '3', reps: '45-90 sec', rest: '90 sec', suggestedWeight: 'Bodyweight', notes: 'Keep hips level, breathe normally' },
+                    { name: 'Hanging Leg Raises', sets: '3', reps: '10-15', rest: '90 sec', suggestedWeight: 'Bodyweight', notes: 'Control the swing, use abs not momentum' }
+                ]
+            }
+        }
     }
 };
 
@@ -685,71 +777,70 @@ const workoutInfo = {
             'Recovery is absolutely critical'
         ]
     },
-    'serena': {
-        name: 'Serena Williams Power Tennis',
-        creator: 'Serena Williams & Team',
-        duration: '12 Weeks',
-        difficulty: 'ADVANCED',
-        type: 'Athletic Power',
-        description: 'Train like the most dominant tennis player of all time. This program builds explosive power, agility, and endurance while developing the mental toughness of a 23-time Grand Slam champion.',
+    'chloe': {
+        name: 'Chloe Ting Summer Shred',
+        creator: 'Chloe Ting',
+        duration: '8 Weeks',
+        difficulty: 'INTERMEDIATE',
+        type: 'Fat Loss & Toning',
+        description: 'Get ready for summer with this popular fat-burning program! Combines HIIT workouts, targeted abs training, and full-body circuits designed to help you lose weight and tone up. Perfect for home workouts with minimal equipment.',
         requirements: [
-            'Access to tennis court (3x per week)',
-            'Full gym access',
-            '5-6 days per week training',
-            '2-3 hours per day',
-            'Agility equipment (cones, ladder)',
-            'Medicine balls and resistance bands'
+            'No gym required - home friendly',
+            '5-6 days per week',
+            '30-45 minutes per session',
+            'Basic equipment (mat, water bottle)',
+            'Commitment to nutrition plan',
+            'Progress photos recommended'
         ],
         weeklySchedule: `
-            Monday: Lower Body Power + Court Drills
-            Tuesday: Upper Body + Core + Agility
-            Wednesday: Tennis Practice + Cardio
-            Thursday: Full Body Strength + Plyo
-            Friday: Tennis Drills + Recovery
-            Saturday: Match Play or Intense Drills
-            Sunday: Active Recovery or Rest
+            Monday: Full Body HIIT
+            Tuesday: Targeted Abs & Core
+            Wednesday: Lower Body Burn
+            Thursday: Upper Body & Arms
+            Friday: Full Body Fat Burn
+            Saturday: Abs & Cardio Combo
+            Sunday: Rest or Active Recovery
         `,
-        equipment: 'Tennis court, full gym, agility ladder, cones, medicine balls, battle ropes',
-        idealFor: 'Athletes wanting explosive power, elite conditioning, and champion mindset',
+        equipment: 'Exercise mat, water bottle, optional: light dumbbells, resistance bands',
+        idealFor: 'Anyone wanting to lose weight and tone up from home with fun, effective workouts',
         warnings: [
-            'High impact on joints from jumping',
-            'Requires sport-specific skills',
-            'Intense schedule may cause burnout',
-            'Need proper warm-up to prevent injury'
+            'High intensity - start slow if needed',
+            'Proper form crucial to avoid injury',
+            'Results depend on nutrition compliance',
+            'May need modifications for beginners'
         ]
     },
-    'simone': {
-        name: 'Simone Biles Gymnastics Strength',
-        creator: 'Simone Biles & Coaching Team',
-        duration: '16 Weeks',
-        difficulty: 'ELITE',
-        type: 'Gymnastics Strength',
-        description: 'Develop the incredible strength-to-weight ratio, flexibility, and body control of the gymnastics GOAT. This program builds functional strength through bodyweight mastery and gymnastics progressions.',
+    'amateur': {
+        name: 'Amateur Strength Foundation',
+        creator: 'Amateur Strength Foundation',
+        duration: '12 Weeks',
+        difficulty: 'INTERMEDIATE',
+        type: 'Strength Building',
+        description: 'A well-rounded 4-day split program focusing on compound movements and progressive overload. Each workout targets two major muscle groups with optimal volume for strength and muscle building. Perfect for intermediate lifters wanting consistent progress.',
         requirements: [
-            'Prior bodyweight training experience',
-            '5-6 days per week',
-            '90-120 minutes per session',
-            'Access to gymnastics equipment helpful',
-            'Extreme flexibility work daily',
-            'Strong core foundation'
+            'Basic gym access required',
+            '4 days per week commitment',
+            '60-90 minutes per session',
+            '6+ months lifting experience',
+            'Knowledge of compound movements',
+            'Consistent nutrition plan'
         ],
         weeklySchedule: `
-            Monday: Strength & Tumbling Basics
-            Tuesday: Flexibility & Balance Beam Work
-            Wednesday: Upper Body & Bar Work
-            Thursday: Core & Floor Routine
-            Friday: Full Body Power & Vault
-            Saturday: Skills Practice & Conditioning
-            Sunday: Active Flexibility & Recovery
+            Monday: Chest & Triceps
+            Tuesday: Back & Biceps
+            Wednesday: Rest or Light Cardio
+            Thursday: Shoulders & Abs
+            Friday: Legs & Glutes
+            Saturday: Rest or Active Recovery
+            Sunday: Rest
         `,
-        equipment: 'Pull-up bar, rings, parallettes, mats, foam roller, resistance bands',
-        idealFor: 'Those wanting elite bodyweight strength, flexibility, and complete body control',
+        equipment: 'Full gym access - barbells, dumbbells, cable machines, leg press, bench',
+        idealFor: 'Intermediate lifters wanting structured progression in strength and muscle building',
         warnings: [
-            'Very technical - requires progression',
-            'High injury risk without proper form',
-            'Flexibility requirements may take months',
-            'Not suitable for those with wrist issues',
-            'Requires professional coaching for advanced skills'
+            'Requires proper form on compound lifts',
+            'Progressive overload is essential',
+            'May need deload weeks for recovery',
+            'Nutrition timing affects results'
         ]
     }
 };
