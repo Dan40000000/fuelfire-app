@@ -2192,15 +2192,23 @@ function loadWorkoutHistory() {
             </div>
         `;
     } else {
+        // Running Total Banner
+        html += `
+            <div class="workout-card glow-effect" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; text-align: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);"></div>
+                <div style="position: relative; z-index: 1;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">🏆 WORKOUTS COMPLETED</div>
+                    <div class="stat-number" style="font-size: 48px; font-weight: 900; margin-bottom: 5px;">${stats.totalWorkouts}</div>
+                    <div style="font-size: 12px; opacity: 0.8;">Keep crushing it, champion!</div>
+                </div>
+            </div>
+        `;
+
         // Stats Overview
         html += `
             <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
                 <h4 style="color: var(--dark); margin-bottom: 20px; text-align: center;">📊 Your Stats</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
-                    <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px;">
-                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: var(--primary); margin-bottom: 5px;">${stats.totalWorkouts}</div>
-                        <div style="font-size: 12px; color: #666;">Total Workouts</div>
-                    </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
                     <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px;">
                         <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #27ae60; margin-bottom: 5px;">${stats.totalMinutes}m</div>
                         <div style="font-size: 12px; color: #666;">Total Time</div>
