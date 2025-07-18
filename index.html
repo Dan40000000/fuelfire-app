@@ -202,7 +202,7 @@
                             <button onclick="showWorkoutInfo('75hard')" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
                                 ℹ️ More Info
                             </button>
-                            <button style="background: white; color: #C44569; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                            <button onclick="showScreen('saved-workouts')" style="background: white; color: #C44569; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
                                 💪 Start Challenge
                             </button>
                         </div>
@@ -573,7 +573,63 @@
                     </div>
                     
                     <div id="saved-workouts-list">
-                        <!-- Workouts will be dynamically loaded here -->
+                        <!-- Example saved workouts -->
+                        <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="color: var(--dark); margin: 0;">🔥 My Push Day</h4>
+                                <span style="background: var(--primary); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">45 min</span>
+                            </div>
+                            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Chest, Shoulders, Triceps • 8 exercises</p>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="startSavedWorkout('push')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ▶️ Start
+                                </button>
+                                <button onclick="editSavedWorkout('push')" style="background: var(--lighter-bg); color: var(--primary); border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ✏️ Edit
+                                </button>
+                                <button onclick="deleteSavedWorkout('push')" style="background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #27ae60;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="color: var(--dark); margin: 0;">🏃 HIIT Cardio Blast</h4>
+                                <span style="background: #27ae60; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">25 min</span>
+                            </div>
+                            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">High Intensity Intervals • 6 exercises</p>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="startSavedWorkout('hiit')" style="background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ▶️ Start
+                                </button>
+                                <button onclick="editSavedWorkout('hiit')" style="background: var(--lighter-bg); color: #27ae60; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ✏️ Edit
+                                </button>
+                                <button onclick="deleteSavedWorkout('hiit')" style="background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #f39c12;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="color: var(--dark); margin: 0;">🦵 Leg Day Beast</h4>
+                                <span style="background: #f39c12; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">60 min</span>
+                            </div>
+                            <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Quads, Glutes, Hamstrings • 10 exercises</p>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="startSavedWorkout('legs')" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ▶️ Start
+                                </button>
+                                <button onclick="editSavedWorkout('legs')" style="background: var(--lighter-bg); color: #f39c12; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ✏️ Edit
+                                </button>
+                                <button onclick="deleteSavedWorkout('legs')" style="background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
                     <div style="background: var(--lighter-bg); padding: 20px; border-radius: 20px; text-align: center; margin-top: 30px;">
@@ -587,31 +643,476 @@
                 <!-- TRACK WORKOUTS SCREEN -->
                 <div class="screen-content" id="track-workouts">
                     <div id="workout-tracker-content">
-                        <!-- Content will be dynamically loaded -->
+                        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+                            <h3 style="font-size: 20px; margin-bottom: 10px;">📈 Workout Tracker</h3>
+                            <p style="opacity: 0.9; font-size: 14px;">Track your progress and log your workouts</p>
+                        </div>
+                        
+                        <!-- Quick Log Section -->
+                        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                            <h4 style="color: var(--dark); margin-bottom: 15px;">🏃 Quick Log</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                <button onclick="logQuickWorkout('cardio')" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    💨 Cardio
+                                </button>
+                                <button onclick="logQuickWorkout('strength')" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    💪 Strength
+                                </button>
+                                <button onclick="logQuickWorkout('yoga')" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    🧘 Yoga/Stretch
+                                </button>
+                                <button onclick="logQuickWorkout('sports')" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                                    ⚽ Sports
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Workouts -->
+                        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                            <h4 style="color: var(--dark); margin-bottom: 15px;">📝 Recent Workouts</h4>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🔥 Push Day</div>
+                                    <div style="color: #666; font-size: 12px;">Today • 45 min</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--primary); font-weight: bold;">8 exercises</div>
+                                    <div style="color: #666; font-size: 12px;">Completed</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🏃 HIIT Cardio</div>
+                                    <div style="color: #666; font-size: 12px;">Yesterday • 25 min</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--primary); font-weight: bold;">6 exercises</div>
+                                    <div style="color: #666; font-size: 12px;">Completed</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🦵 Leg Day</div>
+                                    <div style="color: #666; font-size: 12px;">2 days ago • 60 min</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--primary); font-weight: bold;">10 exercises</div>
+                                    <div style="color: #666; font-size: 12px;">Completed</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Weekly Stats -->
+                        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+                            <h4 style="color: var(--dark); margin-bottom: 15px;">📊 This Week</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                                <div>
+                                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">3</div>
+                                    <div style="font-size: 12px; color: #666;">Workouts</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">130</div>
+                                    <div style="font-size: 12px; color: #666;">Minutes</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">24</div>
+                                    <div style="font-size: 12px; color: #666;">Exercises</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- DIET TRACKER SCREEN -->
                 <div class="screen-content" id="diet-tracker">
-                    <h2 style="color: var(--dark); margin-bottom: 20px; text-align: center;">Diet Tracker</h2>
-                    <div style="background: var(--gradient-light); padding: 40px; border-radius: 20px; text-align: center;">
-                        <p>🥗 Nutrition tracking coming soon!</p>
+                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px;">🥗 Diet Tracker</h3>
+                        <p style="opacity: 0.9; font-size: 14px;">Track your daily nutrition and calories</p>
+                    </div>
+                    
+                    <!-- Daily Calories -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">📊 Today's Calories</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">1,847</div>
+                                <div style="font-size: 12px; color: #666;">calories consumed</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #27ae60;">453</div>
+                                <div style="font-size: 12px; color: #666;">remaining</div>
+                            </div>
+                        </div>
+                        <div style="background: var(--lighter-bg); border-radius: 10px; height: 8px; margin-bottom: 10px;">
+                            <div style="background: var(--primary); height: 100%; width: 80%; border-radius: 10px;"></div>
+                        </div>
+                        <div style="text-align: center; color: #666; font-size: 12px;">Goal: 2,300 calories</div>
+                    </div>
+                    
+                    <!-- Macros -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">⚖️ Macronutrients</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: #e74c3c;">92g</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Protein</div>
+                                <div style="background: var(--lighter-bg); border-radius: 5px; height: 4px;">
+                                    <div style="background: #e74c3c; height: 100%; width: 75%; border-radius: 5px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: #f39c12;">240g</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Carbs</div>
+                                <div style="background: var(--lighter-bg); border-radius: 5px; height: 4px;">
+                                    <div style="background: #f39c12; height: 100%; width: 85%; border-radius: 5px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: #27ae60;">65g</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Fat</div>
+                                <div style="background: var(--lighter-bg); border-radius: 5px; height: 4px;">
+                                    <div style="background: #27ae60; height: 100%; width: 70%; border-radius: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Add -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">➕ Quick Add</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button onclick="addFood('breakfast')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
+                                🌅 Breakfast
+                            </button>
+                            <button onclick="addFood('lunch')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
+                                🌞 Lunch
+                            </button>
+                            <button onclick="addFood('dinner')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
+                                🌙 Dinner
+                            </button>
+                            <button onclick="addFood('snack')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
+                                🥨 Snack
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Meals -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🍽️ Recent Meals</h4>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">Chicken & Rice Bowl</div>
+                                <div style="color: #666; font-size: 12px;">Lunch • 1:30 PM</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">645 cal</div>
+                                <div style="color: #666; font-size: 12px;">35g protein</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">Greek Yogurt & Berries</div>
+                                <div style="color: #666; font-size: 12px;">Breakfast • 8:00 AM</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">280 cal</div>
+                                <div style="color: #666; font-size: 12px;">20g protein</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">Protein Shake</div>
+                                <div style="color: #666; font-size: 12px;">Pre-workout • 6:00 AM</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">320 cal</div>
+                                <div style="color: #666; font-size: 12px;">40g protein</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- DIET CREATION SCREEN -->
                 <div class="screen-content" id="diet-creation">
-                    <h2 style="color: var(--dark); margin-bottom: 20px; text-align: center;">Diet Creation</h2>
-                    <div style="background: var(--gradient-light); padding: 40px; border-radius: 20px; text-align: center;">
-                        <p>🎯 Diet planning coming soon!</p>
+                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px;">🎯 Diet Creation</h3>
+                        <p style="opacity: 0.9; font-size: 14px;">Create your personalized nutrition plan</p>
+                    </div>
+                    
+                    <!-- Goal Selection -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🎯 Select Your Goal</h4>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                            <button onclick="selectDietGoal('weight-loss')" style="background: var(--lighter-bg); border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: left;">
+                                <div style="font-weight: bold;">🔥 Weight Loss</div>
+                                <div style="font-size: 12px; opacity: 0.8;">Lose 1-2 lbs per week safely</div>
+                            </button>
+                            <button onclick="selectDietGoal('muscle-gain')" style="background: var(--lighter-bg); border: 2px solid #27ae60; color: #27ae60; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: left;">
+                                <div style="font-weight: bold;">💪 Muscle Gain</div>
+                                <div style="font-size: 12px; opacity: 0.8;">Build lean muscle with proper nutrition</div>
+                            </button>
+                            <button onclick="selectDietGoal('maintenance')" style="background: var(--lighter-bg); border: 2px solid #f39c12; color: #f39c12; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: left;">
+                                <div style="font-weight: bold;">⚖️ Maintenance</div>
+                                <div style="font-size: 12px; opacity: 0.8;">Maintain current weight and energy</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Popular Diet Plans -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">📋 Popular Diet Plans</h4>
+                        
+                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🥩 High Protein</div>
+                                    <div style="color: #666; font-size: 12px;">40% protein, 30% carbs, 30% fat</div>
+                                </div>
+                                <button onclick="selectDietPlan('high-protein')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-size: 12px; cursor: pointer;">
+                                    Select
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🥑 Keto</div>
+                                    <div style="color: #666; font-size: 12px;">5% carbs, 75% fat, 20% protein</div>
+                                </div>
+                                <button onclick="selectDietPlan('keto')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-size: 12px; cursor: pointer;">
+                                    Select
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🌾 Balanced</div>
+                                    <div style="color: #666; font-size: 12px;">30% protein, 40% carbs, 30% fat</div>
+                                </div>
+                                <button onclick="selectDietPlan('balanced')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-size: 12px; cursor: pointer;">
+                                    Select
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: bold; color: var(--dark);">🌱 Mediterranean</div>
+                                    <div style="color: #666; font-size: 12px;">Heart-healthy fats and whole foods</div>
+                                </div>
+                                <button onclick="selectDietPlan('mediterranean')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-size: 12px; cursor: pointer;">
+                                    Select
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Calculator -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🧮 Quick Calculator</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <div>
+                                <label style="font-size: 12px; color: #666;">Weight (lbs)</label>
+                                <input type="number" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: #666;">Height (inches)</label>
+                                <input type="number" placeholder="68" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <div>
+                                <label style="font-size: 12px; color: #666;">Age</label>
+                                <input type="number" placeholder="25" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: #666;">Activity Level</label>
+                                <select style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                                    <option>Sedentary</option>
+                                    <option>Light</option>
+                                    <option>Moderate</option>
+                                    <option>Active</option>
+                                    <option>Very Active</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="calculateMacros()" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer; width: 100%;">
+                            📊 Calculate My Macros
+                        </button>
                     </div>
                 </div>
 
                 <!-- PROGRESS SCREEN -->
                 <div class="screen-content" id="progress">
-                    <h2 style="color: var(--dark); margin-bottom: 20px; text-align: center;">Progress & Analytics</h2>
-                    <div style="background: var(--gradient-light); padding: 40px; border-radius: 20px; text-align: center;">
-                        <p>📊 Analytics coming soon!</p>
+                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px;">📊 Progress & Analytics</h3>
+                        <p style="opacity: 0.9; font-size: 14px;">Track your fitness journey and achievements</p>
+                    </div>
+                    
+                    <!-- Current Stats -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">📈 Current Stats</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">175</div>
+                                <div style="font-size: 12px; color: #666;">Current Weight (lbs)</div>
+                                <div style="font-size: 10px; color: #27ae60;">-5 lbs from start</div>
+                            </div>
+                            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">18.5</div>
+                                <div style="font-size: 12px; color: #666;">Body Fat %</div>
+                                <div style="font-size: 10px; color: #27ae60;">-2.5% from start</div>
+                            </div>
+                            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">42</div>
+                                <div style="font-size: 12px; color: #666;">Muscle Mass (lbs)</div>
+                                <div style="font-size: 10px; color: #27ae60;">+3 lbs from start</div>
+                            </div>
+                            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">28</div>
+                                <div style="font-size: 12px; color: #666;">Workouts This Month</div>
+                                <div style="font-size: 10px; color: #27ae60;">+8 from last month</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Workout Analytics -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">💪 Workout Analytics</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center; margin-bottom: 15px;">
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: var(--primary);">47</div>
+                                <div style="font-size: 12px; color: #666;">Total Workouts</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: var(--primary);">38h</div>
+                                <div style="font-size: 12px; color: #666;">Total Time</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: var(--primary);">3.2</div>
+                                <div style="font-size: 12px; color: #666;">Avg/Week</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Workout Types -->
+                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px;">
+                            <h5 style="color: var(--dark); margin-bottom: 10px; font-size: 14px;">Workout Distribution</h5>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>🔥 Strength</span>
+                                    <span style="color: var(--primary);">60%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>🏃 Cardio</span>
+                                    <span style="color: var(--primary);">25%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>🧘 Flexibility</span>
+                                    <span style="color: var(--primary);">10%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>⚽ Sports</span>
+                                    <span style="color: var(--primary);">5%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Personal Records -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🏆 Personal Records</h4>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🏋️ Bench Press</div>
+                                <div style="color: #666; font-size: 12px;">Set 3 days ago</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">225 lbs</div>
+                                <div style="color: #27ae60; font-size: 12px;">+10 lbs PR</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🦵 Squat</div>
+                                <div style="color: #666; font-size: 12px;">Set 1 week ago</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">315 lbs</div>
+                                <div style="color: #27ae60; font-size: 12px;">+25 lbs PR</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🏃 5K Run</div>
+                                <div style="color: #666; font-size: 12px;">Set 2 weeks ago</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">22:15</div>
+                                <div style="color: #27ae60; font-size: 12px;">-1:30 PR</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">💪 Pull-ups</div>
+                                <div style="color: #666; font-size: 12px;">Set yesterday</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">15 reps</div>
+                                <div style="color: #27ae60; font-size: 12px;">+3 reps PR</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Goals Progress -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🎯 Goals Progress</h4>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 14px; color: var(--dark);">Lose 10 lbs</span>
+                                <span style="font-size: 14px; color: var(--primary);">50%</span>
+                            </div>
+                            <div style="background: var(--lighter-bg); border-radius: 10px; height: 8px;">
+                                <div style="background: var(--primary); height: 100%; width: 50%; border-radius: 10px;"></div>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">5 lbs lost • 5 lbs to go</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 14px; color: var(--dark);">Workout 4x per week</span>
+                                <span style="font-size: 14px; color: #27ae60;">125%</span>
+                            </div>
+                            <div style="background: var(--lighter-bg); border-radius: 10px; height: 8px;">
+                                <div style="background: #27ae60; height: 100%; width: 100%; border-radius: 10px;"></div>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">5 workouts this week • Goal exceeded!</div>
+                        </div>
+                        
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-size: 14px; color: var(--dark);">Bench 250 lbs</span>
+                                <span style="font-size: 14px; color: var(--primary);">90%</span>
+                            </div>
+                            <div style="background: var(--lighter-bg); border-radius: 10px; height: 8px;">
+                                <div style="background: var(--primary); height: 100%; width: 90%; border-radius: 10px;"></div>
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">225 lbs current • 25 lbs to go</div>
+                        </div>
                     </div>
                 </div>
 

@@ -1864,6 +1864,83 @@ function startQuickWorkout(workoutType) {
     }
 }
 
+// Saved Workouts Functions
+function startSavedWorkout(workoutId) {
+    alert(`Starting ${workoutId} workout! (This would load the workout tracker)`);
+}
+
+function editSavedWorkout(workoutId) {
+    alert(`Editing ${workoutId} workout! (This would open the workout editor)`);
+}
+
+function deleteSavedWorkout(workoutId) {
+    if (confirm(`Are you sure you want to delete this workout?`)) {
+        alert(`${workoutId} workout deleted!`);
+        // This would remove the workout from the UI
+    }
+}
+
+// Track Workouts Functions
+function logQuickWorkout(workoutType) {
+    const workoutNames = {
+        'cardio': 'Cardio Session',
+        'strength': 'Strength Training',
+        'yoga': 'Yoga/Stretching',
+        'sports': 'Sports Activity'
+    };
+    
+    const duration = prompt(`How long was your ${workoutNames[workoutType]} session? (in minutes)`, '30');
+    if (duration) {
+        alert(`✅ ${workoutNames[workoutType]} logged: ${duration} minutes`);
+        // This would save to localStorage and update the UI
+    }
+}
+
+// Diet Tracker Functions
+function addFood(mealType) {
+    const mealNames = {
+        'breakfast': 'Breakfast',
+        'lunch': 'Lunch',
+        'dinner': 'Dinner',
+        'snack': 'Snack'
+    };
+    
+    const foodName = prompt(`What did you eat for ${mealNames[mealType]}?`, '');
+    if (foodName) {
+        alert(`✅ Added "${foodName}" to ${mealNames[mealType]}`);
+        // This would open a food logging interface
+    }
+}
+
+// Diet Creation Functions
+function selectDietGoal(goal) {
+    const goals = {
+        'weight-loss': 'Weight Loss',
+        'muscle-gain': 'Muscle Gain',
+        'maintenance': 'Maintenance'
+    };
+    
+    alert(`Selected goal: ${goals[goal]}`);
+    // This would save the selected goal and update the UI
+}
+
+function selectDietPlan(plan) {
+    const plans = {
+        'high-protein': 'High Protein Diet',
+        'keto': 'Ketogenic Diet',
+        'balanced': 'Balanced Diet',
+        'mediterranean': 'Mediterranean Diet'
+    };
+    
+    alert(`Selected diet plan: ${plans[plan]}`);
+    // This would apply the selected diet plan
+}
+
+function calculateMacros() {
+    alert('Calculating your personalized macros... (This would perform the calculation based on inputs)');
+    // This would calculate and display personalized macro recommendations
+}
+
 // Initialize
 window.onload = function() {
     updateTime();
