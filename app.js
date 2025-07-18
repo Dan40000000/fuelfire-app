@@ -1941,6 +1941,174 @@ function calculateMacros() {
     // This would calculate and display personalized macro recommendations
 }
 
+// Workout Program Functions
+let currentWorkoutProgram = null;
+
+function startWorkoutProgram(programId) {
+    currentWorkoutProgram = programId;
+    displayWorkoutProgram(programId);
+}
+
+function startWorkoutProgramFromInfo() {
+    if (currentWorkoutProgram) {
+        displayWorkoutProgram(currentWorkoutProgram);
+    }
+}
+
+function displayWorkoutProgram(programId) {
+    const program = workoutPrograms[programId];
+    if (!program) return;
+    
+    document.getElementById('program-title').textContent = program.name;
+    
+    let contentHTML = `
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0;">${program.name}</h3>
+            <p style="opacity: 0.9; margin: 0;">${program.duration} • ${program.daysPerWeek} days/week</p>
+        </div>
+    `;
+    
+    if (programId === '75hard') {
+        contentHTML += `
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                <h4 style="color: var(--dark); margin-bottom: 15px;">📋 Daily Requirements</h4>
+                <div style="display: grid; gap: 12px;">
+                    <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; display: flex; align-items: center;">
+                        <span style="font-size: 20px; margin-right: 12px;">🥗</span>
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">Follow a structured diet</div>
+                            <div style="color: #666; font-size: 12px;">No cheat meals or alcohol</div>
+                        </div>
+                    </div>
+                    <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; display: flex; align-items: center;">
+                        <span style="font-size: 20px; margin-right: 12px;">💪</span>
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">2 workouts (45 min each)</div>
+                            <div style="color: #666; font-size: 12px;">One must be outdoors</div>
+                        </div>
+                    </div>
+                    <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; display: flex; align-items: center;">
+                        <span style="font-size: 20px; margin-right: 12px;">💧</span>
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">Drink 1 gallon of water</div>
+                            <div style="color: #666; font-size: 12px;">Every single day</div>
+                        </div>
+                    </div>
+                    <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; display: flex; align-items: center;">
+                        <span style="font-size: 20px; margin-right: 12px;">📚</span>
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">Read 10 pages</div>
+                            <div style="color: #666; font-size: 12px;">Non-fiction book only</div>
+                        </div>
+                    </div>
+                    <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; display: flex; align-items: center;">
+                        <span style="font-size: 20px; margin-right: 12px;">📸</span>
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">Take progress photo</div>
+                            <div style="color: #666; font-size: 12px;">Document your journey</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #ff4757; color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
+                <h4 style="margin: 0 0 10px 0;">⚠️ WARNING</h4>
+                <p style="margin: 0; font-size: 14px;">Miss ANY task on ANY day = START OVER at Day 1</p>
+            </div>
+        `;
+    } else {
+        // Show weekly schedule for other programs
+        contentHTML += `
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                <h4 style="color: var(--dark); margin-bottom: 15px;">📅 Weekly Schedule</h4>
+        `;
+        
+        // Display each day's workout
+        Object.entries(program.schedule).forEach(([day, workout]) => {
+            contentHTML += `
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h5 style="margin: 0; color: var(--dark); font-weight: bold;">${day}</h5>
+                        <span style="background: var(--primary); color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">${workout.name}</span>
+                    </div>
+                    <div style="display: grid; gap: 8px;">
+            `;
+            
+            // Show first few exercises as preview
+            workout.exercises.slice(0, 3).forEach(exercise => {
+                contentHTML += `
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                        <span>${exercise.name}</span>
+                        <span>${exercise.sets} x ${exercise.reps}</span>
+                    </div>
+                `;
+            });
+            
+            if (workout.exercises.length > 3) {
+                contentHTML += `
+                    <div style="text-align: center; color: var(--primary); font-size: 12px;">
+                        +${workout.exercises.length - 3} more exercises
+                    </div>
+                `;
+            }
+            
+            contentHTML += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        contentHTML += `
+            </div>
+        `;
+    }
+    
+    // Add action buttons
+    contentHTML += `
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="addProgramToSaved('${programId}')" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1;">
+                📚 Save Program
+            </button>
+            <button onclick="startProgramToday('${programId}')" style="background: var(--gradient-1); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1;">
+                🚀 Start Today
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('program-content').innerHTML = contentHTML;
+    document.getElementById('workout-program').style.display = 'block';
+}
+
+function closeWorkoutProgram() {
+    document.getElementById('workout-program').style.display = 'none';
+}
+
+function addProgramToSaved(programId) {
+    const program = workoutPrograms[programId];
+    alert(`✅ "${program.name}" added to your saved programs!`);
+    closeWorkoutProgram();
+    showScreen('saved-workouts');
+}
+
+function startProgramToday(programId) {
+    const program = workoutPrograms[programId];
+    if (programId === '75hard') {
+        alert(`🔥 Starting 75 HARD Challenge today! Remember: ALL 5 tasks EVERY day for 75 days.`);
+    } else {
+        // Get today's workout
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        const todayWorkout = program.schedule[today];
+        
+        if (todayWorkout) {
+            alert(`💪 Starting today's workout: ${todayWorkout.name}`);
+        } else {
+            alert(`📅 Today is a rest day! Check back tomorrow for your next workout.`);
+        }
+    }
+    closeWorkoutProgram();
+    showScreen('track-workouts');
+}
+
 // Initialize
 window.onload = function() {
     updateTime();
