@@ -1866,17 +1866,50 @@ function startQuickWorkout(workoutType) {
 
 // Saved Workouts Functions
 function startSavedWorkout(workoutId) {
-    alert(`Starting ${workoutId} workout! (This would load the workout tracker)`);
+    const program = workoutPrograms[workoutId];
+    if (program) {
+        if (workoutId === '75hard') {
+            alert(`🔥 Starting 75 HARD Challenge! Remember: ALL 5 tasks EVERY day for 75 days.`);
+        } else {
+            // Get today's workout
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            const todayWorkout = program.schedule[today];
+            
+            if (todayWorkout) {
+                alert(`💪 Starting today's workout: ${todayWorkout.name}`);
+            } else {
+                alert(`📅 Today is a rest day! Check back tomorrow for your next workout.`);
+            }
+        }
+        showScreen('track-workouts');
+    } else {
+        alert(`Starting ${workoutId} workout! (This would load the workout tracker)`);
+    }
 }
 
-function editSavedWorkout(workoutId) {
-    alert(`Editing ${workoutId} workout! (This would open the workout editor)`);
+function viewSavedWorkout(workoutId) {
+    const program = workoutPrograms[workoutId];
+    if (program) {
+        // Show the full program details
+        displayWorkoutProgram(workoutId);
+    } else {
+        alert(`Viewing ${workoutId} workout details! (This would show the workout details)`);
+    }
 }
 
 function deleteSavedWorkout(workoutId) {
-    if (confirm(`Are you sure you want to delete this workout?`)) {
-        alert(`${workoutId} workout deleted!`);
-        // This would remove the workout from the UI
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    const workout = savedWorkouts.find(w => w.id === workoutId);
+    
+    if (workout && confirm(`Are you sure you want to delete "${workout.name}"?`)) {
+        // Remove from saved workouts
+        const updatedWorkouts = savedWorkouts.filter(w => w.id !== workoutId);
+        localStorage.setItem('savedWorkouts', JSON.stringify(updatedWorkouts));
+        
+        // Refresh the display
+        loadSavedWorkouts();
+        
+        alert(`✅ "${workout.name}" removed from saved workouts!`);
     }
 }
 
@@ -2085,28 +2118,145 @@ function closeWorkoutProgram() {
 
 function addProgramToSaved(programId) {
     const program = workoutPrograms[programId];
+    
+    // Get existing saved workouts
+    let savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    
+    // Check if program already exists
+    const existingIndex = savedWorkouts.findIndex(w => w.id === programId);
+    if (existingIndex !== -1) {
+        alert(`"${program.name}" is already in your saved programs!`);
+        closeWorkoutProgram();
+        showScreen('saved-workouts');
+        return;
+    }
+    
+    // Add new program
+    const savedProgram = {
+        id: programId,
+        name: program.name,
+        duration: program.duration,
+        daysPerWeek: program.daysPerWeek,
+        type: program.type || 'Program',
+        color: getWorkoutColor(programId),
+        dateAdded: new Date().toISOString()
+    };
+    
+    savedWorkouts.push(savedProgram);
+    localStorage.setItem('savedWorkouts', JSON.stringify(savedWorkouts));
+    
     alert(`✅ "${program.name}" added to your saved programs!`);
     closeWorkoutProgram();
     showScreen('saved-workouts');
+    loadSavedWorkouts(); // Refresh the display
 }
 
 function startProgramToday(programId) {
     const program = workoutPrograms[programId];
+    
+    // Automatically add to saved workouts (silently)
+    let savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    const existingIndex = savedWorkouts.findIndex(w => w.id === programId);
+    
+    if (existingIndex === -1) {
+        const savedProgram = {
+            id: programId,
+            name: program.name,
+            duration: program.duration,
+            daysPerWeek: program.daysPerWeek,
+            type: program.type || 'Program',
+            color: getWorkoutColor(programId),
+            dateAdded: new Date().toISOString()
+        };
+        savedWorkouts.push(savedProgram);
+        localStorage.setItem('savedWorkouts', JSON.stringify(savedWorkouts));
+    }
+    
     if (programId === '75hard') {
-        alert(`🔥 Starting 75 HARD Challenge today! Remember: ALL 5 tasks EVERY day for 75 days.`);
+        alert(`🔥 Starting 75 HARD Challenge today! Remember: ALL 5 tasks EVERY day for 75 days.\n\n✅ Program automatically added to your saved workouts!`);
     } else {
         // Get today's workout
         const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
         const todayWorkout = program.schedule[today];
         
         if (todayWorkout) {
-            alert(`💪 Starting today's workout: ${todayWorkout.name}`);
+            alert(`💪 Starting today's workout: ${todayWorkout.name}\n\n✅ Program automatically added to your saved workouts!`);
         } else {
-            alert(`📅 Today is a rest day! Check back tomorrow for your next workout.`);
+            alert(`📅 Today is a rest day! Check back tomorrow for your next workout.\n\n✅ Program automatically added to your saved workouts!`);
         }
     }
     closeWorkoutProgram();
     showScreen('track-workouts');
+}
+
+function getWorkoutColor(programId) {
+    const colors = {
+        'cbum': '#4B9CD3',
+        '75hard': '#C44569',
+        'arnold': '#f39c12',
+        'summershred': '#e74c3c',
+        'beginner': '#27ae60',
+        'chloe': '#e91e63',
+        'amateur': '#9b59b6'
+    };
+    return colors[programId] || '#4B9CD3';
+}
+
+function loadSavedWorkouts() {
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    const savedWorkoutsList = document.getElementById('saved-workouts-list');
+    
+    if (savedWorkouts.length === 0) {
+        savedWorkoutsList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <h4>No saved workouts yet!</h4>
+                <p>Start a workout program to add it here automatically.</p>
+                <button onclick="showScreen('create-workout')" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 20px; cursor: pointer; margin-top: 15px;">
+                    Browse Workouts
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    savedWorkouts.forEach(workout => {
+        html += `
+            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; border-left: 4px solid ${workout.color};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="color: var(--dark); margin: 0;">${getWorkoutIcon(workout.id)} ${workout.name}</h4>
+                    <span style="background: ${workout.color}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">${workout.duration}</span>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">${workout.type} • ${workout.daysPerWeek} days/week</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="startSavedWorkout('${workout.id}')" style="background: ${workout.color}; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                        ▶️ Start
+                    </button>
+                    <button onclick="viewSavedWorkout('${workout.id}')" style="background: var(--lighter-bg); color: ${workout.color}; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                        👁️ View
+                    </button>
+                    <button onclick="deleteSavedWorkout('${workout.id}')" style="background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    savedWorkoutsList.innerHTML = html;
+}
+
+function getWorkoutIcon(programId) {
+    const icons = {
+        'cbum': '🏆',
+        '75hard': '🔥',
+        'arnold': '💪',
+        'summershred': '🌞',
+        'beginner': '🌱',
+        'chloe': '💃',
+        'amateur': '⚡'
+    };
+    return icons[programId] || '💪';
 }
 
 // Initialize
