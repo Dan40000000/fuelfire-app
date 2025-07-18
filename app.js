@@ -1630,7 +1630,11 @@ function showScreen(screenId) {
         'track-workouts': 'Track Workouts',
         'diet-tracker': 'Diet Tracker',
         'diet-creation': 'Diet Creation',
-        'progress': 'Progress & Analytics'
+        'progress': 'Progress & Analytics',
+        'workout-muscle-30': '30-Min Muscle',
+        'workout-hiit-20': '20-Min HIIT',
+        'workout-mobility-15': '15-Min Mobility',
+        'workout-core-10': '10-Min Core'
     };
     document.querySelector('.header-title').textContent = titles[screenId] || 'FuelFire';
     
@@ -1682,6 +1686,91 @@ function startWorkoutNow() {
     localStorage.setItem('activeWorkout', JSON.stringify(workoutData));
     closeGeneratedWorkout();
     showScreen('track-workouts');
+}
+
+// Quick start workout function
+function quickStartWorkout(workoutType) {
+    // Map workout types to screen IDs
+    const workoutScreens = {
+        'muscle-30': 'workout-muscle-30',
+        'hiit-20': 'workout-hiit-20',
+        'mobility-15': 'workout-mobility-15',
+        'core-10': 'workout-core-10'
+    };
+    
+    const screenId = workoutScreens[workoutType];
+    if (screenId) {
+        showScreen(screenId);
+    }
+}
+
+// Start quick workout tracker
+function startQuickWorkout(workoutType) {
+    const workoutDetails = {
+        'muscle-30': {
+            name: '30-Minute Muscle Builder',
+            duration: 30,
+            exercises: [
+                { name: 'Push-Ups', sets: 3, reps: '45 sec' },
+                { name: 'Squats', sets: 3, reps: '45 sec' },
+                { name: 'Dumbbell Rows', sets: 3, reps: '45 sec' },
+                { name: 'Lunges', sets: 3, reps: '45 sec' },
+                { name: 'Shoulder Press', sets: 3, reps: '45 sec' },
+                { name: 'Plank', sets: 3, reps: '45 sec' },
+                { name: 'Bicep Curls', sets: 3, reps: '45 sec' },
+                { name: 'Tricep Dips', sets: 3, reps: '45 sec' }
+            ]
+        },
+        'hiit-20': {
+            name: '20-Minute HIIT Blast',
+            duration: 20,
+            exercises: [
+                { name: 'Burpees', sets: 4, reps: '40 sec' },
+                { name: 'Mountain Climbers', sets: 4, reps: '40 sec' },
+                { name: 'Jump Squats', sets: 4, reps: '40 sec' },
+                { name: 'High Knees', sets: 4, reps: '40 sec' },
+                { name: 'Push-Up to T', sets: 4, reps: '40 sec' },
+                { name: 'Jumping Lunges', sets: 4, reps: '40 sec' },
+                { name: 'Plank Jacks', sets: 4, reps: '40 sec' },
+                { name: 'Star Jumps', sets: 4, reps: '40 sec' }
+            ]
+        },
+        'mobility-15': {
+            name: '15-Minute Mobility Flow',
+            duration: 15,
+            exercises: [
+                { name: 'Cat-Cow Stretch', sets: 1, reps: '45-60 sec' },
+                { name: 'Downward Dog', sets: 1, reps: '45-60 sec' },
+                { name: 'Hip Circles', sets: 1, reps: '45-60 sec' },
+                { name: 'Pigeon Pose', sets: 1, reps: '30 sec each' },
+                { name: 'Thread the Needle', sets: 1, reps: '45-60 sec' },
+                { name: 'Seated Forward Fold', sets: 1, reps: '45-60 sec' },
+                { name: 'Ankle Circles', sets: 1, reps: '45-60 sec' },
+                { name: 'Child\'s Pose', sets: 1, reps: '45-60 sec' }
+            ]
+        },
+        'core-10': {
+            name: '10-Minute Core Crusher',
+            duration: 10,
+            exercises: [
+                { name: 'Plank', sets: 1, reps: '45 sec' },
+                { name: 'Bicycle Crunches', sets: 1, reps: '45 sec' },
+                { name: 'Russian Twists', sets: 1, reps: '45 sec' },
+                { name: 'Mountain Climbers', sets: 1, reps: '45 sec' },
+                { name: 'Leg Raises', sets: 1, reps: '45 sec' },
+                { name: 'Flutter Kicks', sets: 1, reps: '45 sec' },
+                { name: 'Side Plank (Right)', sets: 1, reps: '45 sec' },
+                { name: 'Side Plank (Left)', sets: 1, reps: '45 sec' },
+                { name: 'Hollow Body Hold', sets: 1, reps: '45 sec' }
+            ]
+        }
+    };
+    
+    const workout = workoutDetails[workoutType];
+    if (workout) {
+        localStorage.setItem('activeWorkout', JSON.stringify(workout));
+        showScreen('track-workouts');
+    }
 }
 
 // Initialize
