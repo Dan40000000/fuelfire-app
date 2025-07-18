@@ -1869,19 +1869,18 @@ function startSavedWorkout(workoutId) {
     const program = workoutPrograms[workoutId];
     if (program) {
         if (workoutId === '75hard') {
-            alert(`🔥 Starting 75 HARD Challenge! Remember: ALL 5 tasks EVERY day for 75 days.`);
+            show75HardTracker();
         } else {
             // Get today's workout
             const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
             const todayWorkout = program.schedule[today];
             
             if (todayWorkout) {
-                alert(`💪 Starting today's workout: ${todayWorkout.name}`);
+                showWorkoutTracker(workoutId, today, todayWorkout);
             } else {
                 alert(`📅 Today is a rest day! Check back tomorrow for your next workout.`);
             }
         }
-        showScreen('track-workouts');
     } else {
         alert(`Starting ${workoutId} workout! (This would load the workout tracker)`);
     }
@@ -1913,20 +1912,190 @@ function deleteSavedWorkout(workoutId) {
     }
 }
 
-// Track Workouts Functions
-function logQuickWorkout(workoutType) {
-    const workoutNames = {
-        'cardio': 'Cardio Session',
-        'strength': 'Strength Training',
-        'yoga': 'Yoga/Stretching',
-        'sports': 'Sports Activity'
-    };
+// Workout Tracker Functions
+function showWorkoutTracker(programId, day, workout) {
+    const program = workoutPrograms[programId];
+    document.getElementById('tracker-title').textContent = `${day} - ${workout.name}`;
     
-    const duration = prompt(`How long was your ${workoutNames[workoutType]} session? (in minutes)`, '30');
-    if (duration) {
-        alert(`✅ ${workoutNames[workoutType]} logged: ${duration} minutes`);
-        // This would save to localStorage and update the UI
+    let trackerHTML = `
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0;">${workout.name}</h3>
+            <p style="opacity: 0.9; margin: 0;">${program.name} • ${workout.exercises.length} exercises</p>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">💪 Today's Exercises</h4>
+    `;
+    
+    workout.exercises.forEach((exercise, index) => {
+        trackerHTML += `
+            <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h5 style="margin: 0; color: var(--dark);">${exercise.name}</h5>
+                    <span style="background: var(--primary); color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">${exercise.sets} sets</span>
+                </div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Target: ${exercise.reps} • Rest: ${exercise.rest}</div>
+                <div style="font-size: 11px; color: #888; margin-bottom: 15px;">${exercise.notes}</div>
+                
+                <!-- Set tracking -->
+                <div style="display: grid; grid-template-columns: repeat(${exercise.sets}, 1fr); gap: 8px;">
+        `;
+        
+        for (let i = 1; i <= parseInt(exercise.sets); i++) {
+            trackerHTML += `
+                <div style="text-align: center;">
+                    <div style="font-size: 10px; color: #666; margin-bottom: 5px;">Set ${i}</div>
+                    <input type="number" placeholder="Reps" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; text-align: center; margin-bottom: 4px;">
+                    <input type="number" placeholder="Lbs" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; text-align: center;">
+                </div>
+            `;
+        }
+        
+        trackerHTML += `
+                </div>
+            </div>
+        `;
+    });
+    
+    trackerHTML += `
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">📝 Workout Notes</h4>
+            <textarea placeholder="How did the workout feel? Any notes for next time?" style="width: 100%; height: 80px; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; resize: none;"></textarea>
+        </div>
+    `;
+    
+    document.getElementById('tracker-content').innerHTML = trackerHTML;
+    document.getElementById('workout-tracker').style.display = 'block';
+}
+
+function show75HardTracker() {
+    // Get current day from localStorage
+    const startDate = localStorage.getItem('75hardStartDate');
+    let currentDay = 1;
+    
+    if (startDate) {
+        const start = new Date(startDate);
+        const today = new Date();
+        const diffTime = Math.abs(today - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        currentDay = Math.min(diffDays, 75);
+    } else {
+        localStorage.setItem('75hardStartDate', new Date().toISOString());
     }
+    
+    document.getElementById('hard-day').textContent = currentDay;
+    
+    const trackerHTML = `
+        <div style="background: linear-gradient(135deg, #C44569, #8B1538); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0;">75 HARD Challenge</h3>
+            <p style="opacity: 0.9; margin: 0;">Day ${currentDay} of 75 • No compromises, no excuses</p>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">📋 Today's Tasks</h4>
+            
+            <div style="display: grid; gap: 12px;">
+                <label style="display: flex; align-items: center; background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">🥗 Follow structured diet</div>
+                        <div style="color: #666; font-size: 12px;">No cheat meals or alcohol</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">💪 First workout (45 min)</div>
+                        <div style="color: #666; font-size: 12px;">Any type of workout</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">🌞 Second workout (45 min)</div>
+                        <div style="color: #666; font-size: 12px;">Must be outdoors</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">💧 Drink 1 gallon of water</div>
+                        <div style="color: #666; font-size: 12px;">128 oz throughout the day</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">📚 Read 10 pages</div>
+                        <div style="color: #666; font-size: 12px;">Non-fiction book only</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 12px; transform: scale(1.2);">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">📸 Take progress photo</div>
+                        <div style="color: #666; font-size: 12px;">Document your journey</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <div style="background: #ff4757; color: white; padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">⚠️ REMEMBER</div>
+            <div style="font-size: 12px;">Miss ANY task = Start over at Day 1</div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">📝 Daily Notes</h4>
+            <textarea placeholder="How are you feeling today? Any challenges or wins?" style="width: 100%; height: 80px; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; resize: none;"></textarea>
+        </div>
+    `;
+    
+    document.getElementById('75hard-content').innerHTML = trackerHTML;
+    document.getElementById('75hard-tracker').style.display = 'block';
+}
+
+function closeWorkoutTracker() {
+    document.getElementById('workout-tracker').style.display = 'none';
+}
+
+function close75HardTracker() {
+    document.getElementById('75hard-tracker').style.display = 'none';
+}
+
+function finishWorkout() {
+    if (confirm('Mark this workout as completed?')) {
+        alert('🎉 Workout completed! Great job!');
+        closeWorkoutTracker();
+        showScreen('track-workouts');
+    }
+}
+
+function complete75HardDay() {
+    const checkboxes = document.querySelectorAll('#75hard-content input[type="checkbox"]');
+    const completed = Array.from(checkboxes).every(cb => cb.checked);
+    
+    if (!completed) {
+        alert('❌ You must complete ALL 5 tasks to finish the day!');
+        return;
+    }
+    
+    const currentDay = parseInt(document.getElementById('hard-day').textContent);
+    if (currentDay >= 75) {
+        alert('🏆 CONGRATULATIONS! You completed 75 HARD! You are mentally tough!');
+    } else {
+        alert(`🔥 Day ${currentDay} completed! Only ${75 - currentDay} days left!`);
+    }
+    
+    close75HardTracker();
+    showScreen('track-workouts');
 }
 
 // Diet Tracker Functions
