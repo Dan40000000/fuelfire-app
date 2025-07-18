@@ -614,359 +614,6 @@
                         <p>📊 Analytics coming soon!</p>
                     </div>
                 </div>
-
-                <!-- 30-MIN MUSCLE WORKOUT SCREEN -->
-                <div class="screen-content" id="workout-muscle-30">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h2 style="font-size: 24px; margin-bottom: 10px;">💪 30-Minute Muscle Builder</h2>
-                        <p style="opacity: 0.9;">Full-body strength training - 3 rounds total</p>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🏃 Warm-Up (3 minutes)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Arm circles - 30 seconds each direction<br>
-                            • Leg swings - 30 seconds each leg<br>
-                            • Bodyweight squats - 1 minute<br>
-                            • Light stretching - 30 seconds
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🔥 Main Workout (24 minutes)</h3>
-                        <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">Perform 3 rounds - 45 seconds work, 15 seconds rest</p>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Push-Ups</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Chest, shoulders, triceps<br>
-                            Modification: Knee push-ups if needed</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Squats</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Quads, glutes, hamstrings<br>
-                            Keep chest up, weight in heels</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Dumbbell Rows</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Back, biceps<br>
-                            Use water bottles if no weights available</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ Lunges (Alternating)</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Legs, glutes, balance<br>
-                            Step back into lunge, alternate legs</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Shoulder Press</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Shoulders, triceps<br>
-                            Can use dumbbells or resistance bands</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Plank</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Core, shoulders<br>
-                            Hold strong plank position</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Bicep Curls</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Biceps<br>
-                            Control the movement, squeeze at top</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Tricep Dips</h4>
-                            <p style="color: #666; font-size: 14px;">Target: Triceps<br>
-                            Use chair or bench, control the descent</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🧘 Cool-Down (3 minutes)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Chest stretch - 30 seconds<br>
-                            • Quad stretch - 30 seconds each leg<br>
-                            • Shoulder stretch - 30 seconds each arm<br>
-                            • Deep breathing - 1 minute
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
-                            ← Back
-                        </button>
-                        <button onclick="startQuickWorkout('muscle-30')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
-                            🔥 Start Workout
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 20-MIN HIIT WORKOUT SCREEN -->
-                <div class="screen-content" id="workout-hiit-20">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h2 style="font-size: 24px; margin-bottom: 10px;">🔥 20-Minute HIIT Blast</h2>
-                        <p style="opacity: 0.9;">High-intensity fat burning - 4 rounds total</p>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🏃 Warm-Up (2 minutes)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Jumping jacks - 30 seconds<br>
-                            • High knees - 30 seconds<br>
-                            • Butt kicks - 30 seconds<br>
-                            • Dynamic stretching - 30 seconds
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">⚡ Main HIIT Circuit (16 minutes)</h3>
-                        <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">4 rounds - 40 seconds work, 20 seconds rest</p>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Burpees</h4>
-                            <p style="color: #666; font-size: 14px;">Full body explosive movement<br>
-                            Modification: Step back instead of jump</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Mountain Climbers</h4>
-                            <p style="color: #666; font-size: 14px;">Core and cardio crusher<br>
-                            Keep hips low, drive knees to chest</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Jump Squats</h4>
-                            <p style="color: #666; font-size: 14px;">Explosive lower body power<br>
-                            Land softly, immediately into next rep</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ High Knees</h4>
-                            <p style="color: #666; font-size: 14px;">Cardio blast<br>
-                            Drive knees above hip level</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Push-Up to T</h4>
-                            <p style="color: #666; font-size: 14px;">Upper body and core<br>
-                            Push-up, then rotate to side plank</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Jumping Lunges</h4>
-                            <p style="color: #666; font-size: 14px;">Explosive leg workout<br>
-                            Alternate legs with jump between</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Plank Jacks</h4>
-                            <p style="color: #666; font-size: 14px;">Core stability with cardio<br>
-                            Jump feet in and out in plank position</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Star Jumps</h4>
-                            <p style="color: #666; font-size: 14px;">Full body finisher<br>
-                            Jump spreading arms and legs wide</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🧘 Cool-Down (2 minutes)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Walking in place - 30 seconds<br>
-                            • Hamstring stretch - 30 seconds each<br>
-                            • Hip flexor stretch - 30 seconds each<br>
-                            • Deep breathing - 30 seconds
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
-                            ← Back
-                        </button>
-                        <button onclick="startQuickWorkout('hiit-20')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
-                            🔥 Start Workout
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 15-MIN MOBILITY WORKOUT SCREEN -->
-                <div class="screen-content" id="workout-mobility-15">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h2 style="font-size: 24px; margin-bottom: 10px;">🧘 15-Minute Mobility Flow</h2>
-                        <p style="opacity: 0.9;">Flexibility, recovery, and injury prevention</p>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🌟 Opening Sequence (3 minutes)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Neck rolls - 30 seconds each direction<br>
-                            • Shoulder rolls - 30 seconds backward, 30 forward<br>
-                            • Arm circles - 30 seconds each direction<br>
-                            • Torso twists - 1 minute
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🌊 Mobility Flow (10 minutes)</h3>
-                        <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">Hold each position for 45-60 seconds</p>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Cat-Cow Stretch</h4>
-                            <p style="color: #666; font-size: 14px;">Spine mobility<br>
-                            Flow between positions with breath</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Downward Dog</h4>
-                            <p style="color: #666; font-size: 14px;">Full body stretch<br>
-                            Pedal feet, stretch calves and hamstrings</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Hip Circles</h4>
-                            <p style="color: #666; font-size: 14px;">Hip mobility<br>
-                            Large circles in both directions</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ Pigeon Pose</h4>
-                            <p style="color: #666; font-size: 14px;">Deep hip stretch<br>
-                            30 seconds each side</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Thread the Needle</h4>
-                            <p style="color: #666; font-size: 14px;">Shoulder and spine mobility<br>
-                            Rotate and reach through</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Seated Forward Fold</h4>
-                            <p style="color: #666; font-size: 14px;">Hamstring and back stretch<br>
-                            Breathe deeply, relax into stretch</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Ankle Circles</h4>
-                            <p style="color: #666; font-size: 14px;">Ankle mobility<br>
-                            Both directions, both feet</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Child's Pose</h4>
-                            <p style="color: #666; font-size: 14px;">Restorative stretch<br>
-                            Breathe and relax completely</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🌙 Closing (2 minutes)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Seated meditation - 1 minute<br>
-                            • Gratitude breathing - 30 seconds<br>
-                            • Set intention for the day - 30 seconds
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
-                            ← Back
-                        </button>
-                        <button onclick="startQuickWorkout('mobility-15')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
-                            🧘 Start Flow
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 10-MIN CORE WORKOUT SCREEN -->
-                <div class="screen-content" id="workout-core-10">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h2 style="font-size: 24px; margin-bottom: 10px;">🎯 10-Minute Core Crusher</h2>
-                        <p style="opacity: 0.9;">Intense ab workout - no rest between exercises</p>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🔥 Core Circuit (9 minutes)</h3>
-                        <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">45 seconds per exercise, 15 seconds transition</p>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Plank</h4>
-                            <p style="color: #666; font-size: 14px;">Core stabilization<br>
-                            Keep body straight, breathe normally</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Bicycle Crunches</h4>
-                            <p style="color: #666; font-size: 14px;">Obliques and upper abs<br>
-                            Elbow to opposite knee, controlled</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Russian Twists</h4>
-                            <p style="color: #666; font-size: 14px;">Obliques and rotation<br>
-                            Lean back, twist side to side</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ Mountain Climbers</h4>
-                            <p style="color: #666; font-size: 14px;">Dynamic core work<br>
-                            Drive knees to chest rapidly</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Leg Raises</h4>
-                            <p style="color: #666; font-size: 14px;">Lower abs focus<br>
-                            Keep lower back pressed down</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Flutter Kicks</h4>
-                            <p style="color: #666; font-size: 14px;">Lower abs and hip flexors<br>
-                            Small, quick kicks</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Side Plank (Right)</h4>
-                            <p style="color: #666; font-size: 14px;">Obliques and stability<br>
-                            Stack feet or modify on knees</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Side Plank (Left)</h4>
-                            <p style="color: #666; font-size: 14px;">Obliques and stability<br>
-                            Stack feet or modify on knees</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <h4 style="color: var(--dark); margin-bottom: 8px;">9️⃣ Hollow Body Hold</h4>
-                            <p style="color: #666; font-size: 14px;">Total core engagement<br>
-                            Press lower back down, hold position</p>
-                        </div>
-                    </div>
-                    
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px;">🧘 Cool-Down (1 minute)</h3>
-                        <div style="color: #666; line-height: 1.8;">
-                            • Cobra stretch - 30 seconds<br>
-                            • Knee to chest stretches - 30 seconds
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
-                            ← Back
-                        </button>
-                        <button onclick="startQuickWorkout('core-10')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
-                            💪 Start Workout
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1288,6 +935,358 @@
         </div>
     </div>
                 
+                <!-- 30-MIN MUSCLE WORKOUT SCREEN -->
+    <div class="screen-content" id="workout-muscle-30">
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 24px; margin-bottom: 10px;">💪 30-Minute Muscle Builder</h2>
+            <p style="opacity: 0.9;">Full-body strength training - 3 rounds total</p>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🏃 Warm-Up (3 minutes)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Arm circles - 30 seconds each direction<br>
+                • Leg swings - 30 seconds each leg<br>
+                • Bodyweight squats - 1 minute<br>
+                • Light stretching - 30 seconds
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🔥 Main Workout (24 minutes)</h3>
+            <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">Perform 3 rounds - 45 seconds work, 15 seconds rest</p>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Push-Ups</h4>
+                <p style="color: #666; font-size: 14px;">Target: Chest, shoulders, triceps<br>
+                Modification: Knee push-ups if needed</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Squats</h4>
+                <p style="color: #666; font-size: 14px;">Target: Quads, glutes, hamstrings<br>
+                Keep chest up, weight in heels</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Dumbbell Rows</h4>
+                <p style="color: #666; font-size: 14px;">Target: Back, biceps<br>
+                Use water bottles if no weights available</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ Lunges (Alternating)</h4>
+                <p style="color: #666; font-size: 14px;">Target: Legs, glutes, balance<br>
+                Step back into lunge, alternate legs</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Shoulder Press</h4>
+                <p style="color: #666; font-size: 14px;">Target: Shoulders, triceps<br>
+                Can use dumbbells or resistance bands</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Plank</h4>
+                <p style="color: #666; font-size: 14px;">Target: Core, shoulders<br>
+                Hold strong plank position</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Bicep Curls</h4>
+                <p style="color: #666; font-size: 14px;">Target: Biceps<br>
+                Control the movement, squeeze at top</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Tricep Dips</h4>
+                <p style="color: #666; font-size: 14px;">Target: Triceps<br>
+                Use chair or bench, control the descent</p>
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🧘 Cool-Down (3 minutes)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Chest stretch - 30 seconds<br>
+                • Quad stretch - 30 seconds each leg<br>
+                • Shoulder stretch - 30 seconds each arm<br>
+                • Deep breathing - 1 minute
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
+                ← Back
+            </button>
+            <button onclick="startQuickWorkout('muscle-30')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                🔥 Start Workout
+            </button>
+        </div>
+    </div>
+    
+    <!-- 20-MIN HIIT WORKOUT SCREEN -->
+    <div class="screen-content" id="workout-hiit-20">
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 24px; margin-bottom: 10px;">🔥 20-Minute HIIT Blast</h2>
+            <p style="opacity: 0.9;">High-intensity fat burning - 4 rounds total</p>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🏃 Warm-Up (2 minutes)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Jumping jacks - 30 seconds<br>
+                • High knees - 30 seconds<br>
+                • Butt kicks - 30 seconds<br>
+                • Dynamic stretching - 30 seconds
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">⚡ Main HIIT Circuit (16 minutes)</h3>
+            <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">4 rounds - 40 seconds work, 20 seconds rest</p>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Burpees</h4>
+                <p style="color: #666; font-size: 14px;">Full body explosive movement<br>
+                Modification: Step back instead of jump</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Mountain Climbers</h4>
+                <p style="color: #666; font-size: 14px;">Core and cardio crusher<br>
+                Keep hips low, drive knees to chest</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Jump Squats</h4>
+                <p style="color: #666; font-size: 14px;">Explosive lower body power<br>
+                Land softly, immediately into next rep</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ High Knees</h4>
+                <p style="color: #666; font-size: 14px;">Cardio blast<br>
+                Drive knees above hip level</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Push-Up to T</h4>
+                <p style="color: #666; font-size: 14px;">Upper body and core<br>
+                Push-up, then rotate to side plank</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Jumping Lunges</h4>
+                <p style="color: #666; font-size: 14px;">Explosive leg workout<br>
+                Alternate legs with jump between</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Plank Jacks</h4>
+                <p style="color: #666; font-size: 14px;">Core stability with cardio<br>
+                Jump feet in and out in plank position</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Star Jumps</h4>
+                <p style="color: #666; font-size: 14px;">Full body finisher<br>
+                Jump spreading arms and legs wide</p>
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🧘 Cool-Down (2 minutes)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Walking in place - 30 seconds<br>
+                • Hamstring stretch - 30 seconds each<br>
+                • Hip flexor stretch - 30 seconds each<br>
+                • Deep breathing - 30 seconds
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
+                ← Back
+            </button>
+            <button onclick="startQuickWorkout('hiit-20')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                🔥 Start Workout
+            </button>
+        </div>
+    </div>
+    
+    <!-- 15-MIN MOBILITY WORKOUT SCREEN -->
+    <div class="screen-content" id="workout-mobility-15">
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 24px; margin-bottom: 10px;">🧘 15-Minute Mobility Flow</h2>
+            <p style="opacity: 0.9;">Flexibility, recovery, and injury prevention</p>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🌟 Opening Sequence (3 minutes)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Neck rolls - 30 seconds each direction<br>
+                • Shoulder rolls - 30 seconds backward, 30 forward<br>
+                • Arm circles - 30 seconds each direction<br>
+                • Torso twists - 1 minute
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🌊 Mobility Flow (10 minutes)</h3>
+            <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">Hold each position for 45-60 seconds</p>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Cat-Cow Stretch</h4>
+                <p style="color: #666; font-size: 14px;">Spine mobility<br>
+                Flow between positions with breath</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Downward Dog</h4>
+                <p style="color: #666; font-size: 14px;">Full body stretch<br>
+                Pedal feet, stretch calves and hamstrings</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Hip Circles</h4>
+                <p style="color: #666; font-size: 14px;">Hip mobility<br>
+                Large circles in both directions</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ Pigeon Pose</h4>
+                <p style="color: #666; font-size: 14px;">Deep hip stretch<br>
+                30 seconds each side</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Thread the Needle</h4>
+                <p style="color: #666; font-size: 14px;">Shoulder and spine mobility<br>
+                Rotate and reach through</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Seated Forward Fold</h4>
+                <p style="color: #666; font-size: 14px;">Hamstring and back stretch<br>
+                Breathe deeply, relax into stretch</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Ankle Circles</h4>
+                <p style="color: #666; font-size: 14px;">Ankle mobility<br>
+                Both directions, both feet</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Child's Pose</h4>
+                <p style="color: #666; font-size: 14px;">Restorative stretch<br>
+                Breathe and relax completely</p>
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🌙 Closing (2 minutes)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Seated meditation - 1 minute<br>
+                • Gratitude breathing - 30 seconds<br>
+                • Set intention for the day - 30 seconds
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
+                ← Back
+            </button>
+            <button onclick="startQuickWorkout('mobility-15')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                🧘 Start Flow
+            </button>
+        </div>
+    </div>
+    
+    <!-- 10-MIN CORE WORKOUT SCREEN -->
+    <div class="screen-content" id="workout-core-10">
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 24px; margin-bottom: 10px;">🎯 10-Minute Core Crusher</h2>
+            <p style="opacity: 0.9;">Intense ab workout - no rest between exercises</p>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🔥 Core Circuit (9 minutes)</h3>
+            <p style="color: var(--primary-dark); margin-bottom: 15px; font-weight: bold;">45 seconds per exercise, 15 seconds transition</p>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">1️⃣ Plank</h4>
+                <p style="color: #666; font-size: 14px;">Core stabilization<br>
+                Keep body straight, breathe normally</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">2️⃣ Bicycle Crunches</h4>
+                <p style="color: #666; font-size: 14px;">Obliques and upper abs<br>
+                Elbow to opposite knee, controlled</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">3️⃣ Russian Twists</h4>
+                <p style="color: #666; font-size: 14px;">Obliques and rotation<br>
+                Lean back, twist side to side</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">4️⃣ Mountain Climbers</h4>
+                <p style="color: #666; font-size: 14px;">Dynamic core work<br>
+                Drive knees to chest rapidly</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">5️⃣ Leg Raises</h4>
+                <p style="color: #666; font-size: 14px;">Lower abs focus<br>
+                Keep lower back pressed down</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">6️⃣ Flutter Kicks</h4>
+                <p style="color: #666; font-size: 14px;">Lower abs and hip flexors<br>
+                Small, quick kicks</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">7️⃣ Side Plank (Right)</h4>
+                <p style="color: #666; font-size: 14px;">Obliques and stability<br>
+                Stack feet or modify on knees</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">8️⃣ Side Plank (Left)</h4>
+                <p style="color: #666; font-size: 14px;">Obliques and stability<br>
+                Stack feet or modify on knees</p>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">9️⃣ Hollow Body Hold</h4>
+                <p style="color: #666; font-size: 14px;">Total core engagement<br>
+                Press lower back down, hold position</p>
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🧘 Cool-Down (1 minute)</h3>
+            <div style="color: #666; line-height: 1.8;">
+                • Cobra stretch - 30 seconds<br>
+                • Knee to chest stretches - 30 seconds
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="showScreen('create-workout')" style="background: var(--lighter-bg); color: var(--primary-dark); border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
+                ← Back
+            </button>
+            <button onclick="startQuickWorkout('core-10')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                💪 Start Workout
+            </button>
+        </div>
+    </div>
     
     <div class="overlay" onclick="toggleSidebar()"></div>
     
