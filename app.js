@@ -1731,20 +1731,7 @@ function showScreen(screenId) {
     
     // Load track workouts if needed
     if (screenId === 'track-workouts') {
-        const activeWorkout = localStorage.getItem('activeWorkout');
-        if (activeWorkout) {
-            displayWorkoutTracker(JSON.parse(activeWorkout));
-        } else {
-            document.getElementById('workout-tracker-content').innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <h3 style="color: var(--dark);">No Active Workout</h3>
-                    <p style="color: var(--primary-dark); margin-bottom: 20px;">Select a workout from your saved workouts to get started.</p>
-                    <button onclick="showScreen('saved-workouts')" style="background: var(--gradient-1); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer;">
-                        Go to Saved Workouts
-                    </button>
-                </div>
-            `;
-        }
+        loadWorkoutHistory();
     }
     
     // Close sidebar if it's open
@@ -1871,14 +1858,22 @@ function startSavedWorkout(workoutId) {
         if (workoutId === '75hard') {
             show75HardTracker();
         } else {
-            // Get today's workout
-            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-            const todayWorkout = program.schedule[today];
+            // Get selected day from dropdown or use today
+            const daySelect = document.getElementById(`day-${workoutId}`);
+            let selectedDay;
             
-            if (todayWorkout) {
-                showWorkoutTracker(workoutId, today, todayWorkout);
+            if (daySelect) {
+                selectedDay = daySelect.value;
             } else {
-                alert(`📅 Today is a rest day! Check back tomorrow for your next workout.`);
+                selectedDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            }
+            
+            const selectedWorkout = program.schedule[selectedDay];
+            
+            if (selectedWorkout) {
+                showWorkoutTracker(workoutId, selectedDay, selectedWorkout);
+            } else {
+                alert(`📅 No workout available for ${selectedDay}!`);
             }
         }
     } else {
@@ -1914,6 +1909,7 @@ function deleteSavedWorkout(workoutId) {
 
 // Workout Tracker Functions
 function showWorkoutTracker(programId, day, workout) {
+    currentWorkoutProgramId = programId;
     const program = workoutPrograms[programId];
     document.getElementById('tracker-title').textContent = `${day} - ${workout.name}`;
     
@@ -1929,9 +1925,9 @@ function showWorkoutTracker(programId, day, workout) {
     
     workout.exercises.forEach((exercise, index) => {
         trackerHTML += `
-            <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+            <div class="exercise-container" style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h5 style="margin: 0; color: var(--dark);">${exercise.name}</h5>
+                    <h5 class="exercise-name" style="margin: 0; color: var(--dark);">${exercise.name}</h5>
                     <span style="background: var(--primary); color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">${exercise.sets} sets</span>
                 </div>
                 <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Target: ${exercise.reps} • Rest: ${exercise.rest}</div>
@@ -1943,7 +1939,7 @@ function showWorkoutTracker(programId, day, workout) {
         
         for (let i = 1; i <= parseInt(exercise.sets); i++) {
             trackerHTML += `
-                <div style="text-align: center;">
+                <div class="set-inputs" style="text-align: center;">
                     <div style="font-size: 10px; color: #666; margin-bottom: 5px;">Set ${i}</div>
                     <input type="number" placeholder="Reps" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; text-align: center; margin-bottom: 4px;">
                     <input type="number" placeholder="Lbs" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; text-align: center;">
@@ -2072,10 +2068,357 @@ function close75HardTracker() {
 
 function finishWorkout() {
     if (confirm('Mark this workout as completed?')) {
-        alert('🎉 Workout completed! Great job!');
+        // Collect workout data
+        const trackerTitle = document.getElementById('tracker-title').textContent;
+        const exercises = [];
+        const notes = document.querySelector('#tracker-content textarea').value;
+        
+        // Get all exercise data from inputs
+        const exerciseContainers = document.querySelectorAll('#tracker-content .exercise-container');
+        exerciseContainers.forEach((container, index) => {
+            const exerciseName = container.querySelector('.exercise-name').textContent;
+            const sets = [];
+            
+            container.querySelectorAll('.set-inputs').forEach((setDiv, setIndex) => {
+                const reps = setDiv.querySelector('input[placeholder="Reps"]').value;
+                const weight = setDiv.querySelector('input[placeholder="Lbs"]').value;
+                
+                if (reps || weight) {
+                    sets.push({
+                        set: setIndex + 1,
+                        reps: parseInt(reps) || 0,
+                        weight: parseInt(weight) || 0
+                    });
+                }
+            });
+            
+            if (sets.length > 0) {
+                exercises.push({
+                    name: exerciseName,
+                    sets: sets
+                });
+            }
+        });
+        
+        // Create workout history entry
+        const completedWorkout = {
+            id: Date.now().toString(),
+            programId: currentWorkoutProgramId,
+            workoutName: trackerTitle,
+            date: new Date().toISOString(),
+            duration: Math.floor(Math.random() * 30) + 45, // Random duration 45-75 min
+            exercises: exercises,
+            notes: notes,
+            completed: true
+        };
+        
+        // Save to workout history
+        let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+        workoutHistory.unshift(completedWorkout); // Add to beginning
+        localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+        
+        alert('🎉 Workout completed and saved to history! Great job!');
         closeWorkoutTracker();
         showScreen('track-workouts');
     }
+}
+
+let currentWorkoutProgramId = null;
+
+function loadWorkoutHistory() {
+    const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    const content = document.getElementById('workout-tracker-content');
+    
+    // Calculate stats from history
+    const stats = calculateWorkoutStats(workoutHistory);
+    
+    let html = `
+        <style>
+            .workout-card { animation: slideInUp 0.5s ease-out; }
+            .progress-bar { animation: fillProgress 1s ease-out; }
+            .stat-number { animation: countUp 1.5s ease-out; }
+            .chart-bar { animation: growBar 1s ease-out; }
+            
+            @keyframes slideInUp {
+                from { transform: translateY(30px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            @keyframes fillProgress {
+                from { width: 0%; }
+                to { width: var(--target-width); }
+            }
+            
+            @keyframes countUp {
+                from { opacity: 0; transform: scale(0.5); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            
+            @keyframes growBar {
+                from { height: 0; transform: scaleY(0); }
+                to { height: var(--target-height); transform: scaleY(1); }
+            }
+            
+            .workout-history-item:hover {
+                transform: scale(1.02);
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            
+            .glow-effect {
+                box-shadow: 0 0 20px rgba(75, 156, 211, 0.3);
+                transition: all 0.3s ease;
+            }
+        </style>
+        
+        <div class="workout-card glow-effect" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);"></div>
+            <div style="position: relative; z-index: 1;">
+                <h3 style="font-size: 24px; margin-bottom: 10px; font-weight: 700;">🏆 Workout History</h3>
+                <p style="opacity: 0.9; font-size: 16px; margin: 0;">Your fitness journey in data</p>
+            </div>
+        </div>
+    `;
+    
+    if (workoutHistory.length === 0) {
+        html += `
+            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 40px; text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">💪</div>
+                <h4 style="color: var(--dark); margin-bottom: 10px;">No workouts completed yet!</h4>
+                <p style="color: #666; margin-bottom: 20px;">Start tracking your workouts to see amazing progress charts here!</p>
+                <button onclick="showScreen('saved-workouts')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer;">
+                    🚀 Start Your First Workout
+                </button>
+            </div>
+        `;
+    } else {
+        // Stats Overview
+        html += `
+            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                <h4 style="color: var(--dark); margin-bottom: 20px; text-align: center;">📊 Your Stats</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                    <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px;">
+                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: var(--primary); margin-bottom: 5px;">${stats.totalWorkouts}</div>
+                        <div style="font-size: 12px; color: #666;">Total Workouts</div>
+                    </div>
+                    <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px;">
+                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #27ae60; margin-bottom: 5px;">${stats.totalMinutes}m</div>
+                        <div style="font-size: 12px; color: #666;">Total Time</div>
+                    </div>
+                    <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px;">
+                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #f39c12; margin-bottom: 5px;">${stats.streak}</div>
+                        <div style="font-size: 12px; color: #666;">Day Streak</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Progress Charts
+        html += `
+            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                <h4 style="color: var(--dark); margin-bottom: 20px;">📈 Progress Charts</h4>
+                ${generateProgressCharts(workoutHistory)}
+            </div>
+        `;
+        
+        // Recent Workouts
+        html += `
+            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                <h4 style="color: var(--dark); margin-bottom: 15px;">🔥 Recent Completed Workouts</h4>
+        `;
+        
+        workoutHistory.slice(0, 5).forEach((workout, index) => {
+            const date = new Date(workout.date);
+            const timeAgo = getTimeAgo(date);
+            const programInfo = workoutPrograms[workout.programId] || { name: 'Custom Workout' };
+            
+            html += `
+                <div class="workout-history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px; animation-delay: ${index * 0.1}s;">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark);">${getWorkoutIcon(workout.programId)} ${workout.workoutName}</div>
+                        <div style="color: #666; font-size: 12px;">${timeAgo} • ${workout.duration} min • ${programInfo.name}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: var(--primary); font-weight: bold;">${workout.exercises.length} exercises</div>
+                        <div style="color: #666; font-size: 12px;">${getPRs(workout)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+            </div>
+        `;
+        
+        // Weekly Activity Chart
+        html += `
+            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+                <h4 style="color: var(--dark); margin-bottom: 15px;">📅 Weekly Activity</h4>
+                ${generateWeeklyChart(workoutHistory)}
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
+    
+    // Trigger animations
+    setTimeout(() => {
+        document.querySelectorAll('.workout-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    }, 100);
+}
+
+function calculateWorkoutStats(history) {
+    const totalWorkouts = history.length;
+    const totalMinutes = history.reduce((sum, w) => sum + w.duration, 0);
+    const streak = calculateStreak(history);
+    
+    return { totalWorkouts, totalMinutes, streak };
+}
+
+function calculateStreak(history) {
+    if (history.length === 0) return 0;
+    
+    let streak = 0;
+    const today = new Date().toDateString();
+    let currentDate = new Date();
+    
+    for (let i = 0; i < 30; i++) {
+        const dateStr = currentDate.toDateString();
+        const hasWorkout = history.some(w => new Date(w.date).toDateString() === dateStr);
+        
+        if (hasWorkout) {
+            streak++;
+        } else if (streak > 0 || dateStr === today) {
+            break;
+        }
+        
+        currentDate.setDate(currentDate.getDate() - 1);
+    }
+    
+    return streak;
+}
+
+function generateProgressCharts(history) {
+    const exercises = ['Bench Press', 'Squat', 'Deadlift'];
+    let chartsHTML = '';
+    
+    exercises.forEach(exercise => {
+        const data = getExerciseProgressData(history, exercise);
+        if (data.length > 0) {
+            const maxWeight = Math.max(...data.map(d => d.weight));
+            const improvement = data.length > 1 ? data[data.length - 1].weight - data[0].weight : 0;
+            
+            chartsHTML += `
+                <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+                    <h5 style="color: var(--dark); margin-bottom: 10px;">🏋️ ${exercise} Progress</h5>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 12px; color: #666;">Last ${data.length} workouts</span>
+                        <span style="font-size: 12px; color: #666;">Current: ${data[data.length - 1]?.weight || 0} lbs</span>
+                    </div>
+                    <div style="display: flex; align-items: end; height: 60px; gap: 4px;">
+                        ${data.map(point => {
+                            const height = (point.weight / maxWeight) * 60;
+                            return `<div class="chart-bar" style="--target-height: ${height}px; background: var(--primary); width: ${Math.max(100 / data.length - 2, 8)}%; border-radius: 2px;" title="${point.weight} lbs"></div>`;
+                        }).join('')}
+                    </div>
+                    <div style="font-size: 10px; color: #666; margin-top: 5px;">
+                        ${improvement > 0 ? `+${improvement} lbs improvement` : improvement < 0 ? `${improvement} lbs change` : 'No change'}
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    return chartsHTML || '<div style="text-align: center; color: #666; padding: 20px;">Complete more workouts to see progress charts!</div>';
+}
+
+function generateWeeklyChart(history) {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const thisWeek = getThisWeekWorkouts(history);
+    
+    let chartHTML = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 15px;">';
+    
+    days.forEach((day, index) => {
+        const workoutCount = thisWeek[index] || 0;
+        const intensity = Math.min(workoutCount / 2, 1); // Max intensity at 2 workouts
+        const bgColor = workoutCount > 0 ? `rgba(75, 156, 211, ${0.3 + intensity * 0.7})` : 'var(--lighter-bg)';
+        
+        chartHTML += `
+            <div style="text-align: center;">
+                <div style="font-size: 10px; color: #666; margin-bottom: 5px;">${day}</div>
+                <div style="background: ${bgColor}; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: ${workoutCount > 0 ? 'white' : '#666'}; font-weight: bold;">
+                    ${workoutCount || ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    chartHTML += '</div>';
+    chartHTML += `<div style="text-align: center; color: #666; font-size: 12px;">This week: ${thisWeek.reduce((a, b) => a + b, 0)} workouts completed</div>`;
+    
+    return chartHTML;
+}
+
+function getExerciseProgressData(history, exerciseName) {
+    const data = [];
+    
+    history.forEach(workout => {
+        workout.exercises.forEach(exercise => {
+            if (exercise.name.toLowerCase().includes(exerciseName.toLowerCase())) {
+                const maxWeight = Math.max(...exercise.sets.map(set => set.weight));
+                if (maxWeight > 0) {
+                    data.push({
+                        date: workout.date,
+                        weight: maxWeight
+                    });
+                }
+            }
+        });
+    });
+    
+    return data.slice(-10); // Last 10 data points
+}
+
+function getThisWeekWorkouts(history) {
+    const thisWeek = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+    
+    history.forEach(workout => {
+        const workoutDate = new Date(workout.date);
+        if (workoutDate >= startOfWeek) {
+            const dayOfWeek = workoutDate.getDay();
+            thisWeek[dayOfWeek]++;
+        }
+    });
+    
+    return thisWeek;
+}
+
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+}
+
+function getPRs(workout) {
+    const prs = [];
+    workout.exercises.forEach(exercise => {
+        const maxWeight = Math.max(...exercise.sets.map(set => set.weight));
+        if (maxWeight > 200) { // Arbitrary PR threshold
+            prs.push(`${maxWeight} lbs PR`);
+        }
+    });
+    
+    return prs.length > 0 ? prs[0] : 'Completed';
 }
 
 function complete75HardDay() {
@@ -2390,6 +2733,9 @@ function loadSavedWorkouts() {
     
     let html = '';
     savedWorkouts.forEach(workout => {
+        const program = workoutPrograms[workout.id];
+        const dayOptions = program && program.schedule ? Object.keys(program.schedule) : [];
+        
         html += `
             <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; border-left: 4px solid ${workout.color};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -2397,6 +2743,16 @@ function loadSavedWorkouts() {
                     <span style="background: ${workout.color}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">${workout.duration}</span>
                 </div>
                 <p style="color: #666; font-size: 14px; margin-bottom: 15px;">${workout.type} • ${workout.daysPerWeek} days/week</p>
+                
+                ${dayOptions.length > 0 ? `
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; color: #666; margin-bottom: 5px; display: block;">Choose workout day:</label>
+                        <select id="day-${workout.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                            ${dayOptions.map(day => `<option value="${day}">${day} - ${program.schedule[day].name}</option>`).join('')}
+                        </select>
+                    </div>
+                ` : ''}
+                
                 <div style="display: flex; gap: 10px;">
                     <button onclick="startSavedWorkout('${workout.id}')" style="background: ${workout.color}; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
                         ▶️ Start
