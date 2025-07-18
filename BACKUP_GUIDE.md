@@ -3,7 +3,9 @@
 ## Current Backups
 
 - **v1.0** - First working version with organized code structure
+- **v1.1** - Added complete quick workout pages (30-min muscle, 20-min HIIT, 15-min mobility, 10-min core)
 - **backup/working-version-1** - Branch backup of v1.0
+- **backup/working-version-2-quick-workouts** - Branch backup of v1.1 with quick workouts
 
 ## How to Create a New Backup
 
