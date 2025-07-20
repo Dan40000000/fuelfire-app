@@ -4,6 +4,8 @@
 
 - **v1.0** - First working version with organized code structure
 - **v1.1** - Added complete quick workout pages (30-min muscle, 20-min HIIT, 15-min mobility, 10-min core)
+- **v1.2** - Complete FuelFire app with animated Track Workouts, day selector, and full workout tracking
+- **v1.3** - Added prominent running total of workouts - FuelFire app feature complete
 - **backup/working-version-1** - Branch backup of v1.0
 - **backup/working-version-2-quick-workouts** - Branch backup of v1.1 with quick workouts
 
