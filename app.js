@@ -37,69 +37,6 @@ function toggleSidebar() {
     document.querySelector('.overlay').classList.toggle('show');
 }
 
-// Show screen
-function showScreen(screenId) {
-    // Hide all screens
-    document.querySelectorAll('.screen-content').forEach(screen => {
-        screen.classList.remove('active');
-    });
-    
-    // Show selected screen
-    document.getElementById(screenId).classList.add('active');
-    
-    // Update menu
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Find and highlight the correct menu item
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => {
-        if (item.textContent.includes(getMenuTextForScreen(screenId))) {
-            item.classList.add('active');
-        }
-    });
-    
-    // Update header
-    const titles = {
-        'home': 'FuelFire',
-        'create-workout': 'Create Workout',
-        'track-workouts': 'Track Workouts',
-        'diet-tracker': 'Diet Tracker',
-        'diet-creation': 'Diet Creation',
-        'progress': 'Progress & Analytics'
-    };
-    document.querySelector('.header-title').textContent = titles[screenId] || 'FuelFire';
-    
-    // Load screen-specific content
-    if (screenId === 'diet-tracker') {
-        loadDietTracker();
-    } else if (screenId === 'diet-creation') {
-        loadDietCreation();
-    } else if (screenId === 'track-workouts') {
-        loadWorkoutHistory();
-    } else if (screenId === 'saved-workouts') {
-        loadSavedWorkouts();
-    }
-    
-    // Close sidebar if it's open
-    if (document.getElementById('sidebar').classList.contains('open')) {
-        toggleSidebar();
-    }
-}
-
-// Helper function to get menu text for screen
-function getMenuTextForScreen(screenId) {
-    const screenToMenu = {
-        'home': 'Home',
-        'create-workout': 'Create Workout',
-        'track-workouts': 'Track Workouts',
-        'diet-tracker': 'Diet Tracker',
-        'diet-creation': 'Diet Creation',
-        'progress': 'Progress & Analytics'
-    };
-    return screenToMenu[screenId] || '';
-}
 
 // Update time
 function updateTime() {
@@ -1740,9 +1677,13 @@ function showScreen(screenId) {
     };
     document.querySelector('.header-title').textContent = titles[screenId] || 'FuelFire';
     
-    // Load track workouts if needed
+    // Load screen-specific content
     if (screenId === 'track-workouts') {
         loadWorkoutHistory();
+    } else if (screenId === 'diet-tracker') {
+        loadDietTracker();
+    } else if (screenId === 'diet-creation') {
+        loadDietCreation();
     }
     
     // Close sidebar if it's open
