@@ -71,6 +71,17 @@ function showScreen(screenId) {
     };
     document.querySelector('.header-title').textContent = titles[screenId] || 'FuelFire';
     
+    // Load screen-specific content
+    if (screenId === 'diet-tracker') {
+        loadDietTracker();
+    } else if (screenId === 'diet-creation') {
+        loadDietCreation();
+    } else if (screenId === 'track-workouts') {
+        loadWorkoutHistory();
+    } else if (screenId === 'saved-workouts') {
+        loadSavedWorkouts();
+    }
+    
     // Close sidebar if it's open
     if (document.getElementById('sidebar').classList.contains('open')) {
         toggleSidebar();
@@ -2449,49 +2460,418 @@ function complete75HardDay() {
     showScreen('track-workouts');
 }
 
+// Diet System State
+let dietQuizStep = 1;
+let dietData = {};
+let currentDietPlan = JSON.parse(localStorage.getItem('currentDietPlan') || 'null');
+let dailyFoodLog = JSON.parse(localStorage.getItem('dailyFoodLog') || '[]');
+
+// Simple food database
+const foods = {
+    breakfast: [
+        { name: 'Scrambled Eggs', calories: 200, protein: 18, carbs: 2, fat: 14 },
+        { name: 'Oatmeal with Berries', calories: 300, protein: 10, carbs: 45, fat: 8 },
+        { name: 'Greek Yogurt Parfait', calories: 250, protein: 20, carbs: 30, fat: 6 },
+        { name: 'Avocado Toast', calories: 320, protein: 8, carbs: 35, fat: 18 }
+    ],
+    lunch: [
+        { name: 'Grilled Chicken Salad', calories: 400, protein: 35, carbs: 20, fat: 20 },
+        { name: 'Turkey Sandwich', calories: 450, protein: 30, carbs: 45, fat: 15 },
+        { name: 'Quinoa Bowl', calories: 500, protein: 20, carbs: 65, fat: 18 },
+        { name: 'Salmon & Rice', calories: 550, protein: 40, carbs: 50, fat: 20 }
+    ],
+    dinner: [
+        { name: 'Steak & Vegetables', calories: 600, protein: 45, carbs: 30, fat: 35 },
+        { name: 'Chicken Stir Fry', calories: 500, protein: 35, carbs: 55, fat: 15 },
+        { name: 'Pasta Primavera', calories: 480, protein: 15, carbs: 70, fat: 16 },
+        { name: 'Fish Tacos', calories: 450, protein: 30, carbs: 40, fat: 20 }
+    ],
+    snack: [
+        { name: 'Protein Shake', calories: 150, protein: 25, carbs: 10, fat: 3 },
+        { name: 'Apple with Almond Butter', calories: 200, protein: 5, carbs: 25, fat: 12 },
+        { name: 'Trail Mix', calories: 180, protein: 6, carbs: 20, fat: 10 },
+        { name: 'Cottage Cheese & Fruit', calories: 160, protein: 18, carbs: 15, fat: 4 }
+    ]
+};
+
 // Diet Tracker Functions
 function addFood(mealType) {
-    const mealNames = {
-        'breakfast': 'Breakfast',
-        'lunch': 'Lunch',
-        'dinner': 'Dinner',
-        'snack': 'Snack'
+    const mealFoods = foods[mealType];
+    let html = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+            <div style="background: white; border-radius: 20px; padding: 25px; max-width: 90%; width: 350px;">
+                <h3 style="margin: 0 0 20px 0; color: var(--dark);">Add ${mealType}</h3>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${mealFoods.map((food, index) => `
+                        <div onclick="selectFood('${mealType}', ${index})" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+                            <div style="font-weight: bold; color: var(--dark);">${food.name}</div>
+                            <div style="font-size: 12px; color: #666;">${food.calories} cal • ${food.protein}g protein • ${food.carbs}g carbs • ${food.fat}g fat</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="closeModal()" style="background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 12px; width: 100%; margin-top: 15px; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.innerHTML = html;
+    document.body.appendChild(modal.firstElementChild);
+}
+
+function selectFood(mealType, index) {
+    const food = foods[mealType][index];
+    const entry = {
+        ...food,
+        mealType,
+        timestamp: new Date().toISOString()
     };
     
-    const foodName = prompt(`What did you eat for ${mealNames[mealType]}?`, '');
-    if (foodName) {
-        alert(`✅ Added "${foodName}" to ${mealNames[mealType]}`);
-        // This would open a food logging interface
-    }
+    dailyFoodLog.push(entry);
+    localStorage.setItem('dailyFoodLog', JSON.stringify(dailyFoodLog));
+    
+    closeModal();
+    loadDietTracker();
+    showNotification(`Added ${food.name} to ${mealType}!`);
+}
+
+function closeModal() {
+    const modal = document.querySelector('div[style*="position: fixed"]');
+    if (modal) modal.remove();
 }
 
 // Diet Creation Functions
-function selectDietGoal(goal) {
-    const goals = {
-        'weight-loss': 'Weight Loss',
-        'muscle-gain': 'Muscle Gain',
-        'maintenance': 'Maintenance'
-    };
-    
-    alert(`Selected goal: ${goals[goal]}`);
-    // This would save the selected goal and update the UI
+function loadDietCreation() {
+    if (currentDietPlan) {
+        showDietPlan();
+    } else {
+        showDietQuiz();
+    }
 }
 
-function selectDietPlan(plan) {
-    const plans = {
-        'high-protein': 'High Protein Diet',
-        'keto': 'Ketogenic Diet',
-        'balanced': 'Balanced Diet',
-        'mediterranean': 'Mediterranean Diet'
-    };
+function showDietQuiz() {
+    const content = document.getElementById('diet-creation-content');
+    let html = '';
     
-    alert(`Selected diet plan: ${plans[plan]}`);
-    // This would apply the selected diet plan
+    if (dietQuizStep === 1) {
+        html = `
+            <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                <h2 style="font-size: 28px; margin-bottom: 10px;">🎯 Custom Diet Creation</h2>
+                <p style="opacity: 0.9;">Let's create your perfect meal plan!</p>
+            </div>
+            
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: var(--dark); margin-bottom: 20px;">Step 1: Your Goals</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal?</label>
+                    <select id="diet-goal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                        <option value="">Select your goal...</option>
+                        <option value="weight-loss">🔥 Weight Loss</option>
+                        <option value="muscle-gain">💪 Muscle Gain</option>
+                        <option value="maintenance">⚖️ Maintenance</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Daily calorie target</label>
+                    <input type="number" id="calorie-target" placeholder="2000" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                </div>
+                
+                <button onclick="nextDietStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer;">
+                    Continue to Preferences →
+                </button>
+            </div>
+        `;
+    } else if (dietQuizStep === 2) {
+        html = `
+            <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                <h2 style="font-size: 28px; margin-bottom: 10px;">🍽️ Dietary Preferences</h2>
+                <p style="opacity: 0.9;">Tell us about your restrictions</p>
+            </div>
+            
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: var(--dark); margin-bottom: 20px;">Step 2: Allergies & Restrictions</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Any allergies? (Check all that apply)</label>
+                    <div style="display: grid; gap: 10px;">
+                        ${['None', 'Nuts', 'Dairy', 'Gluten', 'Eggs', 'Shellfish'].map(allergy => `
+                            <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer;">
+                                <input type="checkbox" value="${allergy}" ${allergy === 'None' ? 'onchange="uncheckOthers(this)"' : ''}> ${allergy}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Dietary preference</label>
+                    <select id="diet-type" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                        <option value="balanced">Balanced</option>
+                        <option value="high-protein">High Protein</option>
+                        <option value="low-carb">Low Carb</option>
+                        <option value="vegetarian">Vegetarian</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="prevDietStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                        ← Back
+                    </button>
+                    <button onclick="generateDietPlan()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                        Generate Meal Plan 🚀
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
 }
 
-function calculateMacros() {
-    alert('Calculating your personalized macros... (This would perform the calculation based on inputs)');
-    // This would calculate and display personalized macro recommendations
+function nextDietStep() {
+    // Save step 1 data
+    dietData.goal = document.getElementById('diet-goal').value;
+    dietData.calories = document.getElementById('calorie-target').value || 2000;
+    
+    if (!dietData.goal) {
+        alert('Please select your goal');
+        return;
+    }
+    
+    dietQuizStep = 2;
+    showDietQuiz();
+}
+
+function prevDietStep() {
+    dietQuizStep = 1;
+    showDietQuiz();
+}
+
+function uncheckOthers(checkbox) {
+    if (checkbox.checked) {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            if (cb !== checkbox) cb.checked = false;
+        });
+    }
+}
+
+function generateDietPlan() {
+    // Save step 2 data
+    const allergies = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    dietData.allergies = allergies.includes('None') ? [] : allergies;
+    dietData.dietType = document.getElementById('diet-type').value;
+    
+    // Calculate macros based on goals
+    const calories = parseInt(dietData.calories);
+    let macros = {};
+    
+    if (dietData.goal === 'muscle-gain') {
+        macros = { protein: Math.round(calories * 0.3 / 4), carbs: Math.round(calories * 0.45 / 4), fat: Math.round(calories * 0.25 / 9) };
+    } else if (dietData.goal === 'weight-loss') {
+        macros = { protein: Math.round(calories * 0.35 / 4), carbs: Math.round(calories * 0.35 / 4), fat: Math.round(calories * 0.3 / 9) };
+    } else {
+        macros = { protein: Math.round(calories * 0.25 / 4), carbs: Math.round(calories * 0.45 / 4), fat: Math.round(calories * 0.3 / 9) };
+    }
+    
+    // Generate weekly meal plan
+    const mealPlan = generateWeeklyMeals();
+    const shoppingList = generateShoppingList(mealPlan);
+    
+    currentDietPlan = {
+        ...dietData,
+        macros,
+        mealPlan,
+        shoppingList,
+        createdAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('currentDietPlan', JSON.stringify(currentDietPlan));
+    showDietPlan();
+}
+
+function generateWeeklyMeals() {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const meals = {};
+    
+    days.forEach(day => {
+        meals[day] = {
+            breakfast: foods.breakfast[Math.floor(Math.random() * foods.breakfast.length)],
+            lunch: foods.lunch[Math.floor(Math.random() * foods.lunch.length)],
+            dinner: foods.dinner[Math.floor(Math.random() * foods.dinner.length)],
+            snack: foods.snack[Math.floor(Math.random() * foods.snack.length)]
+        };
+    });
+    
+    return meals;
+}
+
+function generateShoppingList(mealPlan) {
+    return [
+        '🥩 Proteins: Chicken breast, Salmon, Eggs, Greek yogurt, Turkey',
+        '🥬 Vegetables: Broccoli, Spinach, Bell peppers, Tomatoes, Lettuce',
+        '🍞 Carbs: Brown rice, Quinoa, Oatmeal, Whole wheat bread, Sweet potatoes',
+        '🥑 Fats: Avocado, Olive oil, Almonds, Almond butter',
+        '🧂 Other: Seasonings, Low-fat dressing, Protein powder'
+    ];
+}
+
+function showDietPlan() {
+    const content = document.getElementById('diet-creation-content');
+    const plan = currentDietPlan;
+    
+    let totalDayCalories = 0;
+    const todayMeals = plan.mealPlan['Monday'];
+    Object.values(todayMeals).forEach(meal => totalDayCalories += meal.calories);
+    
+    let html = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+            <h2 style="font-size: 28px; margin-bottom: 10px;">🎉 Your Custom Meal Plan!</h2>
+            <p style="opacity: 0.9;">Tailored for ${dietData.goal.replace('-', ' ')}</p>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 20px;">📊 Daily Targets</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; font-weight: bold; color: var(--primary);">${plan.calories}</div>
+                <div style="color: #666;">calories per day</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #e74c3c;">${plan.macros.protein}g</div>
+                    <div style="font-size: 12px; color: #666;">Protein</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #f39c12;">${plan.macros.carbs}g</div>
+                    <div style="font-size: 12px; color: #666;">Carbs</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${plan.macros.fat}g</div>
+                    <div style="font-size: 12px; color: #666;">Fat</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 20px;">📅 This Week's Meals</h3>
+            <div style="max-height: 400px; overflow-y: auto;">
+                ${Object.entries(plan.mealPlan).map(([day, meals]) => `
+                    <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px; margin-bottom: 15px;">
+                        <h4 style="color: var(--primary); margin-bottom: 15px;">${day}</h4>
+                        <div style="display: grid; gap: 10px;">
+                            <div>🌅 <strong>Breakfast:</strong> ${meals.breakfast.name} (${meals.breakfast.calories} cal)</div>
+                            <div>☀️ <strong>Lunch:</strong> ${meals.lunch.name} (${meals.lunch.calories} cal)</div>
+                            <div>🌙 <strong>Dinner:</strong> ${meals.dinner.name} (${meals.dinner.calories} cal)</div>
+                            <div>🥜 <strong>Snack:</strong> ${meals.snack.name} (${meals.snack.calories} cal)</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 20px;">🛒 Shopping List</h3>
+            <div style="white-space: pre-line; color: #666; line-height: 1.8;">${plan.shoppingList.join('\n')}</div>
+        </div>
+        
+        <button onclick="resetDietPlan()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer;">
+            🔄 Create New Plan
+        </button>
+    `;
+    
+    content.innerHTML = html;
+}
+
+function resetDietPlan() {
+    currentDietPlan = null;
+    dietQuizStep = 1;
+    dietData = {};
+    localStorage.removeItem('currentDietPlan');
+    showDietQuiz();
+}
+
+// Load diet tracker
+function loadDietTracker() {
+    const content = document.getElementById('diet-tracker-content');
+    const todayLog = dailyFoodLog.filter(entry => {
+        return new Date(entry.timestamp).toDateString() === new Date().toDateString();
+    });
+    
+    const totals = todayLog.reduce((acc, food) => {
+        acc.calories += food.calories;
+        acc.protein += food.protein;
+        acc.carbs += food.carbs;
+        acc.fat += food.fat;
+        return acc;
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    
+    const targetCalories = currentDietPlan?.calories || 2000;
+    const remaining = targetCalories - totals.calories;
+    const percent = (totals.calories / targetCalories) * 100;
+    
+    let html = `
+        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+            <h3 style="font-size: 20px; margin-bottom: 10px;">🥗 Diet Tracker</h3>
+            <p style="opacity: 0.9; font-size: 14px;">Track your daily nutrition</p>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">📊 Today's Progress</h4>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 36px; font-weight: bold; color: var(--primary);">${totals.calories}</div>
+                <div style="color: #666;">of ${targetCalories} calories</div>
+            </div>
+            <div style="background: var(--lighter-bg); border-radius: 10px; height: 20px; overflow: hidden;">
+                <div style="background: ${percent > 100 ? '#e74c3c' : 'var(--gradient-1)'}; height: 100%; width: ${Math.min(percent, 100)}%; transition: width 0.3s ease;"></div>
+            </div>
+            <div style="text-align: center; margin-top: 10px; color: ${remaining >= 0 ? '#27ae60' : '#e74c3c'}; font-weight: bold;">
+                ${Math.abs(remaining)} calories ${remaining >= 0 ? 'remaining' : 'over'}
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">➕ Add Meal</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                ${['breakfast', 'lunch', 'dinner', 'snack'].map(meal => `
+                    <button onclick="addFood('${meal}')" style="background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: capitalize;">
+                        ${meal === 'breakfast' ? '🌅' : meal === 'lunch' ? '☀️' : meal === 'dinner' ? '🌙' : '🥜'} ${meal}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+            <h4 style="color: var(--dark); margin-bottom: 15px;">🍽️ Today's Meals</h4>
+            ${todayLog.length === 0 ? 
+                '<p style="text-align: center; color: #666; padding: 20px;">No meals logged yet. Start by adding breakfast!</p>' :
+                todayLog.map(food => `
+                    <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">${food.name}</div>
+                                <div style="font-size: 12px; color: #666;">${food.mealType} • ${new Date(food.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary); font-weight: bold;">${food.calories} cal</div>
+                                <div style="font-size: 11px; color: #666;">P: ${food.protein}g | C: ${food.carbs}g | F: ${food.fat}g</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')
+            }
+        </div>
+        
+        ${!currentDietPlan ? `
+            <div style="background: var(--lighter-bg); padding: 20px; border-radius: 20px; text-align: center; margin-top: 20px;">
+                <p style="color: var(--primary-dark); margin-bottom: 15px;">Create a personalized meal plan!</p>
+                <button onclick="showScreen('diet-creation')" style="background: var(--gradient-1); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer;">
+                    🎯 Create Diet Plan
+                </button>
+            </div>
+        ` : ''}
+    `;
+    
+    content.innerHTML = html;
 }
 
 // Workout Program Functions

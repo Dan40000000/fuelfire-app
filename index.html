@@ -633,169 +633,17 @@
 
                 <!-- DIET TRACKER SCREEN -->
                 <div class="screen-content" id="diet-tracker">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
-                        <h3 style="font-size: 20px; margin-bottom: 10px;">🥗 Diet Tracker</h3>
-                        <p style="opacity: 0.9; font-size: 14px;">Track your daily nutrition and calories</p>
-                    </div>
-                    
-                    <!-- Daily Calories -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">📊 Today's Calories</h4>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <div>
-                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">1,847</div>
-                                <div style="font-size: 12px; color: #666;">calories consumed</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 24px; font-weight: bold; color: #27ae60;">453</div>
-                                <div style="font-size: 12px; color: #666;">remaining</div>
-                            </div>
-                        </div>
-                        <div style="background: var(--lighter-bg); border-radius: 10px; height: 8px; margin-bottom: 10px;">
-                            <div style="background: var(--primary); height: 100%; width: 80%; border-radius: 10px;"></div>
-                        </div>
-                        <div style="text-align: center; color: #666; font-size: 12px;">Goal: 2,300 calories</div>
-                    </div>
-                    
-                    <!-- Macros -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">⚖️ Macronutrients</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
-                            <div>
-                                <div style="font-size: 18px; font-weight: bold; color: #e74c3c;">92g</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Protein</div>
-                                <div style="background: var(--lighter-bg); border-radius: 5px; height: 4px;">
-                                    <div style="background: #e74c3c; height: 100%; width: 75%; border-radius: 5px;"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="font-size: 18px; font-weight: bold; color: #f39c12;">240g</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Carbs</div>
-                                <div style="background: var(--lighter-bg); border-radius: 5px; height: 4px;">
-                                    <div style="background: #f39c12; height: 100%; width: 85%; border-radius: 5px;"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="font-size: 18px; font-weight: bold; color: #27ae60;">65g</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Fat</div>
-                                <div style="background: var(--lighter-bg); border-radius: 5px; height: 4px;">
-                                    <div style="background: #27ae60; height: 100%; width: 70%; border-radius: 5px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Quick Add -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">➕ Quick Add</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <button onclick="addFood('breakfast')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
-                                🌅 Breakfast
-                            </button>
-                            <button onclick="addFood('lunch')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
-                                🌞 Lunch
-                            </button>
-                            <button onclick="addFood('dinner')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
-                                🌙 Dinner
-                            </button>
-                            <button onclick="addFood('snack')" style="background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 14px; cursor: pointer;">
-                                🥨 Snack
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Meals -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">🍽️ Recent Meals</h4>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
-                            <div>
-                                <div style="font-weight: bold; color: var(--dark);">Chicken & Rice Bowl</div>
-                                <div style="color: #666; font-size: 12px;">Lunch • 1:30 PM</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--primary); font-weight: bold;">645 cal</div>
-                                <div style="color: #666; font-size: 12px;">35g protein</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px; margin-bottom: 8px;">
-                            <div>
-                                <div style="font-weight: bold; color: var(--dark);">Greek Yogurt & Berries</div>
-                                <div style="color: #666; font-size: 12px;">Breakfast • 8:00 AM</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--primary); font-weight: bold;">280 cal</div>
-                                <div style="color: #666; font-size: 12px;">20g protein</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
-                            <div>
-                                <div style="font-weight: bold; color: var(--dark);">Protein Shake</div>
-                                <div style="color: #666; font-size: 12px;">Pre-workout • 6:00 AM</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--primary); font-weight: bold;">320 cal</div>
-                                <div style="color: #666; font-size: 12px;">40g protein</div>
-                            </div>
-                        </div>
+                    <div id="diet-tracker-content">
+                        <!-- Dynamic content will be loaded here -->
                     </div>
                 </div>
 
                 <!-- DIET CREATION SCREEN -->
                 <div class="screen-content" id="diet-creation">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
-                        <h3 style="font-size: 20px; margin-bottom: 10px;">🎯 Diet Creation</h3>
-                        <p style="opacity: 0.9; font-size: 14px;">Create your personalized nutrition plan</p>
+                    <div id="diet-creation-content">
+                        <!-- Dynamic content will be loaded here -->
                     </div>
-                    
-                    <!-- Goal Selection -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">🎯 Select Your Goal</h4>
-                        <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
-                            <button onclick="selectDietGoal('weight-loss')" style="background: var(--lighter-bg); border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: left;">
-                                <div style="font-weight: bold;">🔥 Weight Loss</div>
-                                <div style="font-size: 12px; opacity: 0.8;">Lose 1-2 lbs per week safely</div>
-                            </button>
-                            <button onclick="selectDietGoal('muscle-gain')" style="background: var(--lighter-bg); border: 2px solid #27ae60; color: #27ae60; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: left;">
-                                <div style="font-weight: bold;">💪 Muscle Gain</div>
-                                <div style="font-size: 12px; opacity: 0.8;">Build lean muscle with proper nutrition</div>
-                            </button>
-                            <button onclick="selectDietGoal('maintenance')" style="background: var(--lighter-bg); border: 2px solid #f39c12; color: #f39c12; padding: 15px; border-radius: 15px; font-size: 14px; cursor: pointer; text-align: left;">
-                                <div style="font-weight: bold;">⚖️ Maintenance</div>
-                                <div style="font-size: 12px; opacity: 0.8;">Maintain current weight and energy</div>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Popular Diet Plans -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">📋 Popular Diet Plans</h4>
-                        
-                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <div style="font-weight: bold; color: var(--dark);">🥩 High Protein</div>
-                                    <div style="color: #666; font-size: 12px;">40% protein, 30% carbs, 30% fat</div>
-                                </div>
-                                <button onclick="selectDietPlan('high-protein')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-size: 12px; cursor: pointer;">
-                                    Select
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <div style="font-weight: bold; color: var(--dark);">🥑 Keto</div>
-                                    <div style="color: #666; font-size: 12px;">5% carbs, 75% fat, 20% protein</div>
-                                </div>
-                                <button onclick="selectDietPlan('keto')" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-size: 12px; cursor: pointer;">
-                                    Select
-                                </button>
-                            </div>
-                        </div>
+                </div>
                         
                         <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
