@@ -2577,7 +2577,6 @@ function showDietQuiz() {
                         </div>
                     </div>
                     
-                    
                     <div onclick="selectPopularDiet('intermittent')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
@@ -2671,6 +2670,9 @@ function showDietQuiz() {
                         <option value="high-protein">High Protein</option>
                         <option value="low-carb">Low Carb</option>
                         <option value="vegetarian">Vegetarian</option>
+                        <option value="keto">Keto</option>
+                        <option value="paleo">Paleo</option>
+                        <option value="vegan">Vegan</option>
                     </select>
                 </div>
                 
