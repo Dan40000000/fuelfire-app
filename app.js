@@ -2577,15 +2577,6 @@ function showDietQuiz() {
                         </div>
                     </div>
                     
-                    <div onclick="selectPopularDiet('mediterranean')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-weight: bold; color: var(--dark);">🫒 Mediterranean Diet</div>
-                                <div style="color: #666; font-size: 12px;">Fish, olive oil, vegetables • Heart healthy</div>
-                            </div>
-                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
-                        </div>
-                    </div>
                     
                     <div onclick="selectPopularDiet('intermittent')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -2677,7 +2668,6 @@ function showDietQuiz() {
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Dietary preference</label>
                     <select id="diet-type" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
-                        <option value="balanced">Balanced</option>
                         <option value="high-protein">High Protein</option>
                         <option value="low-carb">Low Carb</option>
                         <option value="vegetarian">Vegetarian</option>
@@ -2955,14 +2945,6 @@ function selectPopularDiet(dietType) {
             description: 'Eat like our ancestors - whole foods only',
             foods: ['Grass-fed meat', 'Wild fish', 'Vegetables', 'Fruits', 'Nuts', 'Seeds', 'Sweet potatoes'],
             rules: ['No grains', 'No dairy', 'No processed foods', 'No legumes']
-        },
-        mediterranean: {
-            name: 'Mediterranean Diet',
-            calories: 2100,
-            macros: { protein: 131, carbs: 236, fat: 82 },
-            description: 'Heart-healthy diet based on Mediterranean cuisine',
-            foods: ['Fish', 'Olive oil', 'Vegetables', 'Whole grains', 'Legumes', 'Fruits', 'Nuts'],
-            rules: ['Lots of fish', 'Olive oil primary fat', 'Moderate wine', 'Minimal red meat']
         },
         intermittent: {
             name: 'Intermittent Fasting 16:8',
