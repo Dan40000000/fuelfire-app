@@ -2501,8 +2501,137 @@ function showDietQuiz() {
                 <p style="opacity: 0.9;">Let's create your perfect meal plan!</p>
             </div>
             
+            <!-- Quick Calorie Calculator -->
             <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
-                <h3 style="color: var(--dark); margin-bottom: 20px;">Step 1: Your Goals</h3>
+                <h3 style="color: var(--dark); margin-bottom: 20px;">🧮 Quick Calorie Calculator</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Age</label>
+                        <input type="number" id="calc-age" placeholder="25" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Gender</label>
+                        <select id="calc-gender" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Weight (lbs)</label>
+                        <input type="number" id="calc-weight" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height (inches)</label>
+                        <input type="number" id="calc-height" placeholder="68" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Activity Level</label>
+                    <select id="calc-activity" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                        <option value="">Select activity level</option>
+                        <option value="1.2">Sedentary (little/no exercise)</option>
+                        <option value="1.375">Light (exercise 1-3 days/week)</option>
+                        <option value="1.55">Moderate (exercise 3-5 days/week)</option>
+                        <option value="1.725">Active (exercise 6-7 days/week)</option>
+                        <option value="1.9">Very Active (physical job + exercise)</option>
+                    </select>
+                </div>
+                
+                <button onclick="calculateCalories()" style="background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 15px;">
+                    Calculate My Calories & Macros
+                </button>
+                
+                <div id="calc-results" style="display: none; background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+            
+            <!-- Popular Diet Plans -->
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: var(--dark); margin-bottom: 20px;">🔥 Popular Diet Plans</h3>
+                
+                <div style="display: grid; gap: 12px;">
+                    <div onclick="selectPopularDiet('keto')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🥑 Ketogenic Diet</div>
+                                <div style="color: #666; font-size: 12px;">5% carbs, 75% fat, 20% protein • Fast weight loss</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectPopularDiet('paleo')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🥩 Paleo Diet</div>
+                                <div style="color: #666; font-size: 12px;">Whole foods, no grains/dairy • Natural eating</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectPopularDiet('mediterranean')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🫒 Mediterranean Diet</div>
+                                <div style="color: #666; font-size: 12px;">Fish, olive oil, vegetables • Heart healthy</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectPopularDiet('intermittent')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">⏰ Intermittent Fasting</div>
+                                <div style="color: #666; font-size: 12px;">16:8 or 18:6 eating windows • Metabolic benefits</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectPopularDiet('vegan')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🌱 Vegan Diet</div>
+                                <div style="color: #666; font-size: 12px;">Plant-based only • Ethical & healthy</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectPopularDiet('carnivore')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🥩 Carnivore Diet</div>
+                                <div style="color: #666; font-size: 12px;">Meat only • Ultimate elimination diet</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                    
+                    <div onclick="selectPopularDiet('flexible')" style="background: var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold; color: var(--dark);">🎯 Flexible Dieting (IIFYM)</div>
+                                <div style="color: #666; font-size: 12px;">Track macros, eat anything • Maximum freedom</div>
+                            </div>
+                            <div style="background: var(--primary); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px;">Select</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Custom Quiz Option -->
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: var(--dark); margin-bottom: 20px;">🎯 Custom Diet Plan</h3>
                 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal?</label>
@@ -2520,7 +2649,7 @@ function showDietQuiz() {
                 </div>
                 
                 <button onclick="nextDietStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer;">
-                    Continue to Preferences →
+                    Continue to Custom Quiz →
                 </button>
             </div>
         `;
@@ -2729,6 +2858,225 @@ function resetDietPlan() {
     dietData = {};
     localStorage.removeItem('currentDietPlan');
     showDietQuiz();
+}
+
+// Calorie Calculator Function
+function calculateCalories() {
+    const age = parseInt(document.getElementById('calc-age').value);
+    const gender = document.getElementById('calc-gender').value;
+    const weight = parseFloat(document.getElementById('calc-weight').value);
+    const height = parseFloat(document.getElementById('calc-height').value);
+    const activity = parseFloat(document.getElementById('calc-activity').value);
+    
+    if (!age || !gender || !weight || !height || !activity) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Convert to metric for calculation
+    const weightKg = weight * 0.453592;
+    const heightCm = height * 2.54;
+    
+    // Calculate BMR using Mifflin-St Jeor equation
+    let bmr;
+    if (gender === 'male') {
+        bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+    } else {
+        bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+    }
+    
+    // Calculate TDEE
+    const tdee = Math.round(bmr * activity);
+    
+    // Calculate macros (balanced approach)
+    const protein = Math.round((tdee * 0.25) / 4); // 25% protein
+    const carbs = Math.round((tdee * 0.45) / 4);   // 45% carbs  
+    const fat = Math.round((tdee * 0.30) / 9);     // 30% fat
+    
+    // Show results
+    const resultsDiv = document.getElementById('calc-results');
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = `
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div style="font-size: 32px; font-weight: bold; color: var(--primary);">${tdee}</div>
+            <div style="color: #666; font-size: 14px;">Daily Maintenance Calories</div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center; margin-bottom: 15px;">
+            <div style="background: white; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 20px; font-weight: bold; color: #e74c3c;">${protein}g</div>
+                <div style="font-size: 12px; color: #666;">Protein</div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 20px; font-weight: bold; color: #f39c12;">${carbs}g</div>
+                <div style="font-size: 12px; color: #666;">Carbs</div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 8px;">
+                <div style="font-size: 20px; font-weight: bold; color: #27ae60;">${fat}g</div>
+                <div style="font-size: 12px; color: #666;">Fat</div>
+            </div>
+        </div>
+        
+        <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+            <div style="font-size: 14px; font-weight: bold; color: var(--dark); margin-bottom: 5px;">Goal Adjustments:</div>
+            <div style="font-size: 12px; color: #666;">
+                • Weight Loss: ${tdee - 500} calories (-500)<br>
+                • Muscle Gain: ${tdee + 300} calories (+300)<br>
+                • Maintenance: ${tdee} calories
+            </div>
+        </div>
+        
+        <button onclick="useCalculatedCalories(${tdee})" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer;">
+            Use These Results in Custom Plan
+        </button>
+    `;
+}
+
+function useCalculatedCalories(calories) {
+    document.getElementById('calorie-target').value = calories;
+    showNotification('Calories added to your custom plan!');
+}
+
+// Popular Diet Selection
+function selectPopularDiet(dietType) {
+    const dietPlans = {
+        keto: {
+            name: 'Ketogenic Diet',
+            calories: 1800,
+            macros: { protein: 135, carbs: 23, fat: 140 },
+            description: 'High-fat, very low-carb diet for rapid weight loss',
+            foods: ['Avocado', 'Salmon', 'Eggs', 'Cheese', 'Olive oil', 'Leafy greens', 'Nuts', 'MCT oil'],
+            rules: ['<20g carbs daily', 'High fat intake', 'Moderate protein', 'No grains/sugar']
+        },
+        paleo: {
+            name: 'Paleo Diet',
+            calories: 2000,
+            macros: { protein: 150, carbs: 125, fat: 89 },
+            description: 'Eat like our ancestors - whole foods only',
+            foods: ['Grass-fed meat', 'Wild fish', 'Vegetables', 'Fruits', 'Nuts', 'Seeds', 'Sweet potatoes'],
+            rules: ['No grains', 'No dairy', 'No processed foods', 'No legumes']
+        },
+        mediterranean: {
+            name: 'Mediterranean Diet',
+            calories: 2100,
+            macros: { protein: 131, carbs: 236, fat: 82 },
+            description: 'Heart-healthy diet based on Mediterranean cuisine',
+            foods: ['Fish', 'Olive oil', 'Vegetables', 'Whole grains', 'Legumes', 'Fruits', 'Nuts'],
+            rules: ['Lots of fish', 'Olive oil primary fat', 'Moderate wine', 'Minimal red meat']
+        },
+        intermittent: {
+            name: 'Intermittent Fasting 16:8',
+            calories: 1900,
+            macros: { protein: 142, carbs: 213, fat: 63 },
+            description: 'Eat within 8-hour window, fast for 16 hours',
+            foods: ['Balanced meals', 'Nutrient-dense foods', 'Proper hydration during fasts'],
+            rules: ['16-hour fast', '8-hour eating window', 'No calories during fast', 'Stay hydrated']
+        },
+        vegan: {
+            name: 'Vegan Diet',
+            calories: 2000,
+            macros: { protein: 125, carbs: 275, fat: 67 },
+            description: 'Plant-based nutrition for health and ethics',
+            foods: ['Legumes', 'Tofu', 'Quinoa', 'Vegetables', 'Fruits', 'Nuts', 'Seeds', 'Plant milk'],
+            rules: ['No animal products', 'B12 supplement needed', 'Protein combining', 'Iron-rich foods']
+        },
+        carnivore: {
+            name: 'Carnivore Diet',
+            calories: 2200,
+            macros: { protein: 165, carbs: 0, fat: 146 },
+            description: 'Animal products only - ultimate elimination diet',
+            foods: ['Beef', 'Pork', 'Chicken', 'Fish', 'Eggs', 'Organ meats', 'Bone marrow'],
+            rules: ['Animals only', 'No plants', 'Salt allowed', 'Water only']
+        },
+        flexible: {
+            name: 'Flexible Dieting (IIFYM)',
+            calories: 2000,
+            macros: { protein: 150, carbs: 200, fat: 78 },
+            description: 'Track macros, eat any foods that fit',
+            foods: ['Any foods that fit your macros', 'Focus on whole foods 80% of time'],
+            rules: ['Hit macro targets', '80/20 rule', 'Track everything', 'Flexible food choices']
+        }
+    };
+    
+    const plan = dietPlans[dietType];
+    if (!plan) return;
+    
+    // Create and save the diet plan
+    currentDietPlan = {
+        name: plan.name,
+        calories: plan.calories,
+        macros: plan.macros,
+        description: plan.description,
+        foods: plan.foods,
+        rules: plan.rules,
+        type: 'popular',
+        createdAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('currentDietPlan', JSON.stringify(currentDietPlan));
+    showSelectedDiet(plan);
+}
+
+function showSelectedDiet(plan) {
+    const content = document.getElementById('diet-creation-content');
+    
+    let html = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+            <h2 style="font-size: 28px; margin-bottom: 10px;">🎉 ${plan.name} Selected!</h2>
+            <p style="opacity: 0.9;">${plan.description}</p>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 20px;">📊 Your Daily Targets</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; font-weight: bold; color: var(--primary);">${plan.calories}</div>
+                <div style="color: #666;">calories per day</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #e74c3c;">${plan.macros.protein}g</div>
+                    <div style="font-size: 12px; color: #666;">Protein</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #f39c12;">${plan.macros.carbs}g</div>
+                    <div style="font-size: 12px; color: #666;">Carbs</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 12px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${plan.macros.fat}g</div>
+                    <div style="font-size: 12px; color: #666;">Fat</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">🥗 Recommended Foods</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                ${plan.foods.map(food => `
+                    <div style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; text-align: center; color: var(--dark);">
+                        ${food}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">📋 Key Rules</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #666;">
+                ${plan.rules.map(rule => `<li style="margin-bottom: 8px;">${rule}</li>`).join('')}
+            </ul>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="resetDietPlan()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
+                🔄 Choose Different Diet
+            </button>
+            <button onclick="showScreen('diet-tracker')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                🚀 Start Tracking
+            </button>
+        </div>
+    `;
+    
+    content.innerHTML = html;
 }
 
 // Load diet tracker
