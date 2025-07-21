@@ -2483,15 +2483,43 @@ function closeModal() {
 
 // Diet Creation Functions
 function loadDietCreation() {
-    if (currentDietPlan) {
-        showDietPlan();
-    } else {
-        showDietQuiz();
+    const content = document.getElementById('diet-creation-content');
+    if (!content) {
+        console.error('Diet creation content div not found!');
+        return;
     }
+    
+    // Test with simple content first
+    content.innerHTML = `
+        <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+            <h2 style="font-size: 28px; margin-bottom: 10px;">🎯 Diet Creation</h2>
+            <p style="opacity: 0.9;">Testing - page is working!</p>
+        </div>
+        
+        <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 20px;">Quick Test</h3>
+            <p>If you can see this, the basic loading works.</p>
+            <button onclick="showFullDietCreation()" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer;">
+                Load Full Diet Creation
+            </button>
+        </div>
+    `;
+}
+
+function showFullDietCreation() {
+    // Always start fresh with the quiz - no saved plans
+    currentDietPlan = null;
+    localStorage.removeItem('currentDietPlan');
+    showDietQuiz();
 }
 
 function showDietQuiz() {
     const content = document.getElementById('diet-creation-content');
+    if (!content) {
+        console.error('Could not find diet-creation-content element');
+        return;
+    }
+    
     let html = '';
     
     if (dietQuizStep === 1) {
