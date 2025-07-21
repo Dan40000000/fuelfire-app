@@ -2524,14 +2524,31 @@ function showDietQuiz() {
                     </div>
                 </div>
                 
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Measurement System</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="imperial-btn" onclick="setMeasurementSystem('imperial')" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; flex: 1;">🇺🇸 Imperial (lb/ft)</button>
+                        <button id="metric-btn" onclick="setMeasurementSystem('metric')" style="background: var(--lighter-bg); color: var(--dark); border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer; flex: 1;">🌍 Metric (kg/cm)</button>
+                    </div>
+                </div>
+                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
-                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Weight (lbs)</label>
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Weight <span id="weight-unit">(lbs)</span></label>
                         <input type="number" id="calc-weight" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
-                    <div>
-                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height (inches)</label>
-                        <input type="number" id="calc-height" placeholder="68" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    <div id="height-imperial" style="display: block;">
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" id="calc-feet" placeholder="5" style="width: 50%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                            <span style="padding: 10px;">ft</span>
+                            <input type="number" id="calc-inches" placeholder="8" style="width: 50%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                            <span style="padding: 10px;">in</span>
+                        </div>
+                    </div>
+                    <div id="height-metric" style="display: none;">
+                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height (cm)</label>
+                        <input type="number" id="calc-height-cm" placeholder="173" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
                 </div>
                 
@@ -2866,14 +2883,67 @@ function resetDietPlan() {
     showDietQuiz();
 }
 
+// Measurement system toggle
+let measurementSystem = 'imperial';
+
+function setMeasurementSystem(system) {
+    measurementSystem = system;
+    
+    const imperialBtn = document.getElementById('imperial-btn');
+    const metricBtn = document.getElementById('metric-btn');
+    const weightUnit = document.getElementById('weight-unit');
+    const heightImperial = document.getElementById('height-imperial');
+    const heightMetric = document.getElementById('height-metric');
+    const weightInput = document.getElementById('calc-weight');
+    
+    if (system === 'imperial') {
+        imperialBtn.style.background = 'var(--primary)';
+        imperialBtn.style.color = 'white';
+        imperialBtn.style.border = 'none';
+        metricBtn.style.background = 'var(--lighter-bg)';
+        metricBtn.style.color = 'var(--dark)';
+        metricBtn.style.border = '1px solid #ddd';
+        
+        weightUnit.textContent = '(lbs)';
+        weightInput.placeholder = '150';
+        heightImperial.style.display = 'block';
+        heightMetric.style.display = 'none';
+    } else {
+        metricBtn.style.background = 'var(--primary)';
+        metricBtn.style.color = 'white';
+        metricBtn.style.border = 'none';
+        imperialBtn.style.background = 'var(--lighter-bg)';
+        imperialBtn.style.color = 'var(--dark)';
+        imperialBtn.style.border = '1px solid #ddd';
+        
+        weightUnit.textContent = '(kg)';
+        weightInput.placeholder = '68';
+        heightImperial.style.display = 'none';
+        heightMetric.style.display = 'block';
+    }
+}
+
 // Calorie Calculator Function
 function calculateCalories() {
     const age = parseInt(document.getElementById('calc-age').value);
     const gender = document.getElementById('calc-gender').value;
     const weight = parseFloat(document.getElementById('calc-weight').value);
-    const height = parseFloat(document.getElementById('calc-height').value);
     const activity = parseFloat(document.getElementById('calc-activity').value);
     const bodyType = document.getElementById('calc-bodytype').value;
+    
+    let height;
+    if (measurementSystem === 'imperial') {
+        const feet = parseFloat(document.getElementById('calc-feet').value) || 0;
+        const inches = parseFloat(document.getElementById('calc-inches').value) || 0;
+        height = (feet * 12) + inches; // Convert to total inches
+        
+        if (!feet || (!inches && inches !== 0)) {
+            alert('Please enter both feet and inches for height');
+            return;
+        }
+    } else {
+        height = parseFloat(document.getElementById('calc-height-cm').value);
+    }
     
     if (!age || !gender || !weight || !height || !activity || !bodyType) {
         alert('Please fill in all fields including body type');
@@ -2881,8 +2951,14 @@ function calculateCalories() {
     }
     
     // Convert to metric for calculation
-    const weightKg = weight * 0.453592;
-    const heightCm = height * 2.54;
+    let weightKg, heightCm;
+    if (measurementSystem === 'imperial') {
+        weightKg = weight * 0.453592;
+        heightCm = height * 2.54;
+    } else {
+        weightKg = weight;
+        heightCm = height;
+    }
     
     // Calculate BMR using Mifflin-St Jeor equation
     let bmr;
