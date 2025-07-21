@@ -2537,18 +2537,20 @@ function showDietQuiz() {
                         <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Weight <span id="weight-unit">(lbs)</span></label>
                         <input type="number" id="calc-weight" placeholder="150" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
-                    <div id="height-imperial" style="display: block;">
-                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height</label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="number" id="calc-feet" placeholder="5" style="width: 50%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                            <span style="padding: 10px;">ft</span>
-                            <input type="number" id="calc-inches" placeholder="8" style="width: 50%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
-                            <span style="padding: 10px;">in</span>
+                    <div>
+                        <div id="height-imperial" style="display: block;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height</label>
+                            <div style="display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 8px; align-items: center;">
+                                <input type="number" id="calc-feet" placeholder="5" min="0" max="8" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; text-align: center;">
+                                <span style="color: var(--dark); font-weight: bold; font-size: 14px;">ft</span>
+                                <input type="number" id="calc-inches" placeholder="8" min="0" max="11" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; text-align: center;">
+                                <span style="color: var(--dark); font-weight: bold; font-size: 14px;">in</span>
+                            </div>
                         </div>
-                    </div>
-                    <div id="height-metric" style="display: none;">
-                        <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height (cm)</label>
-                        <input type="number" id="calc-height-cm" placeholder="173" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                        <div id="height-metric" style="display: none;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Height (cm)</label>
+                            <input type="number" id="calc-height-cm" placeholder="173" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px;">
+                        </div>
                     </div>
                 </div>
                 
