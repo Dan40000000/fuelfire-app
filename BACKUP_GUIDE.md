@@ -6,8 +6,11 @@
 - **v1.1** - Added complete quick workout pages (30-min muscle, 20-min HIIT, 15-min mobility, 10-min core)
 - **v1.2** - Complete FuelFire app with animated Track Workouts, day selector, and full workout tracking
 - **v1.3** - Added prominent running total of workouts - FuelFire app feature complete
+- **v1.4** - Complete Diet Creation & Tracking System - Quiz, Meal Plans, Shopping Lists
+- **v2.0** - STABLE: Complete app with calorie/macro calculator, body types, imperial/metric toggle
 - **backup/working-version-1** - Branch backup of v1.0
 - **backup/working-version-2-quick-workouts** - Branch backup of v1.1 with quick workouts
+- **backup/complete-app-v2** - Branch backup of v2.0 complete feature set
 
 ## How to Create a New Backup
 
