@@ -2507,7 +2507,7 @@ function showDietQuiz() {
             
             <!-- Quick Calorie Calculator -->
             <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
-                <h3 style="color: var(--dark); margin-bottom: 20px;">🧮 Quick Calorie Calculator</h3>
+                <h3 style="color: var(--dark); margin-bottom: 20px;">🧮 Calorie/Macro Counter</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
@@ -2544,6 +2544,16 @@ function showDietQuiz() {
                         <option value="1.55">Moderate (exercise 3-5 days/week)</option>
                         <option value="1.725">Active (exercise 6-7 days/week)</option>
                         <option value="1.9">Very Active (physical job + exercise)</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: var(--dark); margin-bottom: 5px; font-weight: bold;">Body Type</label>
+                    <select id="calc-bodytype" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                        <option value="">Select body type</option>
+                        <option value="ectomorph">💨 Ectomorph (Naturally thin, fast metabolism)</option>
+                        <option value="mesomorph">💪 Mesomorph (Athletic build, gains muscle easily)</option>
+                        <option value="endomorph">🏋️ Endomorph (Stocky build, slower metabolism)</option>
                     </select>
                 </div>
                 
@@ -2863,9 +2873,10 @@ function calculateCalories() {
     const weight = parseFloat(document.getElementById('calc-weight').value);
     const height = parseFloat(document.getElementById('calc-height').value);
     const activity = parseFloat(document.getElementById('calc-activity').value);
+    const bodyType = document.getElementById('calc-bodytype').value;
     
-    if (!age || !gender || !weight || !height || !activity) {
-        alert('Please fill in all fields');
+    if (!age || !gender || !weight || !height || !activity || !bodyType) {
+        alert('Please fill in all fields including body type');
         return;
     }
     
@@ -2881,13 +2892,39 @@ function calculateCalories() {
         bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
     }
     
-    // Calculate TDEE
-    const tdee = Math.round(bmr * activity);
+    // Calculate TDEE with body type adjustment
+    let tdeeAdjustment = 1.0;
+    if (bodyType === 'ectomorph') {
+        tdeeAdjustment = 1.05; // +5% for fast metabolism
+    } else if (bodyType === 'endomorph') {
+        tdeeAdjustment = 0.95; // -5% for slower metabolism
+    }
     
-    // Calculate macros (balanced approach)
-    const protein = Math.round((tdee * 0.25) / 4); // 25% protein
-    const carbs = Math.round((tdee * 0.45) / 4);   // 45% carbs  
-    const fat = Math.round((tdee * 0.30) / 9);     // 30% fat
+    const tdee = Math.round(bmr * activity * tdeeAdjustment);
+    
+    // Calculate macros based on body type
+    let proteinRatio, carbRatio, fatRatio;
+    
+    if (bodyType === 'ectomorph') {
+        // Higher carbs for ectomorphs
+        proteinRatio = 0.25;
+        carbRatio = 0.50;
+        fatRatio = 0.25;
+    } else if (bodyType === 'mesomorph') {
+        // Balanced macros for mesomorphs
+        proteinRatio = 0.30;
+        carbRatio = 0.40;
+        fatRatio = 0.30;
+    } else if (bodyType === 'endomorph') {
+        // Lower carbs for endomorphs
+        proteinRatio = 0.35;
+        carbRatio = 0.25;
+        fatRatio = 0.40;
+    }
+    
+    const protein = Math.round((tdee * proteinRatio) / 4);
+    const carbs = Math.round((tdee * carbRatio) / 4);
+    const fat = Math.round((tdee * fatRatio) / 9);
     
     // Show results
     const resultsDiv = document.getElementById('calc-results');
@@ -2914,7 +2951,12 @@ function calculateCalories() {
         </div>
         
         <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-            <div style="font-size: 14px; font-weight: bold; color: var(--dark); margin-bottom: 5px;">Goal Adjustments:</div>
+            <div style="font-size: 14px; font-weight: bold; color: var(--dark); margin-bottom: 5px;">Body Type: ${bodyType.charAt(0).toUpperCase() + bodyType.slice(1)}</div>
+            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                ${bodyType === 'ectomorph' ? 'High carbs (50%), moderate protein/fat. +5% metabolism boost.' : 
+                  bodyType === 'mesomorph' ? 'Balanced macros (30/40/30). Optimal for muscle building.' :
+                  'Lower carbs (25%), higher protein/fat. -5% for slower metabolism.'}
+            </div>
             <div style="font-size: 12px; color: #666;">
                 • Weight Loss: ${tdee - 500} calories (-500)<br>
                 • Muscle Gain: ${tdee + 300} calories (+300)<br>
