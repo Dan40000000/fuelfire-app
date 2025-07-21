@@ -2505,9 +2505,33 @@ function showDietQuiz() {
                 <p style="opacity: 0.9;">Let's create your perfect meal plan!</p>
             </div>
             
-            <!-- Quick Calorie Calculator -->
+            <!-- Custom Diet Plan - THE REAL DEAL -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="font-size: 24px; margin-bottom: 20px; text-align: center;">🔥 Custom Diet Plan - The Real Deal</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: white; margin-bottom: 8px; font-weight: bold;">What's your primary goal?</label>
+                    <select id="diet-goal" style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 16px; background: rgba(255,255,255,0.9); color: var(--dark);">
+                        <option value="">Select your goal...</option>
+                        <option value="weight-loss">🔥 Weight Loss</option>
+                        <option value="muscle-gain">💪 Muscle Gain</option>
+                        <option value="maintenance">⚖️ Maintenance</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: white; margin-bottom: 8px; font-weight: bold;">Daily calorie target</label>
+                    <input type="number" id="calorie-target" placeholder="2000" style="width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 16px; background: rgba(255,255,255,0.9); color: var(--dark);">
+                </div>
+                
+                <button onclick="nextDietStep()" style="background: white; color: var(--primary); border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    Start Creating My Custom Diet →
+                </button>
+            </div>
+            
+            <!-- Quick Calc -->
             <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
-                <h3 style="color: var(--dark); margin-bottom: 20px;">🧮 Calorie/Macro Counter</h3>
+                <h3 style="color: var(--dark); margin-bottom: 20px;">🧮 Quick Calc</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div>
@@ -2650,30 +2674,6 @@ function showDietQuiz() {
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Custom Quiz Option -->
-            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
-                <h3 style="color: var(--dark); margin-bottom: 20px;">🎯 Custom Diet Plan</h3>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal?</label>
-                    <select id="diet-goal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
-                        <option value="">Select your goal...</option>
-                        <option value="weight-loss">🔥 Weight Loss</option>
-                        <option value="muscle-gain">💪 Muscle Gain</option>
-                        <option value="maintenance">⚖️ Maintenance</option>
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Daily calorie target</label>
-                    <input type="number" id="calorie-target" placeholder="2000" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
-                </div>
-                
-                <button onclick="nextDietStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer;">
-                    Continue to Custom Quiz →
-                </button>
             </div>
         `;
     } else if (dietQuizStep === 2) {
