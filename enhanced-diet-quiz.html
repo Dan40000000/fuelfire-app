@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Diet Quiz - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="auth.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -34,6 +33,17 @@
         const totalSteps = 9;
         let quizData = {};
         let measurementSystem = 'imperial'; // 'imperial' or 'metric'
+        
+        // Simple inline auth system
+        const fuelFireAuth = {
+            isLoggedIn: () => localStorage.getItem('fuelfire_demo_user') === 'true',
+            demoLogin: () => {
+                localStorage.setItem('fuelfire_demo_user', 'true');
+                localStorage.setItem('fuelfire_user_name', 'Demo User');
+                return { success: true, user: { name: 'Demo User' } };
+            },
+            getCurrentUser: () => ({ name: localStorage.getItem('fuelfire_user_name') || 'Demo User' })
+        };
 
         // Helper functions for check all/none buttons
         function selectAllMeats() {
@@ -848,9 +858,9 @@
 
         async function generatePlan() {
             // Check if user is authenticated
-            if (!window.fuelFireAuth.isLoggedIn()) {
+            if (!fuelFireAuth.isLoggedIn()) {
                 if (confirm('🔐 You need to be logged in to generate AI meal plans. Would you like to continue with a demo account?')) {
-                    const loginResult = window.fuelFireAuth.demoLogin();
+                    const loginResult = fuelFireAuth.demoLogin();
                     if (!loginResult.success) {
                         alert('❌ Failed to create demo account. Please try again.');
                         return;
@@ -862,7 +872,7 @@
             }
 
             // Show loading state
-            const button = event.target;
+            const button = document.querySelector('button[onclick="generatePlan()"]') || event?.target;
             const originalText = button.innerHTML;
             button.innerHTML = '⏳ Generating Your Personalized Meal Plan...';
             button.disabled = true;
@@ -877,6 +887,10 @@
                 
                 // Display the generated meal plan
                 displayMealPlan(mealPlan);
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
                 
             } catch (error) {
                 console.error('Error generating meal plan:', error);
@@ -959,10 +973,13 @@ Please provide the response in a structured format with clear sections for:
             // Real implementation for production use
             const response = await fetch('/api/generate-meal-plan', {
                 method: 'POST',
-                headers: window.fuelFireAuth.getAuthHeaders(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer demo-token'
+                },
                 body: JSON.stringify({
                     prompt: prompt,
-                    userToken: window.fuelFireAuth.getStoredToken()
+                    userToken: 'demo-user'
                 })
             });
             
