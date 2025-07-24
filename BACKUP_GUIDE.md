@@ -8,6 +8,7 @@
 - **v1.3** - Added prominent running total of workouts - FuelFire app feature complete
 - **v1.4** - Complete Diet Creation & Tracking System - Quiz, Meal Plans, Shopping Lists
 - **v2.0** - STABLE: Complete app with calorie/macro calculator, body types, imperial/metric toggle
+- **v2.1-enhanced-quiz-complete** - FUCKING GREAT: Complete enhanced diet quiz with all 10 detailed steps, comprehensive food options, exercise/meal prep preferences
 - **backup/working-version-1** - Branch backup of v1.0
 - **backup/working-version-2-quick-workouts** - Branch backup of v1.1 with quick workouts
 - **backup/complete-app-v2** - Branch backup of v2.0 complete feature set
