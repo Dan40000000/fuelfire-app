@@ -512,7 +512,28 @@
         }
 
         function generatePlan() {
-            alert('🎉 Enhanced Quiz Complete! Your data: ' + JSON.stringify(quizData, null, 2));
+            // Simple demo for now - no complex AI integration yet
+            const goal = quizData.goal || 'maintenance';
+            const name = 'Fitness Enthusiast';
+            
+            // Show a simple confirmation first
+            if (confirm(`🎯 Generate personalized meal plan for ${goal.replace('-', ' ')} goal?\n\nThis will create a detailed 2-week plan with shopping lists!`)) {
+                // Show loading state
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '⏳ Generating Your Plan...';
+                button.disabled = true;
+                
+                // Simulate some processing time
+                setTimeout(() => {
+                    // Show success and collected data
+                    alert(`✅ Meal Plan Generated!\n\nCollected Data:\n- Goal: ${quizData.goal}\n- Meats: ${quizData.meats?.length || 0} selected\n- Vegetables: ${quizData.vegetables?.length || 0} selected\n- Allergies: ${quizData.allergies?.join(', ') || 'None'}\n\nNext: We'll add full AI integration!`);
+                    
+                    // Reset button
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 2000);
+            }
         }
 
         // Initialize
