@@ -1,21 +1,24 @@
 {
-  "name": "fuelfire-fitness-app",
-  "version": "1.0.0",
-  "description": "A modern fitness tracking app with Carolina Blue theme",
+  "name": "fuelfire-app",
+  "version": "2.1.0",
+  "description": "FuelFire - AI-Powered Fitness & Nutrition App with Claude AI meal planning",
   "main": "index.html",
   "scripts": {
     "dev": "npx serve . -p 3000",
-    "build": "echo 'Static site - no build needed'",
-    "start": "npx serve . -p 3000"
+    "build": "echo 'Static app with serverless API - ready for deployment'",
+    "start": "npx serve . -p 3000",  
+    "deploy": "vercel --prod"
   },
   "keywords": [
     "fitness",
+    "nutrition", 
+    "ai",
+    "meal-planning",
+    "claude-ai",
+    "diet",
     "workout",
-    "nutrition",
-    "tracking",
     "health",
-    "mobile-app",
-    "pwa"
+    "personalized-plans"
   ],
   "author": "Dan Perry",
   "license": "MIT",
@@ -23,14 +26,14 @@
     "serve": "^14.2.0"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/fuelfire-fitness-app.git"
+    "url": "git+https://github.com/Dan40000000/fuelfire-app.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/fuelfire-fitness-app/issues"
+    "url": "https://github.com/Dan40000000/fuelfire-app/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/fuelfire-fitness-app#readme"
+  "homepage": "https://github.com/Dan40000000/fuelfire-app#readme"
 }

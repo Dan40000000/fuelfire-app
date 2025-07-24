@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enhanced Diet Quiz - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="fuelfire-auth.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -1093,29 +1094,206 @@
             }
         }
 
-        function generatePlan() {
-            // Simple demo for now - no complex AI integration yet
+        async function generatePlan() {
             const goal = quizData.goal || 'maintenance';
-            const name = 'Fitness Enthusiast';
             
-            // Show a simple confirmation first
-            if (confirm(`🎯 Generate personalized meal plan for ${goal.replace('-', ' ')} goal?\n\nThis will create a detailed 2-week plan with shopping lists!`)) {
-                // Show loading state
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.innerHTML = '⏳ Generating Your Plan...';
-                button.disabled = true;
-                
-                // Simulate some processing time
-                setTimeout(() => {
-                    // Show success and collected data
-                    alert(`✅ Meal Plan Generated!\n\nCollected Data:\n- Goal: ${quizData.goal}\n- Meats: ${quizData.meats?.length || 0} selected\n- Vegetables: ${quizData.vegetables?.length || 0} selected\n- Allergies: ${quizData.allergies?.join(', ') || 'None'}\n\nNext: We'll add full AI integration!`);
-                    
-                    // Reset button
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }, 2000);
+            // Validate we have enough data
+            if (!quizData.goal || !quizData.age || !quizData.weight) {
+                alert('⚠️ Please complete all required fields in the quiz first!');
+                return;
             }
+            
+            // Show confirmation with collected data summary
+            const dataCount = `${quizData.meats?.length || 0} meats, ${quizData.vegetables?.length || 0} vegetables, ${quizData.fruits?.length || 0} fruits`;
+            if (!confirm(`🎯 Generate AI meal plan for ${goal.replace('-', ' ')} goal?\n\n📊 Your preferences: ${dataCount}\n🤖 This will use Claude AI to create your personalized 2-week plan!`)) {
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '🤖 Claude AI is creating your plan...';
+            button.disabled = true;
+            
+            try {
+                console.log('🔥 Starting meal plan generation with quiz data:', Object.keys(quizData));
+                
+                // Generate meal plan using Claude AI through your account
+                const result = await window.fuelFireAuth.generateMealPlan(quizData);
+                
+                if (result.success) {
+                    // Show the meal plan in a new window/tab
+                    displayMealPlan(result.mealPlan, result.metadata);
+                    
+                    // Update button to show success
+                    button.innerHTML = '✅ Plan Generated! Check New Tab';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 3000);
+                    
+                } else {
+                    throw new Error(result.message || 'Failed to generate meal plan');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error generating meal plan:', error);
+                
+                // Show user-friendly error
+                alert(`❌ Oops! Something went wrong:\n\n${error.message}\n\nPlease try again in a moment. If the problem persists, check your internet connection.`);
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        function displayMealPlan(mealPlan, metadata) {
+            // Create a new window to display the meal plan
+            const planWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes');
+            
+            planWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Your FuelFire Meal Plan</title>
+                    <link rel="stylesheet" href="styles.css">
+                    <style>
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            line-height: 1.6;
+                            max-width: 1000px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            min-height: 100vh;
+                        }
+                        .meal-plan-container {
+                            background: white;
+                            border-radius: 20px;
+                            padding: 30px;
+                            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                        }
+                        .plan-title {
+                            color: #4B9CD3;
+                            text-align: center;
+                            margin-bottom: 30px;
+                            font-size: 2.5em;
+                        }
+                        .section-header {
+                            color: #333;
+                            border-bottom: 3px solid #4B9CD3;
+                            padding-bottom: 10px;
+                            margin: 30px 0 20px 0;
+                        }
+                        .day-header {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 15px;
+                            border-radius: 15px;
+                            margin: 20px 0 15px 0;
+                        }
+                        .day-plan {
+                            background: #f8f9ff;
+                            border-radius: 15px;
+                            padding: 20px;
+                            margin: 15px 0;
+                            border-left: 5px solid #4B9CD3;
+                        }
+                        .meal-item {
+                            background: white;
+                            padding: 15px;
+                            margin: 10px 0;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                        }
+                        .meal-details {
+                            margin-top: 8px;
+                            color: #666;
+                        }
+                        .shopping-list {
+                            background: #e8f5e8;
+                            border-radius: 15px;
+                            padding: 20px;
+                            margin: 20px 0;
+                            border-left: 5px solid #28a745;
+                        }
+                        .nutrition-info {
+                            background: #fff3cd;
+                            border: 1px solid #ffeaa7;
+                            border-radius: 10px;
+                            padding: 15px;
+                            margin: 15px 0;
+                        }
+                        .prep-instructions {
+                            background: #e7f3ff;
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin: 15px 0;
+                            border-left: 5px solid #007bff;
+                        }
+                        .highlight {
+                            color: #4B9CD3;
+                            font-weight: bold;
+                        }
+                        .metadata {
+                            background: #f1f3f4;
+                            padding: 15px;
+                            border-radius: 10px;
+                            margin-bottom: 20px;
+                            text-align: center;
+                            color: #666;
+                        }
+                        .print-button {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border: none;
+                            padding: 15px 30px;
+                            border-radius: 25px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            font-size: 16px;
+                            margin: 20px 10px;
+                        }
+                        .print-button:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                        }
+                        @media print {
+                            body { background: white !important; }
+                            .print-button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="meal-plan-container">
+                        <div class="metadata">
+                            🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt).toLocaleDateString()} | 
+                            <strong>Goal:</strong> ${metadata.goal} | 
+                            <strong>Duration:</strong> ${metadata.planDuration}
+                        </div>
+                        
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <button class="print-button" onclick="window.print()">🖨️ Print Plan</button>
+                            <button class="print-button" onclick="window.close()">← Back to Quiz</button>
+                        </div>
+                        
+                        ${mealPlan}
+                        
+                        <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9ff; border-radius: 15px;">
+                            <h3>🔥 Powered by FuelFire & Claude AI</h3>
+                            <p>Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
+                            <button class="print-button" onclick="window.print()">🖨️ Print This Plan</button>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            planWindow.document.close();
+            console.log('✅ Meal plan displayed in new window');
         }
 
         // Initialize
