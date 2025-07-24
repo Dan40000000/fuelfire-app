@@ -2,9 +2,12 @@
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
-  "framework": null,
-  "buildCommand": "",
-  "devCommand": "",
-  "installCommand": "",
-  "outputDirectory": "."
+  "functions": {
+    "api/claude-meal-plan.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "CLAUDE_API_KEY": "@claude_api_key"
+  }
 }
