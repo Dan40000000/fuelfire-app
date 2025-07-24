@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Diet Quiz - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="goBack()">←</div>
+                <div class="header-title">Enhanced Diet Quiz</div>
+            </div>
+            
+            <div class="content">
+                <div id="quiz-content">
+                    <!-- Quiz content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Diet Quiz Variables
+        let currentStep = 1;
+        const totalSteps = 9;
+        let quizData = {};
+
+        // Helper functions for check all/none buttons
+        function selectAllMeats() {
+            document.querySelectorAll('.meat-check').forEach(cb => cb.checked = true);
+        }
+
+        function selectNoMeats() {
+            document.querySelectorAll('.meat-check').forEach(cb => cb.checked = false);
+        }
+
+        function selectAllVeggies() {
+            document.querySelectorAll('.veggie-check').forEach(cb => cb.checked = true);
+        }
+
+        function selectNoVeggies() {
+            document.querySelectorAll('.veggie-check').forEach(cb => cb.checked = false);
+        }
+
+        function handleNoneAllergy(checkbox) {
+            if (checkbox.checked) {
+                document.querySelectorAll('.allergy-check').forEach(cb => {
+                    if (cb !== checkbox) cb.checked = false;
+                });
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function showStep(step) {
+            const content = document.getElementById('quiz-content');
+            let html = '';
+
+            if (step === 1) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🎯 Your Goals</h2>
+                        <p style="opacity: 0.9;">Step 1 of 9 - Let's start with your objectives</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal?</label>
+                            <select id="diet-goal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select your goal...</option>
+                                <option value="weight-loss">🔥 Weight Loss</option>
+                                <option value="muscle-gain">💪 Muscle Gain</option>
+                                <option value="maintenance">⚖️ Maintenance</option>
+                                <option value="recomp">🔄 Body Recomposition</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Daily calorie target (optional)</label>
+                            <input type="number" id="calorie-target" placeholder="Leave blank for automatic calculation" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                        </div>
+                        
+                        <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px;">
+                            Continue →
+                        </button>
+                    </div>
+                `;
+            } else if (step === 2) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">👤 Personal Information</h2>
+                        <p style="opacity: 0.9;">Step 2 of 9 - Help us understand your needs</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Age</label>
+                                <input type="number" id="quiz-age" placeholder="25" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Gender</label>
+                                <select id="quiz-gender" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                    <option value="">Select...</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weight (lbs)</label>
+                                <input type="number" id="quiz-weight" placeholder="150" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Height</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="number" id="quiz-feet" placeholder="5" min="3" max="8" style="width: 50%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                    <span style="padding: 12px;">ft</span>
+                                    <input type="number" id="quiz-inches" placeholder="8" min="0" max="11" style="width: 50%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                    <span style="padding: 12px;">in</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Activity Level</label>
+                            <select id="quiz-activity" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="">Select your activity level...</option>
+                                <option value="sedentary">Sedentary (little/no exercise)</option>
+                                <option value="light">Light (exercise 1-3 days/week)</option>
+                                <option value="moderate">Moderate (exercise 3-5 days/week)</option>
+                                <option value="very-active">Very Active (exercise 6-7 days/week)</option>
+                                <option value="extra-active">Extra Active (physical job + exercise)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Body Type</label>
+                            <select id="quiz-bodytype" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="">Select your body type...</option>
+                                <option value="ectomorph">Ectomorph (Naturally thin, fast metabolism)</option>
+                                <option value="mesomorph">Mesomorph (Athletic build, gains muscle easily)</option>
+                                <option value="endomorph">Endomorph (Stocky build, slower metabolism)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 3) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🥗 Dietary Restrictions</h2>
+                        <p style="opacity: 0.9;">Step 3 of 9 - What should we avoid?</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Food Allergies (check all that apply)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" class="allergy-check" value="None" style="margin-right: 8px;" onchange="handleNoneAllergy(this)">
+                                    <span>None</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" class="allergy-check" value="Peanuts" style="margin-right: 8px;">
+                                    <span>Peanuts</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" class="allergy-check" value="Tree Nuts" style="margin-right: 8px;">
+                                    <span>Tree Nuts</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" class="allergy-check" value="Dairy" style="margin-right: 8px;">
+                                    <span>Dairy</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" class="allergy-check" value="Gluten" style="margin-right: 8px;">
+                                    <span>Gluten</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" class="allergy-check" value="Eggs" style="margin-right: 8px;">
+                                    <span>Eggs</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Dietary Lifestyle</label>
+                            <select id="quiz-dietary-lifestyle" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="omnivore">Omnivore (eat everything)</option>
+                                <option value="vegetarian">Vegetarian (no meat)</option>
+                                <option value="vegan">Vegan (no animal products)</option>
+                                <option value="pescatarian">Pescatarian (fish only)</option>
+                                <option value="keto">Keto (very low carb)</option>
+                                <option value="paleo">Paleo (whole foods only)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 4) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🥩 Meat Preferences</h2>
+                        <p style="opacity: 0.9;">Step 4 of 9 - What meats do you enjoy?</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label style="color: var(--dark); font-weight: bold;">Select all meats you enjoy eating</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="selectAllMeats()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check All
+                                    </button>
+                                    <button type="button" onclick="selectNoMeats()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check None
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 280px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐓 Chicken Breast" style="margin-right: 8px;">
+                                    <span>🐓 Chicken Breast</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐓 Chicken Thighs" style="margin-right: 8px;">
+                                    <span>🐓 Chicken Thighs</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥩 Ground Beef" style="margin-right: 8px;">
+                                    <span>🥩 Ground Beef</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥩 Steak" style="margin-right: 8px;">
+                                    <span>🥩 Steak</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦃 Turkey" style="margin-right: 8px;">
+                                    <span>🦃 Turkey</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐖 Pork" style="margin-right: 8px;">
+                                    <span>🐖 Pork</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥓 Bacon" style="margin-right: 8px;">
+                                    <span>🥓 Bacon</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🌭 Sausages" style="margin-right: 8px;">
+                                    <span>🌭 Sausages</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">How often do you want to eat meat?</label>
+                            <select id="quiz-meat-frequency" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="every-meal">Every meal</option>
+                                <option value="twice-daily">Twice per day</option>
+                                <option value="once-daily">Once per day</option>
+                                <option value="few-times-week">Few times per week</option>
+                                <option value="rarely">Rarely</option>
+                                <option value="never">Never (plant-based only)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 5) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🥬 Vegetable Preferences</h2>
+                        <p style="opacity: 0.9;">Step 5 of 9 - Choose your vegetables</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="color: var(--dark); font-weight: bold;">Select vegetables you enjoy</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="selectAllVeggies()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check All
+                                    </button>
+                                    <button type="button" onclick="selectNoVeggies()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check None
+                                    </button>
+                                </div>
+                            </div>
+                            <p style="font-style: italic; color: #666; margin-bottom: 12px; font-size: 14px;">
+                                <em>Recommended: Choose at least 5-8 vegetables for variety</em>
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 320px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥬 Spinach" style="margin-right: 8px;" checked>
+                                    <span>🥬 Spinach</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥦 Broccoli" style="margin-right: 8px;" checked>
+                                    <span>🥦 Broccoli</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥕 Carrots" style="margin-right: 8px;" checked>
+                                    <span>🥕 Carrots</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🍅 Tomatoes" style="margin-right: 8px;" checked>
+                                    <span>🍅 Tomatoes</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🌶️ Bell Peppers" style="margin-right: 8px;" checked>
+                                    <span>🌶️ Bell Peppers</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥒 Cucumbers" style="margin-right: 8px;" checked>
+                                    <span>🥒 Cucumbers</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🧅 Onions" style="margin-right: 8px;" checked>
+                                    <span>🧅 Onions</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥑 Avocados" style="margin-right: 8px;" checked>
+                                    <span>🥑 Avocados</span>
+                                </label>
+                            </div>
+                            <p style="font-style: italic; color: #888; margin-top: 8px; font-size: 12px;">
+                                <em>All vegetables are pre-selected. Uncheck any you don't want in your meal plans.</em>
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 9) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🎯 Quiz Complete!</h2>
+                        <p style="opacity: 0.9;">Step 9 of 9 - Ready to generate your plan</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: var(--dark); margin-bottom: 20px;">🎉 Your Enhanced Diet Quiz is Complete!</h3>
+                        <p style="color: #666; margin-bottom: 25px;">We've collected all your preferences and will generate a personalized 2-week meal plan with shopping lists.</p>
+                        
+                        <button onclick="generatePlan()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 20px 40px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 18px; margin-bottom: 15px;">
+                            🚀 Generate My AI Meal Plan
+                        </button>
+                        
+                        <div style="margin-top: 20px;">
+                            <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer;">
+                                ← Back to Main App
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🚧 Step ${step}</h2>
+                        <p style="opacity: 0.9;">Step ${step} of 9 - Coming soon!</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: center;">
+                        <p style="color: #666; margin-bottom: 25px;">This step is still being built. You can see steps 1-5 and 9 are working!</p>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Skip →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+        }
+
+        function nextStep() {
+            // Save current step data
+            if (currentStep === 1) {
+                quizData.goal = document.getElementById('diet-goal').value;
+                quizData.calories = document.getElementById('calorie-target').value;
+                
+                if (!quizData.goal) {
+                    alert('Please select your goal');
+                    return;
+                }
+            } else if (currentStep === 2) {
+                quizData.age = document.getElementById('quiz-age').value;
+                quizData.gender = document.getElementById('quiz-gender').value;
+                quizData.weight = document.getElementById('quiz-weight').value;
+                // ... save other step 2 data
+            } else if (currentStep === 3) {
+                quizData.allergies = Array.from(document.querySelectorAll('.allergy-check:checked')).map(cb => cb.value);
+                quizData.dietaryLifestyle = document.getElementById('quiz-dietary-lifestyle').value;
+            } else if (currentStep === 4) {
+                quizData.meats = Array.from(document.querySelectorAll('.meat-check:checked')).map(cb => cb.value);
+                quizData.meatFrequency = document.getElementById('quiz-meat-frequency').value;
+            } else if (currentStep === 5) {
+                quizData.vegetables = Array.from(document.querySelectorAll('.veggie-check:checked')).map(cb => cb.value);
+            }
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function generatePlan() {
+            alert('🎉 Enhanced Quiz Complete! Your data: ' + JSON.stringify(quizData, null, 2));
+        }
+
+        // Initialize
+        updateTime();
+        setInterval(updateTime, 1000);
+        showStep(1);
+    </script>
+</body>
+</html>
