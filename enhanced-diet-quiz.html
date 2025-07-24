@@ -158,25 +158,28 @@
                             </div>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div>
-                                <label id="weight-label" style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weight (lbs)</label>
-                                <input type="number" id="quiz-weight" placeholder="150" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
-                            </div>
-                            <div>
-                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Height</label>
-                                <div id="height-imperial" style="display: block;">
-                                    <div style="display: flex; gap: 8px; align-items: center;">
-                                        <input type="number" id="quiz-feet" placeholder="5" min="3" max="8" style="width: 45%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; text-align: center;">
-                                        <span style="font-weight: bold; color: var(--dark);">ft</span>
-                                        <input type="number" id="quiz-inches" placeholder="8" min="0" max="11" style="width: 45%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; text-align: center;">
-                                        <span style="font-weight: bold; color: var(--dark);">in</span>
+                        <div style="margin-bottom: 20px;">
+                            <label id="weight-label" style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weight (lbs)</label>
+                            <input type="number" id="quiz-weight" placeholder="150" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Height</label>
+                            <div id="height-imperial" style="display: block;">
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <div style="flex: 1;">
+                                        <input type="number" id="quiz-feet" placeholder="5" min="3" max="8" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                                        <label style="font-size: 14px; color: #666; margin-top: 4px; display: block; text-align: center; font-weight: bold;">feet</label>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <input type="number" id="quiz-inches" placeholder="8" min="0" max="11" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                                        <label style="font-size: 14px; color: #666; margin-top: 4px; display: block; text-align: center; font-weight: bold;">inches</label>
                                     </div>
                                 </div>
-                                <div id="height-metric" style="display: none;">
-                                    <input type="number" id="quiz-height-cm" placeholder="173" style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
-                                    <label style="font-size: 12px; color: #666; margin-top: 4px; display: block;">centimeters</label>
-                                </div>
+                            </div>
+                            <div id="height-metric" style="display: none;">
+                                <input type="number" id="quiz-height-cm" placeholder="173" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                                <label style="font-size: 14px; color: #666; margin-top: 4px; display: block; text-align: center; font-weight: bold;">centimeters</label>
                             </div>
                         </div>
                         
@@ -795,7 +798,15 @@
                 quizData.age = document.getElementById('quiz-age').value;
                 quizData.gender = document.getElementById('quiz-gender').value;
                 quizData.weight = document.getElementById('quiz-weight').value;
-                // ... save other step 2 data
+                quizData.activity = document.getElementById('quiz-activity').value;
+                quizData.bodyType = document.getElementById('quiz-bodytype').value;
+                quizData.measurementSystem = measurementSystem;
+                if (measurementSystem === 'metric') {
+                    quizData.heightCm = document.getElementById('quiz-height-cm').value;
+                } else {
+                    quizData.feet = document.getElementById('quiz-feet').value;
+                    quizData.inches = document.getElementById('quiz-inches').value;
+                }
             } else if (currentStep === 3) {
                 quizData.allergies = Array.from(document.querySelectorAll('.allergy-check:checked')).map(cb => cb.value);
                 quizData.dietaryLifestyle = document.getElementById('quiz-dietary-lifestyle').value;
@@ -818,13 +829,6 @@
                 quizData.cuisines = Array.from(document.querySelectorAll('.cuisine-check:checked')).map(cb => cb.value);
                 quizData.notes = document.getElementById('quiz-notes').value;
                 quizData.otherAllergies = document.getElementById('other-allergies').value;
-                quizData.measurementSystem = measurementSystem;
-                if (measurementSystem === 'metric') {
-                    quizData.heightCm = document.getElementById('quiz-height-cm').value;
-                } else {
-                    quizData.feet = document.getElementById('quiz-feet').value;
-                    quizData.inches = document.getElementById('quiz-inches').value;
-                }
             }
             
             if (currentStep < totalSteps) {
