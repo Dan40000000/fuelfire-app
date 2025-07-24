@@ -811,6 +811,7 @@
             } else if (currentStep === 3) {
                 quizData.allergies = Array.from(document.querySelectorAll('.allergy-check:checked')).map(cb => cb.value);
                 quizData.dietaryLifestyle = document.getElementById('quiz-dietary-lifestyle').value;
+                quizData.otherAllergies = document.getElementById('other-allergies').value;
             } else if (currentStep === 4) {
                 quizData.meats = Array.from(document.querySelectorAll('.meat-check:checked')).map(cb => cb.value);
                 quizData.meatFrequency = document.getElementById('quiz-meat-frequency').value;
@@ -829,7 +830,6 @@
                 quizData.budget = document.getElementById('quiz-budget').value;
                 quizData.cuisines = Array.from(document.querySelectorAll('.cuisine-check:checked')).map(cb => cb.value);
                 quizData.notes = document.getElementById('quiz-notes').value;
-                quizData.otherAllergies = document.getElementById('other-allergies').value;
             }
             
             if (currentStep < totalSteps) {
