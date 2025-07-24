@@ -1219,7 +1219,7 @@ Please provide the response in a structured format with clear sections for:
             // Create a new page/modal to display the comprehensive meal plan
             const mealPlanWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes');
             
-            mealPlanWindow.document.write(\`
+            const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -1234,6 +1234,8 @@ Please provide the response in a structured format with clear sections for:
         .category { font-weight: bold; color: #667eea; margin-top: 15px; margin-bottom: 8px; }
         .print-btn { background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
         .nutrition { background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 10px; }
+        .section-header { color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .day-header { color: #333; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -1249,7 +1251,7 @@ Please provide the response in a structured format with clear sections for:
     </div>
     
     <div id="meal-plan-content">
-        \${mealPlan}
+        ${mealPlan}
     </div>
     
     <script>
@@ -1259,8 +1261,9 @@ Please provide the response in a structured format with clear sections for:
     </script>
 </body>
 </html>
-            \`);
+            `;
             
+            mealPlanWindow.document.write(htmlContent);
             mealPlanWindow.document.close();
         }
 
