@@ -1173,8 +1173,14 @@
         }
 
         function displayMealPlan(mealPlan, metadata) {
-            // Create a new window to display the meal plan
+            // Check if new window can be opened (popup blocker check)
             const planWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes');
+            
+            if (!planWindow) {
+                // Popup blocked - show in same page
+                showMealPlanInPage(mealPlan, metadata);
+                return;
+            }
             
             planWindow.document.write(`
                 <!DOCTYPE html>
@@ -1318,6 +1324,41 @@
             
             planWindow.document.close();
             console.log('✅ Meal plan displayed in new window');
+        }
+
+        function showMealPlanInPage(mealPlan, metadata) {
+            // Hide the quiz and show meal plan in same page
+            document.getElementById('quiz-content').innerHTML = `
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div style="background: #f1f3f4; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; color: #666;">
+                        🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt).toLocaleDateString()} | 
+                        <strong>Goal:</strong> ${metadata.goal} | 
+                        <strong>Duration:</strong> ${metadata.planDuration}
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <button onclick="window.print()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer; margin: 0 10px;">
+                            🖨️ Print Plan
+                        </button>
+                        <button onclick="location.reload()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 20px; cursor: pointer; margin: 0 10px;">
+                            ← Back to Quiz
+                        </button>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        ${mealPlan}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9ff; border-radius: 15px;">
+                        <h3 style="color: #4B9CD3;">🔥 Powered by FuelFire & Claude AI</h3>
+                        <p style="color: #666;">Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
+                        <button onclick="window.print()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+                            🖨️ Print This Plan
+                        </button>
+                    </div>
+                </div>
+            `;
+            console.log('✅ Meal plan displayed in same page (popup blocked)');
         }
 
         // Initialize
