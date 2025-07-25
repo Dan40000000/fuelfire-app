@@ -1,6 +1,8 @@
 # FuelFire Fitness App 🔥
 
-A modern, responsive fitness tracking app with a beautiful Carolina Blue theme, designed to help users ignite their fitness journey.
+A modern, responsive fitness tracking app with AI-powered meal planning using Claude AI.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDan40000000%2Ffuelfire-app&env=CLAUDE_API_KEY&envDescription=Your%20Claude%20API%20key%20from%20console.anthropic.com&project-name=fuelfire-app&repository-name=fuelfire-app)
 
 ## ✨ Features
 
