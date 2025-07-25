@@ -1146,6 +1146,9 @@
                 const result = await window.fuelFireAuth.generateMealPlan(quizData);
                 
                 if (result.success) {
+                    // Save meal plan to localStorage for the meal-plans.html page
+                    saveMealPlanToStorage(result.mealPlan, result.metadata);
+                    
                     // Redirect to dedicated meal plan page
                     const planData = encodeURIComponent(JSON.stringify({
                         mealPlan: result.mealPlan,
@@ -1173,6 +1176,40 @@
                 // Reset button
                 button.innerHTML = originalText;
                 button.disabled = false;
+            }
+        }
+
+        function saveMealPlanToStorage(mealPlan, metadata) {
+            try {
+                // Get existing meal plans from localStorage
+                const existingPlans = localStorage.getItem('fuelfire_meal_plans');
+                const mealPlans = existingPlans ? JSON.parse(existingPlans) : [];
+                
+                // Create new meal plan object
+                const newPlan = {
+                    mealPlan: mealPlan,
+                    metadata: {
+                        ...metadata,
+                        createdAt: new Date().toISOString()
+                    },
+                    id: Date.now().toString() // Simple unique ID
+                };
+                
+                // Add to beginning of array (newest first)
+                mealPlans.unshift(newPlan);
+                
+                // Keep only the latest 10 meal plans to avoid storage issues
+                if (mealPlans.length > 10) {
+                    mealPlans.splice(10);
+                }
+                
+                // Save back to localStorage
+                localStorage.setItem('fuelfire_meal_plans', JSON.stringify(mealPlans));
+                
+                console.log('✅ Meal plan saved to localStorage');
+                
+            } catch (error) {
+                console.error('❌ Error saving meal plan to localStorage:', error);
             }
         }
 
