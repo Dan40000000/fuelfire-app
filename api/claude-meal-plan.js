@@ -28,6 +28,14 @@ export default async function handler(req, res) {
         
         console.log(`🎯 Generating meal plan for user: ${userId || 'anonymous'}`);
         console.log(`📊 Quiz data includes: ${Object.keys(quizData).join(', ')}`);
+        
+        // Check if API key exists
+        if (!process.env.CLAUDE_API_KEY) {
+            console.error('❌ CLAUDE_API_KEY not found in environment variables');
+            throw new Error('API configuration error - please contact support');
+        }
+        
+        console.log('🔑 API Key found, length:', process.env.CLAUDE_API_KEY.length);
 
         // Call Claude API using your account credentials
         const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
