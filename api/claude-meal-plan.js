@@ -33,10 +33,12 @@ export default async function handler(req, res) {
         // Check if API key exists
         if (!process.env.CLAUDE_API_KEY) {
             console.error('❌ CLAUDE_API_KEY not found in environment variables');
-            throw new Error('API configuration error - please contact support');
+            console.error('Available env vars:', Object.keys(process.env));
+            throw new Error('API configuration error - Claude API key not configured');
         }
         
         console.log('🔑 API Key found, length:', process.env.CLAUDE_API_KEY.length);
+        console.log('🔑 API Key prefix:', process.env.CLAUDE_API_KEY.substring(0, 15) + '...');
 
         // Call Claude API using your account credentials
         const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
