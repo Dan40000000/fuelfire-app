@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI Meal Plan - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .meal-plan-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .meal-plan-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .plan-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+        
+        .plan-title {
+            color: #4B9CD3;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .plan-metadata {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .action-buttons {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .day-plan {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4B9CD3;
+        }
+        
+        .day-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .meal {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .meal-name {
+            font-weight: bold;
+            color: #4B9CD3;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .meal-details {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .shopping-section {
+            background: #e8f5e8;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #28a745;
+        }
+        
+        .shopping-list {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .shopping-category {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .shopping-items {
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .nutrition-summary {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .nutrition-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .tips-section {
+            background: #e7f3ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #007bff;
+        }
+        
+        .footer-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+        
+        @media print {
+            .action-buttons { display: none; }
+            .meal-plan-container { background: white !important; }
+        }
+        
+        @media (max-width: 768px) {
+            .meal-plan-container { padding: 10px; }
+            .meal-plan-content { padding: 20px; }
+            .plan-title { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="meal-plan-container">
+        <div class="meal-plan-content">
+            <div class="plan-header">
+                <h1 class="plan-title">🎯 Your AI-Generated Meal Plan</h1>
+                <div class="plan-metadata" id="plan-metadata">
+                    <!-- Metadata will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn" onclick="window.print()">🖨️ Print Plan</button>
+                <button class="btn btn-secondary" onclick="goBack()">← Back to Quiz</button>
+                <button class="btn" onclick="sharePlan()">📤 Share Plan</button>
+            </div>
+            
+            <div id="meal-plan-content">
+                <!-- Meal plan content will be inserted here -->
+            </div>
+            
+            <div class="footer-section">
+                <h3 style="color: #4B9CD3; margin-bottom: 10px;">🔥 Powered by FuelFire & Claude AI</h3>
+                <p style="color: #666; margin-bottom: 15px;">Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
+                <button class="btn" onclick="window.print()">🖨️ Print This Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'enhanced-diet-quiz.html';
+        }
+        
+        function sharePlan() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My AI Meal Plan - FuelFire',
+                    text: 'Check out my personalized meal plan generated by AI!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('📋 Plan URL copied to clipboard!');
+                });
+            }
+        }
+        
+        // Function to receive and display meal plan data
+        function displayMealPlan(mealPlan, metadata) {
+            // Set metadata
+            document.getElementById('plan-metadata').innerHTML = `
+                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt).toLocaleDateString()} | 
+                <strong>Goal:</strong> ${metadata.goal} | 
+                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
+            `;
+            
+            // Process and display meal plan content
+            const processedContent = processMealPlanContent(mealPlan);
+            document.getElementById('meal-plan-content').innerHTML = processedContent;
+        }
+        
+        function processMealPlanContent(rawContent) {
+            // Parse the raw meal plan and organize it into clean sections
+            let content = rawContent;
+            
+            // Create organized sections
+            let organizedContent = '';
+            
+            // Extract and format different sections
+            const sections = extractSections(content);
+            
+            // Daily Meal Plans Section
+            if (sections.dailyPlans) {
+                organizedContent += `
+                    <div class="section">
+                        <div class="section-title">
+                            <span class="section-icon">📅</span>
+                            Daily Meal Plans
+                        </div>
+                        ${sections.dailyPlans}
+                    </div>
+                `;
+            }
+            
+            // Shopping Lists Section
+            if (sections.shoppingLists) {
+                organizedContent += `
+                    <div class="section">
+                        <div class="section-title">
+                            <span class="section-icon">🛒</span>
+                            Shopping Lists
+                        </div>
+                        <div class="shopping-section">
+                            ${sections.shoppingLists}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Meal Prep Instructions
+            if (sections.mealPrep) {
+                organizedContent += `
+                    <div class="section">
+                        <div class="section-title">
+                            <span class="section-icon">👨‍🍳</span>
+                            Meal Prep Instructions
+                        </div>
+                        <div class="tips-section">
+                            ${sections.mealPrep}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Nutritional Summary
+            if (sections.nutrition) {
+                organizedContent += `
+                    <div class="section">
+                        <div class="section-title">
+                            <span class="section-icon">📊</span>
+                            Nutritional Summary
+                        </div>
+                        <div class="nutrition-summary">
+                            ${sections.nutrition}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return organizedContent;
+        }
+        
+        function extractSections(content) {
+            const sections = {};
+            
+            // Parse content into organized sections using regex patterns
+            
+            // Extract Daily Meal Plans (everything before shopping lists)
+            const dailyPlansMatch = content.match(/📅[\s\S]*?(?=🛒|$)/);
+            if (dailyPlansMatch) {
+                sections.dailyPlans = formatDailyPlans(dailyPlansMatch[0]);
+            }
+            
+            // Extract Shopping Lists
+            const shoppingMatch = content.match(/🛒[\s\S]*?(?=👨‍🍳|📊|$)/);
+            if (shoppingMatch) {
+                sections.shoppingLists = formatShoppingLists(shoppingMatch[0]);
+            }
+            
+            // Extract Meal Prep Instructions
+            const mealPrepMatch = content.match(/👨‍🍳[\s\S]*?(?=📊|$)/);
+            if (mealPrepMatch) {
+                sections.mealPrep = formatMealPrep(mealPrepMatch[0]);
+            }
+            
+            // Extract Nutritional Summary
+            const nutritionMatch = content.match(/📊[\s\S]*$/);
+            if (nutritionMatch) {
+                sections.nutrition = formatNutrition(nutritionMatch[0]);
+            }
+            
+            // Fallback: if parsing fails, show all content
+            if (!sections.dailyPlans && !sections.shoppingLists) {
+                sections.dailyPlans = content;
+            }
+            
+            return sections;
+        }
+        
+        function formatDailyPlans(content) {
+            // Split content by days and format each day
+            const days = content.split(/### Day \d+/).filter(day => day.trim());
+            let formatted = '';
+            
+            days.forEach((day, index) => {
+                if (day.trim()) {
+                    formatted += `
+                        <div class="day-plan">
+                            <div class="day-title">📅 Day ${index + 1}</div>
+                            ${formatMealsForDay(day)}
+                        </div>
+                    `;
+                }
+            });
+            
+            return formatted || content; // Fallback to original content
+        }
+        
+        function formatMealsForDay(dayContent) {
+            // Extract individual meals
+            const meals = ['🍳 Breakfast', '🥗 Lunch', '🍽️ Dinner', '🍎 Snacks'];
+            let formatted = '';
+            
+            meals.forEach(mealType => {
+                const regex = new RegExp(`\\*\\*${mealType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:\\*\\*([\\s\\S]*?)(?=\\*\\*(?:🍳|🥗|🍽️|🍎)|Daily Total|$)`);
+                const match = dayContent.match(regex);
+                
+                if (match) {
+                    formatted += `
+                        <div class="meal">
+                            <div class="meal-name">${mealType}</div>
+                            <div class="meal-details">${match[1].trim()}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            return formatted || `<div class="meal-details">${dayContent}</div>`;
+        }
+        
+        function formatShoppingLists(content) {
+            // Extract Week 1 and Week 2 lists
+            const week1Match = content.match(/Week 1 Shopping List([\s\S]*?)(?=Week 2|$)/);
+            const week2Match = content.match(/Week 2 Shopping List([\s\S]*?)$/);
+            
+            let formatted = '';
+            
+            if (week1Match) {
+                formatted += `
+                    <div class="shopping-list">
+                        <h3 style="color: #28a745; margin-bottom: 15px;">🛒 Week 1 Shopping List</h3>
+                        ${formatShoppingCategories(week1Match[1])}
+                    </div>
+                `;
+            }
+            
+            if (week2Match) {
+                formatted += `
+                    <div class="shopping-list">
+                        <h3 style="color: #28a745; margin-bottom: 15px;">🛒 Week 2 Shopping List</h3>
+                        ${formatShoppingCategories(week2Match[1])}
+                    </div>
+                `;
+            }
+            
+            return formatted || `<div class="shopping-list">${content}</div>`;
+        }
+        
+        function formatShoppingCategories(content) {
+            const categories = ['🥩 Proteins', '🥬 Vegetables', '🍎 Fruits', '🥛 Dairy', '🌾 Pantry'];
+            let formatted = '';
+            
+            categories.forEach(category => {
+                const regex = new RegExp(`\\*\\*${category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:\\*\\*([\\s\\S]*?)(?=\\*\\*(?:🥩|🥬|🍎|🥛|🌾|Estimated)|$)`);
+                const match = content.match(regex);
+                
+                if (match) {
+                    formatted += `
+                        <div style="margin-bottom: 15px;">
+                            <div class="shopping-category">${category}</div>
+                            <div class="shopping-items">${match[1].trim()}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            return formatted || `<div class="shopping-items">${content}</div>`;
+        }
+        
+        function formatMealPrep(content) {
+            return `<div style="line-height: 1.6;">${content.replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        function formatNutrition(content) {
+            return `<div style="line-height: 1.6;">${content.replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        // Check if meal plan data was passed
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const planData = urlParams.get('data');
+            
+            if (planData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(planData));
+                    displayMealPlan(data.mealPlan, data.metadata);
+                } catch (error) {
+                    console.error('Error loading meal plan data:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

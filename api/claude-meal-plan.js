@@ -143,43 +143,82 @@ ${quizData.specialRequests || 'None'}
 ---
 
 # INSTRUCTIONS:
-Create a **comprehensive ${quizData.planDuration || '2-week'} meal plan** that includes:
+Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} meal plan** with the following structure:
 
-## 1. DAILY MEAL PLANS
-For each day, provide:
-- **Breakfast** with exact measurements (e.g., "1 cup oatmeal, 1/2 cup blueberries, 2 tbsp almond butter")
-- **Lunch** with exact measurements
-- **Dinner** with exact measurements
-- **Snacks** (if applicable based on meals per day preference)
-- **Daily Calories & Macros** (Protein/Carbs/Fat breakdown)
+## 1. 📅 DAILY MEAL PLANS SECTION
+**Format each day as:**
+### Day 1: [Date]
+**🍳 Breakfast:**
+- [Meal description with exact measurements]
+- Calories: [X] | Protein: [X]g | Carbs: [X]g | Fat: [X]g
 
-## 2. SHOPPING LISTS
-- **Week 1 Shopping List** with exact quantities needed
-- **Week 2 Shopping List** with exact quantities needed
-- Organize by category (Proteins, Vegetables, Fruits, Pantry Items, etc.)
-- Include total estimated cost if possible
+**🥗 Lunch:**
+- [Meal description with exact measurements]  
+- Calories: [X] | Protein: [X]g | Carbs: [X]g | Fat: [X]g
 
-## 3. MEAL PREP INSTRUCTIONS
-- **Sunday Prep Guide** (what to prepare ahead)
-- **Storage Instructions** for prepped items
-- **Cooking Tips** based on their skill level
+**🍽️ Dinner:**
+- [Meal description with exact measurements]
+- Calories: [X] | Protein: [X]g | Carbs: [X]g | Fat: [X]g
 
-## 4. NUTRITIONAL SUMMARY
-- **Daily Average**: Calories, Protein, Carbs, Fat
-- **Weekly Totals** and how it aligns with their goals
-- **Key Nutrients** highlighted (fiber, vitamins, etc.)
+**🍎 Snacks:** (if applicable)
+- [Snack with measurements]
 
-## FORMATTING REQUIREMENTS:
-- Use clear headers with emojis (🍳, 🥗, 🛒)
-- Make it visually appealing and easy to follow
-- Include motivational elements
-- Ensure all measurements are precise (oz, cups, tbsp, etc.)
-- Make sure recipes match their cooking skill level
-- Consider their available kitchen equipment
-- Stay within their budget range
-- Focus on foods they actually like
+**Daily Total:** [X] calories
 
-Create an amazing, personalized meal plan that will help them achieve their ${quizData.goal} goal while being practical and delicious!`;
+## 2. 🛒 SHOPPING LISTS SECTION (CRITICAL - MUST INCLUDE!)
+### Week 1 Shopping List
+**🥩 Proteins:**
+- [Item] - [exact quantity needed]
+- [Item] - [exact quantity needed]
+
+**🥬 Vegetables:**  
+- [Item] - [exact quantity needed]
+- [Item] - [exact quantity needed]
+
+**🍎 Fruits:**
+- [Item] - [exact quantity needed]
+
+**🥛 Dairy:**
+- [Item] - [exact quantity needed]
+
+**🌾 Pantry/Dry Goods:**
+- [Item] - [exact quantity needed]
+
+**Estimated Total Cost: $[X]**
+
+### Week 2 Shopping List
+[Same format as Week 1]
+
+## 3. 👨‍🍳 MEAL PREP INSTRUCTIONS
+**Sunday Prep (Week 1):**
+- [Step-by-step prep instructions]
+- [Storage instructions]
+
+**Sunday Prep (Week 2):**
+- [Step-by-step prep instructions]
+
+## 4. 📊 NUTRITIONAL SUMMARY
+**Daily Averages:**
+- Calories: [X]
+- Protein: [X]g ([X]%)
+- Carbohydrates: [X]g ([X]%)
+- Fat: [X]g ([X]%)
+- Fiber: [X]g
+
+**How this aligns with your ${quizData.goal} goal:**
+[Explanation of nutritional strategy]
+
+## CRITICAL REQUIREMENTS:
+- ✅ MUST include detailed shopping lists with exact quantities
+- ✅ Use precise measurements (1 cup, 4 oz, 2 tbsp, etc.)
+- ✅ Organize content with clear sections and headers
+- ✅ Include daily calorie/macro breakdowns
+- ✅ Focus on foods from their preferences: ${quizData.meats?.join(', ')}, ${quizData.vegetables?.join(', ')}, ${quizData.fruits?.join(', ')}
+- ✅ Match their cooking skill level: ${quizData.cookingSkill}
+- ✅ Stay within budget: ${quizData.budgetRange}
+- ✅ Consider available equipment: ${quizData.kitchenEquipment?.join(', ')}
+
+Create a professional, organized meal plan that delivers real value and helps them achieve their ${quizData.goal} goal!`;
 }
 
 function formatMealPlanForApp(rawMealPlan) {
