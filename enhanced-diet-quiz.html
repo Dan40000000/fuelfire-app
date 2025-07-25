@@ -80,7 +80,7 @@
             document.getElementById('height-metric').style.display = system === 'metric' ? 'block' : 'none';
             
             // Update weight label
-            document.getElementById('weight-label').textContent = `Weight (${system === 'imperial' ? 'lbs' : 'kg'})`;
+            document.getElementById('weight-label').innerHTML = `Weight (${system === 'imperial' ? 'lbs' : 'kg'}) <span style="color: #e74c3c;">*</span>`;
             document.getElementById('quiz-weight').placeholder = system === 'imperial' ? '150' : '68';
         }
 
@@ -111,7 +111,7 @@
                     
                     <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal?</label>
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal? <span style="color: #e74c3c;">*</span></label>
                             <select id="diet-goal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
                                 <option value="">Select your goal...</option>
                                 <option value="weight-loss">🔥 Weight Loss</option>
@@ -141,11 +141,11 @@
                     <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                             <div>
-                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Age</label>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Age <span style="color: #e74c3c;">*</span></label>
                                 <input type="number" id="quiz-age" placeholder="25" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
                             </div>
                             <div>
-                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Gender</label>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Gender <span style="color: #e74c3c;">*</span></label>
                                 <select id="quiz-gender" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
                                     <option value="">Select...</option>
                                     <option value="male">Male</option>
@@ -168,7 +168,7 @@
                         </div>
                         
                         <div style="margin-bottom: 20px;">
-                            <label id="weight-label" style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weight (lbs)</label>
+                            <label id="weight-label" style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weight (lbs) <span style="color: #e74c3c;">*</span></label>
                             <input type="number" id="quiz-weight" placeholder="150" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
                         </div>
                         
@@ -972,7 +972,7 @@
                         
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Any special requests or notes?</label>
-                            <textarea id="quiz-special-requests" placeholder="Any specific foods you love/hate, medical conditions, or special preferences..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; min-height: 80px; resize: vertical; box-sizing: border-box;"></textarea>
+                            <textarea id="quiz-special-requests" placeholder="Any specific foods you love/hate, medical conditions, or special preferences... (Type 'N/A' if nothing applies)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; min-height: 80px; resize: vertical; box-sizing: border-box;"></textarea>
                         </div>
                         
                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
@@ -1051,10 +1051,34 @@
                 quizData.age = document.getElementById('quiz-age').value;
                 quizData.gender = document.getElementById('quiz-gender').value;
                 quizData.weight = document.getElementById('quiz-weight').value;
-                // ... save other step 2 data
+                quizData.activity = document.getElementById('quiz-activity').value;
+                quizData.bodytype = document.getElementById('quiz-bodytype').value;
+                
+                // Store height based on measurement system
+                if (measurementSystem === 'imperial') {
+                    quizData.feet = document.getElementById('quiz-feet').value;
+                    quizData.inches = document.getElementById('quiz-inches').value;
+                } else {
+                    quizData.heightCm = document.getElementById('quiz-height-cm').value;
+                }
+                quizData.measurementSystem = measurementSystem;
+                
+                // Validate required fields
+                if (!quizData.age) {
+                    alert('❗ Please enter your age');
+                    return;
+                }
+                if (!quizData.weight) {
+                    alert('❗ Please enter your weight');
+                    return;
+                }
+                if (!quizData.gender) {
+                    alert('❗ Please select your gender');
+                    return;
+                }
             } else if (currentStep === 3) {
                 quizData.allergies = Array.from(document.querySelectorAll('.allergy-check:checked')).map(cb => cb.value);
-                quizData.otherAllergies = document.getElementById('other-allergies').value;
+                quizData.otherAllergies = document.getElementById('other-allergies').value || 'N/A';
                 quizData.dietaryLifestyle = document.getElementById('quiz-dietary-lifestyle').value;
             } else if (currentStep === 4) {
                 quizData.meats = Array.from(document.querySelectorAll('.meat-check:checked')).map(cb => cb.value);
@@ -1078,7 +1102,7 @@
                 quizData.budgetRange = document.getElementById('quiz-budget-range').value;
                 quizData.preferredStores = Array.from(document.querySelectorAll('.store-check:checked')).map(cb => cb.value);
                 quizData.planDuration = document.getElementById('quiz-plan-duration').value;
-                quizData.specialRequests = document.getElementById('quiz-special-requests').value;
+                quizData.specialRequests = document.getElementById('quiz-special-requests').value || 'N/A';
             }
             
             if (currentStep < totalSteps) {
