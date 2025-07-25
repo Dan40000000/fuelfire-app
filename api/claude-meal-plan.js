@@ -1,5 +1,6 @@
 // Claude AI Meal Plan Generation API
 // This routes all user requests through your Claude Pro account
+// Last updated: July 25, 2025 - Added better error handling
 
 export default async function handler(req, res) {
     // Set CORS headers for frontend access
