@@ -129,6 +129,7 @@ You are an expert nutritionist and meal planning specialist creating a comprehen
 - **Meals Per Day**: ${quizData.mealsPerDay || '3'} meals
 - **Largest Meal**: ${quizData.largestMeal || 'dinner'}
 - **Meal Prep Time**: ${quizData.mealPrepTime || 'moderate'}
+- **Meal Variety**: ${quizData.mealVariety || 'some-variety'}
 - **Cooking Skill**: ${quizData.cookingSkill || 'intermediate'}
 - **Kitchen Equipment**: ${quizData.kitchenEquipment?.join(', ') || 'Basic equipment'}
 
@@ -217,6 +218,13 @@ Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} me
 - ✅ Match their cooking skill level: ${quizData.cookingSkill}
 - ✅ Stay within budget: ${quizData.budgetRange}
 - ✅ Consider available equipment: ${quizData.kitchenEquipment?.join(', ')}
+
+## MEAL VARIETY INSTRUCTIONS:
+${quizData.mealVariety === 'same-daily' ? '- Use the SAME breakfast, lunch, and dinner every day for easier meal prep' : ''}
+${quizData.mealVariety === 'weekday-same' ? '- Use the SAME meals Monday-Friday, but create different meals for weekends' : ''}
+${quizData.mealVariety === 'some-variety' ? '- Provide 2-3 options for breakfast and lunch that rotate, dinner can vary daily' : ''}
+${quizData.mealVariety === 'full-variety' ? '- Create DIFFERENT meals every single day - maximum variety' : ''}
+${quizData.mealVariety === 'office-prep' ? '- Create same meals for Mon/Tue/Thu/Fri (office days) and different for Wed/Sat/Sun (WFH days)' : ''}
 
 Create a professional, organized meal plan that delivers real value and helps them achieve their ${quizData.goal} goal!`;
 }
