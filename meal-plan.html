@@ -354,28 +354,65 @@
             
             // Split by days more flexibly
             const dayPatterns = [
-                /Day \d+:/gi,
-                /### Day \d+/gi,
-                /## Day \d+/gi,
-                /\*\*Day \d+/gi
+                { pattern: /Day \d+:/gi, name: 'Day X:' },
+                { pattern: /### Day \d+/gi, name: '### Day X' },
+                { pattern: /## Day \d+/gi, name: '## Day X' },
+                { pattern: /\*\*Day \d+/gi, name: '**Day X' },
+                { pattern: /Day \d+ -/gi, name: 'Day X -' },
+                { pattern: /\n\d+\./gi, name: 'Number list' }
             ];
             
             let days = [];
             let dayFound = false;
+            let matchedPattern = null;
             
             // Try different patterns to find days
-            for (const pattern of dayPatterns) {
-                if (rawContent.match(pattern)) {
-                    days = rawContent.split(pattern).filter(d => d.trim());
-                    dayFound = true;
-                    console.log(`✅ Found ${days.length} days using pattern: ${pattern}`);
-                    break;
+            for (const patternObj of dayPatterns) {
+                const matches = rawContent.match(patternObj.pattern);
+                if (matches && matches.length > 1) {
+                    console.log(`🔍 Testing pattern '${patternObj.name}': found ${matches.length} matches`);
+                    
+                    // Get all day markers
+                    const dayMarkers = [...rawContent.matchAll(patternObj.pattern)];
+                    console.log(`📍 Day markers found at positions:`, dayMarkers.map(m => m.index));
+                    
+                    // Split content by day markers
+                    days = [];
+                    for (let i = 0; i < dayMarkers.length; i++) {
+                        const start = dayMarkers[i].index + dayMarkers[i][0].length;
+                        const end = i < dayMarkers.length - 1 ? dayMarkers[i + 1].index : rawContent.length;
+                        const dayContent = rawContent.substring(start, end).trim();
+                        if (dayContent) {
+                            days.push(dayContent);
+                        }
+                    }
+                    
+                    if (days.length > 1) {
+                        dayFound = true;
+                        matchedPattern = patternObj.name;
+                        console.log(`✅ Successfully extracted ${days.length} days using pattern: ${patternObj.name}`);
+                        break;
+                    }
                 }
             }
             
-            // If no days found, try to parse as a single block
+            // If no days found, check if it's already showing HTML for days
+            if (!dayFound && rawContent.includes('Daily Meal Plans')) {
+                console.log('⚠️ Content may already be formatted, checking for daily sections...');
+                // Try to extract content between day headers
+                const dayHeaderPattern = /<h3[^>]*>Day \d+[^<]*<\/h3>/gi;
+                const dayHeaders = rawContent.match(dayHeaderPattern);
+                if (dayHeaders && dayHeaders.length > 1) {
+                    console.log(`📅 Found ${dayHeaders.length} day headers in HTML content`);
+                    days = [rawContent]; // Process as is
+                    dayFound = true;
+                }
+            }
+            
+            // If still no days found, try to parse as a single block
             if (!dayFound) {
-                console.log('⚠️ No day patterns found, parsing as single content');
+                console.log('⚠️ No day patterns found, showing full content');
+                console.log('Content preview:', rawContent.substring(0, 200));
                 days = [rawContent];
             }
             
@@ -389,26 +426,65 @@
                         </div>
                 `;
                 
-                days.forEach((dayContent, index) => {
-                    if (dayContent.trim()) {
-                        const dayNum = dayFound ? index + 1 : 1;
-                        const weekNum = dayNum <= 7 ? 1 : 2;
-                        const dayInWeek = ((dayNum - 1) % 7) + 1;
-                        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                        const dayName = dayNames[(dayInWeek - 1)];
+                console.log(`📊 Processing ${days.length} days...`);
+                
+                // If we only found one "day" but it contains multiple days, try to extract them
+                if (days.length === 1 && !dayFound) {
+                    console.log('🔄 Single block detected, checking for embedded days...');
+                    const singleContent = days[0];
+                    
+                    // Check if the content has multiple day references
+                    const dayReferences = singleContent.match(/Day \d+/gi);
+                    if (dayReferences && dayReferences.length > 1) {
+                        console.log(`Found ${dayReferences.length} day references, attempting to show all content...`);
                         
+                        // Show the entire content in a scrollable format
+                        organizedContent += `
+                            <div style="background: #f8f9ff; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                                <h3 style="color: #4B9CD3; margin-bottom: 20px;">📅 Your Complete 14-Day Meal Plan</h3>
+                                <div style="white-space: pre-wrap; line-height: 1.8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                                    ${singleContent}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Show as Day 1 only
                         organizedContent += `
                             <div class="day-plan" style="background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); margin-bottom: 20px; border-radius: 20px; overflow: hidden; box-shadow: 0 3px 15px rgba(0,0,0,0.08);">
                                 <div class="day-title" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; font-size: 18px; font-weight: bold;">
-                                    Week ${weekNum} - ${dayName} (Day ${dayNum})
+                                    Week 1 - Monday (Day 1)
                                 </div>
                                 <div style="padding: 20px;">
-                                    ${formatDayContent(dayContent)}
+                                    ${formatDayContent(singleContent)}
                                 </div>
                             </div>
                         `;
                     }
-                });
+                } else {
+                    // Multiple days found - display each one
+                    days.forEach((dayContent, index) => {
+                        if (dayContent.trim()) {
+                            const dayNum = index + 1;
+                            const weekNum = dayNum <= 7 ? 1 : 2;
+                            const dayInWeek = ((dayNum - 1) % 7) + 1;
+                            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            const dayName = dayNames[(dayInWeek - 1)];
+                            
+                            console.log(`📅 Rendering Day ${dayNum} (${dayName})`);
+                            
+                            organizedContent += `
+                                <div class="day-plan" style="background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); margin-bottom: 20px; border-radius: 20px; overflow: hidden; box-shadow: 0 3px 15px rgba(0,0,0,0.08);">
+                                    <div class="day-title" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; font-size: 18px; font-weight: bold;">
+                                        Week ${weekNum} - ${dayName} (Day ${dayNum})
+                                    </div>
+                                    <div style="padding: 20px;">
+                                        ${formatDayContent(dayContent)}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
                 
                 organizedContent += `</div>`;
             }

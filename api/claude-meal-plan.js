@@ -230,46 +230,8 @@ Create a professional, organized meal plan that delivers real value and helps th
 }
 
 function formatMealPlanForApp(rawMealPlan) {
-    let formatted = rawMealPlan;
-    
-    // Convert markdown-style headers to HTML with FuelFire styling
-    formatted = formatted.replace(/^# (.*$)/gm, '<h1 class="plan-title">🎯 $1</h1>');
-    formatted = formatted.replace(/^## (.*$)/gm, '<h2 class="section-header">$1</h2>');
-    formatted = formatted.replace(/^### (.*$)/gm, '<h3 class="day-header">$1</h3>');
-    
-    // Convert bold text
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>');
-    
-    // Convert line breaks and create paragraphs
-    formatted = formatted.replace(/\n\n/g, '</p><p>');
-    formatted = '<p>' + formatted + '</p>';
-    
-    // Style different sections with CSS classes
-    formatted = addFuelFireStyling(formatted);
-    
-    return formatted;
+    // Return the raw meal plan without HTML conversion
+    // The frontend will handle the formatting
+    return rawMealPlan;
 }
 
-function addFuelFireStyling(content) {
-    // Style meal plans with special containers
-    content = content.replace(/(Day \d+.*?(?=Day \d+|Week \d+ Shopping|$))/gs, 
-        '<div class="day-plan">$1</div>');
-    
-    // Style shopping lists
-    content = content.replace(/(Week \d+ Shopping List.*?(?=Week \d+ Shopping|Meal Prep|Nutritional Summary|$))/gs, 
-        '<div class="shopping-list">$1</div>');
-    
-    // Style individual meals
-    content = content.replace(/(🍳 Breakfast:|🥗 Lunch:|🍽️ Dinner:|🍎 Snack:)(.*?)(?=🍳|🥗|🍽️|🍎|<\/div>)/gs, 
-        '<div class="meal-item"><strong>$1</strong><div class="meal-details">$2</div></div>');
-    
-    // Style nutritional information
-    content = content.replace(/(Calories:.*?Fat:.*?)/g, 
-        '<div class="nutrition-info">$1</div>');
-    
-    // Style prep instructions
-    content = content.replace(/(Prep Instructions:.*?(?=Storage|$))/gs,
-        '<div class="prep-instructions">$1</div>');
-    
-    return content;
-}
