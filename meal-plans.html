@@ -136,11 +136,8 @@
             const savedPlans = getMealPlansFromStorage();
             if (savedPlans[index]) {
                 const plan = savedPlans[index];
-                const planData = encodeURIComponent(JSON.stringify({
-                    mealPlan: plan.mealPlan,
-                    metadata: plan.metadata
-                }));
-                window.location.href = `meal-plan.html?data=${planData}`;
+                // Use plan ID method for more reliable data passing
+                window.location.href = `meal-plan.html?planId=${plan.id}`;
             }
         }
 

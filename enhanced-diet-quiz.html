@@ -1147,20 +1147,14 @@
                 
                 if (result.success) {
                     // Save meal plan to localStorage for the meal-plans.html page
-                    saveMealPlanToStorage(result.mealPlan, result.metadata);
-                    
-                    // Redirect to dedicated meal plan page
-                    const planData = encodeURIComponent(JSON.stringify({
-                        mealPlan: result.mealPlan,
-                        metadata: result.metadata
-                    }));
+                    const savedPlanId = saveMealPlanToStorage(result.mealPlan, result.metadata);
                     
                     // Update button to show success
                     button.innerHTML = '✅ Plan Generated! Redirecting...';
                     
-                    // Redirect after short delay
+                    // Redirect after short delay - using plan ID instead of data in URL
                     setTimeout(() => {
-                        window.location.href = `meal-plan.html?data=${planData}`;
+                        window.location.href = `meal-plan.html?planId=${savedPlanId}`;
                     }, 1000);
                     
                 } else {
@@ -1208,8 +1202,11 @@
                 
                 console.log('✅ Meal plan saved to localStorage');
                 
+                return newPlan.id;
+                
             } catch (error) {
                 console.error('❌ Error saving meal plan to localStorage:', error);
+                return null;
             }
         }
 

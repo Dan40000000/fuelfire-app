@@ -307,21 +307,46 @@
         
         // Function to receive and display meal plan data
         function displayMealPlan(mealPlan, metadata) {
+            console.log('📋 Displaying meal plan:', {
+                mealPlanLength: mealPlan ? mealPlan.length : 0,
+                mealPlanType: typeof mealPlan,
+                metadataKeys: metadata ? Object.keys(metadata) : []
+            });
+            
             // Set metadata
             document.getElementById('plan-metadata').innerHTML = `
-                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt).toLocaleDateString()} | 
+                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
                 <strong>Goal:</strong> ${metadata.goal} | 
                 <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
             `;
             
             // Process and display meal plan content
+            if (!mealPlan || mealPlan.length === 0) {
+                document.getElementById('meal-plan-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>⚠️ Empty Meal Plan</h3>
+                        <p>The meal plan appears to be empty. Please try generating a new one.</p>
+                        <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Start New Quiz</button>
+                    </div>
+                `;
+                return;
+            }
+            
             const processedContent = processMealPlanContent(mealPlan);
             document.getElementById('meal-plan-content').innerHTML = processedContent;
         }
         
         function processMealPlanContent(rawContent) {
+            console.log('🔧 Processing meal plan content, length:', rawContent.length);
+            
             // Parse the raw meal plan and organize it into clean sections
             let content = rawContent;
+            
+            // If content appears to be HTML already, display it directly
+            if (content.includes('<h') || content.includes('<div') || content.includes('<p>')) {
+                console.log('✅ Content appears to be pre-formatted HTML');
+                return content;
+            }
             
             // Create organized sections
             let organizedContent = '';
@@ -382,6 +407,18 @@
                         </div>
                         <div class="nutrition-summary">
                             ${sections.nutrition}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // If no sections were extracted, show the raw content
+            if (!organizedContent) {
+                console.log('⚠️ No sections extracted, showing raw content');
+                organizedContent = `
+                    <div class="section">
+                        <div style="white-space: pre-wrap; line-height: 1.6; padding: 20px;">
+                            ${content}
                         </div>
                     </div>
                 `;
@@ -542,38 +579,58 @@
             setInterval(updateTime, 1000);
             
             const urlParams = new URLSearchParams(window.location.search);
-            const planData = urlParams.get('data');
+            const planId = urlParams.get('planId');
+            const planData = urlParams.get('data'); // Fallback for old method
             
             console.log('🔍 Checking for meal plan data...');
             console.log('URL params:', urlParams.toString());
+            console.log('Plan ID:', planId);
             console.log('Plan data exists:', !!planData);
             
-            if (planData) {
+            // Try to load from localStorage first (new method)
+            if (planId) {
+                try {
+                    const savedPlans = localStorage.getItem('fuelfire_meal_plans');
+                    const mealPlans = savedPlans ? JSON.parse(savedPlans) : [];
+                    const plan = mealPlans.find(p => p.id === planId);
+                    
+                    if (plan) {
+                        console.log('✅ Successfully loaded meal plan from localStorage');
+                        displayMealPlan(plan.mealPlan, plan.metadata);
+                    } else {
+                        throw new Error('Plan not found in localStorage');
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading from localStorage:', error);
+                    showErrorMessage();
+                }
+            } 
+            // Fallback to URL data method
+            else if (planData) {
                 try {
                     const data = JSON.parse(decodeURIComponent(planData));
-                    console.log('✅ Successfully parsed meal plan data:', Object.keys(data));
+                    console.log('✅ Successfully parsed meal plan data from URL:', Object.keys(data));
                     displayMealPlan(data.mealPlan, data.metadata);
                 } catch (error) {
                     console.error('❌ Error loading meal plan data:', error);
-                    document.getElementById('meal-plan-content').innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #666;">
-                            <h3>⚠️ Error Loading Meal Plan</h3>
-                            <p>There was an issue loading your meal plan data.</p>
-                            <button onclick="goBack()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">← Back to Quiz</button>
-                        </div>
-                    `;
+                    showErrorMessage();
                 }
             } else {
                 console.log('❌ No meal plan data found');
-                document.getElementById('meal-plan-content').innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #666;">
-                        <h3>🔍 No Meal Plan Data</h3>
-                        <p>Please generate a meal plan from the quiz first.</p>
-                        <button onclick="goBack()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">← Back to Quiz</button>
-                    </div>
-                `;
+                showErrorMessage();
             }
         });
+        
+        function showErrorMessage() {
+            document.getElementById('meal-plan-content').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <h3>🔍 No Meal Plan Data</h3>
+                    <p>Please generate a meal plan from the quiz first.</p>
+                    <button onclick="goBack()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">← Back to Meal Plans</button>
+                    <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px; margin-left: 10px;">🎯 Start Quiz</button>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
