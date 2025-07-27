@@ -5,40 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meal Plans - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Ensure sidebar functionality */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -300px;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            transition: left 0.3s ease;
-            z-index: 1001;
-        }
-        
-        .sidebar.active {
-            left: 0;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            z-index: 1000;
-        }
-        
-        .sidebar.active ~ .overlay,
-        .overlay.active {
-            display: block;
-        }
-    </style>
 </head>
 <body>
     <div class="phone-container">
@@ -109,8 +75,8 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.overlay');
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
         }
 
         function goToPage(page) {
