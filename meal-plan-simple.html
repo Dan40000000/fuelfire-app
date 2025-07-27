@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI Meal Plan - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="goBack()">←</div>
+                <div class="header-title">Your Meal Plan</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div class="plan-header">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2 style="color: var(--primary); margin: 0 0 10px 0; font-size: 24px;">🎯 AI Meal Plan</h2>
+                            <div class="plan-metadata" id="plan-metadata" style="background: #f8f9ff; padding: 10px; border-radius: 10px; font-size: 14px; color: #666;">
+                                <!-- Metadata will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="meal-plan-content">
+                        <!-- Meal plan content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'meal-plans.html';
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+        
+        function displayMealPlan(mealPlan, metadata) {
+            console.log('📋 Displaying meal plan:', {
+                mealPlanLength: mealPlan ? mealPlan.length : 0,
+                mealPlanType: typeof mealPlan,
+                metadataKeys: metadata ? Object.keys(metadata) : []
+            });
+            
+            // Set metadata
+            document.getElementById('plan-metadata').innerHTML = `
+                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
+                <strong>Goal:</strong> ${metadata.goal} | 
+                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
+            `;
+            
+            if (!mealPlan || mealPlan.length === 0) {
+                document.getElementById('meal-plan-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>⚠️ Empty Meal Plan</h3>
+                        <p>The meal plan appears to be empty. Please try generating a new one.</p>
+                        <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Start New Quiz</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // SIMPLE DISPLAY - Just format what we get
+            let formatted = mealPlan;
+            
+            // Basic markdown formatting
+            formatted = formatted.replace(/^### (.*?)$/gm, '<h3 style="color: #4B9CD3; margin: 25px 0 15px 0; font-size: 20px; padding-bottom: 8px; border-bottom: 2px solid #e3f2fd;">$1</h3>');
+            formatted = formatted.replace(/^## (.*?)$/gm, '<h2 style="color: #4B9CD3; margin: 35px 0 20px 0; font-size: 24px; padding-bottom: 10px; border-bottom: 3px solid #4B9CD3;">$1</h2>');
+            formatted = formatted.replace(/^# (.*?)$/gm, '<h1 style="color: #4B9CD3; margin: 30px 0 25px 0; font-size: 28px; text-align: center;">$1</h1>');
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333; font-weight: 600;">$1</strong>');
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            const content = `
+                <div style="background: white; border-radius: 20px; padding: 30px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333;">
+                        ${formatted}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('meal-plan-content').innerHTML = content;
+        }
+        
+        // Check if meal plan data was passed
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const planId = urlParams.get('planId');
+            
+            console.log('🔍 Looking for plan ID:', planId);
+            
+            if (planId) {
+                try {
+                    const savedPlans = localStorage.getItem('fuelfire_meal_plans');
+                    const mealPlans = savedPlans ? JSON.parse(savedPlans) : [];
+                    const plan = mealPlans.find(p => p.id === planId);
+                    
+                    if (plan) {
+                        console.log('✅ Found meal plan in localStorage');
+                        console.log('🔍 MEAL PLAN DATA:', plan.mealPlan);
+                        displayMealPlan(plan.mealPlan, plan.metadata);
+                    } else {
+                        console.log('❌ Plan not found in localStorage');
+                        document.getElementById('meal-plan-content').innerHTML = `
+                            <div style="text-align: center; padding: 40px; color: #666;">
+                                <h3>🔍 Meal Plan Not Found</h3>
+                                <p>This meal plan may have been deleted or expired.</p>
+                                <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Create New Plan</button>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading meal plan:', error);
+                    document.getElementById('meal-plan-content').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <h3>⚠️ Error Loading Plan</h3>
+                            <p>There was an error loading your meal plan.</p>
+                            <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Try Again</button>
+                        </div>
+                    `;
+                }
+            } else {
+                console.log('❌ No plan ID provided');
+                document.getElementById('meal-plan-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>🔍 No Meal Plan</h3>
+                        <p>Please generate a meal plan first.</p>
+                        <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Start Quiz</button>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

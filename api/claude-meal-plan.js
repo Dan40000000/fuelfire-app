@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 model: 'claude-3-5-sonnet-20241022',
-                max_tokens: 4000,
+                max_tokens: 8000,
                 messages: [
                     {
                         role: 'user',
@@ -147,24 +147,38 @@ ${quizData.specialRequests || 'None'}
 Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} meal plan** with the following structure:
 
 ## 1. 📅 DAILY MEAL PLANS SECTION
-**Format each day as:**
-### Day 1: [Date]
+**CRITICAL: You MUST include ALL 14 DAYS (Day 1 through Day 14)**
+
+**Format EXACTLY like this for EVERY day:**
+
+### Day 1:
 **🍳 Breakfast:**
-- [Meal description with exact measurements]
+- [Meal with exact measurements like "2 scrambled eggs, 1 slice whole grain toast, 1/2 avocado"]
 - Calories: [X] | Protein: [X]g | Carbs: [X]g | Fat: [X]g
 
 **🥗 Lunch:**
-- [Meal description with exact measurements]  
+- [Meal with exact measurements]  
 - Calories: [X] | Protein: [X]g | Carbs: [X]g | Fat: [X]g
 
 **🍽️ Dinner:**
-- [Meal description with exact measurements]
+- [Meal with exact measurements]
 - Calories: [X] | Protein: [X]g | Carbs: [X]g | Fat: [X]g
 
-**🍎 Snacks:** (if applicable)
+**🍎 Snacks:**
 - [Snack with measurements]
 
 **Daily Total:** [X] calories
+
+### Day 2:
+[Same format]
+
+### Day 3:
+[Same format]
+
+...continue through...
+
+### Day 14:
+[Same format]
 
 ## 2. 🛒 SHOPPING LISTS SECTION (CRITICAL - MUST INCLUDE!)
 ### Week 1 Shopping List
@@ -226,7 +240,15 @@ ${quizData.mealVariety === 'some-variety' ? '- Provide 2-3 options for breakfast
 ${quizData.mealVariety === 'full-variety' ? '- Create DIFFERENT meals every single day - maximum variety' : ''}
 ${quizData.mealVariety === 'office-prep' ? '- Create same meals for Mon/Tue/Thu/Fri (office days) and different for Wed/Sat/Sun (WFH days)' : ''}
 
-Create a professional, organized meal plan that delivers real value and helps them achieve their ${quizData.goal} goal!`;
+## ABSOLUTELY CRITICAL REQUIREMENTS:
+- ✅ MUST include ALL 14 days (Day 1, Day 2, Day 3... through Day 14) 
+- ✅ Do NOT truncate or shorten the response
+- ✅ Include complete shopping lists for both weeks
+- ✅ Make sure every day has breakfast, lunch, dinner, and snacks
+
+Create a professional, organized meal plan that delivers real value and helps them achieve their ${quizData.goal} goal!
+
+**REMINDER: This must be a COMPLETE 14-day plan - do not stop at Day 7!**`;
 }
 
 function formatMealPlanForApp(rawMealPlan) {
