@@ -338,305 +338,48 @@
         
         function processMealPlanContent(rawContent) {
             console.log('🔧 Processing meal plan content, length:', rawContent.length);
-            console.log('🔍 RAW CONTENT FROM CLAUDE:');
-            console.log(rawContent);
-            console.log('🔍 END RAW CONTENT');
             
-            // EMERGENCY FALLBACK - Just show the raw content formatted
-            let emergencyContent = `
-                <div style="background: white; border-radius: 20px; padding: 30px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <h2 style="color: #4B9CD3; margin-bottom: 20px;">🍽️ Your Meal Plan (Debug Mode)</h2>
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333; white-space: pre-wrap;">
-                        ${rawContent}
-                    </div>
-                </div>
-            `;
-            
-            let organizedContent = '';
-            
-            // First, let's find the main sections
-            const sections = {
-                dailyMeals: null,
-                shoppingLists: null,
-                mealPrep: null,
-                nutrition: null
-            };
-            
-            // Extract daily meal plans section
-            const dailyMealsMatch = rawContent.match(/(?:📅|##)\s*(?:DAILY MEAL PLANS|Daily Meal Plans)[\s\S]*?(?=(?:🛒|##\s*SHOPPING)|$)/i);
-            if (dailyMealsMatch) {
-                sections.dailyMeals = dailyMealsMatch[0];
-                console.log('✅ Found daily meals section');
+            if (!rawContent || rawContent.trim() === '') {
+                return `<div style="text-align: center; padding: 40px; color: #666;">
+                    <h3>⚠️ Empty meal plan</h3>
+                    <p>No content received. Please try generating again.</p>
+                </div>`;
             }
             
-            // Extract shopping lists section  
-            const shoppingMatch = rawContent.match(/(?:🛒|##)\s*(?:SHOPPING LISTS?)[\s\S]*?(?=(?:👨‍🍳|##\s*MEAL PREP)|$)/i);
-            if (shoppingMatch) {
-                sections.shoppingLists = shoppingMatch[0];
-                console.log('✅ Found shopping lists section');
-            }
+            let formatted = rawContent;
             
-            // Extract meal prep section
-            const mealPrepMatch = rawContent.match(/(?:👨‍🍳|##)\s*(?:MEAL PREP)[\s\S]*?(?=(?:📊|##\s*NUTRITION)|$)/i);
-            if (mealPrepMatch) {
-                sections.mealPrep = mealPrepMatch[0];
-                console.log('✅ Found meal prep section');
-            }
-            
-            // Extract nutrition section
-            const nutritionMatch = rawContent.match(/(?:📊|##)\s*(?:NUTRITION)[\s\S]*$/i);
-            if (nutritionMatch) {
-                sections.nutrition = nutritionMatch[0];
-                console.log('✅ Found nutrition section');
-            }
-            
-            // Process daily meals
-            if (sections.dailyMeals) {
-                organizedContent += formatDailyMealsSection(sections.dailyMeals);
-            } else {
-                // If no sections found, show the whole content
-                console.log('⚠️ No sections found, showing full content');
-                organizedContent += formatFullContent(rawContent);
-            }
-            
-            // Process shopping lists
-            if (sections.shoppingLists) {
-                organizedContent += formatShoppingListsSection(sections.shoppingLists);
-            }
-            
-            // Process meal prep
-            if (sections.mealPrep) {
-                organizedContent += formatMealPrepSection(sections.mealPrep);
-            }
-            
-            // Process nutrition
-            if (sections.nutrition) {
-                organizedContent += formatNutritionSection(sections.nutrition);
-            }
-            
-            // If nothing was found, return the emergency content
-            if (!organizedContent || organizedContent.trim() === '') {
-                console.log('⚠️ No organized content found, showing emergency fallback');
-                return emergencyContent;
-            }
-            
-            return organizedContent;
-        }
-        function formatDailyMealsSection(content) {
-            let html = `
-                <div style="margin-bottom: 40px;">
-                    <h2 style="color: #4B9CD3; font-size: 28px; margin-bottom: 30px; text-align: center;">
-                        📅 Your 14-Day Meal Plan
-                    </h2>
-            `;
-            
-            // Try to find all days (Day 1 through Day 14)
-            for (let day = 1; day <= 14; day++) {
-                // Look for this day's content
-                const dayPattern = new RegExp(`(?:Day ${day}[:\\s-]|###\\s*Day ${day})([\\s\\S]*?)(?=Day ${day + 1}[:\\s-]|###\\s*Day|##|🛒|$)`, 'i');
-                const dayMatch = content.match(dayPattern);
+            // Clean up and format the content
+            formatted = formatted
+                // Convert headers
+                .replace(/^# (.*$)/gm, '<h1 style="color: #4B9CD3; text-align: center; font-size: 32px; margin: 30px 0;">$1</h1>')
+                .replace(/^## (.*$)/gm, '<h2 style="color: #28a745; font-size: 24px; margin: 30px 0 20px 0; padding: 15px; background: #f0fff0; border-radius: 10px; border-left: 5px solid #28a745;">$1</h2>')
+                .replace(/^### (Day \d+):?/gm, '<h3 style="color: #667eea; font-size: 20px; margin: 25px 0 15px 0; padding: 12px 20px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); border-radius: 15px; border-left: 4px solid #667eea;">📅 $1</h3>')
                 
-                if (dayMatch) {
-                    const weekNum = day <= 7 ? 1 : 2;
-                    const dayOfWeek = ((day - 1) % 7);
-                    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                    const dayName = dayNames[dayOfWeek];
-                    
-                    html += `
-                        <div style="background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); 
-                                    border-radius: 20px; 
-                                    margin-bottom: 25px; 
-                                    overflow: hidden; 
-                                    box-shadow: 0 3px 15px rgba(0,0,0,0.08);">
-                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                                        color: white; 
-                                        padding: 15px 20px; 
-                                        font-size: 18px; 
-                                        font-weight: bold;">
-                                🗓️ Week ${weekNum} - ${dayName} (Day ${day})
-                            </div>
-                            <div style="padding: 25px;">
-                                ${formatDayMeals(dayMatch[1])}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-            
-            html += `</div>`;
-            return html;
-        }
-        
-        function formatDayMeals(dayContent) {
-            let formatted = dayContent;
-            
-            // Format breakfast
-            formatted = formatted.replace(/(?:🍳\s*)?(?:\*\*)?Breakfast:?(?:\*\*)?([\s\S]*?)(?=(?:🥗|🍽️|🍎|\*\*)?(?:Lunch|Dinner|Snack)|$)/gi, 
-                `<div style="background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #FF6B6B;">
-                    <h4 style="color: #FF6B6B; margin: 0 0 10px 0; font-size: 18px;">🍳 Breakfast</h4>
-                    <div style="color: #333; line-height: 1.6;">$1</div>
-                </div>`);
-            
-            // Format lunch
-            formatted = formatted.replace(/(?:🥗\s*)?(?:\*\*)?Lunch:?(?:\*\*)?([\s\S]*?)(?=(?:🍽️|🍎|\*\*)?(?:Dinner|Snack)|$)/gi,
-                `<div style="background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #4ECDC4;">
-                    <h4 style="color: #4ECDC4; margin: 0 0 10px 0; font-size: 18px;">🥗 Lunch</h4>
-                    <div style="color: #333; line-height: 1.6;">$1</div>
-                </div>`);
-            
-            // Format dinner
-            formatted = formatted.replace(/(?:🍽️\s*)?(?:\*\*)?Dinner:?(?:\*\*)?([\s\S]*?)(?=(?:🍎|\*\*)?Snack|Daily Total|$)/gi,
-                `<div style="background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #95E1D3;">
-                    <h4 style="color: #3AA69D; margin: 0 0 10px 0; font-size: 18px;">🍽️ Dinner</h4>
-                    <div style="color: #333; line-height: 1.6;">$1</div>
-                </div>`);
-            
-            // Format snacks if present
-            formatted = formatted.replace(/(?:🍎\s*)?(?:\*\*)?Snacks?:?(?:\*\*)?([\s\S]*?)(?=Daily Total|$)/gi,
-                `<div style="background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #F38181;">
-                    <h4 style="color: #F38181; margin: 0 0 10px 0; font-size: 18px;">🍎 Snacks</h4>
-                    <div style="color: #333; line-height: 1.6;">$1</div>
-                </div>`);
-            
-            // Format daily totals
-            formatted = formatted.replace(/Daily Total:?([\s\S]*?)$/i,
-                `<div style="background: #f0f8ff; border-radius: 10px; padding: 15px; margin-top: 15px; text-align: center;">
-                    <strong style="color: #4B9CD3;">📊 Daily Totals:</strong>
-                    <div style="color: #666; margin-top: 5px;">$1</div>
-                </div>`);
-            
-            // Clean up formatting
-            formatted = formatted.replace(/\*\*/g, '');
-            formatted = formatted.replace(/\n/g, '<br>');
-            
-            return formatted;
-        }
-        
-        function formatShoppingListsSection(content) {
-            let html = `
-                <div style="margin-bottom: 40px;">
-                    <h2 style="color: #28a745; font-size: 28px; margin-bottom: 30px; text-align: center;">
-                        🛒 Shopping Lists
-                    </h2>
-            `;
-            
-            // Extract Week 1
-            const week1Match = content.match(/Week 1[\s\S]*?(?=Week 2|$)/i);
-            if (week1Match) {
-                html += formatWeekShoppingList(week1Match[0], 1);
-            }
-            
-            // Extract Week 2
-            const week2Match = content.match(/Week 2[\s\S]*$/i);
-            if (week2Match) {
-                html += formatWeekShoppingList(week2Match[0], 2);
-            }
-            
-            html += `</div>`;
-            return html;
-        }
-        
-        function formatWeekShoppingList(content, weekNum) {
-            let html = `
-                <div style="background: #f0fff0; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                    <h3 style="color: #28a745; margin-bottom: 20px; font-size: 22px;">📋 Week ${weekNum} Shopping List</h3>
-            `;
-            
-            // Format each category
-            const categories = [
-                { name: 'Proteins', emoji: '🥩', color: '#e74c3c' },
-                { name: 'Vegetables', emoji: '🥬', color: '#27ae60' },
-                { name: 'Fruits', emoji: '🍎', color: '#e67e22' },
-                { name: 'Dairy', emoji: '🥛', color: '#3498db' },
-                { name: 'Pantry', emoji: '🌾', color: '#9b59b6' }
-            ];
-            
-            categories.forEach(cat => {
-                const catPattern = new RegExp(`(?:${cat.emoji}\\s*)?(?:\\*\\*)?${cat.name}:?(?:\\*\\*)?([\\s\\S]*?)(?=${categories.map(c => c.name).join('|')}|Estimated|$)`, 'i');
-                const catMatch = content.match(catPattern);
+                // Format meals
+                .replace(/\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #FF6B6B;"><h4 style="color: #FF6B6B; margin: 0 0 8px 0;">🍳 Breakfast</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
+                .replace(/\*\*🥗 Lunch:\*\*(.*?)(?=\*\*🍽️|\*\*🍎|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #4ECDC4;"><h4 style="color: #4ECDC4; margin: 0 0 8px 0;">🥗 Lunch</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
+                .replace(/\*\*🍽️ Dinner:\*\*(.*?)(?=\*\*🍎|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #95E1D3;"><h4 style="color: #3AA69D; margin: 0 0 8px 0;">🍽️ Dinner</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
+                .replace(/\*\*🍎 Snacks:\*\*(.*?)(?=\*\*Day Total|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #F38181;"><h4 style="color: #F38181; margin: 0 0 8px 0;">🍎 Snacks</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
                 
-                if (catMatch && catMatch[1].trim()) {
-                    html += `
-                        <div style="margin-bottom: 20px;">
-                            <h4 style="color: ${cat.color}; font-size: 18px; margin-bottom: 10px;">
-                                ${cat.emoji} ${cat.name}
-                            </h4>
-                            <div style="background: white; border-radius: 10px; padding: 15px;">
-                                ${formatShoppingItems(catMatch[1])}
-                            </div>
-                        </div>
-                    `;
-                }
-            });
+                // Format day totals with full macros
+                .replace(/\*\*Day Total:\*\*(.*?)(?=###|##|$)/gs, '<div style="background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); border-radius: 12px; padding: 15px; margin: 20px 0; text-align: center; border: 2px solid #4B9CD3;"><strong style="color: #4B9CD3; font-size: 16px;">📊 Daily Totals:</strong><div style="color: #333; margin-top: 8px; font-weight: 600;">$1</div></div>')
+                
+                // Format shopping categories
+                .replace(/\*\*Proteins:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #e74c3c; margin-bottom: 8px;">🥩 Proteins</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #e74c3c;">$1</div></div>')
+                .replace(/\*\*Vegetables:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #27ae60; margin-bottom: 8px;">🥬 Vegetables</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #27ae60;">$1</div></div>')
+                .replace(/\*\*Fruits:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #e67e22; margin-bottom: 8px;">🍎 Fruits</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #e67e22;">$1</div></div>')
+                .replace(/\*\*Dairy & Eggs:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #3498db; margin-bottom: 8px;">🥛 Dairy & Eggs</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #3498db;">$1</div></div>')
+                .replace(/\*\*Pantry Items:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #9b59b6; margin-bottom: 8px;">🌾 Pantry Items</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #9b59b6;">$1</div></div>')
+                .replace(/\*\*Cost Estimate:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="background: #fff3cd; border-radius: 10px; padding: 15px; text-align: center; margin: 20px 0;"><strong style="color: #856404; font-size: 18px;">💰 Cost Estimate:$1</strong></div>')
+                
+                // Clean up remaining bold text
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
+                
+                // Convert line breaks
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
             
-            // Add total cost if present
-            const costMatch = content.match(/Estimated.*?:\s*([\$\d.]+)/i);
-            if (costMatch) {
-                html += `
-                    <div style="background: #fff3cd; border-radius: 10px; padding: 15px; text-align: center; margin-top: 20px;">
-                        <strong style="color: #856404; font-size: 18px;">💰 Estimated Total: ${costMatch[1]}</strong>
-                    </div>
-                `;
-            }
-            
-            html += `</div>`;
-            return html;
-        }
-        
-        function formatShoppingItems(items) {
-            return items
-                .split('\n')
-                .filter(item => item.trim() && !item.match(/^[-*]\s*$/))
-                .map(item => {
-                    const cleaned = item.replace(/^[-*]\s*/, '').trim();
-                    return `<div style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">✓ ${cleaned}</div>`;
-                })
-                .join('');
-        }
-        
-        function formatMealPrepSection(content) {
-            return `
-                <div style="margin-bottom: 40px;">
-                    <h2 style="color: #f39c12; font-size: 28px; margin-bottom: 30px; text-align: center;">
-                        👨‍🍳 Meal Prep Instructions
-                    </h2>
-                    <div style="background: #fff9e6; border-radius: 20px; padding: 25px; line-height: 1.8;">
-                        ${content.replace(/\*\*/g, '').replace(/\n/g, '<br>')}
-                    </div>
-                </div>
-            `;
-        }
-        
-        function formatNutritionSection(content) {
-            return `
-                <div style="margin-bottom: 40px;">
-                    <h2 style="color: #9b59b6; font-size: 28px; margin-bottom: 30px; text-align: center;">
-                        📊 Nutritional Summary
-                    </h2>
-                    <div style="background: #f5f0ff; border-radius: 20px; padding: 25px; line-height: 1.8;">
-                        ${content.replace(/\*\*/g, '').replace(/\n/g, '<br>')}
-                    </div>
-                </div>
-            `;
-        }
-        
-        function formatFullContent(content) {
-            // Fallback formatter if sections aren't detected
-            let formatted = content;
-            
-            // Basic formatting
-            formatted = formatted.replace(/^### (.*?)$/gm, '<h3 style="color: #4B9CD3; margin: 25px 0 15px 0; font-size: 22px;">$1</h3>');
-            formatted = formatted.replace(/^## (.*?)$/gm, '<h2 style="color: #4B9CD3; margin: 35px 0 20px 0; font-size: 26px; border-bottom: 2px solid #4B9CD3; padding-bottom: 10px;">$1</h2>');
-            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>');
-            formatted = formatted.replace(/\n/g, '<br>');
-            
-            return `
-                <div style="background: white; border-radius: 20px; padding: 30px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.8; color: #333;">
-                        ${formatted}
-                    </div>
-                </div>
-            `;
+            return `<div style="background: white; border-radius: 20px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 15px rgba(0,0,0,0.08); line-height: 1.6;">${formatted}</div>`;
         }
         
         function updateTime() {

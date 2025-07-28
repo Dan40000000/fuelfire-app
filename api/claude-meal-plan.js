@@ -17,90 +17,45 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { quizData, userId, phase = '1' } = req.body;
+        const { quizData, userId } = req.body;
 
         // Validate required data
         if (!quizData) {
             return res.status(400).json({ error: 'Quiz data is required' });
         }
 
-        // Build phase-specific prompt from quiz data
-        const prompt = buildMealPlanPrompt(quizData, phase);
-        
-        console.log(`🎯 Generating meal plan Phase ${phase} for user: ${userId || 'anonymous'}`);
+        console.log(`🎯 Generating complete meal plan for user: ${userId || 'anonymous'}`);
         console.log(`📊 Quiz data includes: ${Object.keys(quizData).join(', ')}`);
         
         // Check if API key exists
         if (!process.env.CLAUDE_API_KEY) {
             console.error('❌ CLAUDE_API_KEY not found in environment variables');
-            console.error('Available env vars:', Object.keys(process.env));
             throw new Error('API configuration error - Claude API key not configured');
         }
         
-        console.log('🔑 API Key found, length:', process.env.CLAUDE_API_KEY.length);
-        console.log('🔑 API Key prefix:', process.env.CLAUDE_API_KEY.substring(0, 15) + '...');
+        console.log('🔑 API Key found, generating 4-part meal plan...');
 
-        // Call Claude API using your account credentials
-        // Log the request for debugging
-        const requestBody = {
-            model: 'claude-3-5-haiku-20241022',
-            max_tokens: 8192, // Haiku maximum limit
-            messages: [
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ]
-        };
-        
-        console.log('📤 Sending to Claude API with body length:', JSON.stringify(requestBody).length);
-        
-        const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.CLAUDE_API_KEY, // Your Claude API key
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify(requestBody)
-        });
+        // Generate all 4 parts in parallel
+        const [week1, week2, shopping, title] = await Promise.all([
+            generateWeek1(quizData),
+            generateWeek2(quizData),
+            generateShoppingList(quizData),
+            generateTitle(quizData)
+        ]);
 
-        if (!claudeResponse.ok) {
-            const errorData = await claudeResponse.text();
-            console.error('Claude API Error Status:', claudeResponse.status);
-            console.error('Claude API Error Response:', errorData);
-            
-            // Parse error if it's JSON
-            let errorMessage = `Claude API error: ${claudeResponse.status}`;
-            try {
-                const errorJson = JSON.parse(errorData);
-                errorMessage = errorJson.error?.message || errorJson.message || errorMessage;
-            } catch (e) {
-                // Not JSON, use raw text
-            }
-            
-            throw new Error(errorMessage);
-        }
+        // Combine all parts
+        const completeMealPlan = `${title}\n\n${week1}\n\n${week2}\n\n${shopping}`;
 
-        const claudeData = await claudeResponse.json();
-        const rawMealPlan = claudeData.content[0].text;
-
-        // Format the meal plan for beautiful display
-        const formattedMealPlan = formatMealPlanForApp(rawMealPlan);
-
-        // Log success (for your monitoring)
-        console.log(`✅ Successfully generated meal plan Phase ${phase} for user: ${userId || 'anonymous'}`);
+        console.log(`✅ Successfully generated complete meal plan for user: ${userId || 'anonymous'}`);
 
         res.status(200).json({
             success: true,
-            phase: phase,
-            content: formattedMealPlan,
+            content: completeMealPlan,
             metadata: {
                 generatedAt: new Date().toISOString(),
-                planDuration: quizData.planDuration || '2-week',
+                planDuration: '2-week',
                 goal: quizData.goal,
-                userId: userId || 'anonymous',
-                phase: phase
+                userId: userId || 'anonymous'
             }
         });
 
@@ -115,15 +70,123 @@ export default async function handler(req, res) {
     }
 }
 
+async function callClaudeAPI(prompt) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.CLAUDE_API_KEY,
+            'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 4000,
+            messages: [{ role: 'user', content: prompt }]
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Claude API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+}
+
+async function generateTitle(quizData) {
+    const title = quizData.mealVariety === 'weekday-same' ? '5-Day Hustle + Weekend Vibes Plan' : 'Your Custom Fuel Plan';
+    return `# 🔥 ${title}`;
+}
+
+async function generateWeek1(quizData) {
+    const userInfo = `User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
+Allergies: ${quizData.allergies?.join(', ') || 'None'}
+Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
+
+    const varietyInstructions = getVarietyInstructions(quizData.mealVariety);
+
+    const prompt = `Create Week 1 (Days 1-7) of a meal plan.
+
+${userInfo}
+${varietyInstructions}
+
+Format each day exactly like this:
+### Day X:
+**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**Day Total:** X cal | P: Xg | C: Xg | F: Xg
+
+Include ALL 7 days. Keep meal descriptions concise. ALWAYS include complete macro totals for each day. Start with Day 1.`;
+
+    return await callClaudeAPI(prompt);
+}
+
+async function generateWeek2(quizData) {
+    const userInfo = `User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
+Allergies: ${quizData.allergies?.join(', ') || 'None'}
+Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
+
+    const varietyInstructions = getVarietyInstructions(quizData.mealVariety);
+
+    const prompt = `Create Week 2 (Days 8-14) of a meal plan.
+
+${userInfo}
+${varietyInstructions}
+
+Format each day exactly like this:
+### Day X:
+**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**Day Total:** X cal | P: Xg | C: Xg | F: Xg
+
+Include ALL 7 days (Days 8-14). Keep meal descriptions concise. ALWAYS include complete macro totals for each day. Start with Day 8.`;
+
+    return await callClaudeAPI(prompt);
+}
+
+async function generateShoppingList(quizData) {
+    const prompt = `Create a complete shopping list for a 14-day meal plan.
+
+User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
+Allergies: ${quizData.allergies?.join(', ') || 'None'}
+Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}
+
+## 🛒 Complete Shopping List
+**Proteins:** [list with quantities for 14 days]
+**Vegetables:** [list with quantities for 14 days]
+**Fruits:** [list with quantities for 14 days]
+**Dairy & Eggs:** [list with quantities for 14 days]
+**Pantry Items:** [list with quantities for 14 days]
+**Cost Estimate:** $X
+
+Keep it organized and practical. Include quantities needed for 2 weeks.`;
+
+    return await callClaudeAPI(prompt);
+}
+
+function getVarietyInstructions(mealVariety) {
+    if (mealVariety === 'same-daily') {
+        return 'Same meals every day.';
+    } else if (mealVariety === 'weekday-same') {
+        return 'Days 1-5: same meals. Days 6-7: different weekend meals.';
+    } else if (mealVariety === 'full-variety') {
+        return 'Different meals every day.';
+    } else {
+        return '2-3 rotating options for breakfast/lunch, varied dinners.';
+    }
+}
+
 function buildMealPlanPrompt(quizData, phase) {
     const title = quizData.mealVariety === 'weekday-same' ? '5-Day Hustle + Weekend Vibes Plan' : 'Your Custom Fuel Plan';
     
-    // User info for all phases
     const userInfo = `User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
 Allergies: ${quizData.allergies?.join(', ') || 'None'}
 Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
     
-    // Meal variety logic
     let varietyInstructions = '';
     if (quizData.mealVariety === 'same-daily') {
         varietyInstructions = 'Same meals every day.';
@@ -135,94 +198,35 @@ Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
         varietyInstructions = '2-3 rotating options for breakfast/lunch, varied dinners.';
     }
     
-    if (phase === '1') {
-        return `Create Week 1 of a meal plan (Days 1-7). Start with: # 🔥 ${title} - Week 1
+    // Optimized for complete generation within token limits
+    return `Create a complete 14-day meal plan. Be concise but complete. Start with: # 🔥 ${title}
 
 ${userInfo}
-
 ${varietyInstructions}
 
 Format each day:
 ### Day X:
 **🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg  
 **🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
 **🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
-**Day Total:** X cal | P: Xg | C: Xg | F: Xg
+**Day Total:** X cal
 
-Include Days 1, 2, 3, 4, 5, 6, 7 then:
+Include ALL Days 1-14. Keep meal descriptions concise (1-2 lines max per meal).
 
-**Week 1 Summary:** X cal total | Avg: X cal/day | P: Xg | C: Xg | F: Xg
-
-## 🛒 Week 1 Shopping List
-**Proteins:** [list with exact quantities]
-**Vegetables:** [list with exact quantities]
-**Fruits:** [list with exact quantities]
-**Dairy & Eggs:** [list with exact quantities]
-**Pantry Items:** [list with exact quantities]
-**Spices & Condiments:** [list]
+Then add:
+## 🛒 Shopping List
+**Proteins:** [concise list]
+**Vegetables:** [concise list]
+**Fruits:** [concise list]
+**Dairy & Eggs:** [concise list]
+**Pantry Items:** [concise list]
 **Cost Estimate:** $X
 
-NO intro text. Start with title.`;
-    }
-    
-    if (phase === '2') {
-        return `Create Week 2 of the meal plan (Days 8-14). Start with: ## Week 2 - Days 8-14
+## 📝 Meal Prep Tips
+[2-3 brief tips]
 
-${userInfo}
-
-${varietyInstructions}
-
-Format each day:
-### Day X:
-**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
-**Day Total:** X cal | P: Xg | C: Xg | F: Xg
-
-Include Days 8, 9, 10, 11, 12, 13, 14 then:
-
-**Week 2 Summary:** X cal total | Avg: X cal/day | P: Xg | C: Xg | F: Xg
-
-## 🛒 Week 2 Shopping List
-**Proteins:** [list with exact quantities]
-**Vegetables:** [list with exact quantities]
-**Fruits:** [list with exact quantities]
-**Dairy & Eggs:** [list with exact quantities]
-**Pantry Items:** [list with exact quantities]
-**Spices & Condiments:** [list]
-**Cost Estimate:** $X
-
-NO intro text. Start with Week 2 header.`;
-    }
-    
-    if (phase === '3') {
-        return `Create nutritional summary and tips. Start with: ## 📊 Complete Plan Summary
-
-${userInfo}
-
-**14-Day Totals:** X cal | P: Xg | C: Xg | F: Xg | Fiber: Xg
-**Daily Avg:** X cal | P: Xg | C: Xg | F: Xg
-**Week 1 vs Week 2:** X cal vs X cal avg
-
-**How this supports your ${quizData.goal} goal:**
-[2-3 sentences explaining nutritional strategy]
-
-**📝 Meal Prep Tips:**
-- [3-4 practical meal prep suggestions]
-- [Storage and preparation advice]
-- [Time-saving tips]
-
-**💰 Budget Summary:**
-- Week 1 + Week 2 Total Cost: ~$X
-- [2-3 money-saving suggestions]
-
-NO intro text. Start with summary header.`;
-    }
-    
-    // Default fallback
-    return buildLegacyPrompt(quizData);
+IMPORTANT: Complete the ENTIRE 14-day plan and ALL sections. Do not ask to continue - generate everything.`;
 }
 
 // Fallback to original prompt if phase not recognized
