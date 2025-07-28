@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 model: 'claude-3-5-sonnet-20241022',
-                max_tokens: 16000,
+                max_tokens: 20000,
                 messages: [
                     {
                         role: 'user',
@@ -144,10 +144,12 @@ ${quizData.specialRequests || 'None'}
 
 ---
 
-# INSTRUCTIONS:
-DO NOT include any introductory text or explanations. Start IMMEDIATELY with the meal plan title and content.
+# CRITICAL INSTRUCTIONS - FOLLOW EXACTLY:
+🚨 ABSOLUTELY NO INTRODUCTORY TEXT! 🚨
+🚨 DO NOT WRITE "I'll help create..." or ANY explanation! 🚨
+🚨 START IMMEDIATELY WITH THE TITLE BELOW! 🚨
 
-Start with this dynamic title based on meal variety:
+YOUR RESPONSE MUST START WITH EXACTLY THIS TITLE (choose based on meal variety):
 ${quizData.mealVariety === 'same-daily' ? `# 🔥 The Ultimate Simplicity Plan
 *Same delicious meals every day for maximum convenience*` : ''}
 ${quizData.mealVariety === 'weekday-same' ? `# 🔥 5-Day Hustle + Weekend Vibes Plan
@@ -372,14 +374,17 @@ ${quizData.mealVariety === 'office-prep' ? `
 - Label office meals as "Office Days Meal Plan"
 - Label WFH meals as "WFH Days Meal Plan"` : ''}
 
-## ABSOLUTELY CRITICAL REQUIREMENTS:
+🚨🚨🚨 ABSOLUTELY CRITICAL REQUIREMENTS 🚨🚨🚨:
+- ✅ FIRST LINE MUST BE THE TITLE (# 🔥 [Title])
+- ✅ NO "I'll help create..." or ANY introductory text WHATSOEVER 
 - ✅ MUST include ALL 14 days (Day 1, Day 2, Day 3... through Day 14) 
-- ✅ Do NOT truncate or shorten the response
+- ✅ Do NOT truncate or shorten the response - FULL CONTENT REQUIRED
 - ✅ Include complete shopping lists for both weeks
 - ✅ Make sure every day has breakfast, lunch, dinner, and snacks
-- ✅ DO NOT include any introductory text like "I'll help create..." or summary text at the end
-- ✅ START IMMEDIATELY with the dynamic title, then go straight into the meal plan content
 - ✅ END with the nutritional summary - no additional explanations
+- ✅ FAILURE TO FOLLOW = IMMEDIATE REJECTION
+
+🚨 CRITICAL: Your response MUST start with "# 🔥" and include ALL 14 days + shopping lists! 🚨
 
 **REMINDER: This must be a COMPLETE 14-day plan - do not stop at Day 7!**`;
 }
