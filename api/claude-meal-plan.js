@@ -155,12 +155,25 @@ Include Days 1, 2, 3, 4, 5, 6, 7 then:
 **Week 1 Summary:** X cal total | Avg: X cal/day | P: Xg | C: Xg | F: Xg
 
 ## 🛒 Week 1 Shopping List
-**Proteins:** [list with exact quantities]
-**Vegetables:** [list with exact quantities]
-**Fruits:** [list with exact quantities]
-**Dairy & Eggs:** [list with exact quantities]
-**Pantry Items:** [list with exact quantities]
-**Spices & Condiments:** [list]
+
+### PROTEINS
+[list with exact quantities]
+
+### VEGETABLES  
+[list with exact quantities]
+
+### FRUITS
+[list with exact quantities]
+
+### DAIRY & EGGS
+[list with exact quantities]
+
+### PANTRY ITEMS
+[list with exact quantities]
+
+### SPICES & CONDIMENTS
+[list]
+
 **Cost Estimate:** $X
 
 NO intro text. Start with title.`;
@@ -186,12 +199,25 @@ Include Days 8, 9, 10, 11, 12, 13, 14 then:
 **Week 2 Summary:** X cal total | Avg: X cal/day | P: Xg | C: Xg | F: Xg
 
 ## 🛒 Week 2 Shopping List
-**Proteins:** [list with exact quantities]
-**Vegetables:** [list with exact quantities]
-**Fruits:** [list with exact quantities]
-**Dairy & Eggs:** [list with exact quantities]
-**Pantry Items:** [list with exact quantities]
-**Spices & Condiments:** [list]
+
+### PROTEINS
+[list with exact quantities]
+
+### VEGETABLES
+[list with exact quantities]
+
+### FRUITS
+[list with exact quantities]
+
+### DAIRY & EGGS
+[list with exact quantities]
+
+### PANTRY ITEMS
+[list with exact quantities]
+
+### SPICES & CONDIMENTS
+[list]
+
 **Cost Estimate:** $X
 
 NO intro text. Start with Week 2 header.`;
