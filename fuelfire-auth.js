@@ -57,6 +57,8 @@ class FuelFireAuth {
 
         try {
             console.log('🤖 Sending request to Claude AI...');
+            console.log('🔍 API URL:', `${this.apiBaseUrl}/api/claude-meal-plan`);
+            console.log('🔍 Quiz data keys:', Object.keys(quizData));
             
             const response = await fetch('/api/claude-meal-plan', {
                 method: 'POST',
@@ -71,8 +73,17 @@ class FuelFireAuth {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to generate meal plan');
+                console.error('❌ API Response not OK:', response.status, response.statusText);
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    const textData = await response.text();
+                    console.error('❌ Raw error response:', textData);
+                    throw new Error(`API Error ${response.status}: ${textData.substring(0, 200)}`);
+                }
+                console.error('❌ Error data:', errorData);
+                throw new Error(errorData.message || `API Error ${response.status}`);
             }
 
             const result = await response.json();
