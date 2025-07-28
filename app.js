@@ -4477,6 +4477,14 @@ window.onload = function() {
     setInterval(updateTime, 1000);
     updateDailyQuote();
     
+    // Load today's calorie count
+    const today = new Date().toISOString().split('T')[0];
+    const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+    const todayCalories = loggedMeals[today]?.totalCalories || 0;
+    if (document.getElementById('home-calories')) {
+        document.getElementById('home-calories').textContent = todayCalories.toLocaleString();
+    }
+    
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);
 };

@@ -53,6 +53,93 @@
             document.getElementById('time').textContent = time;
         }
         
+        function enhanceMealPlanWithButtons(content) {
+            // Extract meals and add log buttons
+            let enhanced = content;
+            
+            // Pattern to find meals with calories
+            const mealPattern = /(\*\*(?:🍳 Breakfast|🥗 Lunch|🍽️ Dinner|🍎 Snacks?):\*\*[\s\S]*?Calories:\s*(\d+))/g;
+            
+            enhanced = enhanced.replace(mealPattern, (match, mealContent, calories) => {
+                // Extract meal type
+                const mealTypeMatch = match.match(/\*\*(.*?):\*\*/);
+                const mealType = mealTypeMatch ? mealTypeMatch[1] : 'Meal';
+                
+                // Extract day number
+                const dayMatch = content.substring(0, content.indexOf(match)).match(/Day (\d+)/g);
+                const day = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                
+                // Add log button
+                const buttonId = `log-${day}-${mealType.replace(/[^a-zA-Z]/g, '')}`;
+                const logButton = `<button onclick="logMeal('${day}', '${mealType}', ${calories})" id="${buttonId}" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 15px; font-size: 12px; margin-left: 10px; cursor: pointer;">✓ Log This Meal</button>`;
+                
+                return match + ' ' + logButton;
+            });
+            
+            return enhanced;
+        }
+        
+        function logMeal(day, mealType, calories) {
+            // Get today's date
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Get existing logged meals
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            // Initialize today's log if it doesn't exist
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = {
+                    meals: [],
+                    totalCalories: 0
+                };
+            }
+            
+            // Add this meal
+            loggedMeals[today].meals.push({
+                day: day,
+                type: mealType,
+                calories: calories,
+                time: new Date().toISOString(),
+                fromMealPlan: true
+            });
+            
+            // Update total
+            loggedMeals[today].totalCalories += calories;
+            
+            // Save to localStorage
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Update button to show logged
+            const button = event.target;
+            button.style.background = '#6c757d';
+            button.innerHTML = '✅ Logged!';
+            button.disabled = true;
+            
+            // Show success message
+            showToast(`✅ ${mealType} logged! (+${calories} calories)`);
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-size: 14px;
+                z-index: 9999;
+                animation: slideUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
         function displayMealPlan(mealPlan, metadata) {
             console.log('📋 Displaying meal plan:', {
                 mealPlanLength: mealPlan ? mealPlan.length : 0,
@@ -80,6 +167,12 @@
             
             // SIMPLE DISPLAY - Just format what we get
             let formatted = mealPlan;
+            
+            // Store raw content for calorie tracking
+            window.mealPlanRawContent = mealPlan;
+            
+            // Parse and enhance meal data
+            formatted = enhanceMealPlanWithButtons(mealPlan);
             
             // Basic markdown formatting
             formatted = formatted.replace(/^### (.*?)$/gm, '<h3 style="color: #4B9CD3; margin: 25px 0 15px 0; font-size: 20px; padding-bottom: 8px; border-bottom: 2px solid #e3f2fd;">$1</h3>');
