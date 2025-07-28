@@ -144,7 +144,21 @@ ${quizData.specialRequests || 'None'}
 ---
 
 # INSTRUCTIONS:
-Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} meal plan** with the following structure:
+DO NOT include any introductory text or explanations. Start IMMEDIATELY with the meal plan title and content.
+
+Start with this dynamic title based on meal variety:
+${quizData.mealVariety === 'same-daily' ? `# 🔥 The Ultimate Simplicity Plan
+*Same delicious meals every day for maximum convenience*` : ''}
+${quizData.mealVariety === 'weekday-same' ? `# 🔥 5-Day Hustle + Weekend Vibes Plan
+*Weekday meal prep mastery with exciting weekend variety*` : ''}
+${quizData.mealVariety === 'some-variety' ? `# 🔥 The Balanced Rotation Plan
+*Smart variety that keeps things interesting*` : ''}
+${quizData.mealVariety === 'full-variety' ? `# 🔥 The Adventure Eater's Dream
+*14 days of pure culinary excitement*` : ''}
+${quizData.mealVariety === 'office-prep' ? `# 🔥 Office Warrior Meal Strategy
+*Work-optimized meals for peak performance*` : ''}
+${!quizData.mealVariety || quizData.mealVariety === 'some-variety' ? `# 🔥 Your Custom Fuel Plan
+*Perfectly crafted for your ${quizData.goal} goals*` : ''}
 
 ## 1. 📅 DAILY MEAL PLANS SECTION
 **CRITICAL: You MUST include ALL 14 DAYS (Day 1 through Day 14)**
@@ -308,8 +322,9 @@ ${quizData.mealVariety === 'office-prep' ? `
 - ✅ Do NOT truncate or shorten the response
 - ✅ Include complete shopping lists for both weeks
 - ✅ Make sure every day has breakfast, lunch, dinner, and snacks
-
-Create a professional, organized meal plan that delivers real value and helps them achieve their ${quizData.goal} goal!
+- ✅ DO NOT include any introductory text like "I'll help create..." or summary text at the end
+- ✅ START IMMEDIATELY with the dynamic title, then go straight into the meal plan content
+- ✅ END with the nutritional summary - no additional explanations
 
 **REMINDER: This must be a COMPLETE 14-day plan - do not stop at Day 7!**`;
 }
