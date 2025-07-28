@@ -88,10 +88,11 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('❌ Error generating meal plan:', error);
+        console.error('Full error:', error.stack);
         res.status(500).json({
             error: 'Failed to generate meal plan',
             message: 'Our AI chef is taking a quick break. Please try again in a moment!',
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            details: error.message // Always show error details for debugging
         });
     }
 }
