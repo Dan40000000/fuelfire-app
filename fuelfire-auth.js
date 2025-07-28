@@ -99,6 +99,56 @@ class FuelFireAuth {
             throw error;
         }
     }
+    
+    // Legacy single-phase generation (for Quick Test)
+    async generateMealPlanLegacy(quizData) {
+        const user = this.getCurrentUser();
+        const sessionId = this.getSessionId();
+
+        try {
+            console.log('🤖 Sending single-phase request to Claude AI...');
+            
+            const response = await fetch('/api/claude-meal-plan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    quizData: quizData,
+                    userId: sessionId,
+                    phase: 'legacy', // Uses fallback prompt
+                    timestamp: new Date().toISOString()
+                })
+            });
+
+            if (!response.ok) {
+                console.error('❌ API Response not OK:', response.status, response.statusText);
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    const textData = await response.text();
+                    console.error('❌ Raw error response:', textData);
+                    throw new Error(`API Error ${response.status}: ${textData.substring(0, 200)}`);
+                }
+                console.error('❌ Error data:', errorData);
+                throw new Error(errorData.message || `API Error ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            // Convert to new format for compatibility
+            return {
+                success: true,
+                mealPlan: result.content,
+                metadata: result.metadata
+            };
+
+        } catch (error) {
+            console.error('❌ Error generating meal plan:', error);
+            throw error;
+        }
+    }
 
     // Get user stats (for your monitoring)
     getUserStats() {

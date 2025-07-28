@@ -177,8 +177,8 @@
             button.disabled = true;
 
             try {
-                // Generate meal plan immediately
-                const result = await window.fuelFireAuth.generateMealPlan(quizData);
+                // Use legacy single-phase generation for Quick Test
+                const result = await window.fuelFireAuth.generateMealPlanLegacy(quizData);
                 
                 if (result.success) {
                     // Save meal plan to localStorage
@@ -1289,23 +1289,29 @@
             button.disabled = true;
             
             try {
-                console.log('🔥 Starting meal plan generation with quiz data:', Object.keys(quizData));
+                console.log('🔥 Starting multi-phase meal plan generation with quiz data:', Object.keys(quizData));
                 console.log('🔍 Full quiz data:', quizData);
                 
-                // Generate meal plan using Claude AI through your account
-                const result = await window.fuelFireAuth.generateMealPlan(quizData);
+                // Progress callback to update button text
+                const progressCallback = (progress) => {
+                    const percentage = Math.round((progress.phase / progress.totalPhases) * 100);
+                    button.innerHTML = `🌊 Phase ${progress.phase}/3: ${progress.message} (${percentage}%)`;
+                };
+                
+                // Generate meal plan using progressive multi-phase approach
+                const result = await window.fuelFireAuth.generateMealPlan(quizData, progressCallback);
                 
                 if (result.success) {
                     // Save meal plan to localStorage for the meal-plans.html page
                     const savedPlanId = saveMealPlanToStorage(result.mealPlan, result.metadata);
                     
                     // Update button to show success
-                    button.innerHTML = '✅ Plan Generated! Redirecting...';
+                    button.innerHTML = '✅ Complete Plan Generated! Redirecting...';
                     
                     // Redirect after short delay - using plan ID instead of data in URL
                     setTimeout(() => {
                         window.location.href = `meal-plan-simple.html?planId=${savedPlanId}`;
-                    }, 1000);
+                    }, 1500);
                     
                 } else {
                     throw new Error(result.message || 'Failed to generate meal plan');

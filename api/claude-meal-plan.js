@@ -17,17 +17,17 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { quizData, userId } = req.body;
+        const { quizData, userId, phase = '1' } = req.body;
 
         // Validate required data
         if (!quizData) {
             return res.status(400).json({ error: 'Quiz data is required' });
         }
 
-        // Build comprehensive prompt from quiz data
-        const prompt = buildMealPlanPrompt(quizData);
+        // Build phase-specific prompt from quiz data
+        const prompt = buildMealPlanPrompt(quizData, phase);
         
-        console.log(`🎯 Generating meal plan for user: ${userId || 'anonymous'}`);
+        console.log(`🎯 Generating meal plan Phase ${phase} for user: ${userId || 'anonymous'}`);
         console.log(`📊 Quiz data includes: ${Object.keys(quizData).join(', ')}`);
         
         // Check if API key exists
@@ -89,16 +89,18 @@ export default async function handler(req, res) {
         const formattedMealPlan = formatMealPlanForApp(rawMealPlan);
 
         // Log success (for your monitoring)
-        console.log(`✅ Successfully generated meal plan for user: ${userId || 'anonymous'}`);
+        console.log(`✅ Successfully generated meal plan Phase ${phase} for user: ${userId || 'anonymous'}`);
 
         res.status(200).json({
             success: true,
-            mealPlan: formattedMealPlan,
+            phase: phase,
+            content: formattedMealPlan,
             metadata: {
                 generatedAt: new Date().toISOString(),
                 planDuration: quizData.planDuration || '2-week',
                 goal: quizData.goal,
-                userId: userId || 'anonymous'
+                userId: userId || 'anonymous',
+                phase: phase
             }
         });
 
@@ -113,54 +115,126 @@ export default async function handler(req, res) {
     }
 }
 
-function buildMealPlanPrompt(quizData) {
-    // Ultra-simplified prompt to avoid token limits
-    const title = quizData.mealVariety === 'weekday-same' ? '5-Day Hustle + Weekend Vibes' : 'Your Custom Fuel Plan';
+function buildMealPlanPrompt(quizData, phase) {
+    const title = quizData.mealVariety === 'weekday-same' ? '5-Day Hustle + Weekend Vibes Plan' : 'Your Custom Fuel Plan';
     
-    // Simplified meal variety instructions
+    // User info for all phases
+    const userInfo = `User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
+Allergies: ${quizData.allergies?.join(', ') || 'None'}
+Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
+    
+    // Meal variety logic
     let varietyInstructions = '';
     if (quizData.mealVariety === 'same-daily') {
-        varietyInstructions = 'Same meals every day for 14 days.';
+        varietyInstructions = 'Same meals every day.';
     } else if (quizData.mealVariety === 'weekday-same') {
-        varietyInstructions = 'Mon-Fri: same meals. Sat-Sun: different meals. Week 2 repeats week 1.';
+        varietyInstructions = 'Days 1-5: same meals. Days 6-7: different weekend meals.';
     } else if (quizData.mealVariety === 'full-variety') {
         varietyInstructions = 'Different meals every day.';
     } else {
-        varietyInstructions = '2-3 breakfast/lunch options rotating. Varied dinners.';
+        varietyInstructions = '2-3 rotating options for breakfast/lunch, varied dinners.';
     }
     
+    if (phase === '1') {
+        return `Create Week 1 of a meal plan (Days 1-7). Start with: # 🔥 ${title} - Week 1
+
+${userInfo}
+
+${varietyInstructions}
+
+Format each day:
+### Day X:
+**🍳 Breakfast:** [meal with portions] - Calories: X
+**🥗 Lunch:** [meal with portions] - Calories: X
+**🍽️ Dinner:** [meal with portions] - Calories: X
+**🍎 Snacks:** [snack with portions] - Calories: X
+**Daily Total:** X calories
+
+Include Days 1, 2, 3, 4, 5, 6, 7 then:
+
+## 🛒 Week 1 Shopping List
+**Proteins:** [list with exact quantities]
+**Vegetables:** [list with exact quantities]
+**Fruits:** [list with exact quantities]
+**Dairy & Eggs:** [list with exact quantities]
+**Pantry Items:** [list with exact quantities]
+**Spices & Condiments:** [list]
+**Cost Estimate:** $X
+
+NO intro text. Start with title.`;
+    }
+    
+    if (phase === '2') {
+        return `Create Week 2 of the meal plan (Days 8-14). Start with: ## Week 2 - Days 8-14
+
+${userInfo}
+
+${varietyInstructions}
+
+Format each day:
+### Day X:
+**🍳 Breakfast:** [meal with portions] - Calories: X
+**🥗 Lunch:** [meal with portions] - Calories: X
+**🍽️ Dinner:** [meal with portions] - Calories: X
+**🍎 Snacks:** [snack with portions] - Calories: X
+**Daily Total:** X calories
+
+Include Days 8, 9, 10, 11, 12, 13, 14 then:
+
+## 🛒 Week 2 Shopping List
+**Proteins:** [list with exact quantities]
+**Vegetables:** [list with exact quantities]
+**Fruits:** [list with exact quantities]
+**Dairy & Eggs:** [list with exact quantities]
+**Pantry Items:** [list with exact quantities]
+**Spices & Condiments:** [list]
+**Cost Estimate:** $X
+
+NO intro text. Start with Week 2 header.`;
+    }
+    
+    if (phase === '3') {
+        return `Create nutritional summary and tips. Start with: ## 📊 Nutritional Summary & Tips
+
+${userInfo}
+
+**Daily Averages (across 14 days):**
+- Calories: X
+- Protein: Xg (X%)
+- Carbohydrates: Xg (X%)
+- Fat: Xg (X%)
+- Fiber: Xg
+
+**How this supports your ${quizData.goal} goal:**
+[2-3 sentences explaining nutritional strategy]
+
+**📝 Meal Prep Tips:**
+- [3-4 practical meal prep suggestions]
+- [Storage and preparation advice]
+- [Time-saving tips]
+
+**💰 Budget Tips:**
+- Total weekly cost: ~$X-Y
+- [2-3 money-saving suggestions]
+
+NO intro text. Start with summary header.`;
+    }
+    
+    // Default fallback
+    return buildLegacyPrompt(quizData);
+}
+
+// Fallback to original prompt if phase not recognized
+function buildLegacyPrompt(quizData) {
+    const title = quizData.mealVariety === 'weekday-same' ? '5-Day Hustle + Weekend Vibes' : 'Your Custom Fuel Plan';
     return `Create a 14-day meal plan. Start with: # 🔥 ${title}
 
 User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
 Allergies: ${quizData.allergies?.join(', ') || 'None'}
 Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}
 
-${varietyInstructions}
-
-Format each day:
-### Day X:
-**🍳 Breakfast:** [meal] - Cal: X
-**🥗 Lunch:** [meal] - Cal: X  
-**🍽️ Dinner:** [meal] - Cal: X
-**🍎 Snacks:** [snack] - Cal: X
-**Total:** X cal
-
-Include all 14 days, then:
-
-## 🛒 Week 1 Shopping
-**Proteins:** [list with quantities]
-**Vegetables:** [list with quantities]
-**Fruits:** [list with quantities]
-**Dairy:** [list with quantities]
-**Pantry:** [list with quantities]
-
-## 🛒 Week 2 Shopping
-[Same categories]
-
-## 📊 Summary
-Daily avg: X cal, Xg protein, Xg carbs, Xg fat
-
-NO intro text. Start with title. Include ALL 14 days + shopping lists.`;
+Format: Days 1-14 with breakfast/lunch/dinner/snacks + calories, then shopping lists.
+NO intro text. Start with title.`;
 }
 
 function formatMealPlanForApp(rawMealPlan) {
