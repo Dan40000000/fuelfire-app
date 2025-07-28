@@ -41,6 +41,20 @@ export default async function handler(req, res) {
         console.log('🔑 API Key prefix:', process.env.CLAUDE_API_KEY.substring(0, 15) + '...');
 
         // Call Claude API using your account credentials
+        // Log the request for debugging
+        const requestBody = {
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 8000, // Reduce back to 8000 - might be too high
+            messages: [
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ]
+        };
+        
+        console.log('📤 Sending to Claude API with body length:', JSON.stringify(requestBody).length);
+        
         const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
@@ -48,22 +62,24 @@ export default async function handler(req, res) {
                 'x-api-key': process.env.CLAUDE_API_KEY, // Your Claude API key
                 'anthropic-version': '2023-06-01'
             },
-            body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20241022',
-                max_tokens: 20000,
-                messages: [
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ]
-            })
+            body: JSON.stringify(requestBody)
         });
 
         if (!claudeResponse.ok) {
             const errorData = await claudeResponse.text();
-            console.error('Claude API Error:', errorData);
-            throw new Error(`Claude API error: ${claudeResponse.status}`);
+            console.error('Claude API Error Status:', claudeResponse.status);
+            console.error('Claude API Error Response:', errorData);
+            
+            // Parse error if it's JSON
+            let errorMessage = `Claude API error: ${claudeResponse.status}`;
+            try {
+                const errorJson = JSON.parse(errorData);
+                errorMessage = errorJson.error?.message || errorJson.message || errorMessage;
+            } catch (e) {
+                // Not JSON, use raw text
+            }
+            
+            throw new Error(errorMessage);
         }
 
         const claudeData = await claudeResponse.json();
