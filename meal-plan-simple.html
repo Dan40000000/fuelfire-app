@@ -206,10 +206,17 @@
             // Parse and enhance meal data
             formatted = enhanceMealPlanWithButtons(mealPlan);
             
-            // Basic markdown formatting
-            formatted = formatted.replace(/^### (.*?)$/gm, '<h3 style="color: #4B9CD3; margin: 25px 0 15px 0; font-size: 20px; padding-bottom: 8px; border-bottom: 2px solid #e3f2fd;">$1</h3>');
+            // Enhanced formatting with macro organization
+            formatted = formatted.replace(/^### (Day \d+):?$/gm, '<div style="background: #f8f9ff; border-left: 4px solid #4B9CD3; padding: 15px; margin: 20px 0; border-radius: 8px;"><h3 style="color: #4B9CD3; margin: 0; font-size: 18px;">📅 $1</h3></div>');
             formatted = formatted.replace(/^## (.*?)$/gm, '<h2 style="color: #4B9CD3; margin: 35px 0 20px 0; font-size: 24px; padding-bottom: 10px; border-bottom: 3px solid #4B9CD3;">$1</h2>');
             formatted = formatted.replace(/^# (.*?)$/gm, '<h1 style="color: #4B9CD3; margin: 30px 0 25px 0; font-size: 28px; text-align: center;">$1</h1>');
+            
+            // Highlight daily totals
+            formatted = formatted.replace(/\*\*(📊 Day \d+ Totals:)\*\* (.*)/g, '<div style="background: #e8f5e8; border-radius: 8px; padding: 12px; margin: 10px 0; border-left: 4px solid #4CAF50;"><strong style="color: #2E7D32;">$1</strong><br><span style="color: #555; font-size: 14px;">$2</span></div>');
+            
+            // Highlight weekly summaries
+            formatted = formatted.replace(/\*\*(📈 Week \d+ Summary:)\*\*/g, '<div style="background: #fff3e0; border-radius: 10px; padding: 15px; margin: 15px 0; border: 2px solid #FF9800;"><strong style="color: #F57C00; font-size: 16px;">$1</strong>');
+            
             formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333; font-weight: 600;">$1</strong>');
             formatted = formatted.replace(/\n/g, '<br>');
             

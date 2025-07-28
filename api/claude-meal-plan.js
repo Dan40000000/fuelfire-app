@@ -144,13 +144,18 @@ ${varietyInstructions}
 
 Format each day:
 ### Day X:
-**🍳 Breakfast:** [meal with portions] - Calories: X
-**🥗 Lunch:** [meal with portions] - Calories: X
-**🍽️ Dinner:** [meal with portions] - Calories: X
-**🍎 Snacks:** [snack with portions] - Calories: X
-**Daily Total:** X calories
+**🍳 Breakfast:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+**🥗 Lunch:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+**🍽️ Dinner:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+**🍎 Snacks:** [snack with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+
+**📊 Day X Totals:** X calories | Protein: Xg | Carbs: Xg | Fat: Xg
 
 Include Days 1, 2, 3, 4, 5, 6, 7 then:
+
+**📈 Week 1 Summary:**
+Total: X calories | Protein: Xg | Carbs: Xg | Fat: Xg
+Daily Average: X cal | Xg protein | Xg carbs | Xg fat
 
 ## 🛒 Week 1 Shopping List
 **Proteins:** [list with exact quantities]
@@ -173,13 +178,18 @@ ${varietyInstructions}
 
 Format each day:
 ### Day X:
-**🍳 Breakfast:** [meal with portions] - Calories: X
-**🥗 Lunch:** [meal with portions] - Calories: X
-**🍽️ Dinner:** [meal with portions] - Calories: X
-**🍎 Snacks:** [snack with portions] - Calories: X
-**Daily Total:** X calories
+**🍳 Breakfast:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+**🥗 Lunch:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+**🍽️ Dinner:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+**🍎 Snacks:** [snack with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
+
+**📊 Day X Totals:** X calories | Protein: Xg | Carbs: Xg | Fat: Xg
 
 Include Days 8, 9, 10, 11, 12, 13, 14 then:
+
+**📈 Week 2 Summary:**
+Total: X calories | Protein: Xg | Carbs: Xg | Fat: Xg
+Daily Average: X cal | Xg protein | Xg carbs | Xg fat
 
 ## 🛒 Week 2 Shopping List
 **Proteins:** [list with exact quantities]
@@ -194,16 +204,20 @@ NO intro text. Start with Week 2 header.`;
     }
     
     if (phase === '3') {
-        return `Create nutritional summary and tips. Start with: ## 📊 Nutritional Summary & Tips
+        return `Create nutritional summary and tips. Start with: ## 📊 Complete Plan Summary
 
 ${userInfo}
 
-**Daily Averages (across 14 days):**
-- Calories: X
-- Protein: Xg (X%)
-- Carbohydrates: Xg (X%)
-- Fat: Xg (X%)
-- Fiber: Xg
+**📈 14-Day Overview:**
+- Total Calories: X (avg X/day)
+- Total Protein: Xg (avg Xg/day)
+- Total Carbs: Xg (avg Xg/day) 
+- Total Fat: Xg (avg Xg/day)
+- Total Fiber: Xg (avg Xg/day)
+
+**🎯 Weekly Breakdown:**
+Week 1 Average: X cal | Xg protein | Xg carbs | Xg fat
+Week 2 Average: X cal | Xg protein | Xg carbs | Xg fat
 
 **How this supports your ${quizData.goal} goal:**
 [2-3 sentences explaining nutritional strategy]
@@ -213,8 +227,8 @@ ${userInfo}
 - [Storage and preparation advice]
 - [Time-saving tips]
 
-**💰 Budget Tips:**
-- Total weekly cost: ~$X-Y
+**💰 Budget Summary:**
+- Week 1 + Week 2 Total Cost: ~$X
 - [2-3 money-saving suggestions]
 
 NO intro text. Start with summary header.`;
