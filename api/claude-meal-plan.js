@@ -43,8 +43,8 @@ export default async function handler(req, res) {
         // Call Claude API using your account credentials
         // Log the request for debugging
         const requestBody = {
-            model: 'claude-3-5-sonnet-20241022',
-            max_tokens: 8000, // Reduce back to 8000 - might be too high
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 16000, // Haiku can handle much more
             messages: [
                 {
                     role: 'user',
