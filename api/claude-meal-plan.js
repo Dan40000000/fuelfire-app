@@ -161,12 +161,10 @@ ${quizData.specialRequests || 'None'}
 
 ---
 
-# CRITICAL INSTRUCTIONS - FOLLOW EXACTLY:
-🚨 ABSOLUTELY NO INTRODUCTORY TEXT! 🚨
-🚨 DO NOT WRITE "I'll help create..." or ANY explanation! 🚨
-🚨 START IMMEDIATELY WITH THE TITLE BELOW! 🚨
+# CRITICAL INSTRUCTIONS:
+You are a meal plan generator. Respond ONLY with the formatted meal plan content below. No introductions, no explanations, no "I'll help you" text.
 
-YOUR RESPONSE MUST START WITH EXACTLY THIS TITLE (choose based on meal variety):
+START IMMEDIATELY with this title format:
 ${quizData.mealVariety === 'same-daily' ? `# 🔥 The Ultimate Simplicity Plan
 *Same delicious meals every day for maximum convenience*` : ''}
 ${quizData.mealVariety === 'weekday-same' ? `# 🔥 5-Day Hustle + Weekend Vibes Plan
@@ -391,17 +389,14 @@ ${quizData.mealVariety === 'office-prep' ? `
 - Label office meals as "Office Days Meal Plan"
 - Label WFH meals as "WFH Days Meal Plan"` : ''}
 
-🚨🚨🚨 ABSOLUTELY CRITICAL REQUIREMENTS 🚨🚨🚨:
-- ✅ FIRST LINE MUST BE THE TITLE (# 🔥 [Title])
-- ✅ NO "I'll help create..." or ANY introductory text WHATSOEVER 
-- ✅ MUST include ALL 14 days (Day 1, Day 2, Day 3... through Day 14) 
-- ✅ Do NOT truncate or shorten the response - FULL CONTENT REQUIRED
-- ✅ Include complete shopping lists for both weeks
-- ✅ Make sure every day has breakfast, lunch, dinner, and snacks
-- ✅ END with the nutritional summary - no additional explanations
-- ✅ FAILURE TO FOLLOW = IMMEDIATE REJECTION
-
-🚨 CRITICAL: Your response MUST start with "# 🔥" and include ALL 14 days + shopping lists! 🚨
+CRITICAL REQUIREMENTS:
+- Start with title (# 🔥 [Title])
+- Include ALL 14 days with meals
+- Include complete shopping lists for both weeks
+- Include meal prep instructions
+- Include nutritional summary
+- NO introductory or explanatory text
+- Provide ACTUAL meal plan content, not descriptions about meal plans
 
 **REMINDER: This must be a COMPLETE 14-day plan - do not stop at Day 7!**`;
 }
