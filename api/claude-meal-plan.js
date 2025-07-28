@@ -294,13 +294,56 @@ ${!quizData.mealVariety || quizData.mealVariety === 'some-variety' ? `# 🔥 You
 - ✅ Use diverse cuisines, spices, and cooking methods to keep meals exciting
 
 ## MEAL STYLE & CREATIVITY INSTRUCTIONS:
-**Make meals EXCITING and DELICIOUS, not boring!**
+**Base meal creativity on user's style preference: ${quizData.mealStyle || 'balanced-creative'}**
+
+${quizData.mealStyle === 'simple-clean' ? `
+**SIMPLE & CLEAN APPROACH:**
+- Keep meals basic and straightforward
+- Use minimal seasonings and simple cooking methods
+- Focus on clean, whole foods (grilled chicken, steamed vegetables, etc.)
+- Avoid complex recipes or exotic ingredients
+- Perfect for those who prefer predictable, healthy meals` : ''}
+
+${quizData.mealStyle === 'balanced-creative' ? `
+**BALANCED & CREATIVE APPROACH:**
+- Mix simple and creative meals throughout the week
+- Use moderate spice levels and familiar flavor combinations
+- Include some international dishes but keep them accessible
+- Balance comfort foods with healthy options
+- Good variety without being overwhelming` : ''}
+
+${quizData.mealStyle === 'international-adventure' ? `
+**INTERNATIONAL ADVENTURE APPROACH:**
+- Include diverse cuisines (Mediterranean, Asian, Mexican, Indian, etc.)
+- Use authentic spices and bold flavor combinations
+- Creative cooking methods and interesting ingredients
+- Focus on global healthy eating patterns
+- Make meals exciting and culturally diverse` : ''}
+
+${quizData.mealStyle === 'comfort-healthy' ? `
+**HEALTHY COMFORT FOOD APPROACH:**
+- Transform familiar comfort foods into healthier versions
+- Use healthier cooking methods for classic dishes
+- Maintain familiar flavors but improve nutrition
+- Include satisfying, hearty meals that feel indulgent
+- Perfect balance of comfort and health` : ''}
+
+${quizData.mealStyle === 'gourmet-exciting' ? `
+**GOURMET & EXCITING APPROACH:**
+- Use complex flavor profiles and advanced techniques
+- Include premium ingredients and sophisticated combinations
+- Creative presentations and restaurant-quality meals
+- Experiment with unique ingredients and cooking methods
+- Push culinary boundaries while maintaining nutrition goals` : ''}
+
+${!quizData.mealStyle ? `
+**DEFAULT BALANCED APPROACH:**
 - Use interesting spices, marinades, and cooking methods
 - Include diverse cuisines (Mediterranean, Asian, Mexican, etc.)
 - Add creative twists to basic proteins (cajun chicken, teriyaki salmon, etc.)
 - Use fresh herbs, citrus, and flavor combinations
 - Avoid repetitive "grilled chicken and rice" - be creative!
-- Include satisfying comfort foods that still meet nutritional goals
+- Include satisfying comfort foods that still meet nutritional goals` : ''}
 
 ## MEAL VARIETY INSTRUCTIONS:
 ${quizData.mealVariety === 'same-daily' ? `

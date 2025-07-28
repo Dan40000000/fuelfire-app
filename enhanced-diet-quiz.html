@@ -866,6 +866,21 @@
                         </div>
                         
                         <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Meal style preference</label>
+                            <select id="quiz-meal-style" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select your style...</option>
+                                <option value="simple-clean">🥗 Keep it Simple & Clean (basic healthy meals)</option>
+                                <option value="balanced-creative">🎨 Balanced & Creative (some flavor variety)</option>
+                                <option value="international-adventure">🌎 International Adventure (diverse cuisines & spices)</option>
+                                <option value="comfort-healthy">🍲 Healthy Comfort Food (familiar favorites made healthier)</option>
+                                <option value="gourmet-exciting">⭐ Gourmet & Exciting (complex flavors & techniques)</option>
+                            </select>
+                            <p style="font-size: 12px; color: #666; margin-top: 5px; font-style: italic;">
+                                🍽️ This determines how creative and adventurous your meals will be!
+                            </p>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
                             <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Cooking skill level</label>
                             <select id="quiz-cooking-skill" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
                                 <option value="">Select skill level...</option>
@@ -1112,6 +1127,7 @@
                 quizData.largestMeal = document.getElementById('quiz-largest-meal').value;
                 quizData.mealPrepTime = document.getElementById('quiz-meal-prep-time').value;
                 quizData.mealVariety = document.getElementById('quiz-meal-variety').value;
+                quizData.mealStyle = document.getElementById('quiz-meal-style').value;
                 quizData.cookingSkill = document.getElementById('quiz-cooking-skill').value;
                 quizData.kitchenEquipment = Array.from(document.querySelectorAll('.equipment-check:checked')).map(cb => cb.value);
             } else if (currentStep === 9) {
