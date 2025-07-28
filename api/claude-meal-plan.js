@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         // Log the request for debugging
         const requestBody = {
             model: 'claude-3-5-haiku-20241022',
-            max_tokens: 16000, // Haiku can handle much more
+            max_tokens: 8192, // Haiku maximum limit
             messages: [
                 {
                     role: 'user',
