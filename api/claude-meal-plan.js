@@ -277,15 +277,7 @@ ${!quizData.mealVariety || quizData.mealVariety === 'some-variety' ? `# 🔥 You
 
 **Estimated Total Cost: $[X] (provide realistic estimate based on average grocery prices)**
 
-## 3. 👨‍🍳 MEAL PREP INSTRUCTIONS
-**Sunday Prep (Week 1):**
-- [Step-by-step prep instructions]
-- [Storage instructions]
-
-**Sunday Prep (Week 2):**
-- [Step-by-step prep instructions]
-
-## 4. 📊 NUTRITIONAL SUMMARY
+## 3. 📊 NUTRITIONAL SUMMARY
 **Daily Averages:**
 - Calories: [X]
 - Protein: [X]g ([X]%)
@@ -399,6 +391,7 @@ ${quizData.mealVariety === 'office-prep' ? `
 - ✅ Include complete shopping lists for both weeks
 - ✅ Make sure every day has breakfast, lunch, dinner, and snacks
 - ✅ END with the nutritional summary - no additional explanations
+- ✅ SKIP meal prep instructions to save space
 - ✅ FAILURE TO FOLLOW = IMMEDIATE REJECTION
 
 🚨 CRITICAL: Your response MUST start with "# 🔥" and include ALL 14 days + shopping lists! 🚨
