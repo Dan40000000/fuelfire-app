@@ -181,28 +181,67 @@ Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} me
 [Same format]
 
 ## 2. 🛒 SHOPPING LISTS SECTION (CRITICAL - MUST INCLUDE!)
-### Week 1 Shopping List
+**IMPORTANT: Calculate exact quantities for ALL ingredients across ALL 14 days. This is not optional.**
+
+### Week 1 Shopping List (Days 1-7)
 **🥩 Proteins:**
-- [Item] - [exact quantity needed]
-- [Item] - [exact quantity needed]
+- [Item] - [exact quantity needed for 7 days]
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL proteins used in week 1]
 
 **🥬 Vegetables:**  
-- [Item] - [exact quantity needed]
-- [Item] - [exact quantity needed]
+- [Item] - [exact quantity needed for 7 days]
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL vegetables used in week 1]
 
 **🍎 Fruits:**
-- [Item] - [exact quantity needed]
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL fruits used in week 1]
 
-**🥛 Dairy:**
-- [Item] - [exact quantity needed]
+**🥛 Dairy & Eggs:**
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL dairy items used in week 1]
 
 **🌾 Pantry/Dry Goods:**
-- [Item] - [exact quantity needed]
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL pantry items used in week 1]
 
-**Estimated Total Cost: $[X]**
+**🧂 Spices & Condiments:**
+- [List ALL spices, sauces, oils mentioned in week 1 meals]
 
-### Week 2 Shopping List
-[Same format as Week 1]
+**🥤 Beverages & Snacks:**
+- [Any beverages or packaged snacks mentioned]
+
+**Estimated Total Cost: $[X] (provide realistic estimate based on average grocery prices)**
+
+### Week 2 Shopping List (Days 8-14)
+**🥩 Proteins:**
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL proteins used in week 2]
+
+**🥬 Vegetables:**  
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL vegetables used in week 2]
+
+**🍎 Fruits:**
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL fruits used in week 2]
+
+**🥛 Dairy & Eggs:**
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL dairy items used in week 2]
+
+**🌾 Pantry/Dry Goods:**
+- [Item] - [exact quantity needed for 7 days]
+- [Continue for ALL pantry items used in week 2]
+
+**🧂 Spices & Condiments:**
+- [List ALL spices, sauces, oils mentioned in week 2 meals]
+
+**🥤 Beverages & Snacks:**
+- [Any beverages or packaged snacks mentioned]
+
+**Estimated Total Cost: $[X] (provide realistic estimate based on average grocery prices)**
 
 ## 3. 👨‍🍳 MEAL PREP INSTRUCTIONS
 **Sunday Prep (Week 1):**
@@ -224,7 +263,10 @@ Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} me
 [Explanation of nutritional strategy]
 
 ## CRITICAL REQUIREMENTS:
-- ✅ MUST include detailed shopping lists with exact quantities
+- ✅ MUST include detailed shopping lists with exact quantities for EVERY ingredient mentioned
+- ✅ Shopping lists must include ALL ingredients from ALL 14 days - nothing can be missing
+- ✅ Calculate quantities accurately (if chicken breast appears 3 times at 6oz each = 18oz total)
+- ✅ Include spices, oils, condiments, and seasonings - not just main ingredients
 - ✅ Use precise measurements (1 cup, 4 oz, 2 tbsp, etc.)
 - ✅ Organize content with clear sections and headers
 - ✅ Include daily calorie/macro breakdowns
@@ -232,13 +274,34 @@ Create a **comprehensive, well-organized ${quizData.planDuration || '2-week'} me
 - ✅ Match their cooking skill level: ${quizData.cookingSkill}
 - ✅ Stay within budget: ${quizData.budgetRange}
 - ✅ Consider available equipment: ${quizData.kitchenEquipment?.join(', ')}
+- ✅ Provide realistic cost estimates for each week's shopping list
 
 ## MEAL VARIETY INSTRUCTIONS:
-${quizData.mealVariety === 'same-daily' ? '- Use the SAME breakfast, lunch, and dinner every day for easier meal prep' : ''}
-${quizData.mealVariety === 'weekday-same' ? '- Use the SAME meals Monday-Friday, but create different meals for weekends' : ''}
-${quizData.mealVariety === 'some-variety' ? '- Provide 2-3 options for breakfast and lunch that rotate, dinner can vary daily' : ''}
-${quizData.mealVariety === 'full-variety' ? '- Create DIFFERENT meals every single day - maximum variety' : ''}
-${quizData.mealVariety === 'office-prep' ? '- Create same meals for Mon/Tue/Thu/Fri (office days) and different for Wed/Sat/Sun (WFH days)' : ''}
+${quizData.mealVariety === 'same-daily' ? `
+- Use the SAME breakfast, lunch, and dinner EVERY DAY (all 14 days)
+- Label as: "Daily Meal Plan (Same Every Day)"
+- This makes meal prep extremely simple` : ''}
+${quizData.mealVariety === 'weekday-same' ? `
+- Days 1-5 (Mon-Fri): Use the SAME meals for all weekdays
+- Days 6-7 (Sat-Sun): Create DIFFERENT meals for weekends
+- Days 8-12 (Mon-Fri): SAME as days 1-5
+- Days 13-14 (Sat-Sun): Can be SAME as days 6-7 or different
+- Label weekday meals as "Mon-Fri Meal Plan"
+- Label weekend meals as "Sat-Sun Meal Plan"` : ''}
+${quizData.mealVariety === 'some-variety' ? `
+- Provide 2-3 different breakfast options that rotate
+- Provide 2-3 different lunch options that rotate
+- Dinners can vary each day
+- Ensure all 14 days are included` : ''}
+${quizData.mealVariety === 'full-variety' ? `
+- Create DIFFERENT meals for EVERY SINGLE DAY
+- All 14 days should have unique meals
+- Maximum variety for those who love cooking` : ''}
+${quizData.mealVariety === 'office-prep' ? `
+- Office days (Mon/Tue/Thu/Fri): Use SAME meals for meal prep efficiency
+- WFH days (Wed/Sat/Sun): Create different meals with more cooking flexibility
+- Label office meals as "Office Days Meal Plan"
+- Label WFH meals as "WFH Days Meal Plan"` : ''}
 
 ## ABSOLUTELY CRITICAL REQUIREMENTS:
 - ✅ MUST include ALL 14 days (Day 1, Day 2, Day 3... through Day 14) 
