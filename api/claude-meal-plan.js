@@ -156,22 +156,22 @@ Include Days 1, 2, 3, 4, 5, 6, 7 then:
 
 ## 🛒 Week 1 Shopping List
 
-### PROTEINS
+PROTEINS
 [list with exact quantities]
 
-### VEGETABLES  
+VEGETABLES  
 [list with exact quantities]
 
-### FRUITS
+FRUITS
 [list with exact quantities]
 
-### DAIRY & EGGS
+DAIRY & EGGS
 [list with exact quantities]
 
-### PANTRY ITEMS
+PANTRY ITEMS
 [list with exact quantities]
 
-### SPICES & CONDIMENTS
+SPICES & CONDIMENTS
 [list]
 
 **Cost Estimate:** $X
@@ -200,22 +200,22 @@ Include Days 8, 9, 10, 11, 12, 13, 14 then:
 
 ## 🛒 Week 2 Shopping List
 
-### PROTEINS
+PROTEINS
 [list with exact quantities]
 
-### VEGETABLES
+VEGETABLES
 [list with exact quantities]
 
-### FRUITS
+FRUITS
 [list with exact quantities]
 
-### DAIRY & EGGS
+DAIRY & EGGS
 [list with exact quantities]
 
-### PANTRY ITEMS
+PANTRY ITEMS
 [list with exact quantities]
 
-### SPICES & CONDIMENTS
+SPICES & CONDIMENTS
 [list]
 
 **Cost Estimate:** $X
