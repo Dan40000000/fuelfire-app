@@ -144,18 +144,15 @@ ${varietyInstructions}
 
 Format each day:
 ### Day X:
-**🍳 Breakfast:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-**🥗 Lunch:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-**🍽️ Dinner:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-**🍎 Snacks:** [snack with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-
-**📊 Day X Totals:** X calories | Protein: Xg | Carbs: Xg | Fat: Xg
+**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**Day Total:** X cal | P: Xg | C: Xg | F: Xg
 
 Include Days 1, 2, 3, 4, 5, 6, 7 then:
 
-**📈 Week 1 Summary:**
-Total: X calories | Protein: Xg | Carbs: Xg | Fat: Xg
-Daily Average: X cal | Xg protein | Xg carbs | Xg fat
+**Week 1 Summary:** X cal total | Avg: X cal/day | P: Xg | C: Xg | F: Xg
 
 ## 🛒 Week 1 Shopping List
 **Proteins:** [list with exact quantities]
@@ -178,18 +175,15 @@ ${varietyInstructions}
 
 Format each day:
 ### Day X:
-**🍳 Breakfast:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-**🥗 Lunch:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-**🍽️ Dinner:** [meal with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-**🍎 Snacks:** [snack with portions] - Calories: X | Protein: Xg | Carbs: Xg | Fat: Xg
-
-**📊 Day X Totals:** X calories | Protein: Xg | Carbs: Xg | Fat: Xg
+**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**Day Total:** X cal | P: Xg | C: Xg | F: Xg
 
 Include Days 8, 9, 10, 11, 12, 13, 14 then:
 
-**📈 Week 2 Summary:**
-Total: X calories | Protein: Xg | Carbs: Xg | Fat: Xg
-Daily Average: X cal | Xg protein | Xg carbs | Xg fat
+**Week 2 Summary:** X cal total | Avg: X cal/day | P: Xg | C: Xg | F: Xg
 
 ## 🛒 Week 2 Shopping List
 **Proteins:** [list with exact quantities]
@@ -208,16 +202,9 @@ NO intro text. Start with Week 2 header.`;
 
 ${userInfo}
 
-**📈 14-Day Overview:**
-- Total Calories: X (avg X/day)
-- Total Protein: Xg (avg Xg/day)
-- Total Carbs: Xg (avg Xg/day) 
-- Total Fat: Xg (avg Xg/day)
-- Total Fiber: Xg (avg Xg/day)
-
-**🎯 Weekly Breakdown:**
-Week 1 Average: X cal | Xg protein | Xg carbs | Xg fat
-Week 2 Average: X cal | Xg protein | Xg carbs | Xg fat
+**14-Day Totals:** X cal | P: Xg | C: Xg | F: Xg | Fiber: Xg
+**Daily Avg:** X cal | P: Xg | C: Xg | F: Xg
+**Week 1 vs Week 2:** X cal vs X cal avg
 
 **How this supports your ${quizData.goal} goal:**
 [2-3 sentences explaining nutritional strategy]
