@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 model: 'claude-3-5-sonnet-20241022',
-                max_tokens: 8000,
+                max_tokens: 16000,
                 messages: [
                     {
                         role: 'user',
@@ -132,6 +132,7 @@ You are an expert nutritionist and meal planning specialist creating a comprehen
 - **Meal Variety**: ${quizData.mealVariety || 'some-variety'}
 - **Cooking Skill**: ${quizData.cookingSkill || 'intermediate'}
 - **Kitchen Equipment**: ${quizData.kitchenEquipment?.join(', ') || 'Basic equipment'}
+- **Meal Style Preference**: ${quizData.mealStyle || 'balanced'} (creative vs basic vs international)
 
 ## Budget & Shopping:
 - **Budget Range**: ${quizData.budgetRange || 'moderate'}
@@ -289,6 +290,17 @@ ${!quizData.mealVariety || quizData.mealVariety === 'some-variety' ? `# 🔥 You
 - ✅ Stay within budget: ${quizData.budgetRange}
 - ✅ Consider available equipment: ${quizData.kitchenEquipment?.join(', ')}
 - ✅ Provide realistic cost estimates for each week's shopping list
+- ✅ Make meals INTERESTING and FLAVORFUL - avoid boring "chicken and rice" repetition
+- ✅ Use diverse cuisines, spices, and cooking methods to keep meals exciting
+
+## MEAL STYLE & CREATIVITY INSTRUCTIONS:
+**Make meals EXCITING and DELICIOUS, not boring!**
+- Use interesting spices, marinades, and cooking methods
+- Include diverse cuisines (Mediterranean, Asian, Mexican, etc.)
+- Add creative twists to basic proteins (cajun chicken, teriyaki salmon, etc.)
+- Use fresh herbs, citrus, and flavor combinations
+- Avoid repetitive "grilled chicken and rice" - be creative!
+- Include satisfying comfort foods that still meet nutritional goals
 
 ## MEAL VARIETY INSTRUCTIONS:
 ${quizData.mealVariety === 'same-daily' ? `
