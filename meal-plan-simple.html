@@ -209,8 +209,7 @@
             // Enhanced formatting with macro organization
             formatted = formatted.replace(/^### (Day \d+):?$/gm, '<div style="background: #f8f9ff; border-left: 4px solid #4B9CD3; padding: 15px; margin: 20px 0; border-radius: 8px;"><h3 style="color: #4B9CD3; margin: 0; font-size: 18px;">📅 $1</h3></div>');
             
-            // Shopping list headers with underlines
-            formatted = formatted.replace(/^(PROTEINS|VEGETABLES|FRUITS|DAIRY & EGGS|PANTRY ITEMS|SPICES & CONDIMENTS)$/gm, '<h3 style="color: #333; margin: 25px 0 15px 0; font-size: 18px; font-weight: bold; text-decoration: underline; text-transform: uppercase;">$1</h3>');
+            // Remove shopping list header formatting - keep it simple
             
             formatted = formatted.replace(/^## (.*?)$/gm, '<h2 style="color: #4B9CD3; margin: 35px 0 20px 0; font-size: 24px; padding-bottom: 10px; border-bottom: 3px solid #4B9CD3;">$1</h2>');
             formatted = formatted.replace(/^# (.*?)$/gm, '<h1 style="color: #4B9CD3; margin: 30px 0 25px 0; font-size: 28px; text-align: center;">$1</h1>');
