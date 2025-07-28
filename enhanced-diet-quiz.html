@@ -21,6 +21,16 @@
             </div>
             
             <div class="content">
+                <!-- Quick Test Button -->
+                <div style="text-align: center; margin: 20px; padding: 15px; background: linear-gradient(135deg, #ff6b6b, #ee5a24); border-radius: 15px;">
+                    <button onclick="quickTest()" style="background: white; color: #ee5a24; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        🚀 QUICK TEST (WORKING) - Skip Quiz & Generate Now!
+                    </button>
+                    <div style="color: white; font-size: 12px; margin-top: 8px; opacity: 0.9;">
+                        Use to compare vs full quiz
+                    </div>
+                </div>
+                
                 <div id="quiz-content">
                     <!-- Quiz content will be loaded here -->
                 </div>
@@ -120,6 +130,81 @@
             window.location.href = page;
         }
 
+        // Quick Test Function - Pre-fills realistic data and generates immediately
+        async function quickTest() {
+            // Pre-fill with realistic test data
+            quizData = {
+                goal: 'weight-loss',
+                calories: 'auto-calculate',
+                age: '30',
+                gender: 'male',
+                weight: '180',
+                activity: 'moderate',
+                bodytype: 'mesomorph',
+                measurementSystem: 'imperial',
+                feet: '6',
+                inches: '0',
+                allergies: ['None'],
+                otherAllergies: 'N/A',
+                dietaryLifestyle: 'no-restrictions',
+                meats: ['🐔 Chicken Breast', '🐟 Salmon', '🥚 Eggs', '🐄 Ground Beef (93/7)', '🦃 Turkey'],
+                meatFrequency: 'twice-daily',
+                vegetables: ['🥬 Spinach', '🥦 Broccoli', '🥕 Carrots', '🍅 Tomatoes', '🥒 Cucumber'],
+                fruits: ['🍎 Apples', '🍌 Bananas', '🫐 Blueberries', '🍓 Strawberries'],
+                exerciseType: 'weight-training',
+                exerciseFrequency: '4-5-days',
+                workoutDuration: '45-60-min',
+                fitnessGoal: 'build-muscle-lose-fat',
+                mealsPerDay: '3',
+                largestMeal: 'dinner',
+                mealPrepTime: 'moderate',
+                mealVariety: 'weekday-same',
+                mealStyle: 'international-adventure',
+                cookingSkill: 'intermediate',
+                kitchenEquipment: ['Oven', 'Stovetop', 'Air Fryer'],
+                budgetRange: 'moderate',
+                preferredStores: ['Any Store'],
+                planDuration: '2-week',
+                specialRequests: 'I love spicy food and want exciting flavors!'
+            };
+
+            console.log('🚀 Quick Test activated with data:', quizData);
+
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '🤖 Quick generating...';
+            button.disabled = true;
+
+            try {
+                // Generate meal plan immediately
+                const result = await window.fuelFireAuth.generateMealPlan(quizData);
+                
+                if (result.success) {
+                    // Save meal plan to localStorage
+                    const savedPlanId = saveMealPlanToStorage(result.mealPlan, result.metadata);
+                    
+                    // Update button to show success
+                    button.innerHTML = '✅ Generated! Redirecting...';
+                    
+                    // Redirect to meal plan
+                    setTimeout(() => {
+                        window.location.href = `meal-plan-simple.html?planId=${savedPlanId}`;
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(result.message || 'Failed to generate meal plan');
+                }
+                
+            } catch (error) {
+                console.error('❌ Quick test error:', error);
+                alert(`❌ Quick test failed: ${error.message}`);
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
 
         function updateTime() {
             const now = new Date();
