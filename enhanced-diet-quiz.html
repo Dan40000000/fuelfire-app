@@ -1126,7 +1126,7 @@
                 quizData.largestMeal = document.getElementById('quiz-largest-meal').value;
                 quizData.mealPrepTime = document.getElementById('quiz-meal-prep-time').value;
                 quizData.mealVariety = document.getElementById('quiz-meal-variety').value;
-                quizData.mealStyle = document.getElementById('quiz-meal-style').value;
+                quizData.mealStyle = document.getElementById('quiz-meal-style').value || 'balanced-creative';
                 quizData.cookingSkill = document.getElementById('quiz-cooking-skill').value;
                 quizData.kitchenEquipment = Array.from(document.querySelectorAll('.equipment-check:checked')).map(cb => cb.value);
             } else if (currentStep === 9) {
@@ -1172,6 +1172,7 @@
             
             try {
                 console.log('🔥 Starting meal plan generation with quiz data:', Object.keys(quizData));
+                console.log('🔍 Full quiz data:', quizData);
                 
                 // Generate meal plan using Claude AI through your account
                 const result = await window.fuelFireAuth.generateMealPlan(quizData);
