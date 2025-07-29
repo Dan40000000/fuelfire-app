@@ -334,6 +334,9 @@
             
             const processedContent = processMealPlanContent(mealPlan);
             document.getElementById('meal-plan-content').innerHTML = processedContent;
+            
+            // Restore checkbox states after content is loaded
+            restoreCheckboxStates();
         }
         
         function processMealPlanContent(rawContent) {
@@ -447,14 +450,20 @@
                 return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
             }
             
-            // Helper function to format shopping lists with bullets
+            // Helper function to format shopping lists with checkboxes
             function formatListWithBullets(content) {
                 const items = content.split(/[,\n]/).filter(item => item.trim());
                 if (items.length > 0) {
-                    const bullets = items.map(item => 
-                        `<li style="margin: 5px 0;">${item.trim()}</li>`
-                    ).join('');
-                    return `<ul style="margin: 0; padding-left: 40px;">${bullets}</ul>`;
+                    const checkboxes = items.map((item, index) => {
+                        const itemId = `shop-${Date.now()}-${index}`;
+                        return `<li style="margin: 8px 0; list-style: none;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" id="${itemId}" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="saveCheckboxState('${itemId}', this.checked)">
+                                <span style="font-size: 15px;">${item.trim()}</span>
+                            </label>
+                        </li>`;
+                    }).join('');
+                    return `<ul style="margin: 0; padding-left: 20px;">${checkboxes}</ul>`;
                 }
                 return content;
             }
@@ -470,6 +479,33 @@
                 hour12: true 
             });
             document.getElementById('time').textContent = time;
+        }
+        
+        // Save checkbox state to localStorage
+        function saveCheckboxState(itemId, isChecked) {
+            const planId = new URLSearchParams(window.location.search).get('planId') || 'default';
+            const storageKey = `shopping_checks_${planId}`;
+            
+            let checkedItems = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            checkedItems[itemId] = isChecked;
+            localStorage.setItem(storageKey, JSON.stringify(checkedItems));
+        }
+        
+        // Restore checkbox states after content loads
+        function restoreCheckboxStates() {
+            const planId = new URLSearchParams(window.location.search).get('planId') || 'default';
+            const storageKey = `shopping_checks_${planId}`;
+            const checkedItems = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            
+            // Wait a bit for checkboxes to be rendered
+            setTimeout(() => {
+                Object.keys(checkedItems).forEach(itemId => {
+                    const checkbox = document.getElementById(itemId);
+                    if (checkbox) {
+                        checkbox.checked = checkedItems[itemId];
+                    }
+                });
+            }, 100);
         }
         
         // Check if meal plan data was passed
