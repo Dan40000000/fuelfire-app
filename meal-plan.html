@@ -354,15 +354,40 @@
             }, 500);
         }
         
-        // Helper function to format meal content with bullet points
-        function formatMealWithBullets(content) {
+        // Helper function to format meal content with bullet points and log button
+        function formatMealWithBullets(content, mealType, dayNum) {
             const parts = content.split('-');
             if (parts.length >= 2) {
                 const meal = parts[0].trim();
-                const nutrition = parts.slice(1).join('-').trim();
+                const nutritionText = parts.slice(1).join('-').trim();
+                
+                // Parse nutrition info
+                const calories = nutritionText.match(/Cal:\s*(\d+)/i)?.[1] || '0';
+                const protein = nutritionText.match(/P:\s*(\d+)g/i)?.[1] || '0';
+                const carbs = nutritionText.match(/C:\s*(\d+)g/i)?.[1] || '0';
+                const fat = nutritionText.match(/F:\s*(\d+)g/i)?.[1] || '0';
+                
+                // Create meal data object
+                const mealData = {
+                    name: meal,
+                    type: mealType,
+                    calories: parseInt(calories),
+                    protein: parseInt(protein),
+                    carbs: parseInt(carbs),
+                    fat: parseInt(fat),
+                    day: dayNum
+                };
+                
                 return `<ul style="margin: 0; padding-left: 20px;">
                     <li style="margin-bottom: 8px;"><strong>${meal}</strong></li>
-                    <li style="color: #666; font-size: 14px;">${nutrition}</li>
+                    <li style="color: #666; font-size: 14px;">${nutritionText}</li>
+                    <li style="margin-top: 10px;">
+                        <button onclick='logMealToTracker(${JSON.stringify(mealData)})' 
+                                style="background: #4CAF50; color: white; border: none; padding: 5px 12px; 
+                                       border-radius: 15px; font-size: 12px; cursor: pointer;">
+                            📝 Log to Tracker
+                        </button>
+                    </li>
                 </ul>`;
             }
             return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
@@ -425,29 +450,35 @@
                 .replace(/^### (Day \d+):?/gm, '<h3 style="text-align: center; font-size: 22px; margin: 30px 0 20px 0; font-weight: bold; text-decoration: underline; color: #333;">DAY $1</h3>')
                 
                 // Format meals with centered headers and bullet points
-                .replace(/\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, content) {
-                    const formatted = formatMealWithBullets(content);
-                    return `<div style="margin: 20px 0;">
+                .replace(/(### Day (\d+):?[\s\S]*?)\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, daySection, dayNum, content) {
+                    const formatted = formatMealWithBullets(content, 'breakfast', dayNum);
+                    return daySection.replace(/\*\*🍳 Breakfast:\*\*.*/, '') + `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #FF6B6B; margin: 15px 0; font-size: 18px;">BREAKFAST</h4>
                         <div style="padding: 0 20px;">${formatted}</div>
                     </div>`;
                 })
-                .replace(/\*\*🥗 Lunch:\*\*(.*?)(?=\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, content) {
-                    const formatted = formatMealWithBullets(content);
+                .replace(/\*\*🥗 Lunch:\*\*(.*?)(?=\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, content, offset, string) {
+                    const dayMatch = string.substring(0, offset).match(/### Day (\d+)/g);
+                    const dayNum = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                    const formatted = formatMealWithBullets(content, 'lunch', dayNum);
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #4ECDC4; margin: 15px 0; font-size: 18px;">LUNCH</h4>
                         <div style="padding: 0 20px;">${formatted}</div>
                     </div>`;
                 })
-                .replace(/\*\*🍽️ Dinner:\*\*(.*?)(?=\*\*🍎|###|##|$)/gs, function(match, content) {
-                    const formatted = formatMealWithBullets(content);
+                .replace(/\*\*🍽️ Dinner:\*\*(.*?)(?=\*\*🍎|###|##|$)/gs, function(match, content, offset, string) {
+                    const dayMatch = string.substring(0, offset).match(/### Day (\d+)/g);
+                    const dayNum = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                    const formatted = formatMealWithBullets(content, 'dinner', dayNum);
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #3AA69D; margin: 15px 0; font-size: 18px;">DINNER</h4>
                         <div style="padding: 0 20px;">${formatted}</div>
                     </div>`;
                 })
-                .replace(/\*\*🍎 Snacks:\*\*(.*?)(?=\*\*Day Total|###|##|$)/gs, function(match, content) {
-                    const formatted = formatMealWithBullets(content);
+                .replace(/\*\*🍎 Snacks:\*\*(.*?)(?=\*\*Day Total|###|##|$)/gs, function(match, content, offset, string) {
+                    const dayMatch = string.substring(0, offset).match(/### Day (\d+)/g);
+                    const dayNum = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                    const formatted = formatMealWithBullets(content, 'snacks', dayNum);
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #F38181; margin: 15px 0; font-size: 18px;">SNACKS</h4>
                         <div style="padding: 0 20px;">${formatted}</div>
@@ -540,6 +571,34 @@
                     }
                 });
             }, 100);
+        }
+        
+        // Log meal to calorie tracker
+        function logMealToTracker(mealData) {
+            console.log('📝 Logging meal to tracker:', mealData);
+            
+            // Add current date and time
+            const now = new Date();
+            const logEntry = {
+                ...mealData,
+                date: now.toDateString(),
+                time: now.toTimeString().split(' ')[0],
+                logged_at: now.toISOString()
+            };
+            
+            // Save to localStorage for calorie tracker
+            let trackerData = JSON.parse(localStorage.getItem('fuelfire_calorie_log') || '[]');
+            trackerData.push(logEntry);
+            localStorage.setItem('fuelfire_calorie_log', JSON.stringify(trackerData));
+            
+            // Show confirmation
+            alert(`✅ ${mealData.name} logged to calorie tracker!\n\n📊 ${mealData.calories} calories\n🥩 ${mealData.protein}g protein\n🍞 ${mealData.carbs}g carbs\n🥑 ${mealData.fat}g fat`);
+            
+            // Optional: Open calorie tracker in new tab
+            const openTracker = confirm('Open calorie tracker to view logged meal?');
+            if (openTracker) {
+                window.open('calorie-tracker.html', '_blank');
+            }
         }
         
         // Check if meal plan data was passed
