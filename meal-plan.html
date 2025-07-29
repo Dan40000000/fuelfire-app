@@ -267,6 +267,7 @@
                     </div>
                     
                     <div class="action-buttons" style="text-align: center; margin-bottom: 20px;">
+                        <button onclick="saveMealPlan()" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin: 0 5px;">💾 Save Plan</button>
                         <button onclick="window.print()" style="background: var(--gradient-1); color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin: 0 5px;">🖨️ Print</button>
                         <button onclick="sharePlan()" style="background: var(--gradient-1); color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin: 0 5px;">📤 Share</button>
                     </div>
@@ -573,7 +574,70 @@
             }, 100);
         }
         
-        // Log meal to calorie tracker
+        // Save current meal plan with a name
+        function saveMealPlan() {
+            const currentPlanContent = document.getElementById('meal-plan-content').innerHTML;
+            const currentMetadata = document.getElementById('plan-metadata').innerHTML;
+            
+            if (!currentPlanContent || currentPlanContent.includes('Empty Meal Plan')) {
+                alert('No meal plan to save!');
+                return;
+            }
+            
+            // Get existing saved plans
+            let savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
+            
+            // Generate plan name
+            const planNumber = savedPlans.length + 1;
+            const defaultName = `Meal Plan #${planNumber}`;
+            
+            const planName = prompt('Enter a name for this meal plan:', defaultName);
+            if (!planName) return;
+            
+            // Extract structured meal data from content
+            const mealData = extractMealDataFromPlan(currentPlanContent);
+            
+            const planData = {
+                id: Date.now().toString(),
+                name: planName,
+                content: currentPlanContent,
+                metadata: currentMetadata,
+                meals: mealData,
+                savedAt: new Date().toISOString(),
+                createdAt: new Date().toLocaleDateString()
+            };
+            
+            savedPlans.push(planData);
+            localStorage.setItem('fuelfire_saved_meal_plans', JSON.stringify(savedPlans));
+            
+            alert(`✅ "${planName}" saved successfully!\n\nYou can now select meals from this plan in the calorie tracker.`);
+        }
+        
+        // Extract meal data from the meal plan content
+        function extractMealDataFromPlan(htmlContent) {
+            const meals = [];
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            // Find all meal buttons to extract data
+            const buttons = tempDiv.querySelectorAll('button[onclick*="logMealToTracker"]');
+            buttons.forEach(button => {
+                try {
+                    const onclickAttr = button.getAttribute('onclick');
+                    const mealDataMatch = onclickAttr.match(/logMealToTracker\((.*?)\)/);
+                    if (mealDataMatch) {
+                        const mealData = JSON.parse(mealDataMatch[1]);
+                        meals.push(mealData);
+                    }
+                } catch (e) {
+                    console.log('Error parsing meal data:', e);
+                }
+            });
+            
+            return meals;
+        }
+        
+        // Log meal to calorie tracker (simplified version)
         function logMealToTracker(mealData) {
             console.log('📝 Logging meal to tracker:', mealData);
             

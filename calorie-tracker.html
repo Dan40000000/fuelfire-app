@@ -46,8 +46,8 @@
                     
                     <!-- Quick Actions -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-                        <button onclick="window.location.href='meal-plans.html'" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            🍽️ View Meal Plan
+                        <button onclick="showMealPlanSelector()" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            🍽️ Log from Plan
                         </button>
                         <button onclick="showManualEntry()" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             ➕ Add Food
@@ -104,6 +104,41 @@
             <div style="display: flex; gap: 10px;">
                 <button onclick="addManualFood()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Add</button>
                 <button onclick="hideManualEntry()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meal Plan Selector Modal -->
+    <div id="meal-plan-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">🍽️ Log from Meal Plan</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px;">Select Meal Plan:</label>
+                <select id="meal-plan-select" onchange="loadMealPlanMeals()" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
+                    <option value="">Choose a meal plan...</option>
+                </select>
+            </div>
+            
+            <div id="meal-plan-meals" style="display: none;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px;">Select Meal:</label>
+                <select id="meal-select" onchange="showMealTypeSelector()" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
+                    <option value="">Choose a meal...</option>
+                </select>
+                
+                <div id="meal-type-selector" style="display: none; margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px;">Log as:</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button onclick="logMealFromPlan('breakfast')" style="background: #FF6B6B; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍳 Breakfast</button>
+                        <button onclick="logMealFromPlan('lunch')" style="background: #4ECDC4; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🥗 Lunch</button>
+                        <button onclick="logMealFromPlan('dinner')" style="background: #3AA69D; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍽️ Dinner</button>
+                        <button onclick="logMealFromPlan('snack')" style="background: #F38181; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍎 Snack</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="hideMealPlanSelector()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
     </div>
@@ -259,6 +294,136 @@
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
             
             hideManualEntry();
+            loadTodaysMeals();
+        }
+        
+        // Meal Plan Selector Functions
+        let selectedMealData = null;
+        
+        function showMealPlanSelector() {
+            // Load saved meal plans
+            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
+            const selectElement = document.getElementById('meal-plan-select');
+            
+            // Clear existing options
+            selectElement.innerHTML = '<option value="">Choose a meal plan...</option>';
+            
+            if (savedPlans.length === 0) {
+                selectElement.innerHTML += '<option value="">No saved meal plans found</option>';
+                alert('No saved meal plans found!\n\nPlease save a meal plan first by:\n1. Going to Meal Plans\n2. Generating a meal plan\n3. Clicking "💾 Save Plan"');
+                return;
+            }
+            
+            // Add meal plan options
+            savedPlans.forEach(plan => {
+                selectElement.innerHTML += `<option value="${plan.id}">${plan.name} (${plan.createdAt})</option>`;
+            });
+            
+            document.getElementById('meal-plan-modal').style.display = 'block';
+        }
+        
+        function hideMealPlanSelector() {
+            document.getElementById('meal-plan-modal').style.display = 'none';
+            document.getElementById('meal-plan-meals').style.display = 'none';
+            document.getElementById('meal-type-selector').style.display = 'none';
+            selectedMealData = null;
+        }
+        
+        function loadMealPlanMeals() {
+            const planId = document.getElementById('meal-plan-select').value;
+            if (!planId) {
+                document.getElementById('meal-plan-meals').style.display = 'none';
+                return;
+            }
+            
+            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
+            const selectedPlan = savedPlans.find(plan => plan.id === planId);
+            
+            if (!selectedPlan || !selectedPlan.meals) {
+                alert('No meals found in this plan');
+                return;
+            }
+            
+            const mealSelect = document.getElementById('meal-select');
+            mealSelect.innerHTML = '<option value="">Choose a meal...</option>';
+            
+            // Group meals by day and type
+            const groupedMeals = {};
+            selectedPlan.meals.forEach((meal, index) => {
+                const dayKey = `Day ${meal.day}`;
+                if (!groupedMeals[dayKey]) groupedMeals[dayKey] = {};
+                if (!groupedMeals[dayKey][meal.type]) groupedMeals[dayKey][meal.type] = [];
+                groupedMeals[dayKey][meal.type].push({...meal, index});
+            });
+            
+            // Add organized options
+            Object.keys(groupedMeals).sort((a, b) => {
+                const dayA = parseInt(a.replace('Day ', ''));
+                const dayB = parseInt(b.replace('Day ', ''));
+                return dayA - dayB;
+            }).forEach(day => {
+                const dayMeals = groupedMeals[day];
+                ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+                    if (dayMeals[mealType]) {
+                        dayMeals[mealType].forEach(meal => {
+                            mealSelect.innerHTML += `<option value="${meal.index}">${day} - ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}: ${meal.name}</option>`;
+                        });
+                    }
+                });
+            });
+            
+            document.getElementById('meal-plan-meals').style.display = 'block';
+        }
+        
+        function showMealTypeSelector() {
+            const mealIndex = document.getElementById('meal-select').value;
+            if (!mealIndex) {
+                document.getElementById('meal-type-selector').style.display = 'none';
+                return;
+            }
+            
+            const planId = document.getElementById('meal-plan-select').value;
+            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
+            const selectedPlan = savedPlans.find(plan => plan.id === planId);
+            
+            selectedMealData = selectedPlan.meals[parseInt(mealIndex)];
+            document.getElementById('meal-type-selector').style.display = 'block';
+        }
+        
+        function logMealFromPlan(logAsType) {
+            if (!selectedMealData) {
+                alert('Please select a meal first');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            const logEntry = {
+                name: selectedMealData.name,
+                type: logAsType,
+                calories: selectedMealData.calories,
+                protein: selectedMealData.protein,
+                carbs: selectedMealData.carbs,
+                fat: selectedMealData.fat,
+                time: new Date().toISOString(),
+                fromMealPlan: true,
+                originalDay: selectedMealData.day,
+                originalType: selectedMealData.type
+            };
+            
+            loggedMeals[today].meals.push(logEntry);
+            loggedMeals[today].totalCalories += selectedMealData.calories;
+            
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            alert(`✅ ${selectedMealData.name} logged as ${logAsType}!\n\n📊 ${selectedMealData.calories} calories\n🥩 ${selectedMealData.protein}g protein\n🍞 ${selectedMealData.carbs}g carbs\n🥑 ${selectedMealData.fat}g fat`);
+            
+            hideMealPlanSelector();
             loadTodaysMeals();
         }
         
