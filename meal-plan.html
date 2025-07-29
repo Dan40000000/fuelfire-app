@@ -337,6 +337,21 @@
             
             // Restore checkbox states after content is loaded
             restoreCheckboxStates();
+            
+            // Debug: Check if any shopping checkboxes were created
+            setTimeout(() => {
+                const checkboxCount = document.querySelectorAll('.shopping-checkbox').length;
+                console.log('🔍 Total shopping checkboxes found:', checkboxCount);
+                if (checkboxCount === 0) {
+                    console.log('⚠️ No checkboxes found! Checking for shopping lists...');
+                    const shoppingHeaders = document.querySelectorAll('h2, h4');
+                    shoppingHeaders.forEach(header => {
+                        if (header.textContent.includes('Shopping') || header.textContent.includes('PROTEINS') || header.textContent.includes('VEGETABLES')) {
+                            console.log('📋 Found shopping section:', header.textContent);
+                        }
+                    });
+                }
+            }, 500);
         }
         
         // Helper function to format meal content with bullet points
@@ -355,15 +370,25 @@
         
         // Helper function to format shopping lists with checkboxes
         function formatListWithBullets(content, category) {
-            console.log('Formatting shopping list:', category, content);
-            // Split by comma, semicolon, or newline, and handle parentheses
-            const items = content.split(/[,;\n]/)
+            console.log('🛒 Formatting shopping list for category:', category);
+            console.log('📝 Raw content:', content);
+            
+            // First check if this is being called for shopping lists
+            if (!category || !content) {
+                console.log('⚠️ Missing category or content');
+                return `<ul style="margin: 0; padding-left: 20px;"><li>${content || 'Empty'}</li></ul>`;
+            }
+            
+            // More aggressive splitting - handle various formats
+            const items = content
+                .split(/[,\n]|(?=\d+\s*lbs)|(?=\d+\s*oz)|(?=\d+\s*dozen)/)
                 .map(item => item.trim())
-                .filter(item => item && item.length > 0);
+                .filter(item => item && item.length > 2 && !item.match(/^[,\s]+$/));
+            
+            console.log('📦 Parsed items:', items);
             
             if (items.length > 0) {
                 const checkboxes = items.map((item, index) => {
-                    // Create stable ID based on category and item
                     const itemId = `shop-${category}-${index}`;
                     return `<li style="margin: 8px 0; list-style: none;">
                         <label style="display: flex; align-items: center; cursor: pointer;">
@@ -372,9 +397,12 @@
                         </label>
                     </li>`;
                 }).join('');
+                console.log('✅ Generated checkboxes for', items.length, 'items');
                 return `<ul style="margin: 0; padding-left: 20px;">${checkboxes}</ul>`;
             }
-            return `<ul style="margin: 0; padding-left: 20px;"><li>${content}</li></ul>`;
+            
+            console.log('❌ No items found to create checkboxes');
+            return `<ul style="margin: 0; padding-left: 20px;"><li>☐ ${content}</li></ul>`;
         }
         
         function processMealPlanContent(rawContent) {
