@@ -352,32 +352,112 @@
             formatted = formatted
                 // Convert headers
                 .replace(/^# (.*$)/gm, '<h1 style="color: #4B9CD3; text-align: center; font-size: 32px; margin: 30px 0;">$1</h1>')
-                .replace(/^## (.*$)/gm, '<h2 style="color: #28a745; font-size: 24px; margin: 30px 0 20px 0; padding: 15px; background: #f0fff0; border-radius: 10px; border-left: 5px solid #28a745;">$1</h2>')
-                .replace(/^### (Day \d+):?/gm, '<h3 style="color: #667eea; font-size: 20px; margin: 25px 0 15px 0; padding: 12px 20px; background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%); border-radius: 15px; border-left: 4px solid #667eea;">📅 $1</h3>')
+                .replace(/^## (.*$)/gm, '<h2 style="text-align: center; font-size: 26px; margin: 35px 0 25px 0; font-weight: bold; text-decoration: underline; color: #28a745;">$1</h2>')
+                .replace(/^### (Day \d+):?/gm, '<h3 style="text-align: center; font-size: 22px; margin: 30px 0 20px 0; font-weight: bold; text-decoration: underline; color: #333;">DAY $1</h3>')
                 
-                // Format meals
-                .replace(/\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #FF6B6B;"><h4 style="color: #FF6B6B; margin: 0 0 8px 0;">🍳 Breakfast</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
-                .replace(/\*\*🥗 Lunch:\*\*(.*?)(?=\*\*🍽️|\*\*🍎|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #4ECDC4;"><h4 style="color: #4ECDC4; margin: 0 0 8px 0;">🥗 Lunch</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
-                .replace(/\*\*🍽️ Dinner:\*\*(.*?)(?=\*\*🍎|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #95E1D3;"><h4 style="color: #3AA69D; margin: 0 0 8px 0;">🍽️ Dinner</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
-                .replace(/\*\*🍎 Snacks:\*\*(.*?)(?=\*\*Day Total|###|##|$)/gs, '<div style="background: #fff; border-radius: 12px; padding: 15px; margin: 10px 0; border-left: 4px solid #F38181;"><h4 style="color: #F38181; margin: 0 0 8px 0;">🍎 Snacks</h4><div style="color: #333; line-height: 1.5;">$1</div></div>')
+                // Format meals with centered headers and bullet points
+                .replace(/\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, content) {
+                    const formatted = formatMealWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #FF6B6B; margin: 15px 0; font-size: 18px;">BREAKFAST</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                .replace(/\*\*🥗 Lunch:\*\*(.*?)(?=\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, content) {
+                    const formatted = formatMealWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #4ECDC4; margin: 15px 0; font-size: 18px;">LUNCH</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                .replace(/\*\*🍽️ Dinner:\*\*(.*?)(?=\*\*🍎|###|##|$)/gs, function(match, content) {
+                    const formatted = formatMealWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #3AA69D; margin: 15px 0; font-size: 18px;">DINNER</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                .replace(/\*\*🍎 Snacks:\*\*(.*?)(?=\*\*Day Total|###|##|$)/gs, function(match, content) {
+                    const formatted = formatMealWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #F38181; margin: 15px 0; font-size: 18px;">SNACKS</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
                 
-                // Format day totals with full macros
-                .replace(/\*\*Day Total:\*\*(.*?)(?=###|##|$)/gs, '<div style="background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%); border-radius: 12px; padding: 15px; margin: 20px 0; text-align: center; border: 2px solid #4B9CD3;"><strong style="color: #4B9CD3; font-size: 16px;">📊 Daily Totals:</strong><div style="color: #333; margin-top: 8px; font-weight: 600;">$1</div></div>')
+                // Format day totals
+                .replace(/\*\*Day Total:\*\*(.*?)(?=###|##|$)/gs, '<div style="background: #f0f8ff; border-radius: 8px; padding: 12px; margin: 25px 0; text-align: center;"><strong style="font-size: 14px;">Daily Total:$1</strong></div>')
                 
-                // Format shopping categories
-                .replace(/\*\*Proteins:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #e74c3c; margin-bottom: 8px;">🥩 Proteins</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #e74c3c;">$1</div></div>')
-                .replace(/\*\*Vegetables:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #27ae60; margin-bottom: 8px;">🥬 Vegetables</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #27ae60;">$1</div></div>')
-                .replace(/\*\*Fruits:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #e67e22; margin-bottom: 8px;">🍎 Fruits</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #e67e22;">$1</div></div>')
-                .replace(/\*\*Dairy & Eggs:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #3498db; margin-bottom: 8px;">🥛 Dairy & Eggs</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #3498db;">$1</div></div>')
-                .replace(/\*\*Pantry Items:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="margin: 15px 0;"><h4 style="color: #9b59b6; margin-bottom: 8px;">🌾 Pantry Items</h4><div style="background: white; border-radius: 8px; padding: 12px; border-left: 3px solid #9b59b6;">$1</div></div>')
-                .replace(/\*\*Cost Estimate:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="background: #fff3cd; border-radius: 10px; padding: 15px; text-align: center; margin: 20px 0;"><strong style="color: #856404; font-size: 18px;">💰 Cost Estimate:$1</strong></div>')
+                // Format shopping list with bullet points
+                .replace(/\*\*Proteins:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #e74c3c; margin: 15px 0;">PROTEINS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Vegetables:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #27ae60; margin: 15px 0;">VEGETABLES</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Fruits:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #e67e22; margin: 15px 0;">FRUITS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Dairy & Eggs:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #3498db; margin: 15px 0;">DAIRY & EGGS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Pantry Items:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #9b59b6; margin: 15px 0;">PANTRY ITEMS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Cost Estimate:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="background: #fff3cd; border-radius: 10px; padding: 15px; text-align: center; margin: 20px 0;"><strong style="color: #856404; font-size: 18px;">💰 TOTAL COST:$1</strong></div>')
                 
                 // Clean up remaining bold text
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 
-                // Convert line breaks
+                // Clean up line breaks
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>');
+            
+            // Helper function to format meal content with bullet points
+            function formatMealWithBullets(content) {
+                const parts = content.split('-');
+                if (parts.length >= 2) {
+                    const meal = parts[0].trim();
+                    const nutrition = parts.slice(1).join('-').trim();
+                    return `<ul style="margin: 0; padding-left: 20px;">
+                        <li style="margin-bottom: 8px;"><strong>${meal}</strong></li>
+                        <li style="color: #666; font-size: 14px;">${nutrition}</li>
+                    </ul>`;
+                }
+                return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
+            }
+            
+            // Helper function to format shopping lists with bullets
+            function formatListWithBullets(content) {
+                const items = content.split(/[,\n]/).filter(item => item.trim());
+                if (items.length > 0) {
+                    const bullets = items.map(item => 
+                        `<li style="margin: 5px 0;">${item.trim()}</li>`
+                    ).join('');
+                    return `<ul style="margin: 0; padding-left: 40px;">${bullets}</ul>`;
+                }
+                return content;
+            }
             
             return `<div style="background: white; border-radius: 20px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 15px rgba(0,0,0,0.08); line-height: 1.6;">${formatted}</div>`;
         }
