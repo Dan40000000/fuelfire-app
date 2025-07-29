@@ -393,35 +393,35 @@
                 
                 // Format shopping list with bullet points
                 .replace(/\*\*Proteins:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
-                    const formatted = formatListWithBullets(content);
+                    const formatted = formatListWithBullets(content, 'proteins');
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #e74c3c; margin: 15px 0;">PROTEINS</h4>
                         ${formatted}
                     </div>`;
                 })
                 .replace(/\*\*Vegetables:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
-                    const formatted = formatListWithBullets(content);
+                    const formatted = formatListWithBullets(content, 'vegetables');
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #27ae60; margin: 15px 0;">VEGETABLES</h4>
                         ${formatted}
                     </div>`;
                 })
                 .replace(/\*\*Fruits:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
-                    const formatted = formatListWithBullets(content);
+                    const formatted = formatListWithBullets(content, 'fruits');
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #e67e22; margin: 15px 0;">FRUITS</h4>
                         ${formatted}
                     </div>`;
                 })
                 .replace(/\*\*Dairy & Eggs:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
-                    const formatted = formatListWithBullets(content);
+                    const formatted = formatListWithBullets(content, 'dairy');
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #3498db; margin: 15px 0;">DAIRY & EGGS</h4>
                         ${formatted}
                     </div>`;
                 })
                 .replace(/\*\*Pantry Items:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
-                    const formatted = formatListWithBullets(content);
+                    const formatted = formatListWithBullets(content, 'pantry');
                     return `<div style="margin: 20px 0;">
                         <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #9b59b6; margin: 15px 0;">PANTRY ITEMS</h4>
                         ${formatted}
@@ -451,21 +451,26 @@
             }
             
             // Helper function to format shopping lists with checkboxes
-            function formatListWithBullets(content) {
-                const items = content.split(/[,\n]/).filter(item => item.trim());
+            function formatListWithBullets(content, category) {
+                // Split by comma, semicolon, or newline, and handle parentheses
+                const items = content.split(/[,;\n]/)
+                    .map(item => item.trim())
+                    .filter(item => item && item.length > 0);
+                
                 if (items.length > 0) {
                     const checkboxes = items.map((item, index) => {
-                        const itemId = `shop-${Date.now()}-${index}`;
+                        // Create stable ID based on category and item
+                        const itemId = `shop-${category}-${index}`;
                         return `<li style="margin: 8px 0; list-style: none;">
                             <label style="display: flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="${itemId}" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="saveCheckboxState('${itemId}', this.checked)">
-                                <span style="font-size: 15px;">${item.trim()}</span>
+                                <input type="checkbox" id="${itemId}" class="shopping-checkbox" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="saveCheckboxState('${itemId}', this.checked)">
+                                <span style="font-size: 15px;">${item}</span>
                             </label>
                         </li>`;
                     }).join('');
                     return `<ul style="margin: 0; padding-left: 20px;">${checkboxes}</ul>`;
                 }
-                return content;
+                return `<ul style="margin: 0; padding-left: 20px;"><li>${content}</li></ul>`;
             }
             
             return `<div style="background: white; border-radius: 20px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 15px rgba(0,0,0,0.08); line-height: 1.6;">${formatted}</div>`;

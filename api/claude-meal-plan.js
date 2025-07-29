@@ -35,16 +35,17 @@ export default async function handler(req, res) {
         
         console.log('🔑 API Key found, generating 4-part meal plan...');
 
-        // Generate all 4 parts in parallel
-        const [week1, week2, shopping, title] = await Promise.all([
+        // Generate all 5 parts in parallel
+        const [week1, week2, shopping1, shopping2, title] = await Promise.all([
             generateWeek1(quizData),
             generateWeek2(quizData),
-            generateShoppingList(quizData),
+            generateWeek1ShoppingList(quizData),
+            generateWeek2ShoppingList(quizData),
             generateTitle(quizData)
         ]);
 
         // Combine all parts
-        const completeMealPlan = `${title}\n\n${week1}\n\n${week2}\n\n${shopping}`;
+        const completeMealPlan = `${title}\n\n${week1}\n\n${shopping1}\n\n${week2}\n\n${shopping2}`;
 
         console.log(`✅ Successfully generated complete meal plan for user: ${userId || 'anonymous'}`);
 
@@ -148,22 +149,42 @@ Include ALL 7 days (Days 8-14). Keep meal descriptions concise. ALWAYS include c
     return await callClaudeAPI(prompt);
 }
 
-async function generateShoppingList(quizData) {
-    const prompt = `Create a complete shopping list for a 14-day meal plan.
+async function generateWeek1ShoppingList(quizData) {
+    const prompt = `Create a shopping list for Week 1 (Days 1-7) of a meal plan.
 
 User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
 Allergies: ${quizData.allergies?.join(', ') || 'None'}
 Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}
 
-## 🛒 Complete Shopping List
-**Proteins:** [list with quantities for 14 days]
-**Vegetables:** [list with quantities for 14 days]
-**Fruits:** [list with quantities for 14 days]
-**Dairy & Eggs:** [list with quantities for 14 days]
-**Pantry Items:** [list with quantities for 14 days]
+## 🛒 Week 1 Shopping List
+**Proteins:** chicken breast (2 lbs), ground beef (1 lb), eggs (1 dozen)
+**Vegetables:** spinach (2 bags), broccoli (2 heads), bell peppers (4)
+**Fruits:** apples (6), bananas (7), berries (2 cups)
+**Dairy & Eggs:** Greek yogurt (32 oz), cheese (8 oz), milk (1/2 gallon)
+**Pantry Items:** rice (2 lbs), oats (1 lb), olive oil (1 bottle)
 **Cost Estimate:** $X
 
-Keep it organized and practical. Include quantities needed for 2 weeks.`;
+Format each category with specific items and quantities. Keep it practical.`;
+
+    return await callClaudeAPI(prompt);
+}
+
+async function generateWeek2ShoppingList(quizData) {
+    const prompt = `Create a shopping list for Week 2 (Days 8-14) of a meal plan.
+
+User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
+Allergies: ${quizData.allergies?.join(', ') || 'None'}
+Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}
+
+## 🛒 Week 2 Shopping List
+**Proteins:** salmon (1.5 lbs), turkey breast (1 lb), tofu (1 block)
+**Vegetables:** kale (2 bunches), carrots (2 lbs), zucchini (4)
+**Fruits:** oranges (6), grapes (2 lbs), melon (1)
+**Dairy & Eggs:** cottage cheese (16 oz), almond milk (1/2 gallon)
+**Pantry Items:** quinoa (1 lb), whole grain bread (1 loaf), nuts (1 lb)
+**Cost Estimate:** $X
+
+Format each category with specific items and quantities. Keep it practical.`;
 
     return await callClaudeAPI(prompt);
 }
