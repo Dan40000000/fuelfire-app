@@ -339,6 +339,44 @@
             restoreCheckboxStates();
         }
         
+        // Helper function to format meal content with bullet points
+        function formatMealWithBullets(content) {
+            const parts = content.split('-');
+            if (parts.length >= 2) {
+                const meal = parts[0].trim();
+                const nutrition = parts.slice(1).join('-').trim();
+                return `<ul style="margin: 0; padding-left: 20px;">
+                    <li style="margin-bottom: 8px;"><strong>${meal}</strong></li>
+                    <li style="color: #666; font-size: 14px;">${nutrition}</li>
+                </ul>`;
+            }
+            return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
+        }
+        
+        // Helper function to format shopping lists with checkboxes
+        function formatListWithBullets(content, category) {
+            console.log('Formatting shopping list:', category, content);
+            // Split by comma, semicolon, or newline, and handle parentheses
+            const items = content.split(/[,;\n]/)
+                .map(item => item.trim())
+                .filter(item => item && item.length > 0);
+            
+            if (items.length > 0) {
+                const checkboxes = items.map((item, index) => {
+                    // Create stable ID based on category and item
+                    const itemId = `shop-${category}-${index}`;
+                    return `<li style="margin: 8px 0; list-style: none;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="${itemId}" class="shopping-checkbox" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="saveCheckboxState('${itemId}', this.checked)">
+                            <span style="font-size: 15px;">${item}</span>
+                        </label>
+                    </li>`;
+                }).join('');
+                return `<ul style="margin: 0; padding-left: 20px;">${checkboxes}</ul>`;
+            }
+            return `<ul style="margin: 0; padding-left: 20px;"><li>${content}</li></ul>`;
+        }
+        
         function processMealPlanContent(rawContent) {
             console.log('🔧 Processing meal plan content, length:', rawContent.length);
             
@@ -435,43 +473,6 @@
                 // Clean up line breaks
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>');
-            
-            // Helper function to format meal content with bullet points
-            function formatMealWithBullets(content) {
-                const parts = content.split('-');
-                if (parts.length >= 2) {
-                    const meal = parts[0].trim();
-                    const nutrition = parts.slice(1).join('-').trim();
-                    return `<ul style="margin: 0; padding-left: 20px;">
-                        <li style="margin-bottom: 8px;"><strong>${meal}</strong></li>
-                        <li style="color: #666; font-size: 14px;">${nutrition}</li>
-                    </ul>`;
-                }
-                return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
-            }
-            
-            // Helper function to format shopping lists with checkboxes
-            function formatListWithBullets(content, category) {
-                // Split by comma, semicolon, or newline, and handle parentheses
-                const items = content.split(/[,;\n]/)
-                    .map(item => item.trim())
-                    .filter(item => item && item.length > 0);
-                
-                if (items.length > 0) {
-                    const checkboxes = items.map((item, index) => {
-                        // Create stable ID based on category and item
-                        const itemId = `shop-${category}-${index}`;
-                        return `<li style="margin: 8px 0; list-style: none;">
-                            <label style="display: flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" id="${itemId}" class="shopping-checkbox" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="saveCheckboxState('${itemId}', this.checked)">
-                                <span style="font-size: 15px;">${item}</span>
-                            </label>
-                        </li>`;
-                    }).join('');
-                    return `<ul style="margin: 0; padding-left: 20px;">${checkboxes}</ul>`;
-                }
-                return `<ul style="margin: 0; padding-left: 20px;"><li>${content}</li></ul>`;
-            }
             
             return `<div style="background: white; border-radius: 20px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 15px rgba(0,0,0,0.08); line-height: 1.6;">${formatted}</div>`;
         }
