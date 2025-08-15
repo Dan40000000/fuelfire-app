@@ -44,13 +44,32 @@
                         </div>
                     </div>
                     
-                    <!-- Quick Actions -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-                        <button onclick="showMealPlanSelector()" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            🍽️ Log from Plan
-                        </button>
-                        <button onclick="showManualEntry()" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            ➕ Add Food
+                    <!-- Epic Food Logging Section -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
+                        <h3 style="color: white; text-align: center; margin: 0 0 15px 0; font-size: 20px;">🔥 LOG YOUR FUEL 🔥</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <button onclick="startVoiceLogging()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                                🎤<br>Voice
+                            </button>
+                            <button onclick="startBarcodeScanning()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                                📷<br>Scan
+                            </button>
+                            <button onclick="showSmartEntry()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                                ⌨️<br>Type
+                            </button>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px;">
+                            <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 8px;">QUICK ADD FROM HISTORY:</div>
+                            <div id="quick-adds" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;">
+                                <!-- Quick add buttons will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Original Actions (Keep for meal plan access) -->
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 25px;">
+                        <button onclick="showMealPlanSelector()" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 12px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 14px;">
+                            🍽️ Log from Saved Meal Plan
                         </button>
                     </div>
                     
