@@ -162,7 +162,332 @@
         </div>
     </div>
     
+    <!-- Voice Modal -->
+    <div id="voice-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 350px; text-align: center;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">🎤 Voice Logging</h3>
+            <div id="voice-status" style="font-size: 48px; margin: 20px 0;">🎤</div>
+            <div id="voice-text" style="min-height: 50px; padding: 15px; background: #f0f0f0; border-radius: 10px; margin-bottom: 20px; font-style: italic;">
+                Click the microphone to start speaking...
+            </div>
+            <button onclick="toggleVoiceRecording()" id="voice-button" style="background: #FF6B6B; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer;">
+                Start Recording
+            </button>
+            <button onclick="closeVoiceModal()" style="background: #6c757d; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-left: 10px;">
+                Cancel
+            </button>
+            <div id="food-results" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+    
+    <!-- Barcode Scanner Modal -->
+    <div id="scanner-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px;">
+            <video id="scanner-video" style="width: 100%; border-radius: 10px;"></video>
+            <canvas id="scanner-canvas" style="display: none;"></canvas>
+            <div style="text-align: center; margin-top: 20px;">
+                <div style="color: white; font-size: 18px; margin-bottom: 10px;">📷 Point at barcode</div>
+                <button onclick="closeScannerModal()" style="background: #dc3545; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold;">
+                    Cancel
+                </button>
+            </div>
+            <div id="scan-result" style="color: white; text-align: center; margin-top: 20px;"></div>
+        </div>
+    </div>
+    
+    <!-- Smart Entry Modal -->
+    <div id="smart-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">⌨️ Smart Food Search</h3>
+            <input type="text" id="smart-search" placeholder="Type food name..." onkeyup="searchFood(this.value)" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+            <div id="search-results" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+            <button onclick="closeSmartEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%;">
+                Cancel
+            </button>
+        </div>
+    </div>
+    
+    <!-- QuaggaJS for barcode scanning -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    
     <script>
+        // Voice Recognition
+        let recognition = null;
+        let isRecording = false;
+        
+        function startVoiceLogging() {
+            document.getElementById('voice-modal').style.display = 'block';
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('voice-text').textContent = transcript;
+                    
+                    if (event.results[0].isFinal) {
+                        searchFoodByVoice(transcript);
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    document.getElementById('voice-text').textContent = 'Error: ' + event.error;
+                };
+            } else {
+                alert('Voice recognition not supported on this browser. Try Chrome or Safari.');
+            }
+        }
+        
+        function toggleVoiceRecording() {
+            if (!isRecording) {
+                recognition.start();
+                isRecording = true;
+                document.getElementById('voice-button').textContent = 'Stop Recording';
+                document.getElementById('voice-button').style.background = '#28a745';
+                document.getElementById('voice-status').textContent = '🔴';
+            } else {
+                recognition.stop();
+                isRecording = false;
+                document.getElementById('voice-button').textContent = 'Start Recording';
+                document.getElementById('voice-button').style.background = '#FF6B6B';
+                document.getElementById('voice-status').textContent = '🎤';
+            }
+        }
+        
+        function closeVoiceModal() {
+            document.getElementById('voice-modal').style.display = 'none';
+            if (recognition) recognition.stop();
+            isRecording = false;
+        }
+        
+        // Search food from voice input
+        async function searchFoodByVoice(query) {
+            const results = await searchUSDA(query);
+            displayFoodResults(results, 'voice');
+        }
+        
+        // USDA API Search
+        async function searchUSDA(query) {
+            try {
+                console.log('🔍 Searching USDA for:', query);
+                
+                const response = await fetch('/api/usda-food-search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`✅ Found ${data.foods.length} foods from ${data.source}`);
+                    if (data.message) {
+                        console.log('📝', data.message);
+                    }
+                    return data.foods;
+                } else {
+                    throw new Error(data.error || 'Search failed');
+                }
+                
+            } catch (error) {
+                console.error('USDA search error:', error);
+                
+                // Fallback to basic estimation
+                return [{
+                    name: `${query} (estimated)`,
+                    calories: 200,
+                    protein: 10,
+                    carbs: 20,
+                    fat: 8,
+                    source: 'estimated'
+                }];
+            }
+        }
+        
+        // Display food search results
+        function displayFoodResults(foods, source) {
+            const resultsDiv = document.getElementById(source === 'voice' ? 'food-results' : 'search-results');
+            
+            if (foods.length === 0) {
+                resultsDiv.innerHTML = '<p style="color: #666;">No foods found</p>';
+                return;
+            }
+            
+            let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select a food:</div>';
+            foods.forEach((food, index) => {
+                html += `
+                    <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
+                         onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
+                        <div style="font-weight: bold;">${food.name}</div>
+                        <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Select and log food
+        function selectFood(name, calories, protein, carbs, fat, source) {
+            const mealType = prompt('Log as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
+            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
+            const type = types[parseInt(mealType)] || 'snack';
+            
+            // Log the food
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            loggedMeals[today].meals.push({
+                name: name,
+                type: type,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                time: new Date().toISOString(),
+                source: source
+            });
+            
+            loggedMeals[today].totalCalories += calories;
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Close modal and refresh
+            if (source === 'voice') closeVoiceModal();
+            if (source === 'search') closeSmartEntry();
+            
+            loadTodaysMeals();
+            loadQuickAdds();
+            
+            alert(`✅ ${name} logged!\n\n📊 ${calories} calories\n🥩 ${protein}g protein\n🍞 ${carbs}g carbs\n🥑 ${fat}g fat`);
+        }
+        
+        // Barcode Scanner
+        function startBarcodeScanning() {
+            document.getElementById('scanner-modal').style.display = 'block';
+            
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner-video'),
+                    constraints: {
+                        facingMode: "environment"
+                    }
+                },
+                decoder: {
+                    readers: ["ean_reader", "ean_8_reader", "upc_reader", "upc_e_reader"]
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    alert('Camera access denied. Please allow camera access to scan barcodes.');
+                    closeScannerModal();
+                    return;
+                }
+                Quagga.start();
+            });
+            
+            Quagga.onDetected(function(data) {
+                const code = data.codeResult.code;
+                searchByBarcode(code);
+                Quagga.stop();
+            });
+        }
+        
+        async function searchByBarcode(barcode) {
+            document.getElementById('scan-result').innerHTML = `<div style="background: white; color: black; padding: 10px; border-radius: 10px;">Searching for ${barcode}...</div>`;
+            
+            try {
+                // OpenFoodFacts API (completely free)
+                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const data = await response.json();
+                
+                if (data.status === 1) {
+                    const product = data.product;
+                    const name = product.product_name || 'Unknown Product';
+                    const calories = product.nutriments['energy-kcal_100g'] || 0;
+                    const protein = product.nutriments.proteins_100g || 0;
+                    const carbs = product.nutriments.carbohydrates_100g || 0;
+                    const fat = product.nutriments.fat_100g || 0;
+                    
+                    closeScannerModal();
+                    selectFood(name, Math.round(calories), Math.round(protein), Math.round(carbs), Math.round(fat), 'barcode');
+                } else {
+                    document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Product not found. Try manual entry.</div>';
+                }
+            } catch (error) {
+                console.error('Barcode search error:', error);
+                document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Error searching product</div>';
+            }
+        }
+        
+        function closeScannerModal() {
+            document.getElementById('scanner-modal').style.display = 'none';
+            Quagga.stop();
+        }
+        
+        // Smart Entry
+        function showSmartEntry() {
+            document.getElementById('smart-entry-modal').style.display = 'block';
+            document.getElementById('smart-search').focus();
+        }
+        
+        function closeSmartEntry() {
+            document.getElementById('smart-entry-modal').style.display = 'none';
+            document.getElementById('smart-search').value = '';
+            document.getElementById('search-results').innerHTML = '';
+        }
+        
+        async function searchFood(query) {
+            if (query.length < 2) return;
+            
+            const results = await searchUSDA(query);
+            displayFoodResults(results, 'search');
+        }
+        
+        // Load quick adds from history
+        function loadQuickAdds() {
+            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const foodCounts = {};
+            
+            // Count frequency of foods
+            Object.values(loggedMeals).forEach(day => {
+                day.meals?.forEach(meal => {
+                    const key = `${meal.name}|${meal.calories}|${meal.protein}|${meal.carbs}|${meal.fat}`;
+                    foodCounts[key] = (foodCounts[key] || 0) + 1;
+                });
+            });
+            
+            // Get top 5 most frequent
+            const topFoods = Object.entries(foodCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            const quickAddsDiv = document.getElementById('quick-adds');
+            if (topFoods.length === 0) {
+                quickAddsDiv.innerHTML = '<div style="color: rgba(255,255,255,0.6); font-size: 12px;">Log foods to see quick adds</div>';
+                return;
+            }
+            
+            quickAddsDiv.innerHTML = topFoods.map(([foodData, count]) => {
+                const [name, calories, protein, carbs, fat] = foodData.split('|');
+                return `
+                    <button onclick="selectFood('${name}', ${calories}, ${protein}, ${carbs}, ${fat}, 'quick')" 
+                            style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
+                                   padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;">
+                        ${name} (${calories}cal)
+                    </button>
+                `;
+            }).join('');
+        }
+        
         function updateTime() {
             const now = new Date();
             const time = now.toLocaleTimeString('en-US', { 
@@ -451,6 +776,7 @@
             updateTime();
             setInterval(updateTime, 1000);
             loadTodaysMeals();
+            loadQuickAdds();
         });
     </script>
 </body>
