@@ -683,27 +683,226 @@
             document.getElementById('calories-remaining').textContent = Math.max(0, target - todayData.totalCalories);
             document.getElementById('percent-complete').textContent = Math.round((todayData.totalCalories / target) * 100) + '%';
             
-            // Update meals list
+            // Organize meals by type
+            const mealsByType = {
+                breakfast: [],
+                lunch: [], 
+                dinner: [],
+                snack: []
+            };
+            
+            todayData.meals.forEach((meal, index) => {
+                const mealType = meal.type || 'snack';
+                mealsByType[mealType].push({...meal, originalIndex: index});
+            });
+            
+            // Update meals list with organized sections
             const mealsDiv = document.getElementById('today-meals');
             if (todayData.meals.length === 0) {
                 mealsDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No meals logged yet today</p>';
             } else {
                 let mealsHTML = '';
-                todayData.meals.forEach((meal, index) => {
-                    const time = new Date(meal.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                
+                // Breakfast Section
+                if (mealsByType.breakfast.length > 0) {
+                    const breakfastCalories = mealsByType.breakfast.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+                    const breakfastProtein = mealsByType.breakfast.reduce((sum, meal) => sum + (meal.protein || 0), 0);
+                    const breakfastCarbs = mealsByType.breakfast.reduce((sum, meal) => sum + (meal.carbs || 0), 0);
+                    const breakfastFat = mealsByType.breakfast.reduce((sum, meal) => sum + (meal.fat || 0), 0);
+                    
                     mealsHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-                            <div>
-                                <div style="font-weight: bold; color: #333;">${meal.type || meal.name}</div>
-                                <div style="font-size: 12px; color: #666;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
+                        <div style="background: linear-gradient(135deg, #FFD700, #FFA500); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px;">
+                            <h3 style="margin: 0 0 10px 0; font-size: 18px;">🌅 Breakfast</h3>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${breakfastCalories}</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Calories</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(breakfastProtein)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Protein</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(breakfastCarbs)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Carbs</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(breakfastFat)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Fat</div>
+                                </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-weight: bold; color: var(--primary);">${meal.calories} cal</span>
-                                <button onclick="removeMeal(${index})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 8px; font-size: 12px;">×</button>
-                            </div>
-                        </div>
                     `;
-                });
+                    
+                    mealsByType.breakfast.forEach((meal) => {
+                        const time = new Date(meal.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        mealsHTML += `
+                            <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">
+                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
+                                        </div>
+                                    </div>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    mealsHTML += '</div>';
+                }
+                
+                // Lunch Section
+                if (mealsByType.lunch.length > 0) {
+                    const lunchCalories = mealsByType.lunch.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+                    const lunchProtein = mealsByType.lunch.reduce((sum, meal) => sum + (meal.protein || 0), 0);
+                    const lunchCarbs = mealsByType.lunch.reduce((sum, meal) => sum + (meal.carbs || 0), 0);
+                    const lunchFat = mealsByType.lunch.reduce((sum, meal) => sum + (meal.fat || 0), 0);
+                    
+                    mealsHTML += `
+                        <div style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px;">
+                            <h3 style="margin: 0 0 10px 0; font-size: 18px;">☀️ Lunch</h3>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${lunchCalories}</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Calories</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(lunchProtein)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Protein</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(lunchCarbs)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Carbs</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(lunchFat)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Fat</div>
+                                </div>
+                            </div>
+                    `;
+                    
+                    mealsByType.lunch.forEach((meal) => {
+                        const time = new Date(meal.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        mealsHTML += `
+                            <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">
+                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
+                                        </div>
+                                    </div>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    mealsHTML += '</div>';
+                }
+                
+                // Dinner Section
+                if (mealsByType.dinner.length > 0) {
+                    const dinnerCalories = mealsByType.dinner.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+                    const dinnerProtein = mealsByType.dinner.reduce((sum, meal) => sum + (meal.protein || 0), 0);
+                    const dinnerCarbs = mealsByType.dinner.reduce((sum, meal) => sum + (meal.carbs || 0), 0);
+                    const dinnerFat = mealsByType.dinner.reduce((sum, meal) => sum + (meal.fat || 0), 0);
+                    
+                    mealsHTML += `
+                        <div style="background: linear-gradient(135deg, #FF6B6B, #FF5722); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px;">
+                            <h3 style="margin: 0 0 10px 0; font-size: 18px;">🌙 Dinner</h3>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${dinnerCalories}</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Calories</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(dinnerProtein)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Protein</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(dinnerCarbs)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Carbs</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(dinnerFat)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Fat</div>
+                                </div>
+                            </div>
+                    `;
+                    
+                    mealsByType.dinner.forEach((meal) => {
+                        const time = new Date(meal.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        mealsHTML += `
+                            <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">
+                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
+                                        </div>
+                                    </div>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    mealsHTML += '</div>';
+                }
+                
+                // Snacks Section
+                if (mealsByType.snack.length > 0) {
+                    const snackCalories = mealsByType.snack.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+                    const snackProtein = mealsByType.snack.reduce((sum, meal) => sum + (meal.protein || 0), 0);
+                    const snackCarbs = mealsByType.snack.reduce((sum, meal) => sum + (meal.carbs || 0), 0);
+                    const snackFat = mealsByType.snack.reduce((sum, meal) => sum + (meal.fat || 0), 0);
+                    
+                    mealsHTML += `
+                        <div style="background: linear-gradient(135deg, #9C27B0, #673AB7); color: white; padding: 15px; border-radius: 15px; margin-bottom: 15px;">
+                            <h3 style="margin: 0 0 10px 0; font-size: 18px;">🍎 Snacks</h3>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${snackCalories}</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Calories</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(snackProtein)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Protein</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(snackCarbs)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Carbs</div>
+                                </div>
+                                <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;">
+                                    <div style="font-weight: bold; font-size: 16px;">${Math.round(snackFat)}g</div>
+                                    <div style="font-size: 12px; opacity: 0.9;">Fat</div>
+                                </div>
+                            </div>
+                    `;
+                    
+                    mealsByType.snack.forEach((meal) => {
+                        const time = new Date(meal.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        mealsHTML += `
+                            <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">
+                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
+                                        </div>
+                                    </div>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    mealsHTML += '</div>';
+                }
+                
                 mealsDiv.innerHTML = mealsHTML;
             }
             
