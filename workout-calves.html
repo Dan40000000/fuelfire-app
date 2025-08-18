@@ -32,12 +32,22 @@
             height: 200px;
             background: linear-gradient(135deg, #1abc9c, #16a085);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 40px;
             color: white;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .form-illustration {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+            max-width: 90%;
         }
         
         .difficulty-badge {
@@ -264,6 +274,7 @@
                 equipment: "None (can add weight)",
                 primaryMuscles: ["Gastrocnemius", "Soleus"],
                 icon: "⬆️",
+                formIllustration: "🧍🦶 ⬆️💪 ⬇️🦶 ⬆️💪\nStand tall • Rise on toes • Control down",
                 steps: [
                     "Stand with feet hip-width apart on flat surface",
                     "Place hands on wall or support for balance if needed",
@@ -294,6 +305,7 @@
                 equipment: "Chair and Weight (optional)",
                 primaryMuscles: ["Soleus", "Gastrocnemius"],
                 icon: "💺",
+                formIllustration: "🪑🦶 ⬆️💪 ⬇️🦶 ⬆️💪\nSit with weight • Raise heels • Control down",
                 steps: [
                     "Sit on chair with feet flat on floor",
                     "Place weight on thighs just above knees if using resistance",
@@ -324,6 +336,7 @@
                 equipment: "Step or Platform",
                 primaryMuscles: ["Gastrocnemius", "Soleus", "Stabilizers"],
                 icon: "1️⃣",
+                formIllustration: "1️⃣🦶 ⬆️💪 ⬇️🦶 ⚖️💪\nOne foot • Rise up • Balance control",
                 steps: [
                     "Stand on one foot on edge of step or platform",
                     "Hold wall or rail for balance support",
@@ -354,6 +367,7 @@
                 equipment: "Step or Platform",
                 primaryMuscles: ["Gastrocnemius", "Soleus"],
                 icon: "📶",
+                formIllustration: "📶🦶 ⬇️💫 ⬆️💪 ⬇️💫\nStep edge • Stretch low • Rise high",
                 steps: [
                     "Stand on step with balls of feet on edge",
                     "Let heels hang below step level",
@@ -384,6 +398,7 @@
                 equipment: "Platform and Partner or Weight",
                 primaryMuscles: ["Gastrocnemius", "Soleus"],
                 icon: "🫏",
+                formIllustration: "🤸‍♂️💺 ⬆️💪 ⬇️🦶 🫏💪\nBend over • Partner weight • Calf raise",
                 steps: [
                     "Bend forward at hips and place forearms on bench",
                     "Have partner sit on lower back or use weight belt",
@@ -414,6 +429,7 @@
                 equipment: "Jump Rope",
                 primaryMuscles: ["Calves", "Cardiovascular System"],
                 icon: "🪢",
+                formIllustration: "🪢🔄 ⬆️💫 ⬇️🦶 🔄💨\nRope rhythm • Light bounces • Stay on toes",
                 steps: [
                     "Hold jump rope with proper length adjustment",
                     "Start with small bounces on balls of feet",
@@ -444,6 +460,7 @@
                 equipment: "Wall",
                 primaryMuscles: ["Calves", "Quadriceps", "Glutes"],
                 icon: "🧱",
+                formIllustration: "🧱🤸‍♂️ ⬆️💪 ⬇️🦶 ⏰💪\nWall sit • Raise heels • Hold position",
                 steps: [
                     "Position back against wall in sitting position",
                     "Keep thighs parallel to floor, knees at 90 degrees",
@@ -474,6 +491,7 @@
                 equipment: "Dumbbells or Heavy Objects",
                 primaryMuscles: ["Calves", "Forearms", "Core", "Traps"],
                 icon: "🚶",
+                formIllustration: "🏋️🚶 ⬆️🦶 ➡️💪 🚶💪\nHold weights • Rise on toes • Walk forward",
                 steps: [
                     "Hold heavy dumbbells or weights at sides",
                     "Rise up onto balls of feet",
@@ -504,6 +522,7 @@
                 equipment: "Calf Raise Machine",
                 primaryMuscles: ["Gastrocnemius", "Soleus"],
                 icon: "🏗️",
+                formIllustration: "🏗️🦶 ⬆️💪 ⬇️🦶 🏗️💪\nMachine setup • Rise up • Control down",
                 steps: [
                     "Position shoulders under machine pads",
                     "Stand on platform with balls of feet on edge",
@@ -534,6 +553,7 @@
                 equipment: "None",
                 primaryMuscles: ["Calves", "Achilles Tendon", "Power"],
                 icon: "🦘",
+                formIllustration: "🦘⬆️ 💫💪 ⬆️⬇️ 🦘💨\nQuick jumps • Calves only • Fast rhythm",
                 steps: [
                     "Stand with feet hip-width apart",
                     "Keep knees slightly bent throughout movement",
@@ -602,6 +622,7 @@
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
                             ${exercise.icon}
+                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>

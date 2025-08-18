@@ -32,12 +32,22 @@
             height: 200px;
             background: linear-gradient(135deg, #f39c12, #e67e22);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 40px;
             color: white;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .form-illustration {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+            max-width: 90%;
         }
         
         .difficulty-badge {
@@ -264,6 +274,7 @@
                 equipment: "Barbell or Dumbbells",
                 primaryMuscles: ["Shoulders", "Triceps", "Core"],
                 icon: "🏋️",
+                formIllustration: "🧍🏋️ ⬆️💪 ↓🏋️ ⬆️💪\nStand tall • Press up • Control down",
                 steps: [
                     "Stand with feet shoulder-width apart, core engaged",
                     "Grip bar with hands slightly wider than shoulders",
@@ -294,6 +305,7 @@
                 equipment: "Dumbbells",
                 primaryMuscles: ["Side Delts", "Rear Delts"],
                 icon: "🪁",
+                formIllustration: "💪⬇️ ↖️↗️ 💪↕️ ↙️↘️\nArms down • Raise to sides • Control down",
                 steps: [
                     "Stand with dumbbells at sides, slight bend in elbows",
                     "Keep core engaged and chest up",
@@ -324,6 +336,7 @@
                 equipment: "Dumbbells or Barbell",
                 primaryMuscles: ["Front Delts", "Core"],
                 icon: "⬆️",
+                formIllustration: "💪⬇️ ⬆️💪 ↕️⏸️ ⬇️💪\nArms down • Raise forward • Control down",
                 steps: [
                     "Stand with weights in front of thighs",
                     "Keep slight bend in elbows throughout movement",
@@ -354,6 +367,7 @@
                 equipment: "Dumbbells",
                 primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
                 icon: "🔄",
+                formIllustration: "🤸‍♂️💪 ↖️↗️ 🤗💪 ↙️↘️\nBend forward • Fly out • Squeeze back",
                 steps: [
                     "Bend forward at hips with slight knee bend",
                     "Hold dumbbells with arms hanging down",
@@ -384,6 +398,7 @@
                 equipment: "None",
                 primaryMuscles: ["Shoulders", "Triceps", "Core"],
                 icon: "🔺",
+                formIllustration: "🔺🤲 ↓🤕 ⬆️💪 ↓🤕\nPike position • Lower head • Press up",
                 steps: [
                     "Start in downward dog position with hands shoulder-width apart",
                     "Walk feet closer to hands to increase shoulder angle",
@@ -414,6 +429,7 @@
                 equipment: "Dumbbells",
                 primaryMuscles: ["All Deltoids", "Triceps"],
                 icon: "🌪️",
+                formIllustration: "💪🔄 ⬆️🌀 ⬇️🔄 💪↕️\nPalms in • Rotate & press • Reverse",
                 steps: [
                     "Start seated with dumbbells at shoulder level",
                     "Begin with palms facing you (like top of bicep curl)",
@@ -444,6 +460,7 @@
                 equipment: "Barbell, Dumbbells, or Cable",
                 primaryMuscles: ["Side Delts", "Traps", "Biceps"],
                 icon: "📏",
+                formIllustration: "🏋️⬇️ ⬆️💪 🔼⏸️ ⬇️🏋️\nHang weight • Pull up • Control down",
                 steps: [
                     "Hold weight with overhand grip, hands close together",
                     "Start with weight hanging in front of body",
@@ -474,6 +491,7 @@
                 equipment: "Cable Machine with Rope",
                 primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
                 icon: "👥",
+                formIllustration: "🤲🔗 ↖️↗️ 👤💪 ↙️↘️\nGrip rope • Pull to face • Separate hands",
                 steps: [
                     "Set cable at face height with rope attachment",
                     "Grab rope with overhand grip, arms extended",
@@ -504,6 +522,7 @@
                 equipment: "Wall (for support)",
                 primaryMuscles: ["Shoulders", "Triceps", "Core"],
                 icon: "🤸",
+                formIllustration: "🤲🧱 ↓🤕 ⬆️💪 ↓🤕\nHandstand • Lower head • Press up",
                 steps: [
                     "Start in handstand position against wall",
                     "Place hands shoulder-width apart on ground",
@@ -534,6 +553,7 @@
                 equipment: "Dumbbells or Barbell",
                 primaryMuscles: ["Upper Traps", "Levator Scapulae"],
                 icon: "🤷",
+                formIllustration: "🧍💪 ⬆️🤷 ⬇️💪 ⬆️🤷\nStand tall • Lift shoulders • Control down",
                 steps: [
                     "Hold weights at sides with arms fully extended",
                     "Keep arms straight throughout entire movement",
@@ -602,6 +622,7 @@
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
                             ${exercise.icon}
+                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>

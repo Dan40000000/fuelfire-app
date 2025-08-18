@@ -32,12 +32,22 @@
             height: 200px;
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 40px;
             color: white;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .form-illustration {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+            max-width: 90%;
         }
         
         .difficulty-badge {
@@ -264,6 +274,7 @@
                 equipment: "None or Various",
                 primaryMuscles: ["Full Body", "Cardiovascular System"],
                 icon: "⚡",
+                formIllustration: "⚡🔥 ⏱️😤 ⏸️😌 🔄⚡\nHigh intensity • Rest period • Repeat cycle",
                 steps: [
                     "Choose 3-6 high-intensity exercises (burpees, jumping jacks, etc.)",
                     "Warm up with 5-10 minutes of light movement",
@@ -294,6 +305,7 @@
                 equipment: "Running Shoes",
                 primaryMuscles: ["Legs", "Cardiovascular System", "Core"],
                 icon: "🏃",
+                formIllustration: "🚶‍♂️➡️ 🏃💨 ➡️➡️ 🚶‍♂️\nWarm up • Steady pace • Cool down",
                 steps: [
                     "Start with 5-10 minute walking warm-up",
                     "Begin with comfortable jogging pace",
@@ -324,6 +336,7 @@
                 equipment: "None",
                 primaryMuscles: ["Full Body", "Cardiovascular System"],
                 icon: "🤸",
+                formIllustration: "🧍⬆️ ↗️↖️ 🤸‍♂️ ↙️↘️\nFeet together • Jump apart • Return center",
                 steps: [
                     "Stand with feet together, arms at sides",
                     "Jump while spreading legs to shoulder-width apart",
@@ -354,6 +367,7 @@
                 equipment: "None",
                 primaryMuscles: ["Full Body", "Cardiovascular System"],
                 icon: "💥",
+                formIllustration: "🧍➡️ 🏋️‍♂️➡️ 🤲➡️ 💥⬆️\nSquat down • Plank • Push up • Jump up",
                 steps: [
                     "Start standing with feet shoulder-width apart",
                     "Squat down and place hands on floor",
@@ -384,6 +398,7 @@
                 equipment: "Bicycle or Stationary Bike",
                 primaryMuscles: ["Legs", "Cardiovascular System", "Core"],
                 icon: "🚴",
+                formIllustration: "🚴‍♂️🔄 ⬆️⬇️ 🚴💨 ⬇️⬆️\nSteady pedaling • Smooth motion • Keep rhythm",
                 steps: [
                     "Adjust bike seat to proper height (slight knee bend at bottom)",
                     "Start with easy warm-up pace for 5-10 minutes",
@@ -414,6 +429,7 @@
                 equipment: "Pool, Swimwear",
                 primaryMuscles: ["Full Body", "Cardiovascular System"],
                 icon: "🏊",
+                formIllustration: "🏊‍♂️💨 🌊🔄 💨💦 🏊‍♂️\nStroke rhythm • Breathe steady • Swim smooth",
                 steps: [
                     "Start with 5-10 minutes easy swimming or water walking",
                     "Focus on proper breathing technique",
@@ -444,6 +460,7 @@
                 equipment: "Rowing Machine",
                 primaryMuscles: ["Full Body", "Back", "Legs", "Core"],
                 icon: "🚣",
+                formIllustration: "🚣‍♂️⬅️ 🦵💪 ⬅️🤝 ➡️🚣\nDrive legs • Pull arms • Return smooth",
                 steps: [
                     "Sit on rowing machine with feet secured in foot plates",
                     "Start position: knees bent, arms extended, lean slightly forward",
@@ -474,6 +491,7 @@
                 equipment: "Stairs or Step Machine",
                 primaryMuscles: ["Legs", "Glutes", "Cardiovascular System"],
                 icon: "🪜",
+                formIllustration: "🦶⬆️ 🪜💪 ⬆️⬆️ 💪🔥\nStep up • Full foot • Steady climb",
                 steps: [
                     "Start with 2-5 minutes easy pace warm-up",
                     "Step onto each stair with full foot, not just toes",
@@ -504,6 +522,7 @@
                 equipment: "Elliptical Machine",
                 primaryMuscles: ["Full Body", "Cardiovascular System"],
                 icon: "⭕",
+                formIllustration: "⭕🔄 ↗️↙️ 🏃‍♂️💨 ⭕🔄\nElliptical motion • Arms and legs • Smooth rhythm",
                 steps: [
                     "Step onto elliptical and grip handles lightly",
                     "Start with slow, easy pace for warm-up",
@@ -534,6 +553,7 @@
                 equipment: "None (Music recommended)",
                 primaryMuscles: ["Full Body", "Cardiovascular System", "Coordination"],
                 icon: "💃",
+                formIllustration: "🎵💃 ↗️↙️ 💃🕺 🎵💨\nMove to music • Have fun • Keep moving",
                 steps: [
                     "Choose upbeat music with good rhythm",
                     "Start with simple movements and basic steps",
@@ -602,6 +622,7 @@
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
                             ${exercise.icon}
+                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>

@@ -32,12 +32,22 @@
             height: 200px;
             background: linear-gradient(135deg, #8e44ad, #9b59b6);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 40px;
             color: white;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .form-illustration {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+            max-width: 90%;
         }
         
         .difficulty-badge {
@@ -264,6 +274,7 @@
                 equipment: "Barbell",
                 primaryMuscles: ["Biceps", "Forearms"],
                 icon: "🏋️",
+                formIllustration: "🧍🏋️ ⬆️💪 ↓🏋️ ⬆️💪\nArms down • Curl up • Control down",
                 steps: [
                     "Stand with feet shoulder-width apart, core engaged",
                     "Hold barbell with underhand grip, hands shoulder-width apart",
@@ -294,6 +305,7 @@
                 equipment: "Dumbbells",
                 primaryMuscles: ["Biceps", "Brachialis", "Forearms"],
                 icon: "🔨",
+                formIllustration: "🔨⬇️ ⬆️💪 ↓🔨 ⬆️💪\nNeutral grip • Hammer up • Control down",
                 steps: [
                     "Hold dumbbells at sides with neutral grip (palms facing body)",
                     "Keep elbows close to sides and shoulders back",
@@ -324,6 +336,7 @@
                 equipment: "Bench or Parallel Bars",
                 primaryMuscles: ["Triceps", "Shoulders", "Chest"],
                 icon: "📉",
+                formIllustration: "🪑🤲 ↓🦵 ⬆️💪 ↓🦵\nSit on edge • Dip down • Press up",
                 steps: [
                     "Position hands on bench or bars with arms extended",
                     "Keep legs extended in front or bent for easier variation",
@@ -354,6 +367,7 @@
                 equipment: "None",
                 primaryMuscles: ["Triceps", "Chest", "Shoulders"],
                 icon: "🤲",
+                formIllustration: "🔸🤲 ↓🦵 ⬆️💪 ↓🦵\nDiamond hands • Lower down • Press up",
                 steps: [
                     "Start in push-up position with hands close together",
                     "Form diamond shape with thumbs and index fingers",
@@ -384,6 +398,7 @@
                 equipment: "Dumbbell",
                 primaryMuscles: ["Triceps"],
                 icon: "⬆️",
+                formIllustration: "🏋️⬆️ ↙️💪 ⬆️🏋️ ↓💪\nWeight up • Lower behind • Extend up",
                 steps: [
                     "Hold dumbbell with both hands overhead",
                     "Keep elbows close to head and pointing forward",
@@ -414,6 +429,7 @@
                 equipment: "Preacher Bench, Barbell or Dumbbells",
                 primaryMuscles: ["Biceps"],
                 icon: "⛪",
+                formIllustration: "🪑🔴 ⬆️💪 ↓🏋️ ⬆️💪\nSit at bench • Curl up • Control down",
                 steps: [
                     "Sit at preacher bench with chest against pad",
                     "Position arms over pad with slight bend at bottom",
@@ -444,6 +460,7 @@
                 equipment: "Dumbbells",
                 primaryMuscles: ["Triceps"],
                 icon: "🦵",
+                formIllustration: "🤸‍♂️💪 ↘️💪 ⬅️💪 ↗️💪\nBend over • Arm bent • Kick back",
                 steps: [
                     "Bend forward at hips with one knee on bench",
                     "Hold dumbbell with arm bent at 90 degrees",
@@ -474,6 +491,7 @@
                 equipment: "Barbell or Dumbbells",
                 primaryMuscles: ["Biceps"],
                 icon: "2️⃣1️⃣",
+                formIllustration: "7️⃣⬆️ 🔄 7️⃣⬆️ 🔄 7️⃣↕️\n7 bottom • 7 top • 7 full",
                 steps: [
                     "Perform 7 reps from bottom to halfway up",
                     "Focus on bottom half range of motion",
@@ -504,6 +522,7 @@
                 equipment: "Cable Machine",
                 primaryMuscles: ["Triceps"],
                 icon: "🔗",
+                formIllustration: "🧍🔗 ⬇️💪 ⬆️🔗 ⬇️💪\nStand tall • Push down • Control up",
                 steps: [
                     "Stand at cable machine with high pulley",
                     "Grab rope or bar with overhand grip",
@@ -534,6 +553,7 @@
                 equipment: "Dumbbell, Bench",
                 primaryMuscles: ["Biceps"],
                 icon: "🎯",
+                formIllustration: "🪑🦵 ⬆️💪 ↓🏋️ ⬆️💪\nSit wide • Elbow on thigh • Focus curl",
                 steps: [
                     "Sit on bench with legs spread wide",
                     "Hold dumbbell in one hand between legs",
@@ -602,6 +622,7 @@
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
                             ${exercise.icon}
+                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>

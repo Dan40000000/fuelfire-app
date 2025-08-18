@@ -32,12 +32,22 @@
             height: 200px;
             background: linear-gradient(135deg, #3498db, #2980b9);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 40px;
             color: white;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .form-illustration {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+            max-width: 90%;
         }
         
         .difficulty-badge {
@@ -264,6 +274,7 @@
                 equipment: "Barbell, Plates",
                 primaryMuscles: ["Erector Spinae", "Lats", "Traps", "Glutes"],
                 icon: "🏋️",
+                formIllustration: "🧍→🤸‍♂️ ↓🏋️ ⬆️🧍 💪\nHip hinge • Grip bar • Drive up",
                 steps: [
                     "Stand with feet hip-width apart, bar over mid-foot",
                     "Hinge at hips and bend knees to grip bar just outside legs",
@@ -294,6 +305,7 @@
                 equipment: "Pull-up Bar",
                 primaryMuscles: ["Lats", "Rhomboids", "Biceps", "Mid Traps"],
                 icon: "🏃",
+                formIllustration: "🤲🔗 ↓🔻 ⬆️💪 ↓🔻\nHang • Pull up • Control down",
                 steps: [
                     "Hang from bar with palms facing away, hands shoulder-width apart",
                     "Start from dead hang with arms fully extended",
@@ -324,6 +336,7 @@
                 equipment: "Barbell, Plates",
                 primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
                 icon: "🚣",
+                formIllustration: "🧍↘️ 🏋️💪 ↖️⬆️ ↙️⬇️\nHinge forward • Row to chest • Control down",
                 steps: [
                     "Stand with feet hip-width apart, hold bar with overhand grip",
                     "Hinge at hips keeping chest up and back straight",
@@ -354,6 +367,7 @@
                 equipment: "Cable Machine, Lat Bar",
                 primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Biceps"],
                 icon: "⬇️",
+                formIllustration: "🪑🤲 ⬆️🔗 ⬇️💪 ⬆️🔗\nSit • Grip wide • Pull to chest",
                 steps: [
                     "Sit at lat pulldown machine with thighs secured under pads",
                     "Grip bar wider than shoulder-width with palms away",
@@ -384,6 +398,7 @@
                 equipment: "T-Bar Machine or Landmine",
                 primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
                 icon: "📐",
+                formIllustration: "🧍📐 ↘️🤲 ↗️💪 ↙️⬇️\nStraddle T-bar • Hinge • Row up",
                 steps: [
                     "Straddle T-bar with feet planted firmly",
                     "Hinge at hips and grip handles with both hands",
@@ -414,6 +429,7 @@
                 equipment: "Cable Machine, Seated Row Attachment",
                 primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
                 icon: "🔗",
+                formIllustration: "🪑→ 🤲⬅️ 💪↖️ ➡️🤲\nSit tall • Pull to chest • Squeeze back",
                 steps: [
                     "Sit at cable row machine with feet on platform",
                     "Grip handle with both hands, arms extended",
@@ -444,6 +460,7 @@
                 equipment: "Cable Machine, Rope Attachment",
                 primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
                 icon: "👤",
+                formIllustration: "🤲🔗 ↖️↗️ 👤💪 ↙️↘️\nGrip rope • Pull to face • Separate hands",
                 steps: [
                     "Set cable to face height with rope attachment",
                     "Grip rope with palms down, arms extended",
@@ -474,6 +491,7 @@
                 equipment: "Dumbbells or Barbell",
                 primaryMuscles: ["Upper Traps", "Levator Scapulae"],
                 icon: "🤷",
+                formIllustration: "🧍💪 ⬆️🤷 ⬇️💪 ⬆️🤷\nStand tall • Lift shoulders • Control down",
                 steps: [
                     "Hold dumbbells at sides or barbell in front",
                     "Stand tall with feet hip-width apart",
@@ -542,6 +560,7 @@
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
                             ${exercise.icon}
+                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>

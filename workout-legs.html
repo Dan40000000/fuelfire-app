@@ -32,12 +32,22 @@
             height: 200px;
             background: linear-gradient(135deg, #27ae60, #219a52);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 40px;
             color: white;
             position: relative;
             overflow: hidden;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .form-illustration {
+            font-size: 14px;
+            margin-top: 8px;
+            opacity: 0.9;
+            max-width: 90%;
         }
         
         .difficulty-badge {
@@ -264,6 +274,7 @@
                 equipment: "Barbell, Squat Rack",
                 primaryMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
                 icon: "🏋️",
+                formIllustration: "🧍🏋️ ↓🤸‍♂️ ⬆️💪 ↓🤸‍♂️\nStand tall • Squat down • Drive up",
                 steps: [
                     "Position bar on upper back (trapezius) in squat rack",
                     "Step back and set feet shoulder-width apart",
@@ -294,6 +305,7 @@
                 equipment: "Barbell or Dumbbells",
                 primaryMuscles: ["Hamstrings", "Glutes", "Lower Back"],
                 icon: "🎯",
+                formIllustration: "🧍→🤸‍♂️ ↙️🏋️ ↖️💪 ↓🤸‍♂️\nHip hinge • Lower bar • Drive hips",
                 steps: [
                     "Hold barbell with overhand grip, hands shoulder-width apart",
                     "Start standing with slight bend in knees",
@@ -324,6 +336,7 @@
                 equipment: "Bench or Elevated Surface",
                 primaryMuscles: ["Quadriceps", "Glutes", "Calves"],
                 icon: "🏃",
+                formIllustration: "🦵🪑 ↓🤸‍♂️ ⬆️💪 ↓🤸‍♂️\nRear foot up • Lunge down • Push up",
                 steps: [
                     "Stand 2-3 feet in front of bench or elevated surface",
                     "Place top of one foot on bench behind you",
@@ -354,6 +367,7 @@
                 equipment: "None (can add dumbbells)",
                 primaryMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
                 icon: "🚶",
+                formIllustration: "🚶➡️ ↓🤸‍♂️ ⬆️🚶 ➡️🤸‍♂️\nStep forward • Lunge down • Walk through",
                 steps: [
                     "Start standing with feet hip-width apart",
                     "Step forward with one leg into lunge position",
@@ -384,6 +398,7 @@
                 equipment: "Leg Press Machine",
                 primaryMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
                 icon: "🏗️",
+                formIllustration: "🪑🔴 ↓🦵 ⬆️💪 ↓🦵\nSit back • Lower weight • Press up",
                 steps: [
                     "Sit in leg press machine with back flat against pad",
                     "Place feet on platform shoulder-width apart",
@@ -414,6 +429,7 @@
                 equipment: "Dumbbell or Kettlebell",
                 primaryMuscles: ["Quadriceps", "Glutes", "Core"],
                 icon: "🏆",
+                formIllustration: "🤗🏋️ ↓🤸‍♂️ ⬆️💪 ↓🤸‍♂️\nHold weight • Squat down • Drive up",
                 steps: [
                     "Hold dumbbell or kettlebell close to chest",
                     "Stand with feet slightly wider than shoulder-width",
@@ -444,6 +460,7 @@
                 equipment: "Dumbbell (optional)",
                 primaryMuscles: ["Hamstrings", "Glutes", "Core"],
                 icon: "⚖️",
+                formIllustration: "🧍🦵 ↙️↗️ ↖️💪 ↓🧍\nStand one leg • Hinge forward • Return up",
                 steps: [
                     "Stand on one leg with soft bend in knee",
                     "Hinge at hip and reach forward while lifting back leg",
@@ -474,6 +491,7 @@
                 equipment: "Bench or Step Platform",
                 primaryMuscles: ["Quadriceps", "Glutes", "Calves"],
                 icon: "📶",
+                formIllustration: "🪑⬆️ 🦵↗️ ⬆️💪 ↙️🦵\nStep on box • Drive up • Step down",
                 steps: [
                     "Stand facing bench or step at knee height",
                     "Step up with one foot, placing entire foot on surface",
@@ -504,6 +522,7 @@
                 equipment: "Wall",
                 primaryMuscles: ["Quadriceps", "Glutes", "Core"],
                 icon: "🧱",
+                formIllustration: "🧱🧍 ↓🤸‍♂️ ⏰💪 ⬆️🧍\nBack to wall • Slide down • Hold",
                 steps: [
                     "Stand with back against wall, feet shoulder-width apart",
                     "Walk feet forward while sliding down wall",
@@ -534,6 +553,7 @@
                 equipment: "None",
                 primaryMuscles: ["Quadriceps", "Glutes", "Calves"],
                 icon: "💥",
+                formIllustration: "🤸‍♂️💥 ⬆️💫 ↓🤸‍♂️ 💥⬆️\nSquat • Explode up • Land soft",
                 steps: [
                     "Start in squat position with feet shoulder-width apart",
                     "Lower into squat until thighs parallel to floor",
@@ -602,6 +622,7 @@
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
                             ${exercise.icon}
+                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>
