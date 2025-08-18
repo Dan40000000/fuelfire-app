@@ -9,12 +9,10 @@ FuelFire now uses **Claude AI** to understand complex food descriptions like:
 
 ## API Keys Setup
 
-### 1. **Claude API Key (REQUIRED for AI parsing)**
-   - Go to: https://console.anthropic.com/
-   - Create an account and get your API key
-   - Add to Vercel Environment Variables:
-     - Name: `CLAUDE_API_KEY` 
-     - Value: `your-claude-api-key-here`
+### 1. **Claude API Key (Uses existing key!)**
+   - ✅ **ALREADY CONFIGURED** - Uses the same `CLAUDE_API_KEY` from meal plan generation
+   - No additional setup needed if meal plans are working!
+   - AI food parsing will work automatically
 
 ### 2. **USDA API Key (Optional - for simple searches)**
    - Go to: https://fdc.nal.usda.gov/api-key-signup.html
