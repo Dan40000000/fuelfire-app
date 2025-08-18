@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Back Exercises - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .exercise-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .difficulty-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .exercise-content {
+            padding: 20px;
+        }
+        
+        .exercise-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .exercise-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .exercise-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .muscle-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .muscle-tag {
+            background: #f0f8ff;
+            color: #3498db;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10px;
+            padding: 0;
+            border-radius: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .close-modal {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .risk-warning {
+            background: #fff5f5;
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .tip-box {
+            background: #f0f8ff;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">🦵 Back Exercises</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦵 Back Exercise Library</h2>
+                        <p style="color: #666; font-size: 14px;">Build a strong, wide back with proper form and technique</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    
+                    <!-- Exercises Grid -->
+                    <div id="exercises-container" class="exercise-grid">
+                        <!-- Exercises will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item active" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+    
+    <!-- Exercise Modal -->
+    <div id="exercise-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+                <h2 id="modal-title">Exercise Title</h2>
+                <div id="modal-subtitle" style="opacity: 0.9; margin-top: 8px;"></div>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content-body">
+                    <!-- Content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Back Exercise Database
+        const backExercises = [
+            {
+                name: "Deadlift",
+                description: "The king of all exercises - builds total body strength and power",
+                difficulty: 5,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Erector Spinae", "Lats", "Traps", "Glutes"],
+                icon: "🏋️",
+                steps: [
+                    "Stand with feet hip-width apart, bar over mid-foot",
+                    "Hinge at hips and bend knees to grip bar just outside legs",
+                    "Chest up, shoulders back, neutral spine throughout",
+                    "Drive through heels and hips to stand up tall",
+                    "Keep bar close to body throughout entire movement",
+                    "Reverse movement by hinging at hips first, then knees"
+                ],
+                commonMistakes: [
+                    "Rounding the back - extremely dangerous",
+                    "Bar drifting away from body during lift",
+                    "Hyperextending at the top of movement",
+                    "Looking up during lift (cervical extension)"
+                ],
+                safetyTips: [
+                    "Master hip hinge movement pattern first",
+                    "Start with lighter weight to perfect form",
+                    "Use proper footwear (flat soles, not running shoes)",
+                    "Consider lifting straps for grip if needed"
+                ],
+                risks: "Lower back injury, bicep tears, herniated discs if performed incorrectly",
+                energySaving: "Focus on hip hinge pattern - let your glutes and hamstrings do the work, not your back"
+            },
+            {
+                name: "Pull-ups",
+                description: "Ultimate bodyweight back exercise for width and strength",
+                difficulty: 4,
+                equipment: "Pull-up Bar",
+                primaryMuscles: ["Lats", "Rhomboids", "Biceps", "Mid Traps"],
+                icon: "🏃",
+                steps: [
+                    "Hang from bar with palms facing away, hands shoulder-width apart",
+                    "Start from dead hang with arms fully extended",
+                    "Engage lats and pull chest toward bar",
+                    "Focus on bringing elbows down and back",
+                    "Pull until chin clears bar or chest touches",
+                    "Lower with control to full extension"
+                ],
+                commonMistakes: [
+                    "Using momentum or kipping motion",
+                    "Partial range of motion (not reaching full extension)",
+                    "Pulling with arms instead of back muscles",
+                    "Craning neck to get chin over bar"
+                ],
+                safetyTips: [
+                    "Start with assisted pull-ups or negatives if needed",
+                    "Warm up shoulders thoroughly before starting",
+                    "Progress gradually - quality over quantity",
+                    "Stop if you feel shoulder or elbow pain"
+                ],
+                risks: "Shoulder impingement, elbow strain, falling from bar",
+                energySaving: "Use resistance bands for assistance rather than avoiding the exercise entirely"
+            },
+            {
+                name: "Barbell Rows",
+                description: "Fundamental rowing movement for back thickness and strength",
+                difficulty: 3,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
+                icon: "🚣",
+                steps: [
+                    "Stand with feet hip-width apart, hold bar with overhand grip",
+                    "Hinge at hips keeping chest up and back straight",
+                    "Let bar hang at arm's length with slight knee bend",
+                    "Pull bar to lower chest/upper abdomen",
+                    "Squeeze shoulder blades together at top",
+                    "Lower bar with control to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much body momentum",
+                    "Rowing to wrong part of body (too high or low)",
+                    "Not maintaining hip hinge position",
+                    "Rounding the back during movement"
+                ],
+                safetyTips: [
+                    "Keep core engaged throughout movement",
+                    "Start with lighter weight to master form",
+                    "Don't let lower back round",
+                    "Focus on pulling with back muscles, not arms"
+                ],
+                risks: "Lower back strain, bicep tears, poor posture reinforcement",
+                energySaving: "Use a bench for chest support if lower back fatigue is limiting factor"
+            },
+            {
+                name: "Lat Pulldowns",
+                description: "Cable exercise for building lat width and upper body strength",
+                difficulty: 2,
+                equipment: "Cable Machine, Lat Bar",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Biceps"],
+                icon: "⬇️",
+                steps: [
+                    "Sit at lat pulldown machine with thighs secured under pads",
+                    "Grip bar wider than shoulder-width with palms away",
+                    "Lean back slightly and puff chest out",
+                    "Pull bar down to upper chest in smooth motion",
+                    "Focus on pulling elbows down and back",
+                    "Control weight back to starting position"
+                ],
+                commonMistakes: [
+                    "Pulling bar behind neck (dangerous for shoulders)",
+                    "Using too much body momentum",
+                    "Not getting full stretch at top of movement",
+                    "Pulling with arms instead of back muscles"
+                ],
+                safetyTips: [
+                    "Never pull bar behind your neck",
+                    "Keep chest up throughout movement",
+                    "Don't let weight stack slam down",
+                    "Adjust weight to maintain proper form"
+                ],
+                risks: "Shoulder impingement, neck strain if pulled behind head",
+                energySaving: "Focus on mind-muscle connection - slower reps build more muscle with less weight"
+            },
+            {
+                name: "T-Bar Rows",
+                description: "Thick back builder using specialized equipment for heavy rowing",
+                difficulty: 3,
+                equipment: "T-Bar Machine or Landmine",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
+                icon: "📐",
+                steps: [
+                    "Straddle T-bar with feet planted firmly",
+                    "Hinge at hips and grip handles with both hands",
+                    "Keep chest up and back straight throughout",
+                    "Pull bar to lower chest/upper abdomen",
+                    "Squeeze shoulder blades at top of movement",
+                    "Lower weight with control to full extension"
+                ],
+                commonMistakes: [
+                    "Standing too upright during movement",
+                    "Using legs to help lift weight",
+                    "Not maintaining neutral spine",
+                    "Partial range of motion"
+                ],
+                safetyTips: [
+                    "Keep core braced throughout movement",
+                    "Don't let lower back round",
+                    "Use proper foot placement for stability",
+                    "Start lighter than you think you need"
+                ],
+                risks: "Lower back strain, loss of balance, weight dropping on feet",
+                energySaving: "Use chest-supported version if available to reduce lower back fatigue"
+            },
+            {
+                name: "Cable Rows",
+                description: "Seated cable exercise for controlled back development",
+                difficulty: 2,
+                equipment: "Cable Machine, Seated Row Attachment",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
+                icon: "🔗",
+                steps: [
+                    "Sit at cable row machine with feet on platform",
+                    "Grip handle with both hands, arms extended",
+                    "Sit up tall with slight lean back",
+                    "Pull handle to lower chest/upper abdomen",
+                    "Squeeze shoulder blades together",
+                    "Slowly return to starting position with control"
+                ],
+                commonMistakes: [
+                    "Using too much momentum or body swing",
+                    "Rounding shoulders forward at start position",
+                    "Pulling handle too high (to neck area)",
+                    "Not maintaining upright posture"
+                ],
+                safetyTips: [
+                    "Keep chest up and shoulders back",
+                    "Don't let weight stack slam down",
+                    "Maintain slight bend in knees",
+                    "Focus on controlled movement"
+                ],
+                risks: "Lower back strain from poor posture, shoulder strain",
+                energySaving: "Use pause at peak contraction to maximize muscle activation"
+            },
+            {
+                name: "Face Pulls",
+                description: "Rear delt and upper back exercise for posture improvement",
+                difficulty: 1,
+                equipment: "Cable Machine, Rope Attachment",
+                primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
+                icon: "👤",
+                steps: [
+                    "Set cable to face height with rope attachment",
+                    "Grip rope with palms down, arms extended",
+                    "Pull rope toward face while separating hands",
+                    "Focus on squeezing shoulder blades together",
+                    "Pull until hands reach ear level",
+                    "Slowly return to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight and compromising form",
+                    "Not separating hands at end of movement",
+                    "Pulling too low (to chest instead of face)",
+                    "Using momentum instead of controlled movement"
+                ],
+                safetyTips: [
+                    "Start with very light weight",
+                    "Focus on perfect form over heavy weight",
+                    "Keep elbows high throughout movement",
+                    "Don't let shoulders roll forward"
+                ],
+                risks: "Minimal risk - mainly shoulder strain if too heavy",
+                energySaving: "Perfect exercise for high reps - builds endurance and improves posture"
+            },
+            {
+                name: "Shrugs",
+                description: "Targeted trapezius exercise for upper back development",
+                difficulty: 1,
+                equipment: "Dumbbells or Barbell",
+                primaryMuscles: ["Upper Traps", "Levator Scapulae"],
+                icon: "🤷",
+                steps: [
+                    "Hold dumbbells at sides or barbell in front",
+                    "Stand tall with feet hip-width apart",
+                    "Keep arms straight throughout movement",
+                    "Lift shoulders straight up toward ears",
+                    "Hold peak contraction for 1-2 seconds",
+                    "Lower shoulders slowly to starting position"
+                ],
+                commonMistakes: [
+                    "Rolling shoulders in circular motion",
+                    "Using too much weight and partial range",
+                    "Bending arms during movement",
+                    "Rushing through the exercise"
+                ],
+                safetyTips: [
+                    "Move shoulders straight up and down only",
+                    "Don't roll shoulders - increases injury risk",
+                    "Use straps if grip is limiting factor",
+                    "Focus on slow, controlled movements"
+                ],
+                risks: "Neck strain, shoulder impingement if performed incorrectly",
+                energySaving: "Hold peak contraction longer rather than using heavier weight"
+            }
+        ];
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function goBack() {
+            window.location.href = 'workout-techniques.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function displayExercises() {
+            const container = document.getElementById('exercises-container');
+            let html = '';
+            
+            backExercises.forEach((exercise, index) => {
+                html += `
+                    <div class="exercise-card" onclick="openExerciseModal(${index})">
+                        <div class="exercise-image">
+                            <div class="difficulty-badge">
+                                ${generateDifficultyStars(exercise.difficulty)}
+                            </div>
+                            ${exercise.icon}
+                        </div>
+                        <div class="exercise-content">
+                            <div class="exercise-title">${exercise.name}</div>
+                            <div class="exercise-description">${exercise.description}</div>
+                            <div class="exercise-stats">
+                                <div style="font-size: 12px; color: #666;">
+                                    Equipment: ${exercise.equipment}
+                                </div>
+                            </div>
+                            <div class="muscle-tags">
+                                ${exercise.primaryMuscles.map(muscle => 
+                                    `<span class="muscle-tag">${muscle}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function openExerciseModal(index) {
+            const exercise = backExercises[index];
+            const modal = document.getElementById('exercise-modal');
+            
+            document.getElementById('modal-title').textContent = exercise.name;
+            document.getElementById('modal-subtitle').innerHTML = `
+                ${exercise.icon} ${exercise.description} • Equipment: ${exercise.equipment} • Difficulty: ${generateDifficultyStars(exercise.difficulty)}
+            `;
+            
+            let contentHtml = `
+                <div class="form-section">
+                    <h3 style="color: #3498db; margin-bottom: 15px;">🎯 Proper Form</h3>
+                    ${exercise.steps.map((step, i) => `
+                        <div class="form-step">
+                            <div class="step-number">${i + 1}</div>
+                            <div>${step}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="risk-warning">
+                    <h4 style="color: #e74c3c; margin: 0 0 10px 0;">⚠️ Injury Risks</h4>
+                    <p style="margin: 0; font-size: 14px;">${exercise.risks}</p>
+                </div>
+                
+                <div class="form-section">
+                    <h3 style="color: #e74c3c; margin-bottom: 15px;">❌ Common Mistakes</h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        ${exercise.commonMistakes.map(mistake => `<li style="margin-bottom: 8px;">${mistake}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="form-section">
+                    <h3 style="color: #27ae60; margin-bottom: 15px;">✅ Safety Tips</h3>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        ${exercise.safetyTips.map(tip => `<li style="margin-bottom: 8px;">${tip}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="tip-box">
+                    <h4 style="color: #3498db; margin: 0 0 10px 0;">💡 Energy Conservation Tip</h4>
+                    <p style="margin: 0; font-size: 14px;">${exercise.energySaving}</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <div style="background: #f8f9ff; padding: 15px; border-radius: 10px;">
+                        <h4 style="color: var(--primary); margin: 0 0 8px 0;">Target Muscles</h4>
+                        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                            ${exercise.primaryMuscles.map(muscle => 
+                                `<span style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px;">${muscle}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-content-body').innerHTML = contentHtml;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('exercise-modal').style.display = 'none';
+        }
+
+        // Click outside modal to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('exercise-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            displayExercises();
+        });
+    </script>
+</body>
+</html>
