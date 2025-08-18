@@ -1330,11 +1330,79 @@
             }
         }
 
+        // Calculate and save macro targets based on diet goals
+        function saveMacroTargets(metadata) {
+            try {
+                // Extract calorie target from metadata
+                let calorieTarget = 2000; // default
+                
+                if (metadata.calorieTarget) {
+                    calorieTarget = parseInt(metadata.calorieTarget);
+                } else if (quizData.calories && quizData.calories !== 'auto-calculate') {
+                    calorieTarget = parseInt(quizData.calories);
+                } else {
+                    // Auto-calculate based on basic profile data
+                    const weight = parseInt(quizData.weight) || 180;
+                    const age = parseInt(quizData.age) || 30;
+                    const gender = quizData.gender || 'male';
+                    const activity = quizData.activity || 'moderate';
+                    
+                    // Basic BMR calculation
+                    let bmr = gender === 'male' 
+                        ? 88.362 + (13.397 * (weight * 0.453592)) + (4.799 * 175) - (5.677 * age) // assuming avg height
+                        : 447.593 + (9.247 * (weight * 0.453592)) + (3.098 * 160) - (4.330 * age);
+                    
+                    // Activity multiplier
+                    const activityMultipliers = {
+                        'sedentary': 1.2,
+                        'light': 1.375,
+                        'moderate': 1.55,
+                        'active': 1.725,
+                        'very-active': 1.9
+                    };
+                    
+                    calorieTarget = Math.round(bmr * (activityMultipliers[activity] || 1.55));
+                    
+                    // Adjust for goal
+                    if (quizData.goal === 'weight-loss') calorieTarget -= 500;
+                    if (quizData.goal === 'weight-gain') calorieTarget += 500;
+                }
+                
+                // Calculate macro targets based on standard ratios
+                // Protein: 30% of calories (1g = 4 calories)
+                // Carbs: 40% of calories (1g = 4 calories)  
+                // Fat: 30% of calories (1g = 9 calories)
+                const proteinTarget = Math.round((calorieTarget * 0.30) / 4);
+                const carbsTarget = Math.round((calorieTarget * 0.40) / 4);
+                const fatTarget = Math.round((calorieTarget * 0.30) / 9);
+                
+                // Save to localStorage for calorie tracker
+                const dietGoals = {
+                    calorieTarget: calorieTarget,
+                    proteinTarget: proteinTarget,
+                    carbsTarget: carbsTarget,
+                    fatTarget: fatTarget,
+                    updatedAt: new Date().toISOString(),
+                    source: 'diet_quiz'
+                };
+                
+                localStorage.setItem('fuelfire_recent_diet_goals', JSON.stringify(dietGoals));
+                
+                console.log('📊 Macro targets saved:', dietGoals);
+                
+            } catch (error) {
+                console.error('❌ Error calculating macro targets:', error);
+            }
+        }
+
         function saveMealPlanToStorage(mealPlan, metadata) {
             try {
                 // Get existing meal plans from localStorage
                 const existingPlans = localStorage.getItem('fuelfire_meal_plans');
                 const mealPlans = existingPlans ? JSON.parse(existingPlans) : [];
+                
+                // Calculate and save macro targets based on current quiz data
+                saveMacroTargets(metadata);
                 
                 // Create new meal plan object
                 const newPlan = {

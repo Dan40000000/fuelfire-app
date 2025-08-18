@@ -44,6 +44,68 @@
                         </div>
                     </div>
                     
+                    <!-- Macro Tracking -->
+                    <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">📊 Macro Breakdown</h3>
+                        
+                        <!-- Protein -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: bold; color: #e74c3c;">🥩 Protein</div>
+                                <div style="font-size: 14px; color: #666;">
+                                    <span id="protein-consumed">0</span>g / <span id="protein-target">150</span>g
+                                </div>
+                            </div>
+                            <div style="background: #f0f0f0; border-radius: 10px; height: 12px; overflow: hidden;">
+                                <div id="protein-bar" style="background: linear-gradient(90deg, #e74c3c, #c0392b); height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Carbs -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: bold; color: #f39c12;">🍞 Carbs</div>
+                                <div style="font-size: 14px; color: #666;">
+                                    <span id="carbs-consumed">0</span>g / <span id="carbs-target">200</span>g
+                                </div>
+                            </div>
+                            <div style="background: #f0f0f0; border-radius: 10px; height: 12px; overflow: hidden;">
+                                <div id="carbs-bar" style="background: linear-gradient(90deg, #f39c12, #e67e22); height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fat -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: bold; color: #27ae60;">🥑 Fat</div>
+                                <div style="font-size: 14px; color: #666;">
+                                    <span id="fat-consumed">0</span>g / <span id="fat-target">67</span>g
+                                </div>
+                            </div>
+                            <div style="background: #f0f0f0; border-radius: 10px; height: 12px; overflow: hidden;">
+                                <div id="fat-bar" style="background: linear-gradient(90deg, #27ae60, #229954); height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Macro Summary -->
+                        <div style="background: #f8f9ff; border-radius: 10px; padding: 15px; margin-top: 15px;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+                                <div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #e74c3c;" id="protein-percent">0%</div>
+                                    <div style="font-size: 12px; color: #666;">Protein Goal</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #f39c12;" id="carbs-percent">0%</div>
+                                    <div style="font-size: 12px; color: #666;">Carbs Goal</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #27ae60;" id="fat-percent">0%</div>
+                                    <div style="font-size: 12px; color: #666;">Fat Goal</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Epic Food Logging Section -->
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
                         <h3 style="color: white; text-align: center; margin: 0 0 15px 0; font-size: 20px;">🔥 LOG YOUR FUEL 🔥</h3>
@@ -669,20 +731,78 @@
             window.location.href = page;
         }
         
+        // Update macro display with progress bars
+        function updateMacroDisplay(macroType, consumed, target) {
+            // Update consumed/target values
+            document.getElementById(`${macroType}-consumed`).textContent = Math.round(consumed);
+            document.getElementById(`${macroType}-target`).textContent = Math.round(target);
+            
+            // Calculate percentage
+            const percentage = Math.min((consumed / target) * 100, 100);
+            const percentageRounded = Math.round((consumed / target) * 100);
+            
+            // Update progress bar
+            document.getElementById(`${macroType}-bar`).style.width = `${percentage}%`;
+            
+            // Update percentage display
+            document.getElementById(`${macroType}-percent`).textContent = `${percentageRounded}%`;
+            
+            // Color coding for progress bars based on completion
+            const bar = document.getElementById(`${macroType}-bar`);
+            if (percentageRounded >= 100) {
+                // Completed - use brighter colors
+                if (macroType === 'protein') bar.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+                if (macroType === 'carbs') bar.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
+                if (macroType === 'fat') bar.style.background = 'linear-gradient(90deg, #27ae60, #229954)';
+            } else if (percentageRounded >= 80) {
+                // Near completion - slightly dimmed
+                if (macroType === 'protein') bar.style.background = 'linear-gradient(90deg, #ec7063, #d5616a)';
+                if (macroType === 'carbs') bar.style.background = 'linear-gradient(90deg, #f7a83b, #e89550)';
+                if (macroType === 'fat') bar.style.background = 'linear-gradient(90deg, #48c774, #3a9960)';
+            } else {
+                // Lower completion - dimmed colors
+                if (macroType === 'protein') bar.style.background = 'linear-gradient(90deg, #fadbd8, #f5c6cb)';
+                if (macroType === 'carbs') bar.style.background = 'linear-gradient(90deg, #fdebd0, #fce4b6)';
+                if (macroType === 'fat') bar.style.background = 'linear-gradient(90deg, #d5f4e6, #c8e6c9)';
+            }
+        }
+        
         function loadTodaysMeals() {
             const today = new Date().toISOString().split('T')[0];
             const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
             
-            // Get user's calorie target (default 2000)
+            // Get user's targets from most recent diet goals
             const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
-            const target = userProfile.calorieTarget || 2000;
+            const recentDietGoals = JSON.parse(localStorage.getItem('fuelfire_recent_diet_goals') || '{}');
             
-            // Update summary
+            // Calculate targets based on stored goals or use defaults
+            const calorieTarget = userProfile.calorieTarget || recentDietGoals.calorieTarget || 2000;
+            const proteinTarget = userProfile.proteinTarget || recentDietGoals.proteinTarget || Math.round(calorieTarget * 0.3 / 4);
+            const carbsTarget = userProfile.carbsTarget || recentDietGoals.carbsTarget || Math.round(calorieTarget * 0.4 / 4);
+            const fatTarget = userProfile.fatTarget || recentDietGoals.fatTarget || Math.round(calorieTarget * 0.3 / 9);
+            
+            // Calculate consumed macros
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+            
+            todayData.meals.forEach(meal => {
+                totalProtein += meal.protein || 0;
+                totalCarbs += meal.carbs || 0;
+                totalFat += meal.fat || 0;
+            });
+            
+            // Update calorie summary
             document.getElementById('calories-today').textContent = todayData.totalCalories;
-            document.getElementById('calorie-target').textContent = target;
-            document.getElementById('calories-remaining').textContent = Math.max(0, target - todayData.totalCalories);
-            document.getElementById('percent-complete').textContent = Math.round((todayData.totalCalories / target) * 100) + '%';
+            document.getElementById('calorie-target').textContent = calorieTarget;
+            document.getElementById('calories-remaining').textContent = Math.max(0, calorieTarget - todayData.totalCalories);
+            document.getElementById('percent-complete').textContent = Math.round((todayData.totalCalories / calorieTarget) * 100) + '%';
+            
+            // Update macro tracking
+            updateMacroDisplay('protein', totalProtein, proteinTarget);
+            updateMacroDisplay('carbs', totalCarbs, carbsTarget);
+            updateMacroDisplay('fat', totalFat, fatTarget);
             
             // Organize meals by type
             const mealsByType = {
