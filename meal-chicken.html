@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Recipes - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .meal-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .meal-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .difficulty-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .meal-content {
+            padding: 20px;
+        }
+        
+        .meal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .meal-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .meal-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .meal-time {
+            color: #28a745;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .rating-stars {
+            color: #ff9500;
+            font-size: 14px;
+        }
+        
+        .meal-nutrition {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .nutrition-item {
+            text-align: center;
+            background: #f8f9ff;
+            padding: 8px 4px;
+            border-radius: 8px;
+        }
+        
+        .nutrition-value {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .nutrition-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10px;
+            padding: 0;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .close-modal {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .ingredient-list {
+            margin: 15px 0;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .ingredient-checkbox {
+            margin-right: 10px;
+        }
+
+        .instruction-list {
+            margin: 15px 0;
+        }
+
+        .instruction-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .log-recipe-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">🐔 Chicken Recipes</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🐔 Epic Chicken Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 amazing chicken dishes with fusion flavors and classic favorites</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    
+                    <!-- Meals Grid -->
+                    <div id="meals-container" class="meal-grid">
+                        <!-- Meals will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item active" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+    
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+                <h2 id="modal-title">Recipe Title</h2>
+                <div id="modal-subtitle" style="opacity: 0.9; margin-top: 8px;"></div>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content-body">
+                    <!-- Content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chicken Recipe Database
+        const chickenRecipes = [
+            {
+                name: "Classic Fried Chicken",
+                description: "Crispy, golden Southern-style fried chicken",
+                time: "45 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 580,
+                protein: 42,
+                carbs: 18,
+                fat: 38,
+                icon: "🍗",
+                ingredients: [
+                    "8 chicken pieces (thighs and drumsticks)",
+                    "2 cups all-purpose flour",
+                    "2 tbsp paprika",
+                    "1 tbsp garlic powder",
+                    "1 tbsp onion powder",
+                    "1 tsp cayenne pepper",
+                    "2 tsp salt",
+                    "1 tsp black pepper",
+                    "2 cups buttermilk",
+                    "Vegetable oil for frying"
+                ],
+                instructions: [
+                    "Soak chicken in buttermilk for at least 2 hours or overnight",
+                    "Mix flour with all dry seasonings in a large bowl",
+                    "Heat oil to 350°F in a large heavy pot or deep fryer",
+                    "Remove chicken from buttermilk and dredge in seasoned flour",
+                    "Fry chicken in batches for 12-15 minutes until golden brown",
+                    "Internal temperature should reach 165°F",
+                    "Drain on paper towels and let rest 5 minutes",
+                    "Serve hot with your favorite sides"
+                ]
+            },
+            {
+                name: "Chicken Tikka Masala",
+                description: "Fusion Indian-British curry with tender chicken",
+                time: "1 hour",
+                difficulty: 4,
+                rating: 5,
+                calories: 520,
+                protein: 38,
+                carbs: 22,
+                fat: 32,
+                icon: "🇮🇳",
+                ingredients: [
+                    "2 lbs chicken breast, cubed",
+                    "1 cup plain yogurt",
+                    "2 tbsp garam masala",
+                    "1 tbsp ginger-garlic paste",
+                    "1 large onion, diced",
+                    "1 can crushed tomatoes",
+                    "1 cup heavy cream",
+                    "2 tbsp tomato paste",
+                    "1 tsp cumin",
+                    "1 tsp coriander",
+                    "Fresh cilantro"
+                ],
+                instructions: [
+                    "Marinate chicken in yogurt, half the garam masala, and ginger-garlic paste for 30 minutes",
+                    "Grill or pan-sear marinated chicken until cooked through",
+                    "Sauté onions until golden brown",
+                    "Add tomato paste, remaining spices, cook 2 minutes",
+                    "Add crushed tomatoes, simmer 15 minutes",
+                    "Stir in cream and cooked chicken",
+                    "Simmer 10 minutes until sauce thickens",
+                    "Garnish with cilantro, serve over basmati rice"
+                ]
+            },
+            {
+                name: "Buffalo Chicken Sandwich",
+                description: "Spicy crispy chicken sandwich with ranch",
+                time: "30 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 680,
+                protein: 45,
+                carbs: 48,
+                fat: 35,
+                icon: "🥪",
+                ingredients: [
+                    "4 chicken breasts, pounded thin",
+                    "1 cup flour",
+                    "2 eggs, beaten",
+                    "1 cup panko breadcrumbs",
+                    "1/2 cup buffalo sauce",
+                    "4 brioche buns",
+                    "Lettuce leaves",
+                    "Tomato slices",
+                    "Ranch dressing",
+                    "Pickle slices"
+                ],
+                instructions: [
+                    "Set up breading station: flour, beaten eggs, panko",
+                    "Season chicken with salt and pepper",
+                    "Bread chicken: flour, egg, then panko",
+                    "Pan-fry in oil for 4-5 minutes per side until golden",
+                    "Toss hot chicken in buffalo sauce",
+                    "Toast brioche buns lightly",
+                    "Assemble: bottom bun, ranch, lettuce, buffalo chicken, tomato, pickles, top bun",
+                    "Serve immediately with extra ranch and hot sauce"
+                ]
+            },
+            {
+                name: "Korean Fried Chicken",
+                description: "Fusion double-fried chicken with gochujang glaze",
+                time: "1 hour 15 mins",
+                difficulty: 4,
+                rating: 5,
+                calories: 620,
+                protein: 40,
+                carbs: 35,
+                fat: 38,
+                icon: "🇰🇷",
+                ingredients: [
+                    "3 lbs chicken wings and drumettes",
+                    "1 cup potato starch",
+                    "1/2 cup flour",
+                    "1 tsp salt",
+                    "1 cup cold water",
+                    "3 tbsp gochujang",
+                    "2 tbsp soy sauce",
+                    "2 tbsp rice vinegar",
+                    "3 tbsp honey",
+                    "2 cloves garlic, minced",
+                    "Sesame seeds and green onions"
+                ],
+                instructions: [
+                    "Mix potato starch, flour, salt, and cold water for batter",
+                    "Coat chicken in batter and fry at 325°F for 10 minutes",
+                    "Remove and drain for 5 minutes",
+                    "Fry again at 375°F for 5-7 minutes until extra crispy",
+                    "Mix gochujang, soy sauce, vinegar, honey, and garlic for glaze",
+                    "Heat glaze in pan until slightly thickened",
+                    "Toss hot chicken in glaze until well coated",
+                    "Garnish with sesame seeds and green onions"
+                ]
+            },
+            {
+                name: "Chicken Parmesan",
+                description: "Italian-American classic with marinara and cheese",
+                time: "50 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 640,
+                protein: 48,
+                carbs: 28,
+                fat: 38,
+                icon: "🇮🇹",
+                ingredients: [
+                    "4 chicken breasts, pounded thin",
+                    "2 cups panko breadcrumbs",
+                    "1 cup parmesan cheese, grated",
+                    "1 cup flour",
+                    "3 eggs, beaten",
+                    "2 cups marinara sauce",
+                    "8 oz mozzarella cheese, sliced",
+                    "1/4 cup olive oil",
+                    "Fresh basil",
+                    "Salt and pepper"
+                ],
+                instructions: [
+                    "Preheat oven to 425°F",
+                    "Mix panko with half the parmesan",
+                    "Bread chicken: flour, egg, then panko mixture",
+                    "Pan-fry in olive oil until golden on both sides",
+                    "Transfer to baking dish, top with marinara",
+                    "Add mozzarella and remaining parmesan",
+                    "Bake 20-25 minutes until cheese melts and chicken reaches 165°F",
+                    "Garnish with fresh basil, serve over pasta"
+                ]
+            },
+            {
+                name: "Thai Basil Chicken",
+                description: "Spicy stir-fry with holy basil and chilies",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 420,
+                protein: 35,
+                carbs: 18,
+                fat: 24,
+                icon: "🇹🇭",
+                ingredients: [
+                    "1.5 lbs ground chicken",
+                    "4 cloves garlic, minced",
+                    "2-4 Thai bird chilies, sliced",
+                    "2 cups fresh Thai basil leaves",
+                    "2 tbsp fish sauce",
+                    "1 tbsp soy sauce",
+                    "1 tbsp oyster sauce",
+                    "1 tsp sugar",
+                    "2 tbsp vegetable oil",
+                    "Jasmine rice for serving",
+                    "Fried eggs (optional)"
+                ],
+                instructions: [
+                    "Heat oil in wok or large pan over high heat",
+                    "Add garlic and chilies, stir-fry 30 seconds",
+                    "Add ground chicken, break up and cook 5-7 minutes",
+                    "Mix fish sauce, soy sauce, oyster sauce, and sugar",
+                    "Add sauce mixture to chicken, stir well",
+                    "Cook until chicken is fully cooked and slightly caramelized",
+                    "Remove from heat, stir in fresh basil until wilted",
+                    "Serve over jasmine rice, top with fried egg if desired"
+                ]
+            },
+            {
+                name: "BBQ Chicken",
+                description: "Smoky grilled chicken with tangy barbecue sauce",
+                time: "1 hour 30 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 480,
+                protein: 42,
+                carbs: 24,
+                fat: 26,
+                icon: "🔥",
+                ingredients: [
+                    "1 whole chicken, cut into pieces",
+                    "2 tbsp brown sugar",
+                    "1 tbsp paprika",
+                    "1 tsp garlic powder",
+                    "1 tsp onion powder",
+                    "1 tsp chili powder",
+                    "1 tsp salt",
+                    "1/2 tsp black pepper",
+                    "1 cup BBQ sauce",
+                    "2 tbsp apple cider vinegar"
+                ],
+                instructions: [
+                    "Mix all dry rub ingredients together",
+                    "Rub spice mixture all over chicken pieces",
+                    "Let marinate at room temperature for 30 minutes",
+                    "Preheat grill to medium heat (300-350°F)",
+                    "Grill chicken skin-side down for 25-30 minutes",
+                    "Flip and grill another 20-25 minutes",
+                    "Brush with BBQ sauce in last 10 minutes",
+                    "Cook until internal temperature reaches 165°F"
+                ]
+            },
+            {
+                name: "Chicken Teriyaki",
+                description: "Japanese-style glazed chicken with vegetables",
+                time: "35 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 450,
+                protein: 38,
+                carbs: 32,
+                fat: 20,
+                icon: "🍱",
+                ingredients: [
+                    "2 lbs chicken thighs, boneless",
+                    "1/2 cup soy sauce",
+                    "1/4 cup mirin",
+                    "3 tbsp sugar",
+                    "2 tbsp sake (optional)",
+                    "1 tbsp cornstarch",
+                    "2 tbsp vegetable oil",
+                    "1 tbsp sesame seeds",
+                    "2 green onions, sliced",
+                    "Steamed broccoli"
+                ],
+                instructions: [
+                    "Mix soy sauce, mirin, sugar, and sake for teriyaki sauce",
+                    "Dissolve cornstarch in 2 tbsp water",
+                    "Heat oil in large pan over medium-high heat",
+                    "Cook chicken thighs 6-7 minutes per side until golden",
+                    "Remove chicken and slice",
+                    "Add teriyaki sauce to pan, bring to simmer",
+                    "Add cornstarch mixture, stir until thickened",
+                    "Return chicken to pan, coat with glaze, garnish with sesame seeds and green onions"
+                ]
+            },
+            {
+                name: "Mediterranean Chicken",
+                description: "Herb-crusted chicken with olives and tomatoes",
+                time: "45 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 520,
+                protein: 40,
+                carbs: 12,
+                fat: 35,
+                icon: "🫒",
+                ingredients: [
+                    "6 chicken thighs, bone-in",
+                    "1/4 cup olive oil",
+                    "2 tbsp lemon juice",
+                    "3 cloves garlic, minced",
+                    "1 tbsp dried oregano",
+                    "1 tsp dried thyme",
+                    "1 cup cherry tomatoes",
+                    "1/2 cup kalamata olives",
+                    "1/4 cup sun-dried tomatoes",
+                    "1/2 cup feta cheese",
+                    "Fresh parsley"
+                ],
+                instructions: [
+                    "Preheat oven to 400°F",
+                    "Mix olive oil, lemon juice, garlic, oregano, and thyme",
+                    "Marinate chicken in herb mixture for 20 minutes",
+                    "Place chicken in baking dish with cherry tomatoes and olives",
+                    "Bake 35-40 minutes until chicken reaches 165°F",
+                    "Add sun-dried tomatoes and feta in last 10 minutes",
+                    "Let rest 5 minutes before serving",
+                    "Garnish with fresh parsley"
+                ]
+            },
+            {
+                name: "Chicken Alfredo",
+                description: "Creamy pasta with grilled chicken and parmesan",
+                time: "40 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 720,
+                protein: 45,
+                carbs: 48,
+                fat: 42,
+                icon: "🍝",
+                ingredients: [
+                    "4 chicken breasts",
+                    "1 lb fettuccine pasta",
+                    "1 cup heavy cream",
+                    "1 cup parmesan cheese, grated",
+                    "4 tbsp butter",
+                    "4 cloves garlic, minced",
+                    "1/4 cup white wine (optional)",
+                    "2 tbsp olive oil",
+                    "Fresh parsley",
+                    "Salt, pepper, and nutmeg"
+                ],
+                instructions: [
+                    "Season and grill chicken breasts until cooked through, slice",
+                    "Cook fettuccine according to package directions",
+                    "In large pan, melt butter and sauté garlic",
+                    "Add white wine, cook 1 minute",
+                    "Add heavy cream, bring to gentle simmer",
+                    "Gradually whisk in parmesan until smooth",
+                    "Add drained pasta and sliced chicken",
+                    "Toss until well coated, garnish with parsley"
+                ]
+            }
+        ];
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function goBack() {
+            window.location.href = 'meal-ideas.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function generateRatingStars(rating) {
+            const filledStars = '★'.repeat(rating);
+            const emptyStars = '☆'.repeat(5 - rating);
+            return filledStars + emptyStars;
+        }
+
+        function displayMeals() {
+            const container = document.getElementById('meals-container');
+            let html = '';
+            
+            chickenRecipes.forEach((meal, index) => {
+                html += `
+                    <div class="meal-card" onclick="openRecipeModal(${index})">
+                        <div class="meal-image">
+                            <div class="difficulty-badge">
+                                Difficulty: ${generateDifficultyStars(meal.difficulty)}
+                            </div>
+                            ${meal.icon}
+                        </div>
+                        <div class="meal-content">
+                            <div class="meal-title">${meal.name}</div>
+                            <div class="meal-description">${meal.description}</div>
+                            <div class="meal-stats">
+                                <div class="meal-time">⏱️ ${meal.time}</div>
+                                <div class="rating-stars">${generateRatingStars(meal.rating)}</div>
+                            </div>
+                            <div class="meal-nutrition">
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.calories}</div>
+                                    <div class="nutrition-label">Cal</div>
+                                </div>
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.protein}g</div>
+                                    <div class="nutrition-label">Protein</div>
+                                </div>
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.carbs}g</div>
+                                    <div class="nutrition-label">Carbs</div>
+                                </div>
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.fat}g</div>
+                                    <div class="nutrition-label">Fat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function openRecipeModal(index) {
+            const meal = chickenRecipes[index];
+            const modal = document.getElementById('recipe-modal');
+            
+            document.getElementById('modal-title').textContent = meal.name;
+            document.getElementById('modal-subtitle').innerHTML = `
+                ${meal.icon} ${meal.description} • ⏱️ ${meal.time} • Difficulty: ${generateDifficultyStars(meal.difficulty)}
+            `;
+            
+            let ingredientsHtml = '<h3 style="color: var(--primary); margin-bottom: 15px;">🛒 Shopping List</h3><div class="ingredient-list">';
+            meal.ingredients.forEach(ingredient => {
+                ingredientsHtml += `
+                    <div class="ingredient-item">
+                        <input type="checkbox" class="ingredient-checkbox">
+                        <span>${ingredient}</span>
+                    </div>
+                `;
+            });
+            ingredientsHtml += '</div>';
+            
+            let instructionsHtml = '<h3 style="color: var(--primary); margin: 25px 0 15px 0;">👨‍🍳 Instructions</h3><div class="instruction-list">';
+            meal.instructions.forEach((instruction, i) => {
+                instructionsHtml += `
+                    <div class="instruction-item">
+                        <strong>Step ${i + 1}:</strong> ${instruction}
+                    </div>
+                `;
+            });
+            instructionsHtml += '</div>';
+            
+            const nutritionHtml = `
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9ff; border-radius: 10px;">
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.calories}</div>
+                        <div style="font-size: 12px; color: #666;">Calories</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.protein}g</div>
+                        <div style="font-size: 12px; color: #666;">Protein</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.carbs}g</div>
+                        <div style="font-size: 12px; color: #666;">Carbs</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.fat}g</div>
+                        <div style="font-size: 12px; color: #666;">Fat</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-content-body').innerHTML = 
+                nutritionHtml + ingredientsHtml + instructionsHtml + 
+                `<button class="log-recipe-btn" onclick="logRecipe(${index})">✅ Log This Recipe</button>`;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('recipe-modal').style.display = 'none';
+        }
+
+        function logRecipe(index) {
+            const meal = chickenRecipes[index];
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Get existing logged meals
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = {
+                    meals: [],
+                    totalCalories: 0
+                };
+            }
+            
+            // Add this recipe
+            loggedMeals[today].meals.push({
+                name: meal.name,
+                calories: meal.calories,
+                protein: meal.protein,
+                carbs: meal.carbs,
+                fat: meal.fat,
+                time: new Date().toISOString(),
+                fromRecipe: true,
+                category: 'chicken'
+            });
+            
+            loggedMeals[today].totalCalories += meal.calories;
+            
+            // Save to localStorage
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Show success message
+            alert(`✅ ${meal.name} logged! (+${meal.calories} calories)`);
+            closeModal();
+        }
+
+        // Click outside modal to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('recipe-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            displayMeals();
+        });
+    </script>
+</body>
+</html>
