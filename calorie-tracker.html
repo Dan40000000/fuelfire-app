@@ -262,13 +262,59 @@
             isRecording = false;
         }
         
-        // Search food from voice input
+        // Search food from voice input using AI
         async function searchFoodByVoice(query) {
-            const results = await searchUSDA(query);
+            const results = await parseWithAI(query);
             displayFoodResults(results, 'voice');
         }
         
-        // USDA API Search
+        // AI-Powered Food Parsing
+        async function parseWithAI(query) {
+            try {
+                console.log('🤖 AI parsing food:', query);
+                
+                // Show loading state
+                document.getElementById('voice-text').textContent = `Analyzing: "${query}"...`;
+                
+                const response = await fetch('/api/ai-food-parser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`🍔 AI found ${data.foods.length} foods from ${data.source}`);
+                    if (data.message) {
+                        console.log('📝', data.message);
+                    }
+                    
+                    // Update the voice text to show what was found
+                    if (data.foods.length > 1) {
+                        const foodNames = data.foods.map(f => f.name).join(' + ');
+                        document.getElementById('voice-text').textContent = `Found: ${foodNames}`;
+                    } else {
+                        document.getElementById('voice-text').textContent = `Found: ${data.foods[0].name}`;
+                    }
+                    
+                    return data.foods;
+                } else {
+                    throw new Error(data.error || 'Parsing failed');
+                }
+                
+            } catch (error) {
+                console.error('AI food parsing error:', error);
+                
+                // Fallback to USDA search
+                console.log('🔄 Falling back to USDA search...');
+                return await searchUSDA(query);
+            }
+        }
+        
+        // USDA API Search (fallback)
         async function searchUSDA(query) {
             try {
                 console.log('🔍 Searching USDA for:', query);
@@ -296,13 +342,13 @@
             } catch (error) {
                 console.error('USDA search error:', error);
                 
-                // Fallback to basic estimation
+                // Final fallback to basic estimation
                 return [{
                     name: `${query} (estimated)`,
-                    calories: 200,
-                    protein: 10,
-                    carbs: 20,
-                    fat: 8,
+                    calories: 350,
+                    protein: 15,
+                    carbs: 30,
+                    fat: 15,
                     source: 'estimated'
                 }];
             }
@@ -317,17 +363,101 @@
                 return;
             }
             
-            let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select a food:</div>';
-            foods.forEach((food, index) => {
+            // Check if multiple foods (from AI parsing)
+            if (foods.length > 1) {
+                let html = '<div style="font-weight: bold; margin-bottom: 10px; color: #4CAF50;">🤖 AI found multiple foods:</div>';
+                
+                // Show "Log All" button
+                const allFoodsJson = JSON.stringify(foods).replace(/"/g, '&quot;');
                 html += `
-                    <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
-                         onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
-                        <div style="font-weight: bold;">${food.name}</div>
-                        <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
+                    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;" 
+                         onclick="logAllFoods(${allFoodsJson.replace(/&quot;/g, '\"')}, '${source}')">
+                        <div style="font-weight: bold;">✅ Log All Foods</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Total: ${foods.reduce((sum, f) => sum + f.calories, 0)} calories</div>
                     </div>
                 `;
+                
+                html += '<div style="font-size: 14px; margin-bottom: 8px; color: #666;">Or select individual foods:</div>';
+                
+                foods.forEach((food, index) => {
+                    html += `
+                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
+                             onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
+                            <div style="font-weight: bold;">${food.name}</div>
+                            <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
+                            ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                resultsDiv.innerHTML = html;
+            } else {
+                // Single food - show normal selection
+                let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select food to log:</div>';
+                foods.forEach((food, index) => {
+                    html += `
+                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
+                             onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
+                            <div style="font-weight: bold;">${food.name}</div>
+                            <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
+                            ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                        </div>
+                    `;
+                });
+                resultsDiv.innerHTML = html;
+            }
+        }
+        
+        // Log all foods at once (for AI-parsed multiple foods)
+        function logAllFoods(foods, source) {
+            const mealType = prompt('Log all foods as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
+            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
+            const type = types[parseInt(mealType)] || 'snack';
+            
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0; 
+            let totalFat = 0;
+            
+            // Log each food
+            foods.forEach(food => {
+                loggedMeals[today].meals.push({
+                    name: food.name,
+                    type: type,
+                    calories: food.calories,
+                    protein: food.protein || 0,
+                    carbs: food.carbs || 0,
+                    fat: food.fat || 0,
+                    time: new Date().toISOString(),
+                    source: source,
+                    serving: food.serving || '1 serving'
+                });
+                
+                totalCalories += food.calories;
+                totalProtein += food.protein || 0;
+                totalCarbs += food.carbs || 0;
+                totalFat += food.fat || 0;
             });
-            resultsDiv.innerHTML = html;
+            
+            loggedMeals[today].totalCalories += totalCalories;
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Close modals and refresh
+            if (source === 'voice') closeVoiceModal();
+            if (source === 'search') closeSmartEntry();
+            
+            loadTodaysMeals();
+            loadQuickAdds();
+            
+            const foodNames = foods.map(f => f.name).join('\n• ');
+            alert(`✅ All foods logged as ${type}!\n\n• ${foodNames}\n\n📊 Total: ${totalCalories} calories\n🥩 ${totalProtein}g protein\n🍞 ${totalCarbs}g carbs\n🥑 ${totalFat}g fat`);
         }
         
         // Select and log food
@@ -446,9 +576,24 @@
         }
         
         async function searchFood(query) {
-            if (query.length < 2) return;
+            if (query.length < 2) {
+                document.getElementById('search-results').innerHTML = '';
+                return;
+            }
             
-            const results = await searchUSDA(query);
+            // Show loading
+            document.getElementById('search-results').innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🤖 AI analyzing...</div>';
+            
+            // Use AI parsing for complex queries, USDA for simple ones
+            let results;
+            if (query.includes(' and ') || query.includes(' with ') || query.split(' ').length > 2) {
+                // Complex query - use AI
+                results = await parseWithAI(query);
+            } else {
+                // Simple query - use USDA
+                results = await searchUSDA(query);
+            }
+            
             displayFoodResults(results, 'search');
         }
         
