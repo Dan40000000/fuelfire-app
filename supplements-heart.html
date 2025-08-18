@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Health Supplements - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .heart-gradient {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+        }
+
+        .supplements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .supplement-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .supplement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #FF6B6B;
+        }
+
+        .supplement-header {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .supplement-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+
+        .research-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .star {
+            color: #FFD700;
+            font-size: 18px;
+        }
+
+        .star.empty {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .supplement-content {
+            padding: 25px;
+        }
+
+        .dosage-section {
+            background: #FFF5F5;
+            border-left: 4px solid #FF6B6B;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .dosage-title {
+            font-weight: bold;
+            color: #FF6B6B;
+            margin-bottom: 8px;
+        }
+
+        .timing-badge {
+            display: inline-block;
+            background: #FFF0F0;
+            color: #FF6B6B;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .benefits-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .benefits-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .warning-section {
+            background: #FFF3CD;
+            border: 1px solid #FFE69C;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .interaction-badge {
+            background: #DC3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .quality-indicators {
+            background: #E8F5E9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .quality-title {
+            color: #2E7D32;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .disclaimer {
+            background: #FFEBEE;
+            border: 2px solid #FF6B6B;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .disclaimer-icon {
+            font-size: 36px;
+            color: #FF6B6B;
+            margin-bottom: 10px;
+        }
+
+        .study-link {
+            color: #FF6B6B;
+            text-decoration: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .study-link:hover {
+            text-decoration: underline;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            color: #FF6B6B;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .supplements-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .supplement-card {
+                margin: 0 10px;
+            }
+
+            .supplement-name {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="supplements.html" class="back-button">
+            <span>←</span> Back to Supplements
+        </a>
+
+        <div class="header-section">
+            <h1>Heart Health Supplements</h1>
+            <p class="subtitle">Evidence-based supplements for cardiovascular support</p>
+        </div>
+
+        <div class="disclaimer">
+            <div class="disclaimer-icon">⚕️</div>
+            <h3>Important Medical Disclaimer</h3>
+            <p>Always consult with your healthcare provider before starting any new supplement regimen, especially if you have heart conditions or take medications. These supplements can interact with prescription drugs and may not be suitable for everyone.</p>
+        </div>
+
+        <div class="supplements-grid">
+            <!-- Omega-3 -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Omega-3 (EPA/DHA)</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>1-4g daily (combined EPA + DHA)</p>
+                        <p>Minimum 500mg EPA + 250mg DHA</p>
+                        <div class="timing-badge">🕐 Take with meals</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Reduces triglycerides by 15-30%</li>
+                        <li>Lowers blood pressure (2-3 mmHg)</li>
+                        <li>Reduces inflammation markers</li>
+                        <li>May reduce arrhythmia risk</li>
+                        <li>Improves endothelial function</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Fishy aftertaste, mild GI upset, increased bleeding time</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Blood Thinners</span>
+                        <span class="interaction-badge">Antiplatelet Drugs</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Third-party tested for mercury</li>
+                            <li>IFOS certified</li>
+                            <li>Triglyceride or ethyl ester form</li>
+                            <li>Clear sourcing information</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/30415628/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- CoQ10 -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">CoQ10 (Ubiquinol)</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>100-300mg daily</p>
+                        <p>Ubiquinol form preferred over 40 years</p>
+                        <div class="timing-badge">🕐 Take with fatty meal</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Improves heart muscle function</li>
+                        <li>Reduces statin side effects</li>
+                        <li>May lower blood pressure (10-17 mmHg)</li>
+                        <li>Increases cellular energy production</li>
+                        <li>Powerful antioxidant protection</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Mild stomach upset, headache, insomnia (rare)</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Warfarin</span>
+                        <span class="interaction-badge">Blood Pressure Meds</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Kaneka QH (ubiquinol) or Q10</li>
+                            <li>Oil-based softgels</li>
+                            <li>Dark bottles/packaging</li>
+                            <li>Certificate of analysis available</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/25126052/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Magnesium -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Magnesium</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>200-400mg elemental magnesium daily</p>
+                        <p>Glycinate or citrate forms preferred</p>
+                        <div class="timing-badge">🕐 Take before bed or divided doses</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Regulates heart rhythm</li>
+                        <li>Lowers blood pressure (5-10 mmHg)</li>
+                        <li>Improves insulin sensitivity</li>
+                        <li>Reduces arterial stiffness</li>
+                        <li>May prevent calcium deposits</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Diarrhea (dose-dependent), stomach cramping</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Antibiotics</span>
+                        <span class="interaction-badge">Diuretics</span>
+                        <span class="interaction-badge">Bisphosphonates</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Chelated forms (glycinate, malate)</li>
+                            <li>Avoid oxide form (poor absorption)</li>
+                            <li>USP verified</li>
+                            <li>Clear elemental content labeling</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/27402241/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Garlic Extract -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Garlic Extract</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>600-1200mg aged garlic extract daily</p>
+                        <p>Or 4g fresh garlic (2-3 cloves)</p>
+                        <div class="timing-badge">🕐 Take with meals</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Reduces blood pressure (8-10 mmHg)</li>
+                        <li>Lowers LDL cholesterol 10-15%</li>
+                        <li>Reduces arterial plaque</li>
+                        <li>Anti-inflammatory effects</li>
+                        <li>Improves circulation</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Body odor, heartburn, upset stomach</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Blood Thinners</span>
+                        <span class="interaction-badge">HIV Medications</span>
+                        <span class="interaction-badge">Birth Control</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Aged garlic extract (Kyolic)</li>
+                            <li>Standardized allicin content</li>
+                            <li>Enteric coating available</li>
+                            <li>Odorless formulations</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/26764326/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hawthorn Berry -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Hawthorn Berry</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>160-900mg standardized extract daily</p>
+                        <p>1.8% vitexin or 20% procyanidins</p>
+                        <div class="timing-badge">🕐 Take 2-3 times daily</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Improves heart failure symptoms</li>
+                        <li>Increases exercise tolerance</li>
+                        <li>Mild blood pressure reduction</li>
+                        <li>Improves coronary blood flow</li>
+                        <li>Antioxidant protection</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Dizziness, nausea, digestive upset (rare)</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Digoxin</span>
+                        <span class="interaction-badge">Beta Blockers</span>
+                        <span class="interaction-badge">Calcium Channel Blockers</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Standardized extract</li>
+                            <li>European quality standards</li>
+                            <li>Leaf and flower combination</li>
+                            <li>GMP certified facility</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/18254076/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- L-Arginine -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">L-Arginine</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>3-6g daily in divided doses</p>
+                        <p>Or L-Citrulline 3-8g (converts to arginine)</p>
+                        <div class="timing-badge">🕐 Take on empty stomach</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Improves blood vessel dilation</li>
+                        <li>May reduce angina symptoms</li>
+                        <li>Improves exercise performance</li>
+                        <li>Supports nitric oxide production</li>
+                        <li>May improve erectile function</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Bloating, diarrhea, low blood pressure</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Nitrates</span>
+                        <span class="interaction-badge">Blood Pressure Meds</span>
+                        <span class="interaction-badge">Viagra/Cialis</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Pharmaceutical grade</li>
+                            <li>Free form amino acid</li>
+                            <li>No artificial additives</li>
+                            <li>Consider citrulline alternative</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/27333912/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Vitamin D3 -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Vitamin D3</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>1000-4000 IU daily</p>
+                        <p>Target blood level: 30-50 ng/mL</p>
+                        <div class="timing-badge">🕐 Take with fatty meal</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Reduces cardiovascular mortality</li>
+                        <li>Improves endothelial function</li>
+                        <li>May lower blood pressure</li>
+                        <li>Reduces inflammation</li>
+                        <li>Supports calcium metabolism</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Hypercalcemia (with very high doses)</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Thiazide Diuretics</span>
+                        <span class="interaction-badge">Digoxin</span>
+                        <span class="interaction-badge">Calcium Channel Blockers</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>D3 (cholecalciferol) not D2</li>
+                            <li>Oil-based liquid or softgels</li>
+                            <li>Third-party tested</li>
+                            <li>Combined with K2 (optional)</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/28686645/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Red Yeast Rice -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Red Yeast Rice</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>1200-2400mg daily</p>
+                        <p>Standardized to 4-10mg monacolins</p>
+                        <div class="timing-badge">🕐 Take with evening meal</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Lowers LDL cholesterol 20-30%</li>
+                        <li>Reduces total cholesterol</li>
+                        <li>May reduce cardiovascular events</li>
+                        <li>Natural statin alternative</li>
+                        <li>Anti-inflammatory effects</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Muscle pain, liver enzyme elevation, GI upset</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Statins</span>
+                        <span class="interaction-badge">Fibrates</span>
+                        <span class="interaction-badge">Cyclosporine</span>
+                        <span class="interaction-badge">Grapefruit</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Citrinin-free certification</li>
+                            <li>Standardized monacolin content</li>
+                            <li>Third-party tested</li>
+                            <li>Reputable manufacturer</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/19933169/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Nattokinase -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Nattokinase</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>2000-4000 FU (fibrinolytic units) daily</p>
+                        <p>100-200mg standardized extract</p>
+                        <div class="timing-badge">🕐 Take on empty stomach</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Supports healthy blood flow</li>
+                        <li>May reduce blood clot risk</li>
+                        <li>Lowers blood pressure</li>
+                        <li>Breaks down fibrin</li>
+                        <li>Improves circulation</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Increased bleeding risk, mild dizziness</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Blood Thinners</span>
+                        <span class="interaction-badge">Aspirin</span>
+                        <span class="interaction-badge">NSAIDs</span>
+                        <span class="interaction-badge">Stop 2 weeks before surgery</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>NSK-SD or NK-II patented forms</li>
+                            <li>Vitamin K removed</li>
+                            <li>Enteric coating</li>
+                            <li>Activity units listed</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/18971533/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+
+            <!-- Beetroot Extract -->
+            <div class="supplement-card">
+                <div class="supplement-header">
+                    <h2 class="supplement-name">Beetroot Extract</h2>
+                    <div class="research-rating">
+                        <span>Research Level:</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star empty">★</span>
+                    </div>
+                </div>
+                <div class="supplement-content">
+                    <div class="dosage-section">
+                        <div class="dosage-title">Recommended Dosage</div>
+                        <p>500-1000mg standardized extract</p>
+                        <p>Or 70-140mL beetroot juice</p>
+                        <div class="timing-badge">🕐 Take 2-3 hours before exercise</div>
+                    </div>
+
+                    <h4>Key Benefits</h4>
+                    <ul class="benefits-list">
+                        <li>Lowers blood pressure (4-10 mmHg)</li>
+                        <li>Improves exercise performance</li>
+                        <li>Increases nitric oxide</li>
+                        <li>Improves blood flow</li>
+                        <li>May improve cognitive function</li>
+                    </ul>
+
+                    <div class="warning-section">
+                        <div class="warning-title">
+                            ⚠️ Side Effects & Interactions
+                        </div>
+                        <p><strong>Side Effects:</strong> Red urine/stools, stomach upset, kidney stones (oxalates)</p>
+                        <p><strong>Drug Interactions:</strong></p>
+                        <span class="interaction-badge">Blood Pressure Meds</span>
+                        <span class="interaction-badge">PDE5 Inhibitors</span>
+                    </div>
+
+                    <div class="quality-indicators">
+                        <div class="quality-title">🔍 Quality Indicators</div>
+                        <ul>
+                            <li>Standardized nitrate content</li>
+                            <li>Organic sourcing</li>
+                            <li>No added sugars</li>
+                            <li>Concentrated extract form</li>
+                        </ul>
+                    </div>
+
+                    <a href="https://pubmed.ncbi.nlm.nih.gov/23231777/" class="study-link" target="_blank">
+                        📚 View Research
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer" style="margin-top: 40px;">
+            <div class="disclaimer-icon">📋</div>
+            <h3>Final Reminders</h3>
+            <p><strong>Always inform your healthcare provider about all supplements you take.</strong></p>
+            <p>Start with lower doses and gradually increase. Monitor for side effects and interactions. Get regular blood work to track progress and safety. Remember that supplements work best alongside a heart-healthy diet and lifestyle.</p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scroll for any anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add animation to cards on scroll
+        const cards = document.querySelectorAll('.supplement-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        entry.target.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
