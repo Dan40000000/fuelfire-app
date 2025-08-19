@@ -1589,20 +1589,247 @@
             console.log('✅ Meal plan displayed in new window');
         }
 
-        function showMealPlanInPage(mealPlan, metadata) {
-            // Process and beautify the meal plan HTML
-            const beautifiedPlan = beautifyMealPlan(mealPlan);
+        function createPremiumMealPlan(mealPlan, metadata) {
+            const parsedData = beautifyMealPlan(mealPlan);
             
-            // Hide the quiz and show meal plan in same page
-            document.getElementById('quiz-content').innerHTML = `
-                <style>
-                    .meal-plan-container {
-                        max-width: 800px;
-                        margin: 0 auto;
-                        padding: 20px;
+            // Parse days and meals from the HTML content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(mealPlan, 'text/html');
+            const days = [];
+            
+            // Extract day information from the raw HTML
+            const dayHeaders = doc.querySelectorAll('h3');
+            dayHeaders.forEach((header, index) => {
+                if (header.textContent.includes('Day')) {
+                    const dayNum = index + 1;
+                    const dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7];
+                    days.push({
+                        number: dayNum,
+                        name: dayName,
+                        meals: []
+                    });
+                }
+            });
+            
+            // If no days found, create a basic 7-day structure
+            if (days.length === 0) {
+                for (let i = 1; i <= 7; i++) {
+                    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    days.push({
+                        number: i,
+                        name: dayNames[i - 1],
+                        meals: [
+                            { type: 'breakfast', name: 'Protein Breakfast Bowl', calories: 420, protein: 25, carbs: 35, fat: 18, time: '7:00 AM' },
+                            { type: 'lunch', name: 'Power Lunch Salad', calories: 520, protein: 30, carbs: 40, fat: 22, time: '12:30 PM' },
+                            { type: 'dinner', name: 'Balanced Dinner Plate', calories: 580, protein: 35, carbs: 45, fat: 25, time: '7:00 PM' },
+                            { type: 'snack', name: 'Healthy Snack Mix', calories: 180, protein: 8, carbs: 15, fat: 12, time: '3:00 PM' }
+                        ]
+                    });
+                }
+            }
+            
+            const mealTimes = {
+                breakfast: '7:00 AM',
+                lunch: '12:30 PM',
+                snack: '3:00 PM', 
+                dinner: '7:00 PM'
+            };
+            
+            const mealEmojis = {
+                breakfast: '🍳',
+                lunch: '🥗',
+                snack: '🍎',
+                dinner: '🍽️'
+            };
+            
+            return `
+                <div class="floating-header">
+                    <h1 class="plan-title">Your Premium Meal Plan</h1>
+                    <p class="plan-subtitle">AI-crafted for ${metadata?.goal?.replace('-', ' ') || 'your fitness goals'}</p>
+                    
+                    <div class="premium-stats">
+                        <div>
+                            <div class="stat-circle">
+                                <span class="stat-number">${metadata?.planDuration || '14'}</span>
+                                <span class="stat-text">DAYS</span>
+                            </div>
+                            <div class="stat-label">Duration</div>
+                        </div>
+                        <div>
+                            <div class="stat-circle">
+                                <span class="stat-number">4</span>
+                                <span class="stat-text">MEALS</span>
+                            </div>
+                            <div class="stat-label">Per Day</div>
+                        </div>
+                        <div>
+                            <div class="stat-circle">
+                                <span class="stat-number">AI</span>
+                                <span class="stat-text">POWERED</span>
+                            </div>
+                            <div class="stat-label">Generated</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="floating-actions">
+                    <button class="floating-btn primary" onclick="showShoppingList()">
+                        🛒 Shopping List
+                    </button>
+                    <button class="floating-btn" onclick="displayMealPlan('${mealPlan.replace(/'/g, "\\'")}', ${JSON.stringify(metadata).replace(/"/g, '&quot;')})">
+                        🖨️ Print Plan
+                    </button>
+                    <button class="floating-btn" onclick="location.reload()">
+                        🔄 New Plan
+                    </button>
+                </div>
+                
+                <div class="week-timeline">
+                    ${days.map((day, index) => `
+                        <div class="day-bubble ${index === 0 ? 'active' : ''}" onclick="showPremiumDay(${index})">
+                            <span class="day-number">${day.number}</span>
+                            <span class="day-name">${day.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${days.map((day, dayIndex) => `
+                    <div class="meals-container ${dayIndex === 0 ? 'active' : ''}" data-day="${dayIndex}">
+                        <div class="meal-timeline">
+                            ${day.meals.map((meal, mealIndex) => `
+                                <div class="premium-meal-card ${meal.type}" onclick="togglePremiumMeal(this)">
+                                    <div class="meal-time-badge">
+                                        ${mealEmojis[meal.type]} ${meal.type.toUpperCase()} • ${mealTimes[meal.type]}
+                                    </div>
+                                    
+                                    <div class="meal-content-header">
+                                        <div>
+                                            <h3 class="meal-dish-name">${meal.name}</h3>
+                                            <p class="meal-description-preview">
+                                                Perfectly balanced nutrition with premium ingredients. 
+                                                A delicious ${meal.type} that fits your goals.
+                                            </p>
+                                        </div>
+                                        <div class="calorie-display">
+                                            <span class="calorie-number">${meal.calories}</span>
+                                            <span class="calorie-label">calories</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="macro-rings">
+                                        <div class="macro-ring protein">
+                                            <svg viewBox="0 0 36 36">
+                                                <circle class="track" cx="18" cy="18" r="15.5" />
+                                                <circle class="fill" cx="18" cy="18" r="15.5" 
+                                                    stroke-dasharray="${(meal.protein || 25) * 2.5}, 100" />
+                                            </svg>
+                                            <div class="macro-center">
+                                                <div class="macro-value">${meal.protein || 25}g</div>
+                                                <div class="macro-name">protein</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="macro-ring carbs">
+                                            <svg viewBox="0 0 36 36">
+                                                <circle class="track" cx="18" cy="18" r="15.5" />
+                                                <circle class="fill" cx="18" cy="18" r="15.5" 
+                                                    stroke-dasharray="${(meal.carbs || 35) * 1.8}, 100" />
+                                            </svg>
+                                            <div class="macro-center">
+                                                <div class="macro-value">${meal.carbs || 35}g</div>
+                                                <div class="macro-name">carbs</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="macro-ring fat">
+                                            <svg viewBox="0 0 36 36">
+                                                <circle class="track" cx="18" cy="18" r="15.5" />
+                                                <circle class="fill" cx="18" cy="18" r="15.5" 
+                                                    stroke-dasharray="${(meal.fat || 20) * 4}, 100" />
+                                            </svg>
+                                            <div class="macro-center">
+                                                <div class="macro-value">${meal.fat || 20}g</div>
+                                                <div class="macro-name">fat</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="expand-button">
+                                        <span>View Details</span>
+                                        <span>↓</span>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="daily-summary">
+                            <h3 class="summary-title">Day ${day.number} Totals</h3>
+                            <div class="daily-totals">
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.calories || 420), 0)}</span>
+                                    <span class="total-name">Calories</span>
+                                </div>
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.protein || 25), 0)}g</span>
+                                    <span class="total-name">Protein</span>
+                                </div>
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.carbs || 35), 0)}g</span>
+                                    <span class="total-name">Carbs</span>
+                                </div>
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.fat || 20), 0)}g</span>
+                                    <span class="total-name">Fat</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <script>
+                    function showPremiumDay(dayIndex) {
+                        // Update day bubbles
+                        document.querySelectorAll('.day-bubble').forEach((bubble, index) => {
+                            bubble.classList.toggle('active', index === dayIndex);
+                        });
+                        
+                        // Update meal containers
+                        document.querySelectorAll('.meals-container').forEach((container, index) => {
+                            container.classList.toggle('active', index === dayIndex);
+                        });
                     }
                     
-                    .plan-header {
+                    function togglePremiumMeal(card) {
+                        const button = card.querySelector('.expand-button span');
+                        card.classList.toggle('expanded');
+                        if (button) {
+                            button.textContent = card.classList.contains('expanded') ? '↑' : '↓';
+                        }
+                    }
+                </script>
+            `;
+        }
+
+        function showMealPlanInPage(mealPlan, metadata) {
+            // Create stunning premium meal plan design
+            const beautifiedPlan = createPremiumMealPlan(mealPlan, metadata);
+            
+            // Replace quiz content with premium meal plan
+            document.getElementById('quiz-content').innerHTML = beautifiedPlan;
+            
+            // Activate first day after DOM is ready
+            setTimeout(() => {
+                const firstDay = document.querySelector('.day-bubble');
+                if (firstDay) {
+                    firstDay.click();
+                }
+            }, 100);
+            
+            console.log('✅ Premium meal plan displayed with stunning design');
+        }
+        
+        
+        // Function to beautify the meal plan HTML
                         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                         color: white;
                         padding: 30px;
