@@ -1848,13 +1848,15 @@
                 // Check if it's a day header
                 if (text.match(/Day\s+\d+/i) || text.match(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/i)) {
                     if (currentDay) days.push(currentDay);
-                        margin-top: 20px;
-                        background: rgba(255,255,255,0.1);
-                        padding: 15px;
-                        border-radius: 15px;
-                    }
-                    
-                    .stat-item {
+                    currentDay = {
+                        name: text,
+                        meals: [],
+                        totalCalories: 0,
+                        totalProtein: 0,
+                        totalCarbs: 0,
+                        totalFat: 0
+                    };
+                }
                         text-align: center;
                     }
                     
