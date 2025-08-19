@@ -1830,18 +1830,24 @@
         
         
         // Function to beautify the meal plan HTML
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        padding: 30px;
-                        border-radius: 20px;
-                        margin-bottom: 25px;
-                        text-align: center;
-                        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-                    }
-                    
-                    .plan-stats {
-                        display: flex;
-                        justify-content: space-around;
+        function beautifyMealPlan(rawHtml) {
+            // Parse the raw HTML and extract meal data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawHtml, 'text/html');
+            
+            // Try to extract structured meal data from the HTML
+            const days = [];
+            let currentDay = null;
+            
+            // Look for day headers (Day 1, Day 2, etc.)
+            const elements = doc.body.querySelectorAll('h2, h3, strong, b, p');
+            
+            elements.forEach(element => {
+                const text = element.textContent.trim();
+                
+                // Check if it's a day header
+                if (text.match(/Day\s+\d+/i) || text.match(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/i)) {
+                    if (currentDay) days.push(currentDay);
                         margin-top: 20px;
                         background: rgba(255,255,255,0.1);
                         padding: 15px;
