@@ -1857,36 +1857,31 @@
                         totalFat: 0
                     };
                 }
-                        text-align: center;
+                // Check if it's a meal
+                else if (currentDay && (text.includes('Breakfast') || text.includes('Lunch') || text.includes('Dinner') || text.includes('Snack'))) {
+                    const meal = parseMealData(element);
+                    if (meal) {
+                        currentDay.meals.push(meal);
+                        currentDay.totalCalories += meal.calories || 0;
+                        currentDay.totalProtein += meal.protein || 0;
+                        currentDay.totalCarbs += meal.carbs || 0;
+                        currentDay.totalFat += meal.fat || 0;
                     }
-                    
-                    .stat-value {
-                        font-size: 24px;
-                        font-weight: bold;
-                        display: block;
-                    }
-                    
-                    .stat-label {
-                        font-size: 12px;
-                        opacity: 0.9;
-                    }
-                    
-                    .action-buttons {
-                        display: flex;
-                        gap: 15px;
-                        justify-content: center;
-                        margin-bottom: 25px;
-                        flex-wrap: wrap;
-                    }
-                    
-                    .action-btn {
-                        background: white;
-                        border: none;
-                        padding: 12px 24px;
-                        border-radius: 30px;
-                        font-weight: bold;
-                        cursor: pointer;
-                        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                }
+            });
+            
+            if (currentDay) days.push(currentDay);
+            
+            // If we couldn't parse structured data, use the raw HTML with styling
+            if (days.length === 0) {
+                return `
+                    <div class="raw-meal-plan" style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        ${rawHtml}
+                    </div>
+                `;
+            }
+            
+            // Generate beautiful card-based layout for each day
                         transition: all 0.3s ease;
                         display: flex;
                         align-items: center;
