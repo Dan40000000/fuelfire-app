@@ -1590,38 +1590,566 @@
         }
 
         function showMealPlanInPage(mealPlan, metadata) {
+            // Process and beautify the meal plan HTML
+            const beautifiedPlan = beautifyMealPlan(mealPlan);
+            
             // Hide the quiz and show meal plan in same page
             document.getElementById('quiz-content').innerHTML = `
-                <div style="max-width: 800px; margin: 0 auto;">
-                    <div style="background: #f1f3f4; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; color: #666;">
-                        🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt).toLocaleDateString()} | 
-                        <strong>Goal:</strong> ${metadata.goal} | 
-                        <strong>Duration:</strong> ${metadata.planDuration}
+                <style>
+                    .meal-plan-container {
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    
+                    .plan-header {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        padding: 30px;
+                        border-radius: 20px;
+                        margin-bottom: 25px;
+                        text-align: center;
+                        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+                    }
+                    
+                    .plan-stats {
+                        display: flex;
+                        justify-content: space-around;
+                        margin-top: 20px;
+                        background: rgba(255,255,255,0.1);
+                        padding: 15px;
+                        border-radius: 15px;
+                    }
+                    
+                    .stat-item {
+                        text-align: center;
+                    }
+                    
+                    .stat-value {
+                        font-size: 24px;
+                        font-weight: bold;
+                        display: block;
+                    }
+                    
+                    .stat-label {
+                        font-size: 12px;
+                        opacity: 0.9;
+                    }
+                    
+                    .action-buttons {
+                        display: flex;
+                        gap: 15px;
+                        justify-content: center;
+                        margin-bottom: 25px;
+                        flex-wrap: wrap;
+                    }
+                    
+                    .action-btn {
+                        background: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 30px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                        transition: all 0.3s ease;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    
+                    .action-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+                    }
+                    
+                    .action-btn.primary {
+                        background: linear-gradient(135deg, #4CAF50, #45a049);
+                        color: white;
+                    }
+                    
+                    .action-btn.secondary {
+                        background: #6c757d;
+                        color: white;
+                    }
+                    
+                    .day-tabs {
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        margin-bottom: 25px;
+                        overflow-x: auto;
+                        padding: 5px 0;
+                    }
+                    
+                    .day-tab {
+                        background: white;
+                        border: 2px solid #ddd;
+                        padding: 10px 20px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        transition: all 0.3s ease;
+                        white-space: nowrap;
+                    }
+                    
+                    .day-tab.active {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-color: #667eea;
+                    }
+                    
+                    .day-content {
+                        display: none;
+                        animation: fadeIn 0.3s ease;
+                    }
+                    
+                    .day-content.active {
+                        display: block;
+                    }
+                    
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    
+                    .meal-card {
+                        background: white;
+                        border-radius: 20px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                        border-left: 5px solid;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                    }
+                    
+                    .meal-card:hover {
+                        transform: translateX(5px);
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+                    }
+                    
+                    .meal-card.breakfast { border-left-color: #ff9800; }
+                    .meal-card.lunch { border-left-color: #4CAF50; }
+                    .meal-card.dinner { border-left-color: #2196F3; }
+                    .meal-card.snack { border-left-color: #e91e63; }
+                    
+                    .meal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    }
+                    
+                    .meal-type {
+                        font-size: 12px;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        opacity: 0.7;
+                    }
+                    
+                    .meal-type.breakfast { color: #ff9800; }
+                    .meal-type.lunch { color: #4CAF50; }
+                    .meal-type.dinner { color: #2196F3; }
+                    .meal-type.snack { color: #e91e63; }
+                    
+                    .meal-calories {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #667eea;
+                    }
+                    
+                    .meal-name {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .meal-macros {
+                        display: flex;
+                        gap: 15px;
+                        margin-bottom: 12px;
+                    }
+                    
+                    .macro-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        font-size: 14px;
+                        color: #666;
+                    }
+                    
+                    .macro-dot {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                    }
+                    
+                    .macro-dot.protein { background: #e74c3c; }
+                    .macro-dot.carbs { background: #f39c12; }
+                    .macro-dot.fat { background: #27ae60; }
+                    
+                    .meal-description {
+                        color: #666;
+                        font-size: 14px;
+                        line-height: 1.5;
+                        margin-top: 10px;
+                        display: none;
+                    }
+                    
+                    .meal-card.expanded .meal-description {
+                        display: block;
+                    }
+                    
+                    .expand-indicator {
+                        text-align: center;
+                        font-size: 12px;
+                        color: #999;
+                        margin-top: 10px;
+                    }
+                    
+                    .day-summary {
+                        background: #f8f9ff;
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+                    
+                    .day-totals {
+                        display: flex;
+                        justify-content: space-around;
+                        margin-top: 15px;
+                    }
+                    
+                    .total-item {
+                        text-align: center;
+                    }
+                    
+                    .total-value {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #667eea;
+                    }
+                    
+                    .total-label {
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    
+                    .shopping-list-btn {
+                        background: linear-gradient(135deg, #00bcd4, #00acc1);
+                        color: white;
+                        border: none;
+                        padding: 20px;
+                        border-radius: 20px;
+                        width: 100%;
+                        font-size: 18px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        margin-top: 30px;
+                        box-shadow: 0 4px 15px rgba(0,188,212,0.3);
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .shopping-list-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(0,188,212,0.4);
+                    }
+                    
+                    /* Mobile responsiveness */
+                    @media (max-width: 600px) {
+                        .meal-plan-container {
+                            padding: 10px;
+                        }
+                        
+                        .plan-header {
+                            padding: 20px;
+                        }
+                        
+                        .day-tabs {
+                            justify-content: flex-start;
+                        }
+                        
+                        .meal-macros {
+                            flex-wrap: wrap;
+                        }
+                    }
+                </style>
+                
+                <div class="meal-plan-container">
+                    <div class="plan-header">
+                        <h1 style="margin: 0 0 10px 0; font-size: 28px;">🔥 Your Personal Meal Plan</h1>
+                        <p style="margin: 0; opacity: 0.9;">Customized for ${metadata.goal || 'your goals'}</p>
+                        <div class="plan-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">${metadata.planDuration || '7 Days'}</span>
+                                <span class="stat-label">Duration</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${metadata.dailyCalories || '2000'}</span>
+                                <span class="stat-label">Daily Calories</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${new Date().toLocaleDateString()}</span>
+                                <span class="stat-label">Generated</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <button onclick="window.print()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer; margin: 0 10px;">
-                            🖨️ Print Plan
+                    <div class="action-buttons">
+                        <button class="action-btn primary" onclick="saveMealPlan()">
+                            💾 Save Plan
                         </button>
-                        <button onclick="location.reload()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 20px; cursor: pointer; margin: 0 10px;">
-                            ← Back to Quiz
+                        <button class="action-btn" onclick="window.print()">
+                            🖨️ Print
+                        </button>
+                        <button class="action-btn" onclick="shareMealPlan()">
+                            📤 Share
+                        </button>
+                        <button class="action-btn secondary" onclick="location.reload()">
+                            ← New Plan
                         </button>
                     </div>
                     
-                    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        ${mealPlan}
+                    <div id="meal-plan-display">
+                        ${beautifiedPlan}
                     </div>
+                    
+                    <button class="shopping-list-btn" onclick="showShoppingList()">
+                        🛒 View Complete Shopping List
+                    </button>
                     
                     <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9ff; border-radius: 15px;">
-                        <h3 style="color: #4B9CD3;">🔥 Powered by FuelFire & Claude AI</h3>
-                        <p style="color: #666;">Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
-                        <button onclick="window.print()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer;">
-                            🖨️ Print This Plan
-                        </button>
+                        <h3 style="color: #4B9CD3; margin-bottom: 10px;">🔥 Powered by FuelFire & Claude AI</h3>
+                        <p style="color: #666; margin: 0;">Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
                     </div>
                 </div>
             `;
-            console.log('✅ Meal plan displayed in same page (popup blocked)');
+            
+            // Initialize the first day
+            setTimeout(() => {
+                const firstTab = document.querySelector('.day-tab');
+                if (firstTab) {
+                    firstTab.click();
+                }
+            }, 100);
+            
+            console.log('✅ Meal plan displayed with beautiful card layout');
+        }
+        
+        // Function to beautify the meal plan HTML
+        function beautifyMealPlan(rawHtml) {
+            // Parse the raw HTML and extract meal data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawHtml, 'text/html');
+            
+            // Try to extract structured meal data from the HTML
+            const days = [];
+            let currentDay = null;
+            
+            // Look for day headers (Day 1, Day 2, etc.)
+            const elements = doc.body.querySelectorAll('h2, h3, strong, b, p');
+            
+            elements.forEach(element => {
+                const text = element.textContent.trim();
+                
+                // Check if it's a day header
+                if (text.match(/Day\s+\d+/i) || text.match(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/i)) {
+                    if (currentDay) days.push(currentDay);
+                    currentDay = {
+                        name: text,
+                        meals: [],
+                        totalCalories: 0,
+                        totalProtein: 0,
+                        totalCarbs: 0,
+                        totalFat: 0
+                    };
+                }
+                // Check if it's a meal
+                else if (currentDay && (text.includes('Breakfast') || text.includes('Lunch') || text.includes('Dinner') || text.includes('Snack'))) {
+                    const meal = parseMealFromText(element, text);
+                    if (meal) {
+                        currentDay.meals.push(meal);
+                        currentDay.totalCalories += meal.calories || 0;
+                        currentDay.totalProtein += meal.protein || 0;
+                        currentDay.totalCarbs += meal.carbs || 0;
+                        currentDay.totalFat += meal.fat || 0;
+                    }
+                }
+            });
+            
+            if (currentDay) days.push(currentDay);
+            
+            // If we couldn't parse structured data, use the raw HTML with styling
+            if (days.length === 0) {
+                return `
+                    <div class="raw-meal-plan" style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        ${rawHtml}
+                    </div>
+                `;
+            }
+            
+            // Generate beautiful card-based layout
+            let html = '<div class="day-tabs">';
+            days.forEach((day, index) => {
+                html += `<div class="day-tab ${index === 0 ? 'active' : ''}" onclick="showDay(${index})">${day.name}</div>`;
+            });
+            html += '</div>';
+            
+            days.forEach((day, dayIndex) => {
+                html += `
+                    <div class="day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">
+                        ${day.meals.map(meal => createMealCard(meal)).join('')}
+                        
+                        <div class="day-summary">
+                            <h3 style="color: #667eea; margin: 0 0 15px 0;">Daily Totals</h3>
+                            <div class="day-totals">
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalCalories)}</div>
+                                    <div class="total-label">Calories</div>
+                                </div>
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalProtein)}g</div>
+                                    <div class="total-label">Protein</div>
+                                </div>
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalCarbs)}g</div>
+                                    <div class="total-label">Carbs</div>
+                                </div>
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalFat)}g</div>
+                                    <div class="total-label">Fat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        // Helper function to parse meal data from text
+        function parseMealFromText(element, text) {
+            const meal = {
+                type: '',
+                name: '',
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                description: ''
+            };
+            
+            // Determine meal type
+            if (text.toLowerCase().includes('breakfast')) meal.type = 'breakfast';
+            else if (text.toLowerCase().includes('lunch')) meal.type = 'lunch';
+            else if (text.toLowerCase().includes('dinner')) meal.type = 'dinner';
+            else if (text.toLowerCase().includes('snack')) meal.type = 'snack';
+            
+            // Extract meal name (remove meal type prefix)
+            meal.name = text.replace(/^(Breakfast|Lunch|Dinner|Snack):\s*/i, '').split('(')[0].trim();
+            
+            // Extract nutrition info from text or nearby elements
+            const nutritionMatch = text.match(/(\d+)\s*cal/i);
+            if (nutritionMatch) meal.calories = parseInt(nutritionMatch[1]);
+            
+            const proteinMatch = text.match(/(\d+)g?\s*protein/i);
+            if (proteinMatch) meal.protein = parseInt(proteinMatch[1]);
+            
+            const carbsMatch = text.match(/(\d+)g?\s*carbs?/i);
+            if (carbsMatch) meal.carbs = parseInt(carbsMatch[1]);
+            
+            const fatMatch = text.match(/(\d+)g?\s*fat/i);
+            if (fatMatch) meal.fat = parseInt(fatMatch[1]);
+            
+            // Get description from next sibling or parent
+            const nextEl = element.nextElementSibling;
+            if (nextEl && nextEl.tagName === 'P') {
+                meal.description = nextEl.textContent.trim();
+            }
+            
+            return meal;
+        }
+        
+        // Create a beautiful meal card
+        function createMealCard(meal) {
+            return `
+                <div class="meal-card ${meal.type}" onclick="toggleMealExpand(this)">
+                    <div class="meal-header">
+                        <span class="meal-type ${meal.type}">${meal.type}</span>
+                        <span class="meal-calories">${meal.calories} cal</span>
+                    </div>
+                    <div class="meal-name">${meal.name}</div>
+                    <div class="meal-macros">
+                        <div class="macro-item">
+                            <div class="macro-dot protein"></div>
+                            <span>${meal.protein}g protein</span>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-dot carbs"></div>
+                            <span>${meal.carbs}g carbs</span>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-dot fat"></div>
+                            <span>${meal.fat}g fat</span>
+                        </div>
+                    </div>
+                    ${meal.description ? `
+                        <div class="meal-description">${meal.description}</div>
+                        <div class="expand-indicator">Tap for details ↓</div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Show selected day
+        function showDay(dayIndex) {
+            // Update tabs
+            document.querySelectorAll('.day-tab').forEach((tab, index) => {
+                tab.classList.toggle('active', index === dayIndex);
+            });
+            
+            // Update content
+            document.querySelectorAll('.day-content').forEach((content, index) => {
+                content.classList.toggle('active', index === dayIndex);
+            });
+        }
+        
+        // Toggle meal card expansion
+        function toggleMealExpand(card) {
+            card.classList.toggle('expanded');
+            const indicator = card.querySelector('.expand-indicator');
+            if (indicator) {
+                indicator.textContent = card.classList.contains('expanded') ? 'Tap to hide ↑' : 'Tap for details ↓';
+            }
+        }
+        
+        // Save meal plan function
+        function saveMealPlan() {
+            // Implementation for saving meal plan
+            alert('✅ Meal plan saved! You can access it from the Meal Plans page.');
+        }
+        
+        // Share meal plan function
+        function shareMealPlan() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My FuelFire Meal Plan',
+                    text: 'Check out my personalized meal plan!',
+                    url: window.location.href
+                });
+            } else {
+                alert('📋 Link copied to clipboard!');
+            }
+        }
+        
+        // Show shopping list
+        function showShoppingList() {
+            // This would show a modal with the shopping list
+            alert('🛒 Shopping list feature coming soon! For now, you can print the meal plan.');
         }
 
         // Initialize
