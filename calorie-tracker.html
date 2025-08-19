@@ -128,11 +128,20 @@
                         </div>
                     </div>
                     
-                    <!-- Original Actions (Keep for meal plan access) -->
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 25px;">
-                        <button onclick="showMealPlanSelector()" style="background: white; border: 2px solid var(--primary); color: var(--primary); padding: 12px; border-radius: 15px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 14px;">
-                            🍽️ Log from Saved Meal Plan
-                        </button>
+                    <!-- Quick Import Options -->
+                    <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: var(--primary); margin: 0 0 15px 0; text-align: center; font-size: 18px;">⚡ Quick Import</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <button onclick="showMealPlanSelector()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
+                                🍽️<br>Meal Plans
+                            </button>
+                            <button onclick="showMealIdeasSelector()" style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(255, 152, 0, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
+                                💡<br>Meal Ideas
+                            </button>
+                        </div>
+                        <div style="text-align: center; margin-top: 12px; font-size: 12px; color: #666;">
+                            Import complete meals with one tap!
+                        </div>
                     </div>
                     
                     <!-- Today's Meals -->
@@ -222,6 +231,49 @@
             
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button onclick="hideMealPlanSelector()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meal Ideas Modal -->
+    <div id="meal-ideas-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">💡 Log from Meal Ideas</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px;">Select Category:</label>
+                <select id="meal-category-select" onchange="loadMealIdeasByCategory()" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
+                    <option value="">Choose a category...</option>
+                    <option value="beef">🥩 Beef</option>
+                    <option value="chicken">🍗 Chicken</option>
+                    <option value="pork">🥓 Pork</option>
+                    <option value="shrimp">🍤 Shrimp</option>
+                    <option value="turkey">🦃 Turkey</option>
+                    <option value="sandwiches">🥪 Epic Sandwiches</option>
+                    <option value="keto">🥑 Keto</option>
+                    <option value="fusion">🌍 Fusion</option>
+                </select>
+            </div>
+            
+            <div id="meal-ideas-list" style="display: none;">
+                <label style="display: block; font-weight: bold; margin-bottom: 8px;">Select Meal:</label>
+                <select id="meal-idea-select" onchange="showMealIdeaTypeSelector()" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
+                    <option value="">Choose a meal...</option>
+                </select>
+                
+                <div id="meal-idea-type-selector" style="display: none; margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px;">Log as:</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button onclick="logMealFromIdea('breakfast')" style="background: #FF6B6B; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍳 Breakfast</button>
+                        <button onclick="logMealFromIdea('lunch')" style="background: #4ECDC4; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🥗 Lunch</button>
+                        <button onclick="logMealFromIdea('dinner')" style="background: #3AA69D; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍽️ Dinner</button>
+                        <button onclick="logMealFromIdea('snack')" style="background: #F38181; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍎 Snack</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="hideMealIdeasSelector()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
     </div>
@@ -1248,6 +1300,145 @@
             alert(`✅ ${selectedMealData.name} logged as ${logAsType}!\n\n📊 ${selectedMealData.calories} calories\n🥩 ${selectedMealData.protein}g protein\n🍞 ${selectedMealData.carbs}g carbs\n🥑 ${selectedMealData.fat}g fat`);
             
             hideMealPlanSelector();
+            loadTodaysMeals();
+        }
+        
+        // Meal Ideas Functions
+        let selectedMealIdeaData = null;
+        
+        function showMealIdeasSelector() {
+            document.getElementById('meal-ideas-modal').style.display = 'block';
+        }
+        
+        function hideMealIdeasSelector() {
+            document.getElementById('meal-ideas-modal').style.display = 'none';
+            document.getElementById('meal-ideas-list').style.display = 'none';
+            document.getElementById('meal-idea-type-selector').style.display = 'none';
+            selectedMealIdeaData = null;
+        }
+        
+        function loadMealIdeasByCategory() {
+            const category = document.getElementById('meal-category-select').value;
+            if (!category) {
+                document.getElementById('meal-ideas-list').style.display = 'none';
+                return;
+            }
+            
+            // Define meal ideas for each category with calories and macros
+            const mealIdeas = {
+                beef: [
+                    { name: "Classic Beef Burger", calories: 650, protein: 35, carbs: 45, fat: 35 },
+                    { name: "Beef Stir Fry", calories: 520, protein: 40, carbs: 25, fat: 28 },
+                    { name: "Steak with Sweet Potato", calories: 580, protein: 42, carbs: 35, fat: 25 },
+                    { name: "Beef Tacos (3)", calories: 480, protein: 32, carbs: 38, fat: 22 },
+                    { name: "Beef and Broccoli", calories: 420, protein: 38, carbs: 18, fat: 20 }
+                ],
+                chicken: [
+                    { name: "Grilled Chicken Caesar Salad", calories: 450, protein: 40, carbs: 12, fat: 28 },
+                    { name: "Chicken Breast with Rice", calories: 520, protein: 45, carbs: 55, fat: 8 },
+                    { name: "Buffalo Chicken Wrap", calories: 480, protein: 35, carbs: 42, fat: 20 },
+                    { name: "Chicken Stir Fry", calories: 390, protein: 38, carbs: 22, fat: 15 },
+                    { name: "BBQ Chicken Pizza Slice", calories: 320, protein: 18, carbs: 35, fat: 12 }
+                ],
+                pork: [
+                    { name: "Pulled Pork Sandwich", calories: 580, protein: 32, carbs: 48, fat: 28 },
+                    { name: "Pork Chop with Applesauce", calories: 420, protein: 35, carbs: 25, fat: 20 },
+                    { name: "Bacon and Eggs", calories: 350, protein: 25, carbs: 2, fat: 28 },
+                    { name: "Pork Tenderloin", calories: 380, protein: 40, carbs: 8, fat: 18 },
+                    { name: "BBQ Ribs (4 ribs)", calories: 680, protein: 45, carbs: 15, fat: 48 }
+                ],
+                shrimp: [
+                    { name: "Shrimp Scampi with Pasta", calories: 520, protein: 32, carbs: 45, fat: 22 },
+                    { name: "Shrimp Salad", calories: 280, protein: 25, carbs: 8, fat: 16 },
+                    { name: "Coconut Shrimp (6 pieces)", calories: 420, protein: 20, carbs: 35, fat: 22 },
+                    { name: "Shrimp Tacos (3)", calories: 380, protein: 28, carbs: 35, fat: 15 },
+                    { name: "Garlic Butter Shrimp", calories: 320, protein: 30, carbs: 5, fat: 20 }
+                ],
+                turkey: [
+                    { name: "Turkey Club Sandwich", calories: 480, protein: 32, carbs: 42, fat: 20 },
+                    { name: "Turkey Meatballs with Marinara", calories: 350, protein: 28, carbs: 18, fat: 18 },
+                    { name: "Roasted Turkey Breast", calories: 320, protein: 38, carbs: 0, fat: 15 },
+                    { name: "Turkey Chili Bowl", calories: 280, protein: 25, carbs: 22, fat: 12 },
+                    { name: "Turkey Burger", calories: 420, protein: 30, carbs: 35, fat: 18 }
+                ],
+                sandwiches: [
+                    { name: "Classic BLT", calories: 480, protein: 18, carbs: 35, fat: 32 },
+                    { name: "Grilled Cheese & Tomato Soup", calories: 620, protein: 22, carbs: 65, fat: 28 },
+                    { name: "Philly Cheesesteak", calories: 720, protein: 38, carbs: 48, fat: 42 },
+                    { name: "Italian Sub", calories: 680, protein: 32, carbs: 55, fat: 38 },
+                    { name: "Tuna Melt", calories: 520, protein: 28, carbs: 38, fat: 28 }
+                ],
+                keto: [
+                    { name: "Keto Cauliflower Mac & Cheese", calories: 380, protein: 18, carbs: 8, fat: 32 },
+                    { name: "Avocado Bacon Salad", calories: 420, protein: 15, carbs: 12, fat: 38 },
+                    { name: "Keto Chicken Thighs", calories: 480, protein: 35, carbs: 3, fat: 36 },
+                    { name: "Zucchini Noodles with Pesto", calories: 320, protein: 12, carbs: 10, fat: 28 },
+                    { name: "Keto Beef Bowl", calories: 520, protein: 40, carbs: 8, fat: 38 }
+                ],
+                fusion: [
+                    { name: "Korean BBQ Bowl", calories: 580, protein: 35, carbs: 55, fat: 22 },
+                    { name: "Sushi Bowl", calories: 450, protein: 28, carbs: 48, fat: 18 },
+                    { name: "Thai Curry Chicken", calories: 520, protein: 32, carbs: 35, fat: 28 },
+                    { name: "Mexican Street Corn Salad", calories: 320, protein: 8, carbs: 35, fat: 18 },
+                    { name: "Mediterranean Quinoa Bowl", calories: 480, protein: 18, carbs: 55, fat: 20 }
+                ]
+            };
+            
+            const mealSelect = document.getElementById('meal-idea-select');
+            mealSelect.innerHTML = '<option value="">Choose a meal...</option>';
+            
+            const categoryMeals = mealIdeas[category] || [];
+            categoryMeals.forEach((meal, index) => {
+                mealSelect.innerHTML += `<option value="${index}">${meal.name} (${meal.calories} cal)</option>`;
+            });
+            
+            document.getElementById('meal-ideas-list').style.display = 'block';
+            window.currentCategoryMeals = categoryMeals;
+        }
+        
+        function showMealIdeaTypeSelector() {
+            const mealIndex = document.getElementById('meal-idea-select').value;
+            if (!mealIndex || !window.currentCategoryMeals) {
+                document.getElementById('meal-idea-type-selector').style.display = 'none';
+                return;
+            }
+            
+            selectedMealIdeaData = window.currentCategoryMeals[parseInt(mealIndex)];
+            document.getElementById('meal-idea-type-selector').style.display = 'block';
+        }
+        
+        function logMealFromIdea(logAsType) {
+            if (!selectedMealIdeaData) {
+                alert('Please select a meal first');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            const logEntry = {
+                name: selectedMealIdeaData.name,
+                type: logAsType,
+                calories: selectedMealIdeaData.calories,
+                protein: selectedMealIdeaData.protein,
+                carbs: selectedMealIdeaData.carbs,
+                fat: selectedMealIdeaData.fat,
+                time: new Date().toISOString(),
+                fromMealIdeas: true
+            };
+            
+            loggedMeals[today].meals.push(logEntry);
+            loggedMeals[today].totalCalories += selectedMealIdeaData.calories;
+            
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            alert(`✅ ${selectedMealIdeaData.name} logged as ${logAsType}!\n\n📊 ${selectedMealIdeaData.calories} calories\n🥩 ${selectedMealIdeaData.protein}g protein\n🍞 ${selectedMealIdeaData.carbs}g carbs\n🥑 ${selectedMealIdeaData.fat}g fat`);
+            
+            hideMealIdeasSelector();
             loadTodaysMeals();
         }
         
