@@ -1786,7 +1786,7 @@
                     </div>
                 `).join('')}
                 
-                <script>
+                <${'script'}>
                     function showPremiumDay(dayIndex) {
                         // Update day bubbles
                         document.querySelectorAll('.day-bubble').forEach((bubble, index) => {
@@ -1806,7 +1806,7 @@
                             button.textContent = card.classList.contains('expanded') ? '↑' : '↓';
                         }
                     }
-                </script>
+                </${'script'}>
             `;
         }
 
