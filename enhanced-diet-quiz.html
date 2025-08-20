@@ -1859,7 +1859,7 @@
                 }
                 // Check if it's a meal
                 else if (currentDay && (text.includes('Breakfast') || text.includes('Lunch') || text.includes('Dinner') || text.includes('Snack'))) {
-                    const meal = parseMealData(element);
+                    const meal = parseMealFromText(element, text);
                     if (meal) {
                         currentDay.meals.push(meal);
                         currentDay.totalCalories += meal.calories || 0;
@@ -1882,8 +1882,14 @@
             }
             
             // Generate beautiful card-based layout for each day
-                        transition: all 0.3s ease;
+            let html = '';
+            
+            // Create day tabs navigation
+            html += `
+                <style>
+                    .action-buttons {
                         display: flex;
+                        justify-content: center;
                         align-items: center;
                         gap: 8px;
                     }
@@ -2144,7 +2150,7 @@
                     </div>
                     
                     <div id="meal-plan-display">
-                        ${beautifiedPlan}
+                        ${rawHtml}
                     </div>
                     
                     <button class="shopping-list-btn" onclick="showShoppingList()">
@@ -2167,10 +2173,12 @@
             }, 100);
             
             console.log('✅ Meal plan displayed with beautiful card layout');
+            
+            return html;
         }
         
-        // Function to beautify the meal plan HTML
-        function beautifyMealPlan(rawHtml) {
+        // Function to beautify the meal plan HTML (duplicate - remove this)
+        function beautifyMealPlanOld(rawHtml) {
             // Parse the raw HTML and extract meal data
             const parser = new DOMParser();
             const doc = parser.parseFromString(rawHtml, 'text/html');
