@@ -5,6 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meal Plans - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .meal-plans-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .meal-plan-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .meal-plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .meal-plan-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+        
+        .meal-plan-card:hover::before {
+            opacity: 1;
+        }
+        
+        .meal-plan-card:active {
+            transform: translateY(-2px);
+        }
+        
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .plan-title {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .plan-date {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .plan-meta {
+            background: rgba(255,255,255,0.15);
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: scale(1.05);
+        }
+        
+        .empty-state {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-top: 20px;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        
+        .create-plan-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .create-plan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .create-plan-btn:active {
+            transform: translateY(0);
+        }
+        
+        .plan-weight-loss { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
+        .plan-muscle-gain { background: linear-gradient(135deg, #4ECDC4, #44A08D); }
+        .plan-maintenance { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .plan-cutting { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .plan-bulking { background: linear-gradient(135deg, #DAA520, #FFD700); }
+    </style>
 </head>
 <body>
     <div class="phone-container">
@@ -26,12 +164,12 @@
                         <p style="color: #666; font-size: 14px;">AI-generated personalized meal plans</p>
                     </div>
                     
-                    <div id="meal-plans-list">
+                    <div id="meal-plans-list" class="meal-plans-grid">
                         <!-- Meal plans will be loaded here -->
                     </div>
                     
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button onclick="createNewPlan()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 20px; font-weight: bold; width: 100%;">
+                    <div style="text-align: center;">
+                        <button onclick="createNewPlan()" class="create-plan-btn">
                             ✨ Create New Meal Plan
                         </button>
                     </div>
@@ -94,13 +232,10 @@
             
             if (savedPlans.length === 0) {
                 listContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; background: #f8f9ff; border-radius: 15px;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">🍽️</div>
-                        <h3 style="color: #333; margin-bottom: 10px;">No Meal Plans Yet</h3>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Create your first AI-powered meal plan to get started!</p>
-                        <button onclick="createNewPlan()" style="background: var(--gradient-1); color: white; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold;">
-                            ✨ Create Your First Plan
-                        </button>
+                    <div class="empty-state">
+                        <div class="empty-icon">🍽️</div>
+                        <h3 style="color: #333; margin-bottom: 15px;">No Meal Plans Yet</h3>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 0;">Create your first AI-powered meal plan to get started!</p>
                     </div>
                 `;
                 return;
@@ -109,23 +244,39 @@
             let plansHTML = '';
             savedPlans.forEach((plan, index) => {
                 const date = new Date(plan.createdAt).toLocaleDateString();
+                const goal = plan.metadata.goal.replace('-', ' ').toLowerCase();
+                const goalClass = `plan-${plan.metadata.goal.replace('_', '-')}`;
+                const goalEmoji = getGoalEmoji(goal);
+                
                 plansHTML += `
-                    <div class="meal-plan-card" onclick="viewMealPlan(${index})" style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer;">
-                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 10px;">
+                    <div class="meal-plan-card ${goalClass}" onclick="viewMealPlan(${index})">
+                        <div class="plan-header">
                             <div>
-                                <h3 style="color: var(--primary); margin: 0 0 5px 0; font-size: 16px;">🎯 ${plan.metadata.goal.replace('-', ' ').toUpperCase()} Plan</h3>
-                                <p style="color: #666; margin: 0; font-size: 12px;">Created: ${date}</p>
+                                <h3 class="plan-title">${goalEmoji} ${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan</h3>
+                                <p class="plan-date">Created ${date}</p>
                             </div>
-                            <button onclick="deleteMealPlan(${index}, event)" style="background: #dc3545; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px;">🗑️</button>
+                            <button onclick="deleteMealPlan(${index}, event)" class="delete-btn">🗑️</button>
                         </div>
-                        <div style="background: #f8f9ff; padding: 10px; border-radius: 8px; font-size: 12px; color: #666;">
-                            Duration: ${plan.metadata.planDuration || '2-week'} | Generated: ${date}
+                        <div class="plan-meta">
+                            <div>📅 ${plan.metadata.planDuration || '2-week'} duration</div>
+                            <div>🎯 Personalized for your goals</div>
                         </div>
                     </div>
                 `;
             });
             
             listContainer.innerHTML = plansHTML;
+        }
+        
+        function getGoalEmoji(goal) {
+            const emojis = {
+                'weight loss': '🔥',
+                'muscle gain': '💪',
+                'maintenance': '⚖️',
+                'cutting': '🎯',
+                'bulking': '📈'
+            };
+            return emojis[goal] || '🍽️';
         }
 
         function viewMealPlan(index) {
