@@ -1414,11 +1414,14 @@
         }
         
         function parseMealPlanForImport(mealPlanText) {
+            console.log('🔍 Parsing meal plan text...');
             const meals = [];
             const lines = mealPlanText.split('\n');
             let currentDay = '';
             let currentMeal = null;
             let mealContent = '';
+            
+            console.log(`📄 Total lines to parse: ${lines.length}`);
             
             for (let line of lines) {
                 const trimmed = line.trim();
@@ -1428,13 +1431,15 @@
                     continue;
                 }
                 
-                // Day headers
-                const dayMatch = trimmed.match(/^###?\s*(Day \d+)/i);
+                // Day headers - look for weekday patterns and "Day X" patterns
+                const dayMatch = trimmed.match(/^###?\s*(Day \d+[-\d]*.*?:?)/i);
                 if (dayMatch) {
+                    console.log('📅 Found day:', dayMatch[1]);
                     // Save previous meal if exists
                     if (currentMeal) {
                         currentMeal.content = mealContent.trim();
                         meals.push(currentMeal);
+                        console.log('✅ Saved meal:', currentMeal.name || 'unnamed');
                         currentMeal = null;
                         mealContent = '';
                     }
@@ -1442,19 +1447,22 @@
                     continue;
                 }
                 
-                // Meal headers
-                const mealMatch = trimmed.match(/\*\*.*?(Breakfast|Lunch|Dinner|Snacks?).*?\*\*/i);
+                // Meal headers - updated regex to match your format exactly
+                const mealMatch = trimmed.match(/\*\*🍳\s*(Breakfast):\*\*|\*\*🥗\s*(Lunch):\*\*|\*\*🍽️\s*(Dinner):\*\*|\*\*🍎\s*(Snacks?):\*\*/i);
                 if (mealMatch && currentDay) {
+                    const mealType = mealMatch[1] || mealMatch[2] || mealMatch[3] || mealMatch[4];
+                    console.log('🍽️ Found meal:', mealType, 'for', currentDay);
                     // Save previous meal if exists
                     if (currentMeal) {
                         currentMeal.content = mealContent.trim();
                         meals.push(currentMeal);
+                        console.log('✅ Saved previous meal:', currentMeal.name || 'unnamed');
                         mealContent = '';
                     }
                     
                     currentMeal = {
                         day: currentDay,
-                        type: mealMatch[1].toLowerCase(),
+                        type: mealType.toLowerCase(),
                         name: '',
                         calories: 0,
                         protein: 0,
@@ -1505,10 +1513,16 @@
             if (currentMeal) {
                 currentMeal.content = mealContent.trim();
                 meals.push(currentMeal);
+                console.log('✅ Saved final meal:', currentMeal.name || 'unnamed');
             }
             
+            console.log(`🎯 Total meals found: ${meals.length}`);
+            meals.forEach((meal, i) => {
+                console.log(`   ${i+1}. ${meal.day} - ${meal.type}: ${meal.name || 'unnamed'} (${meal.calories} cal)`);
+            });
+            
             // Clean up meals and set default names if needed
-            return meals.map(meal => ({
+            const finalMeals = meals.map(meal => ({
                 ...meal,
                 name: meal.name || `${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)} Meal`,
                 calories: meal.calories || 400, // Default calories if not found
@@ -1516,6 +1530,9 @@
                 carbs: meal.carbs || 30,
                 fat: meal.fat || 15
             }));
+            
+            console.log(`📋 Returning ${finalMeals.length} processed meals`);
+            return finalMeals;
         }
         
         function showMealTypeSelector() {
