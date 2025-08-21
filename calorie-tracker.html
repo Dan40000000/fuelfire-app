@@ -381,11 +381,27 @@
                 document.getElementById('voice-button').style.background = '#28a745';
                 document.getElementById('voice-status').textContent = '🔴';
             } else {
+                // Manual stop - process whatever we have
+                const currentText = document.getElementById('voice-text').textContent;
+                
                 recognition.stop();
                 isRecording = false;
-                document.getElementById('voice-button').textContent = 'Start Recording';
-                document.getElementById('voice-button').style.background = '#FF6B6B';
-                document.getElementById('voice-status').textContent = '🎤';
+                
+                if (currentText && currentText !== 'Click the microphone to start speaking...' && currentText.trim().length > 0) {
+                    // Process the current text
+                    document.getElementById('voice-button').textContent = 'Processing...';
+                    document.getElementById('voice-button').style.background = '#6c757d';
+                    document.getElementById('voice-status').textContent = '🤖';
+                    
+                    console.log('🎤 Manual stop - processing:', currentText);
+                    searchFoodByVoice(currentText);
+                } else {
+                    // No text captured
+                    document.getElementById('voice-button').textContent = 'Start Recording';
+                    document.getElementById('voice-button').style.background = '#FF6B6B';
+                    document.getElementById('voice-status').textContent = '🎤';
+                    document.getElementById('voice-text').textContent = 'No speech detected. Try again.';
+                }
             }
         }
         
@@ -404,32 +420,60 @@
         
         // Search food from voice input using AI
         async function searchFoodByVoice(query) {
-            const results = await parseWithAI(query);
-            
-            if (results.length === 1) {
-                // Auto-log single food item
-                const food = results[0];
-                const mealType = prompt(`Found: ${food.name} (${food.calories} cal)\n\nLog as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):`);
-                const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
-                const type = types[parseInt(mealType)] || 'snack';
+            try {
+                console.log('🎙️ Processing voice input:', query);
                 
-                // Add to food log
-                addFoodToLog({
-                    name: food.name,
-                    calories: food.calories,
-                    protein: food.protein,
-                    carbs: food.carbs,
-                    fat: food.fat,
-                    meal: type
-                });
+                if (!query || query.trim().length < 2) {
+                    document.getElementById('voice-text').textContent = 'Please say something about food you ate.';
+                    document.getElementById('voice-button').textContent = 'Start Recording';
+                    document.getElementById('voice-button').style.background = '#FF6B6B';
+                    document.getElementById('voice-status').textContent = '🎤';
+                    return;
+                }
                 
-                // Close voice modal
-                closeVoiceModal();
+                const results = await parseWithAI(query);
+                console.log('🤖 AI returned:', results);
                 
-                alert(`✅ Added ${food.name} to ${type}!`);
-            } else {
-                // Show multiple results for selection
-                displayFoodResults(results, 'voice');
+                if (!results || results.length === 0) {
+                    document.getElementById('voice-text').textContent = 'No food found. Try describing what you ate more clearly.';
+                    document.getElementById('voice-button').textContent = 'Start Recording';
+                    document.getElementById('voice-button').style.background = '#FF6B6B';
+                    document.getElementById('voice-status').textContent = '🎤';
+                    return;
+                }
+                
+                if (results.length === 1) {
+                    // Auto-log single food item
+                    const food = results[0];
+                    const mealType = prompt(`Found: ${food.name} (${food.calories} cal)\n\nLog as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):`);
+                    const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
+                    const type = types[parseInt(mealType)] || 'snack';
+                    
+                    // Add to food log
+                    addFoodToLog({
+                        name: food.name,
+                        calories: food.calories,
+                        protein: food.protein,
+                        carbs: food.carbs,
+                        fat: food.fat,
+                        meal: type
+                    });
+                    
+                    // Close voice modal
+                    closeVoiceModal();
+                    
+                    alert(`✅ Added ${food.name} to ${type}!`);
+                } else {
+                    // Show multiple results for selection
+                    displayFoodResults(results, 'voice');
+                }
+                
+            } catch (error) {
+                console.error('❌ Voice processing error:', error);
+                document.getElementById('voice-text').textContent = `Error: ${error.message}`;
+                document.getElementById('voice-button').textContent = 'Try Again';
+                document.getElementById('voice-button').style.background = '#FF6B6B';
+                document.getElementById('voice-status').textContent = '❌';
             }
         }
         
@@ -441,6 +485,8 @@
                 // Show loading state
                 document.getElementById('voice-text').textContent = `Analyzing: "${query}"...`;
                 
+                console.log('📡 Making API call to /api/ai-food-parser...');
+                
                 const response = await fetch('/api/ai-food-parser', {
                     method: 'POST',
                     headers: {
@@ -449,7 +495,14 @@
                     body: JSON.stringify({ query: query })
                 });
                 
+                console.log('📡 API response status:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                }
+                
                 const data = await response.json();
+                console.log('📡 API response data:', data);
                 
                 if (data.success) {
                     console.log(`🍔 AI found ${data.foods.length} foods from ${data.source}`);
@@ -461,21 +514,28 @@
                     if (data.foods.length > 1) {
                         const foodNames = data.foods.map(f => f.name).join(' + ');
                         document.getElementById('voice-text').textContent = `Found: ${foodNames}`;
-                    } else {
+                    } else if (data.foods.length === 1) {
                         document.getElementById('voice-text').textContent = `Found: ${data.foods[0].name}`;
                     }
                     
                     return data.foods;
                 } else {
-                    throw new Error(data.error || 'Parsing failed');
+                    throw new Error(data.error || data.message || 'Parsing failed');
                 }
                 
             } catch (error) {
-                console.error('AI food parsing error:', error);
+                console.error('❌ AI food parsing error:', error);
+                document.getElementById('voice-text').textContent = `AI Error: ${error.message}`;
                 
-                // Fallback to USDA search
-                console.log('🔄 Falling back to USDA search...');
-                return await searchUSDA(query);
+                // Show error in UI
+                alert(`AI Error: ${error.message}\n\nCheck console for details.`);
+                
+                // Reset button
+                document.getElementById('voice-button').textContent = 'Start Recording';
+                document.getElementById('voice-button').style.background = '#FF6B6B';
+                document.getElementById('voice-status').textContent = '🎤';
+                
+                return [];
             }
         }
         
