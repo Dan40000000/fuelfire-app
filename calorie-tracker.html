@@ -1322,16 +1322,22 @@
                 const recentGoals = localStorage.getItem('fuelfire_recent_diet_goals');
                 
                 if (recentPlanText) {
-                    console.log('✅ Found recent meal plan text!');
-                    // Create a temporary plan object from the recent data
+                    console.log('✅ Found recent meal plan text! Converting and saving...');
+                    // Create a proper plan object from the recent data
                     const tempPlan = {
                         mealPlan: recentPlanText,
                         metadata: recentGoals ? JSON.parse(recentGoals) : { goal: 'recent' },
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        id: Date.now().toString()
                     };
                     
-                    // Store it temporarily for this session
-                    window.tempMealPlan = [tempPlan];
+                    // Auto-save it to the proper storage location for future use
+                    const newPlans = [tempPlan];
+                    localStorage.setItem('fuelfire_meal_plans', JSON.stringify(newPlans));
+                    console.log('💾 Auto-saved recent plan to fuelfire_meal_plans for future use');
+                    
+                    // Store it temporarily for this session too
+                    window.tempMealPlan = newPlans;
                     
                     const date = new Date().toLocaleDateString();
                     const goal = tempPlan.metadata?.goal || 'Recent';
