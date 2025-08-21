@@ -1291,8 +1291,8 @@
         let selectedMealData = null;
         
         function showMealPlanSelector() {
-            // Load saved meal plans
-            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
+            // Load saved meal plans from the correct storage key
+            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_meal_plans') || '[]');
             const selectElement = document.getElementById('meal-plan-select');
             
             // Clear existing options
@@ -1300,13 +1300,15 @@
             
             if (savedPlans.length === 0) {
                 selectElement.innerHTML += '<option value="">No saved meal plans found</option>';
-                alert('No saved meal plans found!\n\nPlease save a meal plan first by:\n1. Going to Meal Plans\n2. Generating a meal plan\n3. Clicking "💾 Save Plan"');
+                alert('No saved meal plans found!\n\nPlease create a meal plan first by:\n1. Going to Diet Creation\n2. Generating a meal plan\n\nThen return here to import meals!');
                 return;
             }
             
-            // Add meal plan options
-            savedPlans.forEach(plan => {
-                selectElement.innerHTML += `<option value="${plan.id}">${plan.name} (${plan.createdAt})</option>`;
+            // Add meal plan options with better formatting
+            savedPlans.forEach((plan, index) => {
+                const date = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
+                const goal = plan.metadata?.goal || 'Unknown Goal';
+                selectElement.innerHTML += `<option value="${index}">${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}</option>`;
             });
             
             document.getElementById('meal-plan-modal').style.display = 'block';
@@ -1320,63 +1322,155 @@
         }
         
         function loadMealPlanMeals() {
-            const planId = document.getElementById('meal-plan-select').value;
-            if (!planId) {
+            const planIndex = document.getElementById('meal-plan-select').value;
+            if (!planIndex) {
                 document.getElementById('meal-plan-meals').style.display = 'none';
                 return;
             }
             
-            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
-            const selectedPlan = savedPlans.find(plan => plan.id === planId);
+            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_meal_plans') || '[]');
+            const selectedPlan = savedPlans[parseInt(planIndex)];
             
-            if (!selectedPlan || !selectedPlan.meals) {
-                alert('No meals found in this plan');
+            if (!selectedPlan || !selectedPlan.mealPlan) {
+                alert('No meal plan content found');
+                return;
+            }
+            
+            // Parse the meal plan content to extract individual meals
+            const parsedMeals = parseMealPlanForImport(selectedPlan.mealPlan);
+            
+            if (parsedMeals.length === 0) {
+                alert('No meals could be extracted from this meal plan');
                 return;
             }
             
             const mealSelect = document.getElementById('meal-select');
             mealSelect.innerHTML = '<option value="">Choose a meal...</option>';
             
-            // Group meals by day and type
-            const groupedMeals = {};
-            selectedPlan.meals.forEach((meal, index) => {
-                const dayKey = `Day ${meal.day}`;
-                if (!groupedMeals[dayKey]) groupedMeals[dayKey] = {};
-                if (!groupedMeals[dayKey][meal.type]) groupedMeals[dayKey][meal.type] = [];
-                groupedMeals[dayKey][meal.type].push({...meal, index});
+            // Add parsed meals to the select
+            parsedMeals.forEach((meal, index) => {
+                mealSelect.innerHTML += `<option value="${index}">${meal.day} - ${meal.type}: ${meal.name} (${meal.calories} cal)</option>`;
             });
             
-            // Add organized options
-            Object.keys(groupedMeals).sort((a, b) => {
-                const dayA = parseInt(a.replace('Day ', ''));
-                const dayB = parseInt(b.replace('Day ', ''));
-                return dayA - dayB;
-            }).forEach(day => {
-                const dayMeals = groupedMeals[day];
-                ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-                    if (dayMeals[mealType]) {
-                        dayMeals[mealType].forEach(meal => {
-                            mealSelect.innerHTML += `<option value="${meal.index}">${day} - ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}: ${meal.name}</option>`;
-                        });
-                    }
-                });
-            });
+            // Store parsed meals globally for later use
+            window.currentParsedMeals = parsedMeals;
             
             document.getElementById('meal-plan-meals').style.display = 'block';
         }
         
+        function parseMealPlanForImport(mealPlanText) {
+            const meals = [];
+            const lines = mealPlanText.split('\n');
+            let currentDay = '';
+            let currentMeal = null;
+            let mealContent = '';
+            
+            for (let line of lines) {
+                const trimmed = line.trim();
+                
+                // Skip empty lines and shopping list content
+                if (!trimmed || trimmed.toLowerCase().includes('shopping list') || trimmed.startsWith('#')) {
+                    continue;
+                }
+                
+                // Day headers
+                const dayMatch = trimmed.match(/^###?\s*(Day \d+)/i);
+                if (dayMatch) {
+                    // Save previous meal if exists
+                    if (currentMeal) {
+                        currentMeal.content = mealContent.trim();
+                        meals.push(currentMeal);
+                        currentMeal = null;
+                        mealContent = '';
+                    }
+                    currentDay = dayMatch[1];
+                    continue;
+                }
+                
+                // Meal headers
+                const mealMatch = trimmed.match(/\*\*.*?(Breakfast|Lunch|Dinner|Snacks?).*?\*\*/i);
+                if (mealMatch && currentDay) {
+                    // Save previous meal if exists
+                    if (currentMeal) {
+                        currentMeal.content = mealContent.trim();
+                        meals.push(currentMeal);
+                        mealContent = '';
+                    }
+                    
+                    currentMeal = {
+                        day: currentDay,
+                        type: mealMatch[1].toLowerCase(),
+                        name: '',
+                        calories: 0,
+                        protein: 0,
+                        carbs: 0,
+                        fat: 0,
+                        content: ''
+                    };
+                    continue;
+                }
+                
+                // Skip day totals and weekly summaries
+                if (trimmed.includes('Day Total:') || trimmed.includes('Week') && trimmed.includes('Summary')) {
+                    continue;
+                }
+                
+                // Collect meal content
+                if (currentMeal) {
+                    mealContent += line + '\n';
+                    
+                    // Extract calories if found
+                    const calMatch = line.match(/Calories?:\s*(\d+)/i);
+                    if (calMatch) {
+                        currentMeal.calories = parseInt(calMatch[1]);
+                    }
+                    
+                    // Extract macros
+                    const proteinMatch = line.match(/Protein:\s*(\d+)/i);
+                    if (proteinMatch) currentMeal.protein = parseInt(proteinMatch[1]);
+                    
+                    const carbMatch = line.match(/Carb?s?:\s*(\d+)/i);
+                    if (carbMatch) currentMeal.carbs = parseInt(carbMatch[1]);
+                    
+                    const fatMatch = line.match(/Fat:\s*(\d+)/i);
+                    if (fatMatch) currentMeal.fat = parseInt(fatMatch[1]);
+                    
+                    // Try to extract meal name from first non-empty line
+                    if (!currentMeal.name && trimmed && !trimmed.includes(':')) {
+                        // Clean up the name by removing markdown and extra formatting
+                        let name = trimmed.replace(/\*\*/g, '').replace(/^-\s*/, '').trim();
+                        if (name.length > 5 && name.length < 50) {
+                            currentMeal.name = name.split('(')[0].trim(); // Remove calories from name
+                        }
+                    }
+                }
+            }
+            
+            // Save last meal if exists
+            if (currentMeal) {
+                currentMeal.content = mealContent.trim();
+                meals.push(currentMeal);
+            }
+            
+            // Clean up meals and set default names if needed
+            return meals.map(meal => ({
+                ...meal,
+                name: meal.name || `${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)} Meal`,
+                calories: meal.calories || 400, // Default calories if not found
+                protein: meal.protein || 20,
+                carbs: meal.carbs || 30,
+                fat: meal.fat || 15
+            }));
+        }
+        
         function showMealTypeSelector() {
             const mealIndex = document.getElementById('meal-select').value;
-            if (!mealIndex) {
+            if (!mealIndex || !window.currentParsedMeals) {
                 document.getElementById('meal-type-selector').style.display = 'none';
                 return;
             }
             
-            const planId = document.getElementById('meal-plan-select').value;
-            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
-            const selectedPlan = savedPlans.find(plan => plan.id === planId);
-            
-            selectedMealData = selectedPlan.meals[parseInt(mealIndex)];
+            selectedMealData = window.currentParsedMeals[parseInt(mealIndex)];
             document.getElementById('meal-type-selector').style.display = 'block';
         }
         
@@ -1415,6 +1509,7 @@
             
             hideMealPlanSelector();
             loadTodaysMeals();
+            loadQuickAdds();
         }
         
         // Meal Ideas Functions
