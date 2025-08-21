@@ -132,7 +132,7 @@
                     <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <h3 style="color: var(--primary); margin: 0 0 15px 0; text-align: center; font-size: 18px;">⚡ Quick Import</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <button onclick="debugAndShowMealPlanSelector()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
+                            <button onclick="showMealPlanSelector()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
                                 🍽️<br>Meal Plans
                             </button>
                             <button onclick="showMealIdeasSelector()" style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(255, 152, 0, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
@@ -1362,40 +1362,6 @@
             document.getElementById('meal-plan-modal').style.display = 'block';
         }
         
-        function debugAndShowMealPlanSelector() {
-            alert('🔍 DEBUG: Checking all localStorage...');
-            
-            // Show ALL localStorage keys
-            const allKeys = Object.keys(localStorage);
-            console.log('🗂️ ALL localStorage keys:', allKeys);
-            
-            // Show the exact content of each meal-related key
-            allKeys.forEach(key => {
-                if (key.toLowerCase().includes('meal') || key.toLowerCase().includes('plan')) {
-                    const value = localStorage.getItem(key);
-                    console.log(`📦 ${key}:`, value ? value.substring(0, 200) + '...' : 'EMPTY');
-                }
-            });
-            
-            // Force a manual check
-            const manualCheck = localStorage.getItem('fuelfire_meal_plans');
-            console.log('🎯 Manual fuelfire_meal_plans check:', manualCheck);
-            
-            if (manualCheck) {
-                try {
-                    const parsed = JSON.parse(manualCheck);
-                    alert(`✅ SUCCESS! Found ${parsed.length} meal plans in storage!\n\nFirst plan: "${parsed[0].metadata.goal}" from ${new Date(parsed[0].metadata.createdAt).toLocaleDateString()}`);
-                    console.log('✅ Parsed meal plans:', parsed);
-                } catch (e) {
-                    alert('Error parsing meal plans: ' + e.message);
-                }
-            } else {
-                alert('❌ No fuelfire_meal_plans found in localStorage');
-            }
-            
-            // Now call the original function
-            showMealPlanSelector();
-        }
         
         function hideMealPlanSelector() {
             document.getElementById('meal-plan-modal').style.display = 'none';
@@ -1782,61 +1748,6 @@
             }
         }
         
-        // Show Meal Plan Selector
-        function showMealPlanSelector() {
-            const mealPlanModal = `
-                <div id="meal-plan-selector" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-                    <div style="background: white; border-radius: 20px; padding: 25px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;">
-                        <h3 style="margin: 0 0 20px 0; color: #4B9CD3;">📋 Select from Meal Plan</h3>
-                        
-                        <div style="margin-bottom: 20px;">
-                            <button onclick="selectMealPlanItem('breakfast')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                                🍳 Breakfast: Protein Oatmeal Bowl (420 cal)
-                            </button>
-                            
-                            <button onclick="selectMealPlanItem('lunch')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                                🥗 Lunch: Grilled Chicken Salad (380 cal)
-                            </button>
-                            
-                            <button onclick="selectMealPlanItem('dinner')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                                🍽️ Dinner: Salmon with Veggies (520 cal)
-                            </button>
-                            
-                            <button onclick="selectMealPlanItem('snack')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                                🍎 Snack: Greek Yogurt Parfait (180 cal)
-                            </button>
-                        </div>
-                        
-                        <button onclick="hideMealPlanSelector()" style="width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', mealPlanModal);
-        }
-        
-        function hideMealPlanSelector() {
-            const selector = document.getElementById('meal-plan-selector');
-            if (selector) selector.remove();
-        }
-        
-        function selectMealPlanItem(mealType) {
-            const meals = {
-                breakfast: { name: 'Protein Oatmeal Bowl', calories: 420, protein: 25, carbs: 55, fat: 12 },
-                lunch: { name: 'Grilled Chicken Salad', calories: 380, protein: 35, carbs: 25, fat: 15 },
-                dinner: { name: 'Salmon with Veggies', calories: 520, protein: 40, carbs: 30, fat: 25 },
-                snack: { name: 'Greek Yogurt Parfait', calories: 180, protein: 15, carbs: 22, fat: 5 }
-            };
-            
-            const food = meals[mealType];
-            food.meal = mealType;
-            
-            addFoodToLog(food);
-            hideMealPlanSelector();
-            alert(`✅ Added ${food.name} to your log!`);
-        }
         
         // Show Meal Ideas Selector
         function showMealIdeasSelector() {
