@@ -4604,6 +4604,150 @@ function logWorkout(workoutData) {
     updateProgressDisplay();
 }
 
+// Track Workouts Functions
+let exerciseCount = 0;
+
+function startQuickWorkout(type) {
+    document.getElementById('workout-type').value = type === 'strength' ? 'full-body' : 'cardio';
+    document.getElementById('workout-duration').value = type === 'strength' ? '45' : '30';
+    
+    if (type === 'strength') {
+        // Add some default strength exercises
+        addExercise('Bench Press', '3', '10', '185');
+        addExercise('Squats', '4', '8', '225');
+        addExercise('Deadlifts', '3', '5', '315');
+    } else {
+        // Add cardio entry
+        addExercise('Running', '30 min', '', '5 miles');
+    }
+}
+
+function addExercise(name = '', sets = '', reps = '', weight = '') {
+    exerciseCount++;
+    const exerciseHTML = `
+        <div id="exercise-${exerciseCount}" style="background: var(--lighter-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: center;">
+                <input type="text" placeholder="Exercise name" value="${name}" id="exercise-name-${exerciseCount}" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="text" placeholder="Sets" value="${sets}" id="exercise-sets-${exerciseCount}" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="text" placeholder="Reps" value="${reps}" id="exercise-reps-${exerciseCount}" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="text" placeholder="Weight" value="${weight}" id="exercise-weight-${exerciseCount}" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                <button onclick="removeExercise(${exerciseCount})" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">❌</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('exercise-list').insertAdjacentHTML('beforeend', exerciseHTML);
+}
+
+function removeExercise(id) {
+    const element = document.getElementById(`exercise-${id}`);
+    if (element) element.remove();
+}
+
+function saveWorkout() {
+    const type = document.getElementById('workout-type').value;
+    const duration = document.getElementById('workout-duration').value;
+    const notes = document.getElementById('workout-notes').value;
+    
+    if (!type || !duration) {
+        alert('Please fill in workout type and duration');
+        return;
+    }
+    
+    // Collect exercises
+    const exercises = [];
+    for (let i = 1; i <= exerciseCount; i++) {
+        const nameEl = document.getElementById(`exercise-name-${i}`);
+        if (nameEl) {
+            const name = nameEl.value;
+            const sets = document.getElementById(`exercise-sets-${i}`).value;
+            const reps = document.getElementById(`exercise-reps-${i}`).value;
+            const weight = document.getElementById(`exercise-weight-${i}`).value;
+            
+            if (name) {
+                exercises.push({ name, sets, reps, weight });
+            }
+        }
+    }
+    
+    // Save workout
+    const workoutData = {
+        type: type,
+        duration: parseInt(duration),
+        exercises: exercises,
+        notes: notes
+    };
+    
+    // Log the workout
+    logWorkout(workoutData);
+    
+    // Save to recent workouts
+    saveRecentWorkout(workoutData);
+    
+    // Clear form
+    document.getElementById('workout-type').value = '';
+    document.getElementById('workout-duration').value = '';
+    document.getElementById('workout-notes').value = '';
+    document.getElementById('exercise-list').innerHTML = '';
+    exerciseCount = 0;
+    
+    // Load recent workouts
+    loadRecentWorkouts();
+    
+    alert('✅ Workout saved successfully!');
+}
+
+function saveRecentWorkout(workoutData) {
+    let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    
+    recentWorkouts.unshift({
+        ...workoutData,
+        date: new Date().toISOString()
+    });
+    
+    // Keep only last 10 workouts
+    recentWorkouts = recentWorkouts.slice(0, 10);
+    
+    localStorage.setItem('recentWorkouts', JSON.stringify(recentWorkouts));
+}
+
+function loadRecentWorkouts() {
+    const recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const container = document.getElementById('recent-workouts');
+    
+    if (recentWorkouts.length === 0) {
+        container.innerHTML = '<p style="color: #666;">No recent workouts logged yet.</p>';
+        return;
+    }
+    
+    let html = '';
+    recentWorkouts.forEach(workout => {
+        const date = new Date(workout.date);
+        const dateStr = date.toLocaleDateString();
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        html += `
+            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                        <strong style="color: var(--dark);">${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} Workout</strong>
+                        <div style="color: #666; font-size: 12px;">${dateStr} at ${timeStr}</div>
+                    </div>
+                    <div style="color: var(--primary); font-weight: bold;">${workout.duration} min</div>
+                </div>
+                ${workout.exercises.length > 0 ? `
+                    <div style="font-size: 14px; color: #666;">
+                        ${workout.exercises.map(ex => `• ${ex.name} ${ex.sets ? `(${ex.sets}x${ex.reps})` : ''}`).join('<br>')}
+                    </div>
+                ` : ''}
+                ${workout.notes ? `<div style="font-size: 12px; color: #888; margin-top: 5px; font-style: italic;">"${workout.notes}"</div>` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
 // Initialize
 window.onload = function() {
     updateTime();
@@ -4615,6 +4759,11 @@ window.onload = function() {
     
     // Load progress data
     updateProgressDisplay();
+    
+    // Load recent workouts
+    if (document.getElementById('recent-workouts')) {
+        loadRecentWorkouts();
+    }
     
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);

@@ -636,8 +636,72 @@
 
                 <!-- TRACK WORKOUTS SCREEN -->
                 <div class="screen-content" id="track-workouts">
-                    <div id="workout-tracker-content">
-                        <!-- Dynamic content will be loaded here -->
+                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px;">📊 Track Your Workout</h3>
+                        <p style="opacity: 0.9; font-size: 14px;">Log your exercises and track progress</p>
+                    </div>
+                    
+                    <!-- Quick Start Options -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <button onclick="startQuickWorkout('strength')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; cursor: pointer;">
+                            💪 Log Strength Training
+                        </button>
+                        <button onclick="startQuickWorkout('cardio')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; cursor: pointer;">
+                            🏃 Log Cardio Session
+                        </button>
+                    </div>
+                    
+                    <!-- Workout Form -->
+                    <div id="workout-form" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">📝 Workout Details</h4>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Workout Type</label>
+                            <select id="workout-type" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select type...</option>
+                                <option value="chest">🏋️ Chest</option>
+                                <option value="back">🔙 Back</option>
+                                <option value="legs">🦵 Legs</option>
+                                <option value="shoulders">💪 Shoulders</option>
+                                <option value="arms">💪 Arms</option>
+                                <option value="core">🎯 Core</option>
+                                <option value="cardio">🏃 Cardio</option>
+                                <option value="full-body">🏋️ Full Body</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Duration (minutes)</label>
+                            <input type="number" id="workout-duration" placeholder="45" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                        </div>
+                        
+                        <!-- Exercise Logger -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Exercises Performed</label>
+                            <div id="exercise-list" style="margin-bottom: 10px;">
+                                <!-- Exercises will be added here -->
+                            </div>
+                            <button onclick="addExercise()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                                ➕ Add Exercise
+                            </button>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Notes (optional)</label>
+                            <textarea id="workout-notes" placeholder="How did you feel? Any PRs?" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; min-height: 80px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <button onclick="saveWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px;">
+                            💾 Save Workout
+                        </button>
+                    </div>
+                    
+                    <!-- Recent Workouts -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">📅 Recent Workouts</h4>
+                        <div id="recent-workouts">
+                            <!-- Will be populated dynamically -->
+                        </div>
                     </div>
                 </div>
 
