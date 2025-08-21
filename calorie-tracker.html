@@ -433,149 +433,50 @@
             }
         }
         
-        // Smart Food Parsing (Client-side AI simulation)
+        // AI-Powered Food Parsing using Claude API
         async function parseWithAI(query) {
             try {
-                console.log('🤖 Smart parsing food:', query);
+                console.log('🤖 AI parsing food:', query);
                 
                 // Show loading state
                 document.getElementById('voice-text').textContent = `Analyzing: "${query}"...`;
                 
-                // Smart food parsing with pattern matching
-                const foods = smartParseFood(query);
+                const response = await fetch('/api/ai-food-parser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
                 
-                if (foods.length > 0) {
-                    console.log(`🍔 Smart parser found ${foods.length} foods`);
-                    
-                    // Update the voice text to show what was found
-                    if (foods.length > 1) {
-                        const foodNames = foods.map(f => f.name).join(' + ');
-                        document.getElementById('voice-text').textContent = `Found: ${foodNames}`;
-                    } else {
-                        document.getElementById('voice-text').textContent = `Found: ${foods[0].name}`;
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log(`🍔 AI found ${data.foods.length} foods from ${data.source}`);
+                    if (data.message) {
+                        console.log('📝', data.message);
                     }
                     
-                    return foods;
+                    // Update the voice text to show what was found
+                    if (data.foods.length > 1) {
+                        const foodNames = data.foods.map(f => f.name).join(' + ');
+                        document.getElementById('voice-text').textContent = `Found: ${foodNames}`;
+                    } else {
+                        document.getElementById('voice-text').textContent = `Found: ${data.foods[0].name}`;
+                    }
+                    
+                    return data.foods;
                 } else {
-                    throw new Error('No foods found in speech');
+                    throw new Error(data.error || 'Parsing failed');
                 }
                 
             } catch (error) {
-                console.error('Smart food parsing error:', error);
+                console.error('AI food parsing error:', error);
                 
                 // Fallback to USDA search
                 console.log('🔄 Falling back to USDA search...');
                 return await searchUSDA(query);
             }
-        }
-        
-        // Smart food parser with common foods database
-        function smartParseFood(text) {
-            const foods = [];
-            const lowerText = text.toLowerCase();
-            
-            // Common food database with calories and macros
-            const foodDatabase = {
-                // Proteins
-                'chicken breast': { calories: 165, protein: 31, carbs: 0, fat: 3.6, serving: '100g' },
-                'chicken': { calories: 239, protein: 27, carbs: 0, fat: 14, serving: '100g' },
-                'beef': { calories: 250, protein: 26, carbs: 0, fat: 15, serving: '100g' },
-                'salmon': { calories: 208, protein: 20, carbs: 0, fat: 12, serving: '100g' },
-                'tuna': { calories: 144, protein: 30, carbs: 0, fat: 1, serving: '100g' },
-                'eggs': { calories: 155, protein: 13, carbs: 1, fat: 11, serving: '2 large' },
-                'egg': { calories: 78, protein: 6, carbs: 0.5, fat: 5, serving: '1 large' },
-                
-                // Carbs
-                'rice': { calories: 130, protein: 3, carbs: 28, fat: 0.3, serving: '100g cooked' },
-                'bread': { calories: 265, protein: 9, carbs: 49, fat: 3.2, serving: '100g' },
-                'pasta': { calories: 131, protein: 5, carbs: 25, fat: 1.1, serving: '100g cooked' },
-                'potato': { calories: 77, protein: 2, carbs: 17, fat: 0.1, serving: '100g' },
-                'oatmeal': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4, serving: '100g cooked' },
-                
-                // Fruits
-                'apple': { calories: 52, protein: 0.3, carbs: 14, fat: 0.2, serving: '100g' },
-                'banana': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3, serving: '100g' },
-                'orange': { calories: 47, protein: 0.9, carbs: 12, fat: 0.1, serving: '100g' },
-                
-                // Vegetables
-                'broccoli': { calories: 34, protein: 3, carbs: 7, fat: 0.4, serving: '100g' },
-                'spinach': { calories: 23, protein: 3, carbs: 4, fat: 0.4, serving: '100g' },
-                'carrots': { calories: 41, protein: 1, carbs: 10, fat: 0.2, serving: '100g' },
-                
-                // Common meals
-                'sandwich': { calories: 350, protein: 15, carbs: 45, fat: 12, serving: '1 sandwich' },
-                'burger': { calories: 540, protein: 25, carbs: 40, fat: 31, serving: '1 burger' },
-                'cheeseburger': { calories: 580, protein: 28, carbs: 42, fat: 34, serving: '1 burger' },
-                'pizza': { calories: 285, protein: 12, carbs: 36, fat: 10, serving: '1 slice' },
-                'salad': { calories: 150, protein: 5, carbs: 15, fat: 8, serving: '1 bowl' },
-                'caesar salad': { calories: 280, protein: 12, carbs: 15, fat: 22, serving: '1 bowl' },
-                'french fries': { calories: 365, protein: 4, carbs: 63, fat: 17, serving: '100g' },
-                'fries': { calories: 365, protein: 4, carbs: 63, fat: 17, serving: '100g' },
-                'tacos': { calories: 170, protein: 8, carbs: 13, fat: 10, serving: '1 taco' },
-                'taco': { calories: 170, protein: 8, carbs: 13, fat: 10, serving: '1 taco' },
-                'burrito': { calories: 450, protein: 20, carbs: 55, fat: 18, serving: '1 burrito' },
-                'sushi': { calories: 40, protein: 3, carbs: 6, fat: 1, serving: '1 piece' },
-                'steak': { calories: 271, protein: 26, carbs: 0, fat: 19, serving: '100g' },
-                'pork chop': { calories: 231, protein: 23, carbs: 0, fat: 14, serving: '100g' },
-                'fish': { calories: 206, protein: 22, carbs: 0, fat: 12, serving: '100g' },
-                
-                // Snacks & drinks
-                'peanut butter': { calories: 588, protein: 25, carbs: 20, fat: 50, serving: '100g' },
-                'yogurt': { calories: 59, protein: 10, carbs: 4, fat: 0.4, serving: '100g' },
-                'greek yogurt': { calories: 100, protein: 17, carbs: 6, fat: 0.4, serving: '100g' },
-                'milk': { calories: 42, protein: 3.4, carbs: 5, fat: 1, serving: '100ml' },
-                'protein shake': { calories: 120, protein: 25, carbs: 3, fat: 1, serving: '1 scoop' },
-                'nuts': { calories: 607, protein: 20, carbs: 20, fat: 54, serving: '100g' },
-                'almonds': { calories: 579, protein: 21, carbs: 22, fat: 50, serving: '100g' },
-                'cheese': { calories: 113, protein: 7, carbs: 1, fat: 9, serving: '30g slice' },
-                'crackers': { calories: 502, protein: 9, carbs: 61, fat: 23, serving: '100g' },
-                'cookies': { calories: 502, protein: 5, carbs: 67, fat: 24, serving: '100g' },
-                'cookie': { calories: 50, protein: 0.5, carbs: 7, fat: 2.5, serving: '1 cookie' },
-                'chips': { calories: 536, protein: 7, carbs: 53, fat: 34, serving: '100g' },
-                'popcorn': { calories: 387, protein: 12, carbs: 78, fat: 5, serving: '100g' },
-                'coffee': { calories: 2, protein: 0.3, carbs: 0, fat: 0, serving: '1 cup' },
-                'beer': { calories: 43, protein: 0.5, carbs: 3.6, fat: 0, serving: '100ml' },
-                'wine': { calories: 83, protein: 0.1, carbs: 2.6, fat: 0, serving: '100ml' },
-                'soda': { calories: 41, protein: 0, carbs: 11, fat: 0, serving: '100ml' },
-                'juice': { calories: 45, protein: 0.5, carbs: 11, fat: 0.2, serving: '100ml' }
-            };
-            
-            // Look for food matches
-            for (const [foodName, nutrition] of Object.entries(foodDatabase)) {
-                if (lowerText.includes(foodName)) {
-                    // Try to extract quantity
-                    let multiplier = 1;
-                    const quantityMatch = text.match(new RegExp(`(\\d+)\\s*${foodName}`, 'i'));
-                    if (quantityMatch) {
-                        multiplier = parseInt(quantityMatch[1]);
-                    }
-                    
-                    foods.push({
-                        name: foodName.charAt(0).toUpperCase() + foodName.slice(1),
-                        calories: Math.round(nutrition.calories * multiplier),
-                        protein: Math.round(nutrition.protein * multiplier),
-                        carbs: Math.round(nutrition.carbs * multiplier),
-                        fat: Math.round(nutrition.fat * multiplier),
-                        serving: multiplier > 1 ? `${multiplier}x ${nutrition.serving}` : nutrition.serving
-                    });
-                }
-            }
-            
-            // If no specific foods found, try to extract from common phrases
-            if (foods.length === 0) {
-                // Look for meal indicators
-                if (lowerText.includes('breakfast') || lowerText.includes('morning')) {
-                    foods.push({ name: 'Breakfast Meal', calories: 400, protein: 20, carbs: 50, fat: 15, serving: 'estimated' });
-                } else if (lowerText.includes('lunch')) {
-                    foods.push({ name: 'Lunch Meal', calories: 500, protein: 25, carbs: 60, fat: 18, serving: 'estimated' });
-                } else if (lowerText.includes('dinner')) {
-                    foods.push({ name: 'Dinner Meal', calories: 600, protein: 30, carbs: 70, fat: 20, serving: 'estimated' });
-                } else if (lowerText.includes('snack')) {
-                    foods.push({ name: 'Snack', calories: 200, protein: 5, carbs: 25, fat: 8, serving: 'estimated' });
-                }
-            }
-            
-            return foods;
         }
         
         // USDA API Search (fallback)
