@@ -120,6 +120,64 @@
             color: #333;
         }
         
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .shopping-item:last-child {
+            border-bottom: none;
+        }
+        
+        .shopping-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            margin-right: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .shopping-checkbox:hover {
+            background: rgba(76, 175, 80, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .shopping-checkbox.checked {
+            background: #4CAF50;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .shopping-text {
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .shopping-text.checked {
+            text-decoration: line-through;
+            color: #888;
+            opacity: 0.7;
+        }
+        
+        .shopping-progress {
+            background: rgba(255,255,255,0.8);
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
         .summary-section {
             background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
             border-radius: 20px;
@@ -463,10 +521,14 @@
             
             // Shopping list section
             if (structured.shopping) {
+                const shoppingItems = parseShoppingList(structured.shopping);
+                const shoppingHTML = generateInteractiveShoppingList(shoppingItems);
+                
                 html += `
                     <div class="shopping-section">
                         <h2 class="shopping-title">🛒 Shopping List</h2>
-                        <div class="shopping-list">${structured.shopping.replace(/\n/g, '<br>')}</div>
+                        <div class="shopping-progress" id="shopping-progress">0 of ${shoppingItems.length} items checked</div>
+                        <div class="shopping-list" id="shopping-list">${shoppingHTML}</div>
                     </div>
                 `;
             }
@@ -541,6 +603,78 @@
                 `;
             }
             return '';
+        }
+        
+        function parseShoppingList(shoppingText) {
+            const lines = shoppingText.split('\n').filter(line => line.trim());
+            const items = [];
+            
+            for (let line of lines) {
+                const trimmed = line.trim();
+                if (trimmed && !trimmed.startsWith('#') && !trimmed.toLowerCase().includes('shopping list')) {
+                    // Remove any existing bullet points or dashes
+                    let cleanItem = trimmed.replace(/^[-•*]\s*/, '');
+                    if (cleanItem) {
+                        items.push(cleanItem);
+                    }
+                }
+            }
+            
+            return items;
+        }
+        
+        function generateInteractiveShoppingList(items) {
+            return items.map((item, index) => `
+                <div class="shopping-item" id="shopping-item-${index}">
+                    <div class="shopping-checkbox" onclick="toggleShoppingItem(${index})" id="checkbox-${index}">
+                    </div>
+                    <div class="shopping-text" id="text-${index}">${item}</div>
+                </div>
+            `).join('');
+        }
+        
+        function toggleShoppingItem(index) {
+            const checkbox = document.getElementById(`checkbox-${index}`);
+            const text = document.getElementById(`text-${index}`);
+            const isChecked = checkbox.classList.contains('checked');
+            
+            if (isChecked) {
+                // Uncheck
+                checkbox.classList.remove('checked');
+                checkbox.innerHTML = '';
+                text.classList.remove('checked');
+            } else {
+                // Check
+                checkbox.classList.add('checked');
+                checkbox.innerHTML = '✓';
+                text.classList.add('checked');
+            }
+            
+            // Update progress
+            updateShoppingProgress();
+        }
+        
+        function updateShoppingProgress() {
+            const checkboxes = document.querySelectorAll('.shopping-checkbox');
+            const checkedBoxes = document.querySelectorAll('.shopping-checkbox.checked');
+            const progress = document.getElementById('shopping-progress');
+            
+            if (progress && checkboxes.length > 0) {
+                const checkedCount = checkedBoxes.length;
+                const totalCount = checkboxes.length;
+                const percentage = Math.round((checkedCount / totalCount) * 100);
+                
+                progress.innerHTML = `${checkedCount} of ${totalCount} items checked (${percentage}%)`;
+                
+                if (checkedCount === totalCount) {
+                    progress.innerHTML = `🎉 Shopping complete! All ${totalCount} items checked`;
+                    progress.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                    progress.style.color = 'white';
+                } else {
+                    progress.style.background = 'rgba(255,255,255,0.8)';
+                    progress.style.color = '#4CAF50';
+                }
+            }
         }
         
         // Check if meal plan data was passed
