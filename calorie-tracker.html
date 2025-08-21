@@ -176,7 +176,7 @@
             <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
             <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
             <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="goToPage('workout-techniques.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
             <div class="menu-item active" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
             <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
             <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
@@ -1440,6 +1440,162 @@
             
             hideMealIdeasSelector();
             loadTodaysMeals();
+        }
+        
+        // Voice Logging Function
+        function startVoiceLogging() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = function() {
+                    alert('🎤 Listening... Say what you ate (e.g., "I had a chicken sandwich and an apple")');
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('ai-input').value = transcript;
+                    alert(`📝 Heard: "${transcript}"\n\nClick "Analyze with AI" to process this food.`);
+                };
+                
+                recognition.onerror = function(event) {
+                    alert('❌ Voice recognition error: ' + event.error);
+                };
+                
+                recognition.start();
+            } else {
+                alert('⚠️ Voice recognition is not supported in your browser. Try Chrome or Safari.');
+            }
+        }
+        
+        // Barcode Scanning Function
+        function startBarcodeScanning() {
+            alert('📷 Barcode scanning requires camera access.\n\nThis feature is coming soon! For now, you can:\n1. Enter the food name manually\n2. Use voice input\n3. Use AI parsing');
+            
+            // TODO: Implement actual barcode scanning with QuaggaJS
+            // This requires camera permissions and more complex setup
+        }
+        
+        // Smart Entry Function
+        function showSmartEntry() {
+            const smartSuggestions = [
+                '🥗 Grilled Chicken Salad - 320 cal',
+                '🍕 2 Slices Pizza - 540 cal',
+                '🍔 Cheeseburger with Fries - 750 cal',
+                '🥤 Protein Shake - 250 cal',
+                '🍎 Apple with Peanut Butter - 195 cal',
+                '🍳 3 Eggs with Toast - 420 cal'
+            ];
+            
+            const suggestion = smartSuggestions[Math.floor(Math.random() * smartSuggestions.length)];
+            
+            if (confirm(`💡 Smart Suggestion:\n\n${suggestion}\n\nWould you like to add this to your log?`)) {
+                const parts = suggestion.split(' - ');
+                const foodName = parts[0].replace(/[🥗🍕🍔🥤🍎🍳] /, '');
+                const calories = parseInt(parts[1]);
+                
+                const food = {
+                    name: foodName,
+                    calories: calories,
+                    protein: Math.round(calories * 0.15 / 4), // Estimate
+                    carbs: Math.round(calories * 0.45 / 4),
+                    fat: Math.round(calories * 0.35 / 9),
+                    meal: getMealType()
+                };
+                
+                addFoodToLog(food);
+                alert('✅ Added to your food log!');
+            }
+        }
+        
+        // Show Meal Plan Selector
+        function showMealPlanSelector() {
+            const mealPlanModal = `
+                <div id="meal-plan-selector" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                    <div style="background: white; border-radius: 20px; padding: 25px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <h3 style="margin: 0 0 20px 0; color: #4B9CD3;">📋 Select from Meal Plan</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <button onclick="selectMealPlanItem('breakfast')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                                🍳 Breakfast: Protein Oatmeal Bowl (420 cal)
+                            </button>
+                            
+                            <button onclick="selectMealPlanItem('lunch')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                                🥗 Lunch: Grilled Chicken Salad (380 cal)
+                            </button>
+                            
+                            <button onclick="selectMealPlanItem('dinner')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                                🍽️ Dinner: Salmon with Veggies (520 cal)
+                            </button>
+                            
+                            <button onclick="selectMealPlanItem('snack')" style="width: 100%; padding: 15px; margin-bottom: 10px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                                🍎 Snack: Greek Yogurt Parfait (180 cal)
+                            </button>
+                        </div>
+                        
+                        <button onclick="hideMealPlanSelector()" style="width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', mealPlanModal);
+        }
+        
+        function hideMealPlanSelector() {
+            const selector = document.getElementById('meal-plan-selector');
+            if (selector) selector.remove();
+        }
+        
+        function selectMealPlanItem(mealType) {
+            const meals = {
+                breakfast: { name: 'Protein Oatmeal Bowl', calories: 420, protein: 25, carbs: 55, fat: 12 },
+                lunch: { name: 'Grilled Chicken Salad', calories: 380, protein: 35, carbs: 25, fat: 15 },
+                dinner: { name: 'Salmon with Veggies', calories: 520, protein: 40, carbs: 30, fat: 25 },
+                snack: { name: 'Greek Yogurt Parfait', calories: 180, protein: 15, carbs: 22, fat: 5 }
+            };
+            
+            const food = meals[mealType];
+            food.meal = mealType;
+            
+            addFoodToLog(food);
+            hideMealPlanSelector();
+            alert(`✅ Added ${food.name} to your log!`);
+        }
+        
+        // Show Meal Ideas Selector
+        function showMealIdeasSelector() {
+            window.location.href = 'meal-ideas.html';
+        }
+        
+        // Manual Food Entry
+        function addManualFood() {
+            const name = prompt('Enter food name:');
+            if (!name) return;
+            
+            const calories = parseInt(prompt('Enter calories:') || '0');
+            if (!calories) return;
+            
+            const protein = parseInt(prompt('Enter protein (g):') || '0');
+            const carbs = parseInt(prompt('Enter carbs (g):') || '0');
+            const fat = parseInt(prompt('Enter fat (g):') || '0');
+            
+            const food = {
+                name: name,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                meal: getMealType()
+            };
+            
+            addFoodToLog(food);
+            alert(`✅ Added ${name} to your food log!`);
         }
         
         // Initialize
