@@ -636,71 +636,107 @@
 
                 <!-- TRACK WORKOUTS SCREEN -->
                 <div class="screen-content" id="track-workouts">
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
-                        <h3 style="font-size: 20px; margin-bottom: 10px;">📊 Track Your Workout</h3>
-                        <p style="opacity: 0.9; font-size: 14px;">Log your exercises and track progress</p>
-                    </div>
-                    
-                    <!-- Quick Start Options -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <button onclick="startQuickWorkout('strength')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; cursor: pointer;">
-                            💪 Log Strength Training
-                        </button>
-                        <button onclick="startQuickWorkout('cardio')" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; cursor: pointer;">
-                            🏃 Log Cardio Session
-                        </button>
-                    </div>
-                    
-                    <!-- Workout Form -->
-                    <div id="workout-form" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">📝 Workout Details</h4>
+                    <!-- Header Stats -->
+                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px;">
+                        <h3 style="font-size: 20px; margin-bottom: 15px; text-align: center;">🔥 Fitness Dashboard</h3>
                         
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Workout Type</label>
-                            <select id="workout-type" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
-                                <option value="">Select type...</option>
-                                <option value="chest">🏋️ Chest</option>
-                                <option value="back">🔙 Back</option>
-                                <option value="legs">🦵 Legs</option>
-                                <option value="shoulders">💪 Shoulders</option>
-                                <option value="arms">💪 Arms</option>
-                                <option value="core">🎯 Core</option>
-                                <option value="cardio">🏃 Cardio</option>
-                                <option value="full-body">🏋️ Full Body</option>
-                            </select>
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Duration (minutes)</label>
-                            <input type="number" id="workout-duration" placeholder="45" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
-                        </div>
-                        
-                        <!-- Exercise Logger -->
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Exercises Performed</label>
-                            <div id="exercise-list" style="margin-bottom: 10px;">
-                                <!-- Exercises will be added here -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+                            <div>
+                                <div style="font-size: 24px; font-weight: bold;" id="workout-streak">0</div>
+                                <div style="font-size: 12px; opacity: 0.9;">Day Streak</div>
                             </div>
-                            <button onclick="addExercise()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                                ➕ Add Exercise
-                            </button>
+                            <div>
+                                <div style="font-size: 24px; font-weight: bold;" id="week-workouts">0/5</div>
+                                <div style="font-size: 12px; opacity: 0.9;">Week Goal</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 24px; font-weight: bold;" id="total-workouts">0</div>
+                                <div style="font-size: 12px; opacity: 0.9;">All Time</div>
+                            </div>
                         </div>
                         
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: var(--dark); font-weight: bold;">Notes (optional)</label>
-                            <textarea id="workout-notes" placeholder="How did you feel? Any PRs?" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; min-height: 80px; resize: vertical;"></textarea>
-                        </div>
-                        
-                        <button onclick="saveWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px;">
-                            💾 Save Workout
+                        <button onclick="showQuickLog()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 25px; border-radius: 20px; margin-top: 15px; font-weight: bold; cursor: pointer; width: 100%;">
+                            ⚡ Quick Log Workout
                         </button>
                     </div>
                     
-                    <!-- Recent Workouts -->
+                    <!-- Calendar View -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h4 style="color: var(--dark); margin: 0;">📅 Workout Calendar</h4>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="changeCalendarMonth(-1)" style="background: var(--lighter-bg); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">◀</button>
+                                <span id="calendar-month" style="font-weight: bold; color: var(--dark); min-width: 120px; text-align: center; line-height: 32px;"></span>
+                                <button onclick="changeCalendarMonth(1)" style="background: var(--lighter-bg); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">▶</button>
+                            </div>
+                        </div>
+                        <div id="workout-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-size: 12px;">
+                            <!-- Calendar will be generated here -->
+                        </div>
+                        <div style="display: flex; gap: 15px; margin-top: 15px; font-size: 12px; justify-content: center;">
+                            <div><span style="display: inline-block; width: 12px; height: 12px; background: #4CAF50; border-radius: 3px; margin-right: 5px;"></span>Workout Day</div>
+                            <div><span style="display: inline-block; width: 12px; height: 12px; background: #FF5722; border-radius: 3px; margin-right: 5px;"></span>Missed Goal</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Charts -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">📈 Weekly Progress</h4>
+                        <div id="weekly-chart" style="height: 120px; display: flex; align-items: end; gap: 8px; padding: 10px 0;">
+                            <!-- Chart bars will be generated here -->
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-top: 5px;">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Personal Records -->
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🏆 Recent Achievements</h4>
+                        <div id="recent-prs">
+                            <!-- Personal records will be shown here -->
+                        </div>
+                        <button onclick="addPersonalRecord()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%;">
+                            ➕ Log New Personal Record
+                        </button>
+                    </div>
+                    
+                    <!-- Recent Activity -->
                     <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">📅 Recent Workouts</h4>
-                        <div id="recent-workouts">
-                            <!-- Will be populated dynamically -->
+                        <h4 style="color: var(--dark); margin-bottom: 15px;">🕒 Recent Activity</h4>
+                        <div id="recent-workouts-dashboard">
+                            <!-- Recent workouts will be shown here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Log Modal -->
+                    <div id="quick-log-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+                        <div style="background: white; border-radius: 20px; padding: 25px; max-width: 400px; width: 90%;">
+                            <h3 style="color: var(--dark); margin: 0 0 20px 0;">⚡ Quick Log Workout</h3>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <select id="quick-workout-type" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                    <option value="">Workout Type</option>
+                                    <option value="chest">🏋️ Chest</option>
+                                    <option value="back">🔙 Back</option>
+                                    <option value="legs">🦵 Legs</option>
+                                    <option value="shoulders">💪 Shoulders</option>
+                                    <option value="arms">💪 Arms</option>
+                                    <option value="cardio">🏃 Cardio</option>
+                                </select>
+                                <input type="number" id="quick-duration" placeholder="Duration (min)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                            </div>
+                            
+                            <textarea id="quick-notes" placeholder="Quick notes or key exercises..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; height: 80px; margin-bottom: 20px; resize: vertical;"></textarea>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="saveQuickWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1;">
+                                    💾 Save Workout
+                                </button>
+                                <button onclick="closeQuickLog()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer;">
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

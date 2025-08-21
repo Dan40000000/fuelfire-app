@@ -1648,6 +1648,11 @@ function showScreen(screenId) {
         loadSavedWorkouts();
     }
     
+    // Load fitness dashboard if showing track-workouts
+    if (screenId === 'track-workouts') {
+        setTimeout(updateFitnessDashboard, 100);
+    }
+    
     // Update menu
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');
@@ -4606,6 +4611,7 @@ function logWorkout(workoutData) {
 
 // Track Workouts Functions
 let exerciseCount = 0;
+let currentCalendarDate = new Date();
 
 function startQuickWorkout(type) {
     document.getElementById('workout-type').value = type === 'strength' ? 'full-body' : 'cardio';
@@ -4748,6 +4754,303 @@ function loadRecentWorkouts() {
     container.innerHTML = html;
 }
 
+// Comprehensive Fitness Dashboard Functions
+function updateDashboardStats() {
+    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    
+    // Calculate streak
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 30; i++) {
+        const checkDate = new Date(today.getTime() - (i * 24 * 60 * 60 * 1000));
+        const dateStr = checkDate.toDateString();
+        const hasWorkout = workouts.some(w => new Date(w.date).toDateString() === dateStr);
+        
+        if (hasWorkout) {
+            streak++;
+        } else if (i > 0) {
+            break; // Break streak
+        }
+    }
+    
+    // Calculate this week's workouts
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+    const weekWorkouts = workouts.filter(w => new Date(w.date) >= startOfWeek).length;
+    
+    // Update dashboard
+    if (document.getElementById('workout-streak')) {
+        document.getElementById('workout-streak').textContent = streak;
+        document.getElementById('week-workouts').textContent = `${weekWorkouts}/5`;
+        document.getElementById('total-workouts').textContent = workouts.length;
+    }
+}
+
+function generateWorkoutCalendar() {
+    if (!document.getElementById('workout-calendar')) return;
+    
+    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const calendar = document.getElementById('workout-calendar');
+    const monthLabel = document.getElementById('calendar-month');
+    
+    // Clear calendar
+    calendar.innerHTML = '';
+    
+    // Update month label
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    monthLabel.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+    
+    // Generate calendar days
+    const firstDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 1);
+    const lastDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    // Day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+        const header = document.createElement('div');
+        header.textContent = day;
+        header.style.cssText = 'font-weight: bold; text-align: center; padding: 8px 4px; color: #666;';
+        calendar.appendChild(header);
+    });
+    
+    // Generate 42 days (6 weeks)
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        
+        const dayElement = document.createElement('div');
+        dayElement.textContent = date.getDate();
+        
+        // Check if workout exists for this date
+        const dateStr = date.toDateString();
+        const hasWorkout = workouts.some(w => new Date(w.date).toDateString() === dateStr);
+        
+        let bgColor = '#f8f9fa';
+        if (date.getMonth() !== currentCalendarDate.getMonth()) {
+            bgColor = '#e9ecef'; // Different month
+        } else if (hasWorkout) {
+            bgColor = '#4CAF50'; // Workout day
+        } else if (date < new Date() && date.getDay() !== 0 && date.getDay() !== 6) {
+            bgColor = '#FF5722'; // Missed weekday
+        }
+        
+        dayElement.style.cssText = `
+            background: ${bgColor}; 
+            padding: 8px 4px; 
+            text-align: center; 
+            border-radius: 4px; 
+            cursor: pointer;
+            color: ${hasWorkout || (date.getMonth() !== currentCalendarDate.getMonth()) ? 'white' : '#333'};
+            font-weight: ${hasWorkout ? 'bold' : 'normal'};
+        `;
+        
+        calendar.appendChild(dayElement);
+    }
+}
+
+function changeCalendarMonth(direction) {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+    generateWorkoutCalendar();
+}
+
+function generateWeeklyChart() {
+    if (!document.getElementById('weekly-chart')) return;
+    
+    const chart = document.getElementById('weekly-chart');
+    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    
+    chart.innerHTML = '';
+    
+    // Get this week's workout counts
+    const today = new Date();
+    const weekCounts = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+    
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(today);
+        day.setDate(today.getDate() - today.getDay() + i + 1); // Start from Monday
+        const dayWorkouts = workouts.filter(w => 
+            new Date(w.date).toDateString() === day.toDateString()
+        ).length;
+        weekCounts[i] = dayWorkouts;
+    }
+    
+    // Generate bars
+    const maxCount = Math.max(...weekCounts, 1);
+    weekCounts.forEach(count => {
+        const bar = document.createElement('div');
+        const height = (count / maxCount) * 100;
+        bar.style.cssText = `
+            flex: 1;
+            background: linear-gradient(to top, #4CAF50, #81C784);
+            height: ${height}%;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 4px;
+        `;
+        
+        if (count > 0) {
+            const label = document.createElement('div');
+            label.textContent = count;
+            label.style.cssText = `
+                position: absolute;
+                top: -20px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 10px;
+                font-weight: bold;
+                color: #333;
+            `;
+            bar.appendChild(label);
+        }
+        
+        chart.appendChild(bar);
+    });
+}
+
+function showQuickLog() {
+    document.getElementById('quick-log-modal').style.display = 'flex';
+}
+
+function closeQuickLog() {
+    document.getElementById('quick-log-modal').style.display = 'none';
+    // Clear form
+    document.getElementById('quick-workout-type').value = '';
+    document.getElementById('quick-duration').value = '';
+    document.getElementById('quick-notes').value = '';
+}
+
+function saveQuickWorkout() {
+    const type = document.getElementById('quick-workout-type').value;
+    const duration = document.getElementById('quick-duration').value;
+    const notes = document.getElementById('quick-notes').value;
+    
+    if (!type || !duration) {
+        alert('Please fill in workout type and duration');
+        return;
+    }
+    
+    const workoutData = {
+        type: type,
+        duration: parseInt(duration),
+        exercises: [],
+        notes: notes
+    };
+    
+    // Log the workout
+    logWorkout(workoutData);
+    saveRecentWorkout(workoutData);
+    
+    // Update dashboard
+    updateFitnessDashboard();
+    
+    closeQuickLog();
+    alert('✅ Workout logged successfully!');
+}
+
+function addPersonalRecord() {
+    const exercise = prompt('Exercise name (e.g., "Bench Press", "Squat"):');
+    if (!exercise) return;
+    
+    const weight = prompt(`New ${exercise} personal record (weight in lbs):`);
+    if (!weight || isNaN(weight)) return;
+    
+    const prs = JSON.parse(localStorage.getItem('personalRecords')) || [];
+    prs.unshift({
+        exercise: exercise,
+        weight: parseInt(weight),
+        date: new Date().toISOString(),
+        id: Date.now()
+    });
+    
+    // Keep only last 10 PRs
+    localStorage.setItem('personalRecords', JSON.stringify(prs.slice(0, 10)));
+    
+    updateRecentPRs();
+    alert(`🏆 New ${exercise} PR: ${weight} lbs!`);
+}
+
+function updateRecentPRs() {
+    if (!document.getElementById('recent-prs')) return;
+    
+    const prs = JSON.parse(localStorage.getItem('personalRecords')) || [];
+    const container = document.getElementById('recent-prs');
+    
+    if (prs.length === 0) {
+        container.innerHTML = '<p style="color: #666; text-align: center;">No personal records yet. Start logging your achievements!</p>';
+        return;
+    }
+    
+    let html = '';
+    prs.slice(0, 5).forEach(pr => {
+        const date = new Date(pr.date).toLocaleDateString();
+        html += `
+            <div style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: bold; color: var(--dark);">🏆 ${pr.exercise}</div>
+                    <div style="font-size: 12px; color: #666;">${date}</div>
+                </div>
+                <div style="font-weight: bold; color: var(--primary); font-size: 18px;">${pr.weight} lbs</div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function updateFitnessDashboard() {
+    updateDashboardStats();
+    generateWorkoutCalendar();
+    generateWeeklyChart();
+    updateRecentPRs();
+    loadRecentWorkoutsDashboard();
+}
+
+function loadRecentWorkoutsDashboard() {
+    if (!document.getElementById('recent-workouts-dashboard')) return;
+    
+    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const container = document.getElementById('recent-workouts-dashboard');
+    
+    if (workouts.length === 0) {
+        container.innerHTML = '<p style="color: #666; text-align: center;">No workouts logged yet. Start your fitness journey!</p>';
+        return;
+    }
+    
+    let html = '';
+    workouts.slice(0, 5).forEach(workout => {
+        const date = new Date(workout.date);
+        const timeAgo = getTimeAgo(date);
+        
+        html += `
+            <div style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span style="font-weight: bold; color: var(--dark);">${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}</span>
+                    <span style="color: var(--primary); font-weight: bold;">${workout.duration} min</span>
+                </div>
+                <div style="font-size: 12px; color: #666;">${timeAgo}</div>
+                ${workout.notes ? `<div style="font-size: 12px; color: #888; margin-top: 5px; font-style: italic;">"${workout.notes}"</div>` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+}
+
 // Initialize
 window.onload = function() {
     updateTime();
@@ -4765,6 +5068,11 @@ window.onload = function() {
         loadRecentWorkouts();
     }
     
+    // Load fitness dashboard if track-workouts screen exists
+    if (document.getElementById('track-workouts')) {
+        updateFitnessDashboard();
+    }
+    
     // Check for screen parameter in URL
     const urlParams = new URLSearchParams(window.location.search);
     const screenParam = urlParams.get('screen');
@@ -4772,6 +5080,10 @@ window.onload = function() {
         // Show the requested screen
         setTimeout(() => {
             showScreen(screenParam);
+            // Update dashboard if showing track-workouts
+            if (screenParam === 'track-workouts') {
+                setTimeout(updateFitnessDashboard, 200);
+            }
         }, 100);
     }
     
