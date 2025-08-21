@@ -4765,6 +4765,16 @@ window.onload = function() {
         loadRecentWorkouts();
     }
     
+    // Check for screen parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const screenParam = urlParams.get('screen');
+    if (screenParam) {
+        // Show the requested screen
+        setTimeout(() => {
+            showScreen(screenParam);
+        }, 100);
+    }
+    
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);
 };
