@@ -1384,7 +1384,7 @@
             if (manualCheck) {
                 try {
                     const parsed = JSON.parse(manualCheck);
-                    alert(`Found ${parsed.length} meal plans in storage!`);
+                    alert(`✅ SUCCESS! Found ${parsed.length} meal plans in storage!\n\nFirst plan: "${parsed[0].metadata.goal}" from ${new Date(parsed[0].metadata.createdAt).toLocaleDateString()}`);
                     console.log('✅ Parsed meal plans:', parsed);
                 } catch (e) {
                     alert('Error parsing meal plans: ' + e.message);
