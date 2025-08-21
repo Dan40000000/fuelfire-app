@@ -4503,6 +4503,107 @@ function loadTodaysNutrition() {
     }
 }
 
+// Progress & Analytics Functions
+function loadProgressData() {
+    const progress = JSON.parse(localStorage.getItem('fitnessProgress')) || {
+        currentWeight: 175,
+        startWeight: 180,
+        bodyFat: 18.5,
+        startBodyFat: 21,
+        muscleMass: 42,
+        startMuscleMass: 39,
+        monthlyWorkouts: 28,
+        lastMonthWorkouts: 20,
+        totalWorkouts: 47,
+        totalTime: 38,
+        avgPerWeek: 3.2,
+        personalRecords: {
+            benchPress: { weight: 225, increase: 10, date: '3 days ago' },
+            squat: { weight: 315, increase: 25, date: '1 week ago' },
+            deadlift: { weight: 405, increase: 20, date: '2 weeks ago' },
+            shoulderPress: { weight: 135, increase: 5, date: '5 days ago' }
+        },
+        workoutHistory: []
+    };
+    
+    return progress;
+}
+
+function updateProgressDisplay() {
+    const progress = loadProgressData();
+    
+    // Update weight stats
+    if (document.getElementById('current-weight')) {
+        document.getElementById('current-weight').textContent = progress.currentWeight;
+        const weightChange = progress.currentWeight - progress.startWeight;
+        const weightChangeText = weightChange < 0 ? `${weightChange} lbs from start` : `+${weightChange} lbs from start`;
+        document.getElementById('weight-change').textContent = weightChangeText;
+    }
+    
+    // Update body fat
+    if (document.getElementById('body-fat')) {
+        document.getElementById('body-fat').textContent = progress.bodyFat;
+        const fatChange = progress.bodyFat - progress.startBodyFat;
+        const fatChangeText = fatChange < 0 ? `${fatChange.toFixed(1)}% from start` : `+${fatChange.toFixed(1)}% from start`;
+        document.getElementById('bodyfat-change').textContent = fatChangeText;
+    }
+    
+    // Update monthly workouts
+    if (document.getElementById('monthly-workouts')) {
+        document.getElementById('monthly-workouts').textContent = progress.monthlyWorkouts;
+        const workoutChange = progress.monthlyWorkouts - progress.lastMonthWorkouts;
+        const workoutChangeText = workoutChange > 0 ? `+${workoutChange} from last month` : `${workoutChange} from last month`;
+        document.getElementById('workout-change').textContent = workoutChangeText;
+    }
+}
+
+function updateProgressData() {
+    // Prompt user for updated stats
+    const currentWeight = prompt('Enter current weight (lbs):', '175');
+    const bodyFat = prompt('Enter body fat percentage:', '18.5');
+    const workoutsThisMonth = prompt('Workouts completed this month:', '28');
+    
+    if (currentWeight && bodyFat && workoutsThisMonth) {
+        const progress = loadProgressData();
+        progress.currentWeight = parseFloat(currentWeight);
+        progress.bodyFat = parseFloat(bodyFat);
+        progress.monthlyWorkouts = parseInt(workoutsThisMonth);
+        
+        // Save to localStorage
+        localStorage.setItem('fitnessProgress', JSON.stringify(progress));
+        
+        // Update display
+        updateProgressDisplay();
+        
+        alert('✅ Progress data updated successfully!');
+    }
+}
+
+function logWorkout(workoutData) {
+    const progress = loadProgressData();
+    
+    // Add to workout history
+    progress.workoutHistory.push({
+        date: new Date().toISOString(),
+        type: workoutData.type || 'General',
+        duration: workoutData.duration || 45,
+        exercises: workoutData.exercises || [],
+        notes: workoutData.notes || ''
+    });
+    
+    // Update totals
+    progress.totalWorkouts++;
+    progress.monthlyWorkouts++;
+    progress.totalTime += (workoutData.duration || 45) / 60;
+    progress.avgPerWeek = (progress.totalWorkouts / 4).toFixed(1);
+    
+    // Save to localStorage
+    localStorage.setItem('fitnessProgress', JSON.stringify(progress));
+    
+    // Update display
+    updateProgressDisplay();
+}
+
 // Initialize
 window.onload = function() {
     updateTime();
@@ -4511,6 +4612,9 @@ window.onload = function() {
     
     // Load today's nutrition data
     loadTodaysNutrition();
+    
+    // Load progress data
+    updateProgressDisplay();
     
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);

@@ -647,6 +647,7 @@
                     <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
                         <h3 style="font-size: 20px; margin-bottom: 10px;">📊 Progress & Analytics</h3>
                         <p style="opacity: 0.9; font-size: 14px;">Track your fitness journey and achievements</p>
+                        <button onclick="updateProgressData()" style="background: white; color: var(--primary); border: none; padding: 10px 20px; border-radius: 20px; margin-top: 10px; font-weight: bold; cursor: pointer;">🔄 Update Stats</button>
                     </div>
                     
                     <!-- Current Stats -->
@@ -654,14 +655,14 @@
                         <h4 style="color: var(--dark); margin-bottom: 15px;">📈 Current Stats</h4>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">175</div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);" id="current-weight">175</div>
                                 <div style="font-size: 12px; color: #666;">Current Weight (lbs)</div>
-                                <div style="font-size: 10px; color: #27ae60;">-5 lbs from start</div>
+                                <div style="font-size: 10px; color: #27ae60;" id="weight-change">-5 lbs from start</div>
                             </div>
                             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">18.5</div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);" id="body-fat">18.5</div>
                                 <div style="font-size: 12px; color: #666;">Body Fat %</div>
-                                <div style="font-size: 10px; color: #27ae60;">-2.5% from start</div>
+                                <div style="font-size: 10px; color: #27ae60;" id="bodyfat-change">-2.5% from start</div>
                             </div>
                             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
                                 <div style="font-size: 24px; font-weight: bold; color: var(--primary);">42</div>
@@ -669,9 +670,9 @@
                                 <div style="font-size: 10px; color: #27ae60;">+3 lbs from start</div>
                             </div>
                             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">28</div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);" id="monthly-workouts">28</div>
                                 <div style="font-size: 12px; color: #666;">Workouts This Month</div>
-                                <div style="font-size: 10px; color: #27ae60;">+8 from last month</div>
+                                <div style="font-size: 10px; color: #27ae60;" id="workout-change">+8 from last month</div>
                             </div>
                         </div>
                     </div>
