@@ -1291,14 +1291,56 @@
         let selectedMealData = null;
         
         function showMealPlanSelector() {
+            // Debug: Check all possible storage keys
+            console.log('🔍 DEBUG: Checking for meal plans...');
+            const allKeys = Object.keys(localStorage);
+            const mealKeys = allKeys.filter(key => key.toLowerCase().includes('meal') || key.toLowerCase().includes('plan'));
+            console.log('📦 Found storage keys:', mealKeys);
+            mealKeys.forEach(key => {
+                try {
+                    const value = localStorage.getItem(key);
+                    console.log(`   ${key}:`, value ? value.substring(0, 100) + '...' : 'empty');
+                } catch (e) {
+                    console.log(`   ${key}: error reading`);
+                }
+            });
+            
             // Load saved meal plans from the correct storage key
             const savedPlans = JSON.parse(localStorage.getItem('fuelfire_meal_plans') || '[]');
+            console.log('📋 Loaded', savedPlans.length, 'meal plans from fuelfire_meal_plans');
+            
             const selectElement = document.getElementById('meal-plan-select');
             
             // Clear existing options
             selectElement.innerHTML = '<option value="">Choose a meal plan...</option>';
             
             if (savedPlans.length === 0) {
+                console.log('⚠️ No plans found in fuelfire_meal_plans, checking other locations...');
+                
+                // Check for recent meal plan stored elsewhere
+                const recentPlanText = localStorage.getItem('fuelfire_recent_meal_plan');
+                const recentGoals = localStorage.getItem('fuelfire_recent_diet_goals');
+                
+                if (recentPlanText) {
+                    console.log('✅ Found recent meal plan text!');
+                    // Create a temporary plan object from the recent data
+                    const tempPlan = {
+                        mealPlan: recentPlanText,
+                        metadata: recentGoals ? JSON.parse(recentGoals) : { goal: 'recent' },
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Store it temporarily for this session
+                    window.tempMealPlan = [tempPlan];
+                    
+                    const date = new Date().toLocaleDateString();
+                    const goal = tempPlan.metadata?.goal || 'Recent';
+                    selectElement.innerHTML += `<option value="0">${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}</option>`;
+                    
+                    document.getElementById('meal-plan-modal').style.display = 'block';
+                    return;
+                }
+                
                 selectElement.innerHTML += '<option value="">No saved meal plans found</option>';
                 alert('No saved meal plans found!\n\nPlease create a meal plan first by:\n1. Going to Diet Creation\n2. Generating a meal plan\n\nThen return here to import meals!');
                 return;
@@ -1328,7 +1370,13 @@
                 return;
             }
             
-            const savedPlans = JSON.parse(localStorage.getItem('fuelfire_meal_plans') || '[]');
+            // Check if we're using the temporary plan
+            let savedPlans = JSON.parse(localStorage.getItem('fuelfire_meal_plans') || '[]');
+            if (savedPlans.length === 0 && window.tempMealPlan) {
+                console.log('📋 Using temporary meal plan');
+                savedPlans = window.tempMealPlan;
+            }
+            
             const selectedPlan = savedPlans[parseInt(planIndex)];
             
             if (!selectedPlan || !selectedPlan.mealPlan) {
