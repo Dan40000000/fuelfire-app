@@ -333,6 +333,11 @@
         
         function startVoiceLogging() {
             document.getElementById('voice-modal').style.display = 'block';
+            document.getElementById('voice-text').textContent = 'Click the microphone to start speaking...';
+            document.getElementById('voice-button').textContent = 'Start Recording';
+            document.getElementById('voice-button').style.background = '#FF6B6B';
+            document.getElementById('voice-status').textContent = '🎤';
+            
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
                 recognition.continuous = false;
@@ -344,12 +349,24 @@
                     document.getElementById('voice-text').textContent = transcript;
                     
                     if (event.results[0].isFinal) {
+                        // Stop recording automatically when final result is received
+                        recognition.stop();
+                        isRecording = false;
+                        document.getElementById('voice-button').textContent = 'Processing...';
+                        document.getElementById('voice-button').style.background = '#6c757d';
+                        document.getElementById('voice-status').textContent = '🤖';
+                        
+                        // Search for food using AI
                         searchFoodByVoice(transcript);
                     }
                 };
                 
                 recognition.onerror = function(event) {
                     document.getElementById('voice-text').textContent = 'Error: ' + event.error;
+                    isRecording = false;
+                    document.getElementById('voice-button').textContent = 'Start Recording';
+                    document.getElementById('voice-button').style.background = '#FF6B6B';
+                    document.getElementById('voice-status').textContent = '🎤';
                 };
             } else {
                 alert('Voice recognition not supported on this browser. Try Chrome or Safari.');
@@ -376,6 +393,13 @@
             document.getElementById('voice-modal').style.display = 'none';
             if (recognition) recognition.stop();
             isRecording = false;
+            
+            // Reset modal state
+            document.getElementById('voice-text').textContent = 'Click the microphone to start speaking...';
+            document.getElementById('voice-button').textContent = 'Start Recording';
+            document.getElementById('voice-button').style.background = '#FF6B6B';
+            document.getElementById('voice-status').textContent = '🎤';
+            document.getElementById('food-results').innerHTML = '';
         }
         
         // Search food from voice input using AI
@@ -1442,35 +1466,7 @@
             loadTodaysMeals();
         }
         
-        // Voice Logging Function
-        function startVoiceLogging() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                const recognition = new SpeechRecognition();
-                
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
-                
-                recognition.onstart = function() {
-                    alert('🎤 Listening... Say what you ate (e.g., "I had a chicken sandwich and an apple")');
-                };
-                
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('ai-input').value = transcript;
-                    alert(`📝 Heard: "${transcript}"\n\nClick "Analyze with AI" to process this food.`);
-                };
-                
-                recognition.onerror = function(event) {
-                    alert('❌ Voice recognition error: ' + event.error);
-                };
-                
-                recognition.start();
-            } else {
-                alert('⚠️ Voice recognition is not supported in your browser. Try Chrome or Safari.');
-            }
-        }
+        // Voice logging function is defined earlier in the file
         
         // Barcode Scanning Function
         function startBarcodeScanning() {
