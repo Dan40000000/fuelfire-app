@@ -1439,8 +1439,8 @@
                     continue;
                 }
                 
-                // Day headers - look for weekday patterns and "Day X" patterns
-                const dayMatch = trimmed.match(/^###?\s*(Day \d+[-\d]*.*?:?)/i);
+                // Day headers - match your exact format
+                const dayMatch = trimmed.match(/^###\s*(Day \d+[-\d]*.*?):/i);
                 if (dayMatch) {
                     console.log('📅 Found day:', dayMatch[1]);
                     // Save previous meal if exists
@@ -1455,11 +1455,13 @@
                     continue;
                 }
                 
-                // Meal headers - updated regex to match your format exactly
-                const mealMatch = trimmed.match(/\*\*🍳\s*(Breakfast):\*\*|\*\*🥗\s*(Lunch):\*\*|\*\*🍽️\s*(Dinner):\*\*|\*\*🍎\s*(Snacks?):\*\*/i);
+                // Meal headers - match your format where description is on same line
+                const mealMatch = trimmed.match(/^\*\*(🍳|🥗|🍽️|🍎)\s*(Breakfast|Lunch|Dinner|Snacks?):\*\*\s*(.*)/i);
                 if (mealMatch && currentDay) {
-                    const mealType = mealMatch[1] || mealMatch[2] || mealMatch[3] || mealMatch[4];
-                    console.log('🍽️ Found meal:', mealType, 'for', currentDay);
+                    const mealType = mealMatch[2];
+                    const mealDescription = mealMatch[3];
+                    console.log('🍽️ Found meal:', mealType, 'for', currentDay, '- Description:', mealDescription.substring(0, 50) + '...');
+                    
                     // Save previous meal if exists
                     if (currentMeal) {
                         currentMeal.content = mealContent.trim();
@@ -1468,16 +1470,28 @@
                         mealContent = '';
                     }
                     
+                    // Extract calories and macros from the description
+                    const calorieMatch = mealDescription.match(/Cal:\s*(\d+)/i);
+                    const proteinMatch = mealDescription.match(/P:\s*(\d+)g/i);
+                    const carbMatch = mealDescription.match(/C:\s*(\d+)g/i);
+                    const fatMatch = mealDescription.match(/F:\s*(\d+)g/i);
+                    
+                    // Extract meal name (everything before the calories)
+                    const nameMatch = mealDescription.match(/^([^-]+)/);
+                    const mealName = nameMatch ? nameMatch[1].trim() : mealDescription.substring(0, 30) + '...';
+                    
                     currentMeal = {
                         day: currentDay,
                         type: mealType.toLowerCase(),
-                        name: '',
-                        calories: 0,
-                        protein: 0,
-                        carbs: 0,
-                        fat: 0,
-                        content: ''
+                        name: mealName,
+                        calories: calorieMatch ? parseInt(calorieMatch[1]) : 400,
+                        protein: proteinMatch ? parseInt(proteinMatch[1]) : 20,
+                        carbs: carbMatch ? parseInt(carbMatch[1]) : 30,
+                        fat: fatMatch ? parseInt(fatMatch[1]) : 15,
+                        content: mealDescription
                     };
+                    
+                    console.log('📋 Created meal:', mealName, `(${currentMeal.calories} cal)`);
                     continue;
                 }
                 
