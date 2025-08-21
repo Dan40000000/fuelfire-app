@@ -437,6 +437,8 @@
             const lines = content.split('\n');
             const structured = {
                 shopping: '',
+                shoppingWeek1: '',
+                shoppingWeek2: '',
                 days: [],
                 summaries: []
             };
@@ -444,6 +446,7 @@
             let currentDay = null;
             let currentSection = '';
             let inShopping = false;
+            let currentShoppingWeek = '';
             
             for (let line of lines) {
                 const trimmed = line.trim();
@@ -452,6 +455,16 @@
                 if (trimmed.includes('Shopping List') || trimmed.includes('SHOPPING LIST')) {
                     inShopping = true;
                     currentSection = 'shopping';
+                    continue;
+                }
+                
+                // Week-specific shopping lists
+                if (trimmed.includes('Week 1') && inShopping) {
+                    currentShoppingWeek = 'week1';
+                    continue;
+                }
+                if (trimmed.includes('Week 2') && inShopping) {
+                    currentShoppingWeek = 'week2';
                     continue;
                 }
                 
@@ -498,7 +511,14 @@
                 
                 // Add content to appropriate section
                 if (inShopping && trimmed) {
-                    structured.shopping += line + '\n';
+                    if (currentShoppingWeek === 'week1') {
+                        structured.shoppingWeek1 += line + '\n';
+                    } else if (currentShoppingWeek === 'week2') {
+                        structured.shoppingWeek2 += line + '\n';
+                    } else {
+                        // If no specific week, try to auto-detect or add to general
+                        structured.shopping += line + '\n';
+                    }
                 } else if (currentDay && currentDay.meals.length > 0) {
                     const currentMeal = currentDay.meals[currentDay.meals.length - 1];
                     currentMeal.content += line + '\n';
@@ -513,24 +533,60 @@
             
             if (currentDay) structured.days.push(currentDay);
             
+            // If no week-specific shopping lists were found, split the general list
+            if (!structured.shoppingWeek1 && !structured.shoppingWeek2 && structured.shopping) {
+                const splitShopping = smartSplitShoppingList(structured.shopping, structured.days);
+                structured.shoppingWeek1 = splitShopping.week1;
+                structured.shoppingWeek2 = splitShopping.week2;
+            }
+            
             return structured;
         }
         
         function generateBeautifulMealPlanHTML(structured) {
             let html = '';
             
-            // Shopping list section
-            if (structured.shopping) {
-                const shoppingItems = parseShoppingList(structured.shopping);
-                const shoppingHTML = generateInteractiveShoppingList(shoppingItems);
+            // Shopping list sections
+            if (structured.shoppingWeek1 || structured.shoppingWeek2 || structured.shopping) {
+                if (structured.shoppingWeek1) {
+                    const week1Items = parseShoppingList(structured.shoppingWeek1);
+                    const week1HTML = generateInteractiveShoppingList(week1Items, 'week1');
+                    
+                    html += `
+                        <div class="shopping-section">
+                            <h2 class="shopping-title">🛒 Week 1 Shopping List</h2>
+                            <div class="shopping-progress" id="shopping-progress-week1">0 of ${week1Items.length} items checked</div>
+                            <div class="shopping-list" id="shopping-list-week1">${week1HTML}</div>
+                        </div>
+                    `;
+                }
                 
-                html += `
-                    <div class="shopping-section">
-                        <h2 class="shopping-title">🛒 Shopping List</h2>
-                        <div class="shopping-progress" id="shopping-progress">0 of ${shoppingItems.length} items checked</div>
-                        <div class="shopping-list" id="shopping-list">${shoppingHTML}</div>
-                    </div>
-                `;
+                if (structured.shoppingWeek2) {
+                    const week2Items = parseShoppingList(structured.shoppingWeek2);
+                    const week2HTML = generateInteractiveShoppingList(week2Items, 'week2');
+                    
+                    html += `
+                        <div class="shopping-section" style="margin-top: 30px;">
+                            <h2 class="shopping-title">🛒 Week 2 Shopping List</h2>
+                            <div class="shopping-progress" id="shopping-progress-week2">0 of ${week2Items.length} items checked</div>
+                            <div class="shopping-list" id="shopping-list-week2">${week2HTML}</div>
+                        </div>
+                    `;
+                }
+                
+                // Fallback for single shopping list
+                if (!structured.shoppingWeek1 && !structured.shoppingWeek2 && structured.shopping) {
+                    const shoppingItems = parseShoppingList(structured.shopping);
+                    const shoppingHTML = generateInteractiveShoppingList(shoppingItems, 'general');
+                    
+                    html += `
+                        <div class="shopping-section">
+                            <h2 class="shopping-title">🛒 Shopping List</h2>
+                            <div class="shopping-progress" id="shopping-progress-general">0 of ${shoppingItems.length} items checked</div>
+                            <div class="shopping-list" id="shopping-list-general">${shoppingHTML}</div>
+                        </div>
+                    `;
+                }
             }
             
             // Days sections
@@ -623,19 +679,19 @@
             return items;
         }
         
-        function generateInteractiveShoppingList(items) {
+        function generateInteractiveShoppingList(items, weekId) {
             return items.map((item, index) => `
-                <div class="shopping-item" id="shopping-item-${index}">
-                    <div class="shopping-checkbox" onclick="toggleShoppingItem(${index})" id="checkbox-${index}">
+                <div class="shopping-item" id="shopping-item-${weekId}-${index}">
+                    <div class="shopping-checkbox" onclick="toggleShoppingItem('${weekId}', ${index})" id="checkbox-${weekId}-${index}">
                     </div>
-                    <div class="shopping-text" id="text-${index}">${item}</div>
+                    <div class="shopping-text" id="text-${weekId}-${index}">${item}</div>
                 </div>
             `).join('');
         }
         
-        function toggleShoppingItem(index) {
-            const checkbox = document.getElementById(`checkbox-${index}`);
-            const text = document.getElementById(`text-${index}`);
+        function toggleShoppingItem(weekId, index) {
+            const checkbox = document.getElementById(`checkbox-${weekId}-${index}`);
+            const text = document.getElementById(`text-${weekId}-${index}`);
             const isChecked = checkbox.classList.contains('checked');
             
             if (isChecked) {
@@ -650,14 +706,14 @@
                 text.classList.add('checked');
             }
             
-            // Update progress
-            updateShoppingProgress();
+            // Update progress for this specific week
+            updateShoppingProgress(weekId);
         }
         
-        function updateShoppingProgress() {
-            const checkboxes = document.querySelectorAll('.shopping-checkbox');
-            const checkedBoxes = document.querySelectorAll('.shopping-checkbox.checked');
-            const progress = document.getElementById('shopping-progress');
+        function updateShoppingProgress(weekId) {
+            const checkboxes = document.querySelectorAll(`#shopping-list-${weekId} .shopping-checkbox`);
+            const checkedBoxes = document.querySelectorAll(`#shopping-list-${weekId} .shopping-checkbox.checked`);
+            const progress = document.getElementById(`shopping-progress-${weekId}`);
             
             if (progress && checkboxes.length > 0) {
                 const checkedCount = checkedBoxes.length;
@@ -667,7 +723,8 @@
                 progress.innerHTML = `${checkedCount} of ${totalCount} items checked (${percentage}%)`;
                 
                 if (checkedCount === totalCount) {
-                    progress.innerHTML = `🎉 Shopping complete! All ${totalCount} items checked`;
+                    const weekName = weekId === 'week1' ? 'Week 1' : weekId === 'week2' ? 'Week 2' : 'All';
+                    progress.innerHTML = `🎉 ${weekName} shopping complete! All ${totalCount} items checked`;
                     progress.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
                     progress.style.color = 'white';
                 } else {
@@ -675,6 +732,19 @@
                     progress.style.color = '#4CAF50';
                 }
             }
+        }
+        
+        function smartSplitShoppingList(shoppingText, days) {
+            const items = parseShoppingList(shoppingText);
+            const midPoint = Math.ceil(items.length / 2);
+            
+            const week1Items = items.slice(0, midPoint);
+            const week2Items = items.slice(midPoint);
+            
+            return {
+                week1: week1Items.join('\n'),
+                week2: week2Items.join('\n')
+            };
         }
         
         // Check if meal plan data was passed
