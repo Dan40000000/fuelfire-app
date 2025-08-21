@@ -1415,6 +1415,8 @@
         
         function parseMealPlanForImport(mealPlanText) {
             console.log('🔍 Parsing meal plan text...');
+            console.log('📝 First 500 characters:', mealPlanText.substring(0, 500));
+            
             const meals = [];
             const lines = mealPlanText.split('\n');
             let currentDay = '';
@@ -1422,6 +1424,12 @@
             let mealContent = '';
             
             console.log(`📄 Total lines to parse: ${lines.length}`);
+            
+            // Show first 10 lines to understand format
+            console.log('📋 First 10 lines:');
+            lines.slice(0, 10).forEach((line, i) => {
+                console.log(`   ${i+1}: "${line}"`);
+            });
             
             for (let line of lines) {
                 const trimmed = line.trim();
