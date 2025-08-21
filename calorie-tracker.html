@@ -132,7 +132,7 @@
                     <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <h3 style="color: var(--primary); margin: 0 0 15px 0; text-align: center; font-size: 18px;">⚡ Quick Import</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <button onclick="showMealPlanSelector()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
+                            <button onclick="debugAndShowMealPlanSelector()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
                                 🍽️<br>Meal Plans
                             </button>
                             <button onclick="showMealIdeasSelector()" style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(255, 152, 0, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
@@ -1360,6 +1360,41 @@
             });
             
             document.getElementById('meal-plan-modal').style.display = 'block';
+        }
+        
+        function debugAndShowMealPlanSelector() {
+            alert('🔍 DEBUG: Checking all localStorage...');
+            
+            // Show ALL localStorage keys
+            const allKeys = Object.keys(localStorage);
+            console.log('🗂️ ALL localStorage keys:', allKeys);
+            
+            // Show the exact content of each meal-related key
+            allKeys.forEach(key => {
+                if (key.toLowerCase().includes('meal') || key.toLowerCase().includes('plan')) {
+                    const value = localStorage.getItem(key);
+                    console.log(`📦 ${key}:`, value ? value.substring(0, 200) + '...' : 'EMPTY');
+                }
+            });
+            
+            // Force a manual check
+            const manualCheck = localStorage.getItem('fuelfire_meal_plans');
+            console.log('🎯 Manual fuelfire_meal_plans check:', manualCheck);
+            
+            if (manualCheck) {
+                try {
+                    const parsed = JSON.parse(manualCheck);
+                    alert(`Found ${parsed.length} meal plans in storage!`);
+                    console.log('✅ Parsed meal plans:', parsed);
+                } catch (e) {
+                    alert('Error parsing meal plans: ' + e.message);
+                }
+            } else {
+                alert('❌ No fuelfire_meal_plans found in localStorage');
+            }
+            
+            // Now call the original function
+            showMealPlanSelector();
         }
         
         function hideMealPlanSelector() {
