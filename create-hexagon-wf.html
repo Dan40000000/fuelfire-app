@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - WF Hexagon Icons</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #0f0f0f; color: white; font-family: -apple-system, Arial;">
+    <h2>Well Fit - WF Hexagon + Nutrition & Fitness 🔥</h2>
+    <p style="color: #888;">WF in hexagon with "Nutrition & Fitness" text and your flame</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 30px;">
+        
+        <div>
+            <h3>WF Hexagon + Text Below</h3>
+            <canvas id="canvas1" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'wellfit-hexagon-text-below.png')">Download 512x512</button>
+        </div>
+        
+        <div>
+            <h3>WF Hexagon + Flame Crown</h3>
+            <canvas id="canvas2" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'wellfit-hexagon-flame.png')">Download 512x512</button>
+        </div>
+        
+        <div>
+            <h3>Hexagon Badge Style</h3>
+            <canvas id="canvas3" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'wellfit-hexagon-badge.png')">Download 512x512</button>
+        </div>
+        
+        <div>
+            <h3>Clean Minimal Hexagon</h3>
+            <canvas id="canvas4" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas4', 'wellfit-hexagon-minimal.png')">Download 512x512</button>
+        </div>
+        
+    </div>
+    
+    <img id="sourceFlame" src="flame-source.webp" style="display: none;" onload="createHexagonIcons()">
+    
+    <script>
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function drawHexagon(ctx, centerX, centerY, size, filled = true) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i - Math.PI / 6;
+                const x = centerX + size * Math.cos(angle);
+                const y = centerY + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            
+            if (filled) {
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+        }
+        
+        function createHexagonIcons() {
+            const flameImg = document.getElementById('sourceFlame');
+            
+            // Icon 1: WF Hexagon + Text Below
+            const canvas1 = document.getElementById('canvas1');
+            const ctx1 = canvas1.getContext('2d');
+            
+            // Background gradient
+            const gradient1 = ctx1.createLinearGradient(0, 0, 512, 512);
+            gradient1.addColorStop(0, '#4B9CD3');
+            gradient1.addColorStop(1, '#13294B');
+            roundedRect(ctx1, 0, 0, 512, 512, 90);
+            ctx1.fillStyle = gradient1;
+            ctx1.fill();
+            
+            // White hexagon
+            ctx1.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            drawHexagon(ctx1, 256, 200, 100);
+            
+            // WF in hexagon
+            ctx1.fillStyle = '#4B9CD3';
+            ctx1.font = 'bold 80px -apple-system, Arial';
+            ctx1.textAlign = 'center';
+            ctx1.textBaseline = 'middle';
+            ctx1.fillText('WF', 256, 200);
+            
+            // Small flame above hexagon
+            ctx1.drawImage(flameImg, 226, 80, 60, 80);
+            
+            // Text below
+            ctx1.fillStyle = 'white';
+            ctx1.font = 'bold 28px -apple-system, Arial';
+            ctx1.fillText('NUTRITION', 256, 360);
+            ctx1.font = 'bold 24px -apple-system, Arial';
+            ctx1.fillText('& FITNESS', 256, 390);
+            
+            // Icon 2: WF Hexagon + Flame Crown
+            const canvas2 = document.getElementById('canvas2');
+            const ctx2 = canvas2.getContext('2d');
+            
+            const gradient2 = ctx2.createLinearGradient(0, 0, 512, 512);
+            gradient2.addColorStop(0, '#4B9CD3');
+            gradient2.addColorStop(1, '#13294B');
+            roundedRect(ctx2, 0, 0, 512, 512, 90);
+            ctx2.fillStyle = gradient2;
+            ctx2.fill();
+            
+            // Hexagon outline
+            ctx2.strokeStyle = 'white';
+            ctx2.lineWidth = 8;
+            drawHexagon(ctx2, 256, 220, 90, false);
+            
+            // WF in hexagon
+            ctx2.fillStyle = 'white';
+            ctx2.font = 'bold 70px -apple-system, Arial';
+            ctx2.textAlign = 'center';
+            ctx2.textBaseline = 'middle';
+            ctx2.fillText('WF', 256, 220);
+            
+            // Flame crown above
+            ctx2.drawImage(flameImg, 216, 80, 80, 100);
+            
+            // Text below hexagon
+            ctx2.font = 'bold 22px -apple-system, Arial';
+            ctx2.fillText('NUTRITION & FITNESS', 256, 380);
+            
+            // Icon 3: Hexagon Badge Style
+            const canvas3 = document.getElementById('canvas3');
+            const ctx3 = canvas3.getContext('2d');
+            
+            const gradient3 = ctx3.createLinearGradient(0, 0, 512, 512);
+            gradient3.addColorStop(0, '#4B9CD3');
+            gradient3.addColorStop(1, '#13294B');
+            roundedRect(ctx3, 0, 0, 512, 512, 90);
+            ctx3.fillStyle = gradient3;
+            ctx3.fill();
+            
+            // Large hexagon background
+            ctx3.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            drawHexagon(ctx3, 256, 220, 140);
+            
+            // Inner white hexagon
+            ctx3.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            drawHexagon(ctx3, 256, 220, 100);
+            
+            // WF and flame in hexagon
+            ctx3.drawImage(flameImg, 216, 160, 80, 100);
+            
+            ctx3.fillStyle = '#13294B';
+            ctx3.font = 'bold 45px -apple-system, Arial';
+            ctx3.textAlign = 'center';
+            ctx3.fillText('WF', 256, 280);
+            
+            // Text around hexagon
+            ctx3.fillStyle = 'white';
+            ctx3.font = 'bold 24px -apple-system, Arial';
+            ctx3.fillText('NUTRITION & FITNESS', 256, 400);
+            
+            // Icon 4: Clean Minimal Hexagon
+            const canvas4 = document.getElementById('canvas4');
+            const ctx4 = canvas4.getContext('2d');
+            
+            const gradient4 = ctx4.createLinearGradient(0, 0, 512, 512);
+            gradient4.addColorStop(0, '#4B9CD3');
+            gradient4.addColorStop(1, '#13294B');
+            roundedRect(ctx4, 0, 0, 512, 512, 90);
+            ctx4.fillStyle = gradient4;
+            ctx4.fill();
+            
+            // Clean hexagon outline
+            ctx4.strokeStyle = 'white';
+            ctx4.lineWidth = 6;
+            drawHexagon(ctx4, 256, 180, 80, false);
+            
+            // WF in center
+            ctx4.fillStyle = 'white';
+            ctx4.font = 'bold 60px -apple-system, Arial';
+            ctx4.textAlign = 'center';
+            ctx4.textBaseline = 'middle';
+            ctx4.fillText('WF', 256, 180);
+            
+            // Small flame accent
+            ctx4.drawImage(flameImg, 236, 100, 40, 50);
+            
+            // Clean text below
+            ctx4.font = 'bold 20px -apple-system, Arial';
+            ctx4.fillText('NUTRITION', 256, 320);
+            ctx4.font = '18px -apple-system, Arial';
+            ctx4.fillText('& FITNESS', 256, 345);
+            
+            // Small tagline
+            ctx4.font = '16px -apple-system, Arial';
+            ctx4.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx4.fillText('AI POWERED', 256, 380);
+        }
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #4B9CD3, #13294B);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 10px 20px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.4);
+        }
+        h3 {
+            color: #4B9CD3;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+</html>

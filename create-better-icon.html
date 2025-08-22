@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Professional App Icon</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #1a1a1a; color: white; font-family: Arial;">
+    <h2>Well Fit - Professional Icon Options</h2>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <!-- Option 1: Clean Gradient with W -->
+        <div>
+            <h3>Option 1: Clean Modern</h3>
+            <canvas id="canvas1" width="512" height="512" style="border: 1px solid #444; border-radius: 20px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'wellfit-icon-modern.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 2: Fitness Focus -->
+        <div>
+            <h3>Option 2: Fitness Focus</h3>
+            <canvas id="canvas2" width="512" height="512" style="border: 1px solid #444; border-radius: 20px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'wellfit-icon-fitness.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 3: Minimalist -->
+        <div>
+            <h3>Option 3: Minimalist</h3>
+            <canvas id="canvas3" width="512" height="512" style="border: 1px solid #444; border-radius: 20px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'wellfit-icon-minimal.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+    </div>
+    
+    <script>
+        // Option 1: Clean Modern with W
+        const canvas1 = document.getElementById('canvas1');
+        const ctx1 = canvas1.getContext('2d');
+        
+        // Gradient background
+        const gradient1 = ctx1.createLinearGradient(0, 0, 512, 512);
+        gradient1.addColorStop(0, '#667eea');
+        gradient1.addColorStop(1, '#764ba2');
+        ctx1.fillStyle = gradient1;
+        ctx1.fillRect(0, 0, 512, 512);
+        
+        // White W letter
+        ctx1.fillStyle = 'white';
+        ctx1.font = 'bold 280px Arial';
+        ctx1.textAlign = 'center';
+        ctx1.textBaseline = 'middle';
+        ctx1.fillText('W', 256, 256);
+        
+        // Small fitness icon
+        ctx1.font = '60px Arial';
+        ctx1.fillText('💪', 256, 420);
+        
+        // Option 2: Fitness Focus
+        const canvas2 = document.getElementById('canvas2');
+        const ctx2 = canvas2.getContext('2d');
+        
+        // Gradient background
+        const gradient2 = ctx2.createLinearGradient(0, 0, 512, 512);
+        gradient2.addColorStop(0, '#4ECDC4');
+        gradient2.addColorStop(1, '#44A08D');
+        ctx2.fillStyle = gradient2;
+        ctx2.fillRect(0, 0, 512, 512);
+        
+        // Create circle background
+        ctx2.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx2.beginPath();
+        ctx2.arc(256, 200, 120, 0, Math.PI * 2);
+        ctx2.fill();
+        
+        // Dumbbell shape
+        ctx2.fillStyle = 'white';
+        // Bar
+        ctx2.fillRect(156, 190, 200, 20);
+        // Left weight
+        ctx2.fillRect(126, 160, 40, 80);
+        ctx2.fillRect(116, 170, 60, 60);
+        // Right weight
+        ctx2.fillRect(346, 160, 40, 80);
+        ctx2.fillRect(336, 170, 60, 60);
+        
+        // Text
+        ctx2.font = 'bold 72px Arial';
+        ctx2.textAlign = 'center';
+        ctx2.fillText('WELL FIT', 256, 380);
+        
+        // Option 3: Minimalist
+        const canvas3 = document.getElementById('canvas3');
+        const ctx3 = canvas3.getContext('2d');
+        
+        // Solid color background
+        ctx3.fillStyle = '#667eea';
+        ctx3.fillRect(0, 0, 512, 512);
+        
+        // Create hexagon shape
+        ctx3.strokeStyle = 'white';
+        ctx3.lineWidth = 24;
+        ctx3.beginPath();
+        const size = 140;
+        const centerX = 256;
+        const centerY = 220;
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 6;
+            const x = centerX + size * Math.cos(angle);
+            const y = centerY + size * Math.sin(angle);
+            if (i === 0) {
+                ctx3.moveTo(x, y);
+            } else {
+                ctx3.lineTo(x, y);
+            }
+        }
+        ctx3.closePath();
+        ctx3.stroke();
+        
+        // WF letters inside
+        ctx3.fillStyle = 'white';
+        ctx3.font = 'bold 100px Arial';
+        ctx3.textAlign = 'center';
+        ctx3.textBaseline = 'middle';
+        ctx3.fillText('WF', centerX, centerY);
+        
+        // Small text below
+        ctx3.font = '36px Arial';
+        ctx3.fillText('FITNESS & NUTRITION', 256, 390);
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+    </style>
+</body>
+</html>

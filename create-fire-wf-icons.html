@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - Fire & WF Icon Collection</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #0f0f0f; color: white; font-family: -apple-system, Arial;">
+    <h2>Well Fit - Fire & WF Icon Collection 🔥</h2>
+    <p style="color: #888;">Carolina Blue background with red/yellow/orange fire elements and WF letters</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
+        
+        <!-- Row 1: Fire Symbol Variations -->
+        <div>
+            <h3>Fire Center + WF Below</h3>
+            <canvas id="canvas1" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'fire-wf-below.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Fire Top + WF Center</h3>
+            <canvas id="canvas2" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'fire-top-wf.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>WF with Fire Crown</h3>
+            <canvas id="canvas3" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'wf-fire-crown.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Fire Left + WF Right</h3>
+            <canvas id="canvas4" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas4', 'fire-left-wf.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Custom Fire Symbol</h3>
+            <canvas id="canvas5" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas5', 'custom-fire-wf.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Fire Badge Circle</h3>
+            <canvas id="canvas6" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas6', 'fire-badge.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Stacked Design</h3>
+            <canvas id="canvas7" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas7', 'stacked-fire.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Fire Inside W</h3>
+            <canvas id="canvas8" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas8', 'fire-in-w.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Diagonal Split</h3>
+            <canvas id="canvas9" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas9', 'diagonal-split.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Minimalist Fire WF</h3>
+            <canvas id="canvas10" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas10', 'minimal-fire.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Double Fire</h3>
+            <canvas id="canvas11" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas11', 'double-fire.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Fire Hexagon</h3>
+            <canvas id="canvas12" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas12', 'fire-hexagon.png')">Download</button>
+        </div>
+        
+    </div>
+    
+    <script>
+        // Common rounded rect function
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        // Custom fire shape
+        function drawFireShape(ctx, x, y, width, height) {
+            ctx.beginPath();
+            ctx.moveTo(x + width/2, y + height);
+            ctx.quadraticCurveTo(x, y + height*0.7, x + width*0.2, y + height*0.3);
+            ctx.quadraticCurveTo(x + width*0.1, y + height*0.1, x + width*0.4, y + height*0.2);
+            ctx.quadraticCurveTo(x + width*0.3, y, x + width*0.6, y + height*0.1);
+            ctx.quadraticCurveTo(x + width*0.9, y, x + width*0.8, y + height*0.3);
+            ctx.quadraticCurveTo(x + width, y + height*0.7, x + width/2, y + height);
+            ctx.closePath();
+        }
+        
+        const canvases = [];
+        for (let i = 1; i <= 12; i++) {
+            canvases[i] = document.getElementById(`canvas${i}`);
+        }
+        
+        // Icon 1: Fire Center + WF Below
+        const ctx1 = canvases[1].getContext('2d');
+        const gradient1 = ctx1.createLinearGradient(0, 0, 256, 256);
+        gradient1.addColorStop(0, '#4B9CD3');
+        gradient1.addColorStop(1, '#13294B');
+        roundedRect(ctx1, 0, 0, 256, 256, 45);
+        ctx1.fillStyle = gradient1;
+        ctx1.fill();
+        
+        // Fire shape
+        const fireGrad1 = ctx1.createLinearGradient(0, 80, 0, 160);
+        fireGrad1.addColorStop(0, '#FF4444');
+        fireGrad1.addColorStop(0.5, '#FF8800');
+        fireGrad1.addColorStop(1, '#FFD700');
+        ctx1.fillStyle = fireGrad1;
+        drawFireShape(ctx1, 88, 80, 80, 80);
+        ctx1.fill();
+        
+        ctx1.fillStyle = 'white';
+        ctx1.font = 'bold 36px Arial';
+        ctx1.textAlign = 'center';
+        ctx1.fillText('WF', 128, 210);
+        
+        // Icon 2: Fire Top + WF Center
+        const ctx2 = canvases[2].getContext('2d');
+        const gradient2 = ctx2.createLinearGradient(0, 0, 256, 256);
+        gradient2.addColorStop(0, '#4B9CD3');
+        gradient2.addColorStop(1, '#13294B');
+        roundedRect(ctx2, 0, 0, 256, 256, 45);
+        ctx2.fillStyle = gradient2;
+        ctx2.fill();
+        
+        // Small fire at top
+        const fireGrad2 = ctx2.createLinearGradient(0, 40, 0, 90);
+        fireGrad2.addColorStop(0, '#FF4444');
+        fireGrad2.addColorStop(1, '#FFD700');
+        ctx2.fillStyle = fireGrad2;
+        drawFireShape(ctx2, 108, 40, 40, 50);
+        ctx2.fill();
+        
+        // Large WF
+        ctx2.fillStyle = 'white';
+        ctx2.font = 'bold 80px Arial';
+        ctx2.textAlign = 'center';
+        ctx2.fillText('WF', 128, 180);
+        
+        // Icon 3: WF with Fire Crown
+        const ctx3 = canvases[3].getContext('2d');
+        const gradient3 = ctx3.createLinearGradient(0, 0, 256, 256);
+        gradient3.addColorStop(0, '#4B9CD3');
+        gradient3.addColorStop(1, '#13294B');
+        roundedRect(ctx3, 0, 0, 256, 256, 45);
+        ctx3.fillStyle = gradient3;
+        ctx3.fill();
+        
+        // WF letters
+        ctx3.fillStyle = 'white';
+        ctx3.font = 'bold 70px Arial';
+        ctx3.textAlign = 'center';
+        ctx3.fillText('WF', 128, 160);
+        
+        // Fire crown above
+        const fireGrad3 = ctx3.createLinearGradient(0, 60, 0, 110);
+        fireGrad3.addColorStop(0, '#FF4444');
+        fireGrad3.addColorStop(1, '#FFD700');
+        ctx3.fillStyle = fireGrad3;
+        drawFireShape(ctx3, 88, 60, 30, 40);
+        ctx3.fill();
+        drawFireShape(ctx3, 118, 50, 25, 35);
+        ctx3.fill();
+        drawFireShape(ctx3, 143, 60, 30, 40);
+        ctx3.fill();
+        
+        // Icon 4: Fire Left + WF Right
+        const ctx4 = canvases[4].getContext('2d');
+        const gradient4 = ctx4.createLinearGradient(0, 0, 256, 256);
+        gradient4.addColorStop(0, '#4B9CD3');
+        gradient4.addColorStop(1, '#13294B');
+        roundedRect(ctx4, 0, 0, 256, 256, 45);
+        ctx4.fillStyle = gradient4;
+        ctx4.fill();
+        
+        // Fire on left
+        const fireGrad4 = ctx4.createLinearGradient(0, 80, 0, 180);
+        fireGrad4.addColorStop(0, '#FF4444');
+        fireGrad4.addColorStop(1, '#FFD700');
+        ctx4.fillStyle = fireGrad4;
+        drawFireShape(ctx4, 40, 80, 60, 100);
+        ctx4.fill();
+        
+        // WF on right
+        ctx4.fillStyle = 'white';
+        ctx4.font = 'bold 60px Arial';
+        ctx4.textAlign = 'center';
+        ctx4.fillText('WF', 180, 140);
+        
+        // Icon 5: Custom Fire Symbol
+        const ctx5 = canvases[5].getContext('2d');
+        const gradient5 = ctx5.createLinearGradient(0, 0, 256, 256);
+        gradient5.addColorStop(0, '#4B9CD3');
+        gradient5.addColorStop(1, '#13294B');
+        roundedRect(ctx5, 0, 0, 256, 256, 45);
+        ctx5.fillStyle = gradient5;
+        ctx5.fill();
+        
+        // Custom stylized fire
+        ctx5.strokeStyle = '#FF4444';
+        ctx5.lineWidth = 8;
+        ctx5.lineCap = 'round';
+        ctx5.beginPath();
+        ctx5.moveTo(128, 200);
+        ctx5.quadraticCurveTo(100, 150, 120, 100);
+        ctx5.quadraticCurveTo(110, 80, 128, 90);
+        ctx5.quadraticCurveTo(140, 70, 136, 100);
+        ctx5.quadraticCurveTo(156, 150, 128, 200);
+        ctx5.stroke();
+        
+        // Fill fire
+        const fireGrad5 = ctx5.createLinearGradient(0, 70, 0, 200);
+        fireGrad5.addColorStop(0, '#FF4444');
+        fireGrad5.addColorStop(0.6, '#FF8800');
+        fireGrad5.addColorStop(1, '#FFD700');
+        ctx5.fillStyle = fireGrad5;
+        ctx5.fill();
+        
+        // WF text overlay
+        ctx5.fillStyle = 'white';
+        ctx5.font = 'bold 30px Arial';
+        ctx5.textAlign = 'center';
+        ctx5.fillText('WF', 128, 150);
+        
+        // Icon 6: Fire Badge Circle
+        const ctx6 = canvases[6].getContext('2d');
+        const gradient6 = ctx6.createLinearGradient(0, 0, 256, 256);
+        gradient6.addColorStop(0, '#4B9CD3');
+        gradient6.addColorStop(1, '#13294B');
+        roundedRect(ctx6, 0, 0, 256, 256, 45);
+        ctx6.fillStyle = gradient6;
+        ctx6.fill();
+        
+        // White circle
+        ctx6.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx6.beginPath();
+        ctx6.arc(128, 128, 80, 0, Math.PI * 2);
+        ctx6.fill();
+        
+        // Fire in circle
+        const fireGrad6 = ctx6.createLinearGradient(0, 80, 0, 150);
+        fireGrad6.addColorStop(0, '#FF4444');
+        fireGrad6.addColorStop(1, '#FFD700');
+        ctx6.fillStyle = fireGrad6;
+        drawFireShape(ctx6, 98, 80, 60, 70);
+        ctx6.fill();
+        
+        // WF below circle
+        ctx6.fillStyle = 'white';
+        ctx6.font = 'bold 28px Arial';
+        ctx6.textAlign = 'center';
+        ctx6.fillText('WF', 128, 225);
+        
+        // Icon 7: Stacked Design
+        const ctx7 = canvases[7].getContext('2d');
+        const gradient7 = ctx7.createLinearGradient(0, 0, 256, 256);
+        gradient7.addColorStop(0, '#4B9CD3');
+        gradient7.addColorStop(1, '#13294B');
+        roundedRect(ctx7, 0, 0, 256, 256, 45);
+        ctx7.fillStyle = gradient7;
+        ctx7.fill();
+        
+        // Top fire
+        const fireGrad7 = ctx7.createLinearGradient(0, 60, 0, 120);
+        fireGrad7.addColorStop(0, '#FF4444');
+        fireGrad7.addColorStop(1, '#FFD700');
+        ctx7.fillStyle = fireGrad7;
+        drawFireShape(ctx7, 98, 60, 60, 60);
+        ctx7.fill();
+        
+        // Middle WF
+        ctx7.fillStyle = 'white';
+        ctx7.font = 'bold 40px Arial';
+        ctx7.textAlign = 'center';
+        ctx7.fillText('WF', 128, 170);
+        
+        // Bottom text
+        ctx7.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx7.font = '16px Arial';
+        ctx7.fillText('FITNESS', 128, 210);
+        
+        // Icon 8: Fire Inside W
+        const ctx8 = canvases[8].getContext('2d');
+        const gradient8 = ctx8.createLinearGradient(0, 0, 256, 256);
+        gradient8.addColorStop(0, '#4B9CD3');
+        gradient8.addColorStop(1, '#13294B');
+        roundedRect(ctx8, 0, 0, 256, 256, 45);
+        ctx8.fillStyle = gradient8;
+        ctx8.fill();
+        
+        // Large W outline
+        ctx8.strokeStyle = 'white';
+        ctx8.lineWidth = 12;
+        ctx8.lineCap = 'round';
+        ctx8.beginPath();
+        ctx8.moveTo(60, 90);
+        ctx8.lineTo(90, 180);
+        ctx8.lineTo(128, 130);
+        ctx8.lineTo(166, 180);
+        ctx8.lineTo(196, 90);
+        ctx8.stroke();
+        
+        // Fire inside W
+        const fireGrad8 = ctx8.createLinearGradient(0, 100, 0, 160);
+        fireGrad8.addColorStop(0, '#FF4444');
+        fireGrad8.addColorStop(1, '#FFD700');
+        ctx8.fillStyle = fireGrad8;
+        drawFireShape(ctx8, 108, 100, 40, 60);
+        ctx8.fill();
+        
+        // F below
+        ctx8.fillStyle = 'white';
+        ctx8.font = 'bold 40px Arial';
+        ctx8.textAlign = 'center';
+        ctx8.fillText('F', 128, 220);
+        
+        // Icon 9: Diagonal Split
+        const ctx9 = canvases[9].getContext('2d');
+        const gradient9 = ctx9.createLinearGradient(0, 0, 256, 256);
+        gradient9.addColorStop(0, '#4B9CD3');
+        gradient9.addColorStop(1, '#13294B');
+        roundedRect(ctx9, 0, 0, 256, 256, 45);
+        ctx9.fillStyle = gradient9;
+        ctx9.fill();
+        
+        // Fire on diagonal top left
+        const fireGrad9 = ctx9.createLinearGradient(0, 60, 0, 120);
+        fireGrad9.addColorStop(0, '#FF4444');
+        fireGrad9.addColorStop(1, '#FFD700');
+        ctx9.fillStyle = fireGrad9;
+        drawFireShape(ctx9, 70, 60, 50, 60);
+        ctx9.fill();
+        
+        // WF on diagonal bottom right
+        ctx9.fillStyle = 'white';
+        ctx9.font = 'bold 50px Arial';
+        ctx9.textAlign = 'center';
+        ctx9.fillText('WF', 170, 190);
+        
+        // Icon 10: Minimalist Fire WF
+        const ctx10 = canvases[10].getContext('2d');
+        const gradient10 = ctx10.createLinearGradient(0, 0, 256, 256);
+        gradient10.addColorStop(0, '#4B9CD3');
+        gradient10.addColorStop(1, '#13294B');
+        roundedRect(ctx10, 0, 0, 256, 256, 45);
+        ctx10.fillStyle = gradient10;
+        ctx10.fill();
+        
+        // Simple fire line art
+        ctx10.strokeStyle = '#FFD700';
+        ctx10.lineWidth = 6;
+        ctx10.lineCap = 'round';
+        ctx10.beginPath();
+        ctx10.moveTo(128, 180);
+        ctx10.quadraticCurveTo(110, 140, 120, 100);
+        ctx10.quadraticCurveTo(128, 80, 136, 100);
+        ctx10.quadraticCurveTo(146, 140, 128, 180);
+        ctx10.stroke();
+        
+        // Minimal WF
+        ctx10.fillStyle = 'white';
+        ctx10.font = 'bold 32px Arial';
+        ctx10.textAlign = 'center';
+        ctx10.fillText('WF', 128, 220);
+        
+        // Icon 11: Double Fire
+        const ctx11 = canvases[11].getContext('2d');
+        const gradient11 = ctx11.createLinearGradient(0, 0, 256, 256);
+        gradient11.addColorStop(0, '#4B9CD3');
+        gradient11.addColorStop(1, '#13294B');
+        roundedRect(ctx11, 0, 0, 256, 256, 45);
+        ctx11.fillStyle = gradient11;
+        ctx11.fill();
+        
+        // Two fires
+        const fireGrad11 = ctx11.createLinearGradient(0, 70, 0, 140);
+        fireGrad11.addColorStop(0, '#FF4444');
+        fireGrad11.addColorStop(1, '#FFD700');
+        ctx11.fillStyle = fireGrad11;
+        drawFireShape(ctx11, 70, 70, 45, 70);
+        ctx11.fill();
+        drawFireShape(ctx11, 141, 70, 45, 70);
+        ctx11.fill();
+        
+        // WF between
+        ctx11.fillStyle = 'white';
+        ctx11.font = 'bold 35px Arial';
+        ctx11.textAlign = 'center';
+        ctx11.fillText('WF', 128, 190);
+        
+        // Icon 12: Fire Hexagon
+        const ctx12 = canvases[12].getContext('2d');
+        const gradient12 = ctx12.createLinearGradient(0, 0, 256, 256);
+        gradient12.addColorStop(0, '#4B9CD3');
+        gradient12.addColorStop(1, '#13294B');
+        roundedRect(ctx12, 0, 0, 256, 256, 45);
+        ctx12.fillStyle = gradient12;
+        ctx12.fill();
+        
+        // Hexagon
+        ctx12.strokeStyle = 'white';
+        ctx12.lineWidth = 8;
+        ctx12.beginPath();
+        const centerX = 128, centerY = 128, size = 60;
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i;
+            const x = centerX + size * Math.cos(angle);
+            const y = centerY + size * Math.sin(angle);
+            if (i === 0) ctx12.moveTo(x, y);
+            else ctx12.lineTo(x, y);
+        }
+        ctx12.closePath();
+        ctx12.stroke();
+        
+        // Fire in center
+        const fireGrad12 = ctx12.createLinearGradient(0, 100, 0, 150);
+        fireGrad12.addColorStop(0, '#FF4444');
+        fireGrad12.addColorStop(1, '#FFD700');
+        ctx12.fillStyle = fireGrad12;
+        drawFireShape(ctx12, 108, 100, 40, 50);
+        ctx12.fill();
+        
+        // WF below hexagon
+        ctx12.fillStyle = 'white';
+        ctx12.font = 'bold 24px Arial';
+        ctx12.textAlign = 'center';
+        ctx12.fillText('WF', 128, 210);
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            
+            // Create a higher resolution version (512x512)
+            const hiResCanvas = document.createElement('canvas');
+            hiResCanvas.width = 512;
+            hiResCanvas.height = 512;
+            const hiResCtx = hiResCanvas.getContext('2d');
+            
+            // Scale up 2x
+            hiResCtx.scale(2, 2);
+            hiResCtx.drawImage(canvas, 0, 0);
+            
+            // Download the high-res version
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = hiResCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #FF4444, #FFD700);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px 16px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
+        }
+        h3 {
+            color: #4B9CD3;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turkey Recipes - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .meal-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .meal-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #D2691E, #CD853F);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .difficulty-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .meal-content {
+            padding: 20px;
+        }
+        
+        .meal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .meal-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .meal-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .meal-time {
+            color: #28a745;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .rating-stars {
+            color: #ff9500;
+            font-size: 14px;
+        }
+        
+        .meal-nutrition {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .nutrition-item {
+            text-align: center;
+            background: #f8f9ff;
+            padding: 8px 4px;
+            border-radius: 8px;
+        }
+        
+        .nutrition-value {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .nutrition-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10px;
+            padding: 0;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #D2691E, #CD853F);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .close-modal {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .ingredient-list {
+            margin: 15px 0;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .ingredient-checkbox {
+            margin-right: 10px;
+        }
+
+        .instruction-list {
+            margin: 15px 0;
+        }
+
+        .instruction-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .log-recipe-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">🦃 Turkey Recipes</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦃 Epic Turkey Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 amazing turkey dishes with fusion flavors and classic favorites</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    
+                    <!-- Meals Grid -->
+                    <div id="meals-container" class="meal-grid">
+                        <!-- Meals will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item active" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+    
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+                <h2 id="modal-title">Recipe Title</h2>
+                <div id="modal-subtitle" style="opacity: 0.9; margin-top: 8px;"></div>
+            </div>
+            <div class="modal-body">
+                <div id="modal-content-body">
+                    <!-- Content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Turkey Recipe Database
+        const turkeyRecipes = [
+            {
+                name: "Turkey Club Sandwich",
+                description: "Classic triple-decker with crispy bacon and fresh veggies",
+                time: "15 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 520,
+                protein: 35,
+                carbs: 38,
+                fat: 26,
+                icon: "🥪",
+                ingredients: [
+                    "8 oz sliced turkey breast",
+                    "6 strips bacon, cooked crispy",
+                    "3 slices whole wheat bread, toasted",
+                    "2 leaves butter lettuce",
+                    "2 tomato slices",
+                    "2 tbsp mayonnaise",
+                    "1 tbsp Dijon mustard",
+                    "2 slices avocado",
+                    "Salt and pepper to taste"
+                ],
+                instructions: [
+                    "Toast bread slices until golden brown",
+                    "Cook bacon until crispy and drain on paper towels",
+                    "Mix mayonnaise and Dijon mustard",
+                    "Spread mayo mixture on one side of each toast slice",
+                    "Layer first slice with lettuce and turkey",
+                    "Add second slice, then bacon, tomato, and avocado",
+                    "Top with third slice and secure with toothpicks",
+                    "Cut diagonally and serve immediately"
+                ]
+            },
+            {
+                name: "Italian Turkey Meatballs",
+                description: "Fusion lean turkey meatballs in classic marinara sauce",
+                time: "45 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 380,
+                protein: 32,
+                carbs: 18,
+                fat: 20,
+                icon: "🇮🇹",
+                ingredients: [
+                    "1.5 lbs ground turkey (93/7 lean)",
+                    "1/2 cup panko breadcrumbs",
+                    "1/4 cup parmesan cheese, grated",
+                    "1 egg, beaten",
+                    "3 cloves garlic, minced",
+                    "1/4 cup fresh parsley, chopped",
+                    "2 cups marinara sauce",
+                    "2 tbsp olive oil",
+                    "1 tsp Italian seasoning",
+                    "Salt and pepper to taste"
+                ],
+                instructions: [
+                    "Preheat oven to 400°F",
+                    "Mix turkey, breadcrumbs, parmesan, egg, garlic, and parsley",
+                    "Season with Italian seasoning, salt, and pepper",
+                    "Form into 20 meatballs using wet hands",
+                    "Heat olive oil in oven-safe skillet",
+                    "Brown meatballs on all sides, about 8 minutes total",
+                    "Add marinara sauce and transfer to oven",
+                    "Bake 15-20 minutes until cooked through (165°F internal temp)"
+                ]
+            },
+            {
+                name: "Turkey Burgers",
+                description: "Juicy lean turkey burgers with herb seasoning",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 420,
+                protein: 35,
+                carbs: 28,
+                fat: 18,
+                icon: "🍔",
+                ingredients: [
+                    "1.5 lbs ground turkey (85/15)",
+                    "1/4 cup breadcrumbs",
+                    "1 egg, beaten",
+                    "2 tbsp Worcestershire sauce",
+                    "1 tsp garlic powder",
+                    "1 tsp onion powder",
+                    "4 whole wheat burger buns",
+                    "4 slices cheese (optional)",
+                    "Lettuce, tomato, onion for topping",
+                    "Condiments of choice"
+                ],
+                instructions: [
+                    "Preheat grill or large skillet to medium-high heat",
+                    "Mix turkey, breadcrumbs, egg, Worcestershire, and seasonings",
+                    "Form into 4 patties, slightly larger than buns",
+                    "Create small indent in center of each patty",
+                    "Season both sides with salt and pepper",
+                    "Cook 5-6 minutes per side until 165°F internal temp",
+                    "Add cheese in last minute if using",
+                    "Serve on toasted buns with desired toppings"
+                ]
+            },
+            {
+                name: "Thanksgiving Roast Turkey",
+                description: "Traditional herb-roasted whole turkey with crispy skin",
+                time: "4 hours",
+                difficulty: 4,
+                rating: 5,
+                calories: 450,
+                protein: 52,
+                carbs: 2,
+                fat: 24,
+                icon: "🦃",
+                ingredients: [
+                    "12-14 lb whole turkey, thawed",
+                    "1/2 cup butter, softened",
+                    "2 tbsp fresh sage, chopped",
+                    "2 tbsp fresh thyme, chopped",
+                    "2 tbsp fresh rosemary, chopped",
+                    "1 lemon, quartered",
+                    "1 onion, quartered",
+                    "4 celery stalks, chopped",
+                    "2 cups chicken broth",
+                    "Salt and black pepper"
+                ],
+                instructions: [
+                    "Preheat oven to 325°F and remove turkey giblets",
+                    "Pat turkey completely dry and season inside and out with salt and pepper",
+                    "Mix softened butter with chopped herbs",
+                    "Loosen skin and spread herb butter under and over skin",
+                    "Stuff cavity with lemon and onion quarters",
+                    "Place on roasting rack with celery and broth in bottom",
+                    "Roast 15-20 minutes per pound until 165°F in thickest part",
+                    "Rest 20 minutes before carving"
+                ]
+            },
+            {
+                name: "Turkey Chili",
+                description: "Hearty and healthy ground turkey chili with beans",
+                time: "1 hour 15 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 320,
+                protein: 28,
+                carbs: 32,
+                fat: 12,
+                icon: "🌶️",
+                ingredients: [
+                    "2 lbs ground turkey (93/7 lean)",
+                    "2 cans kidney beans, drained",
+                    "1 can black beans, drained",
+                    "1 can diced tomatoes",
+                    "1 onion, diced",
+                    "3 cloves garlic, minced",
+                    "2 tbsp chili powder",
+                    "1 tbsp cumin",
+                    "1 tsp smoked paprika",
+                    "2 cups low-sodium chicken broth"
+                ],
+                instructions: [
+                    "Brown ground turkey in large pot, breaking up as it cooks",
+                    "Add onions and garlic, cook until softened",
+                    "Add spices and cook 1 minute until fragrant",
+                    "Add tomatoes, beans, and broth",
+                    "Bring to boil, then reduce heat and simmer",
+                    "Cook covered for 45 minutes, stirring occasionally",
+                    "Season with salt and pepper to taste",
+                    "Serve with Greek yogurt and green onions"
+                ]
+            },
+            {
+                name: "Turkish Kebabs",
+                description: "Fusion spiced turkey skewers with Middle Eastern flavors",
+                time: "35 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 380,
+                protein: 36,
+                carbs: 8,
+                fat: 22,
+                icon: "🇹🇷",
+                ingredients: [
+                    "2 lbs turkey breast, cubed",
+                    "2 tbsp olive oil",
+                    "2 tsp ground cumin",
+                    "2 tsp paprika",
+                    "1 tsp ground coriander",
+                    "1 tsp turmeric",
+                    "1/2 tsp cinnamon",
+                    "3 cloves garlic, minced",
+                    "1 red onion, chunked",
+                    "Bell peppers, chunked"
+                ],
+                instructions: [
+                    "Soak wooden skewers in water for 30 minutes",
+                    "Mix olive oil with all spices and garlic",
+                    "Marinate turkey cubes in spice mixture for 2 hours",
+                    "Thread turkey alternating with onions and peppers",
+                    "Preheat grill to medium-high heat",
+                    "Grill kebabs 12-15 minutes, turning every 3-4 minutes",
+                    "Cook until turkey reaches 165°F internal temperature",
+                    "Serve with tzatziki and warm pita bread"
+                ]
+            },
+            {
+                name: "Turkey Meatloaf",
+                description: "Lean and flavorful baked turkey meatloaf with glaze",
+                time: "1 hour 30 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 340,
+                protein: 30,
+                carbs: 22,
+                fat: 16,
+                icon: "🍞",
+                ingredients: [
+                    "2 lbs ground turkey (85/15)",
+                    "1 cup breadcrumbs",
+                    "2 eggs, beaten",
+                    "1/2 cup milk",
+                    "1 onion, finely diced",
+                    "2 cloves garlic, minced",
+                    "1/4 cup ketchup",
+                    "2 tbsp brown sugar",
+                    "1 tbsp Worcestershire sauce",
+                    "Salt, pepper, and herbs"
+                ],
+                instructions: [
+                    "Preheat oven to 350°F",
+                    "Sauté onions and garlic until softened, cool",
+                    "Mix turkey, breadcrumbs, eggs, milk, and sautéed vegetables",
+                    "Season with salt, pepper, and your favorite herbs",
+                    "Shape into loaf and place in baking dish",
+                    "Mix ketchup, brown sugar, and Worcestershire for glaze",
+                    "Bake 45 minutes, then brush with glaze",
+                    "Continue baking 15-20 minutes until 165°F internal temp"
+                ]
+            },
+            {
+                name: "Turkey Teriyaki",
+                description: "Fusion Japanese-style glazed turkey with vegetables",
+                time: "30 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 360,
+                protein: 34,
+                carbs: 28,
+                fat: 14,
+                icon: "🍱",
+                ingredients: [
+                    "2 lbs turkey tenderloin, sliced",
+                    "1/2 cup soy sauce",
+                    "1/4 cup mirin",
+                    "3 tbsp brown sugar",
+                    "2 tbsp rice vinegar",
+                    "1 tbsp cornstarch",
+                    "2 tbsp vegetable oil",
+                    "1 tbsp sesame seeds",
+                    "2 green onions, sliced",
+                    "Steamed broccoli and rice"
+                ],
+                instructions: [
+                    "Mix soy sauce, mirin, brown sugar, and rice vinegar",
+                    "Dissolve cornstarch in 2 tbsp water",
+                    "Heat oil in large skillet over medium-high heat",
+                    "Cook turkey slices 3-4 minutes per side until golden",
+                    "Remove turkey and keep warm",
+                    "Add teriyaki sauce to pan, bring to simmer",
+                    "Add cornstarch mixture, stir until thickened",
+                    "Return turkey to pan, coat with glaze, garnish with sesame seeds"
+                ]
+            },
+            {
+                name: "Turkey Reuben Sandwich",
+                description: "Fusion twist on classic with turkey, sauerkraut, and Swiss",
+                time: "20 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 480,
+                protein: 32,
+                carbs: 36,
+                fat: 24,
+                icon: "🥪",
+                ingredients: [
+                    "8 oz sliced turkey breast",
+                    "8 slices rye bread",
+                    "4 slices Swiss cheese",
+                    "1/2 cup sauerkraut, drained",
+                    "1/4 cup Thousand Island dressing",
+                    "2 tbsp Russian dressing",
+                    "4 tbsp butter",
+                    "Dill pickles for serving"
+                ],
+                instructions: [
+                    "Mix Thousand Island and Russian dressing",
+                    "Spread dressing mixture on one side of each bread slice",
+                    "Layer turkey, Swiss cheese, and sauerkraut on 4 slices",
+                    "Top with remaining bread slices, dressing side down",
+                    "Butter outside of sandwiches",
+                    "Cook in skillet over medium heat 3-4 minutes per side",
+                    "Press down gently while cooking until golden and cheese melts",
+                    "Serve hot with dill pickles"
+                ]
+            },
+            {
+                name: "Turkey Curry",
+                description: "Fusion Indian-spiced turkey in creamy tomato curry sauce",
+                time: "50 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 420,
+                protein: 38,
+                carbs: 20,
+                fat: 22,
+                icon: "🇮🇳",
+                ingredients: [
+                    "2 lbs turkey breast, cubed",
+                    "1 can coconut milk",
+                    "1 can diced tomatoes",
+                    "1 onion, diced",
+                    "4 cloves garlic, minced",
+                    "2 tbsp fresh ginger, grated",
+                    "2 tbsp curry powder",
+                    "1 tsp garam masala",
+                    "1 tsp turmeric",
+                    "2 tbsp vegetable oil",
+                    "Fresh cilantro and basmati rice"
+                ],
+                instructions: [
+                    "Heat oil in large pot over medium-high heat",
+                    "Brown turkey cubes on all sides, remove and set aside",
+                    "Sauté onions until golden, add garlic and ginger",
+                    "Add spices and cook 1 minute until fragrant",
+                    "Add tomatoes and coconut milk, bring to simmer",
+                    "Return turkey to pot and reduce heat to low",
+                    "Simmer covered 25-30 minutes until turkey is tender",
+                    "Garnish with fresh cilantro, serve over basmati rice"
+                ]
+            }
+        ];
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function goBack() {
+            window.location.href = 'meal-ideas.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function generateRatingStars(rating) {
+            const filledStars = '★'.repeat(rating);
+            const emptyStars = '☆'.repeat(5 - rating);
+            return filledStars + emptyStars;
+        }
+
+        function displayMeals() {
+            const container = document.getElementById('meals-container');
+            let html = '';
+            
+            turkeyRecipes.forEach((meal, index) => {
+                html += `
+                    <div class="meal-card" onclick="openRecipeModal(${index})">
+                        <div class="meal-image">
+                            <div class="difficulty-badge">
+                                Difficulty: ${generateDifficultyStars(meal.difficulty)}
+                            </div>
+                            ${meal.icon}
+                        </div>
+                        <div class="meal-content">
+                            <div class="meal-title">${meal.name}</div>
+                            <div class="meal-description">${meal.description}</div>
+                            <div class="meal-stats">
+                                <div class="meal-time">⏱️ ${meal.time}</div>
+                                <div class="rating-stars">${generateRatingStars(meal.rating)}</div>
+                            </div>
+                            <div class="meal-nutrition">
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.calories}</div>
+                                    <div class="nutrition-label">Cal</div>
+                                </div>
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.protein}g</div>
+                                    <div class="nutrition-label">Protein</div>
+                                </div>
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.carbs}g</div>
+                                    <div class="nutrition-label">Carbs</div>
+                                </div>
+                                <div class="nutrition-item">
+                                    <div class="nutrition-value">${meal.fat}g</div>
+                                    <div class="nutrition-label">Fat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function openRecipeModal(index) {
+            const meal = turkeyRecipes[index];
+            const modal = document.getElementById('recipe-modal');
+            
+            document.getElementById('modal-title').textContent = meal.name;
+            document.getElementById('modal-subtitle').innerHTML = `
+                ${meal.icon} ${meal.description} • ⏱️ ${meal.time} • Difficulty: ${generateDifficultyStars(meal.difficulty)}
+            `;
+            
+            let ingredientsHtml = '<h3 style="color: var(--primary); margin-bottom: 15px;">🛒 Shopping List</h3><div class="ingredient-list">';
+            meal.ingredients.forEach(ingredient => {
+                ingredientsHtml += `
+                    <div class="ingredient-item">
+                        <input type="checkbox" class="ingredient-checkbox">
+                        <span>${ingredient}</span>
+                    </div>
+                `;
+            });
+            ingredientsHtml += '</div>';
+            
+            let instructionsHtml = '<h3 style="color: var(--primary); margin: 25px 0 15px 0;">👨‍🍳 Instructions</h3><div class="instruction-list">';
+            meal.instructions.forEach((instruction, i) => {
+                instructionsHtml += `
+                    <div class="instruction-item">
+                        <strong>Step ${i + 1}:</strong> ${instruction}
+                    </div>
+                `;
+            });
+            instructionsHtml += '</div>';
+            
+            const nutritionHtml = `
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9ff; border-radius: 10px;">
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.calories}</div>
+                        <div style="font-size: 12px; color: #666;">Calories</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.protein}g</div>
+                        <div style="font-size: 12px; color: #666;">Protein</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.carbs}g</div>
+                        <div style="font-size: 12px; color: #666;">Carbs</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary);">${meal.fat}g</div>
+                        <div style="font-size: 12px; color: #666;">Fat</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-content-body').innerHTML = 
+                nutritionHtml + ingredientsHtml + instructionsHtml + 
+                `<button class="log-recipe-btn" onclick="logRecipe(${index})">✅ Log This Recipe</button>`;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('recipe-modal').style.display = 'none';
+        }
+
+        function logRecipe(index) {
+            const meal = turkeyRecipes[index];
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Get existing logged meals
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = {
+                    meals: [],
+                    totalCalories: 0
+                };
+            }
+            
+            // Add this recipe
+            loggedMeals[today].meals.push({
+                name: meal.name,
+                calories: meal.calories,
+                protein: meal.protein,
+                carbs: meal.carbs,
+                fat: meal.fat,
+                time: new Date().toISOString(),
+                fromRecipe: true,
+                category: 'turkey'
+            });
+            
+            loggedMeals[today].totalCalories += meal.calories;
+            
+            // Save to localStorage
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Show success message
+            alert(`✅ ${meal.name} logged! (+${meal.calories} calories)`);
+            closeModal();
+        }
+
+        // Click outside modal to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('recipe-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            displayMeals();
+        });
+    </script>
+</body>
+</html>

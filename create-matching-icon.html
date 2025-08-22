@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - Matching App Icons</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #1a1a1a; color: white; font-family: Arial;">
+    <h2>Well Fit - Icons Matching App Colors</h2>
+    <p style="color: #888;">Using app colors: #667eea to #764ba2 gradient with 🔥 fire emoji</p>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <!-- Option 1: Fire Center -->
+        <div>
+            <h3>Option 1: Fire Center</h3>
+            <canvas id="canvas1" width="512" height="512" style="border: 1px solid #444; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'wellfit-fire-center.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 2: Fire & Text -->
+        <div>
+            <h3>Option 2: Fire & Text</h3>
+            <canvas id="canvas2" width="512" height="512" style="border: 1px solid #444; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'wellfit-fire-text.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 3: Modern Badge -->
+        <div>
+            <h3>Option 3: Modern Badge</h3>
+            <canvas id="canvas3" width="512" height="512" style="border: 1px solid #444; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'wellfit-badge.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 4: Sleek Minimal -->
+        <div>
+            <h3>Option 4: Sleek Minimal</h3>
+            <canvas id="canvas4" width="512" height="512" style="border: 1px solid #444; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas4', 'wellfit-sleek.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+    </div>
+    
+    <script>
+        // Helper function to create rounded rect
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        // Option 1: Fire Center - Big fire emoji in center
+        const canvas1 = document.getElementById('canvas1');
+        const ctx1 = canvas1.getContext('2d');
+        
+        // Gradient background with rounded corners
+        const gradient1 = ctx1.createLinearGradient(0, 0, 512, 512);
+        gradient1.addColorStop(0, '#667eea');
+        gradient1.addColorStop(1, '#764ba2');
+        
+        roundedRect(ctx1, 0, 0, 512, 512, 90);
+        ctx1.fillStyle = gradient1;
+        ctx1.fill();
+        
+        // White circle background for fire
+        ctx1.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx1.beginPath();
+        ctx1.arc(256, 256, 140, 0, Math.PI * 2);
+        ctx1.fill();
+        
+        // Fire emoji
+        ctx1.font = '220px Arial';
+        ctx1.textAlign = 'center';
+        ctx1.textBaseline = 'middle';
+        ctx1.fillText('🔥', 256, 256);
+        
+        // Option 2: Fire & Text
+        const canvas2 = document.getElementById('canvas2');
+        const ctx2 = canvas2.getContext('2d');
+        
+        // Gradient background
+        const gradient2 = ctx2.createLinearGradient(0, 0, 512, 512);
+        gradient2.addColorStop(0, '#667eea');
+        gradient2.addColorStop(1, '#764ba2');
+        
+        roundedRect(ctx2, 0, 0, 512, 512, 90);
+        ctx2.fillStyle = gradient2;
+        ctx2.fill();
+        
+        // Fire emoji at top
+        ctx2.font = '150px Arial';
+        ctx2.textAlign = 'center';
+        ctx2.textBaseline = 'middle';
+        ctx2.fillText('🔥', 256, 200);
+        
+        // Text below
+        ctx2.fillStyle = 'white';
+        ctx2.font = 'bold 56px -apple-system, Arial';
+        ctx2.fillText('WELL FIT', 256, 340);
+        
+        // Underline
+        ctx2.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx2.fillRect(106, 370, 300, 4);
+        
+        // Option 3: Modern Badge
+        const canvas3 = document.getElementById('canvas3');
+        const ctx3 = canvas3.getContext('2d');
+        
+        // Gradient background
+        const gradient3 = ctx3.createLinearGradient(0, 0, 512, 512);
+        gradient3.addColorStop(0, '#667eea');
+        gradient3.addColorStop(1, '#764ba2');
+        
+        roundedRect(ctx3, 0, 0, 512, 512, 90);
+        ctx3.fillStyle = gradient3;
+        ctx3.fill();
+        
+        // White rounded rectangle badge
+        ctx3.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        roundedRect(ctx3, 96, 146, 320, 220, 40);
+        ctx3.fill();
+        
+        // Fire emoji in badge
+        ctx3.font = '100px Arial';
+        ctx3.textAlign = 'center';
+        ctx3.textBaseline = 'middle';
+        ctx3.fillText('🔥', 180, 256);
+        
+        // WF text in badge
+        ctx3.fillStyle = '#667eea';
+        ctx3.font = 'bold 90px -apple-system, Arial';
+        ctx3.fillText('WF', 320, 256);
+        
+        // Option 4: Sleek Minimal
+        const canvas4 = document.getElementById('canvas4');
+        const ctx4 = canvas4.getContext('2d');
+        
+        // Gradient background
+        const gradient4 = ctx4.createLinearGradient(0, 0, 512, 512);
+        gradient4.addColorStop(0, '#667eea');
+        gradient4.addColorStop(1, '#764ba2');
+        
+        roundedRect(ctx4, 0, 0, 512, 512, 90);
+        ctx4.fillStyle = gradient4;
+        ctx4.fill();
+        
+        // Create a sleek W shape with fire
+        ctx4.strokeStyle = 'white';
+        ctx4.lineWidth = 28;
+        ctx4.lineCap = 'round';
+        ctx4.lineJoin = 'round';
+        
+        // Draw W shape
+        ctx4.beginPath();
+        ctx4.moveTo(120, 180);
+        ctx4.lineTo(170, 340);
+        ctx4.lineTo(256, 220);
+        ctx4.lineTo(342, 340);
+        ctx4.lineTo(392, 180);
+        ctx4.stroke();
+        
+        // Small fire at top of W
+        ctx4.font = '80px Arial';
+        ctx4.textAlign = 'center';
+        ctx4.fillText('🔥', 256, 160);
+        
+        // Small text at bottom
+        ctx4.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx4.font = '28px -apple-system, Arial';
+        ctx4.fillText('FITNESS & NUTRITION', 256, 420);
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</body>
+</html>

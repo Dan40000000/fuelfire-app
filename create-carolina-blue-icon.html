@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - Carolina Blue Icons</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #13294B; color: white; font-family: -apple-system, Arial;">
+    <h2>Well Fit - Carolina Blue Icons (Actual App Colors!)</h2>
+    <p style="color: #7BAFD4;">Using real app colors: #4B9CD3 (Carolina Blue) to #13294B (Navy)</p>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <!-- Option 1: Fire Center Clean -->
+        <div>
+            <h3>Option 1: Fire Center (Clean)</h3>
+            <canvas id="canvas1" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'wellfit-icon.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 2: Fire Badge -->
+        <div>
+            <h3>Option 2: Fire Badge</h3>
+            <canvas id="canvas2" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'wellfit-badge.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+        
+        <!-- Option 3: Modern W -->
+        <div>
+            <h3>Option 3: Modern W</h3>
+            <canvas id="canvas3" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'wellfit-w.png')" style="margin-top: 10px; padding: 10px 20px;">Download</button>
+        </div>
+    </div>
+    
+    <script>
+        // Helper function for rounded rectangles
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        // Option 1: Fire Center - Clean and Simple
+        const canvas1 = document.getElementById('canvas1');
+        const ctx1 = canvas1.getContext('2d');
+        
+        // Carolina Blue to Navy gradient background
+        const gradient1 = ctx1.createLinearGradient(0, 0, 512, 512);
+        gradient1.addColorStop(0, '#4B9CD3');
+        gradient1.addColorStop(1, '#13294B');
+        
+        roundedRect(ctx1, 0, 0, 512, 512, 90);
+        ctx1.fillStyle = gradient1;
+        ctx1.fill();
+        
+        // Subtle white glow behind fire
+        const glowGradient = ctx1.createRadialGradient(256, 256, 0, 256, 256, 150);
+        glowGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        glowGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx1.fillStyle = glowGradient;
+        ctx1.beginPath();
+        ctx1.arc(256, 256, 150, 0, Math.PI * 2);
+        ctx1.fill();
+        
+        // Fire emoji - large and centered
+        ctx1.font = '240px Arial';
+        ctx1.textAlign = 'center';
+        ctx1.textBaseline = 'middle';
+        ctx1.fillText('🔥', 256, 256);
+        
+        // Option 2: Fire with Badge Design
+        const canvas2 = document.getElementById('canvas2');
+        const ctx2 = canvas2.getContext('2d');
+        
+        // Gradient background
+        const gradient2 = ctx2.createLinearGradient(0, 0, 512, 512);
+        gradient2.addColorStop(0, '#4B9CD3');
+        gradient2.addColorStop(1, '#13294B');
+        
+        roundedRect(ctx2, 0, 0, 512, 512, 90);
+        ctx2.fillStyle = gradient2;
+        ctx2.fill();
+        
+        // White circle badge
+        ctx2.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx2.beginPath();
+        ctx2.arc(256, 200, 100, 0, Math.PI * 2);
+        ctx2.fill();
+        
+        // Fire in white badge
+        ctx2.font = '120px Arial';
+        ctx2.textAlign = 'center';
+        ctx2.textBaseline = 'middle';
+        ctx2.fillText('🔥', 256, 200);
+        
+        // Text below
+        ctx2.fillStyle = 'white';
+        ctx2.font = 'bold 52px -apple-system, Arial';
+        ctx2.fillText('WELL FIT', 256, 360);
+        
+        // Tagline
+        ctx2.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx2.font = '20px -apple-system, Arial';
+        ctx2.fillText('AI FITNESS COACH', 256, 410);
+        
+        // Option 3: Modern W with Fire Accent
+        const canvas3 = document.getElementById('canvas3');
+        const ctx3 = canvas3.getContext('2d');
+        
+        // Gradient background
+        const gradient3 = ctx3.createLinearGradient(0, 0, 512, 512);
+        gradient3.addColorStop(0, '#4B9CD3');
+        gradient3.addColorStop(1, '#13294B');
+        
+        roundedRect(ctx3, 0, 0, 512, 512, 90);
+        ctx3.fillStyle = gradient3;
+        ctx3.fill();
+        
+        // Draw bold W
+        ctx3.strokeStyle = 'white';
+        ctx3.lineWidth = 40;
+        ctx3.lineCap = 'round';
+        ctx3.lineJoin = 'round';
+        
+        ctx3.beginPath();
+        // W shape
+        ctx3.moveTo(100, 180);
+        ctx3.lineTo(160, 360);
+        ctx3.lineTo(256, 240);
+        ctx3.lineTo(352, 360);
+        ctx3.lineTo(412, 180);
+        ctx3.stroke();
+        
+        // Fire accent at top center
+        ctx3.font = '90px Arial';
+        ctx3.textAlign = 'center';
+        ctx3.fillText('🔥', 256, 140);
+        
+        // Small text
+        ctx3.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx3.font = 'bold 24px -apple-system, Arial';
+        ctx3.fillText('FITNESS & NUTRITION', 256, 430);
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #4B9CD3, #13294B);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.4);
+        }
+    </style>
+</body>
+</html>

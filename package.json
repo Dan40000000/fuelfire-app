@@ -6,12 +6,19 @@
   "scripts": {
     "dev": "npx serve . -p 3000",
     "build": "echo 'Static app with serverless API - ready for deployment'",
-    "start": "npx serve . -p 3000",  
-    "deploy": "vercel --prod"
+    "start": "npx serve . -p 3000",
+    "deploy": "vercel --prod",
+    "cap:sync": "npx cap sync",
+    "cap:copy": "npx cap copy", 
+    "cap:update": "npx cap update",
+    "android:open": "npx cap open android",
+    "android:run": "npx cap run android",
+    "android:build": "cd android && ./gradlew assembleRelease",
+    "prepare:android": "npm run cap:sync && npm run cap:copy"
   },
   "keywords": [
     "fitness",
-    "nutrition", 
+    "nutrition",
     "ai",
     "meal-planning",
     "claude-ai",
@@ -35,5 +42,10 @@
   "bugs": {
     "url": "https://github.com/Dan40000000/fuelfire-app/issues"
   },
-  "homepage": "https://github.com/Dan40000000/fuelfire-app#readme"
+  "homepage": "https://github.com/Dan40000000/fuelfire-app#readme",
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  }
 }

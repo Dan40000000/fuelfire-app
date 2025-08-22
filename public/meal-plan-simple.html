@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI Meal Plan - Well Fit</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .meal-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+        
+        .meal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .meal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .meal-calories {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .meal-description {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .log-meal-btn {
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            float: right;
+        }
+        
+        .log-meal-btn:hover {
+            background: rgba(40, 167, 69, 1);
+            transform: scale(1.05);
+        }
+        
+        .log-meal-btn:disabled {
+            background: rgba(108, 117, 125, 0.8);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .day-section {
+            margin-bottom: 30px;
+        }
+        
+        .day-header {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .day-title {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+        
+        .day-summary {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .shopping-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+        }
+        
+        .shopping-title {
+            color: #4CAF50;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .shopping-list {
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .shopping-item:last-child {
+            border-bottom: none;
+        }
+        
+        .shopping-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            margin-right: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .shopping-checkbox:hover {
+            background: rgba(76, 175, 80, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .shopping-checkbox.checked {
+            background: #4CAF50;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .shopping-text {
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .shopping-text.checked {
+            text-decoration: line-through;
+            color: #888;
+            opacity: 0.7;
+        }
+        
+        .shopping-progress {
+            background: rgba(255,255,255,0.8);
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .summary-section {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffeaa7 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 4px solid #FF9800;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
+        }
+        
+        .summary-title {
+            color: #F57C00;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .macro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .macro-card {
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .macro-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .macro-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .breakfast-card { background: linear-gradient(135deg, #FFD93D, #FF9800); }
+        .lunch-card { background: linear-gradient(135deg, #4ECDC4, #44A08D); }
+        .dinner-card { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .snack-card { background: linear-gradient(135deg, #FF6B6B, #FF5252); }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">Your Meal Plan</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div class="plan-header">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2 style="color: var(--primary); margin: 0 0 10px 0; font-size: 24px;">🎯 AI Meal Plan</h2>
+                            <div class="plan-metadata" id="plan-metadata" style="background: #f8f9ff; padding: 10px; border-radius: 10px; font-size: 14px; color: #666;">
+                                <!-- Metadata will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="meal-plan-content">
+                        <!-- Meal plan content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 Well Fit</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item active" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'meal-plans.html';
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+        
+        function enhanceMealPlanWithButtons(content) {
+            // Extract meals and add log buttons
+            let enhanced = content;
+            
+            // Pattern to find meals with calories
+            const mealPattern = /(\*\*(?:🍳 Breakfast|🥗 Lunch|🍽️ Dinner|🍎 Snacks?):\*\*[\s\S]*?Calories:\s*(\d+))/g;
+            
+            enhanced = enhanced.replace(mealPattern, (match, mealContent, calories) => {
+                // Extract meal type
+                const mealTypeMatch = match.match(/\*\*(.*?):\*\*/);
+                const mealType = mealTypeMatch ? mealTypeMatch[1] : 'Meal';
+                
+                // Extract day number
+                const dayMatch = content.substring(0, content.indexOf(match)).match(/Day (\d+)/g);
+                const day = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                
+                // Add log button
+                const buttonId = `log-${day}-${mealType.replace(/[^a-zA-Z]/g, '')}`;
+                const logButton = `<button onclick="logMeal('${day}', '${mealType}', ${calories})" id="${buttonId}" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 15px; font-size: 12px; margin-left: 10px; cursor: pointer;">✓ Log This Meal</button>`;
+                
+                return match + ' ' + logButton;
+            });
+            
+            return enhanced;
+        }
+        
+        function logMeal(day, mealType, calories, mealId) {
+            // Get today's date
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Get existing logged meals
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            // Initialize today's log if it doesn't exist
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = {
+                    meals: [],
+                    totalCalories: 0
+                };
+            }
+            
+            // Add this meal
+            loggedMeals[today].meals.push({
+                day: day,
+                type: mealType,
+                calories: calories,
+                time: new Date().toISOString(),
+                fromMealPlan: true
+            });
+            
+            // Update total
+            loggedMeals[today].totalCalories += calories;
+            
+            // Save to localStorage
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Update button to show logged
+            const button = event.target;
+            button.style.background = 'rgba(108, 117, 125, 0.8)';
+            button.innerHTML = '✅ Logged!';
+            button.disabled = true;
+            
+            // Show success message
+            showToast(`✅ ${mealType} logged! (+${calories} calories)`);
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-size: 14px;
+                z-index: 9999;
+                animation: slideUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function displayMealPlan(mealPlan, metadata) {
+            console.log('📋 Displaying meal plan:', {
+                mealPlanLength: mealPlan ? mealPlan.length : 0,
+                mealPlanType: typeof mealPlan,
+                metadataKeys: metadata ? Object.keys(metadata) : []
+            });
+            
+            // Set metadata
+            document.getElementById('plan-metadata').innerHTML = `
+                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
+                <strong>Goal:</strong> ${metadata.goal} | 
+                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
+            `;
+            
+            if (!mealPlan || mealPlan.length === 0) {
+                document.getElementById('meal-plan-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>⚠️ Empty Meal Plan</h3>
+                        <p>The meal plan appears to be empty. Please try generating a new one.</p>
+                        <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Start New Quiz</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Parse the meal plan content into structured data
+            const structuredContent = parseMealPlanContent(mealPlan);
+            
+            // Generate beautiful HTML using the structured data
+            const content = generateBeautifulMealPlanHTML(structuredContent);
+            
+            document.getElementById('meal-plan-content').innerHTML = content;
+        }
+        
+        function parseMealPlanContent(content) {
+            const lines = content.split('\n');
+            const structured = {
+                shopping: '',
+                shoppingWeek1: '',
+                shoppingWeek2: '',
+                days: [],
+                summaries: []
+            };
+            
+            let currentDay = null;
+            let currentSection = '';
+            let inShopping = false;
+            let currentShoppingWeek = '';
+            
+            for (let line of lines) {
+                const trimmed = line.trim();
+                
+                // Shopping list section
+                if (trimmed.includes('Shopping List') || trimmed.includes('SHOPPING LIST')) {
+                    inShopping = true;
+                    currentSection = 'shopping';
+                    continue;
+                }
+                
+                // Week-specific shopping lists
+                if (trimmed.includes('Week 1') && inShopping) {
+                    currentShoppingWeek = 'week1';
+                    continue;
+                }
+                if (trimmed.includes('Week 2') && inShopping) {
+                    currentShoppingWeek = 'week2';
+                    continue;
+                }
+                
+                // Day headers
+                const dayMatch = trimmed.match(/^###?\s*(Day \d+)/i);
+                if (dayMatch) {
+                    if (currentDay) structured.days.push(currentDay);
+                    currentDay = {
+                        title: dayMatch[1],
+                        meals: [],
+                        total: ''
+                    };
+                    inShopping = false;
+                    currentSection = 'day';
+                    continue;
+                }
+                
+                // Week summaries
+                const weekMatch = trimmed.match(/\*\*(Week \d+ Summary:)\*\*/);
+                if (weekMatch) {
+                    inShopping = false;
+                    currentSection = 'summary';
+                    continue;
+                }
+                
+                // Meal headers - expanded pattern matching
+                const mealMatch = trimmed.match(/\*\*.*?(Breakfast|Lunch|Dinner|Snacks?).*?\*\*/i);
+                if (mealMatch && currentDay) {
+                    const meal = {
+                        type: trimmed.replace(/\*\*/g, ''), // Keep full text including emojis
+                        content: '',
+                        calories: 0
+                    };
+                    currentDay.meals.push(meal);
+                    continue;
+                }
+                
+                // Day totals
+                const totalMatch = trimmed.match(/\*\*(Day Total:)\*\* (.*)/);
+                if (totalMatch && currentDay) {
+                    currentDay.total = totalMatch[2];
+                    continue;
+                }
+                
+                // Add content to appropriate section
+                if (inShopping && trimmed) {
+                    if (currentShoppingWeek === 'week1') {
+                        structured.shoppingWeek1 += line + '\n';
+                    } else if (currentShoppingWeek === 'week2') {
+                        structured.shoppingWeek2 += line + '\n';
+                    } else {
+                        // If no specific week, try to auto-detect or add to general
+                        structured.shopping += line + '\n';
+                    }
+                } else if (currentDay && currentDay.meals.length > 0 && trimmed) {
+                    const currentMeal = currentDay.meals[currentDay.meals.length - 1];
+                    
+                    // Skip if this is another meal header
+                    if (!trimmed.match(/\*\*.*?(Breakfast|Lunch|Dinner|Snacks?).*?\*\*/i)) {
+                        currentMeal.content += line + '\n';
+                        
+                        // Extract calories
+                        const calMatch = line.match(/Calories:\s*(\d+)/);
+                        if (calMatch) {
+                            currentMeal.calories = parseInt(calMatch[1]);
+                        }
+                    }
+                }
+            }
+            
+            if (currentDay) structured.days.push(currentDay);
+            
+            // If no week-specific shopping lists were found, split the general list
+            if (!structured.shoppingWeek1 && !structured.shoppingWeek2 && structured.shopping) {
+                const splitShopping = smartSplitShoppingList(structured.shopping, structured.days);
+                structured.shoppingWeek1 = splitShopping.week1;
+                structured.shoppingWeek2 = splitShopping.week2;
+            }
+            
+            return structured;
+        }
+        
+        function generateBeautifulMealPlanHTML(structured) {
+            let html = '';
+            
+            // Shopping list sections
+            if (structured.shoppingWeek1 || structured.shoppingWeek2 || structured.shopping) {
+                if (structured.shoppingWeek1) {
+                    const week1Items = parseShoppingList(structured.shoppingWeek1);
+                    const week1HTML = generateInteractiveShoppingList(week1Items, 'week1');
+                    const checkableCount1 = week1Items.filter(item => !item.isHeader).length;
+                    
+                    html += `
+                        <div class="shopping-section">
+                            <h2 class="shopping-title">🛒 Week 1 Shopping List</h2>
+                            <div class="shopping-progress" id="shopping-progress-week1">0 of ${checkableCount1} items checked</div>
+                            <div class="shopping-list" id="shopping-list-week1">${week1HTML}</div>
+                        </div>
+                    `;
+                }
+                
+                if (structured.shoppingWeek2) {
+                    const week2Items = parseShoppingList(structured.shoppingWeek2);
+                    const week2HTML = generateInteractiveShoppingList(week2Items, 'week2');
+                    const checkableCount2 = week2Items.filter(item => !item.isHeader).length;
+                    
+                    html += `
+                        <div class="shopping-section" style="margin-top: 30px;">
+                            <h2 class="shopping-title">🛒 Week 2 Shopping List</h2>
+                            <div class="shopping-progress" id="shopping-progress-week2">0 of ${checkableCount2} items checked</div>
+                            <div class="shopping-list" id="shopping-list-week2">${week2HTML}</div>
+                        </div>
+                    `;
+                }
+                
+                // Fallback for single shopping list
+                if (!structured.shoppingWeek1 && !structured.shoppingWeek2 && structured.shopping) {
+                    const shoppingItems = parseShoppingList(structured.shopping);
+                    const shoppingHTML = generateInteractiveShoppingList(shoppingItems, 'general');
+                    const checkableCount = shoppingItems.filter(item => !item.isHeader).length;
+                    
+                    html += `
+                        <div class="shopping-section">
+                            <h2 class="shopping-title">🛒 Shopping List</h2>
+                            <div class="shopping-progress" id="shopping-progress-general">0 of ${checkableCount} items checked</div>
+                            <div class="shopping-list" id="shopping-list-general">${shoppingHTML}</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Days sections
+            structured.days.forEach(day => {
+                html += `<div class="day-section">`;
+                html += `
+                    <div class="day-header">
+                        <h3 class="day-title">📅 ${day.title}</h3>
+                        <p class="day-summary">Complete daily meal plan with balanced nutrition</p>
+                    </div>
+                `;
+                
+                // Meals
+                day.meals.forEach((meal, mealIndex) => {
+                    const mealClass = getMealCardClass(meal.type);
+                    const mealId = `${day.title.replace(' ', '')}-${meal.type.replace(/[^\w]/g, '')}-${mealIndex}`;
+                    
+                    html += `
+                        <div class="meal-card ${mealClass}">
+                            <div class="meal-header">
+                                <h4 class="meal-title">${meal.type}</h4>
+                                ${meal.calories > 0 ? `<div class="meal-calories">${meal.calories} cal</div>` : ''}
+                            </div>
+                            <div class="meal-description">${meal.content.replace(/\n/g, '<br>')}</div>
+                            ${meal.calories > 0 ? `<button class="log-meal-btn" onclick="logMeal('${day.title}', '${meal.type}', ${meal.calories}, '${mealId}')">✓ Log Meal</button>` : ''}
+                            <div style="clear: both;"></div>
+                        </div>
+                    `;
+                });
+                
+                // Day total
+                if (day.total) {
+                    html += `
+                        <div class="summary-section">
+                            <h3 class="summary-title">📊 Day Total</h3>
+                            <div>${day.total}</div>
+                            ${generateMacroCards(day.total)}
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`;
+            });
+            
+            return html;
+        }
+        
+        function getMealCardClass(mealType) {
+            if (mealType.includes('Breakfast')) return 'breakfast-card';
+            if (mealType.includes('Lunch')) return 'lunch-card';
+            if (mealType.includes('Dinner')) return 'dinner-card';
+            if (mealType.includes('Snack')) return 'snack-card';
+            return '';
+        }
+        
+        function generateMacroCards(totalText) {
+            const calorieMatch = totalText.match(/(\d+)\s*calories/i);
+            const proteinMatch = totalText.match(/P:\s*(\d+)g/i);
+            const carbMatch = totalText.match(/C:\s*(\d+)g/i);
+            const fatMatch = totalText.match(/F:\s*(\d+)g/i);
+            
+            if (calorieMatch || proteinMatch || carbMatch || fatMatch) {
+                return `
+                    <div class="macro-grid">
+                        ${calorieMatch ? `<div class="macro-card"><div class="macro-value">${calorieMatch[1]}</div><div class="macro-label">Calories</div></div>` : ''}
+                        ${proteinMatch ? `<div class="macro-card"><div class="macro-value">${proteinMatch[1]}g</div><div class="macro-label">Protein</div></div>` : ''}
+                        ${carbMatch ? `<div class="macro-card"><div class="macro-value">${carbMatch[1]}g</div><div class="macro-label">Carbs</div></div>` : ''}
+                        ${fatMatch ? `<div class="macro-card"><div class="macro-value">${fatMatch[1]}g</div><div class="macro-label">Fat</div></div>` : ''}
+                    </div>
+                `;
+            }
+            return '';
+        }
+        
+        function parseShoppingList(shoppingText) {
+            const lines = shoppingText.split('\n').filter(line => line.trim());
+            const items = [];
+            
+            for (let line of lines) {
+                const trimmed = line.trim();
+                if (trimmed && !trimmed.startsWith('#') && !trimmed.toLowerCase().includes('shopping list')) {
+                    // Check if this is a section header (like "Fruits:", "Vegetables:", etc.)
+                    const isHeader = trimmed.endsWith(':') || trimmed.match(/^\*\*.*\*\*$/);
+                    
+                    if (isHeader) {
+                        // This is a section header - add as title, not checkable item
+                        items.push({
+                            text: trimmed.replace(/[\*:]/g, '').trim(),
+                            isHeader: true
+                        });
+                    } else {
+                        // Remove any existing bullet points or dashes
+                        let cleanItem = trimmed.replace(/^[-•*]\s*/, '');
+                        if (cleanItem) {
+                            items.push({
+                                text: cleanItem,
+                                isHeader: false
+                            });
+                        }
+                    }
+                }
+            }
+            
+            return items;
+        }
+        
+        function generateInteractiveShoppingList(items, weekId) {
+            return items.map((item, index) => {
+                if (item.isHeader) {
+                    // Generate section header without checkbox
+                    return `
+                        <div class="shopping-header" style="margin-top: 20px; margin-bottom: 10px;">
+                            <h4 style="color: #4CAF50; font-weight: bold; font-size: 16px; margin: 0;">${item.text}</h4>
+                        </div>
+                    `;
+                } else {
+                    // Generate regular item with checkbox
+                    return `
+                        <div class="shopping-item" id="shopping-item-${weekId}-${index}">
+                            <div class="shopping-checkbox" onclick="toggleShoppingItem('${weekId}', ${index})" id="checkbox-${weekId}-${index}">
+                            </div>
+                            <div class="shopping-text" id="text-${weekId}-${index}">${item.text}</div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        function toggleShoppingItem(weekId, index) {
+            const checkbox = document.getElementById(`checkbox-${weekId}-${index}`);
+            const text = document.getElementById(`text-${weekId}-${index}`);
+            const isChecked = checkbox.classList.contains('checked');
+            
+            if (isChecked) {
+                // Uncheck
+                checkbox.classList.remove('checked');
+                checkbox.innerHTML = '';
+                text.classList.remove('checked');
+            } else {
+                // Check
+                checkbox.classList.add('checked');
+                checkbox.innerHTML = '✓';
+                text.classList.add('checked');
+            }
+            
+            // Update progress for this specific week
+            updateShoppingProgress(weekId);
+        }
+        
+        function updateShoppingProgress(weekId) {
+            const checkboxes = document.querySelectorAll(`#shopping-list-${weekId} .shopping-checkbox`);
+            const checkedBoxes = document.querySelectorAll(`#shopping-list-${weekId} .shopping-checkbox.checked`);
+            const progress = document.getElementById(`shopping-progress-${weekId}`);
+            
+            if (progress && checkboxes.length > 0) {
+                const checkedCount = checkedBoxes.length;
+                const totalCount = checkboxes.length;
+                const percentage = Math.round((checkedCount / totalCount) * 100);
+                
+                progress.innerHTML = `${checkedCount} of ${totalCount} items checked (${percentage}%)`;
+                
+                if (checkedCount === totalCount) {
+                    const weekName = weekId === 'week1' ? 'Week 1' : weekId === 'week2' ? 'Week 2' : 'All';
+                    progress.innerHTML = `🎉 ${weekName} shopping complete! All ${totalCount} items checked`;
+                    progress.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                    progress.style.color = 'white';
+                } else {
+                    progress.style.background = 'rgba(255,255,255,0.8)';
+                    progress.style.color = '#4CAF50';
+                }
+            }
+        }
+        
+        function smartSplitShoppingList(shoppingText, days) {
+            const items = parseShoppingList(shoppingText);
+            const midPoint = Math.ceil(items.length / 2);
+            
+            const week1Items = items.slice(0, midPoint);
+            const week2Items = items.slice(midPoint);
+            
+            return {
+                week1: week1Items.join('\n'),
+                week2: week2Items.join('\n')
+            };
+        }
+        
+        // Check if meal plan data was passed
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const planId = urlParams.get('planId');
+            
+            console.log('🔍 Looking for plan ID:', planId);
+            
+            if (planId) {
+                try {
+                    const savedPlans = localStorage.getItem('fuelfire_meal_plans');
+                    const mealPlans = savedPlans ? JSON.parse(savedPlans) : [];
+                    const plan = mealPlans.find(p => p.id === planId);
+                    
+                    if (plan) {
+                        console.log('✅ Found meal plan in localStorage');
+                        console.log('🔍 MEAL PLAN DATA:', plan.mealPlan);
+                        displayMealPlan(plan.mealPlan, plan.metadata);
+                    } else {
+                        console.log('❌ Plan not found in localStorage');
+                        document.getElementById('meal-plan-content').innerHTML = `
+                            <div style="text-align: center; padding: 40px; color: #666;">
+                                <h3>🔍 Meal Plan Not Found</h3>
+                                <p>This meal plan may have been deleted or expired.</p>
+                                <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Create New Plan</button>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading meal plan:', error);
+                    document.getElementById('meal-plan-content').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <h3>⚠️ Error Loading Plan</h3>
+                            <p>There was an error loading your meal plan.</p>
+                            <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Try Again</button>
+                        </div>
+                    `;
+                }
+            } else {
+                console.log('❌ No plan ID provided');
+                document.getElementById('meal-plan-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>🔍 No Meal Plan</h3>
+                        <p>Please generate a meal plan first.</p>
+                        <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Start Quiz</button>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

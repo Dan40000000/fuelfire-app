@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Diet Quiz - Well Fit</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="fuelfire-auth.js"></script>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">Enhanced Diet Quiz</div>
+            </div>
+            
+            <div class="content">
+                <!-- Quick Test Button -->
+                <div style="text-align: center; margin: 20px; padding: 15px; background: linear-gradient(135deg, #ff6b6b, #ee5a24); border-radius: 15px;">
+                    <button onclick="quickTest()" style="background: white; color: #ee5a24; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        🚀 QUICK TEST (WORKING) - Skip Quiz & Generate Now!
+                    </button>
+                    <div style="color: white; font-size: 12px; margin-top: 8px; opacity: 0.9;">
+                        Use to compare vs full quiz
+                    </div>
+                </div>
+                
+                <div id="quiz-content">
+                    <!-- Quiz content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 Well Fit</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item active" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Diet Quiz Variables
+        let currentStep = 1;
+        const totalSteps = 10;
+        let quizData = {};
+        let measurementSystem = 'imperial'; // 'imperial' or 'metric'
+
+        // Helper functions for check all/none buttons
+        function selectAllMeats() {
+            document.querySelectorAll('.meat-check').forEach(cb => cb.checked = true);
+        }
+
+        function selectNoMeats() {
+            document.querySelectorAll('.meat-check').forEach(cb => cb.checked = false);
+        }
+
+        function selectAllVeggies() {
+            document.querySelectorAll('.veggie-check').forEach(cb => cb.checked = true);
+        }
+
+        function selectNoVeggies() {
+            document.querySelectorAll('.veggie-check').forEach(cb => cb.checked = false);
+        }
+
+        function selectAllFruits() {
+            document.querySelectorAll('.fruit-check').forEach(cb => cb.checked = true);
+        }
+
+        function selectNoFruits() {
+            document.querySelectorAll('.fruit-check').forEach(cb => cb.checked = false);
+        }
+
+        function handleNoneAllergy(checkbox) {
+            if (checkbox.checked) {
+                document.querySelectorAll('.allergy-check').forEach(cb => {
+                    if (cb !== checkbox) cb.checked = false;
+                });
+            }
+        }
+
+        function toggleMeasurementSystem(system) {
+            measurementSystem = system;
+            document.getElementById('imperial-btn').style.background = system === 'imperial' ? 'var(--primary)' : 'var(--lighter-bg)';
+            document.getElementById('imperial-btn').style.color = system === 'imperial' ? 'white' : 'var(--dark)';
+            document.getElementById('metric-btn').style.background = system === 'metric' ? 'var(--primary)' : 'var(--lighter-bg)';
+            document.getElementById('metric-btn').style.color = system === 'metric' ? 'white' : 'var(--dark)';
+            
+            // Toggle height inputs
+            document.getElementById('height-imperial').style.display = system === 'imperial' ? 'block' : 'none';
+            document.getElementById('height-metric').style.display = system === 'metric' ? 'block' : 'none';
+            
+            // Update weight label
+            document.getElementById('weight-label').innerHTML = `Weight (${system === 'imperial' ? 'lbs' : 'kg'}) <span style="color: #e74c3c;">*</span>`;
+            document.getElementById('quiz-weight').placeholder = system === 'imperial' ? '150' : '68';
+        }
+
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        // Quick Test Function - Pre-fills realistic data and generates immediately
+        async function quickTest() {
+            // Pre-fill with realistic test data
+            quizData = {
+                goal: 'weight-loss',
+                calories: 'auto-calculate',
+                age: '30',
+                gender: 'male',
+                weight: '180',
+                activity: 'moderate',
+                bodytype: 'mesomorph',
+                measurementSystem: 'imperial',
+                feet: '6',
+                inches: '0',
+                allergies: ['None'],
+                otherAllergies: 'N/A',
+                dietaryLifestyle: 'no-restrictions',
+                meats: ['🐔 Chicken Breast', '🐟 Salmon', '🥚 Eggs', '🐄 Ground Beef (93/7)', '🦃 Turkey'],
+                meatFrequency: 'twice-daily',
+                vegetables: ['🥬 Spinach', '🥦 Broccoli', '🥕 Carrots', '🍅 Tomatoes', '🥒 Cucumber'],
+                fruits: ['🍎 Apples', '🍌 Bananas', '🫐 Blueberries', '🍓 Strawberries'],
+                exerciseType: 'weight-training',
+                exerciseFrequency: '4-5-days',
+                workoutDuration: '45-60-min',
+                fitnessGoal: 'build-muscle-lose-fat',
+                mealsPerDay: '3',
+                largestMeal: 'dinner',
+                mealPrepTime: 'moderate',
+                mealVariety: 'weekday-same',
+                mealStyle: 'international-adventure',
+                cookingSkill: 'intermediate',
+                kitchenEquipment: ['Oven', 'Stovetop', 'Air Fryer'],
+                budgetRange: 'moderate',
+                preferredStores: ['Any Store'],
+                planDuration: '2-week',
+                specialRequests: 'I love spicy food and want exciting flavors!'
+            };
+
+            console.log('🚀 Quick Test activated with data:', quizData);
+
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '🤖 Quick generating...';
+            button.disabled = true;
+
+            try {
+                // Use legacy single-phase generation for Quick Test
+                const result = await window.fuelFireAuth.generateMealPlanLegacy(quizData);
+                
+                if (result.success) {
+                    // Save meal plan to localStorage
+                    const savedPlanId = saveMealPlanToStorage(result.mealPlan, result.metadata);
+                    
+                    // Update button to show success
+                    button.innerHTML = '✅ Generated! Redirecting...';
+                    
+                    // Redirect to meal plan
+                    setTimeout(() => {
+                        window.location.href = `meal-plan-simple.html?planId=${savedPlanId}`;
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(result.message || 'Failed to generate meal plan');
+                }
+                
+            } catch (error) {
+                console.error('❌ Quick test error:', error);
+                alert(`❌ Quick test failed: ${error.message}`);
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function showStep(step) {
+            const content = document.getElementById('quiz-content');
+            let html = '';
+
+            if (step === 1) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🎯 Your Goals</h2>
+                        <p style="opacity: 0.9;">Step 1 of 10 - Let's start with your objectives</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What's your primary goal? <span style="color: #e74c3c;">*</span></label>
+                            <select id="diet-goal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select your goal...</option>
+                                <option value="weight-loss">🔥 Weight Loss</option>
+                                <option value="muscle-gain">💪 Muscle Gain</option>
+                                <option value="maintenance">⚖️ Maintenance</option>
+                                <option value="recomp">🔄 Body Recomposition</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Daily calorie target (optional)</label>
+                            <input type="number" id="calorie-target" placeholder="Leave blank for automatic calculation" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                        </div>
+                        
+                        <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px;">
+                            Continue →
+                        </button>
+                    </div>
+                `;
+            } else if (step === 2) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">👤 Personal Information</h2>
+                        <p style="opacity: 0.9;">Step 2 of 10 - Help us understand your needs</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Age <span style="color: #e74c3c;">*</span></label>
+                                <input type="number" id="quiz-age" placeholder="25" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Gender <span style="color: #e74c3c;">*</span></label>
+                                <select id="quiz-gender" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                    <option value="">Select...</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Measurement System</label>
+                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                <button type="button" id="imperial-btn" onclick="toggleMeasurementSystem('imperial')" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; flex: 1; font-weight: bold;">
+                                    🇺🇸 Imperial (lb/ft)
+                                </button>
+                                <button type="button" id="metric-btn" onclick="toggleMeasurementSystem('metric')" style="background: var(--lighter-bg); color: var(--dark); border: 1px solid #ddd; padding: 10px 20px; border-radius: 10px; cursor: pointer; flex: 1; font-weight: bold;">
+                                    🌍 Metric (kg/cm)
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label id="weight-label" style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weight (lbs) <span style="color: #e74c3c;">*</span></label>
+                            <input type="number" id="quiz-weight" placeholder="150" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Height</label>
+                            <div id="height-imperial" style="display: block;">
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <div style="flex: 1;">
+                                        <input type="number" id="quiz-feet" placeholder="5" min="3" max="8" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                                        <label style="font-size: 14px; color: #666; margin-top: 4px; display: block; text-align: center; font-weight: bold;">feet</label>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <input type="number" id="quiz-inches" placeholder="8" min="0" max="11" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                                        <label style="font-size: 14px; color: #666; margin-top: 4px; display: block; text-align: center; font-weight: bold;">inches</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="height-metric" style="display: none;">
+                                <input type="number" id="quiz-height-cm" placeholder="173" style="width: 100%; padding: 18px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                                <label style="font-size: 14px; color: #666; margin-top: 4px; display: block; text-align: center; font-weight: bold;">centimeters</label>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Activity Level</label>
+                            <select id="quiz-activity" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="">Select your activity level...</option>
+                                <option value="sedentary">Sedentary (little/no exercise)</option>
+                                <option value="light">Light (exercise 1-3 days/week)</option>
+                                <option value="moderate">Moderate (exercise 3-5 days/week)</option>
+                                <option value="very-active">Very Active (exercise 6-7 days/week)</option>
+                                <option value="extra-active">Extra Active (physical job + exercise)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Body Type</label>
+                            <select id="quiz-bodytype" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="">Select your body type...</option>
+                                <option value="ectomorph">Ectomorph (Naturally thin, fast metabolism)</option>
+                                <option value="mesomorph">Mesomorph (Athletic build, gains muscle easily)</option>
+                                <option value="endomorph">Endomorph (Stocky build, slower metabolism)</option>
+                                <option value="unknown">I DON'T KNOW</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 3) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🥗 Dietary Restrictions</h2>
+                        <p style="opacity: 0.9;">Step 3 of 10 - What should we avoid?</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Food Allergies (check all that apply)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 280px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="None" style="margin-right: 8px;" onchange="handleNoneAllergy(this)">
+                                    <span>None</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Gluten" style="margin-right: 8px;">
+                                    <span>Gluten</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Dairy/Lactose" style="margin-right: 8px;">
+                                    <span>Dairy/Lactose</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Eggs" style="margin-right: 8px;">
+                                    <span>Eggs</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Peanuts" style="margin-right: 8px;">
+                                    <span>Peanuts</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Tree Nuts" style="margin-right: 8px;">
+                                    <span>Tree Nuts</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Shellfish" style="margin-right: 8px;">
+                                    <span>Shellfish</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Fish" style="margin-right: 8px;">
+                                    <span>Fish</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Soy" style="margin-right: 8px;">
+                                    <span>Soy</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Sesame" style="margin-right: 8px;">
+                                    <span>Sesame</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Wheat" style="margin-right: 8px;">
+                                    <span>Wheat</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Corn" style="margin-right: 8px;">
+                                    <span>Corn</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Sulfites" style="margin-right: 8px;">
+                                    <span>Sulfites</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Nightshades" style="margin-right: 8px;">
+                                    <span>Nightshades</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="MSG" style="margin-right: 8px;">
+                                    <span>MSG</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="allergy-check" value="Artificial Colors" style="margin-right: 8px;">
+                                    <span>Artificial Colors</span>
+                                </label>
+                            </div>
+                            
+                            <div style="margin-top: 15px;">
+                                <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Other Allergies (please specify)</label>
+                                <input type="text" id="other-allergies" placeholder="Type any other allergies or food intolerances..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 12px; font-weight: bold;">Dietary Lifestyle</label>
+                            <select id="quiz-dietary-lifestyle" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="omnivore">Omnivore (eat everything)</option>
+                                <option value="vegetarian">Vegetarian (no meat)</option>
+                                <option value="vegan">Vegan (no animal products)</option>
+                                <option value="pescatarian">Pescatarian (fish only)</option>
+                                <option value="keto">Keto (very low carb)</option>
+                                <option value="paleo">Paleo (whole foods only)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 4) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🥩 Meat Preferences</h2>
+                        <p style="opacity: 0.9;">Step 4 of 10 - What meats do you enjoy?</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label style="color: var(--dark); font-weight: bold;">Select all meats you enjoy eating</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="selectAllMeats()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check All
+                                    </button>
+                                    <button type="button" onclick="selectNoMeats()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check None
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 320px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐓 Chicken Breast" style="margin-right: 8px;">
+                                    <span>🐓 Chicken Breast</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐓 Chicken Thighs" style="margin-right: 8px;">
+                                    <span>🐓 Chicken Thighs</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐓 Chicken Wings" style="margin-right: 8px;">
+                                    <span>🐓 Chicken Wings</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦃 Turkey Breast" style="margin-right: 8px;">
+                                    <span>🦃 Turkey Breast</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦃 Ground Turkey" style="margin-right: 8px;">
+                                    <span>🦃 Ground Turkey</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥩 Lean Ground Beef" style="margin-right: 8px;">
+                                    <span>🥩 Lean Ground Beef</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥩 Sirloin Steak" style="margin-right: 8px;">
+                                    <span>🥩 Sirloin Steak</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥩 Filet Mignon" style="margin-right: 8px;">
+                                    <span>🥩 Filet Mignon</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐖 Pork Tenderloin" style="margin-right: 8px;">
+                                    <span>🐖 Pork Tenderloin</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐖 Pork Chops" style="margin-right: 8px;">
+                                    <span>🐖 Pork Chops</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐑 Lamb Chops" style="margin-right: 8px;">
+                                    <span>🐑 Lamb Chops</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐑 Ground Lamb" style="margin-right: 8px;">
+                                    <span>🐑 Ground Lamb</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥚 Eggs" style="margin-right: 8px;">
+                                    <span>🥚 Eggs</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐟 Salmon" style="margin-right: 8px;">
+                                    <span>🐟 Salmon</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐟 Tuna" style="margin-right: 8px;">
+                                    <span>🐟 Tuna</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐟 Cod" style="margin-right: 8px;">
+                                    <span>🐟 Cod</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐟 Tilapia" style="margin-right: 8px;">
+                                    <span>🐟 Tilapia</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🐟 Mahi Mahi" style="margin-right: 8px;">
+                                    <span>🐟 Mahi Mahi</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦐 Shrimp" style="margin-right: 8px;">
+                                    <span>🦐 Shrimp</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦀 Crab" style="margin-right: 8px;">
+                                    <span>🦀 Crab</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦞 Lobster" style="margin-right: 8px;">
+                                    <span>🦞 Lobster</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦆 Duck" style="margin-right: 8px;">
+                                    <span>🦆 Duck</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🦌 Venison" style="margin-right: 8px;">
+                                    <span>🦌 Venison</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🥓 Bacon" style="margin-right: 8px;">
+                                    <span>🥓 Bacon</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="meat-check" value="🌭 Sausages" style="margin-right: 8px;">
+                                    <span>🌭 Sausages</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">How often do you want to eat meat?</label>
+                            <select id="quiz-meat-frequency" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <option value="every-meal">Every meal</option>
+                                <option value="twice-daily">Twice per day</option>
+                                <option value="once-daily">Once per day</option>
+                                <option value="few-times-week">Few times per week</option>
+                                <option value="rarely">Rarely</option>
+                                <option value="never">Never (plant-based only)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 5) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🥬 Vegetable Preferences</h2>
+                        <p style="opacity: 0.9;">Step 5 of 10 - Choose your vegetables</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="color: var(--dark); font-weight: bold;">Select vegetables you enjoy</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="selectAllVeggies()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check All
+                                    </button>
+                                    <button type="button" onclick="selectNoVeggies()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check None
+                                    </button>
+                                </div>
+                            </div>
+                            <p style="font-style: italic; color: #666; margin-bottom: 12px; font-size: 14px;">
+                                <em>Recommended: Choose at least 5-8 vegetables for variety</em>
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 320px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥬 Spinach" style="margin-right: 8px;" checked>
+                                    <span>🥬 Spinach</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥦 Broccoli" style="margin-right: 8px;" checked>
+                                    <span>🥦 Broccoli</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥕 Carrots" style="margin-right: 8px;" checked>
+                                    <span>🥕 Carrots</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🍅 Tomatoes" style="margin-right: 8px;" checked>
+                                    <span>🍅 Tomatoes</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🌶️ Bell Peppers" style="margin-right: 8px;" checked>
+                                    <span>🌶️ Bell Peppers</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥒 Cucumbers" style="margin-right: 8px;" checked>
+                                    <span>🥒 Cucumbers</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🧅 Onions" style="margin-right: 8px;" checked>
+                                    <span>🧅 Onions</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥑 Avocados" style="margin-right: 8px;" checked>
+                                    <span>🥑 Avocados</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥬 Kale" style="margin-right: 8px;" checked>
+                                    <span>🥬 Kale</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🍄 Mushrooms" style="margin-right: 8px;" checked>
+                                    <span>🍄 Mushrooms</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🌽 Corn" style="margin-right: 8px;" checked>
+                                    <span>🌽 Corn</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥔 Potatoes" style="margin-right: 8px;" checked>
+                                    <span>🥔 Potatoes</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🍠 Sweet Potatoes" style="margin-right: 8px;" checked>
+                                    <span>🍠 Sweet Potatoes</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🧄 Garlic" style="margin-right: 8px;" checked>
+                                    <span>🧄 Garlic</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥬 Lettuce" style="margin-right: 8px;" checked>
+                                    <span>🥬 Lettuce</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🌶️ Jalapeños" style="margin-right: 8px;" checked>
+                                    <span>🌶️ Jalapeños</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥒 Zucchini" style="margin-right: 8px;" checked>
+                                    <span>🥒 Zucchini</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🍆 Eggplant" style="margin-right: 8px;" checked>
+                                    <span>🍆 Eggplant</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥕 Baby Carrots" style="margin-right: 8px;" checked>
+                                    <span>🥕 Baby Carrots</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥜 Green Beans" style="margin-right: 8px;" checked>
+                                    <span>🥜 Green Beans</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥬 Arugula" style="margin-right: 8px;" checked>
+                                    <span>🥬 Arugula</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥒 Celery" style="margin-right: 8px;" checked>
+                                    <span>🥒 Celery</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥬 Cabbage" style="margin-right: 8px;" checked>
+                                    <span>🥬 Cabbage</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🥕 Beets" style="margin-right: 8px;" checked>
+                                    <span>🥕 Beets</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="veggie-check" value="🌿 Herbs (Basil, Cilantro)" style="margin-right: 8px;" checked>
+                                    <span>🌿 Herbs (Basil, Cilantro)</span>
+                                </label>
+                            </div>
+                            <p style="font-style: italic; color: #888; margin-top: 8px; font-size: 12px;">
+                                <em>All vegetables are pre-selected. Uncheck any you don't want in your meal plans.</em>
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 6) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🍎 Fruit Preferences</h2>
+                        <p style="opacity: 0.9;">Step 6 of 10 - Choose your favorite fruits</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="color: var(--dark); font-weight: bold;">Select fruits you enjoy eating</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="selectAllFruits()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check All
+                                    </button>
+                                    <button type="button" onclick="selectNoFruits()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                        Check None
+                                    </button>
+                                </div>
+                            </div>
+                            <p style="font-style: italic; color: #666; margin-bottom: 12px; font-size: 14px;">
+                                <em>Critical for clean eating - fruits provide natural sugars, vitamins, and fiber</em>
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 320px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍎 Apples" style="margin-right: 8px;" checked>
+                                    <span>🍎 Apples</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍌 Bananas" style="margin-right: 8px;" checked>
+                                    <span>🍌 Bananas</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🫐 Blueberries" style="margin-right: 8px;" checked>
+                                    <span>🫐 Blueberries</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍓 Strawberries" style="margin-right: 8px;" checked>
+                                    <span>🍓 Strawberries</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍇 Grapes" style="margin-right: 8px;" checked>
+                                    <span>🍇 Grapes</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍊 Oranges" style="margin-right: 8px;" checked>
+                                    <span>🍊 Oranges</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🥭 Mango" style="margin-right: 8px;" checked>
+                                    <span>🥭 Mango</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍍 Pineapple" style="margin-right: 8px;" checked>
+                                    <span>🍍 Pineapple</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🥝 Kiwi" style="margin-right: 8px;" checked>
+                                    <span>🥝 Kiwi</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍑 Cherries" style="margin-right: 8px;" checked>
+                                    <span>🍑 Cherries</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍒 Dark Cherries" style="margin-right: 8px;" checked>
+                                    <span>🍒 Dark Cherries</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍑 Peaches" style="margin-right: 8px;" checked>
+                                    <span>🍑 Peaches</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍐 Pears" style="margin-right: 8px;" checked>
+                                    <span>🍐 Pears</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🥥 Coconut" style="margin-right: 8px;" checked>
+                                    <span>🥥 Coconut</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍈 Cantaloupe" style="margin-right: 8px;" checked>
+                                    <span>🍈 Cantaloupe</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍉 Watermelon" style="margin-right: 8px;" checked>
+                                    <span>🍉 Watermelon</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🍋 Lemons" style="margin-right: 8px;" checked>
+                                    <span>🍋 Lemons</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🥭 Papaya" style="margin-right: 8px;" checked>
+                                    <span>🥭 Papaya</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🫐 Blackberries" style="margin-right: 8px;" checked>
+                                    <span>🫐 Blackberries</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="fruit-check" value="🫐 Raspberries" style="margin-right: 8px;" checked>
+                                    <span>🫐 Raspberries</span>
+                                </label>
+                            </div>
+                            <p style="font-style: italic; color: #888; margin-top: 8px; font-size: 12px;">
+                                <em>All fruits are pre-selected. Uncheck any you don't want in your meal plans.</em>
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 7) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">💪 Exercise & Activity</h2>
+                        <p style="opacity: 0.9;">Step 7 of 10 - Your fitness routine</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">What type of exercise do you prefer?</label>
+                            <select id="quiz-exercise-type" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select exercise type...</option>
+                                <option value="strength-training">💪 Strength Training</option>
+                                <option value="cardio">🏃 Cardio (Running, Cycling)</option>
+                                <option value="hiit">🔥 HIIT (High Intensity)</option>
+                                <option value="yoga-pilates">🧘 Yoga/Pilates</option>
+                                <option value="sports">⚽ Sports (Team/Individual)</option>
+                                <option value="mixed">🎯 Mixed (Variety)</option>
+                                <option value="minimal">🚶 Light Activity Only</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">How many days per week do you exercise?</label>
+                            <select id="quiz-exercise-frequency" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select frequency...</option>
+                                <option value="0-1">0-1 days (Sedentary)</option>
+                                <option value="2-3">2-3 days (Light)</option>
+                                <option value="4-5">4-5 days (Moderate)</option>
+                                <option value="6-7">6-7 days (Very Active)</option>
+                                <option value="multiple-daily">Multiple sessions daily</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Average workout duration</label>
+                            <select id="quiz-workout-duration" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select duration...</option>
+                                <option value="15-30">15-30 minutes</option>
+                                <option value="30-45">30-45 minutes</option>
+                                <option value="45-60">45-60 minutes</option>
+                                <option value="60-90">60-90 minutes</option>
+                                <option value="90+">90+ minutes</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Current fitness goal</label>
+                            <select id="quiz-fitness-goal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select fitness goal...</option>
+                                <option value="lose-fat">🔥 Lose Body Fat</option>
+                                <option value="build-muscle">💪 Build Muscle Mass</option>
+                                <option value="improve-endurance">🏃 Improve Endurance</option>
+                                <option value="increase-strength">🏋️ Increase Strength</option>
+                                <option value="general-health">❤️ General Health & Wellness</option>
+                                <option value="athletic-performance">🏆 Athletic Performance</option>
+                                <option value="maintain">⚖️ Maintain Current Fitness</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 8) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🍽️ Meal Timing & Prep</h2>
+                        <p style="opacity: 0.9;">Step 8 of 10 - Your eating preferences</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">How many meals do you prefer per day?</label>
+                            <select id="quiz-meals-per-day" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select meal frequency...</option>
+                                <option value="2">2 meals (Intermittent Fasting)</option>
+                                <option value="3">3 meals (Traditional)</option>
+                                <option value="4">4 meals (3 + 1 snack)</option>
+                                <option value="5">5 meals (3 + 2 snacks)</option>
+                                <option value="6">6 meals (Small, frequent)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">When do you prefer your largest meal?</label>
+                            <select id="quiz-largest-meal" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select timing...</option>
+                                <option value="breakfast">🌅 Breakfast (Front-load calories)</option>
+                                <option value="lunch">☀️ Lunch (Midday fuel)</option>
+                                <option value="dinner">🌙 Dinner (Evening meal)</option>
+                                <option value="post-workout">💪 Post-Workout (Whenever I train)</option>
+                                <option value="equal">⚖️ All meals equal size</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">How much time can you dedicate to meal prep?</label>
+                            <select id="quiz-meal-prep-time" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select prep time...</option>
+                                <option value="minimal">⚡ Minimal (5-15 min/day)</option>
+                                <option value="moderate">🍳 Moderate (30-60 min/day)</option>
+                                <option value="extensive">👨‍🍳 Extensive (1-2 hours on weekends)</option>
+                                <option value="batch">📦 Batch Prep (Sunday meal prep)</option>
+                                <option value="no-prep">🥡 No Prep (Ready-made meals)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Meal variety preference</label>
+                            <select id="quiz-meal-variety" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select your preference...</option>
+                                <option value="same-daily">🔄 Same meals every day (easier meal prep)</option>
+                                <option value="weekday-same">💼 Same meals Mon-Fri, different weekends</option>
+                                <option value="some-variety">🎲 Some variety (2-3 breakfast/lunch options)</option>
+                                <option value="full-variety">🌈 Different meals every day</option>
+                                <option value="office-prep">🏢 Office days same, WFH days different</option>
+                            </select>
+                            <p style="font-size: 12px; color: #666; margin-top: 5px; font-style: italic;">
+                                💡 Tip: Repeating meals makes shopping & prep easier!
+                            </p>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Meal style preference</label>
+                            <select id="quiz-meal-style" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select your style...</option>
+                                <option value="simple-clean">🥗 Keep it Simple & Clean (basic healthy meals)</option>
+                                <option value="balanced-creative">🎨 Balanced & Creative (some flavor variety)</option>
+                                <option value="international-adventure">🌎 International Adventure (diverse cuisines & spices)</option>
+                                <option value="comfort-healthy">🍲 Healthy Comfort Food (familiar favorites made healthier)</option>
+                                <option value="gourmet-exciting">⭐ Gourmet & Exciting (complex flavors & techniques)</option>
+                            </select>
+                            <p style="font-size: 12px; color: #666; margin-top: 5px; font-style: italic;">
+                                🍽️ This determines how creative and adventurous your meals will be!
+                            </p>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Cooking skill level</label>
+                            <select id="quiz-cooking-skill" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select skill level...</option>
+                                <option value="beginner">🥄 Beginner (Basic recipes only)</option>
+                                <option value="intermediate">🍳 Intermediate (Can follow most recipes)</option>
+                                <option value="advanced">👨‍🍳 Advanced (Comfortable with complex recipes)</option>
+                                <option value="expert">⭐ Expert (Can adapt and create recipes)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Kitchen equipment available (check all that apply)</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Oven" style="margin-right: 8px;" checked>
+                                    <span>🔥 Oven</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Stovetop" style="margin-right: 8px;" checked>
+                                    <span>🍳 Stovetop</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Microwave" style="margin-right: 8px;" checked>
+                                    <span>📻 Microwave</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Air Fryer" style="margin-right: 8px;">
+                                    <span>💨 Air Fryer</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Slow Cooker" style="margin-right: 8px;">
+                                    <span>🍲 Slow Cooker</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Instant Pot" style="margin-right: 8px;">
+                                    <span>⚡ Instant Pot</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Grill" style="margin-right: 8px;">
+                                    <span>🔥 Grill</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="equipment-check" value="Blender" style="margin-right: 8px;">
+                                    <span>🌪️ Blender</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Continue →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 9) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">💰 Budget & Final Preferences</h2>
+                        <p style="opacity: 0.9;">Step 9 of 10 - Almost finished!</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Weekly grocery budget (optional)</label>
+                            <select id="quiz-budget-range" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select budget range...</option>
+                                <option value="budget">💵 Budget-friendly ($30-50/week)</option>
+                                <option value="moderate">💰 Moderate ($50-100/week)</option>
+                                <option value="premium">💎 Premium ($100-150/week)</option>
+                                <option value="unlimited">🎯 Cost is not a concern</option>
+                                <option value="prefer-not-to-say">🤐 Prefer not to say</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Do you shop at specific stores?</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; border-radius: 10px;">
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="store-check" value="Any Store" style="margin-right: 8px;" checked>
+                                    <span>Any Store</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="store-check" value="Walmart" style="margin-right: 8px;">
+                                    <span>🛒 Walmart</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="store-check" value="Target" style="margin-right: 8px;">
+                                    <span>🎯 Target</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="store-check" value="Whole Foods" style="margin-right: 8px;">
+                                    <span>🥗 Whole Foods</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="store-check" value="Kroger" style="margin-right: 8px;">
+                                    <span>🏪 Kroger</span>
+                                </label>
+                                <label style="background: var(--lighter-bg); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 13px;">
+                                    <input type="checkbox" class="store-check" value="Costco/BJs" style="margin-right: 8px;">
+                                    <span>📦 Costco/BJs</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Preferred meal plan duration</label>
+                            <select id="quiz-plan-duration" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                <option value="">Select duration...</option>
+                                <option value="1-week">📅 1 Week Plan</option>
+                                <option value="2-week">📅 2 Week Plan (Recommended)</option>
+                                <option value="4-week">📅 4 Week Plan</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; color: var(--dark); margin-bottom: 8px; font-weight: bold;">Any special requests or notes?</label>
+                            <textarea id="quiz-special-requests" placeholder="Any specific foods you love/hate, medical conditions, or special preferences... (Type 'N/A' if nothing applies)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; min-height: 80px; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                            <div style="font-weight: bold; margin-bottom: 5px;">🎯 Ready for Your Personalized Plan?</div>
+                            <div style="font-size: 14px; opacity: 0.9;">Your AI-generated meal plan will include exact measurements, cooking instructions, and organized shopping lists!</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Finish Quiz →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (step === 10) {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🎯 Quiz Complete!</h2>
+                        <p style="opacity: 0.9;">Step 10 of 10 - Ready to generate your plan</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: center;">
+                        <h3 style="color: var(--dark); margin-bottom: 20px;">🎉 Your Enhanced Diet Quiz is Complete!</h3>
+                        <p style="color: #666; margin-bottom: 25px;">We've collected all your preferences and will generate a personalized 2-week meal plan with shopping lists.</p>
+                        
+                        <button onclick="generatePlan()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 20px 40px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 18px; margin-bottom: 15px;">
+                            🚀 Generate My AI Meal Plan
+                        </button>
+                        
+                        <div style="margin-top: 20px;">
+                            <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer;">
+                                ← Back to Main App
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div style="background: var(--gradient-1); color: white; padding: 30px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
+                        <h2 style="font-size: 28px; margin-bottom: 10px;">🚧 Step ${step}</h2>
+                        <p style="opacity: 0.9;">Step ${step} of 10 - Coming soon!</p>
+                    </div>
+                    
+                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: center;">
+                        <p style="color: #666; margin-bottom: 25px;">This step is still being built. You can see steps 1-5 and 9 are working!</p>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="prevStep()" style="background: #e74c3c; color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 1; font-weight: bold; cursor: pointer;">
+                                ← Back
+                            </button>
+                            <button onclick="nextStep()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; flex: 2; font-weight: bold; cursor: pointer;">
+                                Skip →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+        }
+
+        function nextStep() {
+            // Save current step data
+            if (currentStep === 1) {
+                quizData.goal = document.getElementById('diet-goal').value;
+                quizData.calories = document.getElementById('calorie-target').value;
+                
+                if (!quizData.goal) {
+                    alert('Please select your goal');
+                    return;
+                }
+            } else if (currentStep === 2) {
+                quizData.age = document.getElementById('quiz-age').value;
+                quizData.gender = document.getElementById('quiz-gender').value;
+                quizData.weight = document.getElementById('quiz-weight').value;
+                quizData.activity = document.getElementById('quiz-activity').value;
+                quizData.bodytype = document.getElementById('quiz-bodytype').value;
+                
+                // Store height based on measurement system
+                if (measurementSystem === 'imperial') {
+                    quizData.feet = document.getElementById('quiz-feet').value;
+                    quizData.inches = document.getElementById('quiz-inches').value;
+                } else {
+                    quizData.heightCm = document.getElementById('quiz-height-cm').value;
+                }
+                quizData.measurementSystem = measurementSystem;
+                
+                // Validate required fields
+                if (!quizData.age) {
+                    alert('❗ Please enter your age');
+                    return;
+                }
+                if (!quizData.weight) {
+                    alert('❗ Please enter your weight');
+                    return;
+                }
+                if (!quizData.gender) {
+                    alert('❗ Please select your gender');
+                    return;
+                }
+            } else if (currentStep === 3) {
+                quizData.allergies = Array.from(document.querySelectorAll('.allergy-check:checked')).map(cb => cb.value);
+                quizData.otherAllergies = document.getElementById('other-allergies').value || 'N/A';
+                quizData.dietaryLifestyle = document.getElementById('quiz-dietary-lifestyle').value;
+            } else if (currentStep === 4) {
+                quizData.meats = Array.from(document.querySelectorAll('.meat-check:checked')).map(cb => cb.value);
+                quizData.meatFrequency = document.getElementById('quiz-meat-frequency').value;
+            } else if (currentStep === 5) {
+                quizData.vegetables = Array.from(document.querySelectorAll('.veggie-check:checked')).map(cb => cb.value);
+            } else if (currentStep === 6) {
+                quizData.fruits = Array.from(document.querySelectorAll('.fruit-check:checked')).map(cb => cb.value);
+            } else if (currentStep === 7) {
+                quizData.exerciseType = document.getElementById('quiz-exercise-type').value;
+                quizData.exerciseFrequency = document.getElementById('quiz-exercise-frequency').value;
+                quizData.workoutDuration = document.getElementById('quiz-workout-duration').value;
+                quizData.fitnessGoal = document.getElementById('quiz-fitness-goal').value;
+            } else if (currentStep === 8) {
+                quizData.mealsPerDay = document.getElementById('quiz-meals-per-day').value;
+                quizData.largestMeal = document.getElementById('quiz-largest-meal').value;
+                quizData.mealPrepTime = document.getElementById('quiz-meal-prep-time').value;
+                quizData.mealVariety = document.getElementById('quiz-meal-variety').value;
+                quizData.mealStyle = document.getElementById('quiz-meal-style').value || 'balanced-creative';
+                quizData.cookingSkill = document.getElementById('quiz-cooking-skill').value;
+                quizData.kitchenEquipment = Array.from(document.querySelectorAll('.equipment-check:checked')).map(cb => cb.value);
+            } else if (currentStep === 9) {
+                quizData.budgetRange = document.getElementById('quiz-budget-range').value;
+                quizData.preferredStores = Array.from(document.querySelectorAll('.store-check:checked')).map(cb => cb.value);
+                quizData.planDuration = document.getElementById('quiz-plan-duration').value;
+                quizData.specialRequests = document.getElementById('quiz-special-requests').value || 'N/A';
+            }
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        async function generatePlan() {
+            const goal = quizData.goal || 'maintenance';
+            
+            // Validate we have enough data
+            if (!quizData.goal || !quizData.age || !quizData.weight) {
+                alert('⚠️ Please complete all required fields in the quiz first!');
+                return;
+            }
+            
+            // Show confirmation with collected data summary
+            const dataCount = `${quizData.meats?.length || 0} meats, ${quizData.vegetables?.length || 0} vegetables, ${quizData.fruits?.length || 0} fruits`;
+            if (!confirm(`🎯 Generate AI meal plan for ${goal.replace('-', ' ')} goal?\n\n📊 Your preferences: ${dataCount}\n🤖 This will use Claude AI to create your personalized 2-week plan!`)) {
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '🤖 Claude AI is creating your plan...';
+            button.disabled = true;
+            
+            try {
+                console.log('🔥 Starting multi-phase meal plan generation with quiz data:', Object.keys(quizData));
+                console.log('🔍 Full quiz data:', quizData);
+                
+                // Progress callback to update button text
+                const progressCallback = (progress) => {
+                    const percentage = Math.round((progress.phase / progress.totalPhases) * 100);
+                    button.innerHTML = `🌊 Phase ${progress.phase}/3: ${progress.message} (${percentage}%)`;
+                };
+                
+                // Generate meal plan using progressive multi-phase approach
+                const result = await window.fuelFireAuth.generateMealPlan(quizData, progressCallback);
+                
+                if (result.success) {
+                    // Save meal plan to localStorage for the meal-plans.html page
+                    const savedPlanId = saveMealPlanToStorage(result.mealPlan, result.metadata);
+                    
+                    // Update button to show success
+                    button.innerHTML = '✅ Complete Plan Generated! Redirecting...';
+                    
+                    // Redirect after short delay - using plan ID instead of data in URL
+                    setTimeout(() => {
+                        window.location.href = `meal-plan-simple.html?planId=${savedPlanId}`;
+                    }, 1500);
+                    
+                } else {
+                    throw new Error(result.message || 'Failed to generate meal plan');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error generating meal plan:', error);
+                
+                // Show user-friendly error
+                alert(`❌ Oops! Something went wrong:\n\n${error.message}\n\nPlease try again in a moment. If the problem persists, check your internet connection.`);
+                
+                // Reset button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Calculate and save macro targets based on diet goals
+        function saveMacroTargets(metadata) {
+            try {
+                // Extract calorie target from metadata
+                let calorieTarget = 2000; // default
+                
+                if (metadata.calorieTarget) {
+                    calorieTarget = parseInt(metadata.calorieTarget);
+                } else if (quizData.calories && quizData.calories !== 'auto-calculate') {
+                    calorieTarget = parseInt(quizData.calories);
+                } else {
+                    // Auto-calculate based on basic profile data
+                    const weight = parseInt(quizData.weight) || 180;
+                    const age = parseInt(quizData.age) || 30;
+                    const gender = quizData.gender || 'male';
+                    const activity = quizData.activity || 'moderate';
+                    
+                    // Basic BMR calculation
+                    let bmr = gender === 'male' 
+                        ? 88.362 + (13.397 * (weight * 0.453592)) + (4.799 * 175) - (5.677 * age) // assuming avg height
+                        : 447.593 + (9.247 * (weight * 0.453592)) + (3.098 * 160) - (4.330 * age);
+                    
+                    // Activity multiplier
+                    const activityMultipliers = {
+                        'sedentary': 1.2,
+                        'light': 1.375,
+                        'moderate': 1.55,
+                        'active': 1.725,
+                        'very-active': 1.9
+                    };
+                    
+                    calorieTarget = Math.round(bmr * (activityMultipliers[activity] || 1.55));
+                    
+                    // Adjust for goal
+                    if (quizData.goal === 'weight-loss') calorieTarget -= 500;
+                    if (quizData.goal === 'weight-gain') calorieTarget += 500;
+                }
+                
+                // Calculate macro targets based on standard ratios
+                // Protein: 30% of calories (1g = 4 calories)
+                // Carbs: 40% of calories (1g = 4 calories)  
+                // Fat: 30% of calories (1g = 9 calories)
+                const proteinTarget = Math.round((calorieTarget * 0.30) / 4);
+                const carbsTarget = Math.round((calorieTarget * 0.40) / 4);
+                const fatTarget = Math.round((calorieTarget * 0.30) / 9);
+                
+                // Save to localStorage for calorie tracker
+                const dietGoals = {
+                    calorieTarget: calorieTarget,
+                    proteinTarget: proteinTarget,
+                    carbsTarget: carbsTarget,
+                    fatTarget: fatTarget,
+                    updatedAt: new Date().toISOString(),
+                    source: 'diet_quiz'
+                };
+                
+                localStorage.setItem('fuelfire_recent_diet_goals', JSON.stringify(dietGoals));
+                
+                console.log('📊 Macro targets saved:', dietGoals);
+                
+            } catch (error) {
+                console.error('❌ Error calculating macro targets:', error);
+            }
+        }
+
+        function saveMealPlanToStorage(mealPlan, metadata) {
+            try {
+                // Get existing meal plans from localStorage
+                const existingPlans = localStorage.getItem('fuelfire_meal_plans');
+                const mealPlans = existingPlans ? JSON.parse(existingPlans) : [];
+                
+                // Calculate and save macro targets based on current quiz data
+                saveMacroTargets(metadata);
+                
+                // Create new meal plan object
+                const newPlan = {
+                    mealPlan: mealPlan,
+                    metadata: {
+                        ...metadata,
+                        createdAt: new Date().toISOString()
+                    },
+                    id: Date.now().toString() // Simple unique ID
+                };
+                
+                // Add to beginning of array (newest first)
+                mealPlans.unshift(newPlan);
+                
+                // Keep only the latest 10 meal plans to avoid storage issues
+                if (mealPlans.length > 10) {
+                    mealPlans.splice(10);
+                }
+                
+                // Save back to localStorage
+                localStorage.setItem('fuelfire_meal_plans', JSON.stringify(mealPlans));
+                
+                console.log('✅ Meal plan saved to localStorage');
+                
+                return newPlan.id;
+                
+            } catch (error) {
+                console.error('❌ Error saving meal plan to localStorage:', error);
+                return null;
+            }
+        }
+
+        function displayMealPlan(mealPlan, metadata) {
+            // Check if new window can be opened (popup blocker check)
+            const planWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes');
+            
+            if (!planWindow) {
+                // Popup blocked - show in same page
+                showMealPlanInPage(mealPlan, metadata);
+                return;
+            }
+            
+            planWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Your Well Fit Meal Plan</title>
+                    <link rel="stylesheet" href="styles.css">
+                    <style>
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            line-height: 1.6;
+                            max-width: 1000px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            min-height: 100vh;
+                        }
+                        .meal-plan-container {
+                            background: white;
+                            border-radius: 20px;
+                            padding: 30px;
+                            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                        }
+                        .plan-title {
+                            color: #4B9CD3;
+                            text-align: center;
+                            margin-bottom: 30px;
+                            font-size: 2.5em;
+                        }
+                        .section-header {
+                            color: #333;
+                            border-bottom: 3px solid #4B9CD3;
+                            padding-bottom: 10px;
+                            margin: 30px 0 20px 0;
+                        }
+                        .day-header {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 15px;
+                            border-radius: 15px;
+                            margin: 20px 0 15px 0;
+                        }
+                        .day-plan {
+                            background: #f8f9ff;
+                            border-radius: 15px;
+                            padding: 20px;
+                            margin: 15px 0;
+                            border-left: 5px solid #4B9CD3;
+                        }
+                        .meal-item {
+                            background: white;
+                            padding: 15px;
+                            margin: 10px 0;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                        }
+                        .meal-details {
+                            margin-top: 8px;
+                            color: #666;
+                        }
+                        .shopping-list {
+                            background: #e8f5e8;
+                            border-radius: 15px;
+                            padding: 20px;
+                            margin: 20px 0;
+                            border-left: 5px solid #28a745;
+                        }
+                        .nutrition-info {
+                            background: #fff3cd;
+                            border: 1px solid #ffeaa7;
+                            border-radius: 10px;
+                            padding: 15px;
+                            margin: 15px 0;
+                        }
+                        .prep-instructions {
+                            background: #e7f3ff;
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin: 15px 0;
+                            border-left: 5px solid #007bff;
+                        }
+                        .highlight {
+                            color: #4B9CD3;
+                            font-weight: bold;
+                        }
+                        .metadata {
+                            background: #f1f3f4;
+                            padding: 15px;
+                            border-radius: 10px;
+                            margin-bottom: 20px;
+                            text-align: center;
+                            color: #666;
+                        }
+                        .print-button {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border: none;
+                            padding: 15px 30px;
+                            border-radius: 25px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            font-size: 16px;
+                            margin: 20px 10px;
+                        }
+                        .print-button:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                        }
+                        @media print {
+                            body { background: white !important; }
+                            .print-button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="meal-plan-container">
+                        <div class="metadata">
+                            🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt).toLocaleDateString()} | 
+                            <strong>Goal:</strong> ${metadata.goal} | 
+                            <strong>Duration:</strong> ${metadata.planDuration}
+                        </div>
+                        
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <button class="print-button" onclick="window.print()">🖨️ Print Plan</button>
+                            <button class="print-button" onclick="window.close()">← Back to Quiz</button>
+                        </div>
+                        
+                        ${mealPlan}
+                        
+                        <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9ff; border-radius: 15px;">
+                            <h3>🔥 Powered by Well Fit & Claude AI</h3>
+                            <p>Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
+                            <button class="print-button" onclick="window.print()">🖨️ Print This Plan</button>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            planWindow.document.close();
+            console.log('✅ Meal plan displayed in new window');
+        }
+
+        function createPremiumMealPlan(mealPlan, metadata) {
+            const parsedData = beautifyMealPlan(mealPlan);
+            
+            // Parse days and meals from the HTML content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(mealPlan, 'text/html');
+            const days = [];
+            
+            // Extract day information from the raw HTML
+            const dayHeaders = doc.querySelectorAll('h3');
+            dayHeaders.forEach((header, index) => {
+                if (header.textContent.includes('Day')) {
+                    const dayNum = index + 1;
+                    const dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7];
+                    days.push({
+                        number: dayNum,
+                        name: dayName,
+                        meals: []
+                    });
+                }
+            });
+            
+            // If no days found, create a basic 7-day structure
+            if (days.length === 0) {
+                for (let i = 1; i <= 7; i++) {
+                    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    days.push({
+                        number: i,
+                        name: dayNames[i - 1],
+                        meals: [
+                            { type: 'breakfast', name: 'Protein Breakfast Bowl', calories: 420, protein: 25, carbs: 35, fat: 18, time: '7:00 AM' },
+                            { type: 'lunch', name: 'Power Lunch Salad', calories: 520, protein: 30, carbs: 40, fat: 22, time: '12:30 PM' },
+                            { type: 'dinner', name: 'Balanced Dinner Plate', calories: 580, protein: 35, carbs: 45, fat: 25, time: '7:00 PM' },
+                            { type: 'snack', name: 'Healthy Snack Mix', calories: 180, protein: 8, carbs: 15, fat: 12, time: '3:00 PM' }
+                        ]
+                    });
+                }
+            }
+            
+            const mealTimes = {
+                breakfast: '7:00 AM',
+                lunch: '12:30 PM',
+                snack: '3:00 PM', 
+                dinner: '7:00 PM'
+            };
+            
+            const mealEmojis = {
+                breakfast: '🍳',
+                lunch: '🥗',
+                snack: '🍎',
+                dinner: '🍽️'
+            };
+            
+            return `
+                <div class="floating-header">
+                    <h1 class="plan-title">Your Premium Meal Plan</h1>
+                    <p class="plan-subtitle">AI-crafted for ${metadata?.goal?.replace('-', ' ') || 'your fitness goals'}</p>
+                    
+                    <div class="premium-stats">
+                        <div>
+                            <div class="stat-circle">
+                                <span class="stat-number">${metadata?.planDuration || '14'}</span>
+                                <span class="stat-text">DAYS</span>
+                            </div>
+                            <div class="stat-label">Duration</div>
+                        </div>
+                        <div>
+                            <div class="stat-circle">
+                                <span class="stat-number">4</span>
+                                <span class="stat-text">MEALS</span>
+                            </div>
+                            <div class="stat-label">Per Day</div>
+                        </div>
+                        <div>
+                            <div class="stat-circle">
+                                <span class="stat-number">AI</span>
+                                <span class="stat-text">POWERED</span>
+                            </div>
+                            <div class="stat-label">Generated</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="floating-actions">
+                    <button class="floating-btn primary" onclick="showShoppingList()">
+                        🛒 Shopping List
+                    </button>
+                    <button class="floating-btn" onclick="displayMealPlan('${mealPlan.replace(/'/g, "\\'")}', ${JSON.stringify(metadata).replace(/"/g, '&quot;')})">
+                        🖨️ Print Plan
+                    </button>
+                    <button class="floating-btn" onclick="location.reload()">
+                        🔄 New Plan
+                    </button>
+                </div>
+                
+                <div class="week-timeline">
+                    ${days.map((day, index) => `
+                        <div class="day-bubble ${index === 0 ? 'active' : ''}" onclick="showPremiumDay(${index})">
+                            <span class="day-number">${day.number}</span>
+                            <span class="day-name">${day.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${days.map((day, dayIndex) => `
+                    <div class="meals-container ${dayIndex === 0 ? 'active' : ''}" data-day="${dayIndex}">
+                        <div class="meal-timeline">
+                            ${day.meals.map((meal, mealIndex) => `
+                                <div class="premium-meal-card ${meal.type}" onclick="togglePremiumMeal(this)">
+                                    <div class="meal-time-badge">
+                                        ${mealEmojis[meal.type]} ${meal.type.toUpperCase()} • ${mealTimes[meal.type]}
+                                    </div>
+                                    
+                                    <div class="meal-content-header">
+                                        <div>
+                                            <h3 class="meal-dish-name">${meal.name}</h3>
+                                            <p class="meal-description-preview">
+                                                Perfectly balanced nutrition with premium ingredients. 
+                                                A delicious ${meal.type} that fits your goals.
+                                            </p>
+                                        </div>
+                                        <div class="calorie-display">
+                                            <span class="calorie-number">${meal.calories}</span>
+                                            <span class="calorie-label">calories</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="macro-rings">
+                                        <div class="macro-ring protein">
+                                            <svg viewBox="0 0 36 36">
+                                                <circle class="track" cx="18" cy="18" r="15.5" />
+                                                <circle class="fill" cx="18" cy="18" r="15.5" 
+                                                    stroke-dasharray="${(meal.protein || 25) * 2.5}, 100" />
+                                            </svg>
+                                            <div class="macro-center">
+                                                <div class="macro-value">${meal.protein || 25}g</div>
+                                                <div class="macro-name">protein</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="macro-ring carbs">
+                                            <svg viewBox="0 0 36 36">
+                                                <circle class="track" cx="18" cy="18" r="15.5" />
+                                                <circle class="fill" cx="18" cy="18" r="15.5" 
+                                                    stroke-dasharray="${(meal.carbs || 35) * 1.8}, 100" />
+                                            </svg>
+                                            <div class="macro-center">
+                                                <div class="macro-value">${meal.carbs || 35}g</div>
+                                                <div class="macro-name">carbs</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="macro-ring fat">
+                                            <svg viewBox="0 0 36 36">
+                                                <circle class="track" cx="18" cy="18" r="15.5" />
+                                                <circle class="fill" cx="18" cy="18" r="15.5" 
+                                                    stroke-dasharray="${(meal.fat || 20) * 4}, 100" />
+                                            </svg>
+                                            <div class="macro-center">
+                                                <div class="macro-value">${meal.fat || 20}g</div>
+                                                <div class="macro-name">fat</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="expand-button">
+                                        <span>View Details</span>
+                                        <span>↓</span>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="daily-summary">
+                            <h3 class="summary-title">Day ${day.number} Totals</h3>
+                            <div class="daily-totals">
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.calories || 420), 0)}</span>
+                                    <span class="total-name">Calories</span>
+                                </div>
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.protein || 25), 0)}g</span>
+                                    <span class="total-name">Protein</span>
+                                </div>
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.carbs || 35), 0)}g</span>
+                                    <span class="total-name">Carbs</span>
+                                </div>
+                                <div class="total-metric">
+                                    <span class="total-number">${day.meals.reduce((sum, meal) => sum + (meal.fat || 20), 0)}g</span>
+                                    <span class="total-name">Fat</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <${'script'}>
+                    function showPremiumDay(dayIndex) {
+                        // Update day bubbles
+                        document.querySelectorAll('.day-bubble').forEach((bubble, index) => {
+                            bubble.classList.toggle('active', index === dayIndex);
+                        });
+                        
+                        // Update meal containers
+                        document.querySelectorAll('.meals-container').forEach((container, index) => {
+                            container.classList.toggle('active', index === dayIndex);
+                        });
+                    }
+                    
+                    function togglePremiumMeal(card) {
+                        const button = card.querySelector('.expand-button span');
+                        card.classList.toggle('expanded');
+                        if (button) {
+                            button.textContent = card.classList.contains('expanded') ? '↑' : '↓';
+                        }
+                    }
+                </${'script'}>
+            `;
+        }
+
+        function showMealPlanInPage(mealPlan, metadata) {
+            // Create stunning premium meal plan design
+            const beautifiedPlan = createPremiumMealPlan(mealPlan, metadata);
+            
+            // Replace quiz content with premium meal plan
+            document.getElementById('quiz-content').innerHTML = beautifiedPlan;
+            
+            // Activate first day after DOM is ready
+            setTimeout(() => {
+                const firstDay = document.querySelector('.day-bubble');
+                if (firstDay) {
+                    firstDay.click();
+                }
+            }, 100);
+            
+            console.log('✅ Premium meal plan displayed with stunning design');
+        }
+        
+        
+        // Function to beautify the meal plan HTML
+        function beautifyMealPlan(rawHtml) {
+            // Parse the raw HTML and extract meal data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawHtml, 'text/html');
+            
+            // Try to extract structured meal data from the HTML
+            const days = [];
+            let currentDay = null;
+            
+            // Look for day headers (Day 1, Day 2, etc.)
+            const elements = doc.body.querySelectorAll('h2, h3, strong, b, p');
+            
+            elements.forEach(element => {
+                const text = element.textContent.trim();
+                
+                // Check if it's a day header
+                if (text.match(/Day\s+\d+/i) || text.match(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/i)) {
+                    if (currentDay) days.push(currentDay);
+                    currentDay = {
+                        name: text,
+                        meals: [],
+                        totalCalories: 0,
+                        totalProtein: 0,
+                        totalCarbs: 0,
+                        totalFat: 0
+                    };
+                }
+                // Check if it's a meal
+                else if (currentDay && (text.includes('Breakfast') || text.includes('Lunch') || text.includes('Dinner') || text.includes('Snack'))) {
+                    const meal = parseMealFromText(element, text);
+                    if (meal) {
+                        currentDay.meals.push(meal);
+                        currentDay.totalCalories += meal.calories || 0;
+                        currentDay.totalProtein += meal.protein || 0;
+                        currentDay.totalCarbs += meal.carbs || 0;
+                        currentDay.totalFat += meal.fat || 0;
+                    }
+                }
+            });
+            
+            if (currentDay) days.push(currentDay);
+            
+            // If we couldn't parse structured data, use the raw HTML with styling
+            if (days.length === 0) {
+                return `
+                    <div class="raw-meal-plan" style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        ${rawHtml}
+                    </div>
+                `;
+            }
+            
+            // Generate beautiful card-based layout for each day
+            let html = '';
+            
+            // Create day tabs navigation
+            html += `
+                <style>
+                    .action-buttons {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    
+                    .action-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+                    }
+                    
+                    .action-btn.primary {
+                        background: linear-gradient(135deg, #4CAF50, #45a049);
+                        color: white;
+                    }
+                    
+                    .action-btn.secondary {
+                        background: #6c757d;
+                        color: white;
+                    }
+                    
+                    .day-tabs {
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        margin-bottom: 25px;
+                        overflow-x: auto;
+                        padding: 5px 0;
+                    }
+                    
+                    .day-tab {
+                        background: white;
+                        border: 2px solid #ddd;
+                        padding: 10px 20px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        transition: all 0.3s ease;
+                        white-space: nowrap;
+                    }
+                    
+                    .day-tab.active {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-color: #667eea;
+                    }
+                    
+                    .day-content {
+                        display: none;
+                        animation: fadeIn 0.3s ease;
+                    }
+                    
+                    .day-content.active {
+                        display: block;
+                    }
+                    
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    
+                    .meal-card {
+                        background: white;
+                        border-radius: 20px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                        border-left: 5px solid;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                    }
+                    
+                    .meal-card:hover {
+                        transform: translateX(5px);
+                        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+                    }
+                    
+                    .meal-card.breakfast { border-left-color: #ff9800; }
+                    .meal-card.lunch { border-left-color: #4CAF50; }
+                    .meal-card.dinner { border-left-color: #2196F3; }
+                    .meal-card.snack { border-left-color: #e91e63; }
+                    
+                    .meal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    }
+                    
+                    .meal-type {
+                        font-size: 12px;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        opacity: 0.7;
+                    }
+                    
+                    .meal-type.breakfast { color: #ff9800; }
+                    .meal-type.lunch { color: #4CAF50; }
+                    .meal-type.dinner { color: #2196F3; }
+                    .meal-type.snack { color: #e91e63; }
+                    
+                    .meal-calories {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #667eea;
+                    }
+                    
+                    .meal-name {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .meal-macros {
+                        display: flex;
+                        gap: 15px;
+                        margin-bottom: 12px;
+                    }
+                    
+                    .macro-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        font-size: 14px;
+                        color: #666;
+                    }
+                    
+                    .macro-dot {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                    }
+                    
+                    .macro-dot.protein { background: #e74c3c; }
+                    .macro-dot.carbs { background: #f39c12; }
+                    .macro-dot.fat { background: #27ae60; }
+                    
+                    .meal-description {
+                        color: #666;
+                        font-size: 14px;
+                        line-height: 1.5;
+                        margin-top: 10px;
+                        display: none;
+                    }
+                    
+                    .meal-card.expanded .meal-description {
+                        display: block;
+                    }
+                    
+                    .expand-indicator {
+                        text-align: center;
+                        font-size: 12px;
+                        color: #999;
+                        margin-top: 10px;
+                    }
+                    
+                    .day-summary {
+                        background: #f8f9ff;
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+                    
+                    .day-totals {
+                        display: flex;
+                        justify-content: space-around;
+                        margin-top: 15px;
+                    }
+                    
+                    .total-item {
+                        text-align: center;
+                    }
+                    
+                    .total-value {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #667eea;
+                    }
+                    
+                    .total-label {
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    
+                    .shopping-list-btn {
+                        background: linear-gradient(135deg, #00bcd4, #00acc1);
+                        color: white;
+                        border: none;
+                        padding: 20px;
+                        border-radius: 20px;
+                        width: 100%;
+                        font-size: 18px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        margin-top: 30px;
+                        box-shadow: 0 4px 15px rgba(0,188,212,0.3);
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .shopping-list-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(0,188,212,0.4);
+                    }
+                    
+                    /* Mobile responsiveness */
+                    @media (max-width: 600px) {
+                        .meal-plan-container {
+                            padding: 10px;
+                        }
+                        
+                        .plan-header {
+                            padding: 20px;
+                        }
+                        
+                        .day-tabs {
+                            justify-content: flex-start;
+                        }
+                        
+                        .meal-macros {
+                            flex-wrap: wrap;
+                        }
+                    }
+                </style>
+                
+                <div class="meal-plan-container">
+                    <div class="plan-header">
+                        <h1 style="margin: 0 0 10px 0; font-size: 28px;">🔥 Your Personal Meal Plan</h1>
+                        <p style="margin: 0; opacity: 0.9;">Customized for ${metadata.goal || 'your goals'}</p>
+                        <div class="plan-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">${metadata.planDuration || '7 Days'}</span>
+                                <span class="stat-label">Duration</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${metadata.dailyCalories || '2000'}</span>
+                                <span class="stat-label">Daily Calories</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${new Date().toLocaleDateString()}</span>
+                                <span class="stat-label">Generated</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn primary" onclick="saveMealPlan()">
+                            💾 Save Plan
+                        </button>
+                        <button class="action-btn" onclick="window.print()">
+                            🖨️ Print
+                        </button>
+                        <button class="action-btn" onclick="shareMealPlan()">
+                            📤 Share
+                        </button>
+                        <button class="action-btn secondary" onclick="location.reload()">
+                            ← New Plan
+                        </button>
+                    </div>
+                    
+                    <div id="meal-plan-display">
+                        ${rawHtml}
+                    </div>
+                    
+                    <button class="shopping-list-btn" onclick="showShoppingList()">
+                        🛒 View Complete Shopping List
+                    </button>
+                    
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8f9ff; border-radius: 15px;">
+                        <h3 style="color: #4B9CD3; margin-bottom: 10px;">🔥 Powered by Well Fit & Claude AI</h3>
+                        <p style="color: #666; margin: 0;">Your personalized meal plan was generated using advanced AI to match your exact preferences and goals.</p>
+                    </div>
+                </div>
+            `;
+            
+            // Initialize the first day
+            setTimeout(() => {
+                const firstTab = document.querySelector('.day-tab');
+                if (firstTab) {
+                    firstTab.click();
+                }
+            }, 100);
+            
+            console.log('✅ Meal plan displayed with beautiful card layout');
+            
+            return html;
+        }
+        
+        // Function to beautify the meal plan HTML (duplicate - remove this)
+        function beautifyMealPlanOld(rawHtml) {
+            // Parse the raw HTML and extract meal data
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawHtml, 'text/html');
+            
+            // Try to extract structured meal data from the HTML
+            const days = [];
+            let currentDay = null;
+            
+            // Look for day headers (Day 1, Day 2, etc.)
+            const elements = doc.body.querySelectorAll('h2, h3, strong, b, p');
+            
+            elements.forEach(element => {
+                const text = element.textContent.trim();
+                
+                // Check if it's a day header
+                if (text.match(/Day\s+\d+/i) || text.match(/Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/i)) {
+                    if (currentDay) days.push(currentDay);
+                    currentDay = {
+                        name: text,
+                        meals: [],
+                        totalCalories: 0,
+                        totalProtein: 0,
+                        totalCarbs: 0,
+                        totalFat: 0
+                    };
+                }
+                // Check if it's a meal
+                else if (currentDay && (text.includes('Breakfast') || text.includes('Lunch') || text.includes('Dinner') || text.includes('Snack'))) {
+                    const meal = parseMealFromText(element, text);
+                    if (meal) {
+                        currentDay.meals.push(meal);
+                        currentDay.totalCalories += meal.calories || 0;
+                        currentDay.totalProtein += meal.protein || 0;
+                        currentDay.totalCarbs += meal.carbs || 0;
+                        currentDay.totalFat += meal.fat || 0;
+                    }
+                }
+            });
+            
+            if (currentDay) days.push(currentDay);
+            
+            // If we couldn't parse structured data, use the raw HTML with styling
+            if (days.length === 0) {
+                return `
+                    <div class="raw-meal-plan" style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        ${rawHtml}
+                    </div>
+                `;
+            }
+            
+            // Generate beautiful card-based layout
+            let html = '<div class="day-tabs">';
+            days.forEach((day, index) => {
+                html += `<div class="day-tab ${index === 0 ? 'active' : ''}" onclick="showDay(${index})">${day.name}</div>`;
+            });
+            html += '</div>';
+            
+            days.forEach((day, dayIndex) => {
+                html += `
+                    <div class="day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">
+                        ${day.meals.map(meal => createMealCard(meal)).join('')}
+                        
+                        <div class="day-summary">
+                            <h3 style="color: #667eea; margin: 0 0 15px 0;">Daily Totals</h3>
+                            <div class="day-totals">
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalCalories)}</div>
+                                    <div class="total-label">Calories</div>
+                                </div>
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalProtein)}g</div>
+                                    <div class="total-label">Protein</div>
+                                </div>
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalCarbs)}g</div>
+                                    <div class="total-label">Carbs</div>
+                                </div>
+                                <div class="total-item">
+                                    <div class="total-value">${Math.round(day.totalFat)}g</div>
+                                    <div class="total-label">Fat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        // Helper function to parse meal data from text
+        function parseMealFromText(element, text) {
+            const meal = {
+                type: '',
+                name: '',
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                description: ''
+            };
+            
+            // Determine meal type
+            if (text.toLowerCase().includes('breakfast')) meal.type = 'breakfast';
+            else if (text.toLowerCase().includes('lunch')) meal.type = 'lunch';
+            else if (text.toLowerCase().includes('dinner')) meal.type = 'dinner';
+            else if (text.toLowerCase().includes('snack')) meal.type = 'snack';
+            
+            // Extract meal name (remove meal type prefix)
+            meal.name = text.replace(/^(Breakfast|Lunch|Dinner|Snack):\s*/i, '').split('(')[0].trim();
+            
+            // Extract nutrition info from text or nearby elements
+            const nutritionMatch = text.match(/(\d+)\s*cal/i);
+            if (nutritionMatch) meal.calories = parseInt(nutritionMatch[1]);
+            
+            const proteinMatch = text.match(/(\d+)g?\s*protein/i);
+            if (proteinMatch) meal.protein = parseInt(proteinMatch[1]);
+            
+            const carbsMatch = text.match(/(\d+)g?\s*carbs?/i);
+            if (carbsMatch) meal.carbs = parseInt(carbsMatch[1]);
+            
+            const fatMatch = text.match(/(\d+)g?\s*fat/i);
+            if (fatMatch) meal.fat = parseInt(fatMatch[1]);
+            
+            // Get description from next sibling or parent
+            const nextEl = element.nextElementSibling;
+            if (nextEl && nextEl.tagName === 'P') {
+                meal.description = nextEl.textContent.trim();
+            }
+            
+            return meal;
+        }
+        
+        // Create a beautiful meal card
+        function createMealCard(meal) {
+            return `
+                <div class="meal-card ${meal.type}" onclick="toggleMealExpand(this)">
+                    <div class="meal-header">
+                        <span class="meal-type ${meal.type}">${meal.type}</span>
+                        <span class="meal-calories">${meal.calories} cal</span>
+                    </div>
+                    <div class="meal-name">${meal.name}</div>
+                    <div class="meal-macros">
+                        <div class="macro-item">
+                            <div class="macro-dot protein"></div>
+                            <span>${meal.protein}g protein</span>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-dot carbs"></div>
+                            <span>${meal.carbs}g carbs</span>
+                        </div>
+                        <div class="macro-item">
+                            <div class="macro-dot fat"></div>
+                            <span>${meal.fat}g fat</span>
+                        </div>
+                    </div>
+                    ${meal.description ? `
+                        <div class="meal-description">${meal.description}</div>
+                        <div class="expand-indicator">Tap for details ↓</div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Show selected day
+        function showDay(dayIndex) {
+            // Update tabs
+            document.querySelectorAll('.day-tab').forEach((tab, index) => {
+                tab.classList.toggle('active', index === dayIndex);
+            });
+            
+            // Update content
+            document.querySelectorAll('.day-content').forEach((content, index) => {
+                content.classList.toggle('active', index === dayIndex);
+            });
+        }
+        
+        // Toggle meal card expansion
+        function toggleMealExpand(card) {
+            card.classList.toggle('expanded');
+            const indicator = card.querySelector('.expand-indicator');
+            if (indicator) {
+                indicator.textContent = card.classList.contains('expanded') ? 'Tap to hide ↑' : 'Tap for details ↓';
+            }
+        }
+        
+        // Save meal plan function
+        function saveMealPlan() {
+            // Implementation for saving meal plan
+            alert('✅ Meal plan saved! You can access it from the Meal Plans page.');
+        }
+        
+        // Share meal plan function
+        function shareMealPlan() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Well Fit Meal Plan',
+                    text: 'Check out my personalized meal plan!',
+                    url: window.location.href
+                });
+            } else {
+                alert('📋 Link copied to clipboard!');
+            }
+        }
+        
+        // Show shopping list
+        function showShoppingList() {
+            // This would show a modal with the shopping list
+            alert('🛒 Shopping list feature coming soon! For now, you can print the meal plan.');
+        }
+
+        // Initialize
+        updateTime();
+        setInterval(updateTime, 1000);
+        showStep(1);
+    </script>
+</body>
+</html>

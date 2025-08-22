@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - 10 Hexagon Variations</title>
+</head>
+<body style="margin: 0; padding: 15px; background: #0f0f0f; color: white; font-family: -apple-system, Arial;">
+    <h2>Well Fit - 10 Hexagon Variations 🔥</h2>
+    <p style="color: #888;">Flame fully inside hexagon with WF - no white backgrounds</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 25px;">
+        
+        <div>
+            <h3>1. Flame Top + WF Bottom</h3>
+            <canvas id="canvas1" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'hex-flame-top-wf.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>2. WF Left + Flame Right</h3>
+            <canvas id="canvas2" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'hex-wf-left-flame.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>3. Flame Center + WF Around</h3>
+            <canvas id="canvas3" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'hex-flame-center-wf.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>4. Stacked: Flame, WF, Text</h3>
+            <canvas id="canvas4" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas4', 'hex-stacked.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>5. WF Top + Flame Below</h3>
+            <canvas id="canvas5" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas5', 'hex-wf-top-flame.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>6. Diagonal Split</h3>
+            <canvas id="canvas6" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas6', 'hex-diagonal.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>7. Flame Behind WF</h3>
+            <canvas id="canvas7" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas7', 'hex-flame-behind.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>8. Corner Layout</h3>
+            <canvas id="canvas8" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas8', 'hex-corner.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>9. Large WF + Small Flame</h3>
+            <canvas id="canvas9" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas9', 'hex-large-wf.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>10. Balanced Center</h3>
+            <canvas id="canvas10" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 200px; height: 200px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas10', 'hex-balanced.png')">Download</button>
+        </div>
+        
+    </div>
+    
+    <img id="sourceFlame" src="flame-source.webp" style="display: none;" onload="create10Variations()">
+    
+    <script>
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function drawHexagon(ctx, centerX, centerY, size, filled = true) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i - Math.PI / 6;
+                const x = centerX + size * Math.cos(angle);
+                const y = centerY + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            
+            if (filled) {
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+        }
+        
+        function clipHexagon(ctx, centerX, centerY, size) {
+            ctx.save();
+            drawHexagon(ctx, centerX, centerY, size);
+            ctx.clip();
+        }
+        
+        function create10Variations() {
+            const flameImg = document.getElementById('sourceFlame');
+            
+            // Variation 1: Flame Top + WF Bottom
+            const canvas1 = document.getElementById('canvas1');
+            const ctx1 = canvas1.getContext('2d');
+            
+            const gradient1 = ctx1.createLinearGradient(0, 0, 512, 512);
+            gradient1.addColorStop(0, '#4B9CD3');
+            gradient1.addColorStop(1, '#13294B');
+            roundedRect(ctx1, 0, 0, 512, 512, 90);
+            ctx1.fillStyle = gradient1;
+            ctx1.fill();
+            
+            // Hexagon outline
+            ctx1.strokeStyle = 'white';
+            ctx1.lineWidth = 8;
+            drawHexagon(ctx1, 256, 256, 120, false);
+            
+            // Clip to hexagon for content
+            clipHexagon(ctx1, 256, 256, 112);
+            
+            // Flame at top inside hex
+            ctx1.drawImage(flameImg, 216, 160, 80, 100);
+            
+            // WF at bottom inside hex
+            ctx1.fillStyle = 'white';
+            ctx1.font = 'bold 50px -apple-system, Arial';
+            ctx1.textAlign = 'center';
+            ctx1.fillText('WF', 256, 320);
+            
+            ctx1.restore();
+            
+            // Text below hexagon
+            ctx1.fillStyle = 'white';
+            ctx1.font = 'bold 18px -apple-system, Arial';
+            ctx1.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 2: WF Left + Flame Right
+            const canvas2 = document.getElementById('canvas2');
+            const ctx2 = canvas2.getContext('2d');
+            
+            const gradient2 = ctx2.createLinearGradient(0, 0, 512, 512);
+            gradient2.addColorStop(0, '#4B9CD3');
+            gradient2.addColorStop(1, '#13294B');
+            roundedRect(ctx2, 0, 0, 512, 512, 90);
+            ctx2.fillStyle = gradient2;
+            ctx2.fill();
+            
+            ctx2.strokeStyle = 'white';
+            ctx2.lineWidth = 8;
+            drawHexagon(ctx2, 256, 256, 120, false);
+            
+            clipHexagon(ctx2, 256, 256, 112);
+            
+            // WF on left
+            ctx2.fillStyle = 'white';
+            ctx2.font = 'bold 45px -apple-system, Arial';
+            ctx2.textAlign = 'center';
+            ctx2.fillText('WF', 200, 270);
+            
+            // Flame on right
+            ctx2.drawImage(flameImg, 280, 200, 60, 80);
+            
+            ctx2.restore();
+            
+            ctx2.fillStyle = 'white';
+            ctx2.font = 'bold 18px -apple-system, Arial';
+            ctx2.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 3: Flame Center + WF Around
+            const canvas3 = document.getElementById('canvas3');
+            const ctx3 = canvas3.getContext('2d');
+            
+            const gradient3 = ctx3.createLinearGradient(0, 0, 512, 512);
+            gradient3.addColorStop(0, '#4B9CD3');
+            gradient3.addColorStop(1, '#13294B');
+            roundedRect(ctx3, 0, 0, 512, 512, 90);
+            ctx3.fillStyle = gradient3;
+            ctx3.fill();
+            
+            ctx3.strokeStyle = 'white';
+            ctx3.lineWidth = 8;
+            drawHexagon(ctx3, 256, 256, 120, false);
+            
+            clipHexagon(ctx3, 256, 256, 112);
+            
+            // Central flame
+            ctx3.drawImage(flameImg, 226, 200, 60, 80);
+            
+            // W and F on sides
+            ctx3.fillStyle = 'white';
+            ctx3.font = 'bold 40px -apple-system, Arial';
+            ctx3.textAlign = 'center';
+            ctx3.fillText('W', 180, 270);
+            ctx3.fillText('F', 332, 270);
+            
+            ctx3.restore();
+            
+            ctx3.fillStyle = 'white';
+            ctx3.font = 'bold 18px -apple-system, Arial';
+            ctx3.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 4: Stacked: Flame, WF, Text
+            const canvas4 = document.getElementById('canvas4');
+            const ctx4 = canvas4.getContext('2d');
+            
+            const gradient4 = ctx4.createLinearGradient(0, 0, 512, 512);
+            gradient4.addColorStop(0, '#4B9CD3');
+            gradient4.addColorStop(1, '#13294B');
+            roundedRect(ctx4, 0, 0, 512, 512, 90);
+            ctx4.fillStyle = gradient4;
+            ctx4.fill();
+            
+            ctx4.strokeStyle = 'white';
+            ctx4.lineWidth = 8;
+            drawHexagon(ctx4, 256, 256, 120, false);
+            
+            clipHexagon(ctx4, 256, 256, 112);
+            
+            // Stacked layout
+            ctx4.drawImage(flameImg, 226, 170, 60, 70);
+            
+            ctx4.fillStyle = 'white';
+            ctx4.font = 'bold 40px -apple-system, Arial';
+            ctx4.textAlign = 'center';
+            ctx4.fillText('WF', 256, 290);
+            
+            ctx4.font = 'bold 14px -apple-system, Arial';
+            ctx4.fillText('FITNESS', 256, 320);
+            
+            ctx4.restore();
+            
+            ctx4.fillStyle = 'white';
+            ctx4.font = 'bold 18px -apple-system, Arial';
+            ctx4.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 5: WF Top + Flame Below
+            const canvas5 = document.getElementById('canvas5');
+            const ctx5 = canvas5.getContext('2d');
+            
+            const gradient5 = ctx5.createLinearGradient(0, 0, 512, 512);
+            gradient5.addColorStop(0, '#4B9CD3');
+            gradient5.addColorStop(1, '#13294B');
+            roundedRect(ctx5, 0, 0, 512, 512, 90);
+            ctx5.fillStyle = gradient5;
+            ctx5.fill();
+            
+            ctx5.strokeStyle = 'white';
+            ctx5.lineWidth = 8;
+            drawHexagon(ctx5, 256, 256, 120, false);
+            
+            clipHexagon(ctx5, 256, 256, 112);
+            
+            // WF at top
+            ctx5.fillStyle = 'white';
+            ctx5.font = 'bold 50px -apple-system, Arial';
+            ctx5.textAlign = 'center';
+            ctx5.fillText('WF', 256, 220);
+            
+            // Flame below
+            ctx5.drawImage(flameImg, 216, 240, 80, 90);
+            
+            ctx5.restore();
+            
+            ctx5.fillStyle = 'white';
+            ctx5.font = 'bold 18px -apple-system, Arial';
+            ctx5.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 6: Diagonal Split
+            const canvas6 = document.getElementById('canvas6');
+            const ctx6 = canvas6.getContext('2d');
+            
+            const gradient6 = ctx6.createLinearGradient(0, 0, 512, 512);
+            gradient6.addColorStop(0, '#4B9CD3');
+            gradient6.addColorStop(1, '#13294B');
+            roundedRect(ctx6, 0, 0, 512, 512, 90);
+            ctx6.fillStyle = gradient6;
+            ctx6.fill();
+            
+            ctx6.strokeStyle = 'white';
+            ctx6.lineWidth = 8;
+            drawHexagon(ctx6, 256, 256, 120, false);
+            
+            clipHexagon(ctx6, 256, 256, 112);
+            
+            // Diagonal layout
+            ctx6.drawImage(flameImg, 180, 180, 60, 80);
+            
+            ctx6.fillStyle = 'white';
+            ctx6.font = 'bold 45px -apple-system, Arial';
+            ctx6.textAlign = 'center';
+            ctx6.fillText('WF', 310, 310);
+            
+            ctx6.restore();
+            
+            ctx6.fillStyle = 'white';
+            ctx6.font = 'bold 18px -apple-system, Arial';
+            ctx6.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 7: Flame Behind WF
+            const canvas7 = document.getElementById('canvas7');
+            const ctx7 = canvas7.getContext('2d');
+            
+            const gradient7 = ctx7.createLinearGradient(0, 0, 512, 512);
+            gradient7.addColorStop(0, '#4B9CD3');
+            gradient7.addColorStop(1, '#13294B');
+            roundedRect(ctx7, 0, 0, 512, 512, 90);
+            ctx7.fillStyle = gradient7;
+            ctx7.fill();
+            
+            ctx7.strokeStyle = 'white';
+            ctx7.lineWidth = 8;
+            drawHexagon(ctx7, 256, 256, 120, false);
+            
+            clipHexagon(ctx7, 256, 256, 112);
+            
+            // Large flame behind
+            ctx7.drawImage(flameImg, 196, 180, 120, 140);
+            
+            // WF in front with outline
+            ctx7.strokeStyle = '#13294B';
+            ctx7.lineWidth = 4;
+            ctx7.font = 'bold 80px -apple-system, Arial';
+            ctx7.textAlign = 'center';
+            ctx7.strokeText('WF', 256, 270);
+            
+            ctx7.fillStyle = 'white';
+            ctx7.fillText('WF', 256, 270);
+            
+            ctx7.restore();
+            
+            ctx7.fillStyle = 'white';
+            ctx7.font = 'bold 18px -apple-system, Arial';
+            ctx7.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 8: Corner Layout
+            const canvas8 = document.getElementById('canvas8');
+            const ctx8 = canvas8.getContext('2d');
+            
+            const gradient8 = ctx8.createLinearGradient(0, 0, 512, 512);
+            gradient8.addColorStop(0, '#4B9CD3');
+            gradient8.addColorStop(1, '#13294B');
+            roundedRect(ctx8, 0, 0, 512, 512, 90);
+            ctx8.fillStyle = gradient8;
+            ctx8.fill();
+            
+            ctx8.strokeStyle = 'white';
+            ctx8.lineWidth = 8;
+            drawHexagon(ctx8, 256, 256, 120, false);
+            
+            clipHexagon(ctx8, 256, 256, 112);
+            
+            // Corner positions
+            ctx8.drawImage(flameImg, 280, 170, 50, 70);
+            
+            ctx8.fillStyle = 'white';
+            ctx8.font = 'bold 60px -apple-system, Arial';
+            ctx8.textAlign = 'center';
+            ctx8.fillText('WF', 220, 300);
+            
+            ctx8.restore();
+            
+            ctx8.fillStyle = 'white';
+            ctx8.font = 'bold 18px -apple-system, Arial';
+            ctx8.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 9: Large WF + Small Flame
+            const canvas9 = document.getElementById('canvas9');
+            const ctx9 = canvas9.getContext('2d');
+            
+            const gradient9 = ctx9.createLinearGradient(0, 0, 512, 512);
+            gradient9.addColorStop(0, '#4B9CD3');
+            gradient9.addColorStop(1, '#13294B');
+            roundedRect(ctx9, 0, 0, 512, 512, 90);
+            ctx9.fillStyle = gradient9;
+            ctx9.fill();
+            
+            ctx9.strokeStyle = 'white';
+            ctx9.lineWidth = 8;
+            drawHexagon(ctx9, 256, 256, 120, false);
+            
+            clipHexagon(ctx9, 256, 256, 112);
+            
+            // Large WF
+            ctx9.fillStyle = 'white';
+            ctx9.font = 'bold 90px -apple-system, Arial';
+            ctx9.textAlign = 'center';
+            ctx9.fillText('WF', 256, 280);
+            
+            // Small flame accent
+            ctx9.drawImage(flameImg, 300, 190, 40, 50);
+            
+            ctx9.restore();
+            
+            ctx9.fillStyle = 'white';
+            ctx9.font = 'bold 18px -apple-system, Arial';
+            ctx9.fillText('NUTRITION & FITNESS', 256, 420);
+            
+            // Variation 10: Balanced Center
+            const canvas10 = document.getElementById('canvas10');
+            const ctx10 = canvas10.getContext('2d');
+            
+            const gradient10 = ctx10.createLinearGradient(0, 0, 512, 512);
+            gradient10.addColorStop(0, '#4B9CD3');
+            gradient10.addColorStop(1, '#13294B');
+            roundedRect(ctx10, 0, 0, 512, 512, 90);
+            ctx10.fillStyle = gradient10;
+            ctx10.fill();
+            
+            ctx10.strokeStyle = 'white';
+            ctx10.lineWidth = 8;
+            drawHexagon(ctx10, 256, 256, 120, false);
+            
+            clipHexagon(ctx10, 256, 256, 112);
+            
+            // Perfectly balanced
+            ctx10.drawImage(flameImg, 206, 190, 70, 85);
+            
+            ctx10.fillStyle = 'white';
+            ctx10.font = 'bold 55px -apple-system, Arial';
+            ctx10.textAlign = 'center';
+            ctx10.fillText('WF', 290, 270);
+            
+            ctx10.restore();
+            
+            ctx10.fillStyle = 'white';
+            ctx10.font = 'bold 18px -apple-system, Arial';
+            ctx10.fillText('NUTRITION & FITNESS', 256, 420);
+        }
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #4B9CD3, #13294B);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 8px 16px;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.4);
+        }
+        h3 {
+            color: #4B9CD3;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+    </style>
+</body>
+</html>

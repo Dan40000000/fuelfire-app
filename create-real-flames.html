@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - Real Flame Icons</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #0f0f0f; color: white; font-family: -apple-system, Arial;">
+    <h2>Well Fit - REAL Flame Icons 🔥</h2>
+    <p style="color: #888;">Clean, sharp flame clipart style like Vexels designs</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px;">
+        
+        <div>
+            <h3>Sharp Flame Center</h3>
+            <canvas id="canvas1" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas1', 'sharp-flame.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Layered Flame</h3>
+            <canvas id="canvas2" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas2', 'layered-flame.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Classic Fire Icon</h3>
+            <canvas id="canvas3" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas3', 'classic-fire.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Triple Layer Flame</h3>
+            <canvas id="canvas4" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas4', 'triple-flame.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Flame + WF Badge</h3>
+            <canvas id="canvas5" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas5', 'flame-wf-badge.png')">Download</button>
+        </div>
+        
+        <div>
+            <h3>Side Flame + WF</h3>
+            <canvas id="canvas6" width="256" height="256" style="border: 2px solid #4B9CD3; border-radius: 45px; background: white; width: 256px; height: 256px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('canvas6', 'side-flame-wf.png')">Download</button>
+        </div>
+        
+    </div>
+    
+    <script>
+        // Common rounded rect function
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        // PROPER flame shape like clipart/SVG designs
+        function drawSharpFlame(ctx, x, y, width, height) {
+            const centerX = x + width / 2;
+            
+            ctx.beginPath();
+            // Start at bottom center
+            ctx.moveTo(centerX, y + height);
+            
+            // Left side - sharp flame curves
+            ctx.bezierCurveTo(
+                x + width * 0.15, y + height * 0.85,
+                x + width * 0.05, y + height * 0.65,
+                x + width * 0.25, y + height * 0.45
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.1, y + height * 0.25,
+                x + width * 0.2, y + height * 0.1,
+                x + width * 0.4, y + height * 0.05
+            );
+            
+            // Top point - sharp flame tip
+            ctx.bezierCurveTo(
+                x + width * 0.45, y,
+                x + width * 0.55, y,
+                x + width * 0.6, y + height * 0.05
+            );
+            
+            // Right side - mirror of left
+            ctx.bezierCurveTo(
+                x + width * 0.8, y + height * 0.1,
+                x + width * 0.9, y + height * 0.25,
+                x + width * 0.75, y + height * 0.45
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.95, y + height * 0.65,
+                x + width * 0.85, y + height * 0.85,
+                centerX, y + height
+            );
+            
+            ctx.closePath();
+        }
+        
+        // Inner flame for layered effect
+        function drawInnerFlame(ctx, x, y, width, height) {
+            const centerX = x + width / 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, y + height);
+            
+            // Smaller, more centered flame
+            ctx.bezierCurveTo(
+                x + width * 0.25, y + height * 0.8,
+                x + width * 0.2, y + height * 0.6,
+                x + width * 0.35, y + height * 0.4
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.25, y + height * 0.2,
+                x + width * 0.4, y + height * 0.1,
+                centerX, y + height * 0.05
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.6, y + height * 0.1,
+                x + width * 0.75, y + height * 0.2,
+                x + width * 0.65, y + height * 0.4
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.8, y + height * 0.6,
+                x + width * 0.75, y + height * 0.8,
+                centerX, y + height
+            );
+            
+            ctx.closePath();
+        }
+        
+        // Core flame (innermost)
+        function drawCoreFlame(ctx, x, y, width, height) {
+            const centerX = x + width / 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, y + height);
+            
+            ctx.bezierCurveTo(
+                x + width * 0.35, y + height * 0.75,
+                x + width * 0.3, y + height * 0.5,
+                x + width * 0.42, y + height * 0.25
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.45, y + height * 0.1,
+                x + width * 0.55, y + height * 0.1,
+                x + width * 0.58, y + height * 0.25
+            );
+            ctx.bezierCurveTo(
+                x + width * 0.7, y + height * 0.5,
+                x + width * 0.65, y + height * 0.75,
+                centerX, y + height
+            );
+            
+            ctx.closePath();
+        }
+        
+        const canvases = [];
+        for (let i = 1; i <= 6; i++) {
+            canvases[i] = document.getElementById(`canvas${i}`);
+        }
+        
+        // Icon 1: Sharp Flame Center
+        const ctx1 = canvases[1].getContext('2d');
+        const gradient1 = ctx1.createLinearGradient(0, 0, 256, 256);
+        gradient1.addColorStop(0, '#4B9CD3');
+        gradient1.addColorStop(1, '#13294B');
+        roundedRect(ctx1, 0, 0, 256, 256, 45);
+        ctx1.fillStyle = gradient1;
+        ctx1.fill();
+        
+        // Sharp flame with gradient
+        const flameGrad1 = ctx1.createLinearGradient(0, 70, 0, 170);
+        flameGrad1.addColorStop(0, '#FF6B35');
+        flameGrad1.addColorStop(0.4, '#F7931E');
+        flameGrad1.addColorStop(0.8, '#FFD700');
+        flameGrad1.addColorStop(1, '#FF4444');
+        ctx1.fillStyle = flameGrad1;
+        drawSharpFlame(ctx1, 88, 70, 80, 100);
+        ctx1.fill();
+        
+        // WF below
+        ctx1.fillStyle = 'white';
+        ctx1.font = 'bold 36px -apple-system, Arial';
+        ctx1.textAlign = 'center';
+        ctx1.fillText('WF', 128, 210);
+        
+        // Icon 2: Layered Flame
+        const ctx2 = canvases[2].getContext('2d');
+        const gradient2 = ctx2.createLinearGradient(0, 0, 256, 256);
+        gradient2.addColorStop(0, '#4B9CD3');
+        gradient2.addColorStop(1, '#13294B');
+        roundedRect(ctx2, 0, 0, 256, 256, 45);
+        ctx2.fillStyle = gradient2;
+        ctx2.fill();
+        
+        // Outer flame (red)
+        ctx2.fillStyle = '#FF4444';
+        drawSharpFlame(ctx2, 88, 70, 80, 100);
+        ctx2.fill();
+        
+        // Inner flame (orange)
+        ctx2.fillStyle = '#F7931E';
+        drawInnerFlame(ctx2, 92, 74, 72, 92);
+        ctx2.fill();
+        
+        // Core flame (yellow)
+        ctx2.fillStyle = '#FFD700';
+        drawCoreFlame(ctx2, 96, 78, 64, 84);
+        ctx2.fill();
+        
+        // WF below
+        ctx2.fillStyle = 'white';
+        ctx2.font = 'bold 36px -apple-system, Arial';
+        ctx2.textAlign = 'center';
+        ctx2.fillText('WF', 128, 210);
+        
+        // Icon 3: Classic Fire Icon
+        const ctx3 = canvases[3].getContext('2d');
+        const gradient3 = ctx3.createLinearGradient(0, 0, 256, 256);
+        gradient3.addColorStop(0, '#4B9CD3');
+        gradient3.addColorStop(1, '#13294B');
+        roundedRect(ctx3, 0, 0, 256, 256, 45);
+        ctx3.fillStyle = gradient3;
+        ctx3.fill();
+        
+        // Classic flame shape - single color with shadow
+        ctx3.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx3.shadowBlur = 8;
+        ctx3.shadowOffsetY = 4;
+        
+        ctx3.fillStyle = '#FF6B35';
+        drawSharpFlame(ctx3, 88, 70, 80, 100);
+        ctx3.fill();
+        
+        ctx3.shadowColor = 'transparent';
+        
+        // Inner highlight
+        ctx3.fillStyle = '#FFD700';
+        drawCoreFlame(ctx3, 96, 78, 64, 84);
+        ctx3.fill();
+        
+        // WF below
+        ctx3.fillStyle = 'white';
+        ctx3.font = 'bold 36px -apple-system, Arial';
+        ctx3.textAlign = 'center';
+        ctx3.fillText('WF', 128, 210);
+        
+        // Icon 4: Triple Layer Flame
+        const ctx4 = canvases[4].getContext('2d');
+        const gradient4 = ctx4.createLinearGradient(0, 0, 256, 256);
+        gradient4.addColorStop(0, '#4B9CD3');
+        gradient4.addColorStop(1, '#13294B');
+        roundedRect(ctx4, 0, 0, 256, 256, 45);
+        ctx4.fillStyle = gradient4;
+        ctx4.fill();
+        
+        // Outer layer - dark red
+        ctx4.fillStyle = '#CC1100';
+        drawSharpFlame(ctx4, 88, 70, 80, 100);
+        ctx4.fill();
+        
+        // Middle layer - bright orange
+        ctx4.fillStyle = '#FF6600';
+        drawInnerFlame(ctx4, 92, 74, 72, 92);
+        ctx4.fill();
+        
+        // Inner layer - bright yellow
+        ctx4.fillStyle = '#FFDD00';
+        drawCoreFlame(ctx4, 96, 78, 64, 84);
+        ctx4.fill();
+        
+        // WF below
+        ctx4.fillStyle = 'white';
+        ctx4.font = 'bold 36px -apple-system, Arial';
+        ctx4.textAlign = 'center';
+        ctx4.fillText('WF', 128, 210);
+        
+        // Icon 5: Flame + WF Badge
+        const ctx5 = canvases[5].getContext('2d');
+        const gradient5 = ctx5.createLinearGradient(0, 0, 256, 256);
+        gradient5.addColorStop(0, '#4B9CD3');
+        gradient5.addColorStop(1, '#13294B');
+        roundedRect(ctx5, 0, 0, 256, 256, 45);
+        ctx5.fillStyle = gradient5;
+        ctx5.fill();
+        
+        // White circle badge
+        ctx5.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx5.beginPath();
+        ctx5.arc(128, 120, 70, 0, Math.PI * 2);
+        ctx5.fill();
+        
+        // Flame in badge
+        ctx5.fillStyle = '#FF4444';
+        drawSharpFlame(ctx5, 98, 80, 60, 80);
+        ctx5.fill();
+        
+        ctx5.fillStyle = '#F7931E';
+        drawInnerFlame(ctx5, 102, 84, 52, 72);
+        ctx5.fill();
+        
+        ctx5.fillStyle = '#FFD700';
+        drawCoreFlame(ctx5, 106, 88, 44, 64);
+        ctx5.fill();
+        
+        // WF below badge
+        ctx5.fillStyle = 'white';
+        ctx5.font = 'bold 28px -apple-system, Arial';
+        ctx5.textAlign = 'center';
+        ctx5.fillText('WF', 128, 225);
+        
+        // Icon 6: Side Flame + WF
+        const ctx6 = canvases[6].getContext('2d');
+        const gradient6 = ctx6.createLinearGradient(0, 0, 256, 256);
+        gradient6.addColorStop(0, '#4B9CD3');
+        gradient6.addColorStop(1, '#13294B');
+        roundedRect(ctx6, 0, 0, 256, 256, 45);
+        ctx6.fillStyle = gradient6;
+        ctx6.fill();
+        
+        // Flame on left side
+        ctx6.fillStyle = '#FF4444';
+        drawSharpFlame(ctx6, 40, 80, 60, 90);
+        ctx6.fill();
+        
+        ctx6.fillStyle = '#F7931E';
+        drawInnerFlame(ctx6, 44, 84, 52, 82);
+        ctx6.fill();
+        
+        ctx6.fillStyle = '#FFD700';
+        drawCoreFlame(ctx6, 48, 88, 44, 74);
+        ctx6.fill();
+        
+        // Large WF on right
+        ctx6.fillStyle = 'white';
+        ctx6.font = 'bold 60px -apple-system, Arial';
+        ctx6.textAlign = 'center';
+        ctx6.fillText('WF', 180, 135);
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            
+            // Create a higher resolution version (512x512)
+            const hiResCanvas = document.createElement('canvas');
+            hiResCanvas.width = 512;
+            hiResCanvas.height = 512;
+            const hiResCtx = hiResCanvas.getContext('2d');
+            
+            // Scale up 2x for crisp quality
+            hiResCtx.scale(2, 2);
+            hiResCtx.drawImage(canvas, 0, 0);
+            
+            // Download the high-res version
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = hiResCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #FF6B35, #F7931E);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px 16px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+        h3 {
+            color: #4B9CD3;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+</html>

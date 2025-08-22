@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Well Fit - Final Icon #7 Refined</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #0f0f0f; color: white; font-family: -apple-system, Arial;">
+    <h2>Well Fit - Final Icon #7 Refined 🔥</h2>
+    <p style="color: #888;">WF lowered to base of flame + evenly spaced "Nutrition & Fitness"</p>
+    
+    <div style="display: flex; gap: 40px; justify-content: center; margin-top: 40px;">
+        
+        <div style="text-align: center;">
+            <h3>Final Icon - Ready for App Store</h3>
+            <canvas id="finalIcon" width="512" height="512" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 300px; height: 300px;"></canvas>
+            <br>
+            <button onclick="downloadIcon('finalIcon', 'wellfit-final-icon-512x512.png')" style="margin-top: 15px; padding: 12px 24px; font-size: 14px;">Download Final Icon 512x512</button>
+            <br>
+            <button onclick="downloadIcon192()" style="margin-top: 10px; padding: 10px 20px; font-size: 12px;">Download 192x192 Version</button>
+        </div>
+        
+    </div>
+    
+    <img id="sourceFlame" src="flame-source.webp" style="display: none;" onload="createFinalIcon()">
+    
+    <script>
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function drawHexagon(ctx, centerX, centerY, size, filled = true) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i - Math.PI / 6;
+                const x = centerX + size * Math.cos(angle);
+                const y = centerY + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            
+            if (filled) {
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+        }
+        
+        function clipHexagon(ctx, centerX, centerY, size) {
+            ctx.save();
+            drawHexagon(ctx, centerX, centerY, size);
+            ctx.clip();
+        }
+        
+        function createFinalIcon() {
+            const flameImg = document.getElementById('sourceFlame');
+            const canvas = document.getElementById('finalIcon');
+            const ctx = canvas.getContext('2d');
+            
+            // Carolina Blue gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+            gradient.addColorStop(0, '#4B9CD3');
+            gradient.addColorStop(1, '#13294B');
+            roundedRect(ctx, 0, 0, 512, 512, 90);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // White hexagon outline
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 8;
+            drawHexagon(ctx, 256, 256, 120, false);
+            
+            // Clip content to hexagon
+            clipHexagon(ctx, 256, 256, 112);
+            
+            // Large flame backdrop - positioned higher
+            ctx.drawImage(flameImg, 176, 160, 160, 180);
+            
+            // WF at the base of the flame - lowered position
+            ctx.strokeStyle = '#13294B';
+            ctx.lineWidth = 6;
+            ctx.font = 'bold 85px -apple-system, Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeText('WF', 256, 310);
+            
+            ctx.fillStyle = 'white';
+            ctx.fillText('WF', 256, 310);
+            
+            ctx.restore();
+            
+            // Evenly spaced "Nutrition & Fitness" below hexagon
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 20px -apple-system, Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('NUTRITION', 256, 410);
+            ctx.fillText('&', 256, 435);
+            ctx.fillText('FITNESS', 256, 460);
+        }
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadIcon192() {
+            const sourceCanvas = document.getElementById('finalIcon');
+            
+            // Create 192x192 version
+            const smallCanvas = document.createElement('canvas');
+            smallCanvas.width = 192;
+            smallCanvas.height = 192;
+            const smallCtx = smallCanvas.getContext('2d');
+            
+            // Scale down from 512x512 to 192x192
+            smallCtx.drawImage(sourceCanvas, 0, 0, 512, 512, 0, 0, 192, 192);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = 'wellfit-icon-192x192.png';
+            link.href = smallCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #4B9CD3, #13294B);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.4);
+        }
+        h3 {
+            color: #4B9CD3;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+    </style>
+</body>
+</html>
