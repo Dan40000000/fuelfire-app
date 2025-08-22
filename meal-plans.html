@@ -172,6 +172,13 @@
                         <button onclick="createNewPlan()" class="create-plan-btn">
                             ✨ Create New Meal Plan
                         </button>
+                        
+                        <button onclick="uploadMealPlan()" class="create-plan-btn" style="background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%); margin-top: 15px;">
+                            📷 Upload Meal Plan Photo
+                        </button>
+                        
+                        <!-- Hidden file input for image upload -->
+                        <input type="file" id="meal-plan-upload" accept="image/*" style="display: none;" onchange="handleMealPlanUpload(event)">
                     </div>
                 </div>
             </div>
@@ -315,6 +322,122 @@
             } catch (error) {
                 console.error('Error saving meal plans:', error);
             }
+        }
+
+        function uploadMealPlan() {
+            // Trigger the hidden file input
+            document.getElementById('meal-plan-upload').click();
+        }
+
+        async function handleMealPlanUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check if it's an image
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file (JPG, PNG, etc.)');
+                return;
+            }
+
+            // Show loading state
+            const uploadBtn = event.target.previousElementSibling;
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.innerHTML = '⏳ Processing image...';
+            uploadBtn.disabled = true;
+
+            try {
+                // Convert image to base64
+                const base64 = await convertToBase64(file);
+                
+                // Send to API for processing
+                const response = await fetch('/api/claude-meal-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageUpload: true,
+                        image: base64,
+                        userId: 'session_' + Date.now(),
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to process image');
+                }
+
+                const result = await response.json();
+                
+                // Save the extracted meal plan
+                const mealPlan = {
+                    id: 'upload_' + Date.now(),
+                    mealPlan: result.mealPlan || result.content,
+                    metadata: {
+                        goal: 'custom',
+                        planDuration: 'custom',
+                        source: 'uploaded',
+                        generatedAt: new Date().toISOString()
+                    },
+                    createdAt: new Date().toISOString()
+                };
+
+                // Add to saved plans
+                const savedPlans = getMealPlansFromStorage();
+                savedPlans.unshift(mealPlan);
+                saveMealPlansToStorage(savedPlans);
+                
+                // Reload the plans list
+                loadMealPlans();
+                
+                // Show success message
+                showUploadSuccess();
+                
+            } catch (error) {
+                console.error('Error uploading meal plan:', error);
+                alert('Failed to process the image. Please try again or use the quiz to create a meal plan.');
+            } finally {
+                // Reset button
+                uploadBtn.innerHTML = originalText;
+                uploadBtn.disabled = false;
+                // Clear the file input
+                event.target.value = '';
+            }
+        }
+
+        function convertToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function showUploadSuccess() {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #4CAF50, #45a049);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                text-align: center;
+                z-index: 10000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            successDiv.innerHTML = `
+                <h3 style="margin: 0 0 10px 0;">✅ Success!</h3>
+                <p style="margin: 0;">Your meal plan has been uploaded and saved.</p>
+            `;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
         }
 
         // Initialize

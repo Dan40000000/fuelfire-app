@@ -17,9 +17,38 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { quizData, userId } = req.body;
+        const { quizData, userId, imageUpload, image } = req.body;
 
-        // Validate required data
+        // Handle image upload
+        if (imageUpload && image) {
+            console.log(`📷 Processing uploaded meal plan image for user: ${userId || 'anonymous'}`);
+            
+            // Check if API key exists
+            if (!process.env.CLAUDE_API_KEY) {
+                console.error('❌ CLAUDE_API_KEY not found in environment variables');
+                throw new Error('API configuration error - Claude API key not configured');
+            }
+            
+            // Extract meal plan from image
+            const extractedMealPlan = await extractMealPlanFromImage(image);
+            
+            console.log(`✅ Successfully extracted meal plan from image for user: ${userId || 'anonymous'}`);
+            
+            return res.status(200).json({
+                success: true,
+                mealPlan: extractedMealPlan,
+                content: extractedMealPlan,
+                metadata: {
+                    generatedAt: new Date().toISOString(),
+                    planDuration: 'custom',
+                    goal: 'custom',
+                    source: 'uploaded',
+                    userId: userId || 'anonymous'
+                }
+            });
+        }
+
+        // Regular quiz-based generation
         if (!quizData) {
             return res.status(400).json({ error: 'Quiz data is required' });
         }
@@ -88,6 +117,88 @@ async function callClaudeAPI(prompt) {
 
     if (!response.ok) {
         throw new Error(`Claude API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+}
+
+async function extractMealPlanFromImage(imageData) {
+    // Extract the base64 data and media type
+    const [header, base64] = imageData.split(',');
+    const mediaType = header.match(/data:image\/(.*?);/)[1];
+    
+    const prompt = `Analyze this image of a meal plan and extract all the information into a structured format.
+
+Please format the extracted meal plan EXACTLY like this:
+
+### Day 1
+
+**🍳 Breakfast:**
+[meal name and description]
+Calories: [number]
+
+**🥗 Lunch:**
+[meal name and description]
+Calories: [number]
+
+**🍽️ Dinner:**
+[meal name and description]
+Calories: [number]
+
+**🍎 Snacks:**
+[snack items]
+Calories: [number]
+
+**Day Total:** [total] calories | P: [protein]g | C: [carbs]g | F: [fat]g
+
+[Continue for all days in the meal plan]
+
+### Shopping List
+[Extract any shopping list if visible]
+
+Important:
+- Extract ALL meals and days visible in the image
+- Include calorie counts and macros if shown
+- Keep the exact formatting with emojis
+- If some information is not visible, make reasonable estimates based on the meals
+- Organize by days if the plan shows multiple days
+- If it's a weekly plan, expand it to cover 7-14 days as appropriate`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.CLAUDE_API_KEY,
+            'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 4000,
+            messages: [{
+                role: 'user',
+                content: [
+                    {
+                        type: 'text',
+                        text: prompt
+                    },
+                    {
+                        type: 'image',
+                        source: {
+                            type: 'base64',
+                            media_type: `image/${mediaType}`,
+                            data: base64
+                        }
+                    }
+                ]
+            }]
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        console.error('Claude API error:', error);
+        throw new Error(`Failed to extract meal plan from image: ${response.status}`);
     }
 
     const data = await response.json();
