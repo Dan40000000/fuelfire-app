@@ -440,3 +440,151 @@ body {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 10px;
+    }
+    
+    .phone-container {
+        width: 100%;
+        max-width: 420px;
+        height: 100vh;
+        max-height: none;
+        min-height: 100vh;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+    
+    .screen {
+        border-radius: 0;
+        overflow-x: hidden;
+    }
+    
+    .header {
+        padding: 15px 20px;
+    }
+    
+    .content {
+        padding: 20px;
+    }
+    
+    /* Make buttons more touch-friendly */
+    .action-btn, .quiz-btn, .create-plan-btn {
+        min-height: 44px;
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+    
+    /* Adjust grid layouts for mobile */
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .macro-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    /* Fix text sizes */
+    .header-title {
+        font-size: 22px;
+    }
+    
+    h1 { font-size: 28px; }
+    h2 { font-size: 24px; }
+    h3 { font-size: 20px; }
+    
+    /* Sidebar adjustments */
+    .sidebar {
+        width: 280px;
+    }
+    
+    /* Form inputs */
+    input, select, textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 12px;
+    }
+    
+    /* Progress cards */
+    .goal-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Meal plan cards */
+    .meal-card {
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .phone-container {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .content {
+        padding: 15px;
+    }
+    
+    .header {
+        padding: 12px 15px;
+    }
+    
+    .header-title {
+        font-size: 20px;
+    }
+    
+    .action-btn, .quiz-btn, .create-plan-btn {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+    
+    .macro-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Stack macro items vertically on very small screens */
+    .nutrition-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    .phone-container {
+        height: 100vh;
+        max-height: none;
+    }
+    
+    .content {
+        padding: 10px 20px;
+    }
+    
+    .header {
+        padding: 8px 20px;
+    }
+}
+
+/* Large screens - maintain phone-like experience */
+@media (min-width: 1024px) {
+    .phone-container {
+        width: 375px;
+        height: 812px;
+        border-radius: 40px;
+        padding: 8px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    
+    body {
+        align-items: center;
+        padding: 20px;
+    }
+}
