@@ -135,19 +135,19 @@ Please format the extracted meal plan EXACTLY like this:
 ### Day 1
 
 **🍳 Breakfast:**
-[meal name and description]
+[meal with specific quantities - e.g., "3 eggs scrambled, 2 slices whole wheat toast, 1 tbsp butter"]
 Calories: [number]
 
 **🥗 Lunch:**
-[meal name and description]
+[meal with specific quantities - e.g., "6oz grilled chicken breast, 1.5 cups mixed greens, 1/2 avocado"]
 Calories: [number]
 
 **🍽️ Dinner:**
-[meal name and description]
+[meal with specific quantities - e.g., "6oz salmon fillet, 1 cup sweet potato, 1 cup steamed broccoli"]
 Calories: [number]
 
 **🍎 Snacks:**
-[snack items]
+[snack items with quantities - e.g., "1 cup Greek yogurt, 1/4 cup blueberries"]
 Calories: [number]
 
 **Day Total:** [total] calories | P: [protein]g | C: [carbs]g | F: [fat]g
@@ -222,15 +222,17 @@ Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
 ${userInfo}
 ${varietyInstructions}
 
+IMPORTANT: Include specific quantities for each ingredient (6oz chicken breast, 1 cup rice, 2 tbsp olive oil, etc.)
+
 Format each day exactly like this:
 ### Day X:
-**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍳 Breakfast:** 3 eggs scrambled, 2 slices whole wheat toast, 1 tbsp butter - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** 6oz grilled chicken breast, 1.5 cups mixed greens, 1/2 avocado, 2 tbsp olive oil dressing - Cal: X | P: Xg | C: Xg | F: Xg
+**🍽️ Dinner:** 6oz salmon fillet, 1 cup sweet potato, 1 cup steamed broccoli, 1 tsp olive oil - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** 1 cup Greek yogurt, 1/4 cup blueberries, 1 tbsp honey - Cal: X | P: Xg | C: Xg | F: Xg
 **Day Total:** X cal | P: Xg | C: Xg | F: Xg
 
-Include ALL 7 days. Keep meal descriptions concise. ALWAYS include complete macro totals for each day. Start with Day 1.`;
+Include ALL 7 days. ALWAYS specify exact quantities for every ingredient. Keep meal descriptions with quantities but concise. ALWAYS include complete macro totals for each day. Start with Day 1.`;
 
     return await callClaudeAPI(prompt);
 }
@@ -247,15 +249,17 @@ Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
 ${userInfo}
 ${varietyInstructions}
 
+IMPORTANT: Include specific quantities for each ingredient (6oz chicken breast, 1 cup rice, 2 tbsp olive oil, etc.)
+
 Format each day exactly like this:
 ### Day X:
-**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍳 Breakfast:** 3 eggs scrambled, 2 slices whole wheat toast, 1 tbsp butter - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** 6oz grilled chicken breast, 1.5 cups mixed greens, 1/2 avocado, 2 tbsp olive oil dressing - Cal: X | P: Xg | C: Xg | F: Xg
+**🍽️ Dinner:** 6oz salmon fillet, 1 cup sweet potato, 1 cup steamed broccoli, 1 tsp olive oil - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** 1 cup Greek yogurt, 1/4 cup blueberries, 1 tbsp honey - Cal: X | P: Xg | C: Xg | F: Xg
 **Day Total:** X cal | P: Xg | C: Xg | F: Xg
 
-Include ALL 7 days (Days 8-14). Keep meal descriptions concise. ALWAYS include complete macro totals for each day. Start with Day 8.`;
+Include ALL 7 days (Days 8-14). ALWAYS specify exact quantities for every ingredient. Keep meal descriptions with quantities but concise. ALWAYS include complete macro totals for each day. Start with Day 8.`;
 
     return await callClaudeAPI(prompt);
 }
@@ -336,15 +340,17 @@ Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
 ${userInfo}
 ${varietyInstructions}
 
+IMPORTANT: Include specific quantities for each ingredient (6oz chicken breast, 1 cup rice, 2 tbsp olive oil, etc.)
+
 Format each day:
 ### Day X:
-**🍳 Breakfast:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🥗 Lunch:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg  
-**🍽️ Dinner:** [meal] - Cal: X | P: Xg | C: Xg | F: Xg
-**🍎 Snacks:** [snack] - Cal: X | P: Xg | C: Xg | F: Xg
+**🍳 Breakfast:** 3 eggs scrambled, 2 slices whole wheat toast, 1 tbsp butter - Cal: X | P: Xg | C: Xg | F: Xg
+**🥗 Lunch:** 6oz grilled chicken breast, 1.5 cups mixed greens, 1/2 avocado, 2 tbsp olive oil dressing - Cal: X | P: Xg | C: Xg | F: Xg  
+**🍽️ Dinner:** 6oz salmon fillet, 1 cup sweet potato, 1 cup steamed broccoli, 1 tsp olive oil - Cal: X | P: Xg | C: Xg | F: Xg
+**🍎 Snacks:** 1 cup Greek yogurt, 1/4 cup blueberries, 1 tbsp honey - Cal: X | P: Xg | C: Xg | F: Xg
 **Day Total:** X cal
 
-Include ALL Days 1-14. Keep meal descriptions concise (1-2 lines max per meal).
+Include ALL Days 1-14. ALWAYS specify exact quantities for every ingredient. Keep meal descriptions with quantities but concise (1-2 lines max per meal).
 
 Then add:
 ## 🛒 Shopping List

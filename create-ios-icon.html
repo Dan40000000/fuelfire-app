@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>iOS App Store Icon - 1024x1024</title>
+</head>
+<body style="margin: 0; padding: 20px; background: #0f0f0f; color: white; font-family: -apple-system, Arial;">
+    <h2>iOS App Store Icon Generator 📱</h2>
+    <p style="color: #888;">Creating 1024x1024 icon for Apple App Store submission</p>
+    
+    <div style="text-align: center; margin-top: 40px;">
+        <h3>iOS App Store Icon (1024x1024)</h3>
+        <canvas id="iosIcon" width="1024" height="1024" style="border: 2px solid #4B9CD3; border-radius: 90px; background: white; width: 400px; height: 400px;"></canvas>
+        <br>
+        <button onclick="downloadIcon()" style="margin-top: 15px; padding: 12px 24px; font-size: 14px;">Download iOS App Store Icon</button>
+    </div>
+    
+    <img id="sourceFlame" src="flame-source.webp" style="display: none;" onload="createIOSIcon()">
+    
+    <script>
+        function roundedRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function drawHexagon(ctx, centerX, centerY, size, filled = true) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (Math.PI / 3) * i - Math.PI / 6;
+                const x = centerX + size * Math.cos(angle);
+                const y = centerY + size * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            
+            if (filled) {
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+        }
+        
+        function createIOSIcon() {
+            const flameImg = document.getElementById('sourceFlame');
+            const canvas = document.getElementById('iosIcon');
+            const ctx = canvas.getContext('2d');
+            
+            // Carolina Blue gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+            gradient.addColorStop(0, '#4B9CD3');
+            gradient.addColorStop(1, '#13294B');
+            roundedRect(ctx, 0, 0, 1024, 1024, 180);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // White hexagon outline
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 16;
+            drawHexagon(ctx, 512, 512, 240, false);
+            
+            // Clip content to hexagon
+            ctx.save();
+            drawHexagon(ctx, 512, 512, 224);
+            ctx.clip();
+            
+            // Large flame backdrop - scaled up for 1024x1024
+            ctx.drawImage(flameImg, 352, 320, 320, 360);
+            
+            // WF at the base of the flame - scaled up
+            ctx.strokeStyle = '#13294B';
+            ctx.lineWidth = 12;
+            ctx.font = 'bold 170px -apple-system, Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeText('WF', 512, 620);
+            
+            ctx.fillStyle = 'white';
+            ctx.fillText('WF', 512, 620);
+            
+            ctx.restore();
+            
+            // Text below hexagon - scaled up
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 40px -apple-system, Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('NUTRITION', 512, 820);
+            ctx.fillText('&', 512, 870);
+            ctx.fillText('FITNESS', 512, 920);
+        }
+        
+        function downloadIcon() {
+            const canvas = document.getElementById('iosIcon');
+            const link = document.createElement('a');
+            link.download = 'wellfit-ios-app-store-icon-1024x1024.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+    
+    <style>
+        button {
+            background: linear-gradient(135deg, #4B9CD3, #13294B);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.4);
+        }
+        h3 {
+            color: #4B9CD3;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+    </style>
+</body>
+</html>

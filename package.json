@@ -9,7 +9,7 @@
     "start": "npx serve . -p 3000",
     "deploy": "vercel --prod",
     "cap:sync": "npx cap sync",
-    "cap:copy": "npx cap copy", 
+    "cap:copy": "npx cap copy",
     "cap:update": "npx cap update",
     "android:open": "npx cap open android",
     "android:run": "npx cap run android",
@@ -46,6 +46,7 @@
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/cli": "^7.4.3",
-    "@capacitor/core": "^7.4.3"
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3"
   }
 }

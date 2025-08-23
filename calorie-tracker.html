@@ -1447,18 +1447,28 @@
                     const calMatch = description.match(/Cal:\s*(\d+)/);
                     const calories = calMatch ? parseInt(calMatch[1]) : 400;
                     
-                    // Get meal name (everything before the dash or parentheses)
-                    let name = description.split(' - ')[0].split('(')[0].trim();
-                    if (name.length > 50) name = name.substring(0, 47) + '...';
+                    // Get meal name and ingredients (keep more detail now)
+                    let name = description.split(' - ')[0].split('Cal:')[0].trim();
+                    if (name.length > 80) name = name.substring(0, 77) + '...';
+                    
+                    // Extract macros if available
+                    let protein = 25, carbs = 35, fat = 15;
+                    const proteinMatch = description.match(/P:\s*(\d+)g?/i);
+                    const carbsMatch = description.match(/C:\s*(\d+)g?/i);
+                    const fatMatch = description.match(/F:\s*(\d+)g?/i);
+                    
+                    if (proteinMatch) protein = parseInt(proteinMatch[1]);
+                    if (carbsMatch) carbs = parseInt(carbsMatch[1]);
+                    if (fatMatch) fat = parseInt(fatMatch[1]);
                     
                     const meal = {
                         day: currentDay,
                         type: mealType,
                         name: name,
                         calories: calories,
-                        protein: 25,
-                        carbs: 35,
-                        fat: 15,
+                        protein: protein,
+                        carbs: carbs,
+                        fat: fat,
                         content: description
                     };
                     
