@@ -31,10 +31,17 @@ jobs:
         distribution: 'temurin'
     
     - name: Install dependencies
-      run: npm ci
+      run: npm install
+    
+    - name: Build web assets
+      run: |
+        echo "Web assets already built in public directory"
+        ls -la public/
     
     - name: Sync Capacitor
-      run: npx cap sync android
+      run: |
+        npx cap sync android
+        echo "Capacitor sync completed"
     
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
