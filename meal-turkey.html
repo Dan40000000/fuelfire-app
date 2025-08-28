@@ -30,7 +30,7 @@
         .meal-image {
             width: 100%;
             height: 200px;
-            background: linear-gradient(135deg, #D2691E, #CD853F);
+            background: linear-gradient(135deg, #D2691E, #8B4513);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -147,7 +147,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #D2691E, #CD853F);
+            background: linear-gradient(135deg, #D2691E, #8B4513);
             color: white;
             padding: 20px;
             border-radius: 20px 20px 0 0;
@@ -228,8 +228,8 @@
             <div class="content">
                 <div style="padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦃 Epic Turkey Recipes</h2>
-                        <p style="color: #666; font-size: 14px;">10 amazing turkey dishes with fusion flavors and classic favorites</p>
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦃 Healthy Lean Turkey Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 lean turkey meals perfect for muscle building</p>
                         <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
                     
@@ -281,354 +281,338 @@
     </div>
 
     <script>
-        // Turkey Recipe Database
+        // Healthy Lean Turkey Recipe Database
         const turkeyRecipes = [
             {
-                name: "Turkey Club Sandwich",
-                description: "Classic triple-decker with crispy bacon and fresh veggies",
-                time: "15 mins",
-                difficulty: 1,
-                rating: 4,
-                calories: 520,
-                protein: 35,
-                carbs: 38,
-                fat: 26,
-                icon: "🥪",
-                image: "https://images.unsplash.com/photo-1553979459-d2229ba7433a?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "8 oz sliced turkey breast",
-                    "6 strips bacon, cooked crispy",
-                    "3 slices whole wheat bread, toasted",
-                    "2 leaves butter lettuce",
-                    "2 tomato slices",
-                    "2 tbsp mayonnaise",
-                    "1 tbsp Dijon mustard",
-                    "2 slices avocado",
-                    "Salt and pepper to taste"
-                ],
-                instructions: [
-                    "Toast bread slices until golden brown",
-                    "Cook bacon until crispy and drain on paper towels",
-                    "Mix mayonnaise and Dijon mustard",
-                    "Spread mayo mixture on one side of each toast slice",
-                    "Layer first slice with lettuce and turkey",
-                    "Add second slice, then bacon, tomato, and avocado",
-                    "Top with third slice and secure with toothpicks",
-                    "Cut diagonally and serve immediately"
-                ]
-            },
-            {
-                name: "Italian Turkey Meatballs",
-                description: "Fusion lean turkey meatballs in classic marinara sauce",
-                time: "45 mins",
+                name: "Grilled Turkey Breast",
+                description: "Lean turkey breast with herbs and roasted vegetables",
+                time: "35 mins",
                 difficulty: 2,
                 rating: 5,
-                calories: 380,
-                protein: 32,
-                carbs: 18,
-                fat: 20,
-                icon: "🇮🇹",
-                image: "https://images.unsplash.com/photo-1551216488-6a5b6a75e834?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "1.5 lbs ground turkey (93/7 lean)",
-                    "1/2 cup panko breadcrumbs",
-                    "1/4 cup parmesan cheese, grated",
-                    "1 egg, beaten",
-                    "3 cloves garlic, minced",
-                    "1/4 cup fresh parsley, chopped",
-                    "2 cups marinara sauce",
-                    "2 tbsp olive oil",
-                    "1 tsp Italian seasoning",
-                    "Salt and pepper to taste"
-                ],
-                instructions: [
-                    "Preheat oven to 400°F",
-                    "Mix turkey, breadcrumbs, parmesan, egg, garlic, and parsley",
-                    "Season with Italian seasoning, salt, and pepper",
-                    "Form into 20 meatballs using wet hands",
-                    "Heat olive oil in oven-safe skillet",
-                    "Brown meatballs on all sides, about 8 minutes total",
-                    "Add marinara sauce and transfer to oven",
-                    "Bake 15-20 minutes until cooked through (165°F internal temp)"
-                ]
-            },
-            {
-                name: "Turkey Burgers",
-                description: "Juicy lean turkey burgers with herb seasoning",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 420,
-                protein: 35,
-                carbs: 28,
-                fat: 18,
-                icon: "🍔",
-                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "1.5 lbs ground turkey (85/15)",
-                    "1/4 cup breadcrumbs",
-                    "1 egg, beaten",
-                    "2 tbsp Worcestershire sauce",
-                    "1 tsp garlic powder",
-                    "1 tsp onion powder",
-                    "4 whole wheat burger buns",
-                    "4 slices cheese (optional)",
-                    "Lettuce, tomato, onion for topping",
-                    "Condiments of choice"
-                ],
-                instructions: [
-                    "Preheat grill or large skillet to medium-high heat",
-                    "Mix turkey, breadcrumbs, egg, Worcestershire, and seasonings",
-                    "Form into 4 patties, slightly larger than buns",
-                    "Create small indent in center of each patty",
-                    "Season both sides with salt and pepper",
-                    "Cook 5-6 minutes per side until 165°F internal temp",
-                    "Add cheese in last minute if using",
-                    "Serve on toasted buns with desired toppings"
-                ]
-            },
-            {
-                name: "Thanksgiving Roast Turkey",
-                description: "Traditional herb-roasted whole turkey with crispy skin",
-                time: "4 hours",
-                difficulty: 4,
-                rating: 5,
-                calories: 450,
-                protein: 52,
-                carbs: 2,
-                fat: 24,
+                calories: 460,
+                protein: 48,
+                carbs: 16,
+                fat: 8,
                 icon: "🦃",
-                image: "https://images.unsplash.com/photo-1574484284002-952d92456975?w=500&h=300&fit=crop&crop=center",
+                image: "https://images.unsplash.com/photo-1532636052595-1ddcd02a6fe0?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
-                    "12-14 lb whole turkey, thawed",
-                    "1/2 cup butter, softened",
-                    "2 tbsp fresh sage, chopped",
-                    "2 tbsp fresh thyme, chopped",
-                    "2 tbsp fresh rosemary, chopped",
-                    "1 lemon, quartered",
-                    "1 onion, quartered",
-                    "4 celery stalks, chopped",
-                    "2 cups chicken broth",
+                    "8 oz boneless turkey breast, sliced",
+                    "1 tbsp olive oil",
+                    "2 tsp dried herbs (rosemary, thyme, sage)",
+                    "1 cup green beans, trimmed",
+                    "1 medium sweet potato, cubed",
+                    "2 cloves garlic, minced",
+                    "1 lemon, juiced",
                     "Salt and black pepper"
                 ],
                 instructions: [
-                    "Preheat oven to 325°F and remove turkey giblets",
-                    "Pat turkey completely dry and season inside and out with salt and pepper",
-                    "Mix softened butter with chopped herbs",
-                    "Loosen skin and spread herb butter under and over skin",
-                    "Stuff cavity with lemon and onion quarters",
-                    "Place on roasting rack with celery and broth in bottom",
-                    "Roast 15-20 minutes per pound until 165°F in thickest part",
-                    "Rest 20 minutes before carving"
+                    "Season turkey breast with herbs, salt, and pepper",
+                    "Heat grill or grill pan to medium heat",
+                    "Brush turkey with olive oil and minced garlic",
+                    "Grill 6-8 minutes per side until cooked through (165°F)",
+                    "Steam green beans until tender-crisp",
+                    "Roast sweet potato cubes at 400°F for 20 minutes",
+                    "Let turkey rest 5 minutes before slicing",
+                    "Serve with vegetables and lemon juice"
+                ]
+            },
+            {
+                name: "Turkey and Vegetable Meatballs",
+                description: "Lean ground turkey meatballs with zucchini noodles",
+                time: "30 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 390,
+                protein: 38,
+                carbs: 14,
+                fat: 9,
+                icon: "🍝",
+                image: "https://images.unsplash.com/photo-1551782450-17144efb9c50?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "6 oz 93/7 lean ground turkey",
+                    "1 egg white",
+                    "1/4 cup almond flour",
+                    "2 large zucchini, spiralized",
+                    "1/2 cup sugar-free marinara sauce",
+                    "2 cloves garlic, minced",
+                    "1 tsp Italian seasoning",
+                    "1 tbsp olive oil"
+                ],
+                instructions: [
+                    "Preheat oven to 400°F",
+                    "Mix ground turkey, egg white, almond flour, garlic, seasoning",
+                    "Form into 12 small meatballs",
+                    "Bake meatballs 18-20 minutes until cooked through",
+                    "Heat olive oil in large pan",
+                    "Add zucchini noodles and cook 2-3 minutes",
+                    "Heat marinara sauce separately",
+                    "Serve meatballs over zucchini noodles with sauce"
+                ]
+            },
+            {
+                name: "Turkey and Quinoa Power Bowl",
+                description: "Ground turkey bowl with quinoa and fresh vegetables",
+                time: "25 mins",
+                difficulty: 1,
+                rating: 5,
+                calories: 510,
+                protein: 40,
+                carbs: 36,
+                fat: 12,
+                icon: "🍲",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "6 oz lean ground turkey (93/7)",
+                    "3/4 cup cooked quinoa",
+                    "2 cups baby spinach",
+                    "1/2 cup cherry tomatoes, halved",
+                    "1/4 cup red onion, diced",
+                    "2 tbsp olive oil",
+                    "1 tsp cumin",
+                    "1 tsp paprika",
+                    "2 tbsp fresh cilantro"
+                ],
+                instructions: [
+                    "Cook quinoa according to package directions",
+                    "Heat 1 tbsp olive oil in large pan",
+                    "Add ground turkey, cumin, and paprika",
+                    "Cook turkey until browned and cooked through",
+                    "Add red onion and cook 2 minutes",
+                    "Arrange spinach in bowl, top with quinoa",
+                    "Add cooked turkey mixture and cherry tomatoes",
+                    "Drizzle with remaining olive oil and garnish with cilantro"
+                ]
+            },
+            {
+                name: "Asian Turkey Lettuce Wraps",
+                description: "Lean ground turkey in crisp lettuce cups with Asian flavors",
+                time: "18 mins",
+                difficulty: 1,
+                rating: 5,
+                calories: 320,
+                protein: 35,
+                carbs: 10,
+                fat: 7,
+                icon: "🥬",
+                image: "https://images.unsplash.com/photo-1600298881974-6be191ceeda1?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "6 oz lean ground turkey (93/7)",
+                    "1 head butter lettuce",
+                    "1/2 cup water chestnuts, diced",
+                    "1/4 cup green onions, chopped",
+                    "2 cloves garlic, minced",
+                    "1 tbsp low-sodium soy sauce",
+                    "1 tsp sesame oil",
+                    "1 tsp fresh ginger, grated"
+                ],
+                instructions: [
+                    "Separate lettuce into individual cup-shaped leaves",
+                    "Heat large pan over medium-high heat",
+                    "Cook ground turkey until browned, breaking up chunks",
+                    "Add garlic and ginger, cook 1 minute",
+                    "Add water chestnuts and green onions",
+                    "Stir in soy sauce and sesame oil",
+                    "Cook 2 more minutes until heated through",
+                    "Serve turkey mixture in lettuce cups"
+                ]
+            },
+            {
+                name: "Turkey and Cauliflower Rice",
+                description: "Low-carb meal with seasoned ground turkey and cauliflower",
+                time: "20 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 360,
+                protein: 36,
+                carbs: 12,
+                fat: 8,
+                icon: "🥦",
+                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "6 oz lean ground turkey (93/7)",
+                    "2 cups cauliflower rice",
+                    "1/2 cup diced tomatoes",
+                    "1/4 cup red onion, diced",
+                    "2 cloves garlic, minced",
+                    "1 tbsp olive oil",
+                    "1 tsp oregano",
+                    "1/4 cup fresh basil"
+                ],
+                instructions: [
+                    "Heat olive oil in large pan over medium-high heat",
+                    "Add ground turkey and cook until browned",
+                    "Add red onion and garlic, cook 2 minutes",
+                    "Add cauliflower rice and oregano",
+                    "Cook 5 minutes, stirring occasionally",
+                    "Add diced tomatoes and cook 3 more minutes",
+                    "Season with salt and pepper",
+                    "Garnish with fresh basil before serving"
                 ]
             },
             {
                 name: "Turkey Chili",
-                description: "Hearty and healthy ground turkey chili with beans",
-                time: "1 hour 15 mins",
+                description: "Hearty, lean turkey chili with beans and vegetables",
+                time: "45 mins",
                 difficulty: 2,
-                rating: 4,
-                calories: 320,
-                protein: 28,
+                rating: 5,
+                calories: 420,
+                protein: 34,
                 carbs: 32,
-                fat: 12,
+                fat: 10,
                 icon: "🌶️",
                 image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
-                    "2 lbs ground turkey (93/7 lean)",
-                    "2 cans kidney beans, drained",
-                    "1 can black beans, drained",
+                    "6 oz lean ground turkey (93/7)",
+                    "1 can black beans, drained and rinsed",
                     "1 can diced tomatoes",
                     "1 onion, diced",
+                    "1 bell pepper, diced",
                     "3 cloves garlic, minced",
                     "2 tbsp chili powder",
-                    "1 tbsp cumin",
-                    "1 tsp smoked paprika",
-                    "2 cups low-sodium chicken broth"
+                    "1 tsp cumin",
+                    "1 cup low-sodium chicken broth"
                 ],
                 instructions: [
-                    "Brown ground turkey in large pot, breaking up as it cooks",
-                    "Add onions and garlic, cook until softened",
+                    "Heat large pot over medium-high heat",
+                    "Cook ground turkey until browned",
+                    "Add onion, bell pepper, and garlic, cook 5 minutes",
                     "Add spices and cook 1 minute until fragrant",
                     "Add tomatoes, beans, and broth",
-                    "Bring to boil, then reduce heat and simmer",
-                    "Cook covered for 45 minutes, stirring occasionally",
-                    "Season with salt and pepper to taste",
-                    "Serve with Greek yogurt and green onions"
+                    "Bring to boil, then reduce heat and simmer 30 minutes",
+                    "Stir occasionally and adjust seasoning",
+                    "Serve hot with Greek yogurt if desired"
                 ]
             },
             {
-                name: "Turkish Kebabs",
-                description: "Fusion spiced turkey skewers with Middle Eastern flavors",
+                name: "Mediterranean Turkey Bowl",
+                description: "Turkey breast with Mediterranean vegetables and herbs",
+                time: "28 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 450,
+                protein: 42,
+                carbs: 24,
+                fat: 14,
+                icon: "🫒",
+                image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "6 oz turkey breast, grilled and sliced",
+                    "1/2 cup cooked bulgur wheat",
+                    "1 cup cucumber, diced",
+                    "1 cup cherry tomatoes, halved",
+                    "1/4 red onion, thinly sliced",
+                    "2 tbsp Greek yogurt (plain, non-fat)",
+                    "1 tbsp lemon juice",
+                    "1 tsp dried oregano"
+                ],
+                instructions: [
+                    "Season turkey with oregano, salt, and pepper",
+                    "Grill turkey breast until cooked through, then slice",
+                    "Cook bulgur wheat according to package directions",
+                    "Mix Greek yogurt with lemon juice for dressing",
+                    "Arrange bulgur in bowl, top with sliced turkey",
+                    "Add cucumber, tomatoes, and red onion",
+                    "Drizzle with yogurt-lemon dressing",
+                    "Garnish with fresh oregano if available"
+                ]
+            },
+            {
+                name: "Turkey and Sweet Potato Hash",
+                description: "Lean ground turkey with roasted sweet potatoes",
                 time: "35 mins",
-                difficulty: 3,
+                difficulty: 2,
+                rating: 4,
+                calories: 470,
+                protein: 36,
+                carbs: 30,
+                fat: 11,
+                icon: "🍠",
+                image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "5 oz lean ground turkey (93/7)",
+                    "2 medium sweet potatoes, diced",
+                    "1/2 green bell pepper, diced",
+                    "1/2 yellow onion, diced",
+                    "2 tbsp olive oil",
+                    "1 tsp smoked paprika",
+                    "1/2 tsp garlic powder",
+                    "Fresh parsley for garnish"
+                ],
+                instructions: [
+                    "Preheat oven to 425°F",
+                    "Toss diced sweet potatoes with 1 tbsp olive oil",
+                    "Roast sweet potatoes 25 minutes until tender",
+                    "Heat remaining oil in large skillet",
+                    "Cook ground turkey until browned",
+                    "Add onion and bell pepper, cook 5 minutes",
+                    "Add roasted sweet potatoes and seasonings",
+                    "Cook 5 more minutes, garnish with parsley"
+                ]
+            },
+            {
+                name: "Herb-Crusted Turkey Cutlets",
+                description: "Pan-seared turkey cutlets with herbs and vegetables",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 410,
+                protein: 44,
+                carbs: 15,
+                fat: 9,
+                icon: "🌿",
+                image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "6 oz turkey breast cutlets",
+                    "2 tbsp almond flour",
+                    "1 tsp dried sage",
+                    "1 tsp dried thyme",
+                    "1 cup broccoli florets",
+                    "1/2 cup carrots, sliced",
+                    "1 tbsp olive oil",
+                    "Salt and pepper to taste"
+                ],
+                instructions: [
+                    "Mix almond flour with sage, thyme, salt, pepper",
+                    "Pound turkey cutlets to even thickness",
+                    "Coat cutlets with herb mixture",
+                    "Heat olive oil in large pan over medium heat",
+                    "Cook cutlets 4-5 minutes per side until golden",
+                    "Steam broccoli and carrots until tender-crisp",
+                    "Let turkey rest 3 minutes before serving",
+                    "Serve with steamed vegetables"
+                ]
+            },
+            {
+                name: "Turkey and Vegetable Skewers",
+                description: "Grilled turkey and colorful vegetables on skewers",
+                time: "25 mins",
+                difficulty: 2,
                 rating: 5,
                 calories: 380,
-                protein: 36,
-                carbs: 8,
-                fat: 22,
-                icon: "🇹🇷",
-                image: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "2 lbs turkey breast, cubed",
-                    "2 tbsp olive oil",
-                    "2 tsp ground cumin",
-                    "2 tsp paprika",
-                    "1 tsp ground coriander",
-                    "1 tsp turmeric",
-                    "1/2 tsp cinnamon",
-                    "3 cloves garlic, minced",
-                    "1 red onion, chunked",
-                    "Bell peppers, chunked"
-                ],
-                instructions: [
-                    "Soak wooden skewers in water for 30 minutes",
-                    "Mix olive oil with all spices and garlic",
-                    "Marinate turkey cubes in spice mixture for 2 hours",
-                    "Thread turkey alternating with onions and peppers",
-                    "Preheat grill to medium-high heat",
-                    "Grill kebabs 12-15 minutes, turning every 3-4 minutes",
-                    "Cook until turkey reaches 165°F internal temperature",
-                    "Serve with tzatziki and warm pita bread"
-                ]
-            },
-            {
-                name: "Turkey Meatloaf",
-                description: "Lean and flavorful baked turkey meatloaf with glaze",
-                time: "1 hour 30 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 340,
-                protein: 30,
-                carbs: 22,
-                fat: 16,
-                icon: "🍞",
-                image: "https://images.unsplash.com/photo-1559847844-4d56a5d4fe76?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "2 lbs ground turkey (85/15)",
-                    "1 cup breadcrumbs",
-                    "2 eggs, beaten",
-                    "1/2 cup milk",
-                    "1 onion, finely diced",
-                    "2 cloves garlic, minced",
-                    "1/4 cup ketchup",
-                    "2 tbsp brown sugar",
-                    "1 tbsp Worcestershire sauce",
-                    "Salt, pepper, and herbs"
-                ],
-                instructions: [
-                    "Preheat oven to 350°F",
-                    "Sauté onions and garlic until softened, cool",
-                    "Mix turkey, breadcrumbs, eggs, milk, and sautéed vegetables",
-                    "Season with salt, pepper, and your favorite herbs",
-                    "Shape into loaf and place in baking dish",
-                    "Mix ketchup, brown sugar, and Worcestershire for glaze",
-                    "Bake 45 minutes, then brush with glaze",
-                    "Continue baking 15-20 minutes until 165°F internal temp"
-                ]
-            },
-            {
-                name: "Turkey Teriyaki",
-                description: "Fusion Japanese-style glazed turkey with vegetables",
-                time: "30 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 360,
-                protein: 34,
-                carbs: 28,
-                fat: 14,
-                icon: "🍱",
-                image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "2 lbs turkey tenderloin, sliced",
-                    "1/2 cup soy sauce",
-                    "1/4 cup mirin",
-                    "3 tbsp brown sugar",
-                    "2 tbsp rice vinegar",
-                    "1 tbsp cornstarch",
-                    "2 tbsp vegetable oil",
-                    "1 tbsp sesame seeds",
-                    "2 green onions, sliced",
-                    "Steamed broccoli and rice"
-                ],
-                instructions: [
-                    "Mix soy sauce, mirin, brown sugar, and rice vinegar",
-                    "Dissolve cornstarch in 2 tbsp water",
-                    "Heat oil in large skillet over medium-high heat",
-                    "Cook turkey slices 3-4 minutes per side until golden",
-                    "Remove turkey and keep warm",
-                    "Add teriyaki sauce to pan, bring to simmer",
-                    "Add cornstarch mixture, stir until thickened",
-                    "Return turkey to pan, coat with glaze, garnish with sesame seeds"
-                ]
-            },
-            {
-                name: "Turkey Reuben Sandwich",
-                description: "Fusion twist on classic with turkey, sauerkraut, and Swiss",
-                time: "20 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 480,
-                protein: 32,
-                carbs: 36,
-                fat: 24,
-                icon: "🥪",
-                image: "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "8 oz sliced turkey breast",
-                    "8 slices rye bread",
-                    "4 slices Swiss cheese",
-                    "1/2 cup sauerkraut, drained",
-                    "1/4 cup Thousand Island dressing",
-                    "2 tbsp Russian dressing",
-                    "4 tbsp butter",
-                    "Dill pickles for serving"
-                ],
-                instructions: [
-                    "Mix Thousand Island and Russian dressing",
-                    "Spread dressing mixture on one side of each bread slice",
-                    "Layer turkey, Swiss cheese, and sauerkraut on 4 slices",
-                    "Top with remaining bread slices, dressing side down",
-                    "Butter outside of sandwiches",
-                    "Cook in skillet over medium heat 3-4 minutes per side",
-                    "Press down gently while cooking until golden and cheese melts",
-                    "Serve hot with dill pickles"
-                ]
-            },
-            {
-                name: "Turkey Curry",
-                description: "Fusion Indian-spiced turkey in creamy tomato curry sauce",
-                time: "50 mins",
-                difficulty: 3,
-                rating: 5,
-                calories: 420,
                 protein: 38,
-                carbs: 20,
-                fat: 22,
-                icon: "🇮🇳",
-                image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&h=300&fit=crop&crop=center",
+                carbs: 18,
+                fat: 9,
+                icon: "🍢",
+                image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
-                    "2 lbs turkey breast, cubed",
-                    "1 can coconut milk",
-                    "1 can diced tomatoes",
-                    "1 onion, diced",
-                    "4 cloves garlic, minced",
-                    "2 tbsp fresh ginger, grated",
-                    "2 tbsp curry powder",
-                    "1 tsp garam masala",
-                    "1 tsp turmeric",
-                    "2 tbsp vegetable oil",
-                    "Fresh cilantro and basmati rice"
+                    "6 oz turkey breast, cubed",
+                    "1 zucchini, thick rounds",
+                    "1 red bell pepper, chunks",
+                    "1 yellow onion, chunks",
+                    "8 cherry tomatoes",
+                    "2 tbsp balsamic vinegar",
+                    "1 tbsp olive oil",
+                    "2 tsp Italian seasoning"
                 ],
                 instructions: [
-                    "Heat oil in large pot over medium-high heat",
-                    "Brown turkey cubes on all sides, remove and set aside",
-                    "Sauté onions until golden, add garlic and ginger",
-                    "Add spices and cook 1 minute until fragrant",
-                    "Add tomatoes and coconut milk, bring to simmer",
-                    "Return turkey to pot and reduce heat to low",
-                    "Simmer covered 25-30 minutes until turkey is tender",
-                    "Garnish with fresh cilantro, serve over basmati rice"
+                    "Cut turkey into 1-inch cubes",
+                    "Cut vegetables into similar-sized pieces",
+                    "Mix balsamic vinegar, olive oil, and Italian seasoning",
+                    "Marinate turkey in mixture for 15 minutes",
+                    "Thread turkey and vegetables alternately on skewers",
+                    "Preheat grill to medium-high heat",
+                    "Grill skewers 12-15 minutes, turning every 3 minutes",
+                    "Cook until turkey reaches 165°F internal temperature"
                 ]
             }
         ];
