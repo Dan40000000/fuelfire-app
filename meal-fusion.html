@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healthy Fusion Fitness Recipes - FuelFire</title>
+    <title>Fusion Recipes - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         .meal-grid {
@@ -32,7 +32,9 @@
             position: absolute;
             top: 15px;
             left: 15px;
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7, #DDA0DD);
+            background-size: 300% 300%;
+            animation: gradient 3s ease infinite;
             color: white;
             padding: 6px 12px;
             border-radius: 15px;
@@ -40,6 +42,12 @@
             font-weight: bold;
             z-index: 10;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .cuisine-fusion {
@@ -80,17 +88,17 @@
             display: none;
         }
         
-        /* Clean gradients for healthy fusion recipes */
-        .fusion-asian-mediterranean { background: linear-gradient(135deg, #28a745, #20c997); }
-        .fusion-mexican-asian { background: linear-gradient(135deg, #17a2b8, #28a745); }
-        .fusion-mediterranean-mexican { background: linear-gradient(135deg, #fd7e14, #28a745); }
-        .fusion-asian-american { background: linear-gradient(135deg, #6f42c1, #28a745); }
-        .fusion-indian-mediterranean { background: linear-gradient(135deg, #e83e8c, #28a745); }
-        .fusion-japanese-mediterranean { background: linear-gradient(135deg, #20c997, #17a2b8); }
-        .fusion-thai-mexican { background: linear-gradient(135deg, #fd7e14, #20c997); }
-        .fusion-mediterranean-indian { background: linear-gradient(135deg, #28a745, #fd7e14); }
-        .fusion-asian-middle-eastern { background: linear-gradient(135deg, #6f42c1, #20c997); }
-        .fusion-mexican-mediterranean { background: linear-gradient(135deg, #17a2b8, #fd7e14); }
+        /* Rainbow gradients for each fusion recipe */
+        .fusion-korean-mexican { background: linear-gradient(135deg, #FF6B6B, #FF8E53, #FF6B9D); }
+        .fusion-japanese-american { background: linear-gradient(135deg, #4ECDC4, #44A08D, #6A82FB); }
+        .fusion-indian-italian { background: linear-gradient(135deg, #FF9500, #FF5722, #E91E63); }
+        .fusion-thai-italian { background: linear-gradient(135deg, #00C851, #32CD32, #FFD700); }
+        .fusion-chinese-american { background: linear-gradient(135deg, #FF4444, #FFD700, #FF6B6B); }
+        .fusion-japanese-mexican { background: linear-gradient(135deg, #E056FD, #F093FB, #FF6B9D); }
+        .fusion-filipino-mexican { background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); }
+        .fusion-vietnamese-french { background: linear-gradient(135deg, #f093fb, #f5576c, #4facfe); }
+        .fusion-peruvian-japanese { background: linear-gradient(135deg, #43e97b, #38f9d7, #667eea); }
+        .fusion-american-chinese { background: linear-gradient(135deg, #fa709a, #fee140, #ff9a9e); }
         
         .difficulty-badge {
             position: absolute;
@@ -188,7 +196,9 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7, #DDA0DD);
+            background-size: 300% 300%;
+            animation: gradient 3s ease infinite;
             color: white;
             padding: 20px;
             border-radius: 20px 20px 0 0;
@@ -255,7 +265,9 @@
         .fusion-header {
             text-align: center;
             margin-bottom: 30px;
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4, #FFEAA7, #DDA0DD);
+            background-size: 300% 300%;
+            animation: gradient 3s ease infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -272,14 +284,14 @@
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
-                <div class="header-title">🌍 Healthy Fusion Fitness</div>
+                <div class="header-title">🌈 Fusion Recipes</div>
             </div>
             
             <div class="content">
                 <div style="padding: 20px;">
                     <div class="fusion-header">
-                        <h2 style="margin-bottom: 10px;">🌍 Healthy Fusion Fitness Recipes</h2>
-                        <p style="color: #666; font-size: 14px;">10 international fitness meals blending clean cuisines for maximum gains</p>
+                        <h2 style="margin-bottom: 10px;">🌈 EPIC Fusion Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 creative fusion dishes blending cuisines from around the world</p>
                         <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
                     
@@ -331,421 +343,415 @@
     </div>
 
     <script>
-        // Healthy Fusion Fitness Recipe Database
+        // Epic Fusion Recipe Database
         const fusionRecipes = [
             {
-                name: "Asian Quinoa Power Bowl",
-                description: "Grilled chicken with edamame, quinoa, and ginger sesame dressing",
-                cuisines: "Asian + American",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 5,
-                calories: 485,
-                protein: 38,
-                carbs: 45,
-                fat: 16,
-                icon: "🥗",
-                fusionClass: "fusion-asian-american",
-                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "6 oz grilled chicken breast, sliced",
-                    "3/4 cup cooked quinoa",
-                    "1/2 cup shelled edamame",
-                    "1/2 cup shredded purple cabbage",
-                    "1/2 cucumber, diced",
-                    "1/4 cup shredded carrots",
-                    "2 tbsp sesame oil",
-                    "1 tbsp rice vinegar",
-                    "1 tsp fresh ginger, grated",
-                    "1 tsp low-sodium soy sauce",
-                    "1 tbsp sesame seeds",
-                    "2 tbsp cilantro, chopped",
-                    "1/4 avocado, sliced"
-                ],
-                instructions: [
-                    "Cook quinoa according to package directions and let cool",
-                    "Steam edamame for 3-4 minutes until tender",
-                    "Grill chicken breast seasoned with salt and pepper until cooked through",
-                    "Make dressing by whisking sesame oil, rice vinegar, ginger, and soy sauce",
-                    "Arrange quinoa in bowl as base",
-                    "Top with arranged sections of chicken, edamame, cabbage, cucumber, and carrots",
-                    "Drizzle with ginger sesame dressing",
-                    "Garnish with avocado, sesame seeds, and cilantro"
-                ]
-            },
-            {
-                name: "Mediterranean Turkey Lettuce Wraps",
-                description: "Seasoned ground turkey with tzatziki in butter lettuce cups",
-                cuisines: "Mediterranean + Mexican",
-                time: "20 mins",
-                difficulty: 1,
-                rating: 4,
-                calories: 420,
-                protein: 35,
-                carbs: 18,
-                fat: 22,
-                icon: "🥬",
-                fusionClass: "fusion-mediterranean-mexican",
-                image: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "1 lb lean ground turkey (93/7)",
-                    "1 head butter lettuce, leaves separated",
-                    "1/4 cup plain Greek yogurt",
-                    "1/4 cucumber, grated and drained",
-                    "2 cloves garlic, minced",
-                    "1 tbsp lemon juice",
-                    "1 tbsp olive oil",
-                    "1 tsp dried oregano",
-                    "1/2 tsp ground cumin",
-                    "1/4 cup diced tomatoes",
-                    "1/4 red onion, diced",
-                    "2 tbsp fresh parsley",
-                    "1 tbsp fresh mint"
-                ],
-                instructions: [
-                    "Make tzatziki by mixing Greek yogurt, grated cucumber, half the garlic, and lemon juice",
-                    "Season with salt and pepper, refrigerate",
-                    "Heat olive oil in large skillet over medium-high heat",
-                    "Add remaining garlic, cook for 30 seconds",
-                    "Add ground turkey, oregano, and cumin",
-                    "Cook turkey 6-8 minutes, breaking up until fully cooked",
-                    "Remove from heat, stir in diced tomatoes and red onion",
-                    "Spoon turkey mixture into lettuce cups, top with tzatziki, parsley, and mint"
-                ]
-            },
-            {
-                name: "Thai-Spiced Salmon with Quinoa",
-                description: "Baked salmon with Thai herbs served over coconut quinoa",
-                cuisines: "Thai + American",
-                time: "30 mins",
-                difficulty: 2,
+                name: "Korean BBQ Tacos",
+                description: "Bulgogi beef in corn tortillas with kimchi slaw",
+                cuisines: "Korean + Mexican",
+                time: "35 mins",
+                difficulty: 3,
                 rating: 5,
                 calories: 520,
-                protein: 42,
-                carbs: 38,
-                fat: 20,
-                icon: "🐟",
-                fusionClass: "fusion-thai-mexican",
-                image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "6 oz salmon fillet",
-                    "3/4 cup quinoa",
-                    "1/2 cup light coconut milk",
-                    "1 cup low-sodium vegetable broth",
-                    "2 tbsp lime juice",
-                    "1 tbsp fish sauce",
-                    "1 tsp fresh ginger, grated",
-                    "2 cloves garlic, minced",
-                    "1 Thai chili, minced (or 1/4 tsp red pepper flakes)",
-                    "1/4 cup fresh basil leaves",
-                    "2 tbsp cilantro",
-                    "1 cup steamed broccoli",
-                    "Lime wedges"
-                ],
-                instructions: [
-                    "Preheat oven to 400°F",
-                    "Cook quinoa in vegetable broth and coconut milk until fluffy",
-                    "Mix lime juice, fish sauce, ginger, garlic, and Thai chili for marinade",
-                    "Marinate salmon in half the mixture for 10 minutes",
-                    "Bake salmon 12-15 minutes until flakes easily",
-                    "Steam broccoli until bright green and tender",
-                    "Fluff quinoa with fork, stir in half the fresh herbs",
-                    "Serve salmon over quinoa with steamed broccoli, drizzle with remaining marinade",
-                    "Garnish with remaining herbs and lime wedges"
-                ]
-            },
-            {
-                name: "Greek Chicken Stuffed Sweet Potato",
-                description: "Roasted sweet potato filled with Greek-seasoned chicken and vegetables",
-                cuisines: "Greek + American",
-                time: "45 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 460,
-                protein: 36,
-                carbs: 52,
-                fat: 12,
-                icon: "🍠",
-                fusionClass: "fusion-mediterranean-indian",
-                image: "https://images.unsplash.com/photo-1516684669134-de6f7c473a2a?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "2 large sweet potatoes",
-                    "6 oz chicken breast, diced",
-                    "1/4 cup diced cucumber",
-                    "1/4 cup cherry tomatoes, halved",
-                    "2 tbsp red onion, diced",
-                    "2 tbsp plain Greek yogurt",
-                    "1 tbsp olive oil",
-                    "1 tsp dried oregano",
-                    "1/2 tsp garlic powder",
-                    "1/4 tsp ground cinnamon",
-                    "2 tbsp fresh parsley",
-                    "1 tbsp fresh dill",
-                    "1 tbsp lemon juice",
-                    "2 tbsp crumbled feta cheese"
-                ],
-                instructions: [
-                    "Preheat oven to 425°F",
-                    "Pierce sweet potatoes, bake 35-40 minutes until tender",
-                    "Season diced chicken with oregano, garlic powder, cinnamon, salt, and pepper",
-                    "Heat olive oil in skillet, cook chicken 6-8 minutes until golden",
-                    "Mix cucumber, tomatoes, red onion, and herbs in bowl",
-                    "Add lemon juice and season with salt and pepper",
-                    "Cut open baked sweet potatoes, fluff flesh with fork",
-                    "Fill sweet potatoes with cooked chicken and vegetable mixture",
-                    "Top with Greek yogurt and crumbled feta"
-                ]
-            },
-            {
-                name: "Indian-Spiced Cauliflower Rice Bowl",
-                description: "Turmeric cauliflower rice with grilled chicken tikka and yogurt sauce",
-                cuisines: "Indian + Mediterranean",
-                time: "35 mins",
-                difficulty: 3,
-                rating: 5,
-                calories: 410,
-                protein: 38,
-                carbs: 22,
-                fat: 18,
-                icon: "🍛",
-                fusionClass: "fusion-indian-mediterranean",
-                image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "6 oz chicken breast, cubed",
-                    "3 cups cauliflower rice",
-                    "1/4 cup plain Greek yogurt",
-                    "2 tbsp lemon juice",
-                    "1 tbsp olive oil",
-                    "1 tsp garam masala",
-                    "1 tsp ground turmeric",
-                    "1/2 tsp ground cumin",
-                    "1/2 tsp smoked paprika",
-                    "2 cloves garlic, minced",
-                    "1 tbsp fresh ginger, grated",
-                    "1/4 cup diced cucumber",
-                    "2 tbsp fresh cilantro",
-                    "1 tbsp fresh mint"
-                ],
-                instructions: [
-                    "Marinate chicken cubes in half the yogurt, garam masala, half the garlic, and ginger",
-                    "Let marinate 20 minutes at room temperature",
-                    "Heat olive oil in large skillet over medium-high heat",
-                    "Cook marinated chicken 6-8 minutes until golden and cooked through",
-                    "In same pan, add cauliflower rice, turmeric, cumin, and paprika",
-                    "Cook 4-5 minutes until cauliflower is tender",
-                    "Make sauce with remaining yogurt, lemon juice, remaining garlic, and cucumber",
-                    "Season sauce with salt and pepper",
-                    "Serve chicken over turmeric cauliflower rice, drizzle with yogurt sauce",
-                    "Garnish with cilantro and mint"
-                ]
-            },
-            {
-                name: "Japanese-Style Zucchini Noodles",
-                description: "Spiralized zucchini with miso-glazed tofu and edamame",
-                cuisines: "Japanese + Mediterranean",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 380,
-                protein: 28,
-                carbs: 24,
-                fat: 20,
-                icon: "🍜",
-                fusionClass: "fusion-japanese-mediterranean",
-                image: "https://images.unsplash.com/photo-1569198011442-6db13b9c8e03?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "3 large zucchini, spiralized",
-                    "6 oz extra-firm tofu, cubed",
-                    "1/2 cup shelled edamame",
-                    "2 tbsp white miso paste",
-                    "1 tbsp rice vinegar",
-                    "1 tbsp sesame oil",
-                    "1 tsp fresh ginger, grated",
-                    "2 cloves garlic, minced",
-                    "1 tbsp olive oil",
-                    "1/4 cup cherry tomatoes, halved",
-                    "2 tbsp sesame seeds",
-                    "2 green onions, sliced",
-                    "1 sheet nori, cut into strips"
-                ],
-                instructions: [
-                    "Press tofu to remove excess water, then cube",
-                    "Whisk miso paste, rice vinegar, sesame oil, ginger, and garlic for glaze",
-                    "Heat olive oil in large skillet over medium-high heat",
-                    "Cook tofu cubes 6-8 minutes until golden on all sides",
-                    "Brush tofu with miso glaze in last 2 minutes",
-                    "Steam edamame 3-4 minutes until tender",
-                    "Quickly sauté zucchini noodles 2-3 minutes until just tender",
-                    "Combine zucchini noodles with glazed tofu and edamame",
-                    "Top with cherry tomatoes, sesame seeds, green onions, and nori strips"
-                ]
-            },
-            {
-                name: "Mexican-Spiced Cod with Black Beans",
-                description: "Baked cod with cumin and chili served over cilantro lime black beans",
-                cuisines: "Mexican + Asian",
-                time: "30 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 445,
-                protein: 40,
+                protein: 35,
                 carbs: 42,
-                fat: 12,
-                icon: "🐟",
-                fusionClass: "fusion-mexican-asian",
-                image: "https://images.unsplash.com/photo-1580013759032-c96505d22d39?w=500&h=300&fit=crop&crop=center",
+                fat: 28,
+                icon: "🌮",
+                fusionClass: "fusion-korean-mexican",
+                image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
-                    "6 oz cod fillet",
-                    "3/4 cup cooked black beans",
-                    "1/4 cup brown rice, cooked",
-                    "2 tbsp lime juice",
-                    "1 tbsp olive oil",
-                    "1 tsp ground cumin",
-                    "1/2 tsp chili powder",
-                    "1/2 tsp smoked paprika",
-                    "2 cloves garlic, minced",
-                    "1/4 cup fresh cilantro",
-                    "1/4 red bell pepper, diced",
-                    "2 tbsp red onion, diced",
-                    "1/4 avocado, diced",
-                    "Lime wedges"
-                ],
-                instructions: [
-                    "Preheat oven to 400°F",
-                    "Season cod with cumin, chili powder, paprika, salt, and pepper",
-                    "Drizzle with half the olive oil and half the lime juice",
-                    "Bake cod 12-15 minutes until flakes easily",
-                    "Heat remaining oil in pan, sauté garlic for 30 seconds",
-                    "Add black beans, bell pepper, and red onion",
-                    "Cook 3-4 minutes until vegetables soften",
-                    "Stir in remaining lime juice and cilantro",
-                    "Serve cod over black bean mixture and brown rice",
-                    "Top with diced avocado and serve with lime wedges"
-                ]
-            },
-            {
-                name: "Middle Eastern Turkey Meatballs",
-                description: "Baked turkey meatballs with za'atar served over herbed quinoa",
-                cuisines: "Middle Eastern + Asian",
-                time: "35 mins",
-                difficulty: 3,
-                rating: 5,
-                calories: 475,
-                protein: 42,
-                carbs: 38,
-                fat: 16,
-                icon: "🧆",
-                fusionClass: "fusion-asian-middle-eastern",
-                image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "1 lb lean ground turkey (93/7)",
-                    "3/4 cup cooked quinoa",
-                    "1/4 cup panko breadcrumbs",
-                    "1 egg white",
-                    "2 tbsp za'atar spice blend",
-                    "3 cloves garlic, minced",
-                    "1/4 cup fresh parsley",
-                    "2 tbsp fresh mint",
-                    "1 tbsp olive oil",
-                    "1/4 cup plain Greek yogurt",
-                    "1 tbsp lemon juice",
-                    "1/4 cucumber, diced",
-                    "2 cups baby spinach",
-                    "1/4 cup pomegranate seeds"
-                ],
-                instructions: [
-                    "Preheat oven to 400°F",
-                    "Mix ground turkey, panko, egg white, za'atar, half the garlic, and 2 tbsp parsley",
-                    "Form into 16 small meatballs, place on lined baking sheet",
-                    "Drizzle with olive oil, bake 18-20 minutes until cooked through",
-                    "Cook quinoa with remaining garlic and herbs",
-                    "Make yogurt sauce with Greek yogurt, lemon juice, and cucumber",
-                    "Sauté spinach until wilted",
-                    "Serve meatballs over herbed quinoa and wilted spinach",
-                    "Drizzle with yogurt sauce and garnish with pomegranate seeds and remaining parsley"
-                ]
-            },
-            {
-                name: "Korean-Style Grilled Shrimp Salad",
-                description: "Grilled shrimp with gochujang dressing over mixed greens",
-                cuisines: "Korean + Mediterranean",
-                time: "20 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 385,
-                protein: 32,
-                carbs: 28,
-                fat: 14,
-                icon: "🍤",
-                fusionClass: "fusion-mexican-mediterranean",
-                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "8 oz large shrimp, peeled and deveined",
-                    "4 cups mixed greens",
-                    "1/2 cup cooked brown rice",
-                    "1/4 cucumber, sliced",
-                    "1/4 cup shredded carrots",
-                    "2 tbsp gochujang paste",
-                    "1 tbsp rice vinegar",
+                    "1 lb ribeye steak, thinly sliced",
+                    "1/4 cup soy sauce",
+                    "2 tbsp brown sugar",
                     "1 tbsp sesame oil",
-                    "1 tsp honey",
-                    "1 tsp fresh ginger, grated",
-                    "2 cloves garlic, minced",
-                    "1 tbsp sesame seeds",
+                    "3 cloves garlic, minced",
+                    "1 tsp grated ginger",
+                    "8 corn tortillas",
+                    "2 cups napa cabbage, shredded",
+                    "1/2 cup kimchi, chopped",
                     "2 green onions, sliced",
-                    "1/4 avocado, sliced"
+                    "1 tbsp rice vinegar",
+                    "1 tsp sesame seeds",
+                    "Sriracha mayo",
+                    "Fresh cilantro"
                 ],
                 instructions: [
-                    "Season shrimp with salt, pepper, and half the garlic",
-                    "Grill shrimp 2-3 minutes per side until pink and cooked through",
-                    "Make dressing by whisking gochujang, rice vinegar, sesame oil, honey, ginger, and remaining garlic",
-                    "Arrange mixed greens in bowl",
-                    "Top with warm brown rice, cucumber, and carrots",
-                    "Add grilled shrimp on top",
-                    "Drizzle with gochujang dressing",
-                    "Garnish with sesame seeds, green onions, and avocado slices"
+                    "Marinate sliced beef in soy sauce, brown sugar, sesame oil, garlic, and ginger for 20 minutes",
+                    "Mix shredded cabbage with chopped kimchi, rice vinegar, and a pinch of salt for slaw",
+                    "Heat a large skillet or grill pan over high heat",
+                    "Cook marinated beef for 2-3 minutes per side until caramelized",
+                    "Warm corn tortillas on a dry skillet for 30 seconds each side",
+                    "Make sriracha mayo by mixing mayo with sriracha to taste",
+                    "Assemble tacos: tortilla, sriracha mayo, bulgogi beef, kimchi slaw",
+                    "Top with green onions, sesame seeds, and fresh cilantro"
                 ]
             },
             {
-                name: "Moroccan-Spiced Chicken with Vegetables",
-                description: "Ras el hanout chicken with roasted vegetables and couscous",
-                cuisines: "Moroccan + Mediterranean",
+                name: "Ramen Burger",
+                description: "Crispy ramen noodle buns with teriyaki beef patty",
+                cuisines: "Japanese + American",
+                time: "45 mins",
+                difficulty: 4,
+                rating: 5,
+                calories: 680,
+                protein: 42,
+                carbs: 55,
+                fat: 35,
+                icon: "🍜",
+                fusionClass: "fusion-japanese-american",
+                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "4 packs instant ramen noodles (discard seasoning)",
+                    "4 eggs, beaten",
+                    "1 lb ground beef",
+                    "1/4 cup teriyaki sauce",
+                    "2 tbsp panko breadcrumbs",
+                    "1 clove garlic, minced",
+                    "4 slices American cheese",
+                    "Lettuce leaves",
+                    "Tomato slices",
+                    "Japanese mayo",
+                    "Nori sheets, cut into strips",
+                    "Vegetable oil for frying"
+                ],
+                instructions: [
+                    "Cook ramen noodles according to package, drain and cool slightly",
+                    "Mix cooked noodles with beaten eggs, form into 8 patty shapes",
+                    "Pan-fry noodle patties until golden and crispy, about 3 minutes per side",
+                    "Mix ground beef with garlic, panko, salt and pepper, form 4 patties",
+                    "Cook beef patties to desired doneness, brush with teriyaki sauce",
+                    "Add cheese to patties in last minute of cooking",
+                    "Assemble burger: bottom ramen bun, Japanese mayo, lettuce, beef patty, tomato",
+                    "Top with nori strips and crown with top ramen bun"
+                ]
+            },
+            {
+                name: "Butter Chicken Pizza",
+                description: "Naan crust pizza with butter chicken and mozzarella",
+                cuisines: "Indian + Italian",
                 time: "40 mins",
                 difficulty: 3,
                 rating: 5,
-                calories: 510,
-                protein: 40,
+                calories: 620,
+                protein: 38,
                 carbs: 48,
-                fat: 18,
-                icon: "🍗",
-                fusionClass: "fusion-mediterranean-mexican",
-                image: "https://images.unsplash.com/photo-1564671165093-20688ff1fffa?w=500&h=300&fit=crop&crop=center",
+                fat: 32,
+                icon: "🍕",
+                fusionClass: "fusion-indian-italian",
+                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
-                    "6 oz chicken breast, cubed",
-                    "3/4 cup whole wheat couscous",
-                    "1 zucchini, diced",
-                    "1/2 red bell pepper, diced",
-                    "1/2 yellow bell pepper, diced",
-                    "1/4 red onion, diced",
-                    "2 tbsp ras el hanout spice blend",
-                    "2 tbsp olive oil",
-                    "1 cup low-sodium chicken broth",
-                    "2 tbsp lemon juice",
-                    "1/4 cup dried apricots, chopped",
-                    "2 tbsp fresh cilantro",
-                    "2 tbsp fresh mint",
-                    "1/4 cup almonds, sliced"
+                    "4 naan breads",
+                    "1 lb chicken breast, cubed",
+                    "1/2 cup butter chicken sauce",
+                    "1/4 cup plain yogurt",
+                    "1 tsp garam masala",
+                    "1 tsp turmeric",
+                    "2 cups mozzarella cheese, shredded",
+                    "1/2 red onion, thinly sliced",
+                    "1/4 cup fresh cilantro",
+                    "2 tbsp ghee or butter",
+                    "Green chilies, sliced",
+                    "Fresh mint leaves"
                 ],
                 instructions: [
-                    "Preheat oven to 425°F",
-                    "Toss chicken cubes with ras el hanout and 1 tbsp olive oil",
-                    "Arrange on baking sheet with zucchini, bell peppers, and onion",
-                    "Drizzle vegetables with remaining oil, season with salt and pepper",
-                    "Roast 20-25 minutes until chicken is cooked and vegetables are tender",
-                    "Prepare couscous with chicken broth according to package directions",
-                    "Fluff couscous, stir in lemon juice and chopped apricots",
-                    "Serve roasted chicken and vegetables over couscous",
-                    "Garnish with cilantro, mint, and sliced almonds"
+                    "Preheat oven to 450°F",
+                    "Marinate chicken cubes in yogurt, garam masala, and turmeric for 15 minutes",
+                    "Cook marinated chicken in ghee until golden and cooked through",
+                    "Mix cooked chicken with butter chicken sauce",
+                    "Place naan on baking sheets, brush edges with ghee",
+                    "Spread butter chicken mixture on naan, leaving borders",
+                    "Top with mozzarella cheese and red onion slices",
+                    "Bake 10-12 minutes until cheese melts and edges are crispy",
+                    "Garnish with cilantro, mint, and green chilies"
+                ]
+            },
+            {
+                name: "Thai Basil Pasta",
+                description: "Linguine with Thai basil, chilies, and fish sauce",
+                cuisines: "Thai + Italian",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 480,
+                protein: 18,
+                carbs: 62,
+                fat: 18,
+                icon: "🍝",
+                fusionClass: "fusion-thai-italian",
+                image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d286?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "1 lb linguine pasta",
+                    "1/4 cup olive oil",
+                    "4 cloves garlic, sliced thin",
+                    "2-3 Thai bird chilies, sliced",
+                    "1 lb shrimp, peeled and deveined",
+                    "2 tbsp fish sauce",
+                    "1 tbsp palm sugar",
+                    "2 cups fresh Thai basil leaves",
+                    "1/4 cup sun-dried tomatoes, chopped",
+                    "1/2 cup white wine",
+                    "Parmesan cheese, grated",
+                    "Lime wedges"
+                ],
+                instructions: [
+                    "Cook linguine in salted water until al dente, reserve 1 cup pasta water",
+                    "Heat olive oil in large pan, sauté garlic and chilies until fragrant",
+                    "Add shrimp, cook 2-3 minutes until pink",
+                    "Add white wine, let reduce by half",
+                    "Stir in fish sauce, palm sugar, and sun-dried tomatoes",
+                    "Add drained pasta and 1/2 cup pasta water, toss to combine",
+                    "Remove from heat, add Thai basil leaves and toss until wilted",
+                    "Serve with Parmesan cheese and lime wedges"
+                ]
+            },
+            {
+                name: "Orange Chicken",
+                description: "Crispy chicken in sweet orange glaze with sesame",
+                cuisines: "Chinese + American",
+                time: "50 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 580,
+                protein: 32,
+                carbs: 65,
+                fat: 22,
+                icon: "🍊",
+                fusionClass: "fusion-chinese-american",
+                image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "2 lbs chicken thighs, cut into chunks",
+                    "1 cup cornstarch",
+                    "2 eggs, beaten",
+                    "1/2 cup orange juice",
+                    "1/4 cup rice vinegar",
+                    "1/3 cup brown sugar",
+                    "2 tbsp soy sauce",
+                    "1 tbsp grated orange zest",
+                    "2 cloves garlic, minced",
+                    "1 tsp grated ginger",
+                    "1/4 tsp red pepper flakes",
+                    "2 tbsp cornstarch mixed with 2 tbsp water",
+                    "Vegetable oil for frying",
+                    "Sesame seeds and green onions"
+                ],
+                instructions: [
+                    "Dip chicken chunks in beaten eggs, then coat in cornstarch",
+                    "Heat oil to 350°F, fry chicken in batches until golden and crispy",
+                    "Drain on paper towels and keep warm",
+                    "In a saucepan, combine orange juice, vinegar, brown sugar, soy sauce",
+                    "Add orange zest, garlic, ginger, and red pepper flakes",
+                    "Bring to a simmer, add cornstarch slurry to thicken",
+                    "Toss crispy chicken in orange sauce until well coated",
+                    "Garnish with sesame seeds and chopped green onions"
+                ]
+            },
+            {
+                name: "Sushi Burrito",
+                description: "Giant nori wrap with sushi rice, salmon, and veggies",
+                cuisines: "Japanese + Mexican",
+                time: "30 mins",
+                difficulty: 4,
+                rating: 4,
+                calories: 520,
+                protein: 28,
+                carbs: 58,
+                fat: 22,
+                icon: "🌯",
+                fusionClass: "fusion-japanese-mexican",
+                image: "https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "4 large nori sheets",
+                    "3 cups cooked sushi rice",
+                    "2 tbsp rice vinegar",
+                    "1 tbsp sugar",
+                    "1 tsp salt",
+                    "8 oz sashimi-grade salmon, sliced",
+                    "1 avocado, sliced",
+                    "1 cucumber, julienned",
+                    "1 carrot, julienned",
+                    "Mixed greens",
+                    "Spicy mayo",
+                    "Soy sauce",
+                    "Wasabi",
+                    "Pickled ginger"
+                ],
+                instructions: [
+                    "Season warm sushi rice with rice vinegar, sugar, and salt, let cool",
+                    "Place nori sheet shiny side down on bamboo mat",
+                    "Spread 3/4 cup rice on lower 2/3 of nori, leaving top border",
+                    "Layer salmon, avocado, cucumber, carrot, and greens horizontally",
+                    "Drizzle with spicy mayo",
+                    "Roll tightly from bottom, using mat to compress",
+                    "Seal edge with water, wrap in plastic wrap",
+                    "Slice in half diagonally, serve with soy sauce, wasabi, and ginger"
+                ]
+            },
+            {
+                name: "Sisig Nachos",
+                description: "Crispy tortilla chips with Filipino sisig and cheese",
+                cuisines: "Filipino + Mexican",
+                time: "40 mins",
+                difficulty: 3,
+                rating: 4,
+                calories: 640,
+                protein: 35,
+                carbs: 45,
+                fat: 38,
+                icon: "🫓",
+                fusionClass: "fusion-filipino-mexican",
+                image: "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "1 bag tortilla chips",
+                    "1 lb pork belly, diced",
+                    "1/2 lb chicken liver, chopped",
+                    "1 large onion, diced",
+                    "3 cloves garlic, minced",
+                    "2 tbsp soy sauce",
+                    "2 tbsp calamansi or lime juice",
+                    "2 tbsp mayonnaise",
+                    "2 cups Mexican cheese blend",
+                    "2 jalapeños, sliced",
+                    "1 red bell pepper, diced",
+                    "Green onions, chopped",
+                    "1 egg, fried and chopped"
+                ],
+                instructions: [
+                    "Cook diced pork belly until crispy, remove excess fat",
+                    "Add chicken liver, cook until no longer pink",
+                    "Sauté onion and garlic until translucent",
+                    "Mix pork, liver, and vegetables with soy sauce and calamansi juice",
+                    "Stir in mayonnaise off heat",
+                    "Preheat oven to 375°F",
+                    "Arrange tortilla chips on large baking sheet",
+                    "Top with sisig mixture, cheese, jalapeños, and bell pepper",
+                    "Bake 10-12 minutes until cheese melts",
+                    "Top with chopped egg and green onions"
+                ]
+            },
+            {
+                name: "Pho French Dip",
+                description: "Baguette sandwich with pho beef and star anise jus",
+                cuisines: "Vietnamese + French",
+                time: "2 hours",
+                difficulty: 5,
+                rating: 5,
+                calories: 720,
+                protein: 45,
+                carbs: 52,
+                fat: 35,
+                icon: "🥖",
+                fusionClass: "fusion-vietnamese-french",
+                image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "2 lbs beef chuck roast",
+                    "2 French baguettes",
+                    "4 cups beef broth",
+                    "2 star anise pods",
+                    "1 cinnamon stick",
+                    "3 whole cloves",
+                    "1 inch ginger, sliced",
+                    "1 onion, quartered",
+                    "2 tbsp fish sauce",
+                    "1 tbsp brown sugar",
+                    "8 oz Swiss cheese, sliced",
+                    "Bean sprouts",
+                    "Thai basil leaves",
+                    "Sliced jalapeños",
+                    "Lime wedges",
+                    "Hoisin sauce"
+                ],
+                instructions: [
+                    "Slow cook beef chuck with half the spices for 6-8 hours until tender",
+                    "Make pho broth: simmer remaining broth with star anise, cinnamon, cloves, ginger, onion",
+                    "Add fish sauce and brown sugar to broth, strain",
+                    "Shred the slow-cooked beef",
+                    "Slice baguettes lengthwise, remove some bread from inside",
+                    "Fill baguettes with shredded beef and Swiss cheese",
+                    "Toast in oven until cheese melts and bread is crispy",
+                    "Serve with warm pho broth for dipping, garnish with herbs, bean sprouts, jalapeños, lime"
+                ]
+            },
+            {
+                name: "Nikkei Ceviche",
+                description: "Raw fish cured in lime with soy sauce and ginger",
+                cuisines: "Peruvian + Japanese",
+                time: "20 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 320,
+                protein: 32,
+                carbs: 18,
+                fat: 12,
+                icon: "🐟",
+                fusionClass: "fusion-peruvian-japanese",
+                image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "1 lb sashimi-grade white fish, cubed",
+                    "1/2 cup fresh lime juice",
+                    "2 tbsp soy sauce",
+                    "1 tbsp mirin",
+                    "1 tsp grated ginger",
+                    "1 aji amarillo pepper, seeded and minced",
+                    "1/2 red onion, thinly sliced",
+                    "1/2 cucumber, diced",
+                    "1 avocado, cubed",
+                    "2 tbsp sesame oil",
+                    "Cilantro leaves",
+                    "Toasted sesame seeds",
+                    "Sweet potato chips",
+                    "Corn kernels"
+                ],
+                instructions: [
+                    "Cut fish into uniform 1/2-inch cubes, place in glass bowl",
+                    "Mix lime juice, soy sauce, mirin, ginger, and aji amarillo",
+                    "Pour marinade over fish, let cure 10-15 minutes until opaque",
+                    "Add red onion and cucumber, mix gently",
+                    "Just before serving, fold in avocado cubes",
+                    "Drizzle with sesame oil",
+                    "Plate and garnish with cilantro and sesame seeds",
+                    "Serve with sweet potato chips and corn kernels"
+                ]
+            },
+            {
+                name: "Sesame Chicken",
+                description: "Sweet and tangy battered chicken with sesame seeds",
+                cuisines: "American + Chinese",
+                time: "45 mins",
+                difficulty: 3,
+                rating: 4,
+                calories: 650,
+                protein: 38,
+                carbs: 58,
+                fat: 32,
+                icon: "🥡",
+                fusionClass: "fusion-american-chinese",
+                image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&h=300&fit=crop&crop=center",
+                ingredients: [
+                    "2 lbs chicken breast, cut into chunks",
+                    "1 cup flour",
+                    "1/2 cup cornstarch",
+                    "2 eggs, beaten",
+                    "1 cup chicken broth",
+                    "1/2 cup sugar",
+                    "1/4 cup apple cider vinegar",
+                    "3 tbsp ketchup",
+                    "2 tbsp soy sauce",
+                    "1 tbsp sesame oil",
+                    "2 cloves garlic, minced",
+                    "1 tsp ginger, grated",
+                    "3 tbsp sesame seeds",
+                    "Green onions, chopped",
+                    "Vegetable oil for frying"
+                ],
+                instructions: [
+                    "Make batter with flour, cornstarch, eggs, and enough water for coating consistency",
+                    "Heat oil to 350°F for frying",
+                    "Dip chicken chunks in batter, fry until golden and crispy",
+                    "Drain on paper towels",
+                    "For sauce: combine broth, sugar, vinegar, ketchup, soy sauce, sesame oil",
+                    "Add garlic and ginger, simmer until thickened",
+                    "Toast sesame seeds in dry pan until golden",
+                    "Toss crispy chicken in sauce, sprinkle with sesame seeds and green onions"
                 ]
             }
         ];
@@ -795,7 +801,7 @@
                 html += `
                     <div class="meal-card" onclick="openRecipeModal(${index})">
                         <div class="meal-image ${meal.fusionClass} has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${meal.image}');">
-                            <div class="fusion-badge">HEALTHY</div>
+                            <div class="fusion-badge">FUSION</div>
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
@@ -921,7 +927,7 @@
                 fat: meal.fat,
                 time: new Date().toISOString(),
                 fromRecipe: true,
-                category: 'healthy-fusion',
+                category: 'fusion',
                 cuisines: meal.cuisines
             });
             

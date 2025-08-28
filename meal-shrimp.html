@@ -30,7 +30,7 @@
         .meal-image {
             width: 100%;
             height: 200px;
-            background: linear-gradient(135deg, #FF6347, #FF4500);
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53, #FF6B35);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -147,7 +147,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #FF6347, #FF4500);
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53, #FF6B35);
             color: white;
             padding: 20px;
             border-radius: 20px 20px 0 0;
@@ -222,14 +222,14 @@
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
-                <div class="header-title">🦐 Shrimp Recipes</div>
+                <div class="header-title">🍤 Shrimp Recipes</div>
             </div>
             
             <div class="content">
                 <div style="padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦐 Healthy Fitness Shrimp Recipes</h2>
-                        <p style="color: #666; font-size: 14px;">10 lean, high-protein shrimp meals prepared cleanly</p>
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🍤 Epic Shrimp Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 amazing shrimp dishes with fusion flavors and quick cooking times</p>
                         <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
                     
@@ -281,336 +281,357 @@
     </div>
 
     <script>
-        // Healthy Fitness Shrimp Recipe Database
+        // Shrimp Recipe Database
         const shrimpRecipes = [
             {
-                name: "Grilled Lemon Garlic Shrimp",
-                description: "Perfectly grilled shrimp with fresh herbs and vegetables",
-                time: "15 mins",
-                difficulty: 1,
-                rating: 5,
-                calories: 320,
-                protein: 38,
-                carbs: 12,
-                fat: 6,
-                icon: "🦐",
-                image: "https://images.unsplash.com/photo-1563379091744-0f5fadc2528d?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "8 oz large shrimp, peeled and deveined",
-                    "2 tbsp olive oil",
-                    "3 cloves garlic, minced",
-                    "2 lemons, juiced",
-                    "1 cup asparagus spears",
-                    "1/2 cup cherry tomatoes",
-                    "2 tbsp fresh parsley, chopped",
-                    "Salt and black pepper"
-                ],
-                instructions: [
-                    "Preheat grill to medium-high heat",
-                    "Toss shrimp with olive oil, garlic, lemon juice, salt, pepper",
-                    "Thread shrimp on skewers with vegetables",
-                    "Grill shrimp 2-3 minutes per side until pink and cooked through",
-                    "Grill asparagus and tomatoes until tender",
-                    "Remove from grill and garnish with fresh parsley",
-                    "Serve immediately with lemon wedges",
-                    "Perfect over cauliflower rice or quinoa"
-                ]
-            },
-            {
-                name: "Steamed Garlic Ginger Shrimp",
-                description: "Light and healthy steamed shrimp with Asian flavors",
+                name: "Garlic Butter Shrimp",
+                description: "Classic buttery shrimp with garlic and herbs",
                 time: "12 mins",
                 difficulty: 1,
                 rating: 5,
                 calories: 280,
-                protein: 36,
-                carbs: 8,
-                fat: 4,
-                icon: "🥢",
-                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop&crop=center",
+                protein: 32,
+                carbs: 4,
+                fat: 15,
+                icon: "🧄",
+                image: "https://images.unsplash.com/photo-1565299585323-38174c8f3f74?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 ingredients: [
-                    "8 oz medium shrimp, peeled",
-                    "2 cloves garlic, minced",
-                    "1 tbsp fresh ginger, grated",
-                    "2 green onions, chopped",
-                    "1 tbsp low-sodium soy sauce",
-                    "1 tsp sesame oil",
-                    "1 cup broccoli florets",
-                    "1/2 cup snap peas"
+                    "2 lbs large shrimp, peeled and deveined",
+                    "4 tbsp butter",
+                    "6 garlic cloves, minced",
+                    "1/4 cup white wine",
+                    "2 tbsp fresh lemon juice",
+                    "2 tbsp fresh parsley, chopped",
+                    "1 tsp red pepper flakes",
+                    "Salt and black pepper",
+                    "2 tbsp olive oil"
                 ],
                 instructions: [
-                    "Set up steamer basket over boiling water",
-                    "Season shrimp with garlic, ginger, salt, pepper",
-                    "Place shrimp in steamer basket",
-                    "Add broccoli and snap peas around shrimp",
-                    "Steam 4-5 minutes until shrimp are pink and vegetables tender",
-                    "Mix soy sauce with sesame oil",
-                    "Drizzle sauce over shrimp and vegetables",
-                    "Garnish with green onions and serve hot"
+                    "Pat shrimp dry and season with salt and pepper",
+                    "Heat olive oil in large skillet over medium-high heat",
+                    "Add shrimp and cook 2-3 minutes per side until pink",
+                    "Remove shrimp and set aside",
+                    "Add butter and garlic to pan, cook 30 seconds until fragrant",
+                    "Add white wine and lemon juice, cook 1 minute",
+                    "Return shrimp to pan, toss to coat",
+                    "Garnish with parsley and red pepper flakes, serve immediately"
                 ]
             },
             {
-                name: "Shrimp and Vegetable Stir-Fry",
-                description: "Quick high-protein stir-fry with colorful vegetables",
+                name: "Shrimp Scampi",
+                description: "Italian-style shrimp in white wine and garlic sauce",
                 time: "18 mins",
-                difficulty: 1,
-                rating: 5,
-                calories: 340,
-                protein: 35,
-                carbs: 16,
-                fat: 8,
-                icon: "🥘",
-                image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "7 oz medium shrimp, peeled",
-                    "1 tbsp coconut oil",
-                    "1 red bell pepper, sliced",
-                    "1 cup snow peas",
-                    "1/2 cup carrots, julienned",
-                    "2 cloves garlic, minced",
-                    "1 tbsp low-sodium soy sauce",
-                    "1 tsp fresh ginger, grated"
-                ],
-                instructions: [
-                    "Heat coconut oil in wok or large pan over high heat",
-                    "Add shrimp and cook 2 minutes until pink",
-                    "Add garlic and ginger, stir-fry 30 seconds",
-                    "Add bell pepper and carrots, stir-fry 2 minutes",
-                    "Add snow peas and cook 1 minute",
-                    "Add soy sauce and toss to combine",
-                    "Cook until vegetables are crisp-tender",
-                    "Serve over cauliflower rice or brown rice"
-                ]
-            },
-            {
-                name: "Mediterranean Shrimp Bowl",
-                description: "Fresh shrimp with Mediterranean vegetables and herbs",
-                time: "20 mins",
                 difficulty: 2,
                 rating: 5,
                 calories: 420,
-                protein: 36,
+                protein: 35,
                 carbs: 28,
-                fat: 12,
-                icon: "🫒",
-                image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&h=300&fit=crop&crop=center",
+                fat: 18,
+                icon: "🍝",
+                image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 ingredients: [
-                    "7 oz large shrimp, peeled",
-                    "1/2 cup cooked quinoa",
-                    "1 cup cucumber, diced",
-                    "1 cup cherry tomatoes, halved",
-                    "1/4 red onion, sliced",
-                    "2 tbsp olive oil",
+                    "1.5 lbs large shrimp, peeled",
+                    "12 oz linguine pasta",
+                    "1/2 cup white wine",
+                    "6 garlic cloves, sliced thin",
+                    "1/4 cup olive oil",
+                    "4 tbsp butter",
+                    "1/4 cup fresh parsley",
                     "2 tbsp lemon juice",
-                    "1 tsp dried oregano"
+                    "1/2 tsp red pepper flakes",
+                    "Parmesan cheese for serving"
                 ],
                 instructions: [
-                    "Cook quinoa according to package directions",
-                    "Season shrimp with oregano, salt, and pepper",
-                    "Heat 1 tbsp olive oil in pan over medium-high heat",
-                    "Cook shrimp 2-3 minutes per side until pink",
-                    "Mix remaining olive oil with lemon juice",
-                    "Arrange quinoa in bowl, top with cooked shrimp",
-                    "Add cucumber, tomatoes, and red onion",
-                    "Drizzle with lemon-olive oil dressing"
+                    "Cook linguine according to package directions, reserve 1 cup pasta water",
+                    "Heat olive oil in large skillet over medium heat",
+                    "Add garlic and red pepper flakes, cook 1 minute",
+                    "Add shrimp, cook 2 minutes per side until pink",
+                    "Add white wine and lemon juice, simmer 2 minutes",
+                    "Add butter and cooked pasta to pan",
+                    "Toss with pasta water as needed to create silky sauce",
+                    "Garnish with parsley and serve with parmesan"
                 ]
             },
             {
-                name: "Cajun Shrimp with Zucchini Noodles",
-                description: "Spiced shrimp with low-carb zucchini noodles",
-                time: "16 mins",
-                difficulty: 1,
-                rating: 4,
-                calories: 290,
-                protein: 34,
-                carbs: 10,
-                fat: 7,
-                icon: "🌶️",
-                image: "https://images.unsplash.com/photo-1551782450-17144efb9c50?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "7 oz large shrimp, peeled",
-                    "2 large zucchini, spiralized",
-                    "1 tbsp olive oil",
-                    "1 tsp paprika",
-                    "1/2 tsp garlic powder",
-                    "1/2 tsp onion powder",
-                    "1/4 tsp cayenne pepper",
-                    "2 tbsp fresh parsley"
-                ],
-                instructions: [
-                    "Mix paprika, garlic powder, onion powder, cayenne",
-                    "Season shrimp with spice mixture",
-                    "Heat olive oil in large pan over medium-high heat",
-                    "Cook shrimp 2-3 minutes per side until pink",
-                    "Add zucchini noodles to pan",
-                    "Toss for 2-3 minutes until zucchini is tender",
-                    "Remove from heat immediately to avoid overcooking",
-                    "Garnish with fresh parsley and serve hot"
-                ]
-            },
-            {
-                name: "Coconut Curry Shrimp",
-                description: "Light coconut curry with shrimp and vegetables",
-                time: "22 mins",
-                difficulty: 2,
+                name: "Kung Pao Shrimp",
+                description: "Fusion Chinese-style spicy shrimp with peanuts",
+                time: "20 mins",
+                difficulty: 3,
                 rating: 5,
                 calories: 380,
-                protein: 35,
+                protein: 34,
                 carbs: 18,
-                fat: 14,
-                icon: "🥥",
-                image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=500&h=300&fit=crop&crop=center",
+                fat: 22,
+                icon: "🇨🇳",
+                image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 ingredients: [
-                    "7 oz large shrimp, peeled",
-                    "1/2 cup light coconut milk",
-                    "1 tbsp red curry paste",
-                    "1 red bell pepper, sliced",
-                    "1 cup green beans, trimmed",
-                    "1/2 onion, sliced",
-                    "2 cloves garlic, minced",
-                    "1 tbsp fresh basil"
+                    "2 lbs shrimp, peeled and deveined",
+                    "1/2 cup roasted peanuts",
+                    "3 tbsp soy sauce",
+                    "2 tbsp rice vinegar",
+                    "1 tbsp cornstarch",
+                    "2 tsp sugar",
+                    "1 tsp sesame oil",
+                    "4 dried chilies",
+                    "3 green onions, sliced",
+                    "3 garlic cloves, minced",
+                    "1 tbsp fresh ginger, minced"
                 ],
                 instructions: [
-                    "Heat large pan over medium heat",
-                    "Sauté onion and garlic until fragrant",
-                    "Add curry paste and cook 1 minute",
-                    "Add coconut milk and bring to simmer",
-                    "Add bell pepper and green beans, cook 5 minutes",
-                    "Add shrimp and cook 3-4 minutes until pink",
-                    "Remove from heat and stir in fresh basil",
-                    "Serve over cauliflower rice"
+                    "Mix soy sauce, vinegar, cornstarch, sugar, and sesame oil for sauce",
+                    "Heat wok or large skillet over high heat with oil",
+                    "Add dried chilies, stir-fry 30 seconds until fragrant",
+                    "Add garlic and ginger, stir-fry 30 seconds",
+                    "Add shrimp, cook 3-4 minutes until pink",
+                    "Pour sauce over shrimp, toss until thickened",
+                    "Add peanuts and green onions, toss briefly",
+                    "Serve immediately over steamed rice"
                 ]
             },
             {
-                name: "Greek Shrimp with Feta",
-                description: "Mediterranean shrimp with tomatoes and feta cheese",
+                name: "Shrimp Po' Boy Sandwich",
+                description: "New Orleans-style fried shrimp sandwich",
+                time: "25 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 580,
+                protein: 38,
+                carbs: 45,
+                fat: 28,
+                icon: "🥪",
+                image: "https://images.unsplash.com/photo-1553979459-d2229ba7433a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1158&q=80",
+                ingredients: [
+                    "2 lbs medium shrimp, peeled",
+                    "2 cups cornmeal",
+                    "1 cup flour",
+                    "2 tsp Cajun seasoning",
+                    "1 tsp paprika",
+                    "2 eggs, beaten",
+                    "4 French bread rolls",
+                    "Lettuce leaves",
+                    "Tomato slices",
+                    "Remoulade sauce",
+                    "Oil for frying"
+                ],
+                instructions: [
+                    "Mix cornmeal, flour, Cajun seasoning, and paprika",
+                    "Heat oil to 375°F in large pot",
+                    "Dip shrimp in beaten eggs, then coat in cornmeal mixture",
+                    "Fry shrimp in batches for 2-3 minutes until golden",
+                    "Drain on paper towels",
+                    "Split and lightly toast French bread rolls",
+                    "Spread remoulade on both sides of rolls",
+                    "Layer with lettuce, tomatoes, and fried shrimp"
+                ]
+            },
+            {
+                name: "Coconut Shrimp",
+                description: "Crispy coconut-crusted shrimp with sweet chili sauce",
+                time: "22 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 440,
+                protein: 32,
+                carbs: 28,
+                fat: 24,
+                icon: "🥥",
+                image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                ingredients: [
+                    "2 lbs large shrimp, peeled with tails on",
+                    "1 cup flour",
+                    "2 eggs, beaten",
+                    "2 cups shredded coconut",
+                    "1 cup panko breadcrumbs",
+                    "1 tsp salt",
+                    "1/2 tsp paprika",
+                    "Sweet chili sauce for dipping",
+                    "Oil for frying"
+                ],
+                instructions: [
+                    "Set up breading station: flour, beaten eggs, coconut-panko mixture",
+                    "Season flour with salt and paprika",
+                    "Heat oil to 350°F",
+                    "Dredge shrimp in flour, then egg, then coconut mixture",
+                    "Fry shrimp for 2-3 minutes until golden brown",
+                    "Don't overcrowd the oil",
+                    "Drain on paper towels",
+                    "Serve immediately with sweet chili sauce"
+                ]
+            },
+            {
+                name: "Shrimp Tacos",
+                description: "Fusion Mexican-style shrimp with lime and cilantro",
                 time: "18 mins",
                 difficulty: 2,
                 rating: 5,
-                calories: 350,
-                protein: 36,
-                carbs: 12,
-                fat: 10,
-                icon: "🇬🇷",
-                image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&h=300&fit=crop&crop=center",
+                calories: 320,
+                protein: 28,
+                carbs: 26,
+                fat: 14,
+                icon: "🌮",
+                image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 ingredients: [
-                    "7 oz large shrimp, peeled",
-                    "1 cup cherry tomatoes, halved",
-                    "1/4 cup feta cheese, crumbled",
-                    "2 tbsp olive oil",
-                    "2 cloves garlic, minced",
-                    "1/4 cup fresh dill, chopped",
-                    "1 lemon, juiced",
-                    "Black olives (optional)"
+                    "1.5 lbs medium shrimp, peeled",
+                    "2 tsp chili powder",
+                    "1 tsp cumin",
+                    "1/2 tsp paprika",
+                    "8 corn tortillas",
+                    "2 cups shredded cabbage",
+                    "1 avocado, sliced",
+                    "1/4 cup cilantro",
+                    "2 limes, cut in wedges",
+                    "Chipotle mayo",
+                    "Pico de gallo"
                 ],
                 instructions: [
-                    "Heat olive oil in large pan over medium-high heat",
-                    "Add garlic and cook 30 seconds",
-                    "Add cherry tomatoes and cook 3 minutes",
-                    "Add shrimp and cook 2-3 minutes per side",
-                    "Add lemon juice and fresh dill",
-                    "Remove from heat and top with feta cheese",
-                    "Let feta slightly melt from residual heat",
-                    "Serve with additional lemon wedges"
+                    "Season shrimp with chili powder, cumin, paprika, salt and pepper",
+                    "Heat skillet over medium-high heat with oil",
+                    "Cook shrimp 2-3 minutes per side until pink and slightly charred",
+                    "Warm tortillas on griddle or in microwave",
+                    "Spread chipotle mayo on tortillas",
+                    "Add shredded cabbage, then seasoned shrimp",
+                    "Top with avocado, cilantro, and pico de gallo",
+                    "Serve with lime wedges"
                 ]
             },
             {
-                name: "Shrimp and Avocado Salad",
-                description: "Fresh, light salad with grilled shrimp and avocado",
-                time: "15 mins",
-                difficulty: 1,
+                name: "Cajun Shrimp and Grits",
+                description: "Southern comfort food with creamy grits",
+                time: "35 mins",
+                difficulty: 4,
+                rating: 5,
+                calories: 520,
+                protein: 36,
+                carbs: 38,
+                fat: 26,
+                icon: "🌶️",
+                image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1025&q=80",
+                ingredients: [
+                    "2 lbs large shrimp, peeled",
+                    "1 cup stone-ground grits",
+                    "4 cups chicken broth",
+                    "1/2 cup heavy cream",
+                    "4 oz sharp cheddar cheese",
+                    "6 strips bacon, chopped",
+                    "1 onion, diced",
+                    "2 tbsp Cajun seasoning",
+                    "3 garlic cloves, minced",
+                    "2 tbsp butter"
+                ],
+                instructions: [
+                    "Cook grits in chicken broth according to package directions",
+                    "Stir in cream, cheese, and butter, keep warm",
+                    "Cook bacon in large skillet until crispy, remove",
+                    "Sauté onions in bacon fat until soft",
+                    "Add garlic, cook 1 minute",
+                    "Season shrimp with Cajun seasoning",
+                    "Add shrimp to pan, cook 3-4 minutes until pink",
+                    "Serve shrimp over creamy grits, top with bacon"
+                ]
+            },
+            {
+                name: "Thai Curry Shrimp",
+                description: "Aromatic coconut curry with vegetables",
+                time: "25 mins",
+                difficulty: 3,
+                rating: 5,
+                calories: 390,
+                protein: 32,
+                carbs: 22,
+                fat: 20,
+                icon: "🇹🇭",
+                image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                ingredients: [
+                    "2 lbs shrimp, peeled and deveined",
+                    "1 can coconut milk",
+                    "3 tbsp red curry paste",
+                    "1 bell pepper, sliced",
+                    "1 onion, sliced",
+                    "1 cup snap peas",
+                    "2 tbsp fish sauce",
+                    "1 tbsp brown sugar",
+                    "1 tbsp lime juice",
+                    "Fresh basil leaves",
+                    "Jasmine rice for serving"
+                ],
+                instructions: [
+                    "Heat 1/4 cup coconut milk in large pan over medium heat",
+                    "Add curry paste, cook 2 minutes until fragrant",
+                    "Add remaining coconut milk, bring to simmer",
+                    "Add bell pepper and onion, cook 5 minutes",
+                    "Add shrimp and snap peas, cook 4-5 minutes",
+                    "Stir in fish sauce, brown sugar, and lime juice",
+                    "Simmer until shrimp are cooked through",
+                    "Garnish with fresh basil, serve over jasmine rice"
+                ]
+            },
+            {
+                name: "Shrimp Tempura",
+                description: "Fusion Japanese-style light and crispy battered shrimp",
+                time: "20 mins",
+                difficulty: 4,
                 rating: 4,
                 calories: 380,
-                protein: 33,
-                carbs: 14,
+                protein: 30,
+                carbs: 32,
                 fat: 16,
-                icon: "🥑",
-                image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&h=300&fit=crop&crop=center",
+                icon: "🍱",
+                image: "https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 ingredients: [
-                    "6 oz large shrimp, peeled and grilled",
-                    "1 avocado, sliced",
-                    "4 cups mixed greens",
-                    "1/2 cup cucumber, diced",
-                    "1/4 cup red onion, thinly sliced",
-                    "2 tbsp olive oil",
-                    "2 tbsp lime juice",
-                    "1 tsp Dijon mustard"
+                    "2 lbs large shrimp, peeled with tails on",
+                    "1 cup ice-cold water",
+                    "1 egg yolk",
+                    "1 cup tempura flour (or 3/4 cup flour + 1/4 cup cornstarch)",
+                    "1/2 tsp salt",
+                    "Oil for deep frying",
+                    "Tempura dipping sauce",
+                    "Grated daikon radish",
+                    "Pickled ginger"
                 ],
                 instructions: [
-                    "Season and grill shrimp until pink and cooked through",
-                    "Whisk olive oil, lime juice, and Dijon mustard",
-                    "Arrange mixed greens in large bowl",
-                    "Top with grilled shrimp, avocado, cucumber, onion",
-                    "Drizzle with lime dressing",
-                    "Toss gently to combine",
-                    "Serve immediately while shrimp are warm",
-                    "Perfect for meal prep without dressing"
+                    "Heat oil to 340°F for frying",
+                    "Mix ice water and egg yolk in bowl",
+                    "Add flour and salt, mix very lightly (lumps are okay)",
+                    "Don't overmix - batter should be lumpy",
+                    "Make small cuts on shrimp belly to prevent curling",
+                    "Dip shrimp in batter, letting excess drip off",
+                    "Fry 2-3 minutes until light golden and crispy",
+                    "Serve immediately with dipping sauce and garnishes"
                 ]
             },
             {
-                name: "Asian Lettuce Wraps with Shrimp",
-                description: "Fresh lettuce wraps filled with seasoned shrimp",
-                time: "20 mins",
-                difficulty: 1,
-                rating: 5,
-                calories: 260,
-                protein: 32,
-                carbs: 12,
-                fat: 6,
-                icon: "🥬",
-                image: "https://images.unsplash.com/photo-1600298881974-6be191ceeda1?w=500&h=300&fit=crop&crop=center",
-                ingredients: [
-                    "7 oz medium shrimp, peeled and chopped",
-                    "1 head butter lettuce",
-                    "1/2 cup water chestnuts, diced",
-                    "1/4 cup green onions, chopped",
-                    "2 cloves garlic, minced",
-                    "1 tbsp low-sodium soy sauce",
-                    "1 tsp sesame oil",
-                    "1 tsp fresh ginger, grated"
-                ],
-                instructions: [
-                    "Separate lettuce into cup-shaped leaves",
-                    "Heat large pan over medium-high heat",
-                    "Cook chopped shrimp until pink, about 3 minutes",
-                    "Add garlic and ginger, cook 1 minute",
-                    "Add water chestnuts and green onions",
-                    "Stir in soy sauce and sesame oil",
-                    "Cook 2 more minutes until heated through",
-                    "Serve shrimp mixture in lettuce cups"
-                ]
-            },
-            {
-                name: "Shrimp and Vegetable Skewers",
-                description: "Colorful grilled skewers with shrimp and fresh vegetables",
-                time: "20 mins",
+                name: "Bang Bang Shrimp",
+                description: "Crispy shrimp with spicy creamy sauce",
+                time: "15 mins",
                 difficulty: 2,
                 rating: 5,
-                calories: 310,
+                calories: 450,
                 protein: 34,
-                carbs: 15,
-                fat: 8,
-                icon: "🍢",
-                image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=300&fit=crop&crop=center",
+                carbs: 28,
+                fat: 24,
+                icon: "💥",
+                image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 ingredients: [
-                    "8 oz large shrimp, peeled",
-                    "1 zucchini, thick rounds",
-                    "1 red bell pepper, chunks",
-                    "1 yellow bell pepper, chunks",
-                    "8 cherry tomatoes",
-                    "2 tbsp olive oil",
-                    "2 tbsp balsamic vinegar",
-                    "2 tsp Italian seasoning"
+                    "2 lbs medium shrimp, peeled",
+                    "1 cup cornstarch",
+                    "2 eggs, beaten",
+                    "1/2 cup mayonnaise",
+                    "1/4 cup sweet chili sauce",
+                    "2 tbsp sriracha",
+                    "1 tbsp rice vinegar",
+                    "1 tsp garlic powder",
+                    "2 green onions, sliced",
+                    "Oil for frying"
                 ],
                 instructions: [
-                    "Preheat grill to medium-high heat",
-                    "Mix olive oil, balsamic vinegar, Italian seasoning",
-                    "Marinate shrimp in mixture for 10 minutes",
-                    "Thread shrimp and vegetables alternately on skewers",
-                    "Grill skewers 2-3 minutes per side",
-                    "Turn carefully to cook all sides evenly",
-                    "Cook until shrimp are pink and vegetables tender",
-                    "Serve immediately with fresh herbs"
+                    "Heat oil to 375°F",
+                    "Dip shrimp in beaten eggs, then coat in cornstarch",
+                    "Fry shrimp in batches for 2-3 minutes until golden",
+                    "Mix mayo, sweet chili sauce, sriracha, vinegar, and garlic powder",
+                    "Drain shrimp on paper towels",
+                    "Toss hot shrimp in bang bang sauce",
+                    "Garnish with sliced green onions",
+                    "Serve immediately over lettuce or rice"
                 ]
             }
         ];
