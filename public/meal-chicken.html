@@ -228,8 +228,8 @@
             <div class="content">
                 <div style="padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: var(--primary); margin-bottom: 10px;">🐔 Epic Chicken Recipes</h2>
-                        <p style="color: #666; font-size: 14px;">10 amazing chicken dishes with fusion flavors and classic favorites</p>
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🐔 Fitness Chicken Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 lean chicken meals for serious lifters - fat always less than protein</p>
                         <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
                     
@@ -281,360 +281,336 @@
     </div>
 
     <script>
-        // Chicken Recipe Database
+        // FITNESS Chicken Recipe Database
         const chickenRecipes = [
             {
-                name: "Classic Fried Chicken",
-                description: "Crispy, golden Southern-style fried chicken",
-                time: "45 mins",
-                difficulty: 3,
-                rating: 5,
-                calories: 580,
+                name: "Grilled Chicken Breast",
+                description: "Simple seasoned grilled chicken breast - bodybuilder staple",
+                time: "20 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 380,
                 protein: 42,
-                carbs: 18,
-                fat: 38,
-                icon: "🍗",
-                image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                carbs: 2,
+                fat: 8,
+                icon: "💪",
                 ingredients: [
-                    "8 chicken pieces (thighs and drumsticks)",
-                    "2 cups all-purpose flour",
-                    "2 tbsp paprika",
-                    "1 tbsp garlic powder",
-                    "1 tbsp onion powder",
-                    "1 tsp cayenne pepper",
-                    "2 tsp salt",
-                    "1 tsp black pepper",
-                    "2 cups buttermilk",
-                    "Vegetable oil for frying"
-                ],
-                instructions: [
-                    "Soak chicken in buttermilk for at least 2 hours or overnight",
-                    "Mix flour with all dry seasonings in a large bowl",
-                    "Heat oil to 350°F in a large heavy pot or deep fryer",
-                    "Remove chicken from buttermilk and dredge in seasoned flour",
-                    "Fry chicken in batches for 12-15 minutes until golden brown",
-                    "Internal temperature should reach 165°F",
-                    "Drain on paper towels and let rest 5 minutes",
-                    "Serve hot with your favorite sides"
-                ]
-            },
-            {
-                name: "Chicken Tikka Masala",
-                description: "Fusion Indian-British curry with tender chicken",
-                time: "1 hour",
-                difficulty: 4,
-                rating: 5,
-                calories: 520,
-                protein: 38,
-                carbs: 22,
-                fat: 32,
-                icon: "🇮🇳",
-                image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                ingredients: [
-                    "2 lbs chicken breast, cubed",
-                    "1 cup plain yogurt",
-                    "2 tbsp garam masala",
-                    "1 tbsp ginger-garlic paste",
-                    "1 large onion, diced",
-                    "1 can crushed tomatoes",
-                    "1 cup heavy cream",
-                    "2 tbsp tomato paste",
-                    "1 tsp cumin",
-                    "1 tsp coriander",
-                    "Fresh cilantro"
-                ],
-                instructions: [
-                    "Marinate chicken in yogurt, half the garam masala, and ginger-garlic paste for 30 minutes",
-                    "Grill or pan-sear marinated chicken until cooked through",
-                    "Sauté onions until golden brown",
-                    "Add tomato paste, remaining spices, cook 2 minutes",
-                    "Add crushed tomatoes, simmer 15 minutes",
-                    "Stir in cream and cooked chicken",
-                    "Simmer 10 minutes until sauce thickens",
-                    "Garnish with cilantro, serve over basmati rice"
-                ]
-            },
-            {
-                name: "Buffalo Chicken Sandwich",
-                description: "Spicy crispy chicken sandwich with ranch",
-                time: "30 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 680,
-                protein: 45,
-                carbs: 48,
-                fat: 35,
-                icon: "🥪",
-                image: "https://images.unsplash.com/photo-1553979459-d2229ba7433a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1158&q=80",
-                ingredients: [
-                    "4 chicken breasts, pounded thin",
-                    "1 cup flour",
-                    "2 eggs, beaten",
-                    "1 cup panko breadcrumbs",
-                    "1/2 cup buffalo sauce",
-                    "4 brioche buns",
-                    "Lettuce leaves",
-                    "Tomato slices",
-                    "Ranch dressing",
-                    "Pickle slices"
-                ],
-                instructions: [
-                    "Set up breading station: flour, beaten eggs, panko",
-                    "Season chicken with salt and pepper",
-                    "Bread chicken: flour, egg, then panko",
-                    "Pan-fry in oil for 4-5 minutes per side until golden",
-                    "Toss hot chicken in buffalo sauce",
-                    "Toast brioche buns lightly",
-                    "Assemble: bottom bun, ranch, lettuce, buffalo chicken, tomato, pickles, top bun",
-                    "Serve immediately with extra ranch and hot sauce"
-                ]
-            },
-            {
-                name: "Korean Fried Chicken",
-                description: "Fusion double-fried chicken with gochujang glaze",
-                time: "1 hour 15 mins",
-                difficulty: 4,
-                rating: 5,
-                calories: 620,
-                protein: 40,
-                carbs: 35,
-                fat: 38,
-                icon: "🇰🇷",
-                image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1158&q=80",
-                ingredients: [
-                    "3 lbs chicken wings and drumettes",
-                    "1 cup potato starch",
-                    "1/2 cup flour",
-                    "1 tsp salt",
-                    "1 cup cold water",
-                    "3 tbsp gochujang",
-                    "2 tbsp soy sauce",
-                    "2 tbsp rice vinegar",
-                    "3 tbsp honey",
-                    "2 cloves garlic, minced",
-                    "Sesame seeds and green onions"
-                ],
-                instructions: [
-                    "Mix potato starch, flour, salt, and cold water for batter",
-                    "Coat chicken in batter and fry at 325°F for 10 minutes",
-                    "Remove and drain for 5 minutes",
-                    "Fry again at 375°F for 5-7 minutes until extra crispy",
-                    "Mix gochujang, soy sauce, vinegar, honey, and garlic for glaze",
-                    "Heat glaze in pan until slightly thickened",
-                    "Toss hot chicken in glaze until well coated",
-                    "Garnish with sesame seeds and green onions"
-                ]
-            },
-            {
-                name: "Chicken Parmesan",
-                description: "Italian-American classic with marinara and cheese",
-                time: "50 mins",
-                difficulty: 3,
-                rating: 5,
-                calories: 640,
-                protein: 48,
-                carbs: 28,
-                fat: 38,
-                icon: "🇮🇹",
-                image: "https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1158&q=80",
-                ingredients: [
-                    "4 chicken breasts, pounded thin",
-                    "2 cups panko breadcrumbs",
-                    "1 cup parmesan cheese, grated",
-                    "1 cup flour",
-                    "3 eggs, beaten",
-                    "2 cups marinara sauce",
-                    "8 oz mozzarella cheese, sliced",
-                    "1/4 cup olive oil",
-                    "Fresh basil",
-                    "Salt and pepper"
-                ],
-                instructions: [
-                    "Preheat oven to 425°F",
-                    "Mix panko with half the parmesan",
-                    "Bread chicken: flour, egg, then panko mixture",
-                    "Pan-fry in olive oil until golden on both sides",
-                    "Transfer to baking dish, top with marinara",
-                    "Add mozzarella and remaining parmesan",
-                    "Bake 20-25 minutes until cheese melts and chicken reaches 165°F",
-                    "Garnish with fresh basil, serve over pasta"
-                ]
-            },
-            {
-                name: "Thai Basil Chicken",
-                description: "Spicy stir-fry with holy basil and chilies",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 420,
-                protein: 35,
-                carbs: 18,
-                fat: 24,
-                icon: "🇹🇭",
-                image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                ingredients: [
-                    "1.5 lbs ground chicken",
-                    "4 cloves garlic, minced",
-                    "2-4 Thai bird chilies, sliced",
-                    "2 cups fresh Thai basil leaves",
-                    "2 tbsp fish sauce",
-                    "1 tbsp soy sauce",
-                    "1 tbsp oyster sauce",
-                    "1 tsp sugar",
-                    "2 tbsp vegetable oil",
-                    "Jasmine rice for serving",
-                    "Fried eggs (optional)"
-                ],
-                instructions: [
-                    "Heat oil in wok or large pan over high heat",
-                    "Add garlic and chilies, stir-fry 30 seconds",
-                    "Add ground chicken, break up and cook 5-7 minutes",
-                    "Mix fish sauce, soy sauce, oyster sauce, and sugar",
-                    "Add sauce mixture to chicken, stir well",
-                    "Cook until chicken is fully cooked and slightly caramelized",
-                    "Remove from heat, stir in fresh basil until wilted",
-                    "Serve over jasmine rice, top with fried egg if desired"
-                ]
-            },
-            {
-                name: "BBQ Chicken",
-                description: "Smoky grilled chicken with tangy barbecue sauce",
-                time: "1 hour 30 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 480,
-                protein: 42,
-                carbs: 24,
-                fat: 26,
-                icon: "🔥",
-                image: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                ingredients: [
-                    "1 whole chicken, cut into pieces",
-                    "2 tbsp brown sugar",
-                    "1 tbsp paprika",
+                    "6 oz boneless skinless chicken breast",
+                    "1 tsp olive oil",
                     "1 tsp garlic powder",
                     "1 tsp onion powder",
-                    "1 tsp chili powder",
-                    "1 tsp salt",
+                    "1 tsp paprika",
+                    "1/2 tsp salt",
                     "1/2 tsp black pepper",
-                    "1 cup BBQ sauce",
-                    "2 tbsp apple cider vinegar"
+                    "1/2 tsp thyme",
+                    "Lemon wedges"
                 ],
                 instructions: [
-                    "Mix all dry rub ingredients together",
-                    "Rub spice mixture all over chicken pieces",
-                    "Let marinate at room temperature for 30 minutes",
-                    "Preheat grill to medium heat (300-350°F)",
-                    "Grill chicken skin-side down for 25-30 minutes",
-                    "Flip and grill another 20-25 minutes",
-                    "Brush with BBQ sauce in last 10 minutes",
-                    "Cook until internal temperature reaches 165°F"
+                    "Pound chicken breast to even thickness",
+                    "Mix all dry seasonings together",
+                    "Brush chicken lightly with olive oil",
+                    "Season both sides with spice mixture",
+                    "Preheat grill to medium-high heat",
+                    "Grill 6-7 minutes per side until internal temp reaches 165°F",
+                    "Let rest 5 minutes before slicing",
+                    "Serve with lemon wedges and vegetables"
                 ]
             },
             {
-                name: "Chicken Teriyaki",
-                description: "Japanese-style glazed chicken with vegetables",
+                name: "Baked Herb Chicken Thighs",
+                description: "Lean skinless thighs baked with fresh herbs",
                 time: "35 mins",
                 difficulty: 1,
                 rating: 4,
-                calories: 450,
+                calories: 420,
                 protein: 38,
-                carbs: 32,
-                fat: 20,
-                icon: "🍱",
-                image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                carbs: 3,
+                fat: 12,
+                icon: "🌿",
                 ingredients: [
-                    "2 lbs chicken thighs, boneless",
-                    "1/2 cup soy sauce",
-                    "1/4 cup mirin",
-                    "3 tbsp sugar",
-                    "2 tbsp sake (optional)",
-                    "1 tbsp cornstarch",
-                    "2 tbsp vegetable oil",
-                    "1 tbsp sesame seeds",
-                    "2 green onions, sliced",
-                    "Steamed broccoli"
-                ],
-                instructions: [
-                    "Mix soy sauce, mirin, sugar, and sake for teriyaki sauce",
-                    "Dissolve cornstarch in 2 tbsp water",
-                    "Heat oil in large pan over medium-high heat",
-                    "Cook chicken thighs 6-7 minutes per side until golden",
-                    "Remove chicken and slice",
-                    "Add teriyaki sauce to pan, bring to simmer",
-                    "Add cornstarch mixture, stir until thickened",
-                    "Return chicken to pan, coat with glaze, garnish with sesame seeds and green onions"
-                ]
-            },
-            {
-                name: "Mediterranean Chicken",
-                description: "Herb-crusted chicken with olives and tomatoes",
-                time: "45 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 520,
-                protein: 40,
-                carbs: 12,
-                fat: 35,
-                icon: "🫒",
-                image: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                ingredients: [
-                    "6 chicken thighs, bone-in",
-                    "1/4 cup olive oil",
-                    "2 tbsp lemon juice",
+                    "6 oz boneless skinless chicken thighs",
+                    "2 tsp fresh rosemary, chopped",
+                    "2 tsp fresh thyme",
                     "3 cloves garlic, minced",
-                    "1 tbsp dried oregano",
-                    "1 tsp dried thyme",
-                    "1 cup cherry tomatoes",
-                    "1/2 cup kalamata olives",
-                    "1/4 cup sun-dried tomatoes",
-                    "1/2 cup feta cheese",
-                    "Fresh parsley"
+                    "1 tbsp lemon juice",
+                    "1 tsp olive oil",
+                    "1/2 tsp salt",
+                    "1/4 tsp black pepper",
+                    "Non-stick cooking spray"
                 ],
                 instructions: [
                     "Preheat oven to 400°F",
-                    "Mix olive oil, lemon juice, garlic, oregano, and thyme",
-                    "Marinate chicken in herb mixture for 20 minutes",
-                    "Place chicken in baking dish with cherry tomatoes and olives",
-                    "Bake 35-40 minutes until chicken reaches 165°F",
-                    "Add sun-dried tomatoes and feta in last 10 minutes",
-                    "Let rest 5 minutes before serving",
+                    "Spray baking dish with cooking spray",
+                    "Mix herbs, garlic, lemon juice, and olive oil",
+                    "Season chicken with salt and pepper",
+                    "Rub herb mixture all over chicken",
+                    "Place in baking dish",
+                    "Bake 25-30 minutes until internal temp reaches 165°F",
+                    "Let rest 5 minutes before serving"
+                ]
+            },
+            {
+                name: "Poached Chicken & Vegetables",
+                description: "Clean poached chicken with steamed vegetables",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 350,
+                protein: 40,
+                carbs: 15,
+                fat: 6,
+                icon: "🥬",
+                ingredients: [
+                    "6 oz boneless skinless chicken breast",
+                    "4 cups low-sodium chicken broth",
+                    "1 bay leaf",
+                    "3 peppercorns",
+                    "1 cup broccoli florets",
+                    "1 cup green beans, trimmed",
+                    "1/2 cup carrots, sliced",
+                    "1 tsp fresh dill",
+                    "Salt and pepper to taste"
+                ],
+                instructions: [
+                    "Bring chicken broth, bay leaf, and peppercorns to simmer",
+                    "Add chicken breast to poaching liquid",
+                    "Poach 12-15 minutes until cooked through",
+                    "Remove chicken and let rest",
+                    "Steam vegetables until tender-crisp",
+                    "Slice chicken against the grain",
+                    "Serve chicken over steamed vegetables",
+                    "Garnish with fresh dill"
+                ]
+            },
+            {
+                name: "Air-Fried Chicken Tenders",
+                description: "Crispy air-fried tenders with almond flour coating",
+                time: "20 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 480,
+                protein: 44,
+                carbs: 8,
+                fat: 18,
+                icon: "🍖",
+                ingredients: [
+                    "6 oz chicken tenderloins",
+                    "1/2 cup almond flour",
+                    "2 tbsp protein powder (unflavored)",
+                    "1 tsp paprika",
+                    "1/2 tsp garlic powder",
+                    "1/2 tsp onion powder",
+                    "1 egg white",
+                    "1 tbsp Dijon mustard",
+                    "Salt and pepper"
+                ],
+                instructions: [
+                    "Preheat air fryer to 400°F",
+                    "Mix almond flour, protein powder, and all spices",
+                    "Whisk egg white with Dijon mustard",
+                    "Season chicken with salt and pepper",
+                    "Dip chicken in egg mixture, then coat with almond flour mixture",
+                    "Spray air fryer basket with cooking spray",
+                    "Air fry 8-10 minutes, flipping halfway",
+                    "Cook until internal temp reaches 165°F"
+                ]
+            },
+            {
+                name: "Grilled Chicken Fajita Bowl",
+                description: "Mexican-inspired grilled chicken with peppers and onions",
+                time: "30 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 440,
+                protein: 38,
+                carbs: 20,
+                fat: 14,
+                icon: "🌶️",
+                ingredients: [
+                    "6 oz boneless skinless chicken breast",
+                    "1 bell pepper, sliced",
+                    "1/2 onion, sliced",
+                    "1 tbsp olive oil",
+                    "1 tsp cumin",
+                    "1 tsp chili powder",
+                    "1/2 tsp paprika",
+                    "1/4 cup salsa (no sugar added)",
+                    "2 tbsp Greek yogurt",
+                    "1/4 avocado, sliced"
+                ],
+                instructions: [
+                    "Season chicken with cumin, chili powder, and paprika",
+                    "Grill chicken 6-7 minutes per side until cooked through",
+                    "Let rest, then slice into strips",
+                    "Heat 1 tsp oil in pan, sauté peppers and onions until tender",
+                    "Season vegetables with salt and pepper",
+                    "Arrange chicken and vegetables in bowl",
+                    "Top with salsa, Greek yogurt, and avocado",
+                    "Serve immediately"
+                ]
+            },
+            {
+                name: "Asian Steamed Chicken",
+                description: "Clean steamed chicken with ginger and scallions",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 380,
+                protein: 41,
+                carbs: 8,
+                fat: 10,
+                icon: "🥢",
+                ingredients: [
+                    "6 oz boneless skinless chicken thighs",
+                    "2 tbsp low-sodium soy sauce",
+                    "1 tbsp rice vinegar",
+                    "1 tsp sesame oil",
+                    "2 tsp fresh ginger, minced",
+                    "3 scallions, chopped",
+                    "1 clove garlic, minced",
+                    "1/2 tsp red pepper flakes",
+                    "1 tsp sesame seeds"
+                ],
+                instructions: [
+                    "Set up steamer basket over simmering water",
+                    "Season chicken with salt and pepper",
+                    "Steam chicken 15-18 minutes until cooked through",
+                    "Mix soy sauce, rice vinegar, sesame oil, ginger, and garlic",
+                    "Let chicken rest 5 minutes, then slice",
+                    "Drizzle sauce over sliced chicken",
+                    "Garnish with scallions, red pepper flakes, and sesame seeds",
+                    "Serve with steamed vegetables"
+                ]
+            },
+            {
+                name: "Mediterranean Baked Chicken",
+                description: "Herb-crusted chicken with tomatoes and olives",
+                time: "40 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 460,
+                protein: 42,
+                carbs: 12,
+                fat: 18,
+                icon: "🫒",
+                ingredients: [
+                    "6 oz boneless skinless chicken breast",
+                    "1 cup cherry tomatoes",
+                    "10 kalamata olives, pitted",
+                    "2 tbsp olive oil",
+                    "2 tsp dried oregano",
+                    "1 tsp dried basil",
+                    "3 cloves garlic, minced",
+                    "1 lemon, juiced",
+                    "2 tbsp fresh parsley"
+                ],
+                instructions: [
+                    "Preheat oven to 425°F",
+                    "Season chicken with salt, pepper, oregano, and basil",
+                    "Heat 1 tbsp olive oil in oven-safe pan",
+                    "Sear chicken 3-4 minutes per side",
+                    "Add tomatoes, olives, garlic, and remaining oil",
+                    "Transfer to oven and bake 15-20 minutes",
+                    "Drizzle with lemon juice",
                     "Garnish with fresh parsley"
                 ]
             },
             {
-                name: "Chicken Alfredo",
-                description: "Creamy pasta with grilled chicken and parmesan",
-                time: "40 mins",
-                difficulty: 3,
-                rating: 5,
-                calories: 720,
-                protein: 45,
-                carbs: 48,
-                fat: 42,
-                icon: "🍝",
-                image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                name: "Chicken & Broccoli Stir-Fry",
+                description: "Simple stir-fry with minimal oil and clean seasonings",
+                time: "15 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 410,
+                protein: 40,
+                carbs: 12,
+                fat: 15,
+                icon: "🥦",
                 ingredients: [
-                    "4 chicken breasts",
-                    "1 lb fettuccine pasta",
-                    "1 cup heavy cream",
-                    "1 cup parmesan cheese, grated",
-                    "4 tbsp butter",
-                    "4 cloves garlic, minced",
-                    "1/4 cup white wine (optional)",
-                    "2 tbsp olive oil",
-                    "Fresh parsley",
-                    "Salt, pepper, and nutmeg"
+                    "6 oz boneless skinless chicken breast, cubed",
+                    "2 cups broccoli florets",
+                    "1 tbsp olive oil",
+                    "2 cloves garlic, minced",
+                    "1 tbsp low-sodium soy sauce",
+                    "1 tsp fresh ginger, minced",
+                    "1/4 cup chicken broth",
+                    "1 tsp sesame seeds",
+                    "2 scallions, chopped"
                 ],
                 instructions: [
-                    "Season and grill chicken breasts until cooked through, slice",
-                    "Cook fettuccine according to package directions",
-                    "In large pan, melt butter and sauté garlic",
-                    "Add white wine, cook 1 minute",
-                    "Add heavy cream, bring to gentle simmer",
-                    "Gradually whisk in parmesan until smooth",
-                    "Add drained pasta and sliced chicken",
-                    "Toss until well coated, garnish with parsley"
+                    "Heat oil in large pan or wok over high heat",
+                    "Add chicken cubes, cook 5-6 minutes until golden",
+                    "Add garlic and ginger, stir-fry 30 seconds",
+                    "Add broccoli and chicken broth",
+                    "Cover and steam 3-4 minutes until broccoli is tender",
+                    "Add soy sauce, toss to combine",
+                    "Remove from heat",
+                    "Garnish with sesame seeds and scallions"
+                ]
+            },
+            {
+                name: "Buffalo Chicken Lettuce Wraps",
+                description: "Spicy grilled chicken in crisp lettuce cups",
+                time: "25 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 390,
+                protein: 39,
+                carbs: 8,
+                fat: 12,
+                icon: "🥬",
+                ingredients: [
+                    "6 oz boneless skinless chicken breast",
+                    "2 tbsp buffalo sauce (no sugar)",
+                    "1 tsp olive oil",
+                    "8 butter lettuce leaves",
+                    "1/4 cup Greek yogurt",
+                    "2 tbsp light ranch seasoning mix",
+                    "2 celery stalks, diced",
+                    "1/4 red onion, diced"
+                ],
+                instructions: [
+                    "Grill chicken breast until cooked through",
+                    "Let rest, then dice into small pieces",
+                    "Toss diced chicken with buffalo sauce",
+                    "Mix Greek yogurt with ranch seasoning",
+                    "Wash and separate lettuce leaves",
+                    "Fill each lettuce cup with buffalo chicken",
+                    "Top with diced celery and onion",
+                    "Serve with Greek yogurt ranch on side"
+                ]
+            },
+            {
+                name: "Lemon Pepper Chicken Meal Prep",
+                description: "Week-prep friendly seasoned chicken with vegetables",
+                time: "45 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 420,
+                protein: 43,
+                carbs: 18,
+                fat: 11,
+                icon: "🍋",
+                ingredients: [
+                    "6 oz boneless skinless chicken breast",
+                    "2 tsp lemon pepper seasoning",
+                    "1 tbsp olive oil",
+                    "1 cup asparagus, trimmed",
+                    "1 cup green beans",
+                    "1/2 cup bell peppers, sliced",
+                    "1 lemon, sliced",
+                    "2 cloves garlic, minced",
+                    "Fresh thyme sprigs"
+                ],
+                instructions: [
+                    "Preheat oven to 425°F",
+                    "Season chicken with lemon pepper",
+                    "Heat oil in oven-safe pan, sear chicken 3 minutes per side",
+                    "Add vegetables around chicken",
+                    "Top with garlic, lemon slices, and thyme",
+                    "Bake 20-25 minutes until chicken reaches 165°F",
+                    "Let rest 5 minutes before serving",
+                    "Perfect for meal prep containers"
                 ]
             }
         ];
@@ -683,7 +659,7 @@
             chickenRecipes.forEach((meal, index) => {
                 html += `
                     <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${meal.image}');">
+                        <div class="meal-image" style="background: linear-gradient(135deg, #FFD700, #FFA500);">
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
