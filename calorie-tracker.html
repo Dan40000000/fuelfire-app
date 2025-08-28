@@ -75,7 +75,7 @@
                         </div>
                         
                         <!-- Fat -->
-                        <div style="margin-bottom: 15px;">
+                        <div style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <div style="font-weight: bold; color: #27ae60;">🥑 Fat</div>
                                 <div style="font-size: 14px; color: #666;">
@@ -84,6 +84,22 @@
                             </div>
                             <div style="background: #f0f0f0; border-radius: 10px; height: 12px; overflow: hidden;">
                                 <div id="fat-bar" style="background: linear-gradient(90deg, #27ae60, #229954); height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sugar -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="font-weight: bold; color: #e74c3c;">🍭 Sugar</div>
+                                <div style="font-size: 14px; color: #666;">
+                                    <span id="sugar-consumed">0</span>g / <span id="sugar-target">25</span>g
+                                </div>
+                            </div>
+                            <div style="background: #f0f0f0; border-radius: 10px; height: 12px; overflow: hidden;">
+                                <div id="sugar-bar" style="background: linear-gradient(90deg, #3498db, #2980b9); height: 100%; width: 0%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div style="text-align: center; margin-top: 5px; font-size: 12px;">
+                                <span id="sugar-status" style="font-weight: bold;">Within Limit</span>
                             </div>
                         </div>
                         
@@ -660,6 +676,7 @@
             let totalProtein = 0;
             let totalCarbs = 0; 
             let totalFat = 0;
+            let totalSugar = 0;
             
             // Log each food
             window.currentFoods.forEach(food => {
@@ -670,6 +687,7 @@
                     protein: food.protein || 0,
                     carbs: food.carbs || 0,
                     fat: food.fat || 0,
+                    sugar: food.sugar || 0,
                     time: new Date().toISOString(),
                     source: window.currentSource,
                     serving: food.serving || '1 serving'
@@ -679,6 +697,7 @@
                 totalProtein += food.protein || 0;
                 totalCarbs += food.carbs || 0;
                 totalFat += food.fat || 0;
+                totalSugar += food.sugar || 0;
             });
             
             loggedMeals[today].totalCalories += totalCalories;
@@ -692,7 +711,7 @@
             loadQuickAdds();
             
             const foodNames = window.currentFoods.map(f => f.name).join('\n• ');
-            alert(`✅ All foods logged as ${type}!\n\n• ${foodNames}\n\n📊 Total: ${totalCalories} calories\n🥩 ${totalProtein}g protein\n🍞 ${totalCarbs}g carbs\n🥑 ${totalFat}g fat`);
+            alert(`✅ All foods logged as ${type}!\n\n• ${foodNames}\n\n📊 Total: ${totalCalories} calories\n🥩 ${totalProtein}g protein\n🍞 ${totalCarbs}g carbs\n🥑 ${totalFat}g fat\n🍭 ${totalSugar}g sugar`);
             
             // Clear globals
             window.currentFoods = null;
@@ -700,7 +719,7 @@
         }
         
         // Select and log food
-        function selectFood(name, calories, protein, carbs, fat, source) {
+        function selectFood(name, calories, protein, carbs, fat, sugar, source) {
             const mealType = prompt('Log as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
             const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
             const type = types[parseInt(mealType)] || 'snack';
@@ -720,6 +739,7 @@
                 protein: protein,
                 carbs: carbs,
                 fat: fat,
+                sugar: sugar || 0,
                 time: new Date().toISOString(),
                 source: source
             });
@@ -734,7 +754,7 @@
             loadTodaysMeals();
             loadQuickAdds();
             
-            alert(`✅ ${name} logged!\n\n📊 ${calories} calories\n🥩 ${protein}g protein\n🍞 ${carbs}g carbs\n🥑 ${fat}g fat`);
+            alert(`✅ ${name} logged!\n\n📊 ${calories} calories\n🥩 ${protein}g protein\n🍞 ${carbs}g carbs\n🥑 ${fat}g fat\n🍭 ${sugar || 0}g sugar`);
         }
         
         // Barcode Scanner
@@ -911,8 +931,28 @@
             // Update progress bar
             document.getElementById(`${macroType}-bar`).style.width = `${percentage}%`;
             
-            // Update percentage display
-            document.getElementById(`${macroType}-percent`).textContent = `${percentageRounded}%`;
+            // Update percentage display if it exists (not for sugar)
+            const percentElement = document.getElementById(`${macroType}-percent`);
+            if (percentElement) {
+                percentElement.textContent = `${percentageRounded}%`;
+            }
+            
+            // Special handling for sugar
+            if (macroType === 'sugar') {
+                const statusElement = document.getElementById('sugar-status');
+                if (consumed > target) {
+                    // Over limit - red
+                    document.getElementById('sugar-bar').style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+                    statusElement.textContent = 'Over Limit';
+                    statusElement.style.color = '#e74c3c';
+                } else {
+                    // Within limit - blue
+                    document.getElementById('sugar-bar').style.background = 'linear-gradient(90deg, #3498db, #2980b9)';
+                    statusElement.textContent = 'Within Limit';
+                    statusElement.style.color = '#3498db';
+                }
+                return; // Skip the general color coding below
+            }
             
             // Color coding for progress bars based on completion
             const bar = document.getElementById(`${macroType}-bar`);
@@ -953,11 +993,13 @@
             let totalProtein = 0;
             let totalCarbs = 0;
             let totalFat = 0;
+            let totalSugar = 0;
             
             todayData.meals.forEach(meal => {
                 totalProtein += meal.protein || 0;
                 totalCarbs += meal.carbs || 0;
                 totalFat += meal.fat || 0;
+                totalSugar += meal.sugar || 0;
             });
             
             // Update calorie summary
@@ -966,10 +1008,14 @@
             document.getElementById('calories-remaining').textContent = Math.max(0, calorieTarget - todayData.totalCalories);
             document.getElementById('percent-complete').textContent = Math.round((todayData.totalCalories / calorieTarget) * 100) + '%';
             
+            // Set sugar target (WHO recommendation: max 25g/day for adults)
+            const sugarTarget = 25;
+            
             // Update macro tracking
             updateMacroDisplay('protein', totalProtein, proteinTarget);
             updateMacroDisplay('carbs', totalCarbs, carbsTarget);
             updateMacroDisplay('fat', totalFat, fatTarget);
+            updateMacroDisplay('sugar', totalSugar, sugarTarget);
             
             // Organize meals by type
             const mealsByType = {
@@ -1512,6 +1558,7 @@
                 protein: selectedMealData.protein,
                 carbs: selectedMealData.carbs,
                 fat: selectedMealData.fat,
+                sugar: selectedMealData.sugar || 0,
                 time: new Date().toISOString(),
                 fromMealPlan: true,
                 originalDay: selectedMealData.day,
@@ -1523,7 +1570,7 @@
             
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
             
-            alert(`✅ ${selectedMealData.name} logged as ${logAsType}!\n\n📊 ${selectedMealData.calories} calories\n🥩 ${selectedMealData.protein}g protein\n🍞 ${selectedMealData.carbs}g carbs\n🥑 ${selectedMealData.fat}g fat`);
+            alert(`✅ ${selectedMealData.name} logged as ${logAsType}!\n\n📊 ${selectedMealData.calories} calories\n🥩 ${selectedMealData.protein}g protein\n🍞 ${selectedMealData.carbs}g carbs\n🥑 ${selectedMealData.fat}g fat\n🍭 ${selectedMealData.sugar || 0}g sugar`);
             
             hideMealPlanSelector();
             loadTodaysMeals();
@@ -1654,6 +1701,7 @@
                 protein: selectedMealIdeaData.protein,
                 carbs: selectedMealIdeaData.carbs,
                 fat: selectedMealIdeaData.fat,
+                sugar: selectedMealIdeaData.sugar || 0,
                 time: new Date().toISOString(),
                 fromMealIdeas: true
             };
@@ -1663,7 +1711,7 @@
             
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
             
-            alert(`✅ ${selectedMealIdeaData.name} logged as ${logAsType}!\n\n📊 ${selectedMealIdeaData.calories} calories\n🥩 ${selectedMealIdeaData.protein}g protein\n🍞 ${selectedMealIdeaData.carbs}g carbs\n🥑 ${selectedMealIdeaData.fat}g fat`);
+            alert(`✅ ${selectedMealIdeaData.name} logged as ${logAsType}!\n\n📊 ${selectedMealIdeaData.calories} calories\n🥩 ${selectedMealIdeaData.protein}g protein\n🍞 ${selectedMealIdeaData.carbs}g carbs\n🥑 ${selectedMealIdeaData.fat}g fat\n🍭 ${selectedMealIdeaData.sugar || 0}g sugar`);
             
             hideMealIdeasSelector();
             loadTodaysMeals();
