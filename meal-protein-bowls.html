@@ -31,6 +31,9 @@
             width: 100%;
             height: 200px;
             background: linear-gradient(135deg, #00b4db, #0083b0);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -38,6 +41,14 @@
             color: white;
             position: relative;
             overflow: hidden;
+        }
+        
+        .meal-image.has-photo {
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
+        }
+        
+        .meal-image.has-photo .category-icon {
+            display: none;
         }
         
         .difficulty-badge {
@@ -225,8 +236,8 @@
                     <div class="meal-grid">
                         <!-- Buddha Bowl Supreme -->
                         <div class="meal-card" onclick="openRecipe(1)">
-                            <div class="meal-image">
-                                🥗
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🥗</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -259,8 +270,8 @@
 
                         <!-- Salmon Power Bowl -->
                         <div class="meal-card" onclick="openRecipe(2)">
-                            <div class="meal-image">
-                                🍣
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🍣</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -293,8 +304,8 @@
 
                         <!-- Greek Goddess Bowl -->
                         <div class="meal-card" onclick="openRecipe(3)">
-                            <div class="meal-image">
-                                🏛️
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🏛️</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -327,8 +338,8 @@
 
                         <!-- Steak & Sweet Potato Bowl -->
                         <div class="meal-card" onclick="openRecipe(4)">
-                            <div class="meal-image">
-                                🥩
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🥩</span>
                                 <div class="difficulty-badge">⭐ Medium</div>
                             </div>
                             <div class="meal-content">
@@ -361,8 +372,8 @@
 
                         <!-- Tuna Poke Power Bowl -->
                         <div class="meal-card" onclick="openRecipe(5)">
-                            <div class="meal-image">
-                                🐟
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🐟</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -395,8 +406,8 @@
 
                         <!-- Thai Protein Powerhouse -->
                         <div class="meal-card" onclick="openRecipe(6)">
-                            <div class="meal-image">
-                                🌶️
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1559314809-0f31657403cb?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🌶️</span>
                                 <div class="difficulty-badge">⭐ Medium</div>
                             </div>
                             <div class="meal-content">
@@ -429,8 +440,8 @@
 
                         <!-- Turkey Harvest Bowl -->
                         <div class="meal-card" onclick="openRecipe(7)">
-                            <div class="meal-image">
-                                🦃
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🦃</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -463,8 +474,8 @@
 
                         <!-- Egg White Breakfast Bowl -->
                         <div class="meal-card" onclick="openRecipe(8)">
-                            <div class="meal-image">
-                                🍳
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🍳</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -497,8 +508,8 @@
 
                         <!-- Shrimp Fiesta Bowl -->
                         <div class="meal-card" onclick="openRecipe(9)">
-                            <div class="meal-image">
-                                🍤
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1563379091339-03246963d96c?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🍤</span>
                                 <div class="difficulty-badge">⚡ Easy</div>
                             </div>
                             <div class="meal-content">
@@ -531,8 +542,8 @@
 
                         <!-- Tofu Zen Bowl -->
                         <div class="meal-card" onclick="openRecipe(10)">
-                            <div class="meal-image">
-                                🌱
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🌱</span>
                                 <div class="difficulty-badge">⭐ Medium</div>
                             </div>
                             <div class="meal-content">
