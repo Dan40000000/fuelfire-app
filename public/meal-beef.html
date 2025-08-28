@@ -281,9 +281,243 @@
     </div>
 
     <script>
-        // FITNESS Beef Recipe Database
-        const beefRecipes = [
-            {
+        // BULK MODE Beef Recipe Database
+        const bulkModeRecipes = {
+            'male-bulk': [
+                {
+                    name: "Beast Beef & Rice Power Bowl",
+                    description: "MASSIVE 12oz beef sirloin with jasmine rice & vegetables",
+                    time: "30 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1420,
+                    protein: 58,
+                    carbs: 145,
+                    fat: 42,
+                    sugar: 8,
+                    icon: "🔥",
+                    ingredients: [
+                        "12 oz lean beef sirloin, cubed",
+                        "2 cups jasmine rice, cooked",
+                        "2 tbsp olive oil",
+                        "1 large sweet potato, cubed",
+                        "2 cups broccoli florets",
+                        "1 tbsp soy sauce (low sodium)",
+                        "2 tsp garlic powder",
+                        "1 tsp ginger powder",
+                        "1 avocado, sliced",
+                        "Salt and pepper to taste"
+                    ],
+                    instructions: [
+                        "Cook jasmine rice according to package (makes 4 cups cooked)",
+                        "Season beef cubes with garlic powder, salt, and pepper",
+                        "Heat olive oil in large skillet over high heat",
+                        "Sear beef cubes for 6-8 minutes until browned",
+                        "Steam sweet potato and broccoli until tender",
+                        "Combine beef with soy sauce and ginger",
+                        "Layer rice in large bowl, top with beef",
+                        "Add steamed vegetables and avocado slices",
+                        "Serve immediately - perfect for serious gains!"
+                    ]
+                },
+                {
+                    name: "Triple Beef Protein Burrito",
+                    description: "Huge burrito with 10oz ground beef, rice, beans & cheese",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1350,
+                    protein: 62,
+                    carbs: 120,
+                    fat: 48,
+                    sugar: 6,
+                    icon: "🌯",
+                    ingredients: [
+                        "10 oz lean ground beef (93/7)",
+                        "1 large whole wheat tortilla",
+                        "1 cup brown rice, cooked",
+                        "3/4 cup black beans",
+                        "1/2 cup sharp cheddar cheese",
+                        "1/4 cup Greek yogurt",
+                        "2 tbsp salsa",
+                        "1 tbsp taco seasoning",
+                        "1/4 cup diced onions",
+                        "Lettuce and tomato"
+                    ],
+                    instructions: [
+                        "Brown ground beef in large pan",
+                        "Add onions and taco seasoning, cook 3 minutes",
+                        "Warm tortilla in microwave for 30 seconds",
+                        "Layer rice, beans, and beef mixture",
+                        "Add cheese, Greek yogurt, and salsa",
+                        "Top with lettuce and tomato",
+                        "Roll tightly, tucking in sides",
+                        "Cut in half and serve - BULKING BEAST!"
+                    ]
+                },
+                {
+                    name: "Beef & Sweet Potato Mass Gainer",
+                    description: "10oz beef roast with massive sweet potato and quinoa",
+                    time: "45 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1280,
+                    protein: 55,
+                    carbs: 138,
+                    fat: 35,
+                    sugar: 22,
+                    icon: "🍠",
+                    ingredients: [
+                        "10 oz beef chuck roast, lean",
+                        "2 large sweet potatoes (16 oz)",
+                        "1 cup quinoa, cooked",
+                        "2 tbsp coconut oil",
+                        "2 tbsp honey",
+                        "1 tsp cinnamon",
+                        "2 tsp thyme",
+                        "1 tsp rosemary",
+                        "Salt and pepper",
+                        "1 cup green beans"
+                    ],
+                    instructions: [
+                        "Season beef with thyme, rosemary, salt and pepper",
+                        "Sear beef in hot pan, then bake at 375°F for 25 minutes",
+                        "Cube sweet potatoes and toss with coconut oil and honey",
+                        "Roast sweet potatoes for 30 minutes until caramelized",
+                        "Cook quinoa according to package directions",
+                        "Steam green beans until tender-crisp",
+                        "Slice beef and serve over quinoa",
+                        "Top with roasted sweet potatoes and green beans",
+                        "MASSIVE meal for serious bulking!"
+                    ]
+                }
+            ],
+            'male-cut': [
+                {
+                    name: "Lean Beef & Zucchini Noodles",
+                    description: "6oz lean beef with spiralized zucchini and peppers",
+                    time: "20 mins",
+                    difficulty: 1,
+                    rating: 4,
+                    calories: 485,
+                    protein: 42,
+                    carbs: 18,
+                    fat: 16,
+                    sugar: 12,
+                    icon: "🥒",
+                    ingredients: [
+                        "6 oz lean beef sirloin, sliced thin",
+                        "3 medium zucchini, spiralized",
+                        "1 cup bell peppers, strips",
+                        "1/2 cup cherry tomatoes",
+                        "1 tbsp olive oil",
+                        "2 cloves garlic, minced",
+                        "1 tsp Italian seasoning",
+                        "2 tbsp balsamic vinegar",
+                        "Salt and pepper",
+                        "Fresh basil"
+                    ],
+                    instructions: [
+                        "Season beef strips with salt, pepper, Italian seasoning",
+                        "Heat olive oil in large skillet over high heat",
+                        "Cook beef strips 3-4 minutes until browned",
+                        "Remove beef, add garlic to pan for 30 seconds",
+                        "Add zucchini noodles, cook 2-3 minutes",
+                        "Add peppers and tomatoes, cook 2 minutes",
+                        "Return beef to pan with balsamic vinegar",
+                        "Toss everything together for 1 minute",
+                        "Garnish with fresh basil - perfect for cutting!"
+                    ]
+                }
+            ],
+            'female-bulk': [
+                {
+                    name: "Beef & Quinoa Power Bowl",
+                    description: "8oz lean beef with quinoa, sweet potato, and avocado",
+                    time: "30 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 820,
+                    protein: 38,
+                    carbs: 85,
+                    fat: 28,
+                    sugar: 15,
+                    icon: "💎",
+                    ingredients: [
+                        "8 oz lean ground beef (93/7)",
+                        "1 cup quinoa, cooked",
+                        "1 medium roasted sweet potato",
+                        "1/2 avocado, sliced",
+                        "2 cups mixed greens",
+                        "1/4 cup pumpkin seeds",
+                        "1 tbsp olive oil",
+                        "1 tsp cumin",
+                        "1 tsp paprika",
+                        "Lime juice and cilantro"
+                    ],
+                    instructions: [
+                        "Season ground beef with cumin and paprika",
+                        "Brown beef in pan over medium-high heat",
+                        "Roast sweet potato at 400°F for 25 minutes",
+                        "Cook quinoa according to package directions",
+                        "Assemble bowl with mixed greens as base",
+                        "Add quinoa, beef, and cubed sweet potato",
+                        "Top with avocado and pumpkin seeds",
+                        "Drizzle with olive oil and lime juice",
+                        "Perfect for female bulking goals!"
+                    ]
+                }
+            ],
+            'female-cut': [
+                {
+                    name: "Lean Beef Lettuce Wraps",
+                    description: "5oz extra lean beef with crisp lettuce cups",
+                    time: "15 mins",
+                    difficulty: 1,
+                    rating: 4,
+                    calories: 320,
+                    protein: 32,
+                    carbs: 12,
+                    fat: 12,
+                    sugar: 8,
+                    icon: "✨",
+                    ingredients: [
+                        "5 oz extra lean ground beef (96/4)",
+                        "8 large butter lettuce leaves",
+                        "1/2 cup diced cucumber",
+                        "1/2 cup cherry tomatoes, halved",
+                        "1/4 cup red onion, diced",
+                        "1 tbsp low-sodium soy sauce",
+                        "1 tsp sesame oil",
+                        "1 tsp ginger, minced",
+                        "1 clove garlic, minced",
+                        "Green onions and cilantro"
+                    ],
+                    instructions: [
+                        "Brown extra lean ground beef in non-stick pan",
+                        "Add garlic and ginger, cook 1 minute",
+                        "Season with soy sauce and sesame oil",
+                        "Remove from heat and let cool slightly",
+                        "Wash and dry lettuce leaves thoroughly",
+                        "Fill lettuce cups with beef mixture",
+                        "Top with cucumber, tomatoes, and onion",
+                        "Garnish with green onions and cilantro",
+                        "Light, lean, and perfect for cutting phase!"
+                    ]
+                }
+            ]
+        };
+        
+        // Get current recipes based on mode
+        function getCurrentRecipes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
+        }
+        
+        const beefRecipes = getCurrentRecipes();
+        
+        // Display functions
                 name: "Grilled Sirloin Steak",
                 description: "Lean grilled sirloin with herbs - perfect protein",
                 time: "20 mins",

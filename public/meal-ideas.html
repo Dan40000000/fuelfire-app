@@ -69,7 +69,27 @@
                 <div style="padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h2 style="color: var(--primary); margin-bottom: 10px;">💡 Meal Ideas</h2>
-                        <p style="color: #666; font-size: 14px;">Choose your protein for epic recipe ideas</p>
+                        <p style="color: #666; font-size: 14px;">Choose your fitness goal for optimized recipes</p>
+                        
+                        <!-- BULK MODE SELECTOR -->
+                        <div style="margin: 20px 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 400px; margin: 20px auto;">
+                            <button id="male-bulk-btn" onclick="setBulkMode('male-bulk')" style="background: linear-gradient(135deg, #FF6B35, #F7931E); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); transition: all 0.3s ease;">
+                                🔥 MALE BULK<br><span style="font-size: 10px; opacity: 0.9;">1000-1500 cal</span>
+                            </button>
+                            <button id="male-cut-btn" onclick="setBulkMode('male-cut')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;">
+                                ⚡ MALE CUT<br><span style="font-size: 10px; opacity: 0.9;">400-600 cal</span>
+                            </button>
+                            <button id="female-bulk-btn" onclick="setBulkMode('female-bulk')" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3); transition: all 0.3s ease;">
+                                💎 FEMALE BULK<br><span style="font-size: 10px; opacity: 0.9;">600-900 cal</span>
+                            </button>
+                            <button id="female-cut-btn" onclick="setBulkMode('female-cut')" style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3); transition: all 0.3s ease;">
+                                ✨ FEMALE CUT<br><span style="font-size: 10px; opacity: 0.9;">300-450 cal</span>
+                            </button>
+                        </div>
+                        
+                        <div id="current-mode" style="font-size: 12px; color: #FF6B35; font-weight: bold; margin-top: 10px;">
+                            Current Mode: 🔥 MALE BULK
+                        </div>
                     </div>
                     
                     <!-- Meat Category Grid -->
@@ -184,13 +204,51 @@
         }
         
         function goToCategory(category) {
-            window.location.href = `meal-${category}.html`;
+            const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            window.location.href = `meal-${category}.html?mode=${currentMode}`;
+        }
+
+        // BULK MODE FUNCTIONS
+        function setBulkMode(mode) {
+            localStorage.setItem('fuelfire_bulk_mode', mode);
+            updateModeDisplay(mode);
+            updateButtonStyles(mode);
+        }
+        
+        function updateModeDisplay(mode) {
+            const modeNames = {
+                'male-bulk': '🔥 MALE BULK',
+                'male-cut': '⚡ MALE CUT', 
+                'female-bulk': '💎 FEMALE BULK',
+                'female-cut': '✨ FEMALE CUT'
+            };
+            document.getElementById('current-mode').textContent = `Current Mode: ${modeNames[mode]}`;
+        }
+        
+        function updateButtonStyles(activeMode) {
+            const buttons = ['male-bulk-btn', 'male-cut-btn', 'female-bulk-btn', 'female-cut-btn'];
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                const mode = btnId.replace('-btn', '');
+                if (mode === activeMode) {
+                    btn.style.transform = 'scale(1.05)';
+                    btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+                } else {
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = btn.getAttribute('data-original-shadow') || '0 4px 15px rgba(0,0,0,0.2)';
+                }
+            });
         }
 
         // Initialize
         window.addEventListener('load', function() {
             updateTime();
             setInterval(updateTime, 1000);
+            
+            // Load saved bulk mode or default to male-bulk
+            const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            updateModeDisplay(currentMode);
+            updateButtonStyles(currentMode);
         });
     </script>
 </body>
