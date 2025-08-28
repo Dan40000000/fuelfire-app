@@ -32,6 +32,9 @@
             width: 100%;
             height: 200px;
             background: linear-gradient(135deg, #8B5CF6, #A855F7);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -39,6 +42,14 @@
             color: white;
             position: relative;
             overflow: hidden;
+        }
+        
+        .meal-image.has-photo {
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
+        }
+        
+        .meal-image.has-photo .category-icon {
+            display: none;
         }
         
         .keto-badge {
@@ -328,6 +339,7 @@
                 carbs: 3,
                 fat: 56,
                 icon: "🥩",
+                image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 ribeye steaks (8 oz each)",
                     "4 tbsp grass-fed butter",
@@ -359,6 +371,7 @@
                 carbs: 2,
                 fat: 46,
                 icon: "🍗",
+                image: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "6 bone-in, skin-on chicken thighs",
                     "3 tbsp olive oil",
@@ -391,6 +404,7 @@
                 carbs: 8,
                 fat: 36,
                 icon: "🧀",
+                image: "https://images.unsplash.com/photo-1516684669134-de6f7c473a2a?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1 large head cauliflower, cut into florets",
                     "8 oz cream cheese, softened",
@@ -424,6 +438,7 @@
                 carbs: 6,
                 fat: 44,
                 icon: "🐟",
+                image: "https://images.unsplash.com/photo-1580959375944-abd7e991f971?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "4 salmon fillets (6 oz each)",
                     "2 large avocados, diced",
@@ -457,6 +472,7 @@
                 carbs: 4,
                 fat: 26,
                 icon: "🥓",
+                image: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs fresh asparagus, trimmed",
                     "12 slices bacon",
@@ -489,6 +505,7 @@
                 carbs: 9,
                 fat: 52,
                 icon: "🍄",
+                image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d286?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs beef sirloin, sliced thin",
                     "2 packages shirataki noodles, rinsed",
@@ -523,6 +540,7 @@
                 carbs: 2,
                 fat: 78,
                 icon: "🐷",
+                image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "3 lbs pork belly, skin scored",
                     "2 tsp Chinese five-spice powder",
@@ -555,6 +573,7 @@
                 carbs: 8,
                 fat: 32,
                 icon: "🥬",
+                image: "https://images.unsplash.com/photo-1540914124281-342587941389?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs ground pork",
                     "1 large head cabbage, shredded",
@@ -589,6 +608,7 @@
                 carbs: 4,
                 fat: 34,
                 icon: "🦐",
+                image: "https://images.unsplash.com/photo-1565299585323-38174c8f3f74?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs large shrimp, peeled and deveined",
                     "6 tbsp grass-fed butter",
@@ -623,6 +643,7 @@
                 carbs: 3,
                 fat: 18,
                 icon: "🍫",
+                image: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1/2 cup coconut oil, melted",
                     "1/2 cup almond butter",
@@ -690,13 +711,13 @@
             ketoRecipes.forEach((meal, index) => {
                 html += `
                     <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image">
+                        <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${meal.image}');">
                             <div class="keto-badge">KETO</div>
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
                             <div class="carb-badge">${meal.carbs}g carbs</div>
-                            ${meal.icon}
+                            <span class="category-icon">${meal.icon}</span>
                         </div>
                         <div class="meal-content">
                             <div class="meal-title">${meal.name}</div>

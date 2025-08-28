@@ -31,6 +31,9 @@
             width: 100%;
             height: 200px;
             background: linear-gradient(135deg, #00C9A7, #4FD1C7);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -38,6 +41,14 @@
             color: white;
             position: relative;
             overflow: hidden;
+        }
+        
+        .meal-image.has-photo {
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
+        }
+        
+        .meal-image.has-photo .category-icon {
+            display: none;
         }
         
         .difficulty-badge {
@@ -296,6 +307,7 @@
                 fat: 38,
                 icon: "🥩",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1553979459-d2229ba7433a?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1 lb thinly sliced ribeye steak",
                     "2 hoagie rolls (8-inch)",
@@ -331,6 +343,7 @@
                 fat: 28,
                 icon: "🇨🇺",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1619096252214-ef06c45683e3?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 Cuban bread loaves (or French bread)",
                     "8 oz roast pork, sliced thin",
@@ -366,6 +379,7 @@
                 fat: 24,
                 icon: "🇻🇳",
                 fusion: true,
+                image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 French baguettes",
                     "1 lb pork shoulder, sliced thin",
@@ -405,6 +419,7 @@
                 fat: 45,
                 icon: "🇮🇹",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1590334356829-78e8aaf88237?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 Italian sub rolls",
                     "4 oz Genoa salami, sliced",
@@ -443,6 +458,7 @@
                 fat: 32,
                 icon: "🇫🇷",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1599351431079-0c2c5f85d975?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 French rolls or baguette sections",
                     "1 lb roast beef, sliced thin",
@@ -480,6 +496,7 @@
                 fat: 42,
                 icon: "🍗",
                 fusion: true,
+                image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 chicken breasts, pounded thin",
                     "2 brioche buns",
@@ -519,6 +536,7 @@
                 fat: 35,
                 icon: "🐷",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1527612820672-5b56351f7346?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "3 lbs pork shoulder",
                     "4 brioche buns",
@@ -555,6 +573,7 @@
                 fat: 38,
                 icon: "🥪",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1587318123448-d5c8d0c6c2a5?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "8 slices rye bread",
                     "1 lb sliced corned beef",
@@ -589,6 +608,7 @@
                 fat: 52,
                 icon: "🍞",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "8 slices brioche or challah bread",
                     "6 oz sliced ham",
@@ -627,6 +647,7 @@
                 fat: 22,
                 icon: "🦞",
                 fusion: false,
+                image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1.5 lbs cooked lobster meat",
                     "4 split-top hot dog buns",
@@ -699,12 +720,12 @@
                 const fusionBadge = meal.fusion ? '<div class="fusion-badge">FUSION</div>' : '';
                 html += `
                     <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image">
+                        <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${meal.image}');">
                             ${fusionBadge}
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
-                            ${meal.icon}
+                            <span class="category-icon">${meal.icon}</span>
                         </div>
                         <div class="meal-content">
                             <div class="meal-title">${meal.name}</div>

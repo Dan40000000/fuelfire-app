@@ -68,6 +68,9 @@
         .meal-image {
             width: 100%;
             height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -75,6 +78,14 @@
             color: white;
             position: relative;
             overflow: hidden;
+        }
+        
+        .meal-image.has-photo {
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
+        }
+        
+        .meal-image.has-photo .category-icon {
+            display: none;
         }
         
         /* Rainbow gradients for each fusion recipe */
@@ -347,6 +358,7 @@
                 fat: 28,
                 icon: "🌮",
                 fusionClass: "fusion-korean-mexican",
+                image: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1 lb ribeye steak, thinly sliced",
                     "1/4 cup soy sauce",
@@ -387,6 +399,7 @@
                 fat: 35,
                 icon: "🍜",
                 fusionClass: "fusion-japanese-american",
+                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "4 packs instant ramen noodles (discard seasoning)",
                     "4 eggs, beaten",
@@ -425,6 +438,7 @@
                 fat: 32,
                 icon: "🍕",
                 fusionClass: "fusion-indian-italian",
+                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "4 naan breads",
                     "1 lb chicken breast, cubed",
@@ -464,6 +478,7 @@
                 fat: 18,
                 icon: "🍝",
                 fusionClass: "fusion-thai-italian",
+                image: "https://images.unsplash.com/photo-1621996346565-e3dbc353d286?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1 lb linguine pasta",
                     "1/4 cup olive oil",
@@ -502,6 +517,7 @@
                 fat: 22,
                 icon: "🍊",
                 fusionClass: "fusion-chinese-american",
+                image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs chicken thighs, cut into chunks",
                     "1 cup cornstarch",
@@ -542,6 +558,7 @@
                 fat: 22,
                 icon: "🌯",
                 fusionClass: "fusion-japanese-mexican",
+                image: "https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "4 large nori sheets",
                     "3 cups cooked sushi rice",
@@ -582,6 +599,7 @@
                 fat: 38,
                 icon: "🫓",
                 fusionClass: "fusion-filipino-mexican",
+                image: "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1 bag tortilla chips",
                     "1 lb pork belly, diced",
@@ -623,6 +641,7 @@
                 fat: 35,
                 icon: "🥖",
                 fusionClass: "fusion-vietnamese-french",
+                image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs beef chuck roast",
                     "2 French baguettes",
@@ -665,6 +684,7 @@
                 fat: 12,
                 icon: "🐟",
                 fusionClass: "fusion-peruvian-japanese",
+                image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "1 lb sashimi-grade white fish, cubed",
                     "1/2 cup fresh lime juice",
@@ -705,6 +725,7 @@
                 fat: 32,
                 icon: "🥡",
                 fusionClass: "fusion-american-chinese",
+                image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&h=300&fit=crop&crop=center",
                 ingredients: [
                     "2 lbs chicken breast, cut into chunks",
                     "1 cup flour",
@@ -779,13 +800,13 @@
             fusionRecipes.forEach((meal, index) => {
                 html += `
                     <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image ${meal.fusionClass}">
+                        <div class="meal-image ${meal.fusionClass} has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${meal.image}');">
                             <div class="fusion-badge">FUSION</div>
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
                             <div class="cuisine-fusion">${meal.cuisines}</div>
-                            ${meal.icon}
+                            <span class="category-icon">${meal.icon}</span>
                         </div>
                         <div class="meal-content">
                             <div class="meal-title">${meal.name}</div>
