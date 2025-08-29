@@ -222,6 +222,30 @@
             font-size: 10px;
             font-weight: bold;
         }
+
+        .champion-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            z-index: 10;
+        }
+
+        .meal-prep-champion {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4) !important;
+            border: 2px solid #FFD700;
+        }
+
+        .meal-prep-champion .meal-image {
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        }
     </style>
 </head>
 <body>
@@ -293,9 +317,358 @@
     </div>
 
     <script>
-        // Fitness Wraps Recipe Database
-        const sandwichRecipes = [
-            {
+        // BULK MODE FITNESS WRAPS RECIPE DATABASE
+        const bulkModeRecipes = {
+            'male-bulk': [
+                {
+                    name: "⭐ WEEKLY MASSIVE WRAP MEAL PREP ⭐",
+                    description: "📅 Prep 7 HUGE muscle-building wraps in 60 mins | 1400+ cal gains!",
+                    time: "60 mins prep (7 wraps)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1420,
+                    protein: 68,
+                    carbs: 142,
+                    fat: 48,
+                    sugar: 12,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    fusion: false,
+                    ingredients: [
+                        "🛒 WEEKLY BULK WRAP SHOPPING LIST:",
+                        "3.5 lbs chicken breast (500g per wrap)",
+                        "21 large whole wheat tortillas (3 per wrap x 7)",
+                        "14 cups mixed greens",
+                        "7 large avocados",
+                        "3.5 cups quinoa (uncooked)",
+                        "14 tbsp hummus",
+                        "7 cups sweet potato, diced",
+                        "3.5 cups black beans",
+                        "14 tbsp olive oil",
+                        "Bulk spices: garlic powder, cumin, paprika",
+                        "📦 Need: 7 large meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY BULK WRAP PREP (60 minutes):",
+                        "Season 3.5lbs chicken with bulk spices, grill all at once",
+                        "Cook 3.5 cups quinoa with chicken broth for extra protein",
+                        "Roast 7 cups sweet potato with olive oil and spices",
+                        "Heat black beans with cumin and garlic",
+                        "Assembly line: lay out 21 tortillas (3 per wrap)",
+                        "Spread 2 tbsp hummus on each tortilla",
+                        "Add quinoa, chicken, sweet potato, beans to each",
+                        "Roll tightly, wrap in foil",
+                        "Store 7 wraps in fridge, freeze rest",
+                        "🔥 BULK WRAP DOMINATION FOR THE WEEK!"
+                    ]
+                },
+                {
+                    name: "Chicken & Sweet Potato BULK Wrap",
+                    description: "Massive chicken wrap with roasted sweet potatoes",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1380,
+                    protein: 65,
+                    carbs: 138,
+                    fat: 44,
+                    sugar: 16,
+                    icon: "🌯",
+                    fusion: false,
+                    ingredients: [
+                        "12 oz grilled chicken breast",
+                        "2 large whole wheat tortillas",
+                        "1.5 cups roasted sweet potato",
+                        "1 cup quinoa, cooked",
+                        "1/2 avocado, sliced",
+                        "2 cups spinach",
+                        "3 tbsp hummus",
+                        "2 tbsp olive oil",
+                        "1 tsp cumin",
+                        "Salt and pepper"
+                    ],
+                    instructions: [
+                        "Season chicken with cumin, salt, pepper",
+                        "Grill chicken until internal temp 165°F",
+                        "Roast sweet potato cubes with olive oil",
+                        "Cook quinoa with chicken broth",
+                        "Warm both tortillas",
+                        "Spread hummus on each tortilla",
+                        "Layer spinach, quinoa, chicken",
+                        "Add sweet potato and avocado",
+                        "Roll tightly into massive wrap",
+                        "BULK WRAP BEAST MODE!"
+                    ]
+                },
+                {
+                    name: "Turkey & Quinoa POWER Wrap",
+                    description: "High-protein turkey wrap with superfood quinoa",
+                    time: "20 mins",
+                    difficulty: 1,
+                    rating: 4,
+                    calories: 1350,
+                    protein: 62,
+                    carbs: 135,
+                    fat: 42,
+                    sugar: 10,
+                    icon: "🦃",
+                    fusion: false,
+                    ingredients: [
+                        "10 oz sliced turkey breast",
+                        "2 large whole wheat tortillas",
+                        "1 cup cooked quinoa",
+                        "1/2 avocado, mashed",
+                        "2 cups mixed greens",
+                        "1/2 cup chickpeas",
+                        "1/4 cup sunflower seeds",
+                        "2 tbsp Greek yogurt",
+                        "2 tbsp olive oil",
+                        "1 tsp garlic powder"
+                    ],
+                    instructions: [
+                        "Cook quinoa with extra protein broth",
+                        "Mix mashed avocado with Greek yogurt",
+                        "Season chickpeas with garlic powder",
+                        "Warm tortillas until pliable",
+                        "Spread avocado mixture on tortillas",
+                        "Layer greens, quinoa, turkey",
+                        "Add chickpeas and sunflower seeds",
+                        "Drizzle with olive oil",
+                        "Roll into thick, protein-packed wrap",
+                        "TURKEY BULK POWER ACHIEVED!"
+                    ]
+                },
+                {
+                    name: "Salmon & Brown Rice Wrap",
+                    description: "Omega-3 rich salmon with brown rice power",
+                    time: "30 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1440,
+                    protein: 58,
+                    carbs: 148,
+                    fat: 52,
+                    sugar: 8,
+                    icon: "🍣",
+                    fusion: false,
+                    ingredients: [
+                        "8 oz salmon fillet",
+                        "2 large tortillas",
+                        "1.5 cups cooked brown rice",
+                        "1 avocado, sliced",
+                        "2 cups arugula",
+                        "1/2 cup edamame",
+                        "3 tbsp tahini sauce",
+                        "2 tbsp olive oil",
+                        "1 tbsp sesame seeds",
+                        "Lemon juice, dill"
+                    ],
+                    instructions: [
+                        "Season salmon with dill and pepper",
+                        "Pan-sear salmon in olive oil",
+                        "Cook brown rice with extra liquid",
+                        "Steam edamame until tender",
+                        "Mix tahini with lemon juice",
+                        "Warm tortillas thoroughly",
+                        "Spread tahini sauce on tortillas",
+                        "Layer rice, arugula, flaked salmon",
+                        "Add avocado, edamame, sesame seeds",
+                        "OMEGA-3 BULK WRAP MASTERY!"
+                    ]
+                },
+                {
+                    name: "Steak & Black Bean Wrap",
+                    description: "Lean beef steak with protein-packed black beans",
+                    time: "25 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1480,
+                    protein: 72,
+                    carbs: 128,
+                    fat: 48,
+                    sugar: 6,
+                    icon: "🥩",
+                    fusion: false,
+                    ingredients: [
+                        "8 oz lean sirloin steak",
+                        "2 large tortillas",
+                        "1 cup black beans",
+                        "1.5 cups cooked rice",
+                        "1/2 avocado, diced",
+                        "2 cups lettuce",
+                        "1/4 cup corn",
+                        "3 tbsp salsa",
+                        "2 tbsp olive oil",
+                        "Cumin, chili powder"
+                    ],
+                    instructions: [
+                        "Season steak with cumin and chili",
+                        "Grill steak to medium, let rest",
+                        "Heat black beans with spices",
+                        "Cook rice with extra volume",
+                        "Slice steak against grain",
+                        "Warm tortillas until flexible",
+                        "Layer rice, beans, lettuce",
+                        "Add sliced steak and corn",
+                        "Top with avocado and salsa",
+                        "STEAK BULK WRAP DOMINATION!"
+                    ]
+                },
+                {
+                    name: "Healthy Asian Fusion Wrap",
+                    description: "Clean Asian-inspired wrap with lean proteins",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 4,
+                    calories: 1390,
+                    protein: 64,
+                    carbs: 136,
+                    fat: 42,
+                    sugar: 14,
+                    icon: "🥢",
+                    fusion: true,
+                    ingredients: [
+                        "10 oz grilled chicken thigh",
+                        "2 large tortillas",
+                        "1.5 cups brown rice",
+                        "2 cups cabbage slaw",
+                        "1/2 cup edamame",
+                        "2 tbsp natural peanut butter",
+                        "2 tbsp coconut aminos",
+                        "1 tbsp sesame oil",
+                        "1 tbsp rice vinegar",
+                        "Fresh cilantro, lime"
+                    ],
+                    instructions: [
+                        "Marinate chicken in coconut aminos",
+                        "Grill chicken until fully cooked",
+                        "Cook brown rice with extra liquid",
+                        "Steam edamame pods",
+                        "Mix peanut butter with rice vinegar",
+                        "Warm tortillas until soft",
+                        "Spread peanut sauce on tortillas",
+                        "Layer rice, slaw, sliced chicken",
+                        "Add edamame and cilantro",
+                        "CLEAN ASIAN BULK FUSION!"
+                    ]
+                },
+                {
+                    name: "Mediterranean BULK Wrap",
+                    description: "Clean Mediterranean flavors in massive wrap",
+                    time: "20 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1410,
+                    protein: 66,
+                    carbs: 132,
+                    fat: 46,
+                    sugar: 8,
+                    icon: "🇬🇷",
+                    fusion: true,
+                    ingredients: [
+                        "10 oz grilled chicken breast",
+                        "2 large tortillas",
+                        "1 cup quinoa, cooked",
+                        "1/2 cup chickpeas",
+                        "2 cups spinach",
+                        "1/4 cup olives, sliced",
+                        "3 tbsp hummus",
+                        "2 tbsp olive oil",
+                        "1 tbsp lemon juice",
+                        "Fresh oregano, mint"
+                    ],
+                    instructions: [
+                        "Season chicken with oregano and lemon",
+                        "Grill chicken until golden",
+                        "Cook quinoa with vegetable broth",
+                        "Warm chickpeas with herbs",
+                        "Mix olive oil with lemon juice",
+                        "Warm tortillas until pliable",
+                        "Spread hummus evenly",
+                        "Layer quinoa, spinach, chicken",
+                        "Add chickpeas and olives",
+                        "MEDITERRANEAN BULK PERFECTION!"
+                    ]
+                },
+                {
+                    name: "BBQ Chicken BULK Wrap",
+                    description: "Clean BBQ chicken with sweet potato power",
+                    time: "30 mins",
+                    difficulty: 2,
+                    rating: 4,
+                    calories: 1450,
+                    protein: 68,
+                    carbs: 142,
+                    fat: 44,
+                    sugar: 18,
+                    icon: "🍖",
+                    fusion: false,
+                    ingredients: [
+                        "10 oz chicken breast",
+                        "2 large tortillas",
+                        "3 tbsp sugar-free BBQ sauce",
+                        "1.5 cups roasted sweet potato",
+                        "1 cup coleslaw mix",
+                        "1/2 cup black beans",
+                        "2 tbsp Greek yogurt",
+                        "1 tbsp apple cider vinegar",
+                        "2 tbsp olive oil",
+                        "Smoked paprika"
+                    ],
+                    instructions: [
+                        "Season chicken with smoked paprika",
+                        "Grill chicken, brush with BBQ sauce",
+                        "Roast sweet potato with olive oil",
+                        "Mix coleslaw with yogurt and vinegar",
+                        "Heat black beans until warm",
+                        "Warm tortillas thoroughly",
+                        "Layer sweet potato and beans",
+                        "Add sliced BBQ chicken",
+                        "Top with coleslaw mixture",
+                        "CLEAN BBQ BULK WRAP WIN!"
+                    ]
+                },
+                {
+                    name: "Tuna & Avocado BULK Wrap",
+                    description: "High-protein tuna with healthy fats",
+                    time: "15 mins",
+                    difficulty: 1,
+                    rating: 4,
+                    calories: 1340,
+                    protein: 72,
+                    carbs: 118,
+                    fat: 44,
+                    sugar: 6,
+                    icon: "🐟",
+                    fusion: false,
+                    ingredients: [
+                        "3 cans (5oz each) tuna in water",
+                        "2 large tortillas",
+                        "1 whole avocado, mashed",
+                        "1.5 cups cooked quinoa",
+                        "2 cups mixed greens",
+                        "1/2 cup chickpeas",
+                        "3 tbsp Greek yogurt",
+                        "2 tbsp lemon juice",
+                        "2 tbsp olive oil",
+                        "Capers, fresh dill"
+                    ],
+                    instructions: [
+                        "Drain tuna thoroughly",
+                        "Mix tuna with Greek yogurt and lemon",
+                        "Mash avocado with olive oil",
+                        "Cook quinoa with extra liquid",
+                        "Add capers to tuna mixture",
+                        "Warm tortillas until soft",
+                        "Spread avocado on tortillas",
+                        "Layer quinoa, greens, tuna",
+                        "Add chickpeas and dill",
+                        "TUNA BULK WRAP DOMINATION!"
+                    ]
+                }
+            ],
+            'male-cut': [
+                {
                 name: "Grilled Chicken Power Wrap",
                 description: "Lean grilled chicken with fresh veggies in whole wheat tortilla",
                 time: "20 mins",
@@ -657,11 +1030,17 @@
             return filledStars + emptyStars;
         }
 
+        // BULK MODE DISPLAY FUNCTION
         function displayMeals() {
             const container = document.getElementById('meals-container');
+            const wrapRecipes = getCurrentRecipes();
             let html = '';
             
-            sandwichRecipes.forEach((meal, index) => {
+            wrapRecipes.forEach((meal, index) => {
+                // Special styling for meal prep champions
+                const isChampion = meal.mealPrepChampion;
+                const championClass = isChampion ? 'meal-prep-champion' : '';
+                const championBadge = isChampion ? '<div class="champion-badge">👑 WEEKLY PREP</div>' : '';
                 const fusionBadge = meal.fusion ? '<div class="fusion-badge">FUSION</div>' : '';
                 html += `
                     <div class="meal-card" onclick="openRecipeModal(${index})">
@@ -706,7 +1085,8 @@
         }
 
         function openRecipeModal(index) {
-            const meal = sandwichRecipes[index];
+            const wrapRecipes = getCurrentRecipes();
+            const meal = wrapRecipes[index];
             const modal = document.getElementById('recipe-modal');
             
             document.getElementById('modal-title').textContent = meal.name;
