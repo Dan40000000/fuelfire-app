@@ -210,6 +210,30 @@
             margin-top: 20px;
             font-size: 14px;
         }
+
+        .meal-prep-champion {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4) !important;
+            border: 2px solid #FFD700;
+        }
+
+        .meal-prep-champion .meal-image {
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        }
+
+        .champion-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -281,9 +305,375 @@
     </div>
 
     <script>
-        // FITNESS Shrimp Recipe Database
-        const shrimpRecipes = [
-            {
+        // BULK MODE SHRIMP RECIPE DATABASE
+        const bulkModeRecipes = {
+            'male-bulk': [
+                {
+                    name: "⭐ WEEKLY SHRIMP POWER MEAL PREP ⭐",
+                    description: "📅 Prep 7 massive shrimp meals in 45 mins | 1400+ cal seafood gains!",
+                    time: "45 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1420,
+                    protein: 72,
+                    carbs: 145,
+                    fat: 48,
+                    sugar: 12,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY BULK SHRIMP SHOPPING LIST:",
+                        "5 lbs jumbo shrimp (peeled, deveined)",
+                        "3.5 cups jasmine rice (uncooked)",
+                        "7 cups sweet potato, cubed",
+                        "14 cups mixed vegetables",
+                        "7 avocados",
+                        "14 tbsp olive oil",
+                        "14 tbsp butter",
+                        "28 cloves garlic",
+                        "7 lemons",
+                        "Bulk seasonings: Old Bay, paprika, garlic powder",
+                        "📦 Need: 7 large meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY BULK SHRIMP PREP (45 minutes):",
+                        "Season all 5lbs shrimp with Old Bay and garlic",
+                        "Cook rice with extra butter for calories",
+                        "Roast sweet potatoes with olive oil until golden",
+                        "Sauté vegetables in batches with garlic butter",
+                        "Cook shrimp in batches - 3 mins per side",
+                        "Assembly: divide rice into 7 containers",
+                        "Add roasted sweet potatoes to each",
+                        "Top with shrimp and sautéed vegetables",
+                        "Add 1 sliced avocado per container when serving",
+                        "🔥 SEAFOOD BULK DOMINATION FOR THE WEEK!"
+                    ]
+                },
+                {
+                    name: "Garlic Butter Shrimp Mountain",
+                    description: "Massive portion of butter-drenched shrimp with rice",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1380,
+                    protein: 65,
+                    carbs: 142,
+                    fat: 52,
+                    sugar: 8,
+                    icon: "🦐",
+                    ingredients: [
+                        "1.5 lbs jumbo shrimp",
+                        "2 cups white rice, cooked",
+                        "6 tbsp butter",
+                        "8 cloves garlic, minced",
+                        "1 cup heavy cream",
+                        "1/2 cup parmesan cheese",
+                        "2 cups pasta",
+                        "1/4 cup olive oil",
+                        "Fresh parsley, lemon"
+                    ],
+                    instructions: [
+                        "Cook pasta and rice for double carbs",
+                        "Melt butter with olive oil in large pan",
+                        "Sauté garlic until fragrant",
+                        "Add shrimp, cook 2-3 minutes per side",
+                        "Pour in heavy cream and parmesan",
+                        "Simmer until sauce thickens",
+                        "Toss with pasta and serve over rice",
+                        "Garnish with parsley and lemon",
+                        "GARLIC BUTTER BULK PARADISE!"
+                    ]
+                },
+                {
+                    name: "Coconut Shrimp & Sweet Potato Feast",
+                    description: "Crispy coconut shrimp with massive sweet potato fries",
+                    time: "35 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1450,
+                    protein: 58,
+                    carbs: 155,
+                    fat: 54,
+                    sugar: 24,
+                    icon: "🥥",
+                    ingredients: [
+                        "1.5 lbs large shrimp",
+                        "2 cups shredded coconut",
+                        "1 cup flour",
+                        "3 eggs, beaten",
+                        "3 large sweet potatoes",
+                        "1/2 cup coconut oil",
+                        "1 cup panko breadcrumbs",
+                        "Sweet chili sauce",
+                        "Mango salsa"
+                    ],
+                    instructions: [
+                        "Cut sweet potatoes into thick fries",
+                        "Deep fry sweet potato fries until crispy",
+                        "Set up breading station: flour, eggs, coconut-panko mix",
+                        "Bread shrimp thoroughly",
+                        "Deep fry shrimp in coconut oil until golden",
+                        "Drain on paper towels",
+                        "Serve mountain of fries with coconut shrimp",
+                        "Drizzle with sweet chili sauce",
+                        "Side of mango salsa for extra calories",
+                        "TROPICAL BULK FEAST ACHIEVED!"
+                    ]
+                },
+                {
+                    name: "Shrimp Alfredo Pasta Mountain",
+                    description: "Creamy alfredo shrimp over massive pasta portion",
+                    time: "30 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1520,
+                    protein: 68,
+                    carbs: 138,
+                    fat: 58,
+                    sugar: 10,
+                    icon: "🍝",
+                    ingredients: [
+                        "1.5 lbs shrimp",
+                        "1 lb fettuccine pasta",
+                        "2 cups heavy cream",
+                        "1 cup parmesan cheese",
+                        "6 tbsp butter",
+                        "6 cloves garlic",
+                        "1/2 cup white wine",
+                        "2 cups broccoli",
+                        "Olive oil, herbs"
+                    ],
+                    instructions: [
+                        "Cook entire pound of fettuccine",
+                        "Sauté shrimp in butter and garlic",
+                        "Deglaze with white wine",
+                        "Add heavy cream and reduce",
+                        "Stir in parmesan until melted",
+                        "Steam broccoli, toss in olive oil",
+                        "Combine pasta with alfredo sauce",
+                        "Top with shrimp and broccoli",
+                        "Extra parmesan on top",
+                        "ALFREDO BULK DOMINATION!"
+                    ]
+                },
+                {
+                    name: "Shrimp & Quinoa Power Bowl",
+                    description: "Protein-packed shrimp with quinoa and avocado",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 4,
+                    calories: 1340,
+                    protein: 72,
+                    carbs: 125,
+                    fat: 48,
+                    sugar: 12,
+                    icon: "🥗",
+                    ingredients: [
+                        "1.5 lbs shrimp",
+                        "2 cups quinoa, cooked",
+                        "1 whole avocado",
+                        "1 cup black beans",
+                        "1 cup corn",
+                        "1 cup brown rice",
+                        "3 tbsp olive oil",
+                        "Lime, cilantro",
+                        "Hot sauce"
+                    ],
+                    instructions: [
+                        "Cook quinoa and brown rice for double grains",
+                        "Season shrimp with spices",
+                        "Grill shrimp until pink",
+                        "Heat black beans and corn",
+                        "Layer quinoa and rice in large bowl",
+                        "Top with shrimp, beans, corn",
+                        "Add sliced avocado",
+                        "Drizzle with olive oil and lime",
+                        "POWER BOWL BULK SUCCESS!"
+                    ]
+                },
+                {
+                    name: "Cajun Shrimp & Sausage Jambalaya",
+                    description: "Spicy Louisiana-style shrimp and sausage feast",
+                    time: "45 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1480,
+                    protein: 76,
+                    carbs: 132,
+                    fat: 52,
+                    sugar: 8,
+                    icon: "🌶️",
+                    ingredients: [
+                        "1 lb shrimp",
+                        "1 lb andouille sausage",
+                        "2 cups long-grain rice",
+                        "1 onion, diced",
+                        "1 bell pepper",
+                        "4 stalks celery",
+                        "6 cloves garlic",
+                        "Cajun seasoning",
+                        "Chicken broth"
+                    ],
+                    instructions: [
+                        "Brown sausage in large pot",
+                        "Sauté onion, pepper, celery (trinity)",
+                        "Add garlic and Cajun seasoning",
+                        "Add rice and toast briefly",
+                        "Pour in broth, bring to boil",
+                        "Simmer covered 20 minutes",
+                        "Add shrimp in last 5 minutes",
+                        "Let rest 10 minutes before serving",
+                        "CAJUN BULK EXPLOSION!"
+                    ]
+                },
+                {
+                    name: "Tempura Shrimp Rice Bowl",
+                    description: "Crispy tempura shrimp over seasoned rice mountain",
+                    time: "35 mins",
+                    difficulty: 3,
+                    rating: 4,
+                    calories: 1410,
+                    protein: 62,
+                    carbs: 148,
+                    fat: 50,
+                    sugar: 14,
+                    icon: "🍱",
+                    ingredients: [
+                        "1.5 lbs jumbo shrimp",
+                        "2 cups tempura batter mix",
+                        "3 cups sushi rice",
+                        "Vegetable oil for frying",
+                        "1 cup tempura vegetables",
+                        "Soy sauce, mirin",
+                        "Sesame oil",
+                        "Nori, sesame seeds",
+                        "Spicy mayo"
+                    ],
+                    instructions: [
+                        "Cook sushi rice with extra water",
+                        "Make tempura batter with ice water",
+                        "Heat oil to 350°F",
+                        "Dip shrimp in batter",
+                        "Deep fry until golden and crispy",
+                        "Fry tempura vegetables",
+                        "Season rice with mirin and sesame",
+                        "Top rice with tempura shrimp",
+                        "Drizzle with spicy mayo",
+                        "TEMPURA BULK PERFECTION!"
+                    ]
+                },
+                {
+                    name: "Shrimp Pad Thai XXL",
+                    description: "Massive portion of shrimp pad thai with extra noodles",
+                    time: "30 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1390,
+                    protein: 64,
+                    carbs: 145,
+                    fat: 48,
+                    sugar: 22,
+                    icon: "🥢",
+                    ingredients: [
+                        "1.5 lbs shrimp",
+                        "1 lb rice noodles",
+                        "4 eggs",
+                        "1 cup peanuts",
+                        "Bean sprouts",
+                        "3 tbsp tamarind paste",
+                        "3 tbsp fish sauce",
+                        "3 tbsp sugar",
+                        "Lime, cilantro"
+                    ],
+                    instructions: [
+                        "Soak rice noodles in hot water",
+                        "Make pad thai sauce with tamarind",
+                        "Stir-fry shrimp until pink",
+                        "Push aside, scramble eggs",
+                        "Add drained noodles",
+                        "Pour sauce and toss",
+                        "Add bean sprouts and peanuts",
+                        "Garnish with lime and cilantro",
+                        "MASSIVE PAD THAI GAINS!"
+                    ]
+                },
+                {
+                    name: "BBQ Bacon-Wrapped Shrimp Platter",
+                    description: "Bacon-wrapped shrimp with BBQ glaze and sides",
+                    time: "40 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1460,
+                    protein: 78,
+                    carbs: 115,
+                    fat: 56,
+                    sugar: 18,
+                    icon: "🥓",
+                    ingredients: [
+                        "2 lbs jumbo shrimp",
+                        "1 lb bacon",
+                        "1/2 cup BBQ sauce",
+                        "2 cups coleslaw",
+                        "2 cups mac and cheese",
+                        "1 cup cornbread",
+                        "Honey butter",
+                        "Hot sauce"
+                    ],
+                    instructions: [
+                        "Wrap each shrimp with half bacon strip",
+                        "Secure with toothpicks",
+                        "Grill or bake until bacon crisps",
+                        "Brush with BBQ sauce",
+                        "Prepare mac and cheese side",
+                        "Make fresh coleslaw",
+                        "Warm cornbread with honey butter",
+                        "Arrange platter with all components",
+                        "BBQ BACON BULK VICTORY!"
+                    ]
+                }
+            ],
+            'male-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN SHRIMP PREP ⭐",
+                    description: "📅 Prep 7 lean shrimp meals in 30 mins | 500 cal cutting success!",
+                    time: "30 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 485,
+                    protein: 52,
+                    carbs: 42,
+                    fat: 12,
+                    sugar: 6,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CUT SHRIMP SHOPPING LIST:",
+                        "3.5 lbs large shrimp (peeled, deveined)",
+                        "14 cups mixed vegetables",
+                        "7 cups zucchini noodles",
+                        "7 cups cauliflower rice",
+                        "7 lemons",
+                        "7 tbsp olive oil",
+                        "28 cloves garlic",
+                        "Fresh herbs: parsley, dill, basil",
+                        "Cutting seasonings: paprika, cayenne",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY CUT SHRIMP PREP (30 minutes):",
+                        "Season all shrimp with cutting spices",
+                        "Batch cook cauliflower rice (no oil)",
+                        "Spiralize zucchini into noodles",
+                        "Steam mixed vegetables until tender",
+                        "Grill shrimp in batches - 2 mins per side",
+                        "Assembly: divide cauliflower rice into containers",
+                        "Add zucchini noodles (raw, will soften)",
+                        "Top with grilled shrimp and vegetables",
+                        "Add lemon wedge to each container",
+                        "🔥 LEAN SHRIMP CUTS FOR THE WEEK!"
+                    ]
+                },
+                {
                 name: "Grilled Lemon Garlic Shrimp",
                 description: "Clean grilled shrimp with herbs - ultra lean protein",
                 time: "12 mins",
@@ -613,7 +1003,99 @@
                     "Store in meal prep containers for up to 4 days"
                 ]
             }
-        ];
+                }
+            ],
+            'female-bulk': [
+                {
+                    name: "⭐ WEEKLY FEMALE SHRIMP PREP ⭐",
+                    description: "📅 Prep 7 balanced shrimp meals in 40 mins | 750 cal gains!",
+                    time: "40 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 780,
+                    protein: 58,
+                    carbs: 85,
+                    fat: 28,
+                    sugar: 10,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY FEMALE BULK SHOPPING:",
+                        "3.5 lbs large shrimp",
+                        "2.5 cups quinoa (uncooked)",
+                        "3.5 cups sweet potato",
+                        "14 cups mixed greens",
+                        "7 small avocados",
+                        "7 tbsp olive oil",
+                        "14 cloves garlic",
+                        "7 limes",
+                        "Fresh herbs and spices",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY FEMALE BULK PREP (40 minutes):",
+                        "Season shrimp with herbs and spices",
+                        "Cook quinoa with vegetable broth",
+                        "Roast sweet potatoes until golden",
+                        "Sauté greens with garlic",
+                        "Grill shrimp in batches",
+                        "Divide quinoa into 7 containers",
+                        "Add sweet potatoes and greens",
+                        "Top with grilled shrimp",
+                        "Add 1/2 avocado per container when serving",
+                        "💪 FEMALE BULK SHRIMP READY!"
+                    ]
+                }
+            ],
+            'female-cut': [
+                {
+                    name: "⭐ WEEKLY FEMALE LEAN SHRIMP ⭐",
+                    description: "📅 Prep 7 light shrimp meals in 25 mins | 380 cal cuts!",
+                    time: "25 mins prep (7 meals)",
+                    difficulty: 1,
+                    rating: 5,
+                    calories: 385,
+                    protein: 42,
+                    carbs: 32,
+                    fat: 10,
+                    sugar: 5,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY FEMALE CUT SHOPPING:",
+                        "2.5 lbs medium shrimp",
+                        "14 cups mixed vegetables",
+                        "7 cups cauliflower rice",
+                        "7 cups spinach",
+                        "7 lemons",
+                        "3.5 tbsp olive oil",
+                        "14 cloves garlic",
+                        "Fresh herbs: parsley, dill",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY FEMALE CUT PREP (25 minutes):",
+                        "Season shrimp with herbs and lemon",
+                        "Prepare cauliflower rice (no oil)",
+                        "Steam mixed vegetables",
+                        "Sauté spinach with garlic spray",
+                        "Grill shrimp quickly - 2 mins per side",
+                        "Divide cauliflower rice into containers",
+                        "Add vegetables and spinach",
+                        "Top with grilled shrimp",
+                        "Include lemon wedge for flavor",
+                        "✨ FEMALE CUT SHRIMP SUCCESS!"
+                    ]
+                }
+            ]
+        };
+
+        // GET CURRENT RECIPES BASED ON BULK MODE
+        function getCurrentRecipes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
+        }
 
         function updateTime() {
             const now = new Date();
@@ -654,12 +1136,17 @@
 
         function displayMeals() {
             const container = document.getElementById('meals-container');
+            const shrimpRecipes = getCurrentRecipes();
             let html = '';
             
             shrimpRecipes.forEach((meal, index) => {
+                const isChampion = meal.mealPrepChampion;
+                const championClass = isChampion ? 'meal-prep-champion' : '';
+                const championBadge = isChampion ? '<div class="champion-badge" style="position: absolute; top: 10px; left: 10px; background: linear-gradient(45deg, #FFD700, #FFA500); color: #333; padding: 6px 10px; border-radius: 15px; font-size: 10px; font-weight: bold; z-index: 10;">👑 WEEKLY PREP</div>' : '';
                 html += `
-                    <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E);">
+                    <div class="meal-card ${championClass}" onclick="openRecipeModal(${index})">
+                        <div class="meal-image" style="${isChampion ? '' : 'background: linear-gradient(135deg, #FF6B6B, #FF8E8E);'}">
+                            ${championBadge}
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
@@ -699,6 +1186,7 @@
         }
 
         function openRecipeModal(index) {
+            const shrimpRecipes = getCurrentRecipes();
             const meal = shrimpRecipes[index];
             const modal = document.getElementById('recipe-modal');
             
@@ -761,6 +1249,7 @@
         }
 
         function logRecipe(index) {
+            const shrimpRecipes = getCurrentRecipes();
             const meal = shrimpRecipes[index];
             const today = new Date().toISOString().split('T')[0];
             
