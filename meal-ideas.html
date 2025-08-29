@@ -73,16 +73,16 @@
                         
                         <!-- BULK MODE SELECTOR -->
                         <div style="margin: 20px 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 400px; margin: 20px auto;">
-                            <button id="male-bulk-btn" onclick="setBulkMode('male-bulk')" style="background: linear-gradient(135deg, #FF6B35, #F7931E); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3); transition: all 0.3s ease;">
+                            <button id="male-bulk-btn" onclick="setBulkMode('male-bulk')" style="background: linear-gradient(135deg, #1a1a1a, #444); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;">
                                 🔥 MALE BULK<br><span style="font-size: 10px; opacity: 0.9;">1000-1500 cal</span>
                             </button>
-                            <button id="male-cut-btn" onclick="setBulkMode('male-cut')" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;">
+                            <button id="male-cut-btn" onclick="setBulkMode('male-cut')" style="background: linear-gradient(135deg, #2c3e50, #3498db); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); transition: all 0.3s ease;">
                                 ⚡ MALE CUT<br><span style="font-size: 10px; opacity: 0.9;">400-600 cal</span>
                             </button>
-                            <button id="female-bulk-btn" onclick="setBulkMode('female-bulk')" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3); transition: all 0.3s ease;">
+                            <button id="female-bulk-btn" onclick="setBulkMode('female-bulk')" style="background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4); transition: all 0.3s ease;">
                                 💎 FEMALE BULK<br><span style="font-size: 10px; opacity: 0.9;">600-900 cal</span>
                             </button>
-                            <button id="female-cut-btn" onclick="setBulkMode('female-cut')" style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3); transition: all 0.3s ease;">
+                            <button id="female-cut-btn" onclick="setBulkMode('female-cut')" style="background: linear-gradient(135deg, #ffc3e1, #ff8cc8); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 140, 200, 0.4); transition: all 0.3s ease;">
                                 ✨ FEMALE CUT<br><span style="font-size: 10px; opacity: 0.9;">300-450 cal</span>
                             </button>
                         </div>
@@ -213,6 +213,63 @@
             localStorage.setItem('fuelfire_bulk_mode', mode);
             updateModeDisplay(mode);
             updateButtonStyles(mode);
+            updatePageTheme(mode);
+        }
+        
+        function updatePageTheme(mode) {
+            const themes = {
+                'male-bulk': {
+                    headerBg: 'linear-gradient(135deg, #1a1a1a, #444)',
+                    categoryBg: 'linear-gradient(135deg, #2a2a2a, #555)',
+                    modeColor: '#1a1a1a',
+                    shadowColor: 'rgba(0, 0, 0, 0.6)'
+                },
+                'male-cut': {
+                    headerBg: 'linear-gradient(135deg, #2c3e50, #3498db)',
+                    categoryBg: 'linear-gradient(135deg, #34495e, #5dade2)',
+                    modeColor: '#2c3e50',
+                    shadowColor: 'rgba(52, 152, 219, 0.5)'
+                },
+                'female-bulk': {
+                    headerBg: 'linear-gradient(135deg, #ff6b9d, #c44569)',
+                    categoryBg: 'linear-gradient(135deg, #ff8fab, #d65780)',
+                    modeColor: '#ff6b9d',
+                    shadowColor: 'rgba(255, 107, 157, 0.5)'
+                },
+                'female-cut': {
+                    headerBg: 'linear-gradient(135deg, #ffc3e1, #ff8cc8)',
+                    categoryBg: 'linear-gradient(135deg, #ffd4e8, #ffadd6)',
+                    modeColor: '#ffc3e1',
+                    shadowColor: 'rgba(255, 140, 200, 0.5)'
+                }
+            };
+            
+            const theme = themes[mode];
+            
+            // Update header background
+            const header = document.querySelector('.header');
+            if (header) {
+                header.style.background = theme.headerBg;
+            }
+            
+            // Update category cards
+            const categoryCards = document.querySelectorAll('.category-card');
+            categoryCards.forEach((card, index) => {
+                // Keep unique colors for each category but apply theme shadow
+                card.style.boxShadow = `0 5px 20px ${theme.shadowColor}`;
+            });
+            
+            // Update current mode text color
+            const currentModeDiv = document.getElementById('current-mode');
+            if (currentModeDiv) {
+                currentModeDiv.style.color = theme.modeColor;
+            }
+            
+            // Update content background with subtle theme
+            const content = document.querySelector('.content');
+            if (content) {
+                content.style.background = `linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))`;
+            }
         }
         
         function updateModeDisplay(mode) {
@@ -249,6 +306,7 @@
             const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
             updateModeDisplay(currentMode);
             updateButtonStyles(currentMode);
+            updatePageTheme(currentMode);
         });
     </script>
 </body>
