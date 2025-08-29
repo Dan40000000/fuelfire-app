@@ -281,9 +281,270 @@
     </div>
 
     <script>
-        // FITNESS Beef Recipe Database
-        const beefRecipes = [
-            {
+        // BULK MODE Beef Recipe Database
+        const bulkModeRecipes = {
+            'male-bulk': [
+                {
+                    name: "⭐ WEEKLY BEEF & RICE POWER BOWLS ⭐",
+                    description: "📅 Prep 7 MASSIVE beef bowls in 1 hour | Sunday = Week Sorted!",
+                    time: "60 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1420,
+                    protein: 58,
+                    carbs: 145,
+                    fat: 42,
+                    sugar: 8,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY SHOPPING LIST:",
+                        "5 lbs lean beef sirloin, cubed",
+                        "14 cups jasmine rice (2 lbs dry rice)",
+                        "14 tbsp olive oil",
+                        "7 large sweet potatoes",
+                        "14 cups broccoli florets (3 large heads)",
+                        "7 tbsp low-sodium soy sauce",
+                        "7 avocados (buy 3 ripe, 4 unripe)",
+                        "Garlic powder, ginger powder, salt, pepper",
+                        "📦 Need: 7 large meal prep containers"
+                    ],
+                    instructions: [
+                        "🔥 SUNDAY MEAL PREP POWER HOUR:",
+                        "Cook 14 cups jasmine rice in rice cooker (45 mins)",
+                        "While rice cooks: Season 5lbs beef with garlic, salt, pepper",
+                        "Cube sweet potatoes, steam for 15 minutes until tender",
+                        "Steam broccoli in batches until bright green (5 mins each)",
+                        "Heat oil in large skillet, sear beef in 3 batches",
+                        "Cook each batch 6-8 minutes until browned",
+                        "Mix cooked beef with soy sauce and ginger",
+                        "ASSEMBLY LINE: Divide rice into 7 containers",
+                        "Add beef, sweet potatoes, broccoli to each",
+                        "Store 5 containers in fridge, 2 in freezer",
+                        "Add fresh avocado just before eating",
+                        "💪 Reheat 2-3 mins, add avocado = BEAST MODE!"
+                    ]
+                },
+                {
+                    name: "Triple Beef Protein Burrito",
+                    description: "Huge burrito with 10oz ground beef, rice, beans & cheese",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1350,
+                    protein: 62,
+                    carbs: 120,
+                    fat: 48,
+                    sugar: 6,
+                    icon: "🌯",
+                    ingredients: [
+                        "10 oz lean ground beef (93/7)",
+                        "1 large whole wheat tortilla",
+                        "1 cup brown rice, cooked",
+                        "3/4 cup black beans",
+                        "1/2 cup sharp cheddar cheese",
+                        "1/4 cup Greek yogurt",
+                        "2 tbsp salsa",
+                        "1 tbsp taco seasoning",
+                        "1/4 cup diced onions",
+                        "Lettuce and tomato"
+                    ],
+                    instructions: [
+                        "Brown ground beef in large pan",
+                        "Add onions and taco seasoning, cook 3 minutes",
+                        "Warm tortilla in microwave for 30 seconds",
+                        "Layer rice, beans, and beef mixture",
+                        "Add cheese, Greek yogurt, and salsa",
+                        "Top with lettuce and tomato",
+                        "Roll tightly, tucking in sides",
+                        "Cut in half and serve - BULKING BEAST!"
+                    ]
+                },
+                {
+                    name: "Beef & Sweet Potato Mass Gainer",
+                    description: "10oz beef roast with massive sweet potato and quinoa",
+                    time: "45 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1280,
+                    protein: 55,
+                    carbs: 138,
+                    fat: 35,
+                    sugar: 22,
+                    icon: "🍠",
+                    ingredients: [
+                        "10 oz beef chuck roast, lean",
+                        "2 large sweet potatoes (16 oz)",
+                        "1 cup quinoa, cooked",
+                        "2 tbsp coconut oil",
+                        "2 tbsp honey",
+                        "1 tsp cinnamon",
+                        "2 tsp thyme",
+                        "1 tsp rosemary",
+                        "Salt and pepper",
+                        "1 cup green beans"
+                    ],
+                    instructions: [
+                        "Season beef with thyme, rosemary, salt and pepper",
+                        "Sear beef in hot pan, then bake at 375°F for 25 minutes",
+                        "Cube sweet potatoes and toss with coconut oil and honey",
+                        "Roast sweet potatoes for 30 minutes until caramelized",
+                        "Cook quinoa according to package directions",
+                        "Steam green beans until tender-crisp",
+                        "Slice beef and serve over quinoa",
+                        "Top with roasted sweet potatoes and green beans",
+                        "MASSIVE meal for serious bulking!"
+                    ]
+                }
+            ],
+            'male-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN BEEF ZOODLE BOWLS ⭐",
+                    description: "📅 Prep 7 lean cutting meals in 45 mins | Zero carb gains!",
+                    time: "45 mins prep (7 meals)",
+                    difficulty: 1,
+                    rating: 5,
+                    calories: 485,
+                    protein: 42,
+                    carbs: 18,
+                    fat: 16,
+                    sugar: 12,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CUTTING SHOPPING LIST:",
+                        "2.5 lbs lean beef sirloin, sliced thin",
+                        "21 medium zucchini (3 per day)",
+                        "7 cups bell pepper strips (4 large peppers)",
+                        "3.5 cups cherry tomatoes (2 containers)",
+                        "7 tbsp olive oil",
+                        "2 heads fresh garlic",
+                        "Italian seasoning, salt, pepper",
+                        "14 tbsp balsamic vinegar",
+                        "Fresh basil bunch",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY CUTTING PREP (45 minutes):",
+                        "Slice 2.5lbs beef into thin strips, season all with Italian herbs",
+                        "Spiralize all 21 zucchini (use food processor if available)",
+                        "Cut peppers into strips, halve cherry tomatoes",
+                        "Heat oil in large skillet, cook beef in 3 batches",
+                        "Cook each batch 3-4 minutes until browned, set aside",
+                        "Sauté peppers and tomatoes lightly (2 mins)",
+                        "ASSEMBLY: Divide cooked beef into 7 containers",
+                        "Add cooked peppers and tomatoes to each",
+                        "Store raw zucchini noodles separately in fridge",
+                        "DAILY: Heat beef/veggie mix, toss with fresh zoodles",
+                        "Drizzle with balsamic, add fresh basil",
+                        "🔥 2 minutes = Perfect cutting meal ready!"
+                    ]
+                }
+            ],
+            'female-bulk': [
+                {
+                    name: "⭐ WEEKLY BEEF QUINOA POWER BOWLS ⭐",
+                    description: "📅 Prep 7 perfect bulking bowls in 50 mins | Balanced gains!",
+                    time: "50 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 820,
+                    protein: 38,
+                    carbs: 85,
+                    fat: 28,
+                    sugar: 15,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY BALANCED SHOPPING LIST:",
+                        "3.5 lbs lean ground beef (93/7)",
+                        "7 cups quinoa (2 lbs dry quinoa)",
+                        "7 medium sweet potatoes",
+                        "3.5 avocados (buy 2 ripe, 1.5 unripe)",
+                        "14 cups mixed greens (3 bags)",
+                        "1.75 cups pumpkin seeds",
+                        "7 tbsp olive oil",
+                        "Cumin, paprika, salt, pepper",
+                        "7 limes, fresh cilantro bunch",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "💎 SUNDAY BALANCED BULK PREP (50 minutes):",
+                        "Roast all 7 sweet potatoes at 400°F for 30 minutes",
+                        "Cook 7 cups quinoa in large pot (20 mins)",
+                        "Season 3.5lbs ground beef with cumin and paprika",
+                        "Brown beef in batches until fully cooked",
+                        "While beef cooks: wash and prep all mixed greens",
+                        "Cube roasted sweet potatoes when cool",
+                        "ASSEMBLY LINE: Layer each container:",
+                        "Bottom: 2 cups mixed greens",
+                        "Middle: 1 cup cooked quinoa + beef portion",
+                        "Top: cubed sweet potato + pumpkin seeds",
+                        "Store dressing separate: olive oil + lime juice",
+                        "Add fresh avocado daily before eating",
+                        "💪 Reheat proteins, add avocado = Perfect bulk!"
+                    ]
+                }
+            ],
+            'female-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN BEEF LETTUCE WRAPS ⭐",
+                    description: "📅 Prep 7 ultra-lean meals in 35 mins | Clean cutting made easy!",
+                    time: "35 mins prep (7 meals)",
+                    difficulty: 1,
+                    rating: 5,
+                    calories: 320,
+                    protein: 32,
+                    carbs: 12,
+                    fat: 12,
+                    sugar: 8,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CLEAN CUTTING SHOPPING LIST:",
+                        "2.25 lbs extra lean ground beef (96/4)",
+                        "14 large heads butter lettuce",
+                        "3.5 cups cucumber, diced",
+                        "3.5 cups cherry tomatoes",
+                        "1.75 cups red onion, diced",
+                        "7 tbsp low-sodium soy sauce",
+                        "7 tsp sesame oil",
+                        "Fresh ginger root",
+                        "2 heads garlic",
+                        "Green onions, fresh cilantro",
+                        "📦 Need: 7 meal prep containers + lettuce storage"
+                    ],
+                    instructions: [
+                        "✨ SUNDAY CLEAN CUTTING PREP (35 minutes):",
+                        "Brown all 2.25lbs extra lean beef in large pan",
+                        "Add minced garlic and ginger, cook 1 minute",
+                        "Season with soy sauce and sesame oil",
+                        "Let beef mixture cool completely",
+                        "Wash and dry all lettuce leaves thoroughly",
+                        "Dice cucumbers, halve cherry tomatoes, dice onions",
+                        "STORAGE SYSTEM:",
+                        "Container 1: Cooked seasoned beef (divided into 7 portions)",
+                        "Container 2: Diced vegetables mixed together",
+                        "Store lettuce leaves in separate container with paper towel",
+                        "DAILY ASSEMBLY (2 minutes): ",
+                        "Grab portion of beef, vegetables, and 8 lettuce leaves",
+                        "Fill lettuce cups, garnish with green onions and cilantro",
+                        "🔥 Fresh, crisp, and perfect for aggressive cuts!"
+                    ]
+                }
+            ]
+        };
+        
+        // Get current recipes based on mode
+        function getCurrentRecipes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
+        }
+        
+        const beefRecipes = getCurrentRecipes();
+        
+        // Display functions
                 name: "Grilled Sirloin Steak",
                 description: "Lean grilled sirloin with herbs - perfect protein",
                 time: "20 mins",
@@ -657,9 +918,15 @@
             let html = '';
             
             beefRecipes.forEach((meal, index) => {
+                const isChampion = meal.mealPrepChampion;
+                const cardStyle = isChampion ? 'style="border: 3px solid #FFD700; box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4); transform: scale(1.02);"' : '';
+                const imageGradient = isChampion ? 'background: linear-gradient(135deg, #FFD700, #FFA500, #8B4513);' : 'background: linear-gradient(135deg, #8B4513, #A0522D);';
+                const championBadge = isChampion ? '<div class="champion-badge" style="position: absolute; top: -10px; right: -10px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #8B4513; padding: 8px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; box-shadow: 0 3px 10px rgba(255, 215, 0, 0.5);">MEAL PREP CHAMPION</div>' : '';
+                
                 html += `
-                    <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image" style="background: linear-gradient(135deg, #8B4513, #A0522D);">
+                    <div class="meal-card" onclick="openRecipeModal(${index})" ${cardStyle}>
+                        ${championBadge}
+                        <div class="meal-image" style="${imageGradient}">
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
