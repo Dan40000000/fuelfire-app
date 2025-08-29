@@ -30,7 +30,7 @@
         .meal-image {
             width: 100%;
             height: 200px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
+            background: linear-gradient(135deg, #8B4513, #A0522D);
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -147,7 +147,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
+            background: linear-gradient(135deg, #8B4513, #A0522D);
             color: white;
             padding: 20px;
             border-radius: 20px 20px 0 0;
@@ -222,14 +222,14 @@
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
-                <div class="header-title">🐔 Chicken Recipes</div>
+                <div class="header-title">🍗 Chicken Recipes</div>
             </div>
             
             <div class="content">
                 <div style="padding: 20px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: var(--primary); margin-bottom: 10px;">🐔 Fitness Chicken Recipes</h2>
-                        <p style="color: #666; font-size: 14px;">10 lean chicken meals for serious lifters - fat always less than protein</p>
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🍗 Lean Chicken Recipes</h2>
+                        <p style="color: #666; font-size: 14px;">10 lean chicken cuts for serious lifters - breast, thighs, and ground chicken</p>
                         <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
                     
@@ -281,267 +281,509 @@
     </div>
 
     <script>
-        // FITNESS Chicken Recipe Database
-        const chickenRecipes = [
-            {
-                name: "Grilled Chicken Breast",
-                description: "Simple seasoned grilled chicken breast - bodybuilder staple",
+        // BULK MODE Chicken Recipe Database
+        const bulkModeRecipes = {
+            'male-bulk': [
+                {
+                    name: "⭐ WEEKLY CHICKEN POWER MEAL PREP ⭐",
+                    description: "📅 Prep 7 MASSIVE chicken meals in 1 hour | Sunday = Week Sorted!",
+                    time: "60 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1380,
+                    protein: 62,
+                    carbs: 45,
+                    fat: 18,
+                    sugar: 4,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY SHOPPING LIST:",
+                        "5 lbs boneless chicken thighs",
+                        "7 cups jasmine rice (uncooked)",
+                        "3.5 cups mixed vegetables (frozen)",
+                        "2 bottles teriyaki sauce",
+                        "1 bottle olive oil",
+                        "Garlic powder, onion powder, paprika",
+                        "7 large meal prep containers"
+                    ],
+                    instructions: [
+                        "🔥 ASSEMBLY LINE METHOD (60 minutes total):",
+                        "",
+                        "⏱️ PREP PHASE (20 minutes):",
+                        "• Season all 5 lbs chicken with garlic powder, paprika",
+                        "• Start rice cooker with 7 cups rice + 10 cups water",
+                        "• Preheat oven to 425°F",
+                        "",
+                        "⏱️ COOKING PHASE (30 minutes):",
+                        "• Bake seasoned chicken thighs for 25-30 minutes",
+                        "• Steam frozen vegetables in microwave (3 batches)",
+                        "• Rice finishes cooking automatically",
+                        "",
+                        "⏱️ ASSEMBLY PHASE (10 minutes):",
+                        "• Slice chicken into portions (7 servings)",
+                        "• Pack containers: 1 cup rice + chicken + ½ cup vegetables",
+                        "• Drizzle teriyaki sauce over each meal",
+                        "• Label containers Day 1-7",
+                        "",
+                        "💾 STORAGE:",
+                        "• Refrigerate 3 meals (use Days 1-3)",
+                        "• Freeze 4 meals (use Days 4-7)",
+                        "",
+                        "🔥 REHEATING:",
+                        "• From fridge: Microwave 2-3 minutes",
+                        "• From frozen: Microwave 4-5 minutes, stir halfway",
+                        "",
+                        "💪 WEEKLY NUTRITION IMPACT:",
+                        "• 7 meals × 1,380 calories = 9,660 calories",
+                        "• 7 meals × 62g protein = 434g protein",
+                        "• Perfect for serious bulk phases!"
+                    ]
+                },
+                {
+                    name: "Triple Beef Protein Burrito",
+                    description: "Huge burrito with 10oz ground beef, rice, beans & cheese",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1350,
+                    protein: 62,
+                    carbs: 120,
+                    fat: 48,
+                    sugar: 6,
+                    icon: "🌯",
+                    ingredients: [
+                        "10 oz lean ground beef (93/7)",
+                        "1 large whole wheat tortilla",
+                        "1 cup brown rice, cooked",
+                        "3/4 cup black beans",
+                        "1/2 cup sharp cheddar cheese",
+                        "1/4 cup Greek yogurt",
+                        "2 tbsp salsa",
+                        "1 tbsp taco seasoning",
+                        "1/4 cup diced onions",
+                        "Lettuce and tomato"
+                    ],
+                    instructions: [
+                        "Brown ground beef in large pan",
+                        "Add onions and taco seasoning, cook 3 minutes",
+                        "Warm tortilla in microwave for 30 seconds",
+                        "Layer rice, beans, and beef mixture",
+                        "Add cheese, Greek yogurt, and salsa",
+                        "Top with lettuce and tomato",
+                        "Roll tightly, tucking in sides",
+                        "Cut in half and serve - BULKING BEAST!"
+                    ]
+                },
+                {
+                    name: "Beef & Sweet Potato Mass Gainer",
+                    description: "10oz beef roast with massive sweet potato and quinoa",
+                    time: "45 mins",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1280,
+                    protein: 55,
+                    carbs: 138,
+                    fat: 35,
+                    sugar: 22,
+                    icon: "🍠",
+                    ingredients: [
+                        "10 oz beef chuck roast, lean",
+                        "2 large sweet potatoes (16 oz)",
+                        "1 cup quinoa, cooked",
+                        "2 tbsp coconut oil",
+                        "2 tbsp honey",
+                        "1 tsp cinnamon",
+                        "2 tsp thyme",
+                        "1 tsp rosemary",
+                        "Salt and pepper",
+                        "1 cup green beans"
+                    ],
+                    instructions: [
+                        "Season beef with thyme, rosemary, salt and pepper",
+                        "Sear beef in hot pan, then bake at 375°F for 25 minutes",
+                        "Cube sweet potatoes and toss with coconut oil and honey",
+                        "Roast sweet potatoes for 30 minutes until caramelized",
+                        "Cook quinoa according to package directions",
+                        "Steam green beans until tender-crisp",
+                        "Slice beef and serve over quinoa",
+                        "Top with roasted sweet potatoes and green beans",
+                        "MASSIVE meal for serious bulking!"
+                    ]
+                }
+            ],
+            'male-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN BEEF ZOODLE BOWLS ⭐",
+                    description: "📅 Prep 7 lean cutting meals in 45 mins | Zero carb gains!",
+                    time: "45 mins prep (7 meals)",
+                    difficulty: 1,
+                    rating: 5,
+                    calories: 485,
+                    protein: 42,
+                    carbs: 18,
+                    fat: 16,
+                    sugar: 12,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CUTTING SHOPPING LIST:",
+                        "2.5 lbs lean beef sirloin, sliced thin",
+                        "21 medium zucchini (3 per day)",
+                        "7 cups bell pepper strips (4 large peppers)",
+                        "3.5 cups cherry tomatoes (2 containers)",
+                        "7 tbsp olive oil",
+                        "2 heads fresh garlic",
+                        "Italian seasoning, salt, pepper",
+                        "14 tbsp balsamic vinegar",
+                        "Fresh basil bunch",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY CUTTING PREP (45 minutes):",
+                        "Slice 2.5lbs beef into thin strips, season all with Italian herbs",
+                        "Spiralize all 21 zucchini (use food processor if available)",
+                        "Cut peppers into strips, halve cherry tomatoes",
+                        "Heat oil in large skillet, cook beef in 3 batches",
+                        "Cook each batch 3-4 minutes until browned, set aside",
+                        "Sauté peppers and tomatoes lightly (2 mins)",
+                        "ASSEMBLY: Divide cooked beef into 7 containers",
+                        "Add cooked peppers and tomatoes to each",
+                        "Store raw zucchini noodles separately in fridge",
+                        "DAILY: Heat beef/veggie mix, toss with fresh zoodles",
+                        "Drizzle with balsamic, add fresh basil",
+                        "🔥 2 minutes = Perfect cutting meal ready!"
+                    ]
+                }
+            ],
+            'female-bulk': [
+                {
+                    name: "⭐ WEEKLY BEEF QUINOA POWER BOWLS ⭐",
+                    description: "📅 Prep 7 perfect bulking bowls in 50 mins | Balanced gains!",
+                    time: "50 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 820,
+                    protein: 38,
+                    carbs: 85,
+                    fat: 28,
+                    sugar: 15,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY BALANCED SHOPPING LIST:",
+                        "3.5 lbs lean ground beef (93/7)",
+                        "7 cups quinoa (2 lbs dry quinoa)",
+                        "7 medium sweet potatoes",
+                        "3.5 avocados (buy 2 ripe, 1.5 unripe)",
+                        "14 cups mixed greens (3 bags)",
+                        "1.75 cups pumpkin seeds",
+                        "7 tbsp olive oil",
+                        "Cumin, paprika, salt, pepper",
+                        "7 limes, fresh cilantro bunch",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "💎 SUNDAY BALANCED BULK PREP (50 minutes):",
+                        "Roast all 7 sweet potatoes at 400°F for 30 minutes",
+                        "Cook 7 cups quinoa in large pot (20 mins)",
+                        "Season 3.5lbs ground beef with cumin and paprika",
+                        "Brown beef in batches until fully cooked",
+                        "While beef cooks: wash and prep all mixed greens",
+                        "Cube roasted sweet potatoes when cool",
+                        "ASSEMBLY LINE: Layer each container:",
+                        "Bottom: 2 cups mixed greens",
+                        "Middle: 1 cup cooked quinoa + beef portion",
+                        "Top: cubed sweet potato + pumpkin seeds",
+                        "Store dressing separate: olive oil + lime juice",
+                        "Add fresh avocado daily before eating",
+                        "💪 Reheat proteins, add avocado = Perfect bulk!"
+                    ]
+                }
+            ],
+            'female-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN BEEF LETTUCE WRAPS ⭐",
+                    description: "📅 Prep 7 ultra-lean meals in 35 mins | Clean cutting made easy!",
+                    time: "35 mins prep (7 meals)",
+                    difficulty: 1,
+                    rating: 5,
+                    calories: 320,
+                    protein: 32,
+                    carbs: 12,
+                    fat: 12,
+                    sugar: 8,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CLEAN CUTTING SHOPPING LIST:",
+                        "2.25 lbs extra lean ground beef (96/4)",
+                        "14 large heads butter lettuce",
+                        "3.5 cups cucumber, diced",
+                        "3.5 cups cherry tomatoes",
+                        "1.75 cups red onion, diced",
+                        "7 tbsp low-sodium soy sauce",
+                        "7 tsp sesame oil",
+                        "Fresh ginger root",
+                        "2 heads garlic",
+                        "Green onions, fresh cilantro",
+                        "📦 Need: 7 meal prep containers + lettuce storage"
+                    ],
+                    instructions: [
+                        "✨ SUNDAY CLEAN CUTTING PREP (35 minutes):",
+                        "Brown all 2.25lbs extra lean beef in large pan",
+                        "Add minced garlic and ginger, cook 1 minute",
+                        "Season with soy sauce and sesame oil",
+                        "Let beef mixture cool completely",
+                        "Wash and dry all lettuce leaves thoroughly",
+                        "Dice cucumbers, halve cherry tomatoes, dice onions",
+                        "STORAGE SYSTEM:",
+                        "Container 1: Cooked seasoned beef (divided into 7 portions)",
+                        "Container 2: Diced vegetables mixed together",
+                        "Store lettuce leaves in separate container with paper towel",
+                        "DAILY ASSEMBLY (2 minutes): ",
+                        "Grab portion of beef, vegetables, and 8 lettuce leaves",
+                        "Fill lettuce cups, garnish with green onions and cilantro",
+                        "🔥 Fresh, crisp, and perfect for aggressive cuts!"
+                    ]
+                }
+            ]
+        };
+        
+        // Get current recipes based on mode
+        function getCurrentRecipes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
+        }
+        
+        const chickenRecipes = getCurrentRecipes();
+        
+        // Display functions
+                name: "Grilled Sirloin Steak",
+                description: "Lean grilled sirloin with herbs - perfect protein",
                 time: "20 mins",
-                difficulty: 1,
-                rating: 4,
-                calories: 380,
-                protein: 42,
-                carbs: 2,
-                fat: 8,
-                icon: "💪",
-                ingredients: [
-                    "6 oz boneless skinless chicken breast",
-                    "1 tsp olive oil",
-                    "1 tsp garlic powder",
-                    "1 tsp onion powder",
-                    "1 tsp paprika",
-                    "1/2 tsp salt",
-                    "1/2 tsp black pepper",
-                    "1/2 tsp thyme",
-                    "Lemon wedges"
-                ],
-                instructions: [
-                    "Pound chicken breast to even thickness",
-                    "Mix all dry seasonings together",
-                    "Brush chicken lightly with olive oil",
-                    "Season both sides with spice mixture",
-                    "Preheat grill to medium-high heat",
-                    "Grill 6-7 minutes per side until internal temp reaches 165°F",
-                    "Let rest 5 minutes before slicing",
-                    "Serve with lemon wedges and vegetables"
-                ]
-            },
-            {
-                name: "Baked Herb Chicken Thighs",
-                description: "Lean skinless thighs baked with fresh herbs",
-                time: "35 mins",
                 difficulty: 1,
                 rating: 4,
                 calories: 420,
-                protein: 38,
-                carbs: 3,
+                protein: 45,
+                carbs: 2,
                 fat: 12,
-                icon: "🌿",
+                icon: "🔥",
                 ingredients: [
-                    "6 oz boneless skinless chicken thighs",
-                    "2 tsp fresh rosemary, chopped",
-                    "2 tsp fresh thyme",
-                    "3 cloves garlic, minced",
-                    "1 tbsp lemon juice",
+                    "8 oz sirloin steak, trimmed",
+                    "1 tsp olive oil",
+                    "2 tsp garlic powder",
+                    "1 tsp onion powder",
+                    "1 tsp smoked paprika",
+                    "1/2 tsp salt",
+                    "1/2 tsp black pepper",
+                    "2 tsp fresh rosemary",
+                    "Lemon wedges"
+                ],
+                instructions: [
+                    "Remove steak from fridge 20 minutes before cooking",
+                    "Mix all dry seasonings together",
+                    "Brush steak lightly with olive oil",
+                    "Season both sides with spice mixture",
+                    "Preheat grill to high heat",
+                    "Grill 4-5 minutes per side for medium-rare",
+                    "Check internal temp: 135°F for medium-rare",
+                    "Rest 5 minutes, serve with lemon and vegetables"
+                ]
+            },
+            {
+                name: "Lean Beef Tenderloin",
+                description: "Baked beef tenderloin with herb crust - ultra lean",
+                time: "35 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 380,
+                protein: 42,
+                carbs: 3,
+                fat: 8,
+                icon: "👑",
+                ingredients: [
+                    "8 oz beef tenderloin",
+                    "2 tsp Dijon mustard",
+                    "1 tbsp fresh herbs (thyme, rosemary)",
+                    "2 cloves garlic, minced",
                     "1 tsp olive oil",
                     "1/2 tsp salt",
                     "1/4 tsp black pepper",
-                    "Non-stick cooking spray"
-                ],
-                instructions: [
-                    "Preheat oven to 400°F",
-                    "Spray baking dish with cooking spray",
-                    "Mix herbs, garlic, lemon juice, and olive oil",
-                    "Season chicken with salt and pepper",
-                    "Rub herb mixture all over chicken",
-                    "Place in baking dish",
-                    "Bake 25-30 minutes until internal temp reaches 165°F",
-                    "Let rest 5 minutes before serving"
-                ]
-            },
-            {
-                name: "Poached Chicken & Vegetables",
-                description: "Clean poached chicken with steamed vegetables",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 350,
-                protein: 40,
-                carbs: 15,
-                fat: 6,
-                icon: "🥬",
-                ingredients: [
-                    "6 oz boneless skinless chicken breast",
-                    "4 cups low-sodium chicken broth",
-                    "1 bay leaf",
-                    "3 peppercorns",
-                    "1 cup broccoli florets",
-                    "1 cup green beans, trimmed",
-                    "1/2 cup carrots, sliced",
-                    "1 tsp fresh dill",
-                    "Salt and pepper to taste"
-                ],
-                instructions: [
-                    "Bring chicken broth, bay leaf, and peppercorns to simmer",
-                    "Add chicken breast to poaching liquid",
-                    "Poach 12-15 minutes until cooked through",
-                    "Remove chicken and let rest",
-                    "Steam vegetables until tender-crisp",
-                    "Slice chicken against the grain",
-                    "Serve chicken over steamed vegetables",
-                    "Garnish with fresh dill"
-                ]
-            },
-            {
-                name: "Air-Fried Chicken Tenders",
-                description: "Crispy air-fried tenders with almond flour coating",
-                time: "20 mins",
-                difficulty: 2,
-                rating: 5,
-                calories: 480,
-                protein: 44,
-                carbs: 8,
-                fat: 18,
-                icon: "🍖",
-                ingredients: [
-                    "6 oz chicken tenderloins",
-                    "1/2 cup almond flour",
-                    "2 tbsp protein powder (unflavored)",
-                    "1 tsp paprika",
-                    "1/2 tsp garlic powder",
-                    "1/2 tsp onion powder",
-                    "1 egg white",
-                    "1 tbsp Dijon mustard",
-                    "Salt and pepper"
-                ],
-                instructions: [
-                    "Preheat air fryer to 400°F",
-                    "Mix almond flour, protein powder, and all spices",
-                    "Whisk egg white with Dijon mustard",
-                    "Season chicken with salt and pepper",
-                    "Dip chicken in egg mixture, then coat with almond flour mixture",
-                    "Spray air fryer basket with cooking spray",
-                    "Air fry 8-10 minutes, flipping halfway",
-                    "Cook until internal temp reaches 165°F"
-                ]
-            },
-            {
-                name: "Grilled Chicken Fajita Bowl",
-                description: "Mexican-inspired grilled chicken with peppers and onions",
-                time: "30 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 440,
-                protein: 38,
-                carbs: 20,
-                fat: 14,
-                icon: "🌶️",
-                ingredients: [
-                    "6 oz boneless skinless chicken breast",
-                    "1 bell pepper, sliced",
-                    "1/2 onion, sliced",
-                    "1 tbsp olive oil",
-                    "1 tsp cumin",
-                    "1 tsp chili powder",
-                    "1/2 tsp paprika",
-                    "1/4 cup salsa (no sugar added)",
-                    "2 tbsp Greek yogurt",
-                    "1/4 avocado, sliced"
-                ],
-                instructions: [
-                    "Season chicken with cumin, chili powder, and paprika",
-                    "Grill chicken 6-7 minutes per side until cooked through",
-                    "Let rest, then slice into strips",
-                    "Heat 1 tsp oil in pan, sauté peppers and onions until tender",
-                    "Season vegetables with salt and pepper",
-                    "Arrange chicken and vegetables in bowl",
-                    "Top with salsa, Greek yogurt, and avocado",
-                    "Serve immediately"
-                ]
-            },
-            {
-                name: "Asian Steamed Chicken",
-                description: "Clean steamed chicken with ginger and scallions",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 380,
-                protein: 41,
-                carbs: 8,
-                fat: 10,
-                icon: "🥢",
-                ingredients: [
-                    "6 oz boneless skinless chicken thighs",
-                    "2 tbsp low-sodium soy sauce",
-                    "1 tbsp rice vinegar",
-                    "1 tsp sesame oil",
-                    "2 tsp fresh ginger, minced",
-                    "3 scallions, chopped",
-                    "1 clove garlic, minced",
-                    "1/2 tsp red pepper flakes",
-                    "1 tsp sesame seeds"
-                ],
-                instructions: [
-                    "Set up steamer basket over simmering water",
-                    "Season chicken with salt and pepper",
-                    "Steam chicken 15-18 minutes until cooked through",
-                    "Mix soy sauce, rice vinegar, sesame oil, ginger, and garlic",
-                    "Let chicken rest 5 minutes, then slice",
-                    "Drizzle sauce over sliced chicken",
-                    "Garnish with scallions, red pepper flakes, and sesame seeds",
-                    "Serve with steamed vegetables"
-                ]
-            },
-            {
-                name: "Mediterranean Baked Chicken",
-                description: "Herb-crusted chicken with tomatoes and olives",
-                time: "40 mins",
-                difficulty: 2,
-                rating: 4,
-                calories: 460,
-                protein: 42,
-                carbs: 12,
-                fat: 18,
-                icon: "🫒",
-                ingredients: [
-                    "6 oz boneless skinless chicken breast",
-                    "1 cup cherry tomatoes",
-                    "10 kalamata olives, pitted",
-                    "2 tbsp olive oil",
-                    "2 tsp dried oregano",
-                    "1 tsp dried basil",
-                    "3 cloves garlic, minced",
-                    "1 lemon, juiced",
-                    "2 tbsp fresh parsley"
+                    "Non-stick cooking spray",
+                    "Fresh parsley"
                 ],
                 instructions: [
                     "Preheat oven to 425°F",
-                    "Season chicken with salt, pepper, oregano, and basil",
-                    "Heat 1 tbsp olive oil in oven-safe pan",
-                    "Sear chicken 3-4 minutes per side",
-                    "Add tomatoes, olives, garlic, and remaining oil",
-                    "Transfer to oven and bake 15-20 minutes",
-                    "Drizzle with lemon juice",
-                    "Garnish with fresh parsley"
+                    "Brush tenderloin with Dijon mustard",
+                    "Mix herbs, garlic, salt, and pepper",
+                    "Coat tenderloin with herb mixture",
+                    "Heat oven-safe pan with oil over high heat",
+                    "Sear tenderloin 2-3 minutes per side",
+                    "Transfer to oven, bake 15-20 minutes until 135°F",
+                    "Rest 10 minutes, slice and garnish with parsley"
                 ]
             },
             {
-                name: "Chicken & Broccoli Stir-Fry",
-                description: "Simple stir-fry with minimal oil and clean seasonings",
-                time: "15 mins",
+                name: "Korean-Style Sirloin",
+                description: "Marinated sirloin strips without sugar - clean bulgogi",
+                time: "45 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 460,
+                protein: 40,
+                carbs: 8,
+                fat: 18,
+                icon: "🇰🇷",
+                ingredients: [
+                    "8 oz sirloin, thinly sliced",
+                    "3 tbsp low-sodium soy sauce",
+                    "2 tbsp rice vinegar",
+                    "1 tbsp sesame oil",
+                    "4 cloves garlic, minced",
+                    "1 tbsp fresh ginger, grated",
+                    "1 onion, sliced",
+                    "2 green onions, chopped",
+                    "1 tsp sesame seeds"
+                ],
+                instructions: [
+                    "Freeze beef 20 minutes for easier slicing",
+                    "Mix soy sauce, vinegar, sesame oil, garlic, and ginger",
+                    "Marinate beef in sauce for 2 hours",
+                    "Heat non-stick pan over high heat",
+                    "Cook beef in batches, don't overcrowd",
+                    "Add onions in last 2 minutes",
+                    "Garnish with green onions and sesame seeds",
+                    "Serve over steamed vegetables"
+                ]
+            },
+            {
+                name: "Lean Beef Chili",
+                description: "High-protein chili with 93/7 ground beef",
+                time: "1 hour 30 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 380,
+                protein: 35,
+                carbs: 25,
+                fat: 8,
+                icon: "🌶️",
+                ingredients: [
+                    "1 lb 93/7 ground beef",
+                    "2 cans kidney beans, drained",
+                    "1 can diced tomatoes (no sugar)",
+                    "1 onion, diced",
+                    "4 cloves garlic, minced",
+                    "2 tbsp chili powder",
+                    "1 tbsp cumin",
+                    "1 tsp smoked paprika",
+                    "2 cups low-sodium beef broth"
+                ],
+                instructions: [
+                    "Brown ground beef in large pot, no oil needed",
+                    "Add onions and garlic, cook until soft",
+                    "Add spices and cook 1 minute until fragrant",
+                    "Add tomatoes, beans, and broth",
+                    "Bring to boil, then simmer 1 hour",
+                    "Stir occasionally and adjust seasoning",
+                    "Serve with Greek yogurt instead of sour cream",
+                    "Perfect for meal prep"
+                ]
+            },
+            {
+                name: "Beef Taco Bowl",
+                description: "Seasoned lean beef over greens - no tortillas",
+                time: "25 mins",
                 difficulty: 1,
                 rating: 4,
                 calories: 410,
-                protein: 40,
+                protein: 38,
+                carbs: 15,
+                fat: 14,
+                icon: "🥗",
+                ingredients: [
+                    "8 oz 93/7 ground beef",
+                    "2 cups romaine lettuce, chopped",
+                    "1/2 cup tomatoes, diced",
+                    "1/4 cup red onion, diced",
+                    "1 tsp cumin",
+                    "1 tsp chili powder",
+                    "1/2 tsp paprika",
+                    "1/4 cup salsa (no sugar)",
+                    "1/4 avocado, sliced"
+                ],
+                instructions: [
+                    "Brown ground beef in non-stick pan",
+                    "Season with cumin, chili powder, and paprika",
+                    "Cook until fully browned and seasoned",
+                    "Arrange lettuce in bowl",
+                    "Top with seasoned beef",
+                    "Add tomatoes and onions",
+                    "Serve with salsa and avocado",
+                    "Skip cheese and sour cream for cleaner macros"
+                ]
+            },
+            {
+                name: "Italian Beef & Vegetables",
+                description: "Baked sirloin with Italian herbs and vegetables",
+                time: "45 mins",
+                difficulty: 2,
+                rating: 4,
+                calories: 450,
+                protein: 44,
+                carbs: 18,
+                fat: 16,
+                icon: "🇮🇹",
+                ingredients: [
+                    "8 oz sirloin steak, cubed",
+                    "1 cup zucchini, sliced",
+                    "1 cup bell peppers, sliced",
+                    "1 cup cherry tomatoes",
+                    "3 cloves garlic, minced",
+                    "2 tbsp olive oil",
+                    "2 tsp Italian seasoning",
+                    "1/2 tsp salt",
+                    "Fresh basil"
+                ],
+                instructions: [
+                    "Preheat oven to 425°F",
+                    "Season beef cubes with Italian seasoning and salt",
+                    "Heat 1 tbsp oil in oven-safe pan",
+                    "Sear beef cubes 2-3 minutes per side",
+                    "Add vegetables and remaining oil",
+                    "Toss with garlic and seasonings",
+                    "Bake 20-25 minutes until beef is cooked through",
+                    "Garnish with fresh basil"
+                ]
+            },
+            {
+                name: "Beef & Broccoli Stir-Fry",
+                description: "Clean stir-fry with minimal oil and sauce",
+                time: "20 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 390,
+                protein: 41,
                 carbs: 12,
                 fat: 15,
                 icon: "🥦",
                 ingredients: [
-                    "6 oz boneless skinless chicken breast, cubed",
-                    "2 cups broccoli florets",
+                    "8 oz sirloin, sliced thin",
+                    "3 cups broccoli florets",
                     "1 tbsp olive oil",
-                    "2 cloves garlic, minced",
-                    "1 tbsp low-sodium soy sauce",
+                    "3 cloves garlic, minced",
+                    "2 tbsp low-sodium soy sauce",
                     "1 tsp fresh ginger, minced",
-                    "1/4 cup chicken broth",
+                    "1/4 cup beef broth",
                     "1 tsp sesame seeds",
                     "2 scallions, chopped"
                 ],
                 instructions: [
                     "Heat oil in large pan or wok over high heat",
-                    "Add chicken cubes, cook 5-6 minutes until golden",
+                    "Add beef slices, cook 3-4 minutes until browned",
                     "Add garlic and ginger, stir-fry 30 seconds",
-                    "Add broccoli and chicken broth",
+                    "Add broccoli and beef broth",
                     "Cover and steam 3-4 minutes until broccoli is tender",
                     "Add soy sauce, toss to combine",
                     "Remove from heat",
@@ -549,68 +791,102 @@
                 ]
             },
             {
-                name: "Buffalo Chicken Lettuce Wraps",
-                description: "Spicy grilled chicken in crisp lettuce cups",
-                time: "25 mins",
-                difficulty: 2,
-                rating: 5,
-                calories: 390,
-                protein: 39,
+                name: "Asian Beef Lettuce Wraps",
+                description: "Seasoned ground beef in crisp lettuce cups",
+                time: "20 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 350,
+                protein: 36,
                 carbs: 8,
                 fat: 12,
                 icon: "🥬",
                 ingredients: [
-                    "6 oz boneless skinless chicken breast",
-                    "2 tbsp buffalo sauce (no sugar)",
-                    "1 tsp olive oil",
+                    "8 oz 93/7 ground beef",
                     "8 butter lettuce leaves",
-                    "1/4 cup Greek yogurt",
-                    "2 tbsp light ranch seasoning mix",
-                    "2 celery stalks, diced",
-                    "1/4 red onion, diced"
+                    "2 tbsp low-sodium soy sauce",
+                    "1 tbsp rice vinegar",
+                    "1 tsp sesame oil",
+                    "2 cloves garlic, minced",
+                    "1 tsp fresh ginger, minced",
+                    "2 scallions, chopped",
+                    "1 tsp sesame seeds"
                 ],
                 instructions: [
-                    "Grill chicken breast until cooked through",
-                    "Let rest, then dice into small pieces",
-                    "Toss diced chicken with buffalo sauce",
-                    "Mix Greek yogurt with ranch seasoning",
+                    "Brown ground beef in non-stick pan",
+                    "Add garlic and ginger, cook 1 minute",
+                    "Mix soy sauce, vinegar, and sesame oil",
+                    "Add sauce to beef, stir well",
+                    "Cook until sauce is absorbed",
                     "Wash and separate lettuce leaves",
-                    "Fill each lettuce cup with buffalo chicken",
-                    "Top with diced celery and onion",
-                    "Serve with Greek yogurt ranch on side"
+                    "Fill lettuce cups with beef mixture",
+                    "Garnish with scallions and sesame seeds"
                 ]
             },
             {
-                name: "Lemon Pepper Chicken Meal Prep",
-                description: "Week-prep friendly seasoned chicken with vegetables",
-                time: "45 mins",
-                difficulty: 1,
-                rating: 4,
-                calories: 420,
+                name: "Pepper-Crusted Tenderloin",
+                description: "Black pepper crusted beef with roasted vegetables",
+                time: "40 mins",
+                difficulty: 2,
+                rating: 5,
+                calories: 440,
                 protein: 43,
-                carbs: 18,
-                fat: 11,
-                icon: "🍋",
+                carbs: 15,
+                fat: 16,
+                icon: "🌶️",
                 ingredients: [
-                    "6 oz boneless skinless chicken breast",
-                    "2 tsp lemon pepper seasoning",
+                    "8 oz beef tenderloin",
+                    "2 tbsp coarsely ground black pepper",
+                    "1 tsp salt",
                     "1 tbsp olive oil",
                     "1 cup asparagus, trimmed",
-                    "1 cup green beans",
-                    "1/2 cup bell peppers, sliced",
-                    "1 lemon, sliced",
+                    "1 cup Brussels sprouts, halved",
                     "2 cloves garlic, minced",
-                    "Fresh thyme sprigs"
+                    "1 lemon, juiced",
+                    "Fresh thyme"
                 ],
                 instructions: [
                     "Preheat oven to 425°F",
-                    "Season chicken with lemon pepper",
-                    "Heat oil in oven-safe pan, sear chicken 3 minutes per side",
-                    "Add vegetables around chicken",
-                    "Top with garlic, lemon slices, and thyme",
-                    "Bake 20-25 minutes until chicken reaches 165°F",
-                    "Let rest 5 minutes before serving",
-                    "Perfect for meal prep containers"
+                    "Coat tenderloin with pepper and salt",
+                    "Heat oil in oven-safe pan over high heat",
+                    "Sear tenderloin 2-3 minutes per side",
+                    "Add vegetables around beef",
+                    "Season vegetables with garlic and thyme",
+                    "Roast 15-20 minutes until beef reaches 135°F",
+                    "Rest 5 minutes, drizzle with lemon juice"
+                ]
+            },
+            {
+                name: "Beef & Veggie Meal Prep",
+                description: "Simple seasoned beef with roasted vegetables",
+                time: "50 mins",
+                difficulty: 1,
+                rating: 4,
+                calories: 410,
+                protein: 40,
+                carbs: 20,
+                fat: 14,
+                icon: "📦",
+                ingredients: [
+                    "8 oz sirloin steak, cubed",
+                    "1 cup sweet potato, cubed",
+                    "1 cup green beans",
+                    "1 cup bell peppers, sliced",
+                    "2 tbsp olive oil",
+                    "1 tsp garlic powder",
+                    "1 tsp onion powder",
+                    "1/2 tsp salt",
+                    "1/2 tsp paprika"
+                ],
+                instructions: [
+                    "Preheat oven to 425°F",
+                    "Season beef cubes with garlic powder, salt, and paprika",
+                    "Toss vegetables with 1 tbsp oil and seasonings",
+                    "Arrange on sheet pan with beef",
+                    "Drizzle remaining oil over beef",
+                    "Roast 25-30 minutes until beef is cooked through",
+                    "Let cool before portioning into containers",
+                    "Perfect for 4-5 meal prep portions"
                 ]
             }
         ];
@@ -657,9 +933,15 @@
             let html = '';
             
             chickenRecipes.forEach((meal, index) => {
+                const isChampion = meal.mealPrepChampion;
+                const cardStyle = isChampion ? 'style="border: 3px solid #FFD700; box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4); transform: scale(1.02);"' : '';
+                const imageGradient = isChampion ? 'background: linear-gradient(135deg, #FFD700, #FFA500, #8B4513);' : 'background: linear-gradient(135deg, #8B4513, #A0522D);';
+                const championBadge = isChampion ? '<div class="champion-badge" style="position: absolute; top: -10px; right: -10px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #8B4513; padding: 8px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; box-shadow: 0 3px 10px rgba(255, 215, 0, 0.5);">MEAL PREP CHAMPION</div>' : '';
+                
                 html += `
-                    <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image" style="background: linear-gradient(135deg, #FFD700, #FFA500);">
+                    <div class="meal-card" onclick="openRecipeModal(${index})" ${cardStyle}>
+                        ${championBadge}
+                        <div class="meal-image" style="${imageGradient}">
                             <div class="difficulty-badge">
                                 Difficulty: ${generateDifficultyStars(meal.difficulty)}
                             </div>
