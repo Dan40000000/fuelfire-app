@@ -1980,6 +1980,7 @@
 
         function displayMeals() {
             const container = document.getElementById('meals-container');
+            const chickenRecipes = getCurrentRecipes();
             let html = '';
             
             chickenRecipes.forEach((meal, index) => {
@@ -2031,6 +2032,7 @@
         }
 
         function openRecipeModal(index) {
+            const chickenRecipes = getCurrentRecipes();
             const meal = chickenRecipes[index];
             const modal = document.getElementById('recipe-modal');
             
