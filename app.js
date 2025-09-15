@@ -1772,7 +1772,7 @@ function quickStartWorkout(workoutType) {
 }
 
 // Start quick workout tracker
-function startQuickWorkout(workoutType) {
+function startQuickWorkoutTracker(workoutType) {
     const workoutDetails = {
         'muscle-30': {
             name: '30-Minute Muscle Builder',
@@ -4645,7 +4645,7 @@ function logWorkout(workoutData) {
 let exerciseCount = 0;
 let currentCalendarDate = new Date();
 
-function startQuickWorkout(type) {
+function startQuickWorkoutLogger(type) {
     document.getElementById('workout-type').value = type === 'strength' ? 'full-body' : 'cardio';
     document.getElementById('workout-duration').value = type === 'strength' ? '45' : '30';
     
