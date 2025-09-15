@@ -1032,7 +1032,7 @@ function updateQuizProgress() {
     document.getElementById('quiz-back-btn').style.display = currentStep > 1 ? 'block' : 'none';
     
     // Change next button text on last step
-    document.getElementById('quiz-next-btn').textContent = currentStep === 7 ? 'Generate Workout 🚀' : 'Next →';
+    document.getElementById('quiz-next-btn').textContent = currentStep === 8 ? 'Generate Workout 🚀' : 'Next →';
 }
 
 // Update injuries
@@ -5119,6 +5119,21 @@ window.onload = function() {
         }, 100);
     }
     
+    // Check for hash in URL for direct navigation
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1); // Remove the #
+        if (hash === 'create-workout') {
+            setTimeout(() => showScreen('create-workout'), 100);
+        }
+    }
+    
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);
 };
+
+// Handle hash navigation when page loads
+window.addEventListener('load', function() {
+    if (window.location.hash === '#create-workout') {
+        showScreen('create-workout');
+    }
+});
