@@ -51,14 +51,32 @@
             opacity: 0.9;
         }
         
-        .warning-banner {
-            background: linear-gradient(135deg, #ff6b6b, #ff5252);
-            color: white;
-            padding: 15px 20px;
+        .disclaimer-banner {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            color: #495057;
+            padding: 20px;
             border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
+            margin-bottom: 25px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .disclaimer-banner h4 {
+            color: #dc3545;
+            margin: 0 0 10px 0;
             font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .disclaimer-banner ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .disclaimer-banner li {
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -77,8 +95,18 @@
             
             <div class="content">
                 <div style="padding: 20px;">
-                    <div class="warning-banner">
-                        ⚠️ Always consult with a healthcare professional before starting any supplement regimen
+                    <div class="disclaimer-banner">
+                        <h4>⚠️ Important Medical Disclaimer</h4>
+                        <strong>This supplement guide is for general educational purposes only.</strong> 
+                        Before starting any supplement regimen, you MUST:
+                        <ul>
+                            <li>Consult with a qualified healthcare professional</li>
+                            <li>Disclose all existing medical conditions including but not limited to: heart disease, kidney disease, liver disease, diabetes, blood pressure issues, or any chronic conditions</li>
+                            <li>Review all current medications for potential interactions</li>
+                            <li>Consider pregnancy, breastfeeding, or planned surgery</li>
+                            <li>Start with lower doses to assess tolerance</li>
+                        </ul>
+                        <strong>WARNING:</strong> Supplements can interact with medications and may cause adverse effects in certain health conditions. Individual responses vary significantly. These recommendations are not personalized medical advice.
                     </div>
                     
                     <div style="text-align: center; margin-bottom: 30px;">
