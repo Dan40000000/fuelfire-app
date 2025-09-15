@@ -932,6 +932,23 @@ function startCustomWorkout() {
     updateQuizProgress();
 }
 
+// Start quick workout generator
+function startQuickWorkout() {
+    // Reset workout data for quick workout
+    currentStep = 1;
+    Object.keys(workoutData).forEach(key => {
+        if (key !== 'muscleGroups') {
+            workoutData[key] = '';
+        } else {
+            workoutData[key] = [];
+        }
+    });
+    
+    // Show the quiz modal
+    document.getElementById('custom-workout-quiz').style.display = 'block';
+    updateQuizProgress();
+}
+
 // Close custom workout
 function closeCustomWorkout() {
     document.getElementById('custom-workout-quiz').style.display = 'none';
