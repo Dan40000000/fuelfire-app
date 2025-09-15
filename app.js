@@ -51,7 +51,7 @@ function updateTime() {
 
 // Custom Workout Quiz Variables
 let currentStep = 1;
-const totalSteps = 7;
+const totalSteps = 8;
 const workoutData = {
     sex: '',
     age: '',
@@ -953,6 +953,21 @@ function selectOption(button, field, value) {
     workoutData[field] = value;
 }
 
+// Update muscle groups selection
+function updateMuscleGroups(checkbox, muscleGroup) {
+    if (!workoutData.muscleGroups) {
+        workoutData.muscleGroups = [];
+    }
+    
+    if (checkbox.checked) {
+        if (!workoutData.muscleGroups.includes(muscleGroup)) {
+            workoutData.muscleGroups.push(muscleGroup);
+        }
+    } else {
+        workoutData.muscleGroups = workoutData.muscleGroups.filter(group => group !== muscleGroup);
+    }
+}
+
 // Navigate quiz
 function nextQuestion() {
     // Validate current step
@@ -964,11 +979,11 @@ function nextQuestion() {
         }
     }
     
-    if (currentStep === 6) {
+    if (currentStep === 7) {
         workoutData.injuryNotes = 'User injuries: ' + workoutData.injuries.join(', ');
     }
     
-    if (currentStep === 7) {
+    if (currentStep === 8) {
         workoutData.experience = document.getElementById('experience').value;
         workoutData.workoutName = document.getElementById('workout-name').value || 'My Custom Workout';
         generateWorkout();

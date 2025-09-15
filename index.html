@@ -1292,7 +1292,7 @@
             <div style="margin-bottom: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: var(--dark); margin: 0;">Create Your Perfect Workout</h2>
-                    <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quiz-step">1</span> of 7</span>
+                    <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quiz-step">1</span> of 8</span>
                 </div>
                 <div style="background: var(--lighter-bg); height: 8px; border-radius: 10px; overflow: hidden;">
                     <div id="quiz-progress" style="background: var(--gradient-1); height: 100%; width: 14%; transition: width 0.3s ease;"></div>
@@ -1417,10 +1417,60 @@
                     </div>
                 </div>
                 
-                <!-- Continue with all 7 questions... -->
-                
-                <!-- Question 4: Availability -->
+                <!-- Question 4: Muscle Groups -->
                 <div class="quiz-question-section" data-step="4" style="display: none;">
+                    <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎯 Which muscle groups do you want to focus on?</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                            <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" onchange="updateMuscleGroups(this, 'chest')" style="width: 18px; height: 18px;">
+                                <span>💪 Chest</span>
+                            </label>
+                            <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" onchange="updateMuscleGroups(this, 'back')" style="width: 18px; height: 18px;">
+                                <span>🗲 Back</span>
+                            </label>
+                            <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" onchange="updateMuscleGroups(this, 'shoulders')" style="width: 18px; height: 18px;">
+                                <span>🤲 Shoulders</span>
+                            </label>
+                            <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" onchange="updateMuscleGroups(this, 'arms')" style="width: 18px; height: 18px;">
+                                <span>💪 Arms</span>
+                            </label>
+                            <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" onchange="updateMuscleGroups(this, 'legs')" style="width: 18px; height: 18px;">
+                                <span>🦵 Legs</span>
+                            </label>
+                            <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" onchange="updateMuscleGroups(this, 'core')" style="width: 18px; height: 18px;">
+                                <span>🔥 Core</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; margin-bottom: 10px; color: var(--primary-dark); font-weight: 600;">💡 Exercise preference:</label>
+                        <div style="display: grid; gap: 12px;">
+                            <button class="quiz-select-btn" onclick="selectOption(this, 'exerciseType', 'standard')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                                <div style="font-weight: bold;">📋 Standard Exercises</div>
+                                <div style="font-size: 14px; color: #666; margin-top: 5px;">Classic movements (bench press, squats, deadlifts)</div>
+                            </button>
+                            <button class="quiz-select-btn" onclick="selectOption(this, 'exerciseType', 'unique')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                                <div style="font-weight: bold;">🎯 Unique & Creative</div>
+                                <div style="font-size: 14px; color: #666; margin-top: 5px;">Less common but effective exercises</div>
+                            </button>
+                            <button class="quiz-select-btn" onclick="selectOption(this, 'exerciseType', 'mixed')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                                <div style="font-weight: bold;">🔄 Mix of Both</div>
+                                <div style="font-size: 14px; color: #666; margin-top: 5px;">Combination of standard and unique exercises</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question 5: Availability -->
+                <div class="quiz-question-section" data-step="5" style="display: none;">
                     <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">📅 How many days can you train?</h3>
                     
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
@@ -1453,8 +1503,8 @@
                     </div>
                 </div>
                 
-                <!-- Question 5: Equipment -->
-                <div class="quiz-question-section" data-step="5" style="display: none;">
+                <!-- Question 6: Equipment -->
+                <div class="quiz-question-section" data-step="6" style="display: none;">
                     <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🏠 Where will you train?</h3>
                     
                     <div style="display: grid; gap: 15px;">
@@ -1475,8 +1525,8 @@
                     </div>
                 </div>
                 
-                <!-- Question 6: Injuries -->
-                <div class="quiz-question-section" data-step="6" style="display: none;">
+                <!-- Question 7: Injuries -->
+                <div class="quiz-question-section" data-step="7" style="display: none;">
                     <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🏥 Any injuries or limitations?</h3>
                     
                     <div style="display: grid; gap: 12px; margin-bottom: 20px;">
@@ -1522,8 +1572,8 @@
                     </div>
                 </div>
                 
-                <!-- Question 7: Experience -->
-                <div class="quiz-question-section" data-step="7" style="display: none;">
+                <!-- Question 8: Experience -->
+                <div class="quiz-question-section" data-step="8" style="display: none;">
                     <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">💡 Final details</h3>
                     
                     <div style="margin-bottom: 25px;">

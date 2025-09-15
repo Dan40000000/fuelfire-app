@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protein Bowls - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .meal-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .meal-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .meal-image.has-photo {
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
+        }
+        
+        .meal-image.has-photo .category-icon {
+            display: none;
+        }
+        
+        .difficulty-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .meal-content {
+            padding: 20px;
+        }
+        
+        .meal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .meal-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .meal-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .meal-time {
+            color: #28a745;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .rating-stars {
+            color: #ff9500;
+            font-size: 14px;
+        }
+        
+        .meal-nutrition {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .nutrition-item {
+            text-align: center;
+            background: #f8f9ff;
+            padding: 8px 4px;
+            border-radius: 8px;
+        }
+        
+        .nutrition-value {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .nutrition-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10px;
+            padding: 0;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .close-modal {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .ingredient-list {
+            margin: 15px 0;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .ingredient-checkbox {
+            margin-right: 10px;
+        }
+
+        .instruction-list {
+            margin: 15px 0;
+        }
+
+        .instruction-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .log-recipe-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="goBack()">←</div>
+                <div class="header-title">Protein Bowls</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 48px;">🥗</div>
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">Power Protein Bowls</h2>
+                        <p style="color: #666; font-size: 14px;">Nutrient-packed bowls loaded with protein and fresh ingredients</p>
+                    </div>
+                    
+                    <div class="meal-grid">
+                        <!-- Buddha Bowl Supreme -->
+                        <div class="meal-card" onclick="openRecipe(1)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1540914124281-342587941389?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🥗</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Buddha Bowl Supreme</div>
+                                <div class="meal-description">Quinoa, grilled chicken, roasted chickpeas, and rainbow veggies with tahini drizzle</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 25 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">480</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">42g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">45g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">14g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Salmon Power Bowl -->
+                        <div class="meal-card" onclick="openRecipe(2)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1580959375944-abd7e991f971?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🍣</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Salmon Power Bowl</div>
+                                <div class="meal-description">Teriyaki glazed salmon over brown rice with edamame, avocado, and sesame seeds</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 30 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">520</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">38g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">48g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">18g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Greek Goddess Bowl -->
+                        <div class="meal-card" onclick="openRecipe(3)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🏛️</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Greek Goddess Bowl</div>
+                                <div class="meal-description">Grilled chicken souvlaki with tzatziki, hummus, quinoa, cucumber, tomatoes, and feta</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 20 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">460</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">45g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">38g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">12g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Steak & Sweet Potato Bowl -->
+                        <div class="meal-card" onclick="openRecipe(4)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🥩</span>
+                                <div class="difficulty-badge">⭐ Medium</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Steak & Sweet Potato Bowl</div>
+                                <div class="meal-description">Lean sirloin strips with roasted sweet potato, black beans, corn, and chimichurri</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 35 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">540</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">46g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">52g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">16g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tuna Poke Power Bowl -->
+                        <div class="meal-card" onclick="openRecipe(5)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1609501676725-7186f017a4b7?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🐟</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Tuna Poke Power Bowl</div>
+                                <div class="meal-description">Fresh ahi tuna with sushi rice, wakame, mango, cucumber, and spicy mayo</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 15 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">470</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">40g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">50g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">10g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thai Protein Powerhouse -->
+                        <div class="meal-card" onclick="openRecipe(6)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🌶️</span>
+                                <div class="difficulty-badge">⭐ Medium</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Thai Protein Powerhouse</div>
+                                <div class="meal-description">Lemongrass chicken, jasmine rice, Thai basil, peanuts, and red curry coconut sauce</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 30 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">500</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">41g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">46g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">17g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Turkey Harvest Bowl -->
+                        <div class="meal-card" onclick="openRecipe(7)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1574484284002-952d92456975?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🦃</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Turkey Harvest Bowl</div>
+                                <div class="meal-description">Ground turkey with wild rice, roasted Brussels sprouts, cranberries, and pecans</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 25 mins</div>
+                                    <div class="rating-stars">★★★★☆</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">450</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">39g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">42g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">14g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Egg White Breakfast Bowl -->
+                        <div class="meal-card" onclick="openRecipe(8)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🍳</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Egg White Breakfast Bowl</div>
+                                <div class="meal-description">Scrambled egg whites with turkey bacon, spinach, whole grain toast, and avocado</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 15 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">380</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">35g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">32g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">12g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shrimp Fiesta Bowl -->
+                        <div class="meal-card" onclick="openRecipe(9)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🍤</span>
+                                <div class="difficulty-badge">⚡ Easy</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Shrimp Fiesta Bowl</div>
+                                <div class="meal-description">Cajun shrimp with cilantro lime rice, black beans, corn salsa, and jalapeño crema</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 20 mins</div>
+                                    <div class="rating-stars">★★★★★</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">420</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">36g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">48g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">9g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tofu Zen Bowl -->
+                        <div class="meal-card" onclick="openRecipe(10)">
+                            <div class="meal-image has-photo" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1546793665-c74683f339c1?w=500&h=300&fit=crop&crop=center');">
+                                <span class="category-icon">🌱</span>
+                                <div class="difficulty-badge">⭐ Medium</div>
+                            </div>
+                            <div class="meal-content">
+                                <div class="meal-title">Tofu Zen Bowl</div>
+                                <div class="meal-description">Crispy sesame tofu with buckwheat noodles, bok choy, mushrooms, and ginger miso dressing</div>
+                                <div class="meal-stats">
+                                    <div class="meal-time">⏱️ 25 mins</div>
+                                    <div class="rating-stars">★★★★☆</div>
+                                </div>
+                                <div class="meal-nutrition">
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">410</div>
+                                        <div class="nutrition-label">Calories</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">28g</div>
+                                        <div class="nutrition-label">Protein</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">45g</div>
+                                        <div class="nutrition-label">Carbs</div>
+                                    </div>
+                                    <div class="nutrition-item">
+                                        <div class="nutrition-value">15g</div>
+                                        <div class="nutrition-label">Fat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Modal -->
+    <div id="recipeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+                <h2 id="modalTitle" style="margin: 0;">Recipe Title</h2>
+            </div>
+            <div class="modal-body">
+                <div id="modalDescription" style="color: #666; margin-bottom: 20px;"></div>
+                
+                <h3 style="color: var(--primary); margin-bottom: 15px;">📝 Ingredients</h3>
+                <div id="ingredientsList" class="ingredient-list"></div>
+                
+                <h3 style="color: var(--primary); margin-bottom: 15px;">👨‍🍳 Instructions</h3>
+                <div id="instructionsList" class="instruction-list"></div>
+                
+                <h3 style="color: var(--primary); margin-bottom: 15px;">📊 Nutrition Facts</h3>
+                <div id="nutritionInfo" style="background: #f8f9ff; padding: 15px; border-radius: 10px;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <div><strong>Calories:</strong> <span id="modalCalories"></span></div>
+                        <div><strong>Protein:</strong> <span id="modalProtein"></span></div>
+                        <div><strong>Carbs:</strong> <span id="modalCarbs"></span></div>
+                        <div><strong>Fat:</strong> <span id="modalFat"></span></div>
+                    </div>
+                </div>
+                
+                <button class="log-recipe-btn" onclick="logToCalorieTracker()">📱 Log to Calorie Tracker</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Recipe data
+        // BULK MODE SYSTEM - Dynamic protein bowls based on fitness goals
+        const bulkModeRecipes = {
+            'male-bulk': [
+                {
+                    name: "⭐ WEEKLY POWER PROTEIN BOWL PREP ⭐",
+                    description: "📅 Prep 7 massive protein bowls in 60 mins | Ultimate gains!",
+                    time: "60 mins prep (7 meals)",
+                    difficulty: 3,
+                    rating: 5,
+                    calories: 1485,
+                    protein: 68,
+                    carbs: 142,
+                    fat: 45,
+                    sugar: 22,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY PROTEIN POWER SHOPPING:",
+                        "5 lbs mixed proteins (2.5lb chicken, 1.5lb ground turkey, 1lb salmon)",
+                        "7 cups quinoa + brown rice blend (uncooked)",
+                        "14 cups mixed greens (kale, spinach, arugula)",
+                        "7 sweet potatoes + 7 regular potatoes",
+                        "3.5 avocados + 1.75 cups mixed nuts",
+                        "14 cups mixed vegetables (broccoli, peppers, carrots)",
+                        "7 tbsp olive oil + balsamic vinegar",
+                        "Protein powders, hemp seeds, chia seeds",
+                        "📦 Need: 7 XL meal prep containers"
+                    ],
+                    instructions: [
+                        "🔥 SUNDAY PROTEIN POWER PREP (60 minutes):",
+                        "",
+                        "⏱️ BULK PREP PHASE (20 minutes):",
+                        "• Season and prep all proteins (chicken, turkey, salmon)",
+                        "• Roast potatoes and sweet potatoes at 425°F",
+                        "• Cook quinoa-rice blend in large batch",
+                        "• Preheat multiple pans and oven stations",
+                        "",
+                        "⏱️ COOKING PHASE (30 minutes):",
+                        "• Grill chicken breasts (6-7 mins per side)",
+                        "• Brown ground turkey with spices",
+                        "• Bake salmon fillets (12-15 minutes)",
+                        "• Steam vegetables in batches",
+                        "",
+                        "⏱️ POWER ASSEMBLY (10 minutes):",
+                        "• Layer each container: 1.5 cups grain blend",
+                        "• Add mixed protein portions (chicken + turkey + salmon)",
+                        "• Pack vegetables, potatoes, and greens",
+                        "• Top with avocado, nuts, and seeds",
+                        "",
+                        "💪 WEEKLY DOMINATION:",
+                        "• 7 bowls × 1,485 calories = 10,395 calories",
+                        "• 7 bowls × 68g protein = 476g protein",
+                        "• Complete amino profile for maximum muscle growth!"
+                    ]
+                },
+                {
+                    name: "Beast Mode Protein Mountain",
+                    description: "Massive protein bowl for serious bulkers",
+                    time: "25 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 1520,
+                    protein: 72,
+                    carbs: 138,
+                    fat: 48,
+                    sugar: 18,
+                    icon: "🏔️",
+                    ingredients: [
+                        "10 oz grilled chicken breast + 2 oz salmon",
+                        "1.5 cups quinoa + 0.5 cups brown rice",
+                        "1 cup roasted sweet potato cubes",
+                        "1 cup steamed broccoli",
+                        "1 whole avocado, sliced",
+                        "1/4 cup mixed nuts (almonds, walnuts)",
+                        "2 tbsp olive oil + balsamic",
+                        "1 scoop protein powder mixed in"
+                    ],
+                    instructions: [
+                        "Cook quinoa and brown rice together",
+                        "Grill chicken and salmon simultaneously",
+                        "Roast sweet potato cubes at 425°F",
+                        "Steam broccoli until bright green",
+                        "Layer grains as base in large bowl",
+                        "Add both proteins side by side",
+                        "Arrange vegetables around bowl",
+                        "Top with avocado, nuts, and protein powder",
+                        "Drizzle with olive oil and balsamic",
+                        "BEAST MODE ACTIVATED!"
+                    ]
+                }
+            ],
+            'male-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN PROTEIN CUTTING BOWLS ⭐",
+                    description: "📅 Prep 7 ultra-lean protein bowls in 45 mins | Shred mode!",
+                    time: "45 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 485,
+                    protein: 52,
+                    carbs: 28,
+                    fat: 16,
+                    sugar: 8,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CUTTING SHOPPING:",
+                        "3.5 lbs lean proteins (chicken breast, white fish, lean turkey)",
+                        "14 cups mixed greens (spinach, arugula, kale)",
+                        "7 cups cauliflower rice",
+                        "21 cups mixed vegetables (broccoli, asparagus, bell peppers)",
+                        "7 tbsp olive oil + lemon juice",
+                        "Fresh herbs (parsley, cilantro, basil)",
+                        "Sea salt, pepper, garlic powder",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "⚡ SUNDAY CUTTING PREP (45 minutes):",
+                        "Season all lean proteins with herbs and spices",
+                        "Grill chicken breast and turkey (6-7 mins per side)",
+                        "Bake white fish fillets (10-12 minutes)",
+                        "Steam cauliflower rice in batches",
+                        "Blanch all vegetables until crisp-tender",
+                        "LEAN ASSEMBLY: Pack each container:",
+                        "Base: 2 cups mixed greens + 1 cup cauliflower rice",
+                        "Protein: Mix of chicken, turkey, and fish",
+                        "Vegetables: 3 cups steamed vegetables",
+                        "Dressing: Lemon juice + 1 tsp olive oil",
+                        "Store dressing separately until eating",
+                        "🔥 Zero-carb cutting perfection!"
+                    ]
+                },
+                {
+                    name: "Lean Green Cutting Machine",
+                    description: "Ultra-lean protein bowl for aggressive cuts",
+                    time: "15 mins",
+                    difficulty: 1,
+                    rating: 4,
+                    calories: 420,
+                    protein: 48,
+                    carbs: 18,
+                    fat: 12,
+                    sugar: 6,
+                    icon: "🌱",
+                    ingredients: [
+                        "8 oz grilled chicken breast",
+                        "3 cups mixed greens",
+                        "1 cup steamed broccoli",
+                        "1/2 cup cauliflower rice",
+                        "1/2 cup cherry tomatoes",
+                        "1 tbsp olive oil",
+                        "Lemon juice, herbs, spices"
+                    ],
+                    instructions: [
+                        "Grill seasoned chicken breast",
+                        "Steam cauliflower rice until tender",
+                        "Steam broccoli until bright green",
+                        "Arrange mixed greens in large bowl",
+                        "Add cauliflower rice as base",
+                        "Top with sliced chicken breast",
+                        "Add steamed broccoli and tomatoes",
+                        "Drizzle with olive oil and lemon",
+                        "Season with herbs and spices"
+                    ]
+                }
+            ],
+            'female-bulk': [
+                {
+                    name: "⭐ WEEKLY BALANCED PROTEIN POWER BOWLS ⭐",
+                    description: "📅 Prep 7 perfectly balanced bowls in 50 mins | Lean gains!",
+                    time: "50 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 785,
+                    protein: 45,
+                    carbs: 68,
+                    fat: 28,
+                    sugar: 16,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY BALANCED SHOPPING:",
+                        "3.5 lbs lean proteins (chicken thigh, salmon, turkey)",
+                        "7 cups mixed quinoa and wild rice",
+                        "14 cups mixed greens and spinach",
+                        "7 medium sweet potatoes",
+                        "3.5 avocados + 1.75 cups mixed nuts",
+                        "14 cups mixed vegetables (broccoli, carrots, peppers)",
+                        "7 tbsp olive oil + tahini",
+                        "Fresh herbs and seasonings",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "💎 SUNDAY BALANCED PREP (50 minutes):",
+                        "Cook quinoa-rice blend in large batch",
+                        "Roast sweet potatoes at 400°F (30 minutes)",
+                        "Season and cook proteins (chicken, salmon, turkey)",
+                        "Steam vegetables until crisp-tender",
+                        "Prep fresh greens and herbs",
+                        "BALANCED ASSEMBLY: Layer each container:",
+                        "Base: 2 cups greens + 1 cup grain blend",
+                        "Protein: Mixed portions for variety",
+                        "Vegetables: Roasted sweet potato + steamed veggies",
+                        "Healthy fats: 1/2 avocado + mixed nuts",
+                        "Dressing: Tahini + olive oil blend",
+                        "💪 Perfect balance for female bulking goals!"
+                    ]
+                },
+                {
+                    name: "Goddess Power Bowl",
+                    description: "Balanced nutrition bowl for female bulking",
+                    time: "22 mins",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 720,
+                    protein: 42,
+                    carbs: 58,
+                    fat: 24,
+                    sugar: 14,
+                    icon: "👸",
+                    ingredients: [
+                        "6 oz salmon fillet",
+                        "1 cup quinoa",
+                        "1 cup roasted sweet potato",
+                        "2 cups mixed greens",
+                        "1/2 avocado, sliced",
+                        "1/4 cup pumpkin seeds",
+                        "2 tbsp tahini dressing",
+                        "Fresh herbs and lemon"
+                    ],
+                    instructions: [
+                        "Cook quinoa according to package",
+                        "Roast sweet potato cubes at 400°F",
+                        "Pan-sear salmon skin-side down",
+                        "Cook 4 minutes, flip and cook 3 more",
+                        "Arrange mixed greens in bowl",
+                        "Add quinoa and roasted sweet potato",
+                        "Top with flaked salmon",
+                        "Add avocado slices and pumpkin seeds",
+                        "Drizzle with tahini dressing"
+                    ]
+                }
+            ],
+            'female-cut': [
+                {
+                    name: "⭐ WEEKLY LEAN GODDESS CUTTING BOWLS ⭐",
+                    description: "📅 Prep 7 clean cutting bowls in 40 mins | Sculpted results!",
+                    time: "40 mins prep (7 meals)",
+                    difficulty: 2,
+                    rating: 5,
+                    calories: 345,
+                    protein: 38,
+                    carbs: 22,
+                    fat: 12,
+                    sugar: 10,
+                    icon: "👑",
+                    mealPrepChampion: true,
+                    ingredients: [
+                        "🛒 WEEKLY CUTTING GODDESS SHOPPING:",
+                        "2.5 lbs ultra-lean proteins (chicken breast, white fish, tofu)",
+                        "21 cups mixed greens (spinach, arugula, baby kale)",
+                        "7 cups spiralized zucchini noodles",
+                        "14 cups low-carb vegetables (broccoli, asparagus, cucumber)",
+                        "7 tbsp olive oil + apple cider vinegar",
+                        "Fresh herbs (mint, basil, parsley)",
+                        "Lemon juice, garlic, ginger",
+                        "📦 Need: 7 meal prep containers"
+                    ],
+                    instructions: [
+                        "✨ SUNDAY GODDESS PREP (40 minutes):",
+                        "Season ultra-lean proteins with herbs",
+                        "Grill chicken breast (6-7 mins per side)",
+                        "Steam white fish until flaky",
+                        "Prepare baked seasoned tofu cubes",
+                        "Spiralize zucchini into noodles",
+                        "Steam low-carb vegetables lightly",
+                        "GODDESS ASSEMBLY: Layer each container:",
+                        "Base: 3 cups mixed greens",
+                        "Noodles: 1 cup zucchini spirals",
+                        "Protein: Varied lean portions",
+                        "Vegetables: 2 cups steamed vegetables",
+                        "Dressing: Light vinaigrette",
+                        "🔥 Clean eating perfection for cuts!"
+                    ]
+                },
+                {
+                    name: "Sculpted Goddess Bowl",
+                    description: "Ultra-clean bowl for female cutting phase",
+                    time: "18 mins",
+                    difficulty: 1,
+                    rating: 4,
+                    calories: 320,
+                    protein: 36,
+                    carbs: 16,
+                    fat: 10,
+                    sugar: 8,
+                    icon: "✨",
+                    ingredients: [
+                        "6 oz grilled white fish",
+                        "3 cups mixed greens",
+                        "1 cup spiralized zucchini",
+                        "1/2 cup steamed asparagus",
+                        "1/2 cup cherry tomatoes",
+                        "1 tbsp olive oil",
+                        "Lemon juice, fresh herbs"
+                    ],
+                    instructions: [
+                        "Grill seasoned white fish fillet",
+                        "Spiralize fresh zucchini",
+                        "Steam asparagus until crisp-tender",
+                        "Arrange mixed greens in bowl",
+                        "Add zucchini noodles",
+                        "Top with flaked fish",
+                        "Add asparagus and tomatoes",
+                        "Drizzle with olive oil and lemon",
+                        "Garnish with fresh herbs"
+                    ]
+                }
+            ]
+        };
+
+        // Get current recipes based on mode
+        function getCurrentRecipes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
+        }
+
+        const proteinBowlRecipes = getCurrentRecipes();
+
+        // Legacy recipes for backward compatibility
+        const legacyRecipes = {
+            1: {
+                title: "Buddha Bowl Supreme",
+                description: "A vibrant, nutrient-dense bowl that perfectly balances protein, healthy carbs, and fresh vegetables with a creamy tahini drizzle.",
+                calories: 480,
+                protein: 42,
+                carbs: 45,
+                fat: 14,
+                ingredients: [
+                    "1 cup cooked quinoa",
+                    "6 oz grilled chicken breast",
+                    "1/2 cup roasted chickpeas",
+                    "1/2 cup shredded purple cabbage",
+                    "1/2 cup steamed broccoli",
+                    "1/2 cup roasted sweet potato cubes",
+                    "1/4 avocado, sliced",
+                    "2 tbsp tahini sauce",
+                    "1 tbsp hemp seeds",
+                    "Lemon wedge for serving"
+                ],
+                instructions: [
+                    "Cook quinoa according to package directions and let cool slightly.",
+                    "Season and grill chicken breast until internal temp reaches 165°F. Slice into strips.",
+                    "Roast chickpeas at 400°F for 20 minutes until crispy.",
+                    "Steam broccoli for 4-5 minutes until tender but still bright green.",
+                    "Arrange all components in a bowl, starting with quinoa as the base.",
+                    "Drizzle with tahini sauce and sprinkle with hemp seeds.",
+                    "Serve with a lemon wedge for extra flavor."
+                ]
+            },
+            2: {
+                title: "Salmon Power Bowl",
+                description: "Omega-3 rich salmon glazed with teriyaki sauce over nutrient-packed brown rice and fresh vegetables.",
+                calories: 520,
+                protein: 38,
+                carbs: 48,
+                fat: 18,
+                ingredients: [
+                    "6 oz salmon fillet",
+                    "3 tbsp teriyaki glaze",
+                    "1 cup cooked brown rice",
+                    "1/2 cup edamame, shelled",
+                    "1/2 avocado, sliced",
+                    "1/4 cup shredded carrots",
+                    "1/4 cucumber, sliced",
+                    "1 tbsp sesame seeds",
+                    "2 tbsp pickled ginger",
+                    "Sriracha mayo (optional)"
+                ],
+                instructions: [
+                    "Brush salmon with teriyaki glaze and bake at 400°F for 12-15 minutes.",
+                    "Cook brown rice and keep warm.",
+                    "Steam edamame for 5 minutes.",
+                    "Slice avocado and cucumber thinly.",
+                    "Place rice in bowl, top with glazed salmon.",
+                    "Arrange vegetables around the salmon.",
+                    "Sprinkle with sesame seeds and serve with pickled ginger."
+                ]
+            },
+            3: {
+                title: "Greek Goddess Bowl",
+                description: "Mediterranean-inspired bowl featuring marinated chicken souvlaki with classic Greek accompaniments.",
+                calories: 460,
+                protein: 45,
+                carbs: 38,
+                fat: 12,
+                ingredients: [
+                    "6 oz chicken breast, cubed",
+                    "Greek marinade (lemon, oregano, garlic)",
+                    "1 cup cooked quinoa",
+                    "1/4 cup hummus",
+                    "1/4 cup tzatziki sauce",
+                    "1/2 cup diced cucumber",
+                    "1/2 cup cherry tomatoes, halved",
+                    "1/4 red onion, thinly sliced",
+                    "2 tbsp crumbled feta cheese",
+                    "Kalamata olives (optional)"
+                ],
+                instructions: [
+                    "Marinate chicken in Greek spices for 30 minutes.",
+                    "Grill or pan-sear chicken until golden and cooked through.",
+                    "Prepare quinoa according to package directions.",
+                    "Dice cucumber and halve cherry tomatoes.",
+                    "Create a bed of quinoa in your bowl.",
+                    "Add dollops of hummus and tzatziki.",
+                    "Top with grilled chicken and fresh vegetables.",
+                    "Finish with feta cheese and olives."
+                ]
+            },
+            4: {
+                title: "Steak & Sweet Potato Bowl",
+                description: "Lean sirloin steak paired with roasted sweet potatoes and black beans for the ultimate protein-packed meal.",
+                calories: 540,
+                protein: 46,
+                carbs: 52,
+                fat: 16,
+                ingredients: [
+                    "6 oz lean sirloin steak",
+                    "1 medium sweet potato, cubed",
+                    "1/2 cup black beans",
+                    "1/2 cup corn kernels",
+                    "1/4 cup red bell pepper, diced",
+                    "2 tbsp chimichurri sauce",
+                    "Mixed greens",
+                    "1 lime wedge",
+                    "Fresh cilantro",
+                    "1 tbsp pumpkin seeds"
+                ],
+                instructions: [
+                    "Season steak and let rest at room temperature for 20 minutes.",
+                    "Roast sweet potato cubes at 425°F for 25 minutes.",
+                    "Grill steak to desired doneness (3-4 minutes per side for medium).",
+                    "Let steak rest 5 minutes, then slice against the grain.",
+                    "Warm black beans and corn.",
+                    "Assemble bowl with greens as base.",
+                    "Top with sweet potatoes, beans, corn, and sliced steak.",
+                    "Drizzle with chimichurri and garnish with cilantro."
+                ]
+            },
+            5: {
+                title: "Tuna Poke Power Bowl",
+                description: "Fresh, sushi-grade tuna with traditional Hawaiian poke flavors and modern healthy additions.",
+                calories: 470,
+                protein: 40,
+                carbs: 50,
+                fat: 10,
+                ingredients: [
+                    "6 oz sushi-grade ahi tuna, cubed",
+                    "2 tbsp soy sauce",
+                    "1 tsp sesame oil",
+                    "1 cup sushi rice",
+                    "1/4 cup wakame seaweed",
+                    "1/2 mango, cubed",
+                    "1/2 cucumber, diced",
+                    "1/4 avocado, cubed",
+                    "1 tbsp spicy mayo",
+                    "Nori sheets, shredded"
+                ],
+                instructions: [
+                    "Cube tuna and marinate in soy sauce and sesame oil for 10 minutes.",
+                    "Prepare sushi rice and let cool to room temperature.",
+                    "Rehydrate wakame seaweed in water for 5 minutes.",
+                    "Dice mango, cucumber, and avocado.",
+                    "Place rice in bowl as base.",
+                    "Arrange marinated tuna on top.",
+                    "Add wakame, mango, cucumber, and avocado around the tuna.",
+                    "Drizzle with spicy mayo and top with shredded nori."
+                ]
+            },
+            6: {
+                title: "Thai Protein Powerhouse",
+                description: "Aromatic lemongrass chicken with authentic Thai flavors and a creamy red curry coconut sauce.",
+                calories: 500,
+                protein: 41,
+                carbs: 46,
+                fat: 17,
+                ingredients: [
+                    "6 oz chicken breast",
+                    "2 stalks lemongrass, minced",
+                    "1 cup jasmine rice",
+                    "1/4 cup red curry coconut sauce",
+                    "Thai basil leaves",
+                    "2 tbsp crushed peanuts",
+                    "Bean sprouts",
+                    "1 lime wedge",
+                    "Red chili slices",
+                    "Fish sauce to taste"
+                ],
+                instructions: [
+                    "Marinate chicken with lemongrass, garlic, and fish sauce for 1 hour.",
+                    "Cook jasmine rice until fluffy.",
+                    "Grill or pan-sear chicken until golden and cooked through.",
+                    "Heat red curry coconut sauce gently.",
+                    "Slice chicken and place over rice.",
+                    "Top with fresh bean sprouts and Thai basil.",
+                    "Drizzle with warm coconut curry sauce.",
+                    "Garnish with crushed peanuts and chili slices."
+                ]
+            },
+            7: {
+                title: "Turkey Harvest Bowl",
+                description: "Fall-inspired bowl with lean ground turkey and seasonal vegetables for a comforting yet healthy meal.",
+                calories: 450,
+                protein: 39,
+                carbs: 42,
+                fat: 14,
+                ingredients: [
+                    "6 oz ground turkey (93/7 lean)",
+                    "1 cup cooked wild rice",
+                    "1 cup Brussels sprouts, halved",
+                    "2 tbsp dried cranberries",
+                    "2 tbsp chopped pecans",
+                    "1 tbsp maple syrup",
+                    "Fresh thyme",
+                    "Salt and pepper",
+                    "1 tbsp olive oil",
+                    "Apple cider vinegar"
+                ],
+                instructions: [
+                    "Cook wild rice according to package directions.",
+                    "Brown ground turkey with salt, pepper, and fresh thyme.",
+                    "Roast Brussels sprouts at 400°F for 20 minutes until crispy.",
+                    "Toast pecans in a dry pan for 2-3 minutes.",
+                    "Mix rice with a splash of apple cider vinegar.",
+                    "Place rice in bowl, top with turkey.",
+                    "Add roasted Brussels sprouts around the edges.",
+                    "Sprinkle with cranberries and pecans, drizzle with maple syrup."
+                ]
+            },
+            8: {
+                title: "Egg White Breakfast Bowl",
+                description: "High-protein breakfast bowl perfect for starting your day with sustained energy.",
+                calories: 380,
+                protein: 35,
+                carbs: 32,
+                fat: 12,
+                ingredients: [
+                    "4 egg whites",
+                    "2 whole eggs",
+                    "3 strips turkey bacon",
+                    "2 cups fresh spinach",
+                    "1 slice whole grain toast",
+                    "1/4 avocado, sliced",
+                    "Cherry tomatoes",
+                    "Everything bagel seasoning",
+                    "Hot sauce (optional)",
+                    "Fresh chives"
+                ],
+                instructions: [
+                    "Cook turkey bacon until crispy, set aside.",
+                    "Sauté spinach until wilted.",
+                    "Whisk egg whites and whole eggs together.",
+                    "Scramble eggs over medium-low heat until fluffy.",
+                    "Toast bread and cut into triangles.",
+                    "Layer spinach in bowl, top with scrambled eggs.",
+                    "Add crumbled turkey bacon and sliced avocado.",
+                    "Garnish with tomatoes, seasoning, and fresh chives."
+                ]
+            },
+            9: {
+                title: "Shrimp Fiesta Bowl",
+                description: "Spicy Cajun shrimp with Mexican-inspired accompaniments for a flavorful, protein-rich meal.",
+                calories: 420,
+                protein: 36,
+                carbs: 48,
+                fat: 9,
+                ingredients: [
+                    "8 oz large shrimp, peeled",
+                    "Cajun seasoning",
+                    "1 cup cilantro lime rice",
+                    "1/2 cup black beans",
+                    "1/4 cup corn salsa",
+                    "2 tbsp jalapeño crema",
+                    "Pico de gallo",
+                    "Fresh cilantro",
+                    "Lime wedges",
+                    "Tortilla strips (optional)"
+                ],
+                instructions: [
+                    "Season shrimp with Cajun spices.",
+                    "Cook cilantro lime rice with fresh cilantro and lime juice.",
+                    "Sauté shrimp for 2-3 minutes per side until pink.",
+                    "Warm black beans with cumin and garlic.",
+                    "Prepare corn salsa with corn, red onion, and cilantro.",
+                    "Place rice as base in bowl.",
+                    "Arrange shrimp, beans, and corn salsa on top.",
+                    "Drizzle with jalapeño crema and top with pico de gallo."
+                ]
+            },
+            10: {
+                title: "Tofu Zen Bowl",
+                description: "Plant-based protein bowl with crispy tofu and Asian-inspired vegetables in a savory miso dressing.",
+                calories: 410,
+                protein: 28,
+                carbs: 45,
+                fat: 15,
+                ingredients: [
+                    "8 oz extra-firm tofu, pressed",
+                    "2 tbsp sesame seeds",
+                    "Buckwheat soba noodles (3 oz)",
+                    "2 baby bok choy",
+                    "1 cup shiitake mushrooms",
+                    "Ginger miso dressing",
+                    "Green onions",
+                    "Sesame oil",
+                    "Rice vinegar",
+                    "Shredded nori"
+                ],
+                instructions: [
+                    "Press tofu and cut into cubes, coat with cornstarch.",
+                    "Pan-fry tofu until golden and crispy on all sides.",
+                    "Cook soba noodles according to package, rinse with cold water.",
+                    "Sauté bok choy and mushrooms with garlic and ginger.",
+                    "Toss tofu with sesame seeds while hot.",
+                    "Place noodles in bowl as base.",
+                    "Arrange crispy tofu and vegetables on top.",
+                    "Drizzle with ginger miso dressing and garnish with green onions."
+                ]
+            }
+        };
+
+        let currentRecipe = null;
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function goBack() {
+            window.location.href = 'meal-ideas.html';
+        }
+
+        function openRecipe(recipeIndex) {
+            // Support both old numbered system and new array system
+            currentRecipe = proteinBowlRecipes[recipeIndex] || legacyRecipes[recipeIndex];
+            const title = currentRecipe.name || currentRecipe.title;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDescription').textContent = currentRecipe.description;
+            document.getElementById('modalCalories').textContent = currentRecipe.calories;
+            document.getElementById('modalProtein').textContent = currentRecipe.protein + 'g';
+            document.getElementById('modalCarbs').textContent = currentRecipe.carbs + 'g';
+            document.getElementById('modalFat').textContent = currentRecipe.fat + 'g';
+            
+            // Populate ingredients
+            const ingredientsList = document.getElementById('ingredientsList');
+            ingredientsList.innerHTML = '';
+            currentRecipe.ingredients.forEach(ingredient => {
+                const item = document.createElement('div');
+                item.className = 'ingredient-item';
+                item.innerHTML = `
+                    <input type="checkbox" class="ingredient-checkbox">
+                    <span>${ingredient}</span>
+                `;
+                ingredientsList.appendChild(item);
+            });
+            
+            // Populate instructions
+            const instructionsList = document.getElementById('instructionsList');
+            instructionsList.innerHTML = '';
+            currentRecipe.instructions.forEach((instruction, index) => {
+                const item = document.createElement('div');
+                item.className = 'instruction-item';
+                item.innerHTML = `<strong>Step ${index + 1}:</strong> ${instruction}`;
+                instructionsList.appendChild(item);
+            });
+            
+            document.getElementById('recipeModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('recipeModal').style.display = 'none';
+        }
+
+        function logToCalorieTracker() {
+            if (currentRecipe) {
+                // Get existing meals from localStorage or initialize
+                let mealsData = localStorage.getItem('calorieTrackerMeals');
+                let meals = mealsData ? JSON.parse(mealsData) : { breakfast: [], lunch: [], dinner: [], snacks: [] };
+                
+                // Create meal entry (support both new and legacy format)
+                const title = currentRecipe.name || currentRecipe.title;
+                const mealEntry = {
+                    name: title,
+                    calories: currentRecipe.calories,
+                    protein: currentRecipe.protein,
+                    carbs: currentRecipe.carbs,
+                    fat: currentRecipe.fat
+                };
+                
+                // Add to lunch by default (can be changed by user in the calorie tracker)
+                meals.lunch.push(mealEntry);
+                
+                // Save back to localStorage
+                localStorage.setItem('calorieTrackerMeals', JSON.stringify(meals));
+                
+                // Show success message
+                alert(`✅ ${title} has been added to your Calorie Tracker!`);
+                closeModal();
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('recipeModal')) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
+</body>
+</html>

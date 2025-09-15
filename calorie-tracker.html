@@ -205,12 +205,41 @@
     
     <!-- Manual Entry Modal -->
     <div id="manual-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 350px;">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">➕ Add Food</h3>
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">🍎 Log Your Fuel</h3>
+            
+            <!-- Saved Meals Quick Import -->
+            <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 14px;">⚡ Quick Import</h4>
+                <select id="saved-meals-select" onchange="loadSavedMeal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                    <option value="">Select saved meal...</option>
+                </select>
+            </div>
+
+            <!-- Manual Entry Form -->
             <input type="text" id="food-name" placeholder="Food name" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
-            <input type="number" id="food-calories" placeholder="Calories" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 20px;">
+            
+            <!-- Macro Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <input type="number" id="food-calories" placeholder="Calories" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                <input type="number" id="food-protein" placeholder="Protein (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                <input type="number" id="food-carbs" placeholder="Carbs (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                <input type="number" id="food-fat" placeholder="Fat (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+            </div>
+            
+            <!-- Sugar Input -->
+            <input type="number" id="food-sugar" placeholder="Sugar (g)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
+            
+            <!-- Save Option -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; font-size: 14px; color: #666;">
+                    <input type="checkbox" id="save-meal-checkbox" style="margin-right: 8px;">
+                    💾 Save this meal for future use
+                </label>
+            </div>
+            
             <div style="display: flex; gap: 10px;">
-                <button onclick="addManualFood()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Add</button>
+                <button onclick="addManualFood()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Add to Log</button>
                 <button onclick="hideManualEntry()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
@@ -1294,24 +1323,86 @@
         
         function showManualEntry() {
             document.getElementById('manual-entry-modal').style.display = 'block';
+            loadSavedMealsToSelect();
             document.getElementById('food-name').focus();
         }
         
         function hideManualEntry() {
             document.getElementById('manual-entry-modal').style.display = 'none';
+            clearManualEntryForm();
+        }
+        
+        function clearManualEntryForm() {
             document.getElementById('food-name').value = '';
             document.getElementById('food-calories').value = '';
+            document.getElementById('food-protein').value = '';
+            document.getElementById('food-carbs').value = '';
+            document.getElementById('food-fat').value = '';
+            document.getElementById('food-sugar').value = '';
+            document.getElementById('save-meal-checkbox').checked = false;
+            document.getElementById('saved-meals-select').value = '';
+        }
+        
+        function loadSavedMealsToSelect() {
+            const select = document.getElementById('saved-meals-select');
+            const savedMeals = JSON.parse(localStorage.getItem('fuelfire_saved_meals') || '[]');
+            
+            // Clear existing options except first
+            select.innerHTML = '<option value="">Select saved meal...</option>';
+            
+            savedMeals.forEach((meal, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${meal.name} (${meal.calories} cal)`;
+                select.appendChild(option);
+            });
+        }
+        
+        function loadSavedMeal() {
+            const select = document.getElementById('saved-meals-select');
+            const selectedIndex = select.value;
+            
+            if (selectedIndex === '') return;
+            
+            const savedMeals = JSON.parse(localStorage.getItem('fuelfire_saved_meals') || '[]');
+            const meal = savedMeals[selectedIndex];
+            
+            if (meal) {
+                document.getElementById('food-name').value = meal.name;
+                document.getElementById('food-calories').value = meal.calories;
+                document.getElementById('food-protein').value = meal.protein || 0;
+                document.getElementById('food-carbs').value = meal.carbs || 0;
+                document.getElementById('food-fat').value = meal.fat || 0;
+                document.getElementById('food-sugar').value = meal.sugar || 0;
+            }
         }
         
         function addManualFood() {
             const name = document.getElementById('food-name').value;
-            const calories = parseInt(document.getElementById('food-calories').value);
+            const calories = parseInt(document.getElementById('food-calories').value) || 0;
+            const protein = parseInt(document.getElementById('food-protein').value) || 0;
+            const carbs = parseInt(document.getElementById('food-carbs').value) || 0;
+            const fat = parseInt(document.getElementById('food-fat').value) || 0;
+            const sugar = parseInt(document.getElementById('food-sugar').value) || 0;
+            const shouldSave = document.getElementById('save-meal-checkbox').checked;
             
-            if (!name || !calories) {
-                alert('Please enter both food name and calories');
+            if (!name) {
+                alert('Please enter a food name');
                 return;
             }
             
+            const foodItem = {
+                name: name,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                sugar: sugar,
+                time: new Date().toISOString(),
+                fromMealPlan: false
+            };
+            
+            // Save to today's log
             const today = new Date().toISOString().split('T')[0];
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
@@ -1319,15 +1410,27 @@
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
             }
             
-            loggedMeals[today].meals.push({
-                name: name,
-                calories: calories,
-                time: new Date().toISOString(),
-                fromMealPlan: false
-            });
-            
+            loggedMeals[today].meals.push(foodItem);
             loggedMeals[today].totalCalories += calories;
+            
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Save to saved meals if requested
+            if (shouldSave) {
+                let savedMeals = JSON.parse(localStorage.getItem('fuelfire_saved_meals') || '[]');
+                const savedMeal = {
+                    name: name,
+                    calories: calories,
+                    protein: protein,
+                    carbs: carbs,
+                    fat: fat,
+                    sugar: sugar,
+                    savedAt: new Date().toISOString()
+                };
+                savedMeals.push(savedMeal);
+                localStorage.setItem('fuelfire_saved_meals', JSON.stringify(savedMeals));
+                loadSavedMealsToSelect();
+            }
             
             hideManualEntry();
             loadTodaysMeals();
