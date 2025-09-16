@@ -1325,42 +1325,84 @@
 
             <!-- Question 2: Muscle Groups -->
             <div class="quick-quiz-question" data-step="2" style="display: none;">
-                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎯 What do you want to target today?</h3>
-                <div style="display: grid; gap: 15px;">
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'full-body')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
-                        <div style="font-weight: bold; margin-bottom: 5px;">🔥 Full Body</div>
-                        <div style="font-size: 14px; color: #666;">Hit everything in one session</div>
-                    </button>
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'upper')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
-                        <div style="font-weight: bold; margin-bottom: 5px;">💪 Upper Body</div>
-                        <div style="font-size: 14px; color: #666;">Chest, back, shoulders, arms</div>
-                    </button>
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'lower')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
-                        <div style="font-weight: bold; margin-bottom: 5px;">🦵 Lower Body</div>
-                        <div style="font-size: 14px; color: #666;">Legs, glutes, calves</div>
-                    </button>
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'core')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
-                        <div style="font-weight: bold; margin-bottom: 5px;">🔥 Core Focus</div>
-                        <div style="font-size: 14px; color: #666;">Abs, obliques, core strength</div>
-                    </button>
+                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎯 Which muscles do you want to target?</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Select all that apply:</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'chest')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">💪 Chest</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'back')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🗲 Back</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'shoulders')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🤲 Shoulders</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'biceps')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">💪 Biceps</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'triceps')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">💪 Triceps</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'quads')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🦵 Quads</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'hamstrings')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🦵 Hamstrings</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'glutes')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🍑 Glutes</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'calves')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🦵 Calves</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'core')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🔥 Core</span>
+                    </label>
+                    <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
+                        <input type="checkbox" onchange="updateQuickMuscleGroups(this, 'lowerback')" style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; font-weight: 500;">🗲 Lower Back</span>
+                    </label>
                 </div>
             </div>
 
             <!-- Question 3: Time Available -->
             <div class="quick-quiz-question" data-step="3" style="display: none;">
                 <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">⏰ How much time do you have?</h3>
-                <div style="display: grid; gap: 15px;">
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '15')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                <div style="display: grid; gap: 12px;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '15')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
                         <div style="font-weight: bold; margin-bottom: 5px;">⚡ 15 Minutes</div>
-                        <div style="font-size: 14px; color: #666;">Quick and intense</div>
+                        <div style="font-size: 13px; color: #666;">Quick and intense</div>
                     </button>
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '30')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '30')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
                         <div style="font-weight: bold; margin-bottom: 5px;">🔥 30 Minutes</div>
-                        <div style="font-size: 14px; color: #666;">Perfect balance</div>
+                        <div style="font-size: 13px; color: #666;">Perfect balance</div>
                     </button>
-                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '45')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '45')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
                         <div style="font-weight: bold; margin-bottom: 5px;">💪 45 Minutes</div>
-                        <div style="font-size: 14px; color: #666;">Full session</div>
+                        <div style="font-size: 13px; color: #666;">Standard session</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '60')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🏋️ 60 Minutes</div>
+                        <div style="font-size: 13px; color: #666;">Full workout</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '75')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🚀 75 Minutes</div>
+                        <div style="font-size: 13px; color: #666;">Extended session</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '90')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">💥 90 Minutes</div>
+                        <div style="font-size: 13px; color: #666;">Beast mode</div>
                     </button>
                 </div>
             </div>

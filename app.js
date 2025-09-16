@@ -936,7 +936,7 @@ function startCustomWorkout() {
 let quickQuizStep = 1;
 const quickWorkoutData = {
     experience: '',
-    target: '',
+    muscleGroups: [],
     time: '',
     style: ''
 };
@@ -946,7 +946,11 @@ function startQuickWorkout() {
     // Reset quick quiz data
     quickQuizStep = 1;
     Object.keys(quickWorkoutData).forEach(key => {
-        quickWorkoutData[key] = '';
+        if (key === 'muscleGroups') {
+            quickWorkoutData[key] = [];
+        } else {
+            quickWorkoutData[key] = '';
+        }
     });
     
     // Show the quick quiz modal
@@ -976,12 +980,44 @@ function selectQuickOption(button, field, value) {
     quickWorkoutData[field] = value;
 }
 
+// Update muscle groups selection in quick quiz
+function updateQuickMuscleGroups(checkbox, muscleGroup) {
+    const label = checkbox.closest('label');
+    
+    if (checkbox.checked) {
+        // Add to muscle groups array
+        if (!quickWorkoutData.muscleGroups.includes(muscleGroup)) {
+            quickWorkoutData.muscleGroups.push(muscleGroup);
+        }
+        // Highlight the label
+        label.style.border = '2px solid var(--carolina-blue)';
+        label.style.background = 'var(--lighter-bg)';
+    } else {
+        // Remove from muscle groups array
+        quickWorkoutData.muscleGroups = quickWorkoutData.muscleGroups.filter(group => group !== muscleGroup);
+        // Reset label styling
+        label.style.border = '2px solid var(--lighter-bg)';
+        label.style.background = 'var(--card-bg)';
+    }
+}
+
 // Navigate to next question in quick quiz
 function quickQuizNext() {
     // Validate current step
-    const currentField = Object.keys(quickWorkoutData)[quickQuizStep - 1];
-    if (!quickWorkoutData[currentField]) {
-        alert('Please select an option to continue');
+    if (quickQuizStep === 1 && !quickWorkoutData.experience) {
+        alert('Please select your experience level');
+        return;
+    }
+    if (quickQuizStep === 2 && quickWorkoutData.muscleGroups.length === 0) {
+        alert('Please select at least one muscle group');
+        return;
+    }
+    if (quickQuizStep === 3 && !quickWorkoutData.time) {
+        alert('Please select workout duration');
+        return;
+    }
+    if (quickQuizStep === 4 && !quickWorkoutData.style) {
+        alert('Please select exercise style');
         return;
     }
     
@@ -1051,100 +1087,113 @@ function displayQuickWorkout() {
 
 // Create quick workout plan based on selections
 function createQuickWorkoutPlan() {
-    const { experience, target, time, style } = quickWorkoutData;
+    const { experience, muscleGroups, time, style } = quickWorkoutData;
     
     let exercises = [];
     let restTime = experience === 'beginner' ? '60-90 seconds' : experience === 'intermediate' ? '45-60 seconds' : '30-45 seconds';
     
-    // Select exercises based on target and style
-    if (target === 'full-body') {
-        if (style === 'mainstream') {
-            exercises = [
-                { name: 'Squats', sets: 3, reps: experience === 'beginner' ? '8-10' : experience === 'intermediate' ? '10-12' : '12-15' },
-                { name: 'Push-ups', sets: 3, reps: experience === 'beginner' ? '5-8' : experience === 'intermediate' ? '8-12' : '12-20' },
-                { name: 'Bent-over Rows', sets: 3, reps: '8-12' },
-                { name: 'Overhead Press', sets: 3, reps: '6-10' },
-                { name: 'Deadlifts', sets: 2, reps: experience === 'beginner' ? '5-8' : '8-10' }
-            ];
-        } else {
-            exercises = [
-                { name: 'Bulgarian Split Squats', sets: 3, reps: '8-10 each leg' },
-                { name: 'Pike Push-ups', sets: 3, reps: '6-10' },
-                { name: 'Single-arm Dumbbell Rows', sets: 3, reps: '10-12 each' },
-                { name: 'Turkish Get-ups', sets: 2, reps: '3-5 each side' },
-                { name: 'Bear Crawls', sets: 3, reps: '30-45 seconds' }
-            ];
+    // Exercise database organized by muscle group
+    const exerciseDB = {
+        chest: {
+            mainstream: ['Push-ups', 'Bench Press', 'Incline Press', 'Dips'],
+            unique: ['Archer Push-ups', 'Single-arm Push-ups', 'Clap Push-ups', 'Diamond Push-ups']
+        },
+        back: {
+            mainstream: ['Pull-ups', 'Bent-over Rows', 'Lat Pulldowns', 'Seated Rows'],
+            unique: ['Inverted Rows', 'Single-arm Rows', 'Face Pulls', 'Reverse Flyes']
+        },
+        shoulders: {
+            mainstream: ['Overhead Press', 'Lateral Raises', 'Front Raises', 'Rear Delt Flyes'],
+            unique: ['Pike Push-ups', 'Handstand Push-ups', 'Arnold Press', 'Wall Walks']
+        },
+        biceps: {
+            mainstream: ['Bicep Curls', 'Hammer Curls', 'Preacher Curls', 'Cable Curls'],
+            unique: ['Towel Curls', 'Resistance Band Curls', '21s', 'Concentration Curls']
+        },
+        triceps: {
+            mainstream: ['Tricep Dips', 'Close-grip Push-ups', 'Overhead Extension', 'Tricep Kickbacks'],
+            unique: ['Diamond Push-ups', 'Tricep Wall Push-ups', 'Single-arm Extensions', 'Tricep Pulses']
+        },
+        quads: {
+            mainstream: ['Squats', 'Lunges', 'Leg Press', 'Step-ups'],
+            unique: ['Jump Squats', 'Pistol Squats', 'Bulgarian Split Squats', 'Cossack Squats']
+        },
+        hamstrings: {
+            mainstream: ['Romanian Deadlifts', 'Leg Curls', 'Good Mornings', 'Stiff-leg Deadlifts'],
+            unique: ['Single-leg RDLs', 'Nordic Curls', 'Glute Ham Raises', 'Reverse Lunges']
+        },
+        glutes: {
+            mainstream: ['Hip Thrusts', 'Glute Bridges', 'Squats', 'Deadlifts'],
+            unique: ['Single-leg Hip Thrusts', 'Clamshells', 'Fire Hydrants', 'Curtsy Lunges']
+        },
+        calves: {
+            mainstream: ['Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises', 'Wall Calf Raises'],
+            unique: ['Single-leg Calf Raises', 'Jump Rope', 'Calf Raises on Steps', 'Farmer Walk on Toes']
+        },
+        core: {
+            mainstream: ['Planks', 'Crunches', 'Russian Twists', 'Leg Raises'],
+            unique: ['Dead Bug', 'Bird Dog', 'Hollow Body Holds', 'Pallof Press']
+        },
+        lowerback: {
+            mainstream: ['Hyperextensions', 'Superman', 'Good Mornings', 'Back Extensions'],
+            unique: ['Bird Dog', 'Single-arm Superman', 'Reverse Plank', 'Wall Sits']
         }
-    } else if (target === 'upper') {
-        if (style === 'mainstream') {
-            exercises = [
-                { name: 'Bench Press', sets: 4, reps: '8-10' },
-                { name: 'Pull-ups/Lat Pulldowns', sets: 3, reps: '6-10' },
-                { name: 'Overhead Press', sets: 3, reps: '8-10' },
-                { name: 'Barbell Rows', sets: 3, reps: '8-12' },
-                { name: 'Dips', sets: 3, reps: '8-12' },
-                { name: 'Bicep Curls', sets: 3, reps: '10-15' }
-            ];
-        } else {
-            exercises = [
-                { name: 'Archer Push-ups', sets: 3, reps: '5-8 each side' },
-                { name: 'Face Pulls', sets: 4, reps: '15-20' },
-                { name: 'Landmine Press', sets: 3, reps: '8-10 each arm' },
-                { name: 'Inverted Rows', sets: 3, reps: '8-12' },
-                { name: 'Pike Walks', sets: 3, reps: '8-10' },
-                { name: 'Hammer Curls to Press', sets: 3, reps: '10-12' }
-            ];
+    };
+    
+    // Select exercises based on selected muscle groups
+    muscleGroups.forEach(muscle => {
+        if (exerciseDB[muscle]) {
+            const muscleExercises = exerciseDB[muscle][style] || exerciseDB[muscle].mainstream;
+            const selectedExercise = muscleExercises[Math.floor(Math.random() * muscleExercises.length)];
+            
+            // Set appropriate sets and reps based on experience
+            let sets, reps;
+            if (experience === 'beginner') {
+                sets = 2;
+                reps = '8-12';
+            } else if (experience === 'intermediate') {
+                sets = 3;
+                reps = '10-15';
+            } else {
+                sets = 4;
+                reps = '12-20';
+            }
+            
+            exercises.push({
+                name: selectedExercise,
+                muscle: muscle,
+                sets: sets,
+                reps: reps
+            });
         }
-    } else if (target === 'lower') {
-        if (style === 'mainstream') {
-            exercises = [
-                { name: 'Back Squats', sets: 4, reps: '8-12' },
-                { name: 'Romanian Deadlifts', sets: 3, reps: '10-12' },
-                { name: 'Walking Lunges', sets: 3, reps: '12-15 each leg' },
-                { name: 'Leg Press', sets: 3, reps: '15-20' },
-                { name: 'Calf Raises', sets: 4, reps: '15-20' }
-            ];
-        } else {
-            exercises = [
-                { name: 'Pistol Squats', sets: 3, reps: '5-8 each leg' },
-                { name: 'Single-leg Hip Thrusts', sets: 3, reps: '10-12 each' },
-                { name: 'Lateral Lunges', sets: 3, reps: '10-12 each side' },
-                { name: 'Jump Squats', sets: 3, reps: '8-12' },
-                { name: 'Single-leg Calf Raises', sets: 3, reps: '12-15 each' }
-            ];
-        }
-    } else if (target === 'core') {
-        if (style === 'mainstream') {
-            exercises = [
-                { name: 'Planks', sets: 3, reps: '30-60 seconds' },
-                { name: 'Crunches', sets: 3, reps: '15-25' },
-                { name: 'Russian Twists', sets: 3, reps: '20-30' },
-                { name: 'Leg Raises', sets: 3, reps: '10-15' },
-                { name: 'Mountain Climbers', sets: 3, reps: '30-45 seconds' }
-            ];
-        } else {
-            exercises = [
-                { name: 'Dead Bug', sets: 3, reps: '8-10 each side' },
-                { name: 'Bird Dog', sets: 3, reps: '8-10 each side' },
-                { name: 'Pallof Press', sets: 3, reps: '10-12 each side' },
-                { name: 'Single-arm Farmer Carries', sets: 3, reps: '30-45 seconds each' },
-                { name: 'Hollow Body Rocks', sets: 3, reps: '10-15' }
-            ];
-        }
+    });
+    
+    // Adjust number of exercises based on time (filter existing exercises)
+    let maxExercises;
+    if (time === '15') {
+        maxExercises = 3;
+    } else if (time === '30') {
+        maxExercises = 4;
+    } else if (time === '45') {
+        maxExercises = 5;
+    } else if (time === '60') {
+        maxExercises = 6;
+    } else if (time === '75') {
+        maxExercises = 8;
+    } else if (time === '90') {
+        maxExercises = 10;
     }
     
-    // Adjust number of exercises based on time
-    if (time === '15') {
-        exercises = exercises.slice(0, 3);
-    } else if (time === '30') {
-        exercises = exercises.slice(0, 4);
+    // Limit exercises to time constraint
+    if (exercises.length > maxExercises) {
+        exercises = exercises.slice(0, maxExercises);
     }
-    // 45 minutes keeps all exercises
     
     let html = `
         <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="color: var(--primary); margin-bottom: 10px;">⚡ Your Quick ${target === 'full-body' ? 'Full Body' : target === 'upper' ? 'Upper Body' : target === 'lower' ? 'Lower Body' : 'Core'} Workout</h2>
+            <h2 style="color: var(--primary); margin-bottom: 10px;">⚡ Your Quick Blast Workout</h2>
             <p style="color: #666; font-size: 14px;">${time} minutes • ${experience} level • ${style === 'mainstream' ? 'Classic exercises' : 'Unique movements'}</p>
+            <p style="color: var(--carolina-blue); font-size: 13px; margin-top: 8px;">Targeting: ${muscleGroups.join(', ')}</p>
         </div>
         
         <div style="background: #f8f9ff; padding: 20px; border-radius: 15px; margin-bottom: 25px;">
