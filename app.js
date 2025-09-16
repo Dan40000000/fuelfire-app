@@ -1095,7 +1095,16 @@ function createQuickWorkoutPlan() {
     const { experience, muscleGroups, time, location, style } = quickWorkoutData;
     
     let exercises = [];
-    let restTime = experience === 'beginner' ? '60-90 seconds' : experience === 'intermediate' ? '45-60 seconds' : '30-45 seconds';
+    
+    // Adjust rest time based on experience AND workout duration
+    let restTime;
+    if (experience === 'beginner') {
+        restTime = time <= 30 ? '60 seconds' : '60-90 seconds';
+    } else if (experience === 'intermediate') {
+        restTime = time <= 30 ? '45 seconds' : '45-60 seconds';
+    } else {
+        restTime = time <= 30 ? '30 seconds' : '30-45 seconds';
+    }
     
     // Comprehensive exercise database organized by muscle group, location, and style
     const exerciseDB = {
@@ -1106,13 +1115,19 @@ function createQuickWorkoutPlan() {
                     { name: 'Incline Dumbbell Press', equipment: 'Dumbbells + Incline Bench', form: 'Upper chest focus, 30-45 degree incline' },
                     { name: 'Dumbbell Flyes', equipment: 'Dumbbells + Bench', form: 'Wide arc motion, feel stretch in chest' },
                     { name: 'Cable Chest Press', equipment: 'Cable Machine', form: 'Smooth controlled motion, squeeze at end' },
-                    { name: 'Chest Dips', equipment: 'Dip Station', form: 'Lean forward slightly, deep stretch' }
+                    { name: 'Chest Dips', equipment: 'Dip Station', form: 'Lean forward slightly, deep stretch' },
+                    { name: 'Machine Chest Press', equipment: 'Chest Press Machine', form: 'Controlled motion, focus on squeeze' },
+                    { name: 'Decline Barbell Press', equipment: 'Barbell + Decline Bench', form: 'Lower chest emphasis, control the weight' },
+                    { name: 'Pec Deck Machine', equipment: 'Pec Deck', form: 'Bring arms together, squeeze chest' }
                 ],
                 unique: [
                     { name: 'Single-Arm Dumbbell Press', equipment: 'Dumbbell + Bench', form: 'One arm at a time, core stability challenge' },
                     { name: 'Cable Crossovers', equipment: 'Cable Machine', form: 'High to low motion, squeeze chest' },
                     { name: 'Landmine Press', equipment: 'Barbell + Landmine', form: 'Core-engaged unilateral press' },
-                    { name: 'Decline Push-ups on Bench', equipment: 'Bench', form: 'Feet elevated, upper chest emphasis' }
+                    { name: 'Decline Push-ups on Bench', equipment: 'Bench', form: 'Feet elevated, upper chest emphasis' },
+                    { name: 'Svend Press', equipment: 'Weight Plate', form: 'Squeeze plate between palms, press out' },
+                    { name: 'Hex Press', equipment: 'Dumbbells', form: 'Press dumbbells together throughout movement' },
+                    { name: 'Floor Press', equipment: 'Dumbbells or Barbell', form: 'Press from floor, limited range of motion' }
                 ]
             },
             'basic-gym': {
@@ -1213,21 +1228,164 @@ function createQuickWorkoutPlan() {
         }
     };
 
-    // Add quick muscle groups for comprehensive database (will expand this)
+    // MASSIVE EXERCISE VARIETY DATABASE
     const quickMuscleDB = {
-        shoulders: { gym: ['Overhead Press', 'Lateral Raises', 'Rear Delt Flyes'], home: ['Pike Push-ups', 'Wall Handstand Push-ups', 'Arm Circles'] },
-        biceps: { gym: ['Barbell Curls', 'Dumbbell Curls', 'Hammer Curls'], home: ['Towel Curls', 'Resistance Band Curls', 'Door Frame Curls'] },
-        triceps: { gym: ['Close-Grip Bench', 'Tricep Dips', 'Overhead Extension'], home: ['Diamond Push-ups', 'Chair Dips', 'Wall Push-ups'] },
-        quads: { gym: ['Barbell Squats', 'Leg Press', 'Lunges'], home: ['Bodyweight Squats', 'Jump Squats', 'Wall Sit'] },
-        hamstrings: { gym: ['Romanian Deadlifts', 'Leg Curls', 'Good Mornings'], home: ['Single-leg RDLs', 'Glute Bridges', 'Reverse Lunges'] },
-        glutes: { gym: ['Hip Thrusts', 'Bulgarian Split Squats', 'Sumo Deadlifts'], home: ['Glute Bridges', 'Single-leg Hip Thrusts', 'Clamshells'] },
-        calves: { gym: ['Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises'], home: ['Calf Raises', 'Single-leg Calf Raises', 'Jump Rope'] },
-        core: { gym: ['Cable Crunches', 'Hanging Leg Raises', 'Russian Twists'], home: ['Planks', 'Bicycle Crunches', 'Mountain Climbers'] },
-        lowerback: { gym: ['Hyperextensions', 'Good Mornings', 'Deadlifts'], home: ['Superman', 'Bird Dog', 'Reverse Plank'] }
+        shoulders: { 
+            gym: [
+                'Overhead Press', 'Dumbbell Shoulder Press', 'Lateral Raises', 'Cable Lateral Raises',
+                'Rear Delt Flyes', 'Arnold Press', 'Front Raises', 'Upright Rows', 'Face Pulls',
+                'Machine Shoulder Press', 'Behind-the-Neck Press', 'Bradford Press', 'Cuban Press',
+                'Y-Raises', 'Bus Drivers', 'Plate Raises', 'Cable Front Raises', 'Shrugs'
+            ], 
+            home: [
+                'Pike Push-ups', 'Wall Handstand Push-ups', 'Arm Circles', 'Shoulder Taps', 
+                'Lateral Raises (water bottles)', 'Front Raises (backpack)', 'Hindu Push-ups',
+                'Plank to Downward Dog', 'Wall Walks', 'Bear Crawl', 'Crab Walks'
+            ] 
+        },
+        biceps: { 
+            gym: [
+                'Barbell Curls', 'Dumbbell Curls', 'Hammer Curls', 'Preacher Curls', 'Cable Curls', 
+                'Concentration Curls', 'EZ-Bar Curls', '21s', 'Spider Curls', 'Incline Curls',
+                'Cable Hammer Curls', 'Reverse Curls', 'Zottman Curls', 'Drag Curls', 'Machine Curls',
+                'Cross-body Hammer Curls', 'Wide-grip Curls', 'Close-grip Curls'
+            ], 
+            home: [
+                'Towel Curls', 'Resistance Band Curls', 'Door Frame Curls', 'Backpack Curls', 
+                'Isometric Holds', 'Chin-ups', 'Concentration Curls (water jug)', 'Wall Curls',
+                'Negative Curls', 'Hammer Curls (bottles)'
+            ] 
+        },
+        triceps: { 
+            gym: [
+                'Close-Grip Bench', 'Tricep Dips', 'Overhead Extension', 'Cable Pushdowns', 'Skull Crushers', 
+                'Kickbacks', 'Diamond Push-ups', 'Rope Pushdowns', 'JM Press', 'Tate Press',
+                'Cable Overhead Extension', 'Reverse-grip Pushdowns', 'Machine Dips', 'Floor Press',
+                'Single-arm Cable Pushdown', 'Bench Dips', 'V-bar Pushdowns'
+            ], 
+            home: [
+                'Diamond Push-ups', 'Chair Dips', 'Wall Push-ups', 'Overhead Extension (bottle)', 
+                'Close-grip Push-ups', 'Tricep Dips (couch)', 'Pike Push-ups', 'Sphinx Push-ups',
+                'Tricep Kickbacks (bottles)', 'Bench Dips (chair)', 'Reverse Dips'
+            ] 
+        },
+        quads: { 
+            gym: [
+                'Barbell Squats', 'Leg Press', 'Lunges', 'Front Squats', 'Hack Squats', 
+                'Bulgarian Split Squats', 'Step-ups', 'Leg Extensions', 'Goblet Squats', 'Box Squats',
+                'Walking Lunges', 'Reverse Lunges', 'Smith Machine Squats', 'Sissy Squats',
+                'Single-leg Press', 'Jump Squats', 'Pendulum Squats', 'Zercher Squats'
+            ], 
+            home: [
+                'Bodyweight Squats', 'Jump Squats', 'Wall Sit', 'Pistol Squats', 'Bulgarian Split Squats', 
+                'Lunges', 'Step-ups', 'Box Jumps', 'Squat Pulses', 'Single-leg Squats',
+                'Cossack Squats', 'Squat Jumps', 'Reverse Lunges', 'Lateral Lunges', 'Squat Hold'
+            ] 
+        },
+        hamstrings: { 
+            gym: [
+                'Romanian Deadlifts', 'Leg Curls', 'Good Mornings', 'Stiff-leg Deadlifts', 'Nordic Curls', 
+                'Cable Pull-throughs', 'Glute Ham Raises', 'Sumo Deadlifts', 'Single-leg Deadlifts',
+                'Seated Leg Curls', 'Standing Leg Curls', 'Swiss Ball Curls', 'Reverse Lunges',
+                'Jefferson Deadlifts', 'Trap Bar Deadlifts'
+            ], 
+            home: [
+                'Single-leg RDLs', 'Glute Bridges', 'Reverse Lunges', 'Good Mornings', 'Wall Sits', 
+                'Hamstring Walkouts', 'Nordic Curls (assisted)', 'Single-leg Glute Bridge', 
+                'Sliding Leg Curls', 'Romanian Deadlifts (backpack)', 'Marching Glute Bridge'
+            ] 
+        },
+        glutes: { 
+            gym: [
+                'Hip Thrusts', 'Bulgarian Split Squats', 'Sumo Deadlifts', 'Cable Kickbacks', 
+                'Walking Lunges', 'Goblet Squats', 'Romanian Deadlifts', 'Smith Machine Hip Thrusts',
+                'Cable Pull-throughs', 'Reverse Lunges', 'Step-ups', 'Single-leg Hip Thrusts',
+                'Glute Ham Raises', 'Curtsy Lunges', 'Box Squats', 'Hip Abduction Machine'
+            ], 
+            home: [
+                'Glute Bridges', 'Single-leg Hip Thrusts', 'Clamshells', 'Fire Hydrants', 'Donkey Kicks', 
+                'Curtsy Lunges', 'Frog Pumps', 'Bird Dog', 'Side-lying Hip Raises', 'Rainbow Kicks',
+                'Glute Bridge March', 'Wall Sit', 'Single-leg Deadlifts', 'Lateral Lunges'
+            ] 
+        },
+        calves: { 
+            gym: [
+                'Standing Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises', 'Leg Press Calf Raises', 
+                'Smith Machine Calf Raises', 'Single-leg Calf Raises', 'Calf Press Machine',
+                'Barbell Calf Raises', 'Dumbbell Calf Raises'
+            ], 
+            home: [
+                'Calf Raises', 'Single-leg Calf Raises', 'Jump Rope', 'Stair Calf Raises', 
+                'Wall Calf Stretch Pulses', 'Seated Calf Raises (weighted)', 'Jumping Jacks',
+                'Box Jumps', 'Farmer Walks on Toes'
+            ] 
+        },
+        core: { 
+            gym: [
+                'Cable Crunches', 'Hanging Leg Raises', 'Russian Twists', 'Ab Rollouts', 'Pallof Press', 
+                'Wood Chops', 'Decline Sit-ups', 'Cable Russian Twists', 'Hanging Knee Raises',
+                'Machine Crunches', 'Cable Side Bends', 'Landmine Rotations', 'Dead Bug with Weights',
+                'Weighted Planks', 'Turkish Get-ups', 'Farmer Walks'
+            ], 
+            home: [
+                'Planks', 'Bicycle Crunches', 'Mountain Climbers', 'Dead Bug', 'Bird Dog', 
+                'Hollow Body Hold', 'Flutter Kicks', 'V-ups', 'Leg Raises', 'Russian Twists',
+                'Side Planks', 'Toe Touches', 'Scissor Kicks', 'Plank Jacks', 'Bear Crawl',
+                'Reverse Crunches', 'Heel Taps', 'Superman Planks'
+            ] 
+        },
+        lowerback: { 
+            gym: [
+                'Hyperextensions', 'Good Mornings', 'Deadlifts', 'Reverse Hyperextensions', 
+                'Cable Pull-throughs', 'Back Extensions', 'Rack Pulls', 'Jefferson Deadlifts',
+                'Romanian Deadlifts', 'Sumo Deadlifts'
+            ], 
+            home: [
+                'Superman', 'Bird Dog', 'Reverse Plank', 'Cat-Cow Stretches', 'Prone Y-T-W', 
+                'Bridge Hold', 'Good Mornings (bodyweight)', 'Back Extensions (on floor)',
+                'Cobra Stretch', 'Swimming Exercise'
+            ] 
+        }
     };
     
-    // Select exercises based on selected muscle groups
-    muscleGroups.forEach(muscle => {
+    // PROPER TIME-BASED EXERCISE CALCULATION
+    // Assuming each exercise with sets + rest takes ~4-5 minutes on average
+    let totalExercises;
+    if (time === '15') {
+        totalExercises = 4;  // Quick circuit style
+    } else if (time === '30') {
+        totalExercises = 6;  // ~5 min per exercise
+    } else if (time === '45') {
+        totalExercises = 10; // ~4.5 min per exercise
+    } else if (time === '60') {
+        totalExercises = 12; // ~5 min per exercise
+    } else if (time === '75') {
+        totalExercises = 15; // ~5 min per exercise
+    } else if (time === '90') {
+        totalExercises = 18; // ~5 min per exercise
+    }
+    
+    // We want to generate EXACTLY totalExercises, distributing them across muscle groups
+    // If user selects 1 muscle group, all exercises target that muscle
+    // If user selects multiple, we cycle through them
+    
+    let muscleIndex = 0;
+    
+    // Generate EXACTLY the total number of exercises needed
+    console.log('Starting generation. Target exercises:', totalExercises);
+    console.log('Selected muscle groups:', muscleGroups);
+    console.log('Location:', location);
+    console.log('Style:', style);
+    
+    let safetyCounter = 0;
+    const maxAttempts = 50; // Prevent infinite loop
+    
+    while (exercises.length < totalExercises && safetyCounter < maxAttempts) {
+        safetyCounter++;
+        const muscle = muscleGroups[muscleIndex % muscleGroups.length];
+        console.log(`Creating exercise ${exercises.length + 1} of ${totalExercises} for muscle: ${muscle}`);
+        muscleIndex++;
+        
         let selectedExercise;
         let equipment = 'None';
         let form = 'Maintain proper form throughout';
@@ -1235,30 +1393,84 @@ function createQuickWorkoutPlan() {
         // Use comprehensive database for chest and back, quick database for others
         if (exerciseDB[muscle] && exerciseDB[muscle][location]) {
             const locationExercises = exerciseDB[muscle][location][style] || exerciseDB[muscle][location].mainstream;
-            const exerciseObj = locationExercises[Math.floor(Math.random() * locationExercises.length)];
-            selectedExercise = exerciseObj.name;
-            equipment = exerciseObj.equipment;
-            form = exerciseObj.form;
+            // Make sure we don't repeat the same exercise
+            let attempts = 0;
+            do {
+                const exerciseObj = locationExercises[Math.floor(Math.random() * locationExercises.length)];
+                selectedExercise = exerciseObj.name;
+                equipment = exerciseObj.equipment;
+                form = exerciseObj.form;
+                attempts++;
+            } while (exercises.some(e => e.name === selectedExercise) && attempts < 5);
         } else if (quickMuscleDB[muscle]) {
             // Use location-appropriate exercises
             const locationKey = (location === 'gym' || location === 'basic-gym') ? 'gym' : 'home';
             const muscleExercises = quickMuscleDB[muscle][locationKey];
-            selectedExercise = muscleExercises[Math.floor(Math.random() * muscleExercises.length)];
+            // Avoid repeating exercises when possible
+            let attempts = 0;
+            do {
+                selectedExercise = muscleExercises[Math.floor(Math.random() * muscleExercises.length)];
+                attempts++;
+            } while (exercises.some(e => e.name === selectedExercise) && attempts < 5);
         } else {
-            selectedExercise = `${muscle.charAt(0).toUpperCase() + muscle.slice(1)} Exercise`;
+            selectedExercise = `${muscle.charAt(0).toUpperCase() + muscle.slice(1)} Exercise ${exercises.filter(e => e.muscle === muscle).length + 1}`;
         }
         
-        // Set appropriate sets and reps based on experience
+        // SMART SETS/REPS BASED ON TIME AND EXPERIENCE
+        // Shorter workouts = fewer sets per exercise to fit more exercises
+        // Longer workouts = more sets for proper volume
         let sets, reps;
         if (experience === 'beginner') {
-            sets = Math.floor(Math.random() * 2) + 2; // 2-3 sets
-            reps = '8-12';
+            if (time === '15') {
+                sets = 2; // Quick circuit
+                reps = '10-12';
+            } else if (time === '30') {
+                sets = 2; // Keep it manageable
+                reps = '10-12';
+            } else if (time === '45') {
+                sets = 3; // Standard
+                reps = '10-12';
+            } else if (time === '60') {
+                sets = 3; // Good volume
+                reps = '10-15';
+            } else {
+                sets = Math.random() < 0.5 ? 3 : 4; // Mix it up
+                reps = '10-15';
+            }
         } else if (experience === 'intermediate') {
-            sets = Math.floor(Math.random() * 2) + 3; // 3-4 sets  
-            reps = '10-15';
-        } else {
-            sets = Math.floor(Math.random() * 2) + 3; // 3-4 sets
-            reps = '12-20';
+            if (time === '15') {
+                sets = 2; // Circuit style
+                reps = '12-15';
+            } else if (time === '30') {
+                sets = 3; // Standard
+                reps = '10-12';
+            } else if (time === '45') {
+                sets = 3; // Standard
+                reps = '10-15';
+            } else if (time === '60') {
+                sets = Math.random() < 0.5 ? 3 : 4; // Vary it
+                reps = '10-15';
+            } else {
+                sets = 4; // Higher volume
+                reps = '10-15';
+            }
+        } else { // advanced
+            if (time === '15') {
+                sets = 3; // High intensity
+                reps = '8-12';
+            } else if (time === '30') {
+                sets = 3; // Intense
+                reps = '10-15';
+            } else if (time === '45') {
+                sets = Math.random() < 0.5 ? 3 : 4; // Mix
+                reps = '10-15';
+            } else if (time === '60') {
+                sets = 4; // Volume
+                reps = '12-15';
+            } else {
+                sets = Math.random() < 0.3 ? 3 : (Math.random() < 0.7 ? 4 : 5); // Vary 3-5 sets
+                reps = '12-20';
+            }
         }
         
         exercises.push({
@@ -1269,28 +1481,17 @@ function createQuickWorkoutPlan() {
             equipment: equipment,
             form: form
         });
-    });
-    
-    // Adjust number of exercises based on time (filter existing exercises)
-    let maxExercises;
-    if (time === '15') {
-        maxExercises = 3;
-    } else if (time === '30') {
-        maxExercises = 4;
-    } else if (time === '45') {
-        maxExercises = 5;
-    } else if (time === '60') {
-        maxExercises = 6;
-    } else if (time === '75') {
-        maxExercises = 8;
-    } else if (time === '90') {
-        maxExercises = 10;
+        console.log(`Added exercise: ${selectedExercise}. Total now: ${exercises.length}`);
     }
     
-    // Limit exercises to time constraint
-    if (exercises.length > maxExercises) {
-        exercises = exercises.slice(0, maxExercises);
+    if (safetyCounter >= maxAttempts) {
+        console.error('Hit safety limit! Something went wrong in exercise generation.');
     }
+    
+    console.log(`Final exercise count: ${exercises.length}`);
+    
+    // Shuffle exercises for variety
+    exercises = exercises.sort(() => Math.random() - 0.5);
     
     let html = `
         <div style="text-align: center; margin-bottom: 30px;">
@@ -1312,7 +1513,8 @@ function createQuickWorkoutPlan() {
         </div>
         
         <div style="background: linear-gradient(135deg, #f8f9ff, #fff); padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-            <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">🏋️ Your Workout Plan</h3>
+            <h3 style="color: var(--primary); margin-bottom: 10px; text-align: center;">🏋️ Your Workout Plan</h3>
+            <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 20px;">${exercises.length} exercises • ${exercises.reduce((total, ex) => total + ex.sets, 0)} total sets</p>
     `;
     
     exercises.forEach((exercise, index) => {
