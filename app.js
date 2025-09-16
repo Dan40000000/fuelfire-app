@@ -1118,16 +1118,28 @@ function createQuickWorkoutPlan() {
                     { name: 'Chest Dips', equipment: 'Dip Station', form: 'Lean forward slightly, deep stretch' },
                     { name: 'Machine Chest Press', equipment: 'Chest Press Machine', form: 'Controlled motion, focus on squeeze' },
                     { name: 'Decline Barbell Press', equipment: 'Barbell + Decline Bench', form: 'Lower chest emphasis, control the weight' },
-                    { name: 'Pec Deck Machine', equipment: 'Pec Deck', form: 'Bring arms together, squeeze chest' }
+                    { name: 'Pec Deck Machine', equipment: 'Pec Deck', form: 'Bring arms together, squeeze chest' },
+                    { name: 'Smith Machine Bench Press', equipment: 'Smith Machine', form: 'Guided bar path, focus on contraction' },
+                    { name: 'Close-Grip Bench Press', equipment: 'Barbell + Bench', form: 'Hands shoulder-width, tricep emphasis' },
+                    { name: 'Wide-Grip Bench Press', equipment: 'Barbell + Bench', form: 'Extra wide grip, outer chest focus' },
+                    { name: 'Hammer Strength Chest Press', equipment: 'Hammer Machine', form: 'Independent arm movement' }
                 ],
                 unique: [
-                    { name: 'Single-Arm Dumbbell Press', equipment: 'Dumbbell + Bench', form: 'One arm at a time, core stability challenge' },
-                    { name: 'Cable Crossovers', equipment: 'Cable Machine', form: 'High to low motion, squeeze chest' },
-                    { name: 'Landmine Press', equipment: 'Barbell + Landmine', form: 'Core-engaged unilateral press' },
-                    { name: 'Decline Push-ups on Bench', equipment: 'Bench', form: 'Feet elevated, upper chest emphasis' },
+                    { name: 'Guillotine Press', equipment: 'Barbell + Bench', form: 'Bar to neck level, extreme chest stretch' },
                     { name: 'Svend Press', equipment: 'Weight Plate', form: 'Squeeze plate between palms, press out' },
                     { name: 'Hex Press', equipment: 'Dumbbells', form: 'Press dumbbells together throughout movement' },
-                    { name: 'Floor Press', equipment: 'Dumbbells or Barbell', form: 'Press from floor, limited range of motion' }
+                    { name: 'Floor Press', equipment: 'Dumbbells or Barbell', form: 'Press from floor, limited range of motion' },
+                    { name: 'Landmine Press', equipment: 'Barbell + Landmine', form: 'Core-engaged unilateral press' },
+                    { name: 'Single-Arm Cable Press', equipment: 'Cable Machine', form: 'Unilateral chest work' },
+                    { name: 'Squeeze Press', equipment: 'Dumbbells', form: 'Press dumbbells together hard throughout' },
+                    { name: 'Plate Press-Out', equipment: 'Weight Plate', form: 'Hold plate at chest, press straight out' },
+                    { name: 'Band-Resisted Push-ups', equipment: 'Resistance Band', form: 'Band across back for added resistance' },
+                    { name: 'Chain Bench Press', equipment: 'Barbell + Chains', form: 'Progressive resistance through range' },
+                    { name: 'Reverse-Grip Bench Press', equipment: 'Barbell', form: 'Underhand grip, upper chest focus' },
+                    { name: 'JM Press', equipment: 'Barbell', form: 'Hybrid between close-grip bench and skullcrusher' },
+                    { name: 'Bamboo Bar Press', equipment: 'Bamboo Bar + Bands', form: 'Unstable load for stabilization' },
+                    { name: 'Ballistic Push-ups', equipment: 'None', form: 'Explosive push off ground' },
+                    { name: 'Weighted Vest Push-ups', equipment: 'Weighted Vest', form: 'Added resistance push-ups' }
                 ]
             },
             'basic-gym': {
@@ -1177,13 +1189,32 @@ function createQuickWorkoutPlan() {
                     { name: 'Lat Pulldowns', equipment: 'Lat Pulldown Machine', form: 'Pull to upper chest, squeeze shoulder blades' },
                     { name: 'Barbell Rows', equipment: 'Barbell', form: 'Bent over, pull to lower chest' },
                     { name: 'Seated Cable Rows', equipment: 'Cable Machine', form: 'Pull to torso, squeeze back' },
-                    { name: 'T-Bar Rows', equipment: 'T-Bar', form: 'Chest supported, pull weight to chest' }
+                    { name: 'T-Bar Rows', equipment: 'T-Bar', form: 'Chest supported, pull weight to chest' },
+                    { name: 'Deadlifts', equipment: 'Barbell', form: 'Full body pull from floor' },
+                    { name: 'Rack Pulls', equipment: 'Barbell + Rack', form: 'Partial deadlift from knee height' },
+                    { name: 'Machine Rows', equipment: 'Row Machine', form: 'Chest supported horizontal pull' },
+                    { name: 'Wide-Grip Pulldowns', equipment: 'Cable Machine', form: 'Wide grip for outer lats' },
+                    { name: 'Close-Grip Pulldowns', equipment: 'Cable Machine', form: 'Close grip for lower lats' },
+                    { name: 'Straight-Arm Pulldowns', equipment: 'Cable Machine', form: 'Keep arms straight, pull down' }
                 ],
                 unique: [
-                    { name: 'Single-Arm Dumbbell Rows', equipment: 'Dumbbell + Bench', form: 'One arm at a time, full stretch' },
-                    { name: 'Face Pulls', equipment: 'Cable Machine', form: 'Pull to face, rear delt focus' },
-                    { name: 'Inverted Rows', equipment: 'Barbell + Rack', form: 'Body under bar, pull chest to bar' },
-                    { name: 'Landmine Rows', equipment: 'Barbell + Landmine', form: 'Straddle bar, pull to chest' }
+                    { name: 'Kroc Rows', equipment: 'Heavy Dumbbell', form: 'High rep, explosive one-arm rows' },
+                    { name: 'Meadows Rows', equipment: 'Barbell + Landmine', form: 'Perpendicular stance, stretch focus' },
+                    { name: 'Pendlay Rows', equipment: 'Barbell', form: 'Dead stop each rep from floor' },
+                    { name: 'Helms Rows', equipment: 'Dumbbells + Incline Bench', form: 'Chest supported, elbows wide' },
+                    { name: 'Seal Rows', equipment: 'Barbell + Elevated Bench', form: 'Lying flat, row underneath' },
+                    { name: 'Reeves Deadlift', equipment: 'Barbell', form: 'Grip the plates, not the bar' },
+                    { name: 'Snatch-Grip Deadlifts', equipment: 'Barbell', form: 'Ultra-wide grip deadlift' },
+                    { name: 'Cable Pull-throughs', equipment: 'Cable Machine', form: 'Hip hinge with cable between legs' },
+                    { name: 'Kelso Shrugs', equipment: 'Dumbbells + Incline Bench', form: 'Lying face down shrugs' },
+                    { name: 'Lu Raises', equipment: 'Plates or Dumbbells', form: 'Lateral raise variation for rear delts' },
+                    { name: 'Chest-Supported Y-Raises', equipment: 'Dumbbells + Incline Bench', form: 'Arms in Y position' },
+                    { name: 'Cable Face Pulls', equipment: 'Cable + Rope', form: 'Pull rope to face, elbows high' },
+                    { name: 'High Cable Rows', equipment: 'Cable Machine', form: 'Pull from high to chest level' },
+                    { name: 'Kayak Rows', equipment: 'Cable Machine', form: 'Alternating pulls like paddling' },
+                    { name: 'Gorilla Rows', equipment: 'Kettlebells', form: 'Alternating rows in hinge position' },
+                    { name: 'Renegade Rows', equipment: 'Dumbbells', form: 'Plank position alternating rows' },
+                    { name: 'Archer Pull-ups', equipment: 'Pull-up Bar', form: 'Shift weight to one arm' }
                 ]
             },
             'basic-gym': {
@@ -1235,12 +1266,18 @@ function createQuickWorkoutPlan() {
                 'Overhead Press', 'Dumbbell Shoulder Press', 'Lateral Raises', 'Cable Lateral Raises',
                 'Rear Delt Flyes', 'Arnold Press', 'Front Raises', 'Upright Rows', 'Face Pulls',
                 'Machine Shoulder Press', 'Behind-the-Neck Press', 'Bradford Press', 'Cuban Press',
-                'Y-Raises', 'Bus Drivers', 'Plate Raises', 'Cable Front Raises', 'Shrugs'
+                'Y-Raises', 'Bus Drivers', 'Plate Raises', 'Cable Front Raises', 'Shrugs',
+                'Viking Press', 'Landmine Press', 'Z-Press', 'Scott Press', 'Lu Raises',
+                'Egyptian Lateral Raises', 'Powell Raises', 'Poliquin Raises', 'W-Raises',
+                'Cable Upright Rows', 'Smith Machine Press', 'Javelin Press', 'Bottoms-up KB Press',
+                'Handstand Push-ups', 'Cable Rear Delt Flyes', '6-Ways', 'Pendulum Raises',
+                'Cross-body Cable Raise', 'Lying Side Raises', 'Incline Y-Raises', 'Band Pull-aparts'
             ], 
             home: [
                 'Pike Push-ups', 'Wall Handstand Push-ups', 'Arm Circles', 'Shoulder Taps', 
                 'Lateral Raises (water bottles)', 'Front Raises (backpack)', 'Hindu Push-ups',
-                'Plank to Downward Dog', 'Wall Walks', 'Bear Crawl', 'Crab Walks'
+                'Plank to Downward Dog', 'Wall Walks', 'Bear Crawl', 'Crab Walks',
+                'YTW Raises', 'Band Dislocations', 'Doorway Stretch-Press', 'Pseudo Planche Push-ups'
             ] 
         },
         biceps: { 
@@ -1274,12 +1311,21 @@ function createQuickWorkoutPlan() {
                 'Barbell Squats', 'Leg Press', 'Lunges', 'Front Squats', 'Hack Squats', 
                 'Bulgarian Split Squats', 'Step-ups', 'Leg Extensions', 'Goblet Squats', 'Box Squats',
                 'Walking Lunges', 'Reverse Lunges', 'Smith Machine Squats', 'Sissy Squats',
-                'Single-leg Press', 'Jump Squats', 'Pendulum Squats', 'Zercher Squats'
+                'Single-leg Press', 'Jump Squats', 'Pendulum Squats', 'Zercher Squats',
+                'Anderson Squats', 'Pause Squats', 'Tempo Squats', '1.5 Rep Squats', 'Heels Elevated Squats',
+                'Belt Squat', 'Hatfield Squats', 'Safety Bar Squats', 'Jefferson Squats', 'Cyclist Squats',
+                'Spanish Squats', 'Platz Squats', 'Hindu Squats', 'Overhead Squats', 'Landmine Squats',
+                'Split Squats', 'Curtsy Lunges', 'Lateral Lunges', 'Clock Lunges', 'Deficit Reverse Lunges',
+                'High Bar Squats', 'Low Bar Squats', 'Pin Squats', 'Banded Squats', 'Chain Squats',
+                'Leg Press Calf Raise', 'Single Leg Extension', 'Terminal Knee Extension', 'Wall Squats',
+                'Prowler Push', 'Sled Drag', 'Farmers Walk Lunges', 'Death March'
             ], 
             home: [
                 'Bodyweight Squats', 'Jump Squats', 'Wall Sit', 'Pistol Squats', 'Bulgarian Split Squats', 
                 'Lunges', 'Step-ups', 'Box Jumps', 'Squat Pulses', 'Single-leg Squats',
-                'Cossack Squats', 'Squat Jumps', 'Reverse Lunges', 'Lateral Lunges', 'Squat Hold'
+                'Cossack Squats', 'Squat Jumps', 'Reverse Lunges', 'Lateral Lunges', 'Squat Hold',
+                'Shrimp Squats', 'Dragon Squats', 'Matrix Squats', 'Skater Squats', 'Hindu Squats',
+                'Frog Squats', 'Sumo Squats', 'Narrow Stance Squats', 'Tuck Jumps', 'Burpees'
             ] 
         },
         hamstrings: { 
@@ -1325,13 +1371,25 @@ function createQuickWorkoutPlan() {
                 'Cable Crunches', 'Hanging Leg Raises', 'Russian Twists', 'Ab Rollouts', 'Pallof Press', 
                 'Wood Chops', 'Decline Sit-ups', 'Cable Russian Twists', 'Hanging Knee Raises',
                 'Machine Crunches', 'Cable Side Bends', 'Landmine Rotations', 'Dead Bug with Weights',
-                'Weighted Planks', 'Turkish Get-ups', 'Farmer Walks'
+                'Weighted Planks', 'Turkish Get-ups', 'Farmer Walks',
+                'Dragon Flags', 'Toes to Bar', 'L-Sit', 'Hanging Windshield Wipers', 'Landmine 180s',
+                'Suitcase Carries', 'Copenhagen Planks', 'McGill Big 3', 'Stir the Pot', 'Body Saws',
+                'Cable Pull-ins', 'Garhammer Raises', 'Weighted Decline Russian Twists', 'Medicine Ball Slams',
+                'Battle Ropes', 'Sledgehammer Swings', 'Hanging Pike-ups', 'Cable Bicycle Crunches',
+                'Standing Ab Wheel', 'Barbell Rollouts', 'TRX Knee Tucks', 'TRX Pikes', 'GHD Sit-ups',
+                'Reverse Hypers', 'Belt Squat Marches', 'Weighted Dead Bugs', 'Banded Pallof Press',
+                'Half-Kneeling Chops', 'Tall-Kneeling Pallof', 'Split Stance Anti-rotation', 'Chaos Carries'
             ], 
             home: [
                 'Planks', 'Bicycle Crunches', 'Mountain Climbers', 'Dead Bug', 'Bird Dog', 
                 'Hollow Body Hold', 'Flutter Kicks', 'V-ups', 'Leg Raises', 'Russian Twists',
                 'Side Planks', 'Toe Touches', 'Scissor Kicks', 'Plank Jacks', 'Bear Crawl',
-                'Reverse Crunches', 'Heel Taps', 'Superman Planks'
+                'Reverse Crunches', 'Heel Taps', 'Superman Planks',
+                'Hollow Body Rocks', 'Sprinter Sit-ups', 'Star Planks', 'Thread the Needle', 'Pike Pulses',
+                'Butterfly Sit-ups', 'Candlesticks', 'Banana Rolls', 'Plank Up-downs', 'Cross-body Climbers',
+                'Russian V-ups', 'Starfish Crunches', 'Windmills', 'Bear Crawl Hold', 'Crab Toe Touches',
+                'Lying Leg Circles', 'Plank Knee to Elbow', 'Side Plank Dips', 'Plank Shoulder Taps',
+                'X-ups', 'Seated Knee Tucks', 'Boat Pose', 'Rolling Planks', 'Inch Worms'
             ] 
         },
         lowerback: { 
@@ -1348,21 +1406,22 @@ function createQuickWorkoutPlan() {
         }
     };
     
-    // PROPER TIME-BASED EXERCISE CALCULATION
-    // Assuming each exercise with sets + rest takes ~4-5 minutes on average
+    // REALISTIC TIME-BASED EXERCISE CALCULATION
+    // Each set takes ~1 min + ~1 min rest = 2 min per set
+    // So 3 sets = 6 minutes, 4 sets = 8 minutes per exercise
     let totalExercises;
     if (time === '15') {
-        totalExercises = 4;  // Quick circuit style
+        totalExercises = 3;  // Circuit style, minimal rest
     } else if (time === '30') {
-        totalExercises = 6;  // ~5 min per exercise
+        totalExercises = 5;  // ~6 min per exercise
     } else if (time === '45') {
-        totalExercises = 10; // ~4.5 min per exercise
+        totalExercises = 6;  // ~7.5 min per exercise  
     } else if (time === '60') {
-        totalExercises = 12; // ~5 min per exercise
+        totalExercises = 8;  // ~7.5 min per exercise
     } else if (time === '75') {
-        totalExercises = 15; // ~5 min per exercise
+        totalExercises = 10; // ~7.5 min per exercise
     } else if (time === '90') {
-        totalExercises = 18; // ~5 min per exercise
+        totalExercises = 12; // ~7.5 min per exercise
     }
     
     // We want to generate EXACTLY totalExercises, distributing them across muscle groups
@@ -1372,18 +1431,12 @@ function createQuickWorkoutPlan() {
     let muscleIndex = 0;
     
     // Generate EXACTLY the total number of exercises needed
-    console.log('Starting generation. Target exercises:', totalExercises);
-    console.log('Selected muscle groups:', muscleGroups);
-    console.log('Location:', location);
-    console.log('Style:', style);
-    
     let safetyCounter = 0;
     const maxAttempts = 50; // Prevent infinite loop
     
     while (exercises.length < totalExercises && safetyCounter < maxAttempts) {
         safetyCounter++;
         const muscle = muscleGroups[muscleIndex % muscleGroups.length];
-        console.log(`Creating exercise ${exercises.length + 1} of ${totalExercises} for muscle: ${muscle}`);
         muscleIndex++;
         
         let selectedExercise;
@@ -1416,39 +1469,44 @@ function createQuickWorkoutPlan() {
             selectedExercise = `${muscle.charAt(0).toUpperCase() + muscle.slice(1)} Exercise ${exercises.filter(e => e.muscle === muscle).length + 1}`;
         }
         
-        // SMART SETS/REPS BASED ON TIME AND EXPERIENCE
-        // Shorter workouts = fewer sets per exercise to fit more exercises
-        // Longer workouts = more sets for proper volume
+        // REALISTIC SETS/REPS BASED ON TIME
+        // Math: (time ÷ exercises) ÷ 2 minutes per set = max sets possible
         let sets, reps;
         if (experience === 'beginner') {
             if (time === '15') {
-                sets = 2; // Quick circuit
+                sets = 2; // Circuit, quick
                 reps = '10-12';
             } else if (time === '30') {
-                sets = 2; // Keep it manageable
+                sets = 3; // Standard
                 reps = '10-12';
             } else if (time === '45') {
                 sets = 3; // Standard
-                reps = '10-12';
-            } else if (time === '60') {
-                sets = 3; // Good volume
                 reps = '10-15';
+            } else if (time === '60') {
+                sets = 3; // Standard
+                reps = '12-15';
+            } else if (time === '75') {
+                sets = 3; // Standard
+                reps = '12-15';
             } else {
-                sets = Math.random() < 0.5 ? 3 : 4; // Mix it up
+                sets = Math.random() < 0.7 ? 3 : 4; // Mostly 3
                 reps = '10-15';
             }
         } else if (experience === 'intermediate') {
             if (time === '15') {
-                sets = 2; // Circuit style
-                reps = '12-15';
+                sets = 2; // Quick
+                reps = '10-15';
             } else if (time === '30') {
                 sets = 3; // Standard
                 reps = '10-12';
             } else if (time === '45') {
-                sets = 3; // Standard
+                sets = 3; // Standard  
                 reps = '10-15';
             } else if (time === '60') {
-                sets = Math.random() < 0.5 ? 3 : 4; // Vary it
+                sets = Math.random() < 0.5 ? 3 : 4; // Mix
+                reps = '10-15';
+            } else if (time === '75') {
+                sets = Math.random() < 0.5 ? 3 : 4; // Mix
                 reps = '10-15';
             } else {
                 sets = 4; // Higher volume
@@ -1456,20 +1514,23 @@ function createQuickWorkoutPlan() {
             }
         } else { // advanced
             if (time === '15') {
-                sets = 3; // High intensity
-                reps = '8-12';
+                sets = 2; // Fast and heavy
+                reps = '8-10';
             } else if (time === '30') {
-                sets = 3; // Intense
-                reps = '10-15';
+                sets = 3; // Standard
+                reps = '8-12';
             } else if (time === '45') {
+                sets = Math.random() < 0.7 ? 3 : 4; // Mostly 3
+                reps = '10-12';
+            } else if (time === '60') {
                 sets = Math.random() < 0.5 ? 3 : 4; // Mix
                 reps = '10-15';
-            } else if (time === '60') {
-                sets = 4; // Volume
-                reps = '12-15';
+            } else if (time === '75') {
+                sets = 4; // Good volume
+                reps = '10-15';
             } else {
-                sets = Math.random() < 0.3 ? 3 : (Math.random() < 0.7 ? 4 : 5); // Vary 3-5 sets
-                reps = '12-20';
+                sets = Math.random() < 0.5 ? 4 : 5; // 4-5 sets
+                reps = '10-15';
             }
         }
         
@@ -1481,14 +1542,11 @@ function createQuickWorkoutPlan() {
             equipment: equipment,
             form: form
         });
-        console.log(`Added exercise: ${selectedExercise}. Total now: ${exercises.length}`);
     }
     
     if (safetyCounter >= maxAttempts) {
         console.error('Hit safety limit! Something went wrong in exercise generation.');
     }
-    
-    console.log(`Final exercise count: ${exercises.length}`);
     
     // Shuffle exercises for variety
     exercises = exercises.sort(() => Math.random() - 0.5);
