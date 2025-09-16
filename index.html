@@ -1297,10 +1297,10 @@
             <div style="margin-bottom: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="color: var(--dark); margin: 0;">⚡ Quick Workout Generator</h2>
-                    <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quick-quiz-step">1</span> of 4</span>
+                    <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quick-quiz-step">1</span> of 5</span>
                 </div>
                 <div style="background: var(--lighter-bg); height: 8px; border-radius: 10px; overflow: hidden;">
-                    <div id="quick-quiz-progress" style="background: var(--gradient-1); height: 100%; width: 25%; transition: width 0.3s ease;"></div>
+                    <div id="quick-quiz-progress" style="background: var(--gradient-1); height: 100%; width: 20%; transition: width 0.3s ease;"></div>
                 </div>
             </div>
 
@@ -1407,8 +1407,31 @@
                 </div>
             </div>
 
-            <!-- Question 4: Exercise Style -->
+            <!-- Question 4: Workout Location -->
             <div class="quick-quiz-question" data-step="4" style="display: none;">
+                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🏠 Where are you working out?</h3>
+                <div style="display: grid; gap: 15px;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'location', 'gym')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🏋️ Full Gym</div>
+                        <div style="font-size: 14px; color: #666;">Barbells, dumbbells, machines, cables</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'location', 'home')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🏠 At Home</div>
+                        <div style="font-size: 14px; color: #666;">Bodyweight, resistance bands, basic equipment</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'location', 'hotel')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🏨 Hotel/Travel</div>
+                        <div style="font-size: 14px; color: #666;">Minimal space, no equipment needed</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'location', 'basic-gym')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🏃 Basic Gym</div>
+                        <div style="font-size: 14px; color: #666;">Dumbbells, basic machines, limited equipment</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question 5: Exercise Style -->
+            <div class="quick-quiz-question" data-step="5" style="display: none;">
                 <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎨 What's your vibe?</h3>
                 <div style="display: grid; gap: 15px;">
                     <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'style', 'mainstream')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">

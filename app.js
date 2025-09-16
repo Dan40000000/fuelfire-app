@@ -938,6 +938,7 @@ const quickWorkoutData = {
     experience: '',
     muscleGroups: [],
     time: '',
+    location: '',
     style: ''
 };
 
@@ -1016,12 +1017,16 @@ function quickQuizNext() {
         alert('Please select workout duration');
         return;
     }
-    if (quickQuizStep === 4 && !quickWorkoutData.style) {
+    if (quickQuizStep === 4 && !quickWorkoutData.location) {
+        alert('Please select workout location');
+        return;
+    }
+    if (quickQuizStep === 5 && !quickWorkoutData.style) {
         alert('Please select exercise style');
         return;
     }
     
-    if (quickQuizStep === 4) {
+    if (quickQuizStep === 5) {
         // Generate quick workout
         generateQuickWorkout();
         return;
@@ -1047,7 +1052,7 @@ function quickQuizBack() {
 
 // Update quick quiz progress
 function updateQuickQuizProgress() {
-    const progress = (quickQuizStep / 4) * 100;
+    const progress = (quickQuizStep / 5) * 100;
     document.getElementById('quick-quiz-progress').style.width = progress + '%';
     document.getElementById('quick-quiz-step').textContent = quickQuizStep;
     
@@ -1055,7 +1060,7 @@ function updateQuickQuizProgress() {
     document.getElementById('quick-quiz-back-btn').style.display = quickQuizStep > 1 ? 'block' : 'none';
     
     // Change next button text on last step
-    document.getElementById('quick-quiz-next-btn').textContent = quickQuizStep === 4 ? 'Generate Workout 🚀' : 'Next →';
+    document.getElementById('quick-quiz-next-btn').textContent = quickQuizStep === 5 ? 'Generate Workout 🚀' : 'Next →';
 }
 
 // Generate quick workout
@@ -1087,85 +1092,182 @@ function displayQuickWorkout() {
 
 // Create quick workout plan based on selections
 function createQuickWorkoutPlan() {
-    const { experience, muscleGroups, time, style } = quickWorkoutData;
+    const { experience, muscleGroups, time, location, style } = quickWorkoutData;
     
     let exercises = [];
     let restTime = experience === 'beginner' ? '60-90 seconds' : experience === 'intermediate' ? '45-60 seconds' : '30-45 seconds';
     
-    // Exercise database organized by muscle group
+    // Comprehensive exercise database organized by muscle group, location, and style
     const exerciseDB = {
         chest: {
-            mainstream: ['Push-ups', 'Bench Press', 'Incline Press', 'Dips'],
-            unique: ['Archer Push-ups', 'Single-arm Push-ups', 'Clap Push-ups', 'Diamond Push-ups']
+            gym: {
+                mainstream: [
+                    { name: 'Barbell Bench Press', equipment: 'Barbell + Bench', form: 'Lie on bench, grip wider than shoulders, lower to chest, press up' },
+                    { name: 'Incline Dumbbell Press', equipment: 'Dumbbells + Incline Bench', form: 'Upper chest focus, 30-45 degree incline' },
+                    { name: 'Dumbbell Flyes', equipment: 'Dumbbells + Bench', form: 'Wide arc motion, feel stretch in chest' },
+                    { name: 'Cable Chest Press', equipment: 'Cable Machine', form: 'Smooth controlled motion, squeeze at end' },
+                    { name: 'Chest Dips', equipment: 'Dip Station', form: 'Lean forward slightly, deep stretch' }
+                ],
+                unique: [
+                    { name: 'Single-Arm Dumbbell Press', equipment: 'Dumbbell + Bench', form: 'One arm at a time, core stability challenge' },
+                    { name: 'Cable Crossovers', equipment: 'Cable Machine', form: 'High to low motion, squeeze chest' },
+                    { name: 'Landmine Press', equipment: 'Barbell + Landmine', form: 'Core-engaged unilateral press' },
+                    { name: 'Decline Push-ups on Bench', equipment: 'Bench', form: 'Feet elevated, upper chest emphasis' }
+                ]
+            },
+            'basic-gym': {
+                mainstream: [
+                    { name: 'Dumbbell Bench Press', equipment: 'Dumbbells + Bench', form: 'Control the weight, full range of motion' },
+                    { name: 'Incline Dumbbell Press', equipment: 'Dumbbells + Incline Bench', form: 'Target upper chest fibers' },
+                    { name: 'Dumbbell Flyes', equipment: 'Dumbbells + Bench', form: 'Feel the stretch, controlled motion' },
+                    { name: 'Push-ups', equipment: 'None', form: 'Perfect form, full range of motion' }
+                ],
+                unique: [
+                    { name: 'Single-Arm Dumbbell Press', equipment: 'Dumbbell + Bench', form: 'Unilateral strength, core stability' },
+                    { name: 'Dumbbell Pullovers', equipment: 'Dumbbell + Bench', form: 'Chest and serratus focus' },
+                    { name: 'Diamond Push-ups', equipment: 'None', form: 'Hands in diamond shape, tricep emphasis' }
+                ]
+            },
+            home: {
+                mainstream: [
+                    { name: 'Push-ups', equipment: 'None', form: 'Keep body straight, full range of motion' },
+                    { name: 'Incline Push-ups', equipment: 'Chair/Couch', form: 'Hands elevated, easier variation' },
+                    { name: 'Wide-Grip Push-ups', equipment: 'None', form: 'Hands wider than shoulders' },
+                    { name: 'Resistance Band Chest Press', equipment: 'Resistance Bands', form: 'Anchor band behind you' }
+                ],
+                unique: [
+                    { name: 'Archer Push-ups', equipment: 'None', form: 'One arm does most work, very challenging' },
+                    { name: 'Single-Arm Push-ups', equipment: 'None', form: 'Ultimate unilateral challenge' },
+                    { name: 'Clap Push-ups', equipment: 'None', form: 'Explosive power, clap between reps' },
+                    { name: 'Decline Push-ups', equipment: 'Chair/Couch', form: 'Feet elevated on furniture' }
+                ]
+            },
+            hotel: {
+                mainstream: [
+                    { name: 'Push-ups', equipment: 'None', form: 'Classic bodyweight exercise' },
+                    { name: 'Incline Push-ups on Bed', equipment: 'Bed', form: 'Hands on bed edge, easier angle' },
+                    { name: 'Wall Push-ups', equipment: 'Wall', form: 'Standing, arms length from wall' }
+                ],
+                unique: [
+                    { name: 'Suitcase Push-ups', equipment: 'Suitcase', form: 'Hands on suitcase for elevation' },
+                    { name: 'Towel Slides', equipment: 'Towels', form: 'Slide hands apart on smooth floor' },
+                    { name: 'Doorway Stretch Push', equipment: 'Doorway', form: 'Isometric chest exercise' }
+                ]
+            }
         },
         back: {
-            mainstream: ['Pull-ups', 'Bent-over Rows', 'Lat Pulldowns', 'Seated Rows'],
-            unique: ['Inverted Rows', 'Single-arm Rows', 'Face Pulls', 'Reverse Flyes']
-        },
-        shoulders: {
-            mainstream: ['Overhead Press', 'Lateral Raises', 'Front Raises', 'Rear Delt Flyes'],
-            unique: ['Pike Push-ups', 'Handstand Push-ups', 'Arnold Press', 'Wall Walks']
-        },
-        biceps: {
-            mainstream: ['Bicep Curls', 'Hammer Curls', 'Preacher Curls', 'Cable Curls'],
-            unique: ['Towel Curls', 'Resistance Band Curls', '21s', 'Concentration Curls']
-        },
-        triceps: {
-            mainstream: ['Tricep Dips', 'Close-grip Push-ups', 'Overhead Extension', 'Tricep Kickbacks'],
-            unique: ['Diamond Push-ups', 'Tricep Wall Push-ups', 'Single-arm Extensions', 'Tricep Pulses']
-        },
-        quads: {
-            mainstream: ['Squats', 'Lunges', 'Leg Press', 'Step-ups'],
-            unique: ['Jump Squats', 'Pistol Squats', 'Bulgarian Split Squats', 'Cossack Squats']
-        },
-        hamstrings: {
-            mainstream: ['Romanian Deadlifts', 'Leg Curls', 'Good Mornings', 'Stiff-leg Deadlifts'],
-            unique: ['Single-leg RDLs', 'Nordic Curls', 'Glute Ham Raises', 'Reverse Lunges']
-        },
-        glutes: {
-            mainstream: ['Hip Thrusts', 'Glute Bridges', 'Squats', 'Deadlifts'],
-            unique: ['Single-leg Hip Thrusts', 'Clamshells', 'Fire Hydrants', 'Curtsy Lunges']
-        },
-        calves: {
-            mainstream: ['Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises', 'Wall Calf Raises'],
-            unique: ['Single-leg Calf Raises', 'Jump Rope', 'Calf Raises on Steps', 'Farmer Walk on Toes']
-        },
-        core: {
-            mainstream: ['Planks', 'Crunches', 'Russian Twists', 'Leg Raises'],
-            unique: ['Dead Bug', 'Bird Dog', 'Hollow Body Holds', 'Pallof Press']
-        },
-        lowerback: {
-            mainstream: ['Hyperextensions', 'Superman', 'Good Mornings', 'Back Extensions'],
-            unique: ['Bird Dog', 'Single-arm Superman', 'Reverse Plank', 'Wall Sits']
-        }
+            gym: {
+                mainstream: [
+                    { name: 'Pull-ups', equipment: 'Pull-up Bar', form: 'Dead hang to chin over bar' },
+                    { name: 'Lat Pulldowns', equipment: 'Lat Pulldown Machine', form: 'Pull to upper chest, squeeze shoulder blades' },
+                    { name: 'Barbell Rows', equipment: 'Barbell', form: 'Bent over, pull to lower chest' },
+                    { name: 'Seated Cable Rows', equipment: 'Cable Machine', form: 'Pull to torso, squeeze back' },
+                    { name: 'T-Bar Rows', equipment: 'T-Bar', form: 'Chest supported, pull weight to chest' }
+                ],
+                unique: [
+                    { name: 'Single-Arm Dumbbell Rows', equipment: 'Dumbbell + Bench', form: 'One arm at a time, full stretch' },
+                    { name: 'Face Pulls', equipment: 'Cable Machine', form: 'Pull to face, rear delt focus' },
+                    { name: 'Inverted Rows', equipment: 'Barbell + Rack', form: 'Body under bar, pull chest to bar' },
+                    { name: 'Landmine Rows', equipment: 'Barbell + Landmine', form: 'Straddle bar, pull to chest' }
+                ]
+            },
+            'basic-gym': {
+                mainstream: [
+                    { name: 'Dumbbell Rows', equipment: 'Dumbbells + Bench', form: 'One knee on bench, pull weight up' },
+                    { name: 'Pull-ups/Chin-ups', equipment: 'Pull-up Bar', form: 'Full range of motion' },
+                    { name: 'Reverse Flyes', equipment: 'Dumbbells', form: 'Bent over, arms wide, squeeze shoulder blades' },
+                    { name: 'Superman', equipment: 'None', form: 'Lie face down, lift chest and legs' }
+                ],
+                unique: [
+                    { name: 'Renegade Rows', equipment: 'Dumbbells', form: 'Plank position, row each arm' },
+                    { name: 'Single-Arm Bent Rows', equipment: 'Dumbbell', form: 'Staggered stance, row one arm' },
+                    { name: 'Dumbbell Pullovers', equipment: 'Dumbbell + Bench', form: 'Back and chest exercise' }
+                ]
+            },
+            home: {
+                mainstream: [
+                    { name: 'Superman', equipment: 'None', form: 'Strengthen lower back and glutes' },
+                    { name: 'Reverse Snow Angels', equipment: 'None', form: 'Lying face down, move arms in arc' },
+                    { name: 'Resistance Band Rows', equipment: 'Resistance Bands', form: 'Anchor band, pull to torso' },
+                    { name: 'Door Frame Rows', equipment: 'Towel + Door', form: 'Towel around door handle, lean back and pull' }
+                ],
+                unique: [
+                    { name: 'Towel Door Rows', equipment: 'Towel + Door', form: 'Wrap towel around door, pull body up' },
+                    { name: 'Single-Arm Superman', equipment: 'None', form: 'Opposite arm and leg lift' },
+                    { name: 'Wall Handstand', equipment: 'Wall', form: 'Advanced back strengthening' },
+                    { name: 'Backpack Rows', equipment: 'Loaded Backpack', form: 'Use heavy backpack as weight' }
+                ]
+            },
+            hotel: {
+                mainstream: [
+                    { name: 'Superman', equipment: 'None', form: 'Lie on floor, lift opposite arm/leg' },
+                    { name: 'Reverse Snow Angels', equipment: 'None', form: 'Face down, move arms in sweeping motion' },
+                    { name: 'Towel Rows', equipment: 'Towel + Door', form: 'Towel around door handle, lean and pull' }
+                ],
+                unique: [
+                    { name: 'Luggage Rows', equipment: 'Suitcase', form: 'Bent over, row heavy suitcase' },
+                    { name: 'Wall Angels', equipment: 'Wall', form: 'Back to wall, move arms up and down' },
+                    { name: 'Reverse Plank', equipment: 'None', form: 'Face up plank position' }
+                ]
+            }
+    };
+
+    // Add quick muscle groups for comprehensive database (will expand this)
+    const quickMuscleDB = {
+        shoulders: { gym: ['Overhead Press', 'Lateral Raises', 'Rear Delt Flyes'], home: ['Pike Push-ups', 'Wall Handstand Push-ups', 'Arm Circles'] },
+        biceps: { gym: ['Barbell Curls', 'Dumbbell Curls', 'Hammer Curls'], home: ['Towel Curls', 'Resistance Band Curls', 'Door Frame Curls'] },
+        triceps: { gym: ['Close-Grip Bench', 'Tricep Dips', 'Overhead Extension'], home: ['Diamond Push-ups', 'Chair Dips', 'Wall Push-ups'] },
+        quads: { gym: ['Barbell Squats', 'Leg Press', 'Lunges'], home: ['Bodyweight Squats', 'Jump Squats', 'Wall Sit'] },
+        hamstrings: { gym: ['Romanian Deadlifts', 'Leg Curls', 'Good Mornings'], home: ['Single-leg RDLs', 'Glute Bridges', 'Reverse Lunges'] },
+        glutes: { gym: ['Hip Thrusts', 'Bulgarian Split Squats', 'Sumo Deadlifts'], home: ['Glute Bridges', 'Single-leg Hip Thrusts', 'Clamshells'] },
+        calves: { gym: ['Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises'], home: ['Calf Raises', 'Single-leg Calf Raises', 'Jump Rope'] },
+        core: { gym: ['Cable Crunches', 'Hanging Leg Raises', 'Russian Twists'], home: ['Planks', 'Bicycle Crunches', 'Mountain Climbers'] },
+        lowerback: { gym: ['Hyperextensions', 'Good Mornings', 'Deadlifts'], home: ['Superman', 'Bird Dog', 'Reverse Plank'] }
     };
     
     // Select exercises based on selected muscle groups
     muscleGroups.forEach(muscle => {
-        if (exerciseDB[muscle]) {
-            const muscleExercises = exerciseDB[muscle][style] || exerciseDB[muscle].mainstream;
-            const selectedExercise = muscleExercises[Math.floor(Math.random() * muscleExercises.length)];
-            
-            // Set appropriate sets and reps based on experience
-            let sets, reps;
-            if (experience === 'beginner') {
-                sets = 2;
-                reps = '8-12';
-            } else if (experience === 'intermediate') {
-                sets = 3;
-                reps = '10-15';
-            } else {
-                sets = 4;
-                reps = '12-20';
-            }
-            
-            exercises.push({
-                name: selectedExercise,
-                muscle: muscle,
-                sets: sets,
-                reps: reps
-            });
+        let selectedExercise;
+        let equipment = 'None';
+        let form = 'Maintain proper form throughout';
+        
+        // Use comprehensive database for chest and back, quick database for others
+        if (exerciseDB[muscle] && exerciseDB[muscle][location]) {
+            const locationExercises = exerciseDB[muscle][location][style] || exerciseDB[muscle][location].mainstream;
+            const exerciseObj = locationExercises[Math.floor(Math.random() * locationExercises.length)];
+            selectedExercise = exerciseObj.name;
+            equipment = exerciseObj.equipment;
+            form = exerciseObj.form;
+        } else if (quickMuscleDB[muscle]) {
+            // Use location-appropriate exercises
+            const locationKey = (location === 'gym' || location === 'basic-gym') ? 'gym' : 'home';
+            const muscleExercises = quickMuscleDB[muscle][locationKey];
+            selectedExercise = muscleExercises[Math.floor(Math.random() * muscleExercises.length)];
+        } else {
+            selectedExercise = `${muscle.charAt(0).toUpperCase() + muscle.slice(1)} Exercise`;
         }
+        
+        // Set appropriate sets and reps based on experience
+        let sets, reps;
+        if (experience === 'beginner') {
+            sets = Math.floor(Math.random() * 2) + 2; // 2-3 sets
+            reps = '8-12';
+        } else if (experience === 'intermediate') {
+            sets = Math.floor(Math.random() * 2) + 3; // 3-4 sets  
+            reps = '10-15';
+        } else {
+            sets = Math.floor(Math.random() * 2) + 3; // 3-4 sets
+            reps = '12-20';
+        }
+        
+        exercises.push({
+            name: selectedExercise,
+            muscle: muscle,
+            sets: sets,
+            reps: reps,
+            equipment: equipment,
+            form: form
+        });
     });
     
     // Adjust number of exercises based on time (filter existing exercises)
@@ -1192,27 +1294,73 @@ function createQuickWorkoutPlan() {
     let html = `
         <div style="text-align: center; margin-bottom: 30px;">
             <h2 style="color: var(--primary); margin-bottom: 10px;">⚡ Your Quick Blast Workout</h2>
-            <p style="color: #666; font-size: 14px;">${time} minutes • ${experience} level • ${style === 'mainstream' ? 'Classic exercises' : 'Unique movements'}</p>
-            <p style="color: var(--carolina-blue); font-size: 13px; margin-top: 8px;">Targeting: ${muscleGroups.join(', ')}</p>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 15px;">
+                <span style="background: var(--lighter-bg); padding: 8px 12px; border-radius: 20px; font-size: 13px; color: var(--dark);">
+                    ⏱️ ${time} min
+                </span>
+                <span style="background: var(--lighter-bg); padding: 8px 12px; border-radius: 20px; font-size: 13px; color: var(--dark);">
+                    💪 ${experience}
+                </span>
+                <span style="background: var(--lighter-bg); padding: 8px 12px; border-radius: 20px; font-size: 13px; color: var(--dark);">
+                    📍 ${location === 'gym' ? 'Full Gym' : location === 'basic-gym' ? 'Basic Gym' : location === 'home' ? 'At Home' : 'Hotel'}
+                </span>
+            </div>
+            <p style="color: var(--carolina-blue); font-size: 13px; margin: 0;">
+                ${style === 'mainstream' ? '📋 Classic exercises' : '🎯 Unique movements'} • Targeting: ${muscleGroups.join(', ')}
+            </p>
         </div>
         
-        <div style="background: #f8f9ff; padding: 20px; border-radius: 15px; margin-bottom: 25px;">
-            <h3 style="color: var(--primary); margin-bottom: 15px;">📋 Workout Plan</h3>
+        <div style="background: linear-gradient(135deg, #f8f9ff, #fff); padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">🏋️ Your Workout Plan</h3>
     `;
     
     exercises.forEach((exercise, index) => {
         html += `
-            <div style="background: white; margin-bottom: 15px; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary);">
-                <h4 style="color: var(--dark); margin-bottom: 8px;">${index + 1}. ${exercise.name}</h4>
-                <p style="color: #666; font-size: 14px; margin: 0;"><strong>Sets:</strong> ${exercise.sets} | <strong>Reps:</strong> ${exercise.reps}</p>
+            <div style="background: white; margin-bottom: 20px; padding: 20px; border-radius: 15px; border-left: 5px solid var(--primary); box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="color: var(--dark); margin: 0; font-size: 18px;">${index + 1}. ${exercise.name}</h4>
+                    <span style="background: var(--carolina-blue); color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                        ${exercise.muscle.toUpperCase()}
+                    </span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px;">
+                    <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary); font-size: 16px;">${exercise.sets}</div>
+                        <div style="font-size: 12px; color: #666;">SETS</div>
+                    </div>
+                    <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; text-align: center;">
+                        <div style="font-weight: bold; color: var(--primary); font-size: 16px;">${exercise.reps}</div>
+                        <div style="font-size: 12px; color: #666;">REPS</div>
+                    </div>
+                </div>
+                
+                ${exercise.equipment && exercise.equipment !== 'None' ? `
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 13px; color: #856404;"><strong>🛠️ Equipment:</strong> ${exercise.equipment}</div>
+                    </div>
+                ` : ''}
+                
+                <div style="background: #e8f5e8; padding: 12px; border-radius: 8px;">
+                    <div style="font-size: 13px; color: #2d5a2d; line-height: 1.4;"><strong>💡 Form:</strong> ${exercise.form}</div>
+                </div>
             </div>
         `;
     });
     
     html += `
-            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 10px; margin-top: 20px;">
-                <p style="margin: 0; color: var(--dark); font-size: 14px;"><strong>💡 Rest:</strong> ${restTime} between sets</p>
+            <div style="background: linear-gradient(135deg, var(--primary), var(--carolina-blue)); color: white; padding: 20px; border-radius: 15px; text-align: center; margin-top: 25px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 16px;">⏱️ Rest Period</h4>
+                <p style="margin: 0; font-size: 18px; font-weight: bold;">${restTime} between sets</p>
             </div>
+        </div>
+        
+        <div style="background: #fff; padding: 20px; border-radius: 15px; border: 2px solid #e9ecef; text-align: center;">
+            <h4 style="color: var(--primary); margin-bottom: 15px;">🎯 Quick Blast Complete!</h4>
+            <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0;">
+                This is a quick workout blast - not saved to your workout history. 
+                Ready for another? Hit the ⚡ Quick Workout button again!
+            </p>
         </div>
     `;
     
