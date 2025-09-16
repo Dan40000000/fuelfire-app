@@ -1210,6 +1210,7 @@ function createQuickWorkoutPlan() {
                     { name: 'Reverse Plank', equipment: 'None', form: 'Face up plank position' }
                 ]
             }
+        }
     };
 
     // Add quick muscle groups for comprehensive database (will expand this)
