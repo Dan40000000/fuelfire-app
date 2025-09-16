@@ -1291,6 +1291,104 @@
         </div>
     </div>
     
+    <!-- Quick Workout Quiz -->
+    <div class="screen-content" id="quick-workout-quiz" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
+        <div style="max-width: 375px; margin: 0 auto; padding: 20px;">
+            <div style="margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--dark); margin: 0;">⚡ Quick Workout Generator</h2>
+                    <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quick-quiz-step">1</span> of 4</span>
+                </div>
+                <div style="background: var(--lighter-bg); height: 8px; border-radius: 10px; overflow: hidden;">
+                    <div id="quick-quiz-progress" style="background: var(--gradient-1); height: 100%; width: 25%; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- Question 1: Experience Level -->
+            <div class="quick-quiz-question" data-step="1">
+                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">💪 What's your lifting experience?</h3>
+                <div style="display: grid; gap: 15px;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'experience', 'beginner')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🌱 Beginner (0-6 months)</div>
+                        <div style="font-size: 14px; color: #666;">New to working out or getting back into it</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'experience', 'intermediate')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🔥 Intermediate (6+ months)</div>
+                        <div style="font-size: 14px; color: #666;">Comfortable with basic movements</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'experience', 'advanced')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🚀 Advanced (2+ years)</div>
+                        <div style="font-size: 14px; color: #666;">Experienced with complex movements</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question 2: Muscle Groups -->
+            <div class="quick-quiz-question" data-step="2" style="display: none;">
+                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎯 What do you want to target today?</h3>
+                <div style="display: grid; gap: 15px;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'full-body')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🔥 Full Body</div>
+                        <div style="font-size: 14px; color: #666;">Hit everything in one session</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'upper')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">💪 Upper Body</div>
+                        <div style="font-size: 14px; color: #666;">Chest, back, shoulders, arms</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'lower')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🦵 Lower Body</div>
+                        <div style="font-size: 14px; color: #666;">Legs, glutes, calves</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'target', 'core')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🔥 Core Focus</div>
+                        <div style="font-size: 14px; color: #666;">Abs, obliques, core strength</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question 3: Time Available -->
+            <div class="quick-quiz-question" data-step="3" style="display: none;">
+                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">⏰ How much time do you have?</h3>
+                <div style="display: grid; gap: 15px;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '15')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">⚡ 15 Minutes</div>
+                        <div style="font-size: 14px; color: #666;">Quick and intense</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '30')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🔥 30 Minutes</div>
+                        <div style="font-size: 14px; color: #666;">Perfect balance</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'time', '45')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">💪 45 Minutes</div>
+                        <div style="font-size: 14px; color: #666;">Full session</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question 4: Exercise Style -->
+            <div class="quick-quiz-question" data-step="4" style="display: none;">
+                <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎨 What's your vibe?</h3>
+                <div style="display: grid; gap: 15px;">
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'style', 'mainstream')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">📋 Classic & Proven</div>
+                        <div style="font-size: 14px; color: #666;">Squats, bench, deadlifts - the basics</div>
+                    </button>
+                    <button class="quick-quiz-btn" onclick="selectQuickOption(this, 'style', 'unique')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 15px; cursor: pointer; text-align: left; transition: all 0.3s ease;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">🎯 Fresh & Different</div>
+                        <div style="font-size: 14px; color: #666;">Unique movements you haven't tried</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div style="display: flex; gap: 15px; margin-top: 40px;">
+                <button id="quick-quiz-back-btn" onclick="quickQuizBack()" style="display: none; flex: 1; background: #6c757d; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer;">← Back</button>
+                <button onclick="closeQuickWorkout()" style="flex: 1; background: var(--lighter-bg); color: var(--dark); border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer;">Cancel</button>
+                <button id="quick-quiz-next-btn" onclick="quickQuizNext()" style="flex: 2; background: var(--gradient-1); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer;">Next →</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Workout Questionnaire -->
     <div class="screen-content" id="custom-workout-quiz" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
         <div style="max-width: 375px; margin: 0 auto; padding: 20px;">

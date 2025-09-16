@@ -932,21 +932,242 @@ function startCustomWorkout() {
     updateQuizProgress();
 }
 
+// Quick Workout Quiz Variables
+let quickQuizStep = 1;
+const quickWorkoutData = {
+    experience: '',
+    target: '',
+    time: '',
+    style: ''
+};
+
 // Start quick workout generator
 function startQuickWorkout() {
-    // Reset workout data for quick workout
-    currentStep = 1;
-    Object.keys(workoutData).forEach(key => {
-        if (key !== 'muscleGroups') {
-            workoutData[key] = '';
-        } else {
-            workoutData[key] = [];
-        }
+    // Reset quick quiz data
+    quickQuizStep = 1;
+    Object.keys(quickWorkoutData).forEach(key => {
+        quickWorkoutData[key] = '';
     });
     
-    // Show the quiz modal
-    document.getElementById('custom-workout-quiz').style.display = 'block';
-    updateQuizProgress();
+    // Show the quick quiz modal
+    document.getElementById('quick-workout-quiz').style.display = 'block';
+    updateQuickQuizProgress();
+}
+
+// Close quick workout quiz
+function closeQuickWorkout() {
+    document.getElementById('quick-workout-quiz').style.display = 'none';
+}
+
+// Select option in quick quiz
+function selectQuickOption(button, field, value) {
+    // Remove selected class from all buttons in this question
+    const questionDiv = button.closest('.quick-quiz-question');
+    questionDiv.querySelectorAll('.quick-quiz-btn').forEach(btn => {
+        btn.style.border = '2px solid var(--lighter-bg)';
+        btn.style.background = 'var(--card-bg)';
+    });
+    
+    // Highlight selected button
+    button.style.border = '2px solid var(--carolina-blue)';
+    button.style.background = 'var(--lighter-bg)';
+    
+    // Store the value
+    quickWorkoutData[field] = value;
+}
+
+// Navigate to next question in quick quiz
+function quickQuizNext() {
+    // Validate current step
+    const currentField = Object.keys(quickWorkoutData)[quickQuizStep - 1];
+    if (!quickWorkoutData[currentField]) {
+        alert('Please select an option to continue');
+        return;
+    }
+    
+    if (quickQuizStep === 4) {
+        // Generate quick workout
+        generateQuickWorkout();
+        return;
+    }
+    
+    // Move to next step
+    document.querySelector(`.quick-quiz-question[data-step="${quickQuizStep}"]`).style.display = 'none';
+    quickQuizStep++;
+    document.querySelector(`.quick-quiz-question[data-step="${quickQuizStep}"]`).style.display = 'block';
+    
+    updateQuickQuizProgress();
+}
+
+// Navigate to previous question in quick quiz
+function quickQuizBack() {
+    if (quickQuizStep > 1) {
+        document.querySelector(`.quick-quiz-question[data-step="${quickQuizStep}"]`).style.display = 'none';
+        quickQuizStep--;
+        document.querySelector(`.quick-quiz-question[data-step="${quickQuizStep}"]`).style.display = 'block';
+        updateQuickQuizProgress();
+    }
+}
+
+// Update quick quiz progress
+function updateQuickQuizProgress() {
+    const progress = (quickQuizStep / 4) * 100;
+    document.getElementById('quick-quiz-progress').style.width = progress + '%';
+    document.getElementById('quick-quiz-step').textContent = quickQuizStep;
+    
+    // Show/hide back button
+    document.getElementById('quick-quiz-back-btn').style.display = quickQuizStep > 1 ? 'block' : 'none';
+    
+    // Change next button text on last step
+    document.getElementById('quick-quiz-next-btn').textContent = quickQuizStep === 4 ? 'Generate Workout 🚀' : 'Next →';
+}
+
+// Generate quick workout
+function generateQuickWorkout() {
+    document.getElementById('quick-workout-quiz').style.display = 'none';
+    document.getElementById('generating-workout').style.display = 'block';
+    
+    // Update status
+    document.getElementById('generating-status').textContent = 'Creating your quick workout...';
+    
+    // Simulate quick generation (shorter than full workout)
+    setTimeout(() => {
+        document.getElementById('generating-status').textContent = 'Almost ready...';
+        setTimeout(() => {
+            displayQuickWorkout();
+        }, 1000);
+    }, 1500);
+}
+
+// Display quick workout
+function displayQuickWorkout() {
+    document.getElementById('generating-workout').style.display = 'none';
+    document.getElementById('generated-workout').style.display = 'block';
+    
+    // Generate quick workout content
+    const workoutPlan = createQuickWorkoutPlan();
+    document.getElementById('workout-plan-content').innerHTML = workoutPlan;
+}
+
+// Create quick workout plan based on selections
+function createQuickWorkoutPlan() {
+    const { experience, target, time, style } = quickWorkoutData;
+    
+    let exercises = [];
+    let restTime = experience === 'beginner' ? '60-90 seconds' : experience === 'intermediate' ? '45-60 seconds' : '30-45 seconds';
+    
+    // Select exercises based on target and style
+    if (target === 'full-body') {
+        if (style === 'mainstream') {
+            exercises = [
+                { name: 'Squats', sets: 3, reps: experience === 'beginner' ? '8-10' : experience === 'intermediate' ? '10-12' : '12-15' },
+                { name: 'Push-ups', sets: 3, reps: experience === 'beginner' ? '5-8' : experience === 'intermediate' ? '8-12' : '12-20' },
+                { name: 'Bent-over Rows', sets: 3, reps: '8-12' },
+                { name: 'Overhead Press', sets: 3, reps: '6-10' },
+                { name: 'Deadlifts', sets: 2, reps: experience === 'beginner' ? '5-8' : '8-10' }
+            ];
+        } else {
+            exercises = [
+                { name: 'Bulgarian Split Squats', sets: 3, reps: '8-10 each leg' },
+                { name: 'Pike Push-ups', sets: 3, reps: '6-10' },
+                { name: 'Single-arm Dumbbell Rows', sets: 3, reps: '10-12 each' },
+                { name: 'Turkish Get-ups', sets: 2, reps: '3-5 each side' },
+                { name: 'Bear Crawls', sets: 3, reps: '30-45 seconds' }
+            ];
+        }
+    } else if (target === 'upper') {
+        if (style === 'mainstream') {
+            exercises = [
+                { name: 'Bench Press', sets: 4, reps: '8-10' },
+                { name: 'Pull-ups/Lat Pulldowns', sets: 3, reps: '6-10' },
+                { name: 'Overhead Press', sets: 3, reps: '8-10' },
+                { name: 'Barbell Rows', sets: 3, reps: '8-12' },
+                { name: 'Dips', sets: 3, reps: '8-12' },
+                { name: 'Bicep Curls', sets: 3, reps: '10-15' }
+            ];
+        } else {
+            exercises = [
+                { name: 'Archer Push-ups', sets: 3, reps: '5-8 each side' },
+                { name: 'Face Pulls', sets: 4, reps: '15-20' },
+                { name: 'Landmine Press', sets: 3, reps: '8-10 each arm' },
+                { name: 'Inverted Rows', sets: 3, reps: '8-12' },
+                { name: 'Pike Walks', sets: 3, reps: '8-10' },
+                { name: 'Hammer Curls to Press', sets: 3, reps: '10-12' }
+            ];
+        }
+    } else if (target === 'lower') {
+        if (style === 'mainstream') {
+            exercises = [
+                { name: 'Back Squats', sets: 4, reps: '8-12' },
+                { name: 'Romanian Deadlifts', sets: 3, reps: '10-12' },
+                { name: 'Walking Lunges', sets: 3, reps: '12-15 each leg' },
+                { name: 'Leg Press', sets: 3, reps: '15-20' },
+                { name: 'Calf Raises', sets: 4, reps: '15-20' }
+            ];
+        } else {
+            exercises = [
+                { name: 'Pistol Squats', sets: 3, reps: '5-8 each leg' },
+                { name: 'Single-leg Hip Thrusts', sets: 3, reps: '10-12 each' },
+                { name: 'Lateral Lunges', sets: 3, reps: '10-12 each side' },
+                { name: 'Jump Squats', sets: 3, reps: '8-12' },
+                { name: 'Single-leg Calf Raises', sets: 3, reps: '12-15 each' }
+            ];
+        }
+    } else if (target === 'core') {
+        if (style === 'mainstream') {
+            exercises = [
+                { name: 'Planks', sets: 3, reps: '30-60 seconds' },
+                { name: 'Crunches', sets: 3, reps: '15-25' },
+                { name: 'Russian Twists', sets: 3, reps: '20-30' },
+                { name: 'Leg Raises', sets: 3, reps: '10-15' },
+                { name: 'Mountain Climbers', sets: 3, reps: '30-45 seconds' }
+            ];
+        } else {
+            exercises = [
+                { name: 'Dead Bug', sets: 3, reps: '8-10 each side' },
+                { name: 'Bird Dog', sets: 3, reps: '8-10 each side' },
+                { name: 'Pallof Press', sets: 3, reps: '10-12 each side' },
+                { name: 'Single-arm Farmer Carries', sets: 3, reps: '30-45 seconds each' },
+                { name: 'Hollow Body Rocks', sets: 3, reps: '10-15' }
+            ];
+        }
+    }
+    
+    // Adjust number of exercises based on time
+    if (time === '15') {
+        exercises = exercises.slice(0, 3);
+    } else if (time === '30') {
+        exercises = exercises.slice(0, 4);
+    }
+    // 45 minutes keeps all exercises
+    
+    let html = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: var(--primary); margin-bottom: 10px;">⚡ Your Quick ${target === 'full-body' ? 'Full Body' : target === 'upper' ? 'Upper Body' : target === 'lower' ? 'Lower Body' : 'Core'} Workout</h2>
+            <p style="color: #666; font-size: 14px;">${time} minutes • ${experience} level • ${style === 'mainstream' ? 'Classic exercises' : 'Unique movements'}</p>
+        </div>
+        
+        <div style="background: #f8f9ff; padding: 20px; border-radius: 15px; margin-bottom: 25px;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">📋 Workout Plan</h3>
+    `;
+    
+    exercises.forEach((exercise, index) => {
+        html += `
+            <div style="background: white; margin-bottom: 15px; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                <h4 style="color: var(--dark); margin-bottom: 8px;">${index + 1}. ${exercise.name}</h4>
+                <p style="color: #666; font-size: 14px; margin: 0;"><strong>Sets:</strong> ${exercise.sets} | <strong>Reps:</strong> ${exercise.reps}</p>
+            </div>
+        `;
+    });
+    
+    html += `
+            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <p style="margin: 0; color: var(--dark); font-size: 14px;"><strong>💡 Rest:</strong> ${restTime} between sets</p>
+            </div>
+        </div>
+    `;
+    
+    return html;
 }
 
 // Close custom workout
