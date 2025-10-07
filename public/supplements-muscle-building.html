@@ -3,881 +3,766 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muscle Building & Strength Supplements Guide | Evidence-Based</title>
+    <title>Muscle Building Supplements - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #ff6b35 0%, #d63031 50%, #b71c1c 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
-        }
-
-        .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header .subtitle {
-            font-size: 1.3em;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-
-        .muscle-icon {
-            font-size: 2em;
-            margin: 0 10px;
-        }
-
-        .timing-section {
-            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .timing-section h2 {
-            color: #ff6b35;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 2em;
-        }
-
-        .timing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .timing-card {
-            background: rgba(255, 107, 53, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #ff6b35;
-            text-align: center;
-        }
-
-        .timing-card h3 {
-            color: #ff6b35;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .timing-card ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .timing-card li {
-            margin: 8px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
-        }
-
-        .supplement-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
         .supplement-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            background: white;
             border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 3px solid transparent;
-            background-clip: padding-box;
-            position: relative;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .supplement-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #ff6b35, #d63031, #b71c1c);
-        }
-
         .supplement-header {
+            background: linear-gradient(135deg, #ff6b35, #d63031);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .supplement-name {
-            font-size: 1.8em;
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #d63031, #b71c1c);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #b71c1c, #922b21);
+        }
+
+        .supplement-title {
+            font-size: 18px;
             font-weight: bold;
-            color: #2d3436;
+            margin: 0;
         }
 
-        .research-rating {
+        .supplement-rating {
             display: flex;
             align-items: center;
             gap: 5px;
+            font-size: 12px;
         }
 
-        .star {
-            color: #ffa500;
-            font-size: 1.2em;
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
         }
 
-        .star.empty {
-            color: #ddd;
+        .expand-icon.rotated {
+            transform: rotate(180deg);
         }
 
-        .level-indicators {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .level-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .beginner {
-            background: #00b894;
-            color: white;
-        }
-
-        .intermediate {
-            background: #fdcb6e;
-            color: #2d3436;
-        }
-
-        .advanced {
-            background: #e17055;
-            color: white;
-        }
-
-        .timing-badge {
-            display: inline-block;
-            background: linear-gradient(45deg, #ff6b35, #d63031);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin: 5px 5px 5px 0;
-        }
-
-        .dosage-section {
-            background: linear-gradient(135deg, #ff6b35, #d63031);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .dosage-section h4 {
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-
-        .benefits-list {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-        }
-
-        .benefits-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            position: relative;
-            padding-left: 30px;
-        }
-
-        .benefits-list li::before {
-            content: '💪';
-            position: absolute;
-            left: 0;
-            top: 8px;
-        }
-
-        .protein-content {
-            background: linear-gradient(45deg, #00b894, #00cec9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            display: inline-block;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-
-        .side-effects {
-            background: #fff5f5;
-            border-left: 4px solid #e74c3c;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .quality-indicators {
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 2px solid #dee2e6;
         }
 
-        .quality-indicators h5 {
-            color: #495057;
+        .supplement-content.expanded {
+            max-height: 1000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
             margin-bottom: 10px;
         }
 
-        .loading-phase {
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            color: white;
-            padding: 15px;
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
             border-radius: 8px;
-            margin: 15px 0;
+            text-align: center;
         }
 
-        .icon {
-            font-size: 1.5em;
-            margin-right: 10px;
+        .stat-value {
+            font-weight: bold;
+            color: #ff6b35;
+            font-size: 16px;
         }
 
-        @media (max-width: 768px) {
-            .supplement-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .timing-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .supplement-card {
-                padding: 20px;
-            }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
         }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><span class="muscle-icon">💪</span>MUSCLE BUILDING SUPPLEMENTS<span class="muscle-icon">🏋️</span></h1>
-            <div class="subtitle">Evidence-Based Guide for Maximum Gains & Strength</div>
-        </div>
-
-        <div class="timing-section">
-            <h2><span class="icon">⏰</span>Workout Nutrition Timing</h2>
-            <div class="timing-grid">
-                <div class="timing-card">
-                    <h3>Pre-Workout (30-60 min before)</h3>
-                    <ul>
-                        <li>Creatine Monohydrate (3-5g)</li>
-                        <li>Beta-Alanine (2-3g)</li>
-                        <li>Citrulline Malate (6-8g)</li>
-                        <li>Whey Protein (20-30g) if fasted</li>
-                    </ul>
-                </div>
-                <div class="timing-card">
-                    <h3>Post-Workout (within 30 min)</h3>
-                    <ul>
-                        <li>Whey Protein (25-40g)</li>
-                        <li>Creatine Monohydrate (3-5g)</li>
-                        <li>Leucine/BCAAs (10-15g)</li>
-                        <li>Glutamine (10-15g)</li>
-                    </ul>
-                </div>
-                <div class="timing-card">
-                    <h3>Before Bed</h3>
-                    <ul>
-                        <li>Casein Protein (20-40g)</li>
-                        <li>ZMA (3 capsules)</li>
-                        <li>Glutamine (10g)</li>
-                        <li>HMB (3g) - optional</li>
-                    </ul>
-                </div>
-                <div class="timing-card">
-                    <h3>Morning/Anytime</h3>
-                    <ul>
-                        <li>D-Aspartic Acid (3g)</li>
-                        <li>HMB (3g total, split doses)</li>
-                        <li>Whey Protein (25-30g)</li>
-                        <li>Creatine (if not pre/post)</li>
-                    </ul>
-                </div>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
             </div>
-        </div>
-
-        <div class="supplement-grid">
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🥛</span>Whey Protein Powder</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="">☰</div>
+                <div class="header-title">💪 Muscle Building</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">💪 Muscle Building Supplements</h2>
+                        <p style="color: #666; font-size: 14px;">Evidence-based supplements for maximum gains and strength</p>
+                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; -webkit-tap-highlight-color: transparent;">← Back to Categories</button>
                     </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge beginner">Beginner</span>
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
+                    
+                    <!-- Supplements List -->
+                    <div id="supplements-container">
 
-                <div class="protein-content">
-                    <span class="icon">🥩</span>Protein Content: 20-30g per serving
-                </div>
+                        <!-- Whey Protein -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(0)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Whey Protein Powder</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-0">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-0">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">25-40g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Post-Workout</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Fast absorption for muscle protein synthesis<br>
+                                            • Complete amino acid profile<br>
+                                            • Promotes lean muscle growth<br>
+                                            • Supports recovery and repair
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Beginners:</strong> 25-30g per serving, 1-2 servings daily<br>
+                                            <strong>Advanced:</strong> 30-40g per serving, 2-3 servings daily<br>
+                                            <strong>Timing:</strong> Post-workout, between meals, morning
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Digestive upset in lactose intolerant individuals, bloating if consumed too quickly</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Beginners:</strong> 25-30g per serving, 1-2 servings daily</p>
-                    <p><strong>Advanced:</strong> 30-40g per serving, 2-3 servings daily</p>
-                </div>
+                        <!-- Creatine Monohydrate -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(1)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Creatine Monohydrate</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-1">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-1">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3-5g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Anytime</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases power and strength output<br>
+                                            • Enhances muscle volume and size<br>
+                                            • Improves high-intensity performance<br>
+                                            • Most researched supplement for strength
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Maintenance:</strong> 3-5g daily, any time<br>
+                                            <strong>Loading (optional):</strong> 20g daily for 5-7 days<br>
+                                            <strong>Form:</strong> Creapure® monohydrate preferred
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Water retention (beneficial for muscle growth), rare digestive upset with large doses</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="timing-badge">Post-Workout</div>
-                <div class="timing-badge">Between Meals</div>
-                <div class="timing-badge">Morning</div>
+                        <!-- Beta-Alanine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(2)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Beta-Alanine</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-2">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-2">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">2-5g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Reduces muscle fatigue during high-rep sets<br>
+                                            • Improves muscular endurance<br>
+                                            • Buffers lactic acid buildup<br>
+                                            • Enhances training volume capacity
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Beginners:</strong> 2-3g daily, split into 2 doses<br>
+                                            <strong>Advanced:</strong> 3-5g daily, split into 2-3 doses<br>
+                                            <strong>Loading:</strong> 4-6 weeks for muscle saturation
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Harmless tingling sensation (paresthesia), especially on empty stomach</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <ul class="benefits-list">
-                    <li>Fast absorption for muscle protein synthesis</li>
-                    <li>Complete amino acid profile</li>
-                    <li>Promotes lean muscle growth</li>
-                    <li>Supports recovery and repair</li>
-                    <li>Convenient protein source</li>
-                </ul>
+                        <!-- HMB -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(3)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">HMB (β-Hydroxy β-Methylbutyrate)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-3">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-3">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Reduces muscle protein breakdown<br>
+                                            • Preserves lean muscle during cutting<br>
+                                            • May enhance recovery<br>
+                                            • Most effective for beginners or during stress
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Standard:</strong> 3g daily, split into 3 doses of 1g each<br>
+                                            <strong>Timing:</strong> With protein-containing meals<br>
+                                            <strong>Form:</strong> Calcium HMB or free acid
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Generally well-tolerated, rare digestive upset</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Digestive upset in lactose intolerant individuals, bloating if consumed too quickly
-                </div>
+                        <!-- Citrulline Malate -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(4)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Citrulline Malate</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-4">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-4">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">6-8g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Pre-Workout</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Enhances muscle pumps and vascularity<br>
+                                            • Reduces muscle soreness<br>
+                                            • Improves exercise performance<br>
+                                            • Supports nitric oxide production
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Citrulline Malate:</strong> 6-8g, 30-45 minutes pre-workout<br>
+                                            <strong>L-Citrulline:</strong> 3-6g if using pure form<br>
+                                            <strong>Quality:</strong> 2:1 ratio citrulline to malate
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Mild stomach upset if taken on empty stomach, rare digestive issues</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Third-party tested for purity<br>
-                    • Minimal artificial fillers<br>
-                    • Clear amino acid profile<br>
-                    • Whey isolate for higher protein content</p>
-                </div>
-            </div>
+                        <!-- D-Aspartic Acid -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(5)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">D-Aspartic Acid</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-5">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-5">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Morning</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May support natural testosterone levels<br>
+                                            • Potential strength and muscle gains<br>
+                                            • Supports hormonal optimization<br>
+                                            • Research shows mixed results
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Standard:</strong> 3g daily on empty stomach<br>
+                                            <strong>Cycling:</strong> 12 days on, 18 days off pattern<br>
+                                            <strong>Form:</strong> Pure D-Aspartic acid
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Possible mood changes, headaches in some individuals</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">⚡</span>Creatine Monohydrate</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
+                        <!-- ZMA -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(6)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">ZMA (Zinc, Magnesium, B6)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-6">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-6">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">30mg Zn</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Before Bed</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Supports quality sleep and recovery<br>
+                                            • May optimize natural hormone levels<br>
+                                            • Corrects common mineral deficiencies<br>
+                                            • Supports immune function
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Men:</strong> 30mg Zinc, 450mg Magnesium, 10.5mg B6<br>
+                                            <strong>Women:</strong> 20mg Zinc, 300mg Magnesium, 7mg B6<br>
+                                            <strong>Timing:</strong> Before bed on empty stomach
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Nausea if taken with food, vivid dreams in some users</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Glutamine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(7)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Glutamine</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-7">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-7">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">10-15g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Post-Workout</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Supports muscle recovery<br>
+                                            • May reduce muscle soreness<br>
+                                            • Supports immune function during training<br>
+                                            • Most beneficial during intense training
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Standard:</strong> 10-15g daily, split into 2-3 doses<br>
+                                            <strong>Intense Training:</strong> Up to 20-30g daily<br>
+                                            <strong>Form:</strong> L-Glutamine free form
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Generally well-tolerated, rare digestive upset at high doses</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Leucine/BCAAs -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(8)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Leucine/BCAAs</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-8">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-8">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">10-15g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">During Workout</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Stimulates muscle protein synthesis<br>
+                                            • Reduces muscle protein breakdown<br>
+                                            • May reduce exercise fatigue<br>
+                                            • Most useful when training fasted
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Leucine:</strong> 2.5-5g per serving<br>
+                                            <strong>BCAAs:</strong> 10-15g (2:1:1 ratio)<br>
+                                            <strong>Timing:</strong> Pre/during/post workout if fasted
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Generally safe, may compete with other amino acids if overused</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Casein Protein -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(9)" ontouchstart="">
+                                <div>
+                                    <div class="supplement-title">Casein Protein</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-9">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-9">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">20-40g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Before Bed</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Slow-release protein for sustained amino acids<br>
+                                            • Reduces muscle protein breakdown overnight<br>
+                                            • Supports overnight muscle recovery<br>
+                                            • Keeps you satisfied longer
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Before Bed:</strong> 20-40g, 30-60 minutes before sleep<br>
+                                            <strong>Between Meals:</strong> 20-30g during long gaps<br>
+                                            <strong>Form:</strong> Micellar casein preferred
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Digestive issues in lactose intolerant individuals, thicker texture than whey</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge beginner">Beginner</span>
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Maintenance:</strong> 3-5g daily, any time</p>
-                    <p><strong>Total Daily:</strong> 3-5g consistently</p>
-                </div>
-
-                <div class="loading-phase">
-                    <strong>Loading Phase (Optional):</strong> 20g daily for 5-7 days, then 3-5g maintenance
-                </div>
-
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">Post-Workout</div>
-                <div class="timing-badge">Anytime</div>
-
-                <ul class="benefits-list">
-                    <li>Increases power and strength output</li>
-                    <li>Enhances muscle volume and size</li>
-                    <li>Improves high-intensity performance</li>
-                    <li>Supports muscle recovery</li>
-                    <li>Most researched supplement for strength</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Water retention (beneficial for muscle growth), rare digestive upset with large doses
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Creapure® or other tested brands<br>
-                    • 99.9% pure creatine monohydrate<br>
-                    • No artificial flavors needed<br>
-                    • Micronized for better mixing</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🔋</span>Beta-Alanine</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Beginners:</strong> 2-3g daily, split into 2 doses</p>
-                    <p><strong>Advanced:</strong> 3-5g daily, split into 2-3 doses</p>
-                </div>
-
-                <div class="loading-phase">
-                    <strong>Loading Phase:</strong> 4-6 weeks of consistent use needed for muscle carnosine saturation
-                </div>
-
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">With Meals</div>
-
-                <ul class="benefits-list">
-                    <li>Reduces muscle fatigue during high-rep sets</li>
-                    <li>Improves muscular endurance</li>
-                    <li>Buffers lactic acid buildup</li>
-                    <li>Enhances training volume capacity</li>
-                    <li>Supports lean muscle gains</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Harmless tingling sensation (paresthesia), especially on empty stomach
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• CarnoSyn® beta-alanine preferred<br>
-                    • Sustained-release formulas reduce tingling<br>
-                    • Third-party tested<br>
-                    • No unnecessary additives</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🛡️</span>HMB (β-Hydroxy β-Methylbutyrate)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Standard:</strong> 3g daily, split into 3 doses of 1g each</p>
-                    <p><strong>With meals:</strong> Take with protein-containing meals</p>
-                </div>
-
-                <div class="timing-badge">With Meals</div>
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">Post-Workout</div>
-
-                <ul class="benefits-list">
-                    <li>Reduces muscle protein breakdown</li>
-                    <li>Preserves lean muscle during cutting</li>
-                    <li>May enhance recovery</li>
-                    <li>Supports strength maintenance</li>
-                    <li>Most effective for beginners or during stress</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Generally well-tolerated, rare digestive upset
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Calcium HMB or free acid form<br>
-                    • Clinical dosage of 3g daily<br>
-                    • Enteric-coated for better absorption<br>
-                    • Third-party tested for purity</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🌊</span>Citrulline Malate</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Citrulline Malate:</strong> 6-8g, 30-45 minutes pre-workout</p>
-                    <p><strong>L-Citrulline:</strong> 3-6g if using pure form</p>
-                </div>
-
-                <div class="timing-badge">Pre-Workout</div>
-
-                <ul class="benefits-list">
-                    <li>Enhances muscle pumps and vascularity</li>
-                    <li>Reduces muscle soreness</li>
-                    <li>Improves exercise performance</li>
-                    <li>Supports nitric oxide production</li>
-                    <li>May increase training volume</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Mild stomach upset if taken on empty stomach, rare digestive issues
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• 2:1 ratio citrulline to malate<br>
-                    • Pharmaceutical grade<br>
-                    • No artificial colors preferred<br>
-                    • Tested for heavy metals</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🔥</span>D-Aspartic Acid</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Standard:</strong> 3g daily on empty stomach</p>
-                    <p><strong>Cycling:</strong> 12 days on, 18 days off pattern</p>
-                </div>
-
-                <div class="timing-badge">Morning</div>
-                <div class="timing-badge">Empty Stomach</div>
-
-                <ul class="benefits-list">
-                    <li>May support natural testosterone levels</li>
-                    <li>Potential strength and muscle gains</li>
-                    <li>Supports hormonal optimization</li>
-                    <li>May enhance recovery</li>
-                    <li>Research shows mixed results</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Possible mood changes, headaches in some individuals
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Pure D-Aspartic acid form<br>
-                    • Third-party tested<br>
-                    • No proprietary blends<br>
-                    • Clinical 3g dosage</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">😴</span>ZMA (Zinc, Magnesium, B6)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge beginner">Beginner</span>
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Men:</strong> 30mg Zinc, 450mg Magnesium, 10.5mg B6</p>
-                    <p><strong>Women:</strong> 20mg Zinc, 300mg Magnesium, 7mg B6</p>
-                </div>
-
-                <div class="timing-badge">Before Bed</div>
-                <div class="timing-badge">Empty Stomach</div>
-
-                <ul class="benefits-list">
-                    <li>Supports quality sleep and recovery</li>
-                    <li>May optimize natural hormone levels</li>
-                    <li>Corrects common mineral deficiencies</li>
-                    <li>Supports immune function</li>
-                    <li>May improve strength over time</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Nausea if taken with food, vivid dreams in some users
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Zinc as monomethionine/aspartate<br>
-                    • Magnesium aspartate form<br>
-                    • Pyridoxine HCl for B6<br>
-                    • Take away from calcium/iron</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🔄</span>Glutamine</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Standard:</strong> 10-15g daily, split into 2-3 doses</p>
-                    <p><strong>Intense Training:</strong> Up to 20-30g daily</p>
-                </div>
-
-                <div class="timing-badge">Post-Workout</div>
-                <div class="timing-badge">Before Bed</div>
-                <div class="timing-badge">Between Meals</div>
-
-                <ul class="benefits-list">
-                    <li>Supports muscle recovery</li>
-                    <li>May reduce muscle soreness</li>
-                    <li>Supports immune function during training</li>
-                    <li>Aids in muscle glycogen replenishment</li>
-                    <li>Most beneficial during intense training periods</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Generally well-tolerated, rare digestive upset at high doses
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• L-Glutamine free form<br>
-                    • Pharmaceutical grade<br>
-                    • No artificial additives<br>
-                    • Micronized powder for mixing</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🔗</span>Leucine/BCAAs</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge beginner">Beginner</span>
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Leucine:</strong> 2.5-5g per serving</p>
-                    <p><strong>BCAAs:</strong> 10-15g (2:1:1 ratio), mainly if training fasted</p>
-                </div>
-
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">During Workout</div>
-                <div class="timing-badge">Post-Workout</div>
-
-                <ul class="benefits-list">
-                    <li>Stimulates muscle protein synthesis</li>
-                    <li>Reduces muscle protein breakdown</li>
-                    <li>May reduce exercise fatigue</li>
-                    <li>Supports recovery between sets</li>
-                    <li>Most useful when training fasted</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Generally safe, may compete with other amino acids if overused
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• 2:1:1 ratio (Leucine:Isoleucine:Valine)<br>
-                    • Instantized for better mixing<br>
-                    • Third-party tested<br>
-                    • Natural flavoring preferred</p>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🥛</span>Casein Protein</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                </div>
-                
-                <div class="level-indicators">
-                    <span class="level-badge intermediate">Intermediate</span>
-                    <span class="level-badge advanced">Advanced</span>
-                </div>
-
-                <div class="protein-content">
-                    <span class="icon">🥩</span>Protein Content: 20-30g per serving
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Before Bed:</strong> 20-40g, 30-60 minutes before sleep</p>
-                    <p><strong>Between Meals:</strong> 20-30g during long gaps</p>
-                </div>
-
-                <div class="timing-badge">Before Bed</div>
-                <div class="timing-badge">Between Meals</div>
-
-                <ul class="benefits-list">
-                    <li>Slow-release protein for sustained amino acids</li>
-                    <li>Reduces muscle protein breakdown overnight</li>
-                    <li>Supports overnight muscle recovery</li>
-                    <li>High in calcium and phosphorus</li>
-                    <li>Keeps you satisfied longer</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Digestive issues in lactose intolerant individuals, thicker texture than whey
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Micellar casein preferred over calcium caseinate<br>
-                    • Minimal artificial ingredients<br>
-                    • Third-party tested<br>
-                    • Good amino acid profile</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="timing-section">
-            <h2><span class="icon">📋</span>Beginner vs Advanced Recommendations</h2>
-            <div class="timing-grid">
-                <div class="timing-card">
-                    <h3>Beginner Stack (Essential)</h3>
-                    <ul>
-                        <li><strong>Whey Protein:</strong> Foundation for muscle growth</li>
-                        <li><strong>Creatine:</strong> Proven strength and size gains</li>
-                        <li><strong>ZMA:</strong> Sleep and recovery support</li>
-                        <li><strong>Total Cost:</strong> ~$60-80/month</li>
-                    </ul>
-                </div>
-                <div class="timing-card">
-                    <h3>Intermediate Stack</h3>
-                    <ul>
-                        <li>Beginner stack PLUS:</li>
-                        <li><strong>Beta-Alanine:</strong> Enhanced endurance</li>
-                        <li><strong>Citrulline Malate:</strong> Better pumps</li>
-                        <li><strong>Casein:</strong> Nighttime protein</li>
-                        <li><strong>Total Cost:</strong> ~$100-130/month</li>
-                    </ul>
-                </div>
-                <div class="timing-card">
-                    <h3>Advanced Stack</h3>
-                    <ul>
-                        <li>Intermediate stack PLUS:</li>
-                        <li><strong>HMB:</strong> Muscle preservation</li>
-                        <li><strong>D-Aspartic Acid:</strong> Hormonal support</li>
-                        <li><strong>Glutamine:</strong> Enhanced recovery</li>
-                        <li><strong>Total Cost:</strong> ~$150-200/month</li>
-                    </ul>
-                </div>
-                <div class="timing-card">
-                    <h3>Budget Priorities</h3>
-                    <ul>
-                        <li><strong>1st Priority:</strong> Creatine ($15/month)</li>
-                        <li><strong>2nd Priority:</strong> Whey Protein ($30/month)</li>
-                        <li><strong>3rd Priority:</strong> ZMA ($15/month)</li>
-                        <li><strong>4th Priority:</strong> Beta-Alanine ($20/month)</li>
-                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')" ontouchstart="">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')" ontouchstart="">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')" ontouchstart="">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')" ontouchstart="">💡 Meal Ideas</div>
+            <div class="menu-item active" onclick="goToPage('supplements.html')" ontouchstart="">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')" ontouchstart="">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="">📈 Progress & Analytics</div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function goBack() {
+            window.location.href = 'supplements.html';
+        }
+
+        function toggleSupplement(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        function goBack() {
+            window.location.href = 'supplements.html';
+        }
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
 </body>
 </html>

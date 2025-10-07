@@ -3,237 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Health Supplements Guide</title>
+    <title>Brain Health Supplements - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #5b73c4 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4c63d2 0%, #7c4dff 50%, #3f51b5 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .disclaimer {
-            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
-            color: white;
-            padding: 15px 20px;
-            margin: 20px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .supplements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
         .supplement-card {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .supplement-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-            color: white;
-            padding: 20px;
-            position: relative;
-        }
-
-        .supplement-name {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .supplement-subtitle {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .research-rating {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.2);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        .card-content {
-            padding: 20px;
-        }
-
-        .badges-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
             margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        .badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+        .supplement-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .badge-memory { background: #e8f5e8; color: #2d5016; }
-        .badge-focus { background: #fff3cd; color: #856404; }
-        .badge-neuroprotection { background: #d4edda; color: #155724; }
-        .badge-alzheimers { background: #f8d7da; color: #721c24; }
-        .badge-age-all { background: #d1ecf1; color: #0c5460; }
-        .badge-age-senior { background: #ffeaa7; color: #d63031; }
-        .badge-timing-food { background: #e17055; color: white; }
-        .badge-timing-empty { background: #6c5ce7; color: white; }
-        .badge-timing-anytime { background: #00b894; color: white; }
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #5b6bd8, #6a4190);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #4f59c6, #5e377e);
+        }
+
+        .supplement-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .supplement-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 1000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
 
         .info-section {
             margin-bottom: 15px;
         }
 
         .info-title {
-            font-weight: 700;
-            color: #4c63d2;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
-        .info-content {
-            font-size: 0.9rem;
+        .info-text {
+            font-size: 14px;
             line-height: 1.5;
+            color: #333;
         }
 
-        .dosage-highlight {
-            background: linear-gradient(90deg, #a8e6cf, #88d8a3);
-            color: #2d5016;
-            padding: 8px 12px;
+        .dosage-box {
+            background: white;
+            padding: 12px;
             border-radius: 8px;
-            font-weight: 600;
-            display: inline-block;
-            margin: 5px 0;
+            border-left: 4px solid #667eea;
+            margin-bottom: 10px;
         }
 
-        .warning {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 10px 15px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        .quality-indicators {
-            background: #f8f9fa;
+        .quick-stat {
+            background: white;
             padding: 10px;
             border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        .star-rating {
-            color: #ffd700;
-            font-size: 1.2rem;
-        }
-
-        .research-links {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-
-        .research-link {
-            display: inline-block;
-            color: #4c63d2;
-            text-decoration: none;
-            font-size: 0.8rem;
-            margin-right: 15px;
-            margin-bottom: 5px;
-        }
-
-        .research-link:hover {
-            text-decoration: underline;
-        }
-
-        .footer {
-            background: #2d3436;
-            color: white;
-            padding: 30px 20px;
             text-align: center;
         }
 
-        @media (max-width: 768px) {
-            .supplements-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .supplement-card {
-                margin: 0 10px;
-            }
+        .stat-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 16px;
         }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Brain Health Supplements Guide</h1>
-            <p>Evidence-based cognitive enhancement and neuroprotection</p>
-        </div>
-
-        <div class="disclaimer">
-            <strong>Medical Disclaimer:</strong> This information is for educational purposes only. Consult your healthcare provider before starting any supplement regimen, especially if you have medical conditions or take medications.
-        </div>
-
-        <div class="supplements-grid">
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="">☰</div>
+                <div class="header-title">🧠 Brain Health</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🧠 Brain Health Supplements</h2>
+                        <p style="color: #666; font-size: 14px;">Evidence-based cognitive enhancement and neuroprotection</p>
+                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; -webkit-tap-highlight-color: transparent;">← Back to Categories</button>
+                    </div>
+                    
+                    <!-- Supplements List -->
+                    <div id="supplements-container">
             <!-- Omega-3 (DHA/EPA) -->
             <div class="supplement-card">
                 <div class="card-header">
