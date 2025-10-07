@@ -10,19 +10,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         window = UIWindow(frame: UIScreen.main.bounds)
         
-        // Create WebView configuration
+        // Create WebView configuration with cache clearing
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.allowsInlineMediaPlayback = true
+        
+        // Clear all website data to force fresh load
+        let websiteDataTypes = WKWebsiteDataStore.allWebsiteDataTypes()
+        WKWebsiteDataStore.default().removeData(ofTypes: websiteDataTypes, modifiedSince: Date(timeIntervalSince1970: 0), completionHandler: {})
         
         // Create WebView with proper configuration
         let webView = WKWebView(frame: window!.bounds, configuration: webConfiguration)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.scrollView.bounces = false
         
-        // Load the website with cache busting
-        if let url = URL(string: "https://fuelfire-app.vercel.app?v=\(Date().timeIntervalSince1970)") {
+        // Load the website with aggressive cache busting
+        let timestamp = Date().timeIntervalSince1970
+        if let url = URL(string: "https://fuelfire-app.vercel.app?v=\(timestamp)&bust=\(Int.random(in: 1000...9999))") {
             var request = URLRequest(url: url)
             request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+            request.setValue("no-cache", forHTTPHeaderField: "Pragma")
             webView.load(request)
         }
         
