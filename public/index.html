@@ -133,28 +133,28 @@
                             Quick Start Workouts
                         </h3>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
-                            <div onclick="quickStartWorkout('muscle-30')" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;" 
+                            <div onclick="quickStartWorkout('muscle-30')" ontouchstart="" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" 
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(75, 156, 211, 0.2)'; this.style.borderColor='var(--carolina-blue)'" 
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='transparent'">
                                 <div style="font-size: 24px; margin-bottom: 8px;">💪</div>
                                 <div style="font-weight: bold; color: var(--dark); margin-bottom: 4px;">30-Min Muscle</div>
                                 <div style="font-size: 12px; color: #666;">Quick pump session</div>
                             </div>
-                            <div onclick="quickStartWorkout('hiit-20')" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;"
+                            <div onclick="quickStartWorkout('hiit-20')" ontouchstart="" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(75, 156, 211, 0.2)'; this.style.borderColor='var(--carolina-blue)'"
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='transparent'">
                                 <div style="font-size: 24px; margin-bottom: 8px;">🔥</div>
                                 <div style="font-weight: bold; color: var(--dark); margin-bottom: 4px;">20-Min HIIT</div>
                                 <div style="font-size: 12px; color: #666;">Fat burning blast</div>
                             </div>
-                            <div onclick="quickStartWorkout('mobility-15')" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;"
+                            <div onclick="quickStartWorkout('mobility-15')" ontouchstart="" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(75, 156, 211, 0.2)'; this.style.borderColor='var(--carolina-blue)'"
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='transparent'">
                                 <div style="font-size: 24px; margin-bottom: 8px;">🧘</div>
                                 <div style="font-weight: bold; color: var(--dark); margin-bottom: 4px;">15-Min Mobility</div>
                                 <div style="font-size: 12px; color: #666;">Flexibility & recovery</div>
                             </div>
-                            <div onclick="quickStartWorkout('core-10')" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;"
+                            <div onclick="quickStartWorkout('core-10')" ontouchstart="" style="background: var(--card-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"
                                  onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 25px rgba(75, 156, 211, 0.2)'; this.style.borderColor='var(--carolina-blue)'"
                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.borderColor='transparent'">
                                 <div style="font-size: 24px; margin-bottom: 8px;">🎯</div>
@@ -726,7 +726,7 @@
                             <textarea id="quick-notes" placeholder="Quick notes or key exercises..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; height: 80px; margin-bottom: 20px; resize: vertical;"></textarea>
                             
                             <div style="display: flex; gap: 10px;">
-                                <button onclick="saveQuickWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1;">
+                                <button onclick="saveQuickWorkout()" ontouchstart="" style="background: var(--gradient-1); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                                     💾 Save Workout
                                 </button>
                                 <button onclick="closeQuickLog()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer;">
@@ -1573,7 +1573,7 @@
             </div>
             
             <div style="display: flex; gap: 15px; margin-top: 30px;">
-                <button onclick="saveWorkoutPlan()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">💾 Save Workout</button>
+                <button onclick="saveWorkoutPlan()" ontouchstart="" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💾 Save Workout</button>
                 <button onclick="startWorkoutNow()" style="background: var(--gradient-2); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">🔥 Start Now</button>
             </div>
             

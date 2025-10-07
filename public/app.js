@@ -1233,6 +1233,8 @@ function createWorkoutPlan() {
 
 // Save workout plan with 3-workout limit
 function saveWorkoutPlan() {
+    console.log('saveWorkoutPlan called'); // Debug log
+    
     // Get existing saved workouts
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
     
@@ -1731,6 +1733,8 @@ function startWorkoutNow() {
 
 // Quick start workout function
 function quickStartWorkout(workoutType) {
+    console.log('quickStartWorkout called with:', workoutType); // Debug log
+    
     // Map workout types to screen IDs
     const workoutScreens = {
         'muscle-30': 'workout-muscle-30',
@@ -4928,6 +4932,8 @@ function closeQuickLog() {
 }
 
 function saveQuickWorkout() {
+    console.log('saveQuickWorkout called'); // Debug log
+    
     const type = document.getElementById('quick-workout-type').value;
     const duration = document.getElementById('quick-duration').value;
     const notes = document.getElementById('quick-notes').value;
