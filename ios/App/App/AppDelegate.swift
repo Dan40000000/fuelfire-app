@@ -19,9 +19,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.scrollView.bounces = false
         
-        // Load the website
-        if let url = URL(string: "https://fuelfire-app.vercel.app") {
-            let request = URLRequest(url: url)
+        // Load the website with cache busting
+        if let url = URL(string: "https://fuelfire-app.vercel.app?v=\(Date().timeIntervalSince1970)") {
+            var request = URLRequest(url: url)
+            request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             webView.load(request)
         }
         

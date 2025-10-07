@@ -61,7 +61,7 @@
             </div>
             
             <div class="header">
-                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
                 <div class="header-title">Meal Ideas</div>
             </div>
             
@@ -73,16 +73,16 @@
                         
                         <!-- BULK MODE SELECTOR -->
                         <div style="margin: 20px 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 400px; margin: 20px auto;">
-                            <button id="male-bulk-btn" onclick="setBulkMode('male-bulk')" style="background: linear-gradient(135deg, #1a1a1a, #444); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;">
+                            <button id="male-bulk-btn" onclick="setBulkMode('male-bulk')" ontouchstart="" style="background: linear-gradient(135deg, #1a1a1a, #444); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;">
                                 🔥 MALE BULK<br><span style="font-size: 10px; opacity: 0.9;">1000-1500 cal</span>
                             </button>
-                            <button id="male-cut-btn" onclick="setBulkMode('male-cut')" style="background: linear-gradient(135deg, #2c3e50, #3498db); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); transition: all 0.3s ease;">
+                            <button id="male-cut-btn" onclick="setBulkMode('male-cut')" ontouchstart="" style="background: linear-gradient(135deg, #2c3e50, #3498db); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); transition: all 0.3s ease;">
                                 ⚡ MALE CUT<br><span style="font-size: 10px; opacity: 0.9;">400-600 cal</span>
                             </button>
-                            <button id="female-bulk-btn" onclick="setBulkMode('female-bulk')" style="background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4); transition: all 0.3s ease;">
+                            <button id="female-bulk-btn" onclick="setBulkMode('female-bulk')" ontouchstart="" style="background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4); transition: all 0.3s ease;">
                                 💎 FEMALE BULK<br><span style="font-size: 10px; opacity: 0.9;">600-900 cal</span>
                             </button>
-                            <button id="female-cut-btn" onclick="setBulkMode('female-cut')" style="background: linear-gradient(135deg, #ffc3e1, #ff8cc8); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 140, 200, 0.4); transition: all 0.3s ease;">
+                            <button id="female-cut-btn" onclick="setBulkMode('female-cut')" ontouchstart="" style="background: linear-gradient(135deg, #ffc3e1, #ff8cc8); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 140, 200, 0.4); transition: all 0.3s ease;">
                                 ✨ FEMALE CUT<br><span style="font-size: 10px; opacity: 0.9;">300-450 cal</span>
                             </button>
                         </div>
@@ -94,55 +94,55 @@
                     
                     <!-- Meat Category Grid -->
                     <div class="category-grid">
-                        <div class="category-card" onclick="goToCategory('beef')" style="background: linear-gradient(135deg, #8B4513, #A0522D); box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);">
+                        <div class="category-card" onclick="goToCategory('beef')" ontouchstart="" style="background: linear-gradient(135deg, #8B4513, #A0522D); box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);">
                             <div class="category-icon">🥩</div>
                             <h3 class="category-title">Beef</h3>
                             <p class="category-subtitle">10 Premium Recipes</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('chicken')" style="background: linear-gradient(135deg, #DAA520, #FFD700); box-shadow: 0 5px 20px rgba(218, 165, 32, 0.3);">
+                        <div class="category-card" onclick="goToCategory('chicken')" ontouchstart="" style="background: linear-gradient(135deg, #DAA520, #FFD700); box-shadow: 0 5px 20px rgba(218, 165, 32, 0.3);">
                             <div class="category-icon">🍗</div>
                             <h3 class="category-title">Chicken</h3>
                             <p class="category-subtitle">10 Popular Recipes</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('pork')" style="background: linear-gradient(135deg, #CD853F, #DEB887); box-shadow: 0 5px 20px rgba(205, 133, 63, 0.3);">
+                        <div class="category-card" onclick="goToCategory('pork')" ontouchstart="" style="background: linear-gradient(135deg, #CD853F, #DEB887); box-shadow: 0 5px 20px rgba(205, 133, 63, 0.3);">
                             <div class="category-icon">🥓</div>
                             <h3 class="category-title">Pork</h3>
                             <p class="category-subtitle">10 Tasty Recipes</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('shrimp')" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);">
+                        <div class="category-card" onclick="goToCategory('shrimp')" ontouchstart="" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);">
                             <div class="category-icon">🍤</div>
                             <h3 class="category-title">Shrimp</h3>
                             <p class="category-subtitle">10 Seafood Recipes</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('turkey')" style="background: linear-gradient(135deg, #BC8F8F, #D2691E); box-shadow: 0 5px 20px rgba(188, 143, 143, 0.3);">
+                        <div class="category-card" onclick="goToCategory('turkey')" ontouchstart="" style="background: linear-gradient(135deg, #BC8F8F, #D2691E); box-shadow: 0 5px 20px rgba(188, 143, 143, 0.3);">
                             <div class="category-icon">🦃</div>
                             <h3 class="category-title">Turkey</h3>
                             <p class="category-subtitle">10 Lean Recipes</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('sandwiches')" style="background: linear-gradient(135deg, #4ECDC4, #44A08D); box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);">
+                        <div class="category-card" onclick="goToCategory('sandwiches')" ontouchstart="" style="background: linear-gradient(135deg, #4ECDC4, #44A08D); box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);">
                             <div class="category-icon">🌯</div>
                             <h3 class="category-title">Fitness Wraps</h3>
                             <p class="category-subtitle">10 Healthy Protein Wraps</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('keto')" style="background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
+                        <div class="category-card" onclick="goToCategory('keto')" ontouchstart="" style="background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
                             <div class="category-icon">🥑</div>
                             <h3 class="category-title">Keto</h3>
                             <p class="category-subtitle">10 Low-Carb Recipes</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('fusion')" style="background: linear-gradient(135deg, #f093fb, #f5576c); box-shadow: 0 5px 20px rgba(240, 147, 251, 0.3);">
+                        <div class="category-card" onclick="goToCategory('fusion')" ontouchstart="" style="background: linear-gradient(135deg, #f093fb, #f5576c); box-shadow: 0 5px 20px rgba(240, 147, 251, 0.3);">
                             <div class="category-icon">🌍</div>
                             <h3 class="category-title">Fusion</h3>
                             <p class="category-subtitle">10 Creative Fusion</p>
                         </div>
                         
-                        <div class="category-card" onclick="goToCategory('protein-bowls')" style="background: linear-gradient(135deg, #00b4d8, #0077b6); box-shadow: 0 5px 20px rgba(0, 119, 182, 0.3);">
+                        <div class="category-card" onclick="goToCategory('protein-bowls')" ontouchstart="" style="background: linear-gradient(135deg, #00b4d8, #0077b6); box-shadow: 0 5px 20px rgba(0, 119, 182, 0.3);">
                             <div class="category-icon">🥗</div>
                             <h3 class="category-title">Protein Bowls</h3>
                             <p class="category-subtitle">10 Healthy Power Bowls</p>
@@ -159,7 +159,7 @@
     </div>
 
     <!-- Overlay for sidebar -->
-    <div class="overlay" onclick="toggleSidebar()"></div>
+    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -167,17 +167,17 @@
             <div class="sidebar-brand">🔥 Well Fit</div>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
-            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
-            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
-            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
-            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
-            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
-            <div class="menu-item active" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
-            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍽️ Meal Plans</div>
+            <div class="menu-item active" onclick="goToPage('meal-ideas.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📈 Progress & Analytics</div>
         </div>
     </div>
 
