@@ -1,6 +1,6 @@
 {
   "appId": "com.wellfit.app",
-  "appName": "Well Fit",
+  "appName": "Well Fit Pro",
   "webDir": "public",
   "server": {
     "androidScheme": "https"

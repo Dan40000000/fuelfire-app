@@ -8,23 +8,19 @@
 </head>
 <body>
     <!-- Notification -->
-    <div class="notification" id="notification">
-        <div class="notification-close" onclick="closeNotification()">×</div>
-        <div class="notification-header">
+    <div class="notification" id="notification" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 20px 25px; padding-right: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 350px; width: 90%; z-index: 1000; display: none;">
+        <div class="notification-close" onclick="closeNotification()" style="position: absolute; top: 10px; right: 15px; cursor: pointer; color: #999; font-size: 28px; line-height: 1; padding: 5px;">×</div>
+        <div class="notification-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #4B9CD3; font-weight: bold;">
             <span style="font-size: 24px;">💪</span>
             <span>Daily Motivation</span>
         </div>
-        <div class="notification-content" id="notification-quote">
+        <div class="notification-content" id="notification-quote" style="color: #13294B; font-style: italic; line-height: 1.5;">
             "Loading quote..."
         </div>
     </div>
     
     <div class="phone-container">
         <div class="screen">
-            <div class="status-bar">
-                <span id="time">9:41</span>
-                <span>100%</span>
-            </div>
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>

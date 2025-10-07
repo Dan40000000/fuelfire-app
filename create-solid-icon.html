@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head><title>Create Solid Icon</title></head>
+<body>
+<canvas id="canvas" width="1024" height="1024"></canvas>
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// Solid gradient background
+const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+gradient.addColorStop(0, '#4B9CD3');
+gradient.addColorStop(1, '#13294B');
+ctx.fillStyle = gradient;
+ctx.fillRect(0, 0, 1024, 1024);
+
+// White text
+ctx.fillStyle = 'white';
+ctx.font = 'bold 360px -apple-system';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('WF', 512, 512);
+
+// Download
+canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'solid-icon-1024.png';
+    a.click();
+});
+</script>
+</body>
+</html>

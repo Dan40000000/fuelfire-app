@@ -22,13 +22,19 @@ function updateDailyQuote() {
 
 // Show notification
 function showNotification() {
-    document.getElementById('notification').classList.add('show');
-    setTimeout(closeNotification, 5000);
+    const notification = document.getElementById('notification');
+    if (notification) {
+        notification.style.display = 'block';
+        notification.style.top = '20px';
+    }
 }
 
 // Close notification
 function closeNotification() {
-    document.getElementById('notification').classList.remove('show');
+    const notification = document.getElementById('notification');
+    if (notification) {
+        notification.style.display = 'none';
+    }
 }
 
 // Toggle sidebar

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate iOS App Icons</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            display: block;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>iOS Icon Generator for Well Fit Pro</h1>
+    <div id="output"></div>
+    
+    <script>
+        const sizes = [
+            { name: 'AppIcon-20@1x.png', size: 20 },
+            { name: 'AppIcon-20@2x.png', size: 40 },
+            { name: 'AppIcon-20@3x.png', size: 60 },
+            { name: 'AppIcon-29@1x.png', size: 29 },
+            { name: 'AppIcon-29@2x.png', size: 58 },
+            { name: 'AppIcon-29@3x.png', size: 87 },
+            { name: 'AppIcon-40@1x.png', size: 40 },
+            { name: 'AppIcon-40@2x.png', size: 80 },
+            { name: 'AppIcon-40@3x.png', size: 120 },
+            { name: 'AppIcon-60@2x.png', size: 120 },
+            { name: 'AppIcon-60@3x.png', size: 180 },
+            { name: 'AppIcon-76@1x.png', size: 76 },
+            { name: 'AppIcon-76@2x.png', size: 152 },
+            { name: 'AppIcon-83.5@2x.png', size: 167 },
+            { name: 'AppIcon-1024@1x.png', size: 1024 }
+        ];
+
+        function createIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#4B9CD3');  // Carolina Blue
+            gradient.addColorStop(1, '#13294B');  // Navy
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw "WF" text
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.35}px -apple-system, system-ui`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('WF', size / 2, size / 2);
+            
+            // Small fitness icon
+            if (size >= 40) {
+                ctx.font = `${size * 0.12}px -apple-system, system-ui`;
+                ctx.fillText('💪', size * 0.8, size * 0.8);
+            }
+            
+            return canvas;
+        }
+
+        const output = document.getElementById('output');
+        
+        sizes.forEach(({ name, size }) => {
+            const canvas = createIcon(size);
+            output.appendChild(canvas);
+            
+            // Create download link
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = name;
+                link.textContent = `Download ${name} (${size}x${size})`;
+                output.appendChild(link);
+                output.appendChild(document.createElement('br'));
+            });
+        });
+    </script>
+</body>
+</html>
