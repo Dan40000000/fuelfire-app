@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exercise Image Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .generator {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 10px;
+            background: white;
+        }
+        .download-btn {
+            background: #4B9CD3;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background: #13294B;
+        }
+        .exercise-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Exercise Image Generator for Well Fit Pro</h1>
+    
+    <div class="generator">
+        <h2>Chest Exercise Images</h2>
+        <div id="chest-images" class="exercise-preview"></div>
+        <button class="download-btn" onclick="generateAllChestImages()">Generate All Chest Exercise Images</button>
+    </div>
+
+    <script>
+        const chestExercises = [
+            {
+                name: "Barbell Bench Press",
+                icon: "bench-press",
+                color: "#e74c3c",
+                description: "Barbell Bench Press"
+            },
+            {
+                name: "Dumbbell Bench Press", 
+                icon: "dumbbell-press",
+                color: "#3498db",
+                description: "Dumbbell Press"
+            },
+            {
+                name: "Incline Barbell Press",
+                icon: "incline-press", 
+                color: "#9b59b6",
+                description: "Incline Press"
+            },
+            {
+                name: "Push-ups",
+                icon: "pushup",
+                color: "#27ae60",
+                description: "Push-ups"
+            },
+            {
+                name: "Dumbbell Flyes",
+                icon: "flyes",
+                color: "#f39c12",
+                description: "Dumbbell Flyes"
+            },
+            {
+                name: "Dips",
+                icon: "dips",
+                color: "#34495e",
+                description: "Dips"
+            },
+            {
+                name: "Cable Crossovers",
+                icon: "cable-cross",
+                color: "#e67e22",
+                description: "Cable Crossovers"
+            },
+            {
+                name: "Decline Bench Press",
+                icon: "decline-press",
+                color: "#95a5a6",
+                description: "Decline Press"
+            }
+        ];
+
+        function createExerciseImage(exercise, size = 200) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, exercise.color);
+            gradient.addColorStop(1, adjustBrightness(exercise.color, -30));
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // Exercise illustration based on type
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            
+            switch(exercise.icon) {
+                case 'bench-press':
+                    drawBenchPress(ctx, size);
+                    break;
+                case 'dumbbell-press':
+                    drawDumbbellPress(ctx, size);
+                    break;
+                case 'incline-press':
+                    drawInclinePress(ctx, size);
+                    break;
+                case 'pushup':
+                    drawPushup(ctx, size);
+                    break;
+                case 'flyes':
+                    drawFlyes(ctx, size);
+                    break;
+                case 'dips':
+                    drawDips(ctx, size);
+                    break;
+                case 'cable-cross':
+                    drawCableCross(ctx, size);
+                    break;
+                case 'decline-press':
+                    drawDeclinePress(ctx, size);
+                    break;
+            }
+
+            // Exercise name
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = `bold ${size * 0.08}px -apple-system, system-ui`;
+            ctx.textAlign = 'center';
+            ctx.fillText(exercise.description, size/2, size * 0.9);
+
+            return canvas;
+        }
+
+        function drawBenchPress(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Bench
+            ctx.fillRect(centerX - size*0.3, centerY + size*0.1, size*0.6, size*0.08);
+            
+            // Person lying down (simplified)
+            ctx.beginPath();
+            ctx.arc(centerX - size*0.15, centerY, size*0.05, 0, Math.PI * 2); // Head
+            ctx.fill();
+            
+            // Body
+            ctx.fillRect(centerX - size*0.2, centerY - size*0.02, size*0.4, size*0.04);
+            
+            // Barbell
+            ctx.fillRect(centerX - size*0.25, centerY - size*0.15, size*0.5, size*0.02);
+            
+            // Weights
+            ctx.fillRect(centerX - size*0.3, centerY - size*0.18, size*0.08, size*0.08);
+            ctx.fillRect(centerX + size*0.22, centerY - size*0.18, size*0.08, size*0.08);
+            
+            // Arms
+            ctx.beginPath();
+            ctx.moveTo(centerX - size*0.1, centerY - size*0.1);
+            ctx.lineTo(centerX - size*0.2, centerY - size*0.13);
+            ctx.moveTo(centerX + size*0.1, centerY - size*0.1);
+            ctx.lineTo(centerX + size*0.2, centerY - size*0.13);
+            ctx.stroke();
+        }
+
+        function drawDumbbellPress(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Bench
+            ctx.fillRect(centerX - size*0.3, centerY + size*0.1, size*0.6, size*0.08);
+            
+            // Person
+            ctx.beginPath();
+            ctx.arc(centerX - size*0.15, centerY, size*0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillRect(centerX - size*0.2, centerY - size*0.02, size*0.4, size*0.04);
+            
+            // Dumbbells
+            ctx.fillRect(centerX - size*0.25, centerY - size*0.15, size*0.15, size*0.02);
+            ctx.fillRect(centerX + size*0.1, centerY - size*0.15, size*0.15, size*0.02);
+            
+            // Dumbbell weights
+            ctx.fillRect(centerX - size*0.28, centerY - size*0.17, size*0.05, size*0.06);
+            ctx.fillRect(centerX - size*0.13, centerY - size*0.17, size*0.05, size*0.06);
+            ctx.fillRect(centerX + size*0.08, centerY - size*0.17, size*0.05, size*0.06);
+            ctx.fillRect(centerX + size*0.23, centerY - size*0.17, size*0.05, size*0.06);
+        }
+
+        function drawInclinePress(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Incline bench
+            ctx.save();
+            ctx.translate(centerX, centerY + size*0.1);
+            ctx.rotate(-0.3);
+            ctx.fillRect(-size*0.3, -size*0.04, size*0.6, size*0.08);
+            ctx.restore();
+            
+            // Person on incline
+            ctx.beginPath();
+            ctx.arc(centerX - size*0.1, centerY - size*0.05, size*0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Angled body
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(-0.3);
+            ctx.fillRect(-size*0.2, -size*0.02, size*0.4, size*0.04);
+            ctx.restore();
+            
+            // Barbell above
+            ctx.fillRect(centerX - size*0.25, centerY - size*0.2, size*0.5, size*0.02);
+        }
+
+        function drawPushup(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Ground line
+            ctx.fillRect(0, centerY + size*0.15, size, size*0.02);
+            
+            // Person in plank
+            ctx.beginPath();
+            ctx.arc(centerX - size*0.2, centerY, size*0.05, 0, Math.PI * 2); // Head
+            ctx.fill();
+            
+            // Body line
+            ctx.fillRect(centerX - size*0.25, centerY - size*0.02, size*0.5, size*0.04);
+            
+            // Arms
+            ctx.beginPath();
+            ctx.moveTo(centerX - size*0.15, centerY);
+            ctx.lineTo(centerX - size*0.15, centerY + size*0.15);
+            ctx.moveTo(centerX + size*0.15, centerY);
+            ctx.lineTo(centerX + size*0.15, centerY + size*0.15);
+            ctx.stroke();
+            
+            // Hands
+            ctx.fillRect(centerX - size*0.18, centerY + size*0.13, size*0.06, size*0.03);
+            ctx.fillRect(centerX + size*0.12, centerY + size*0.13, size*0.06, size*0.03);
+        }
+
+        function drawFlyes(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Bench
+            ctx.fillRect(centerX - size*0.3, centerY + size*0.1, size*0.6, size*0.08);
+            
+            // Person
+            ctx.beginPath();
+            ctx.arc(centerX - size*0.15, centerY, size*0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillRect(centerX - size*0.2, centerY - size*0.02, size*0.4, size*0.04);
+            
+            // Arms spread wide
+            ctx.beginPath();
+            ctx.moveTo(centerX - size*0.1, centerY - size*0.1);
+            ctx.lineTo(centerX - size*0.35, centerY - size*0.05);
+            ctx.moveTo(centerX + size*0.1, centerY - size*0.1);
+            ctx.lineTo(centerX + size*0.35, centerY - size*0.05);
+            ctx.stroke();
+            
+            // Dumbbells at ends
+            ctx.fillRect(centerX - size*0.4, centerY - size*0.08, size*0.08, size*0.02);
+            ctx.fillRect(centerX + size*0.32, centerY - size*0.08, size*0.08, size*0.02);
+        }
+
+        function drawDips(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Parallel bars
+            ctx.fillRect(centerX - size*0.3, centerY - size*0.1, size*0.15, size*0.02);
+            ctx.fillRect(centerX + size*0.15, centerY - size*0.1, size*0.15, size*0.02);
+            
+            // Support posts
+            ctx.fillRect(centerX - size*0.23, centerY - size*0.1, size*0.02, size*0.25);
+            ctx.fillRect(centerX + size*0.21, centerY - size*0.1, size*0.02, size*0.25);
+            
+            // Person
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - size*0.05, size*0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillRect(centerX - size*0.02, centerY - size*0.02, size*0.04, size*0.15);
+            
+            // Arms on bars
+            ctx.beginPath();
+            ctx.moveTo(centerX - size*0.1, centerY - size*0.08);
+            ctx.lineTo(centerX - size*0.2, centerY - size*0.1);
+            ctx.moveTo(centerX + size*0.1, centerY - size*0.08);
+            ctx.lineTo(centerX + size*0.2, centerY - size*0.1);
+            ctx.stroke();
+        }
+
+        function drawCableCross(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Cable towers
+            ctx.fillRect(size*0.1, centerY - size*0.25, size*0.03, size*0.5);
+            ctx.fillRect(size*0.87, centerY - size*0.25, size*0.03, size*0.5);
+            
+            // Cables
+            ctx.beginPath();
+            ctx.moveTo(size*0.13, centerY - size*0.2);
+            ctx.lineTo(centerX - size*0.1, centerY);
+            ctx.moveTo(size*0.87, centerY - size*0.2);
+            ctx.lineTo(centerX + size*0.1, centerY);
+            ctx.stroke();
+            
+            // Person
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - size*0.05, size*0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillRect(centerX - size*0.02, centerY - size*0.02, size*0.04, size*0.15);
+            
+            // Arms pulling cables
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX - size*0.1, centerY);
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + size*0.1, centerY);
+            ctx.stroke();
+        }
+
+        function drawDeclinePress(ctx, size) {
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            // Decline bench
+            ctx.save();
+            ctx.translate(centerX, centerY + size*0.1);
+            ctx.rotate(0.3);
+            ctx.fillRect(-size*0.3, -size*0.04, size*0.6, size*0.08);
+            ctx.restore();
+            
+            // Person on decline
+            ctx.beginPath();
+            ctx.arc(centerX + size*0.1, centerY + size*0.05, size*0.05, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Angled body
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(0.3);
+            ctx.fillRect(-size*0.2, -size*0.02, size*0.4, size*0.04);
+            ctx.restore();
+            
+            // Barbell
+            ctx.fillRect(centerX - size*0.25, centerY - size*0.1, size*0.5, size*0.02);
+        }
+
+        function adjustBrightness(color, percent) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 +
+                (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255))
+                .toString(16).slice(1);
+        }
+
+        function generateAllChestImages() {
+            const container = document.getElementById('chest-images');
+            container.innerHTML = '';
+
+            chestExercises.forEach((exercise, index) => {
+                const canvas = createExerciseImage(exercise, 200);
+                container.appendChild(canvas);
+
+                // Create download link
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${exercise.icon}-exercise.png`;
+                    link.textContent = `Download ${exercise.name}`;
+                    link.className = 'download-btn';
+                    link.style.display = 'block';
+                    link.style.margin = '5px 0';
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.style.textAlign = 'center';
+                    wrapper.appendChild(canvas);
+                    wrapper.appendChild(link);
+                    
+                    container.appendChild(wrapper);
+                });
+            });
+        }
+
+        // Auto-generate on load
+        window.addEventListener('load', () => {
+            generateAllChestImages();
+        });
+    </script>
+</body>
+</html>

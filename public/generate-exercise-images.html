@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exercise Image Generator</title>
+    <style>
+        body { font-family: -apple-system, system-ui; padding: 20px; background: #f5f5f5; }
+        .exercise-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+        .exercise-item { text-align: center; background: white; padding: 15px; border-radius: 10px; }
+        canvas { border: 2px solid #ddd; border-radius: 10px; }
+        .download-btn { background: #4B9CD3; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Exercise Images for Well Fit Pro</h1>
+    <div id="images-container" class="exercise-grid"></div>
+
+    <script>
+        const exercises = [
+            { name: "bench-press", color: "#e74c3c", title: "Bench Press" },
+            { name: "dumbbell-press", color: "#3498db", title: "Dumbbell Press" },
+            { name: "incline-press", color: "#9b59b6", title: "Incline Press" },
+            { name: "pushup", color: "#27ae60", title: "Push-ups" },
+            { name: "flyes", color: "#f39c12", title: "Flyes" },
+            { name: "dips", color: "#34495e", title: "Dips" },
+            { name: "cable-cross", color: "#e67e22", title: "Cable Cross" },
+            { name: "decline-press", color: "#95a5a6", title: "Decline Press" }
+        ];
+
+        function createExerciseImage(exercise, size = 150) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, exercise.color);
+            gradient.addColorStop(1, adjustBrightness(exercise.color, -20));
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // White exercise illustration
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            switch(exercise.name) {
+                case 'bench-press':
+                    // Bench
+                    ctx.fillRect(centerX - size*0.25, centerY + size*0.08, size*0.5, size*0.06);
+                    // Person
+                    ctx.beginPath();
+                    ctx.arc(centerX - size*0.1, centerY, size*0.04, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Body
+                    ctx.fillRect(centerX - size*0.15, centerY - size*0.015, size*0.3, size*0.03);
+                    // Barbell
+                    ctx.fillRect(centerX - size*0.2, centerY - size*0.12, size*0.4, size*0.015);
+                    // Weights
+                    ctx.fillRect(centerX - size*0.23, centerY - size*0.14, size*0.06, size*0.06);
+                    ctx.fillRect(centerX + size*0.17, centerY - size*0.14, size*0.06, size*0.06);
+                    break;
+                
+                case 'dumbbell-press':
+                    // Person
+                    ctx.beginPath();
+                    ctx.arc(centerX - size*0.1, centerY, size*0.04, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Body
+                    ctx.fillRect(centerX - size*0.15, centerY - size*0.015, size*0.3, size*0.03);
+                    // Dumbbells
+                    ctx.fillRect(centerX - size*0.2, centerY - size*0.12, size*0.12, size*0.015);
+                    ctx.fillRect(centerX + size*0.08, centerY - size*0.12, size*0.12, size*0.015);
+                    // Weights
+                    ctx.fillRect(centerX - size*0.22, centerY - size*0.135, size*0.04, size*0.045);
+                    ctx.fillRect(centerX - size*0.1, centerY - size*0.135, size*0.04, size*0.045);
+                    ctx.fillRect(centerX + size*0.06, centerY - size*0.135, size*0.04, size*0.045);
+                    ctx.fillRect(centerX + size*0.18, centerY - size*0.135, size*0.04, size*0.045);
+                    break;
+                
+                case 'pushup':
+                    // Ground
+                    ctx.fillRect(0, centerY + size*0.12, size, size*0.015);
+                    // Person
+                    ctx.beginPath();
+                    ctx.arc(centerX - size*0.15, centerY, size*0.04, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Body
+                    ctx.fillRect(centerX - size*0.2, centerY - size*0.015, size*0.4, size*0.03);
+                    // Arms
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - size*0.12, centerY);
+                    ctx.lineTo(centerX - size*0.12, centerY + size*0.12);
+                    ctx.moveTo(centerX + size*0.12, centerY);
+                    ctx.lineTo(centerX + size*0.12, centerY + size*0.12);
+                    ctx.stroke();
+                    break;
+                
+                case 'flyes':
+                    // Person
+                    ctx.beginPath();
+                    ctx.arc(centerX - size*0.1, centerY, size*0.04, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Body
+                    ctx.fillRect(centerX - size*0.15, centerY - size*0.015, size*0.3, size*0.03);
+                    // Arms spread wide
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - size*0.08, centerY - size*0.08);
+                    ctx.lineTo(centerX - size*0.3, centerY - size*0.04);
+                    ctx.moveTo(centerX + size*0.08, centerY - size*0.08);
+                    ctx.lineTo(centerX + size*0.3, centerY - size*0.04);
+                    ctx.stroke();
+                    // Dumbbells
+                    ctx.fillRect(centerX - size*0.35, centerY - size*0.06, size*0.08, size*0.015);
+                    ctx.fillRect(centerX + size*0.27, centerY - size*0.06, size*0.08, size*0.015);
+                    break;
+                
+                case 'dips':
+                    // Bars
+                    ctx.fillRect(centerX - size*0.25, centerY - size*0.08, size*0.12, size*0.015);
+                    ctx.fillRect(centerX + size*0.13, centerY - size*0.08, size*0.12, size*0.015);
+                    // Person
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY - size*0.04, size*0.04, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Body
+                    ctx.fillRect(centerX - size*0.015, centerY - size*0.015, size*0.03, size*0.12);
+                    // Arms
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - size*0.08, centerY - size*0.06);
+                    ctx.lineTo(centerX - size*0.16, centerY - size*0.08);
+                    ctx.moveTo(centerX + size*0.08, centerY - size*0.06);
+                    ctx.lineTo(centerX + size*0.16, centerY - size*0.08);
+                    ctx.stroke();
+                    break;
+                
+                default:
+                    // Generic weight icon
+                    ctx.fillRect(centerX - size*0.15, centerY - size*0.08, size*0.3, size*0.16);
+                    ctx.fillRect(centerX - size*0.2, centerY - size*0.06, size*0.1, size*0.12);
+                    ctx.fillRect(centerX + size*0.1, centerY - size*0.06, size*0.1, size*0.12);
+            }
+
+            return canvas;
+        }
+
+        function adjustBrightness(color, percent) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 +
+                (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255))
+                .toString(16).slice(1);
+        }
+
+        function generateImages() {
+            const container = document.getElementById('images-container');
+            container.innerHTML = '';
+
+            exercises.forEach(exercise => {
+                const canvas = createExerciseImage(exercise, 150);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'exercise-item';
+                
+                wrapper.appendChild(canvas);
+                
+                const title = document.createElement('h3');
+                title.textContent = exercise.title;
+                title.style.margin = '10px 0 5px 0';
+                wrapper.appendChild(title);
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.textContent = 'Download PNG';
+                downloadBtn.className = 'download-btn';
+                downloadBtn.onclick = () => {
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `${exercise.name}.png`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                    });
+                };
+                wrapper.appendChild(downloadBtn);
+                
+                container.appendChild(wrapper);
+            });
+        }
+
+        window.addEventListener('load', generateImages);
+    </script>
+</body>
+</html>
