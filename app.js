@@ -180,14 +180,18 @@ function closeWorkoutPreview() {
     }
 }
 
+}
+
 // Toggle sidebar
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.querySelector('.overlay').classList.toggle('show');
 }
 
-
 // Update time
+function updateTime() {
+    // This function can be used to update time displays if needed
+    // Currently a placeholder for compatibility
 }
 
 // Custom Workout Quiz Variables
