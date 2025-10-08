@@ -3,859 +3,572 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Endurance & Stamina Supplements - Evidence-Based Guide</title>
+    <title>Endurance Supplements - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #2c3e50;
-            background: linear-gradient(135deg, #e8f5e8 0%, #f0fdfd 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            background: linear-gradient(135deg, #2d5a27 0%, #1e6262 100%);
-            color: white;
-            padding: 40px 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .hydration-reminder {
-            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .hydration-reminder h3 {
-            margin-bottom: 10px;
-            font-size: 1.4em;
-        }
-
-        .supplements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-        }
-
         .supplement-card {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            position: relative;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .supplement-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            border-color: #27ae60;
-        }
-
-        .supplement-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #27ae60 0%, #2e8b57 50%, #20b2aa 100%);
-        }
-
         .supplement-header {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
         }
 
-        .supplement-name {
-            font-size: 1.6em;
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #16a085, #138d75);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #138d75, #117a65);
+        }
+
+        .supplement-title {
+            font-size: 18px;
             font-weight: bold;
-            color: #2d5a27;
-            margin-bottom: 5px;
+            margin: 0;
         }
 
-        .research-rating {
+        .supplement-rating {
             display: flex;
             align-items: center;
             gap: 5px;
+            font-size: 12px;
         }
 
-        .stars {
-            color: #f39c12;
-            font-size: 1.2em;
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
         }
 
-        .timing-badges {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+        .expand-icon.rotated {
+            transform: rotate(180deg);
         }
 
-        .timing-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-transform: uppercase;
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
         }
 
-        .pre-workout {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
+        .supplement-content.expanded {
+            max-height: 1000px;
         }
 
-        .during-workout {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-        }
-
-        .post-workout {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-
-        .endurance-types {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .endurance-type {
-            background: linear-gradient(135deg, #27ae60, #2e8b57);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: 500;
-        }
-
-        .dosage-section {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .dosage-title {
-            font-weight: bold;
-            color: #2d5a27;
-            margin-bottom: 8px;
-        }
-
-        .benefits-list {
-            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .benefits-title {
-            font-weight: bold;
-            color: #2d5a27;
-            margin-bottom: 8px;
-        }
-
-        .benefits-list ul {
-            margin-left: 20px;
-        }
-
-        .benefits-list li {
-            margin-bottom: 5px;
-            color: #34495e;
-        }
-
-        .warning-section {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid #f39c12;
-        }
-
-        .warning-title {
-            font-weight: bold;
-            color: #e67e22;
-            margin-bottom: 8px;
-        }
-
-        .quality-section {
-            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .quality-title {
-            font-weight: bold;
-            color: #0c5460;
-            margin-bottom: 8px;
-        }
-
-        .loading-phase {
-            background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid #03a9f4;
-        }
-
-        .loading-title {
-            font-weight: bold;
-            color: #0277bd;
-            margin-bottom: 8px;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 30px;
-            background: linear-gradient(135deg, #2d5a27 0%, #1e6262 100%);
-            color: white;
-            border-radius: 20px;
-        }
-
-        .disclaimer {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        .content-inner {
             padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            border-left: 4px solid #dc3545;
         }
 
-        .disclaimer h3 {
-            color: #721c24;
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #1abc9c;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #1abc9c;
             margin-bottom: 10px;
         }
 
-        .disclaimer p {
-            color: #721c24;
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        @media (max-width: 768px) {
-            .supplements-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .supplement-card {
-                padding: 20px;
-            }
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #1abc9c;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Endurance & Stamina Supplements</h1>
-            <p>Evidence-Based Guide for Peak Performance & Sustained Energy</p>
-        </div>
-
-        <div class="disclaimer">
-            <h3>Medical Disclaimer</h3>
-            <p>This information is for educational purposes only and is not intended as medical advice. Always consult with a healthcare professional before starting any supplement regimen, especially if you have medical conditions or take medications.</p>
-        </div>
-
-        <div class="hydration-reminder">
-            <h3>Essential: Hydration & Electrolytes</h3>
-            <p>Before any supplement strategy, ensure proper hydration with electrolytes (sodium, potassium, magnesium). Dehydration significantly impairs endurance performance regardless of supplementation.</p>
-        </div>
-
-        <div class="supplements-grid">
-            <!-- Beta-Alanine -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Beta-Alanine</div>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">🏃 Endurance</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🏃 Endurance & Stamina Supplements</h2>
+                        <p style="color: #666; font-size: 14px;">Evidence-based supplements for endurance and cardiovascular performance</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★★</span>
-                        <span>5/5</span>
+                    
+                    <!-- Supplements List -->
+                    <div id="supplements-container">
+                        <!-- Beta-Alanine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(0)">
+                                <div>
+                                    <div class="supplement-title">Beta-Alanine</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-0">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-0">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3-5g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Split Doses</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Reduces muscle fatigue during 1-4 minute efforts<br>
+                                            • Improves muscular endurance<br>
+                                            • Most effective for high-intensity endurance events<br>
+                                            • Builds up muscle carnosine levels over time
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 3-5g daily<br>
+                                            <strong>Timing:</strong> Split into 2-3 doses to reduce tingling<br>
+                                            <strong>Loading:</strong> Takes 2-4 weeks to saturate muscles<br>
+                                            <strong>Best for:</strong> Events lasting 1-4 minutes
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Harmless tingling sensation (paresthesia) 15-20 minutes after intake</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Citrulline -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(1)">
+                                <div>
+                                    <div class="supplement-title">L-Citrulline</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-1">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-1">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">6-8g</div>
+                                            <div class="stat-label">Per Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">60 min prior</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Enhances blood flow and oxygen delivery<br>
+                                            • Reduces muscle soreness<br>
+                                            • Improves exercise capacity<br>
+                                            • May delay fatigue during endurance exercise
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>L-Citrulline:</strong> 6-8g<br>
+                                            <strong>Citrulline Malate:</strong> 8-10g<br>
+                                            <strong>Timing:</strong> 60 minutes pre-exercise<br>
+                                            <strong>Daily use:</strong> Safe for continuous supplementation
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Very well tolerated. Rare: mild stomach discomfort at high doses</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nitrates -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(2)">
+                                <div>
+                                    <div class="supplement-title">Beetroot Juice/Nitrates</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-2">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-2">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">500ml</div>
+                                            <div class="stat-label">Beetroot Juice</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">2-3 hours</div>
+                                            <div class="stat-label">Before Exercise</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Reduces oxygen cost of exercise<br>
+                                            • Improves time to exhaustion<br>
+                                            • Enhances performance in 4-30 minute events<br>
+                                            • Natural source of dietary nitrates
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Beetroot juice:</strong> 500ml (300-600mg nitrates)<br>
+                                            <strong>Timing:</strong> 2-3 hours pre-exercise<br>
+                                            <strong>Loading:</strong> 3-6 days for optimal benefits<br>
+                                            <strong>Alternative:</strong> Nitrate supplements (5-9mmol)
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">May cause red/pink urine or stool (harmless beeturia)</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid mouthwash before/after - kills bacteria needed to convert nitrates.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Caffeine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(3)">
+                                <div>
+                                    <div class="supplement-title">Caffeine</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-3">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-3">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3-6mg/kg</div>
+                                            <div class="stat-label">Body Weight</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">30-60 min</div>
+                                            <div class="stat-label">Before Exercise</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Improves endurance performance<br>
+                                            • Reduces perceived exertion<br>
+                                            • Enhances fat oxidation<br>
+                                            • Works for both short and long duration exercise
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 3-6mg per kg body weight<br>
+                                            <strong>Typical:</strong> 200-400mg for most people<br>
+                                            <strong>Timing:</strong> 30-60 minutes pre-exercise<br>
+                                            <strong>Peak effect:</strong> 45-90 minutes post-ingestion
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Jitters, anxiety, GI upset, sleep disruption if taken late</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Tolerance develops quickly. Consider cycling or saving for key events.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Creatine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(4)">
+                                <div>
+                                    <div class="supplement-title">Creatine Monohydrate</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-4">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-4">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">5g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Any Time</div>
+                                            <div class="stat-label">Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Improves repeated high-intensity efforts<br>
+                                            • Enhances power output during intervals<br>
+                                            • Most beneficial for efforts under 30 seconds<br>
+                                            • May help with recovery between bouts
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Maintenance:</strong> 5g daily<br>
+                                            <strong>Loading (optional):</strong> 20g for 5 days<br>
+                                            <strong>Timing:</strong> Consistency matters more than timing<br>
+                                            <strong>Best for:</strong> Interval training and repeated sprints
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Water retention (2-4 lbs), rare stomach upset with large doses</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sodium Bicarbonate -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(5)">
+                                <div>
+                                    <div class="supplement-title">Sodium Bicarbonate</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-5">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-5">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">0.3g/kg</div>
+                                            <div class="stat-label">Body Weight</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">60-90 min</div>
+                                            <div class="stat-label">Before Exercise</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Buffers acid buildup in muscles<br>
+                                            • Most effective for 1-7 minute high-intensity efforts<br>
+                                            • May improve time to exhaustion<br>
+                                            • Works best in trained athletes
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 0.3g per kg body weight<br>
+                                            <strong>Example:</strong> ~20g for 70kg (154lb) person<br>
+                                            <strong>Timing:</strong> 60-90 minutes pre-exercise<br>
+                                            <strong>With food:</strong> To reduce GI upset
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">GI distress, bloating, diarrhea (common). Practice in training first</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">High risk of stomach upset. Test during training, not competition.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                    <span class="timing-badge during-workout">DURING</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">High-Intensity Cardio</span>
-                    <span class="endurance-type">Strength Endurance</span>
-                    <span class="endurance-type">HIIT</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 3-5g daily, divided into 2-3 doses<br>
-                    <strong>Timing:</strong> 30-60 minutes pre-workout or with meals<br>
-                    <strong>Duration:</strong> 4-6 weeks to reach muscle saturation</p>
-                </div>
-
-                <div class="loading-phase">
-                    <div class="loading-title">Loading Protocol</div>
-                    <p>Week 1-2: 2-3g daily<br>
-                    Week 3+: 3-5g daily for maintenance<br>
-                    Take with meals to reduce tingling sensation</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Reduces muscle acidosis and fatigue</li>
-                        <li>Improves performance in 1-4 minute high-intensity efforts</li>
-                        <li>Increases muscle carnosine levels</li>
-                        <li>Delays onset of muscular fatigue</li>
-                        <li>Enhances repeated sprint performance</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Common:</strong> Harmless tingling sensation (paresthesia)<br>
-                    <strong>Avoid if:</strong> Sensitive to tingling sensations<br>
-                    <strong>Note:</strong> Effects diminish if supplementation stops</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: CarnoSyn® branded beta-alanine, third-party tested, pharmaceutical grade, no artificial fillers</p>
                 </div>
             </div>
-
-            <!-- Creatine Monohydrate -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Creatine Monohydrate</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★★</span>
-                        <span>5/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge post-workout">POST</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Strength Endurance</span>
-                    <span class="endurance-type">Power Endurance</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 3-5g daily<br>
-                    <strong>Timing:</strong> Post-workout with carbs or anytime<br>
-                    <strong>Consistency:</strong> Daily supplementation required</p>
-                </div>
-
-                <div class="loading-phase">
-                    <div class="loading-title">Loading Options</div>
-                    <p><strong>Fast Loading:</strong> 20g daily for 5 days, then 3-5g maintenance<br>
-                    <strong>Slow Loading:</strong> 3-5g daily for 3-4 weeks<br>
-                    Both methods achieve same saturation</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Improves repeated high-intensity efforts</li>
-                        <li>Increases muscle power and strength</li>
-                        <li>Faster recovery between sets</li>
-                        <li>Enhanced muscle volume and hydration</li>
-                        <li>Supports ATP regeneration</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Common:</strong> Initial water weight gain (1-3 lbs)<br>
-                    <strong>Rare:</strong> Digestive upset with large doses<br>
-                    <strong>Hydration:</strong> Increase water intake</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Creapure® brand, micronized powder, NSF certified, no added sugars or flavors</p>
-                </div>
-            </div>
-
-            <!-- Citrulline Malate -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Citrulline Malate</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★☆</span>
-                        <span>4/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Cardio Endurance</span>
-                    <span class="endurance-type">Strength Endurance</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 6-8g citrulline malate (2:1 ratio)<br>
-                    <strong>Timing:</strong> 30-45 minutes pre-workout<br>
-                    <strong>Empty stomach:</strong> For optimal absorption</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Increases nitric oxide production</li>
-                        <li>Improves blood flow and oxygen delivery</li>
-                        <li>Reduces muscle soreness</li>
-                        <li>Enhances exercise capacity</li>
-                        <li>Faster recovery between sets</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Rare:</strong> Mild digestive upset with high doses<br>
-                    <strong>Interaction:</strong> May enhance effects of blood pressure medications<br>
-                    <strong>Start low:</strong> Begin with 4-6g to assess tolerance</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: 2:1 citrulline to malate ratio, pharmaceutical grade, third-party tested, no artificial additives</p>
-                </div>
-            </div>
-
-            <!-- Beetroot Extract -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Beetroot Extract (Nitrates)</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★☆</span>
-                        <span>4/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Aerobic Endurance</span>
-                    <span class="endurance-type">Cycling</span>
-                    <span class="endurance-type">Running</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 300-600mg nitrates (equivalent to 500ml beetroot juice)<br>
-                    <strong>Timing:</strong> 2-3 hours pre-exercise for peak effect<br>
-                    <strong>Duration:</strong> Effects last 6-8 hours</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Improves oxygen efficiency</li>
-                        <li>Reduces oxygen cost of exercise</li>
-                        <li>Enhances time to exhaustion</li>
-                        <li>Improves performance in 4-30 minute efforts</li>
-                        <li>Natural vasodilation</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Harmless:</strong> Pink/red urine (beeturia)<br>
-                    <strong>Avoid if:</strong> History of kidney stones<br>
-                    <strong>Note:</strong> Avoid mouthwash 6 hours before use (reduces effectiveness)</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Standardized nitrate content, organic beetroot, concentrated extract, no added sugars</p>
-                </div>
-            </div>
-
-            <!-- Rhodiola Rosea -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Rhodiola Rosea</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★☆☆</span>
-                        <span>3/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Mental Endurance</span>
-                    <span class="endurance-type">Stress Adaptation</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 200-400mg daily<br>
-                    <strong>Timing:</strong> 30-60 minutes pre-workout or morning<br>
-                    <strong>Standardization:</strong> 3% rosavins, 1% salidroside</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Reduces perceived exertion</li>
-                        <li>Combats mental and physical fatigue</li>
-                        <li>Improves stress adaptation</li>
-                        <li>Enhances cognitive function during exercise</li>
-                        <li>Supports recovery from training stress</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Rare:</strong> Jitteriness, insomnia if taken late<br>
-                    <strong>Avoid if:</strong> Bipolar disorder, pregnancy<br>
-                    <strong>Cycling:</strong> Use 2 weeks on, 1 week off</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Standardized extract (3% rosavins, 1% salidroside), organic source, third-party tested</p>
-                </div>
-            </div>
-
-            <!-- Cordyceps -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Cordyceps</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★☆☆</span>
-                        <span>3/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                    <span class="timing-badge post-workout">POST</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Aerobic Capacity</span>
-                    <span class="endurance-type">Oxygen Utilization</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 1-3g daily<br>
-                    <strong>Timing:</strong> 30-60 minutes pre-workout or with meals<br>
-                    <strong>Duration:</strong> Benefits increase with consistent use (4-6 weeks)</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>May improve VO2 max</li>
-                        <li>Enhances cellular energy production</li>
-                        <li>Supports oxygen utilization</li>
-                        <li>May reduce exercise-induced oxidative stress</li>
-                        <li>Traditional adaptogen for endurance</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Generally safe:</strong> Well-tolerated by most<br>
-                    <strong>Rare:</strong> Mild digestive upset<br>
-                    <strong>Quality varies:</strong> Choose reputable brands</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Cordyceps militaris extract, standardized cordycepin content, organic certification, CO2 extraction</p>
-                </div>
-            </div>
-
-            <!-- Iron -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Iron (If Deficient)</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★★</span>
-                        <span>5/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge post-workout">POST</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Oxygen Transport</span>
-                    <span class="endurance-type">All Endurance Types</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Test first:</strong> Blood test to confirm deficiency<br>
-                    <strong>Dosage:</strong> 18-65mg elemental iron (as prescribed)<br>
-                    <strong>Timing:</strong> Between meals or with vitamin C</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits (If Deficient)</div>
-                    <ul>
-                        <li>Improves oxygen-carrying capacity</li>
-                        <li>Reduces fatigue and breathlessness</li>
-                        <li>Enhances aerobic performance</li>
-                        <li>Supports hemoglobin production</li>
-                        <li>Critical for endurance athletes</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Important Cautions</div>
-                    <p><strong>ONLY if deficient:</strong> Excess iron is harmful<br>
-                    <strong>Test required:</strong> Ferritin, hemoglobin, iron studies<br>
-                    <strong>Side effects:</strong> Constipation, nausea, stomach upset<br>
-                    <strong>Monitor:</strong> Regular blood tests during supplementation</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Chelated forms (bisglycinate), gentle on stomach, includes vitamin C, avoid with calcium/coffee</p>
-                </div>
-            </div>
-
-            <!-- B-Complex -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">B-Complex Vitamins</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★☆</span>
-                        <span>4/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                    <span class="timing-badge post-workout">POST</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Energy Metabolism</span>
-                    <span class="endurance-type">All Endurance Types</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> High-potency B-complex (50-100mg B vitamins)<br>
-                    <strong>Timing:</strong> Morning with breakfast or pre-workout<br>
-                    <strong>Key vitamins:</strong> B1, B2, B3, B6, B12, folate</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Essential for energy metabolism</li>
-                        <li>Supports nervous system function</li>
-                        <li>Reduces exercise-induced stress</li>
-                        <li>Aids in recovery and repair</li>
-                        <li>Prevents deficiency in high-training athletes</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Common:</strong> Bright yellow urine (harmless)<br>
-                    <strong>Rare:</strong> Nausea if taken on empty stomach<br>
-                    <strong>Note:</strong> Water-soluble, excess is excreted</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Active forms (methylcobalamin B12, P5P B6), complete spectrum, third-party tested</p>
-                </div>
-            </div>
-
-            <!-- Caffeine + L-Theanine -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Caffeine + L-Theanine</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★★★★</span>
-                        <span>5/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge pre-workout">PRE</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Mental Focus</span>
-                    <span class="endurance-type">Power Endurance</span>
-                    <span class="endurance-type">Fat Burning</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 100-200mg caffeine + 200-400mg L-theanine<br>
-                    <strong>Ratio:</strong> 2:1 theanine to caffeine<br>
-                    <strong>Timing:</strong> 30-45 minutes pre-workout</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>Enhanced focus and alertness</li>
-                        <li>Improved fat oxidation</li>
-                        <li>Reduced perceived exertion</li>
-                        <li>Smooth energy without jitters</li>
-                        <li>Increased time to exhaustion</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Side Effects & Cautions</div>
-                    <p><strong>Common:</strong> Jitters, anxiety without L-theanine<br>
-                    <strong>Timing:</strong> Avoid within 6 hours of sleep<br>
-                    <strong>Tolerance:</strong> Cycle to maintain effectiveness</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: Natural caffeine sources, Suntheanine® L-theanine, proper 2:1 ratio, no artificial stimulants</p>
-                </div>
-            </div>
-
-            <!-- BCAAs -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div>
-                        <div class="supplement-name">Branched Chain Amino Acids (BCAAs)</div>
-                    </div>
-                    <div class="research-rating">
-                        <span class="stars">★★☆☆☆</span>
-                        <span>2/5</span>
-                    </div>
-                </div>
-
-                <div class="timing-badges">
-                    <span class="timing-badge during-workout">DURING</span>
-                    <span class="timing-badge post-workout">POST</span>
-                </div>
-
-                <div class="endurance-types">
-                    <span class="endurance-type">Ultra-Endurance</span>
-                    <span class="endurance-type">Fasted Training</span>
-                    <span class="endurance-type">Recovery</span>
-                </div>
-
-                <div class="dosage-section">
-                    <div class="dosage-title">Optimal Dosage & Timing</div>
-                    <p><strong>Dosage:</strong> 10-15g in 2:1:1 ratio (leucine:isoleucine:valine)<br>
-                    <strong>Timing:</strong> During long sessions or post-workout<br>
-                    <strong>Best for:</strong> Fasted training or sessions >90 minutes</p>
-                </div>
-
-                <div class="benefits-list">
-                    <div class="benefits-title">Key Benefits</div>
-                    <ul>
-                        <li>May reduce muscle protein breakdown</li>
-                        <li>Potential fatigue reduction in long sessions</li>
-                        <li>Muscle recovery support</li>
-                        <li>Useful during fasted cardio</li>
-                        <li>Maintains muscle mass during cutting</li>
-                    </ul>
-                </div>
-
-                <div class="warning-section">
-                    <div class="warning-title">Important Notes</div>
-                    <p><strong>Limited evidence:</strong> Benefits minimal if eating adequate protein<br>
-                    <strong>Better alternatives:</strong> Complete protein sources<br>
-                    <strong>Cost-effective:</strong> Whole foods often superior</p>
-                </div>
-
-                <div class="quality-section">
-                    <div class="quality-title">Quality Indicators</div>
-                    <p>Look for: 2:1:1 ratio, instantized powder, no artificial fillers, third-party tested</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <h3>Key Takeaways for Endurance Supplementation</h3>
-            <p><strong>Priority Order:</strong> 1) Proper nutrition & hydration 2) Creatine & Beta-alanine 3) Caffeine + L-theanine 4) Citrulline malate 5) Address deficiencies (iron, B-vitamins)</p>
-            <p><strong>Remember:</strong> Supplements enhance a solid training and nutrition foundation - they don't replace it</p>
-            <p><strong>Testing:</strong> Always test supplements during training, never on competition day</p>
         </div>
     </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="window.location.href='index.html#create-workout'">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item active" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function goBack() {
+            window.location.href = 'supplements.html';
+        }
+
+        function toggleSupplement(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
 </body>
 </html>

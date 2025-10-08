@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Load the website with aggressive cache busting
         let timestamp = Date().timeIntervalSince1970
-        if let url = URL(string: "https://fuelfire-app.vercel.app") {
+        if let url = URL(string: "https://well-fit-app.vercel.app") {
             var request = URLRequest(url: url)
             request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
