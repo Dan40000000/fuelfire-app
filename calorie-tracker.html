@@ -377,45 +377,63 @@
         let isRecording = false;
         
         function startVoiceLogging() {
+            // Check if we're in iOS WebView (no speech recognition support)
+            const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+            
+            if (isIOSWebView || !('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                // Use text input fallback for iOS WebView
+                const voiceInput = prompt('🎤 Describe what you ate:\n\nExample: "chicken breast with rice and broccoli" or "2 eggs, toast, and orange juice"');
+                
+                if (voiceInput && voiceInput.trim()) {
+                    // Show processing
+                    document.getElementById('voice-modal').style.display = 'block';
+                    document.getElementById('voice-text').textContent = voiceInput;
+                    document.getElementById('voice-button').textContent = 'Processing...';
+                    document.getElementById('voice-button').style.background = '#6c757d';
+                    document.getElementById('voice-status').textContent = '🤖';
+                    
+                    // Process with AI
+                    searchFoodByVoice(voiceInput);
+                }
+                return;
+            }
+            
+            // Original web speech API code for browsers
             document.getElementById('voice-modal').style.display = 'block';
             document.getElementById('voice-text').textContent = 'Click the microphone to start speaking...';
             document.getElementById('voice-button').textContent = 'Start Recording';
             document.getElementById('voice-button').style.background = '#FF6B6B';
             document.getElementById('voice-status').textContent = '🎤';
             
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                recognition.continuous = false;
-                recognition.interimResults = true;
-                recognition.lang = 'en-US';
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('voice-text').textContent = transcript;
                 
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('voice-text').textContent = transcript;
-                    
-                    if (event.results[0].isFinal) {
-                        // Stop recording automatically when final result is received
-                        recognition.stop();
-                        isRecording = false;
-                        document.getElementById('voice-button').textContent = 'Processing...';
-                        document.getElementById('voice-button').style.background = '#6c757d';
-                        document.getElementById('voice-status').textContent = '🤖';
-                        
-                        // Search for food using AI
-                        searchFoodByVoice(transcript);
-                    }
-                };
-                
-                recognition.onerror = function(event) {
-                    document.getElementById('voice-text').textContent = 'Error: ' + event.error;
+                if (event.results[0].isFinal) {
+                    // Stop recording automatically when final result is received
+                    recognition.stop();
                     isRecording = false;
-                    document.getElementById('voice-button').textContent = 'Start Recording';
-                    document.getElementById('voice-button').style.background = '#FF6B6B';
-                    document.getElementById('voice-status').textContent = '🎤';
-                };
-            } else {
-                alert('Voice recognition not supported on this browser. Try Chrome or Safari.');
-            }
+                    document.getElementById('voice-button').textContent = 'Processing...';
+                    document.getElementById('voice-button').style.background = '#6c757d';
+                    document.getElementById('voice-status').textContent = '🤖';
+                    
+                    // Search for food using AI
+                    searchFoodByVoice(transcript);
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                document.getElementById('voice-text').textContent = 'Error: ' + event.error;
+                isRecording = false;
+                document.getElementById('voice-button').textContent = 'Start Recording';
+                document.getElementById('voice-button').style.background = '#FF6B6B';
+                document.getElementById('voice-status').textContent = '🎤';
+            };
         }
         
         function toggleVoiceRecording() {
@@ -879,6 +897,28 @@
         
         // Barcode Scanner
         function startBarcodeScanning() {
+            // Check if we're in iOS WebView
+            const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+            
+            if (isIOSWebView) {
+                // Use manual barcode entry for iOS WebView
+                const barcode = prompt('📷 Enter the barcode number:\n\n(Camera scanning not available in app mode - enter the numbers below the barcode)');
+                
+                if (barcode && barcode.trim()) {
+                    searchByBarcode(barcode.trim());
+                }
+                return;
+            }
+            
+            // Try to use Quagga for web browsers
+            if (typeof Quagga === 'undefined') {
+                const barcode = prompt('📷 Enter the barcode number:\n\n(Scanner not available - enter the numbers below the barcode)');
+                if (barcode && barcode.trim()) {
+                    searchByBarcode(barcode.trim());
+                }
+                return;
+            }
+            
             document.getElementById('scanner-modal').style.display = 'block';
             
             Quagga.init({
@@ -1914,12 +1954,7 @@
         // Voice logging function is defined earlier in the file
         
         // Barcode Scanning Function
-        function startBarcodeScanning() {
-            alert('📷 Barcode scanning requires camera access.\n\nThis feature is coming soon! For now, you can:\n1. Enter the food name manually\n2. Use voice input\n3. Use AI parsing');
-            
-            // TODO: Implement actual barcode scanning with QuaggaJS
-            // This requires camera permissions and more complex setup
-        }
+        // Removed duplicate startBarcodeScanning function - using the one above
         
         // Smart Entry Function
         function showSmartEntry() {
