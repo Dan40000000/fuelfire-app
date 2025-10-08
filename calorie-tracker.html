@@ -641,31 +641,37 @@
                 window.currentFoods = foods;
                 window.currentSource = source;
                 
-                // Show "Log All" button
-                html += `
-                    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;" 
-                         onclick="logAllCurrentFoods()">
-                        <div style="font-weight: bold;">✅ Log All Foods</div>
-                        <div style="font-size: 14px; opacity: 0.9;">Total: ${foods.reduce((sum, f) => sum + f.calories, 0)} calories</div>
-                    </div>
-                `;
-                
-                html += '<div style="font-size: 14px; margin-bottom: 8px; color: #666;">Or select individual foods:</div>';
-                
+                // Add checkboxes for each food item
+                html += '<div style="margin-bottom: 15px;">';
                 foods.forEach((food, index) => {
-                    // Clean the food name for onclick
-                    const cleanName = food.name.replace(/'/g, "\\'");
                     html += `
-                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
-                             onclick="selectFood('${cleanName}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
-                            <div style="font-weight: bold;">${food.name}</div>
-                            <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
-                            ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="food-check-${index}" checked style="width: 20px; height: 20px; cursor: pointer;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">${food.name}</div>
+                                <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
+                                ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                            </div>
                         </div>
                     `;
                 });
+                html += '</div>';
+                
+                // Show "Log Selected" button
+                html += `
+                    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;" 
+                         onclick="logSelectedFoods()">
+                        <div style="font-weight: bold;">✅ Log Selected Foods</div>
+                        <div style="font-size: 14px; opacity: 0.9;" id="selected-total">Total: ${foods.reduce((sum, f) => sum + f.calories, 0)} calories</div>
+                    </div>
+                `;
                 
                 resultsDiv.innerHTML = html;
+                
+                // Add event listeners to checkboxes to update total
+                foods.forEach((food, index) => {
+                    document.getElementById(`food-check-${index}`).addEventListener('change', updateSelectedTotal);
+                });
             } else {
                 // Single food - show normal selection
                 let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select food to log:</div>';
@@ -683,7 +689,92 @@
             }
         }
         
-        // Log all current foods (simplified for onclick)
+        // Update total when checkboxes change
+        function updateSelectedTotal() {
+            if (!window.currentFoods) return;
+            
+            let total = 0;
+            window.currentFoods.forEach((food, index) => {
+                const checkbox = document.getElementById(`food-check-${index}`);
+                if (checkbox && checkbox.checked) {
+                    total += food.calories;
+                }
+            });
+            
+            const totalDiv = document.getElementById('selected-total');
+            if (totalDiv) {
+                totalDiv.textContent = `Total: ${total} calories`;
+            }
+        }
+        
+        // Log selected foods
+        function logSelectedFoods() {
+            if (!window.currentFoods || !window.currentSource) {
+                alert('Error: No foods to log');
+                return;
+            }
+            
+            // Get selected foods
+            const selectedFoods = [];
+            window.currentFoods.forEach((food, index) => {
+                const checkbox = document.getElementById(`food-check-${index}`);
+                if (checkbox && checkbox.checked) {
+                    selectedFoods.push(food);
+                }
+            });
+            
+            if (selectedFoods.length === 0) {
+                alert('Please select at least one food item');
+                return;
+            }
+            
+            const mealType = prompt('Log selected foods as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
+            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
+            const type = types[parseInt(mealType)] || 'snack';
+            
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+            
+            selectedFoods.forEach(food => {
+                const meal = {
+                    name: food.name,
+                    calories: food.calories,
+                    protein: food.protein || 0,
+                    carbs: food.carbs || 0,
+                    fat: food.fat || 0,
+                    type: type,
+                    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                };
+                
+                loggedMeals[today].meals.push(meal);
+                totalCalories += food.calories;
+                totalProtein += food.protein || 0;
+                totalCarbs += food.carbs || 0;
+                totalFat += food.fat || 0;
+            });
+            
+            loggedMeals[today].totalCalories += totalCalories;
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Clear results
+            document.getElementById('food-results').innerHTML = '';
+            document.getElementById('voice-btn').textContent = '🎤 Start Voice';
+            
+            updateTodayProgress();
+            
+            alert(`✅ Logged ${selectedFoods.length} items (${totalCalories} calories)`);
+        }
+        
+        // Log all current foods (simplified for onclick) - DEPRECATED but kept for compatibility
         function logAllCurrentFoods() {
             if (!window.currentFoods || !window.currentSource) {
                 alert('Error: No foods to log');
