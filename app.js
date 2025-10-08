@@ -22,13 +22,162 @@ function updateDailyQuote() {
 
 // Show notification
 function showNotification() {
-    document.getElementById('notification').classList.add('show');
-    setTimeout(closeNotification, 5000);
+    const notification = document.getElementById('notification');
+    notification.classList.add('show');
+    
+    // Add swipe-to-dismiss functionality
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    
+    const handleTouchStart = (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        notification.style.transition = 'none';
+    };
+    
+    const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+        
+        // Only allow swiping up or down
+        if (Math.abs(deltaY) > 0) {
+            notification.style.transform = `translateY(${deltaY}px)`;
+            notification.style.opacity = 1 - Math.abs(deltaY) / 200;
+        }
+    };
+    
+    const handleTouchEnd = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        notification.style.transition = 'all 0.3s ease';
+        
+        const deltaY = currentY - startY;
+        
+        // If swiped more than 100px in any direction, dismiss
+        if (Math.abs(deltaY) > 100) {
+            closeNotification();
+        } else {
+            // Snap back to original position
+            notification.style.transform = 'translateY(0)';
+            notification.style.opacity = '1';
+        }
+    };
+    
+    // Add touch event listeners
+    notification.addEventListener('touchstart', handleTouchStart);
+    notification.addEventListener('touchmove', handleTouchMove);
+    notification.addEventListener('touchend', handleTouchEnd);
+    
+    // Auto-dismiss after 8 seconds
+    setTimeout(closeNotification, 8000);
 }
 
 // Close notification
 function closeNotification() {
-    document.getElementById('notification').classList.remove('show');
+    const notification = document.getElementById('notification');
+    notification.style.transform = 'translateY(-100%)';
+    notification.style.opacity = '0';
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        notification.style.transform = '';
+        notification.style.opacity = '';
+    }, 300);
+}
+
+// Quick preview functions for workouts
+function showQuickPreview30() {
+    const exercises = [
+        { name: 'Push-Ups', image: 'https://media.giphy.com/media/3ohzdQ0aPaDbyD2Zry/giphy.gif', target: 'Chest, Shoulders' },
+        { name: 'Squats', image: 'https://media.giphy.com/media/1qfKUnnWlaCHeiMyDa/giphy.gif', target: 'Legs, Glutes' },
+        { name: 'Dumbbell Rows', image: 'https://media.giphy.com/media/6EUl7bx8d8dCdzsAiB/giphy.gif', target: 'Back, Biceps' },
+        { name: 'Lunges', image: 'https://media.giphy.com/media/l0MYAoMdxUe5BONqM/giphy.gif', target: 'Legs, Balance' },
+        { name: 'Shoulder Press', image: 'https://media.giphy.com/media/tsTsgmmuqTm9Pikluz/giphy.gif', target: 'Shoulders' },
+        { name: 'Planks', image: 'https://media.giphy.com/media/xT8qBff8cRRFf7k2u4/giphy.gif', target: 'Core' },
+        { name: 'Bicep Curls', image: 'https://media.giphy.com/media/tJjqU5LkyMfYI/giphy.gif', target: 'Arms' },
+        { name: 'Tricep Dips', image: 'https://media.giphy.com/media/aTGZc1WENbMRy/giphy.gif', target: 'Triceps' }
+    ];
+    
+    showWorkoutPreviewModal('30-Minute Muscle Builder', exercises);
+}
+
+function showQuickPreview10() {
+    const exercises = [
+        { name: 'Plank', image: 'https://media.giphy.com/media/xT8qBff8cRRFf7k2u4/giphy.gif', target: 'Core Stabilization' },
+        { name: 'Bicycle Crunches', image: 'https://media.giphy.com/media/TMNCtgJGJnV8k/giphy.gif', target: 'Obliques, Upper Abs' },
+        { name: 'Russian Twists', image: 'https://media.giphy.com/media/Ke8JKfxe83FpLrra4E/giphy.gif', target: 'Obliques' },
+        { name: 'Mountain Climbers', image: 'https://media.giphy.com/media/bWYc47O3jSef6/giphy.gif', target: 'Core, Cardio' },
+        { name: 'Leg Raises', image: 'https://media.giphy.com/media/5t22Xgf9RzDBgIowhn/giphy.gif', target: 'Lower Abs' },
+        { name: 'Flutter Kicks', image: 'https://media.giphy.com/media/lqPSBlqkdaFH8fYXeR/giphy.gif', target: 'Lower Abs, Hip Flexors' },
+        { name: 'Side Plank (L)', image: 'https://media.giphy.com/media/13HOBYoIMGe4QE/giphy.gif', target: 'Obliques Left' },
+        { name: 'Side Plank (R)', image: 'https://media.giphy.com/media/13HOBYoIMGe4QE/giphy.gif', target: 'Obliques Right' },
+        { name: 'Burpees', image: 'https://media.giphy.com/media/23hPPMRgPxbNBlPQe3/giphy.gif', target: 'Full Body, Cardio' }
+    ];
+    
+    showWorkoutPreviewModal('10-Minute Core Crusher', exercises);
+}
+
+function showWorkoutPreviewModal(title, exercises) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('workout-preview-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'workout-preview-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    let html = `
+        <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: var(--dark); margin: 0;">${title}</h2>
+                <button onclick="closeWorkoutPreview()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer;">✕ Close</button>
+            </div>
+            <div style="display: grid; gap: 15px;">
+    `;
+    
+    exercises.forEach((exercise, index) => {
+        html += `
+            <div style="background: #f8f9fa; border-radius: 15px; padding: 15px; display: flex; gap: 15px; align-items: center;">
+                <div style="background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+                    ${index + 1}
+                </div>
+                <img src="${exercise.image}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://via.placeholder.com/80/4CAF50/ffffff?text=Exercise'">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">${exercise.name}</div>
+                    <div style="font-size: 12px; color: #666;">${exercise.target}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    modal.innerHTML = html;
+    modal.style.display = 'block';
+}
+
+function closeWorkoutPreview() {
+    const modal = document.getElementById('workout-preview-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Toggle sidebar
@@ -39,14 +188,6 @@ function toggleSidebar() {
 
 
 // Update time
-function updateTime() {
-    const now = new Date();
-    const time = now.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-    });
-    document.getElementById('time').textContent = time;
 }
 
 // Custom Workout Quiz Variables
@@ -3961,7 +4102,6 @@ function nextDietStep() {
     } else if (dietQuizStep === 7) {
         // Save meal preferences
         dietData.mealsPerDay = document.getElementById('quiz-meals-per-day').value;
-        dietData.cookingTime = document.getElementById('quiz-cooking-time').value;
         dietData.skillLevel = document.getElementById('quiz-skill-level').value;
         dietData.variety = document.querySelector('input[name="variety"]:checked')?.value;
     } else if (dietQuizStep === 8) {
@@ -4181,36 +4321,121 @@ function createMealTemplates(data) {
     const isVegetarian = data.restrictions.dietaryLifestyle === 'vegetarian' || data.restrictions.dietaryLifestyle === 'vegan';
     const isKeto = data.restrictions.dietaryLifestyle === 'keto';
     const skillLevel = data.preferences.skillLevel;
+    const goal = data.goals.primaryGoal;
     
-    return {
+    // Expanded meal templates with actual variety
+    const bulkingMeals = {
         breakfast: [
-            { name: 'Greek Yogurt Parfait', calories: 320, protein: 25, carbs: 35, fat: 8, difficulty: 'beginner' },
-            { name: 'Scrambled Eggs with Avocado Toast', calories: 380, protein: 18, carbs: 25, fat: 22, difficulty: 'beginner' },
-            { name: 'Protein Smoothie Bowl', calories: 350, protein: 30, carbs: 40, fat: 12, difficulty: 'beginner' },
-            { name: 'Overnight Oats with Berries', calories: 340, protein: 15, carbs: 55, fat: 8, difficulty: 'beginner' },
-            { name: 'Veggie Omelet', calories: 280, protein: 20, carbs: 8, fat: 18, difficulty: 'intermediate' }
+            { name: 'Loaded Protein Pancakes with Maple Bacon', calories: 520, protein: 35, carbs: 55, fat: 18, difficulty: 'intermediate' },
+            { name: 'Pork Sausage & Egg Breakfast Burrito', calories: 480, protein: 32, carbs: 42, fat: 20, difficulty: 'beginner' },
+            { name: 'Steak & Eggs with Hash Browns', calories: 550, protein: 40, carbs: 35, fat: 25, difficulty: 'intermediate' },
+            { name: 'Mass Gainer Overnight Oats', calories: 480, protein: 30, carbs: 65, fat: 12, difficulty: 'beginner' },
+            { name: 'Bacon Avocado Omelet with Toast', calories: 460, protein: 28, carbs: 30, fat: 26, difficulty: 'beginner' }
         ],
         lunch: [
-            { name: 'Grilled Chicken Salad', calories: 420, protein: 35, carbs: 15, fat: 25, difficulty: 'beginner' },
-            { name: 'Quinoa Buddha Bowl', calories: 450, protein: 18, carbs: 65, fat: 15, difficulty: 'intermediate' },
-            { name: 'Turkey Wrap with Hummus', calories: 380, protein: 25, carbs: 45, fat: 12, difficulty: 'beginner' },
-            { name: 'Salmon with Sweet Potato', calories: 480, protein: 30, carbs: 35, fat: 22, difficulty: 'intermediate' },
-            { name: 'Chickpea Curry with Rice', calories: 440, protein: 16, carbs: 70, fat: 12, difficulty: 'intermediate' }
+            { name: 'BBQ Pulled Pork Power Bowl - Sweet Potato, Black Beans, Corn', calories: 580, protein: 38, carbs: 65, fat: 18, difficulty: 'intermediate' },
+            { name: 'Teriyaki Chicken Power Bowl - Brown Rice, Edamame, Pineapple', calories: 550, protein: 40, carbs: 70, fat: 12, difficulty: 'beginner' },
+            { name: 'Mediterranean Shrimp Power Bowl - Quinoa, Feta, Olives', calories: 520, protein: 35, carbs: 55, fat: 20, difficulty: 'intermediate' },
+            { name: 'Korean Pork Bulgogi with Kimchi Rice', calories: 540, protein: 36, carbs: 60, fat: 18, difficulty: 'intermediate' },
+            { name: 'Double Protein Chipotle Bowl', calories: 620, protein: 45, carbs: 70, fat: 16, difficulty: 'beginner' }
         ],
         dinner: [
-            { name: 'Baked Cod with Vegetables', calories: 350, protein: 30, carbs: 25, fat: 15, difficulty: 'intermediate' },
-            { name: 'Lean Beef Stir-fry', calories: 420, protein: 32, carbs: 35, fat: 18, difficulty: 'intermediate' },
-            { name: 'Grilled Chicken with Quinoa', calories: 450, protein: 38, carbs: 40, fat: 16, difficulty: 'beginner' },
-            { name: 'Lentil Bolognese with Pasta', calories: 380, protein: 18, carbs: 65, fat: 8, difficulty: 'intermediate' },
-            { name: 'Turkey Meatballs with Zucchini Noodles', calories: 320, protein: 28, carbs: 12, fat: 18, difficulty: 'intermediate' }
+            { name: 'Honey Garlic Pork Tenderloin with Mashed Potatoes', calories: 580, protein: 42, carbs: 55, fat: 20, difficulty: 'intermediate' },
+            { name: 'Beef & Broccoli over Jasmine Rice', calories: 620, protein: 45, carbs: 65, fat: 18, difficulty: 'intermediate' },
+            { name: 'Baked Salmon with Pesto Pasta', calories: 590, protein: 38, carbs: 60, fat: 22, difficulty: 'intermediate' },
+            { name: 'Pork Chops with Apple Compote & Wild Rice', calories: 550, protein: 40, carbs: 50, fat: 20, difficulty: 'advanced' },
+            { name: 'Chicken Parmesan with Spaghetti', calories: 640, protein: 42, carbs: 70, fat: 20, difficulty: 'intermediate' }
         ],
         snacks: [
-            { name: 'Apple with Almond Butter', calories: 180, protein: 6, carbs: 20, fat: 12, difficulty: 'beginner' },
-            { name: 'Greek Yogurt with Nuts', calories: 150, protein: 15, carbs: 8, fat: 8, difficulty: 'beginner' },
-            { name: 'Protein Smoothie', calories: 200, protein: 25, carbs: 15, fat: 5, difficulty: 'beginner' },
-            { name: 'Hummus with Veggies', calories: 120, protein: 5, carbs: 12, fat: 6, difficulty: 'beginner' }
+            { name: 'Mass Gainer Shake with Banana', calories: 380, protein: 30, carbs: 45, fat: 10, difficulty: 'beginner' },
+            { name: 'Trail Mix with Dried Fruit', calories: 280, protein: 10, carbs: 35, fat: 15, difficulty: 'beginner' },
+            { name: 'Pork Jerky with Rice Cakes', calories: 220, protein: 20, carbs: 25, fat: 5, difficulty: 'beginner' },
+            { name: 'Protein Bar & Mixed Nuts', calories: 320, protein: 25, carbs: 30, fat: 12, difficulty: 'beginner' }
         ]
     };
+    
+    const cuttingMeals = {
+        breakfast: [
+            { name: 'Egg White Veggie Scramble', calories: 220, protein: 25, carbs: 15, fat: 5, difficulty: 'beginner' },
+            { name: 'Lean Pork Canadian Bacon with Cottage Cheese', calories: 240, protein: 30, carbs: 10, fat: 8, difficulty: 'beginner' },
+            { name: 'Protein Shake with Berries', calories: 200, protein: 28, carbs: 18, fat: 3, difficulty: 'beginner' },
+            { name: 'Turkey Sausage with Cauliflower Hash', calories: 260, protein: 26, carbs: 12, fat: 12, difficulty: 'intermediate' },
+            { name: 'Greek Yogurt Parfait (Low-Fat)', calories: 180, protein: 22, carbs: 20, fat: 2, difficulty: 'beginner' }
+        ],
+        lunch: [
+            { name: 'Asian Pork Lettuce Wraps', calories: 280, protein: 32, carbs: 15, fat: 10, difficulty: 'beginner' },
+            { name: 'Grilled Chicken Caesar (No Croutons)', calories: 320, protein: 38, carbs: 8, fat: 15, difficulty: 'beginner' },
+            { name: 'Shrimp Zoodle Stir-Fry', calories: 260, protein: 30, carbs: 18, fat: 8, difficulty: 'intermediate' },
+            { name: 'Lean Pork Tenderloin Salad', calories: 290, protein: 34, carbs: 20, fat: 8, difficulty: 'beginner' },
+            { name: 'Tuna Poke Bowl (Cauliflower Rice)', calories: 310, protein: 35, carbs: 25, fat: 8, difficulty: 'intermediate' }
+        ],
+        dinner: [
+            { name: 'Herb-Crusted Pork Loin with Roasted Vegetables', calories: 340, protein: 38, carbs: 20, fat: 12, difficulty: 'intermediate' },
+            { name: 'Baked Cod with Asparagus', calories: 280, protein: 35, carbs: 15, fat: 8, difficulty: 'beginner' },
+            { name: 'Turkey Chili (No Beans)', calories: 320, protein: 36, carbs: 18, fat: 10, difficulty: 'intermediate' },
+            { name: 'Grilled Chicken with Cauliflower Rice', calories: 300, protein: 40, carbs: 12, fat: 10, difficulty: 'beginner' },
+            { name: 'Lean Pork Stir-Fry with Bok Choy', calories: 310, protein: 35, carbs: 22, fat: 10, difficulty: 'intermediate' }
+        ],
+        snacks: [
+            { name: 'Protein Shake (Water-Based)', calories: 120, protein: 25, carbs: 3, fat: 1, difficulty: 'beginner' },
+            { name: 'Cucumber with Tuna', calories: 100, protein: 18, carbs: 5, fat: 2, difficulty: 'beginner' },
+            { name: 'Sugar-Free Jello with Protein', calories: 80, protein: 15, carbs: 5, fat: 0, difficulty: 'beginner' },
+            { name: 'Celery with PB2', calories: 90, protein: 8, carbs: 8, fat: 2, difficulty: 'beginner' }
+        ]
+    };
+    
+    const maintenanceMeals = {
+        breakfast: [
+            { name: 'Balanced Breakfast Bowl', calories: 380, protein: 28, carbs: 40, fat: 12, difficulty: 'beginner' },
+            { name: 'Pork & Apple Breakfast Hash', calories: 360, protein: 26, carbs: 35, fat: 14, difficulty: 'intermediate' },
+            { name: 'Protein Pancakes with Turkey Bacon', calories: 400, protein: 30, carbs: 45, fat: 12, difficulty: 'intermediate' },
+            { name: 'Mediterranean Omelet', calories: 340, protein: 24, carbs: 18, fat: 20, difficulty: 'intermediate' },
+            { name: 'Overnight Protein Oats', calories: 350, protein: 22, carbs: 48, fat: 10, difficulty: 'beginner' }
+        ],
+        lunch: [
+            { name: 'Thai Pork Power Bowl - Jasmine Rice, Mango, Peanuts', calories: 480, protein: 32, carbs: 55, fat: 16, difficulty: 'intermediate' },
+            { name: 'Buffalo Chicken Power Bowl - Quinoa, Blue Cheese, Celery', calories: 460, protein: 35, carbs: 45, fat: 18, difficulty: 'beginner' },
+            { name: 'Cajun Shrimp Power Bowl - Dirty Rice, Okra, Corn', calories: 440, protein: 30, carbs: 50, fat: 14, difficulty: 'intermediate' },
+            { name: 'Cuban Pork Bowl with Black Beans', calories: 470, protein: 34, carbs: 52, fat: 15, difficulty: 'intermediate' },
+            { name: 'Harvest Turkey Bowl with Cranberries', calories: 450, protein: 32, carbs: 48, fat: 16, difficulty: 'beginner' }
+        ],
+        dinner: [
+            { name: 'Grilled Pork Tenderloin with Quinoa Pilaf', calories: 460, protein: 38, carbs: 45, fat: 14, difficulty: 'intermediate' },
+            { name: 'Baked Chicken with Sweet Potato', calories: 480, protein: 40, carbs: 50, fat: 12, difficulty: 'beginner' },
+            { name: 'Pan-Seared Salmon with Brown Rice', calories: 500, protein: 35, carbs: 45, fat: 20, difficulty: 'intermediate' },
+            { name: 'Lean Beef Tacos (3)', calories: 470, protein: 36, carbs: 42, fat: 18, difficulty: 'beginner' },
+            { name: 'Pork Marsala with Roasted Potatoes', calories: 490, protein: 36, carbs: 48, fat: 16, difficulty: 'advanced' }
+        ],
+        snacks: [
+            { name: 'Apple with Almond Butter', calories: 200, protein: 6, carbs: 25, fat: 12, difficulty: 'beginner' },
+            { name: 'Greek Yogurt with Granola', calories: 180, protein: 18, carbs: 22, fat: 4, difficulty: 'beginner' },
+            { name: 'Pork Jerky & Fruit', calories: 160, protein: 15, carbs: 20, fat: 3, difficulty: 'beginner' },
+            { name: 'Protein Smoothie', calories: 220, protein: 25, carbs: 20, fat: 5, difficulty: 'beginner' }
+        ]
+    };
+    
+    // Select appropriate meal set based on goal
+    let selectedMeals;
+    if (goal === 'muscleGain' || goal === 'buildStrength') {
+        selectedMeals = bulkingMeals;
+    } else if (goal === 'loseFat' || goal === 'getShredded') {
+        selectedMeals = cuttingMeals;
+    } else {
+        selectedMeals = maintenanceMeals;
+    }
+    
+    // Filter out pork if dietary restrictions
+    if (data.restrictions.noPork || isVegetarian) {
+        Object.keys(selectedMeals).forEach(mealType => {
+            selectedMeals[mealType] = selectedMeals[mealType].filter(meal => 
+                !meal.name.toLowerCase().includes('pork') && 
+                !meal.name.toLowerCase().includes('bacon') &&
+                !meal.name.toLowerCase().includes('sausage')
+            );
+        });
+    }
+    
+    return selectedMeals;
 }
 
 function generatePersonalizedShoppingList(data, mealPlan) {
@@ -5882,10 +6107,24 @@ function getTimeAgo(date) {
     return date.toLocaleDateString();
 }
 
+// Listen for nutrition updates from calorie tracker
+window.addEventListener('storage', function(e) {
+    if (e.key === 'fuelfire_nutrition_updated' || e.key === 'fuelfire_logged_meals') {
+        // Reload nutrition data when updated in calorie tracker
+        loadTodaysNutrition();
+    }
+});
+
+// Also check when page becomes visible (switching tabs/apps)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        loadTodaysNutrition();
+    }
+});
+
 // Initialize
 window.onload = function() {
     updateTime();
-    setInterval(updateTime, 1000);
     updateDailyQuote();
     
     // Load today's nutrition data
@@ -5926,8 +6165,10 @@ window.onload = function() {
         }
     }
     
-    // Show notification after 2 seconds
-    setTimeout(showNotification, 2000);
+    // Show notification after 2 seconds (only on home page)
+    if (!window.location.hash || window.location.hash === '#home') {
+        setTimeout(showNotification, 2000);
+    }
 };
 
 // Handle hash navigation when page loads

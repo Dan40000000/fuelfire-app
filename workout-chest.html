@@ -198,10 +198,6 @@
 <body>
     <div class="phone-container">
         <div class="screen">
-            <div class="status-bar">
-                <span id="time">9:41</span>
-                <span>100%</span>
-            </div>
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
@@ -231,20 +227,20 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-brand">🔥 FuelFire</div>
+            <div class="sidebar-brand">🔥 Well Fit</div>
         </div>
         <div class="sidebar-menu">
             <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
             <div class="menu-item" onclick="window.location.href='index.html#create-workout'">💪 Create Workout</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="window.location.href='index.html#saved-workouts'">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="window.location.href='index.html#track-workouts'">📊 Track Workouts</div>
             <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
             <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
             <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
             <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
             <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
             <div class="menu-item active" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+            <div class="menu-item" onclick="window.location.href='analytics.html'">📈 Progress onclick="goToPage('index.html')">📈 Progress & Analytics Analytics</div>
         </div>
     </div>
     
@@ -274,6 +270,7 @@
                 equipment: "Barbell, Bench",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 icon: "🏋️",
+                image: "https://media.giphy.com/media/inVvfuomoD31K/giphy.gif",
                 formIllustration: "🧍→🛌 ↓⬇️ 🏋️ ⬆️↑ 💪\nLie down • Lower bar • Press up",
                 steps: [
                     "Lie flat on bench with eyes directly under the bar",
@@ -305,6 +302,7 @@
                 equipment: "Dumbbells, Bench",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 icon: "💪",
+                image: "https://media.giphy.com/media/82W7N8dpXkQy3KIQvF/giphy.gif",
                 formIllustration: "🪑→🛌 ↙️💪↘️ ↗️💪↖️ 🤗\nSit • Lower dumbbells • Press up",
                 steps: [
                     "Sit on bench with dumbbells on thighs",
@@ -517,14 +515,6 @@
             }
         ];
 
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('time').textContent = time;
         }
 
         function toggleSidebar() {
@@ -559,8 +549,9 @@
                             <div class="difficulty-badge">
                                 ${generateDifficultyStars(exercise.difficulty)}
                             </div>
-                            ${exercise.icon}
-                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
+                            ${exercise.image ? `<img src="${exercise.image}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 15px 15px 0 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none;">${exercise.icon}</div>` : exercise.icon}
+                            ${!exercise.image ? `<div class="form-illustration">${exercise.formIllustration || ''}</div>` : ''}
                         </div>
                         <div class="exercise-content">
                             <div class="exercise-title">${exercise.name}</div>
@@ -658,7 +649,6 @@
         // Initialize
         window.addEventListener('load', function() {
             updateTime();
-            setInterval(updateTime, 1000);
             displayExercises();
         });
     </script>

@@ -215,10 +215,6 @@
 <body>
     <div class="phone-container">
         <div class="screen">
-            <div class="status-bar">
-                <span id="time">9:41</span>
-                <span>100%</span>
-            </div>
             
             <div class="header">
                 <div class="hamburger" onclick="goBack()">←</div>
@@ -1246,14 +1242,6 @@
 
         let currentRecipe = null;
 
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('time').textContent = time;
         }
 
         function goBack() {
@@ -1339,7 +1327,6 @@
         // Initialize
         window.addEventListener('load', function() {
             updateTime();
-            setInterval(updateTime, 1000);
         });
     </script>
 </body>

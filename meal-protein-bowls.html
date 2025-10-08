@@ -241,10 +241,6 @@
 <body>
     <div class="phone-container">
         <div class="screen">
-            <div class="status-bar">
-                <span id="time">9:41</span>
-                <span>100%</span>
-            </div>
             
             <div class="header">
                 <div class="hamburger" onclick="goBack()">←</div>
@@ -324,8 +320,8 @@
         <div class="sidebar-menu">
             <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
             <div class="menu-item" onclick="window.location.href='index.html#create-workout'">💪 Create Workout</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="window.location.href='index.html#saved-workouts'">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="window.location.href='index.html#track-workouts'">📊 Track Workouts</div>
             <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
             <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
             <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
@@ -333,7 +329,7 @@
             <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
             <div class="menu-item active" onclick="goToPage('meal-protein-bowls.html')">🥗 Protein Bowls</div>
             <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
-            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+            <div class="menu-item" onclick="window.location.href='analytics.html'">📈 Progress onclick="goToPage('index.html')">📈 Progress & Analytics Analytics</div>
         </div>
     </div>
 
@@ -669,14 +665,6 @@
         const proteinBowlRecipes = getCurrentRecipes();
         
         // Helper functions
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('time').textContent = time;
         }
 
         function toggleSidebar() {
@@ -754,7 +742,6 @@
             
             document.getElementById('modal-title').textContent = meal.name;
             document.getElementById('modal-description').textContent = meal.description;
-            document.getElementById('modal-time').textContent = meal.time;
             document.getElementById('modal-difficulty').textContent = generateDifficultyStars(meal.difficulty);
             document.getElementById('modal-calories').textContent = meal.calories;
             document.getElementById('modal-protein').textContent = meal.protein;
@@ -855,7 +842,6 @@
         // Initialize
         window.addEventListener('load', function() {
             updateTime();
-            setInterval(updateTime, 1000);
             displayMeals();
         });
     </script>
