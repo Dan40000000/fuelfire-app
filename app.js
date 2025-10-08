@@ -180,8 +180,6 @@ function closeWorkoutPreview() {
     }
 }
 
-}
-
 // Toggle sidebar
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
