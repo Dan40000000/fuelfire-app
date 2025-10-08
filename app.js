@@ -2451,6 +2451,126 @@ function quickStartWorkout(workoutType) {
 }
 
 // Start quick workout tracker
+function showQuickWorkoutTracker(workout) {
+    // Create a modal-like overlay for the workout tracker
+    const trackerDiv = document.createElement('div');
+    trackerDiv.id = 'quick-workout-tracker';
+    trackerDiv.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--light-bg);
+        z-index: 10000;
+        overflow-y: auto;
+    `;
+    
+    let html = `
+        <div style="max-width: 375px; margin: 0 auto; padding: 20px;">
+            <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+                <h2 style="font-size: 24px; margin-bottom: 10px;">💪 ${workout.name}</h2>
+                <p style="opacity: 0.9;">Track your sets and reps</p>
+            </div>
+            
+            <div id="exercise-inputs" style="margin-bottom: 20px;">
+    `;
+    
+    workout.exercises.forEach((exercise, index) => {
+        html += `
+            <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 15px;">
+                <h3 style="color: var(--dark); margin-bottom: 15px;">${exercise.name}</h3>
+                <p style="color: #666; margin-bottom: 15px;">Target: ${exercise.sets} sets × ${exercise.reps}</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(${exercise.sets}, 1fr); gap: 10px;">
+        `;
+        
+        for (let set = 1; set <= exercise.sets; set++) {
+            html += `
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Set ${set}</div>
+                    <input type="number" 
+                           id="exercise-${index}-set-${set}" 
+                           placeholder="${exercise.reps.includes('sec') ? 'Sec' : 'Reps'}"
+                           style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; text-align: center; font-size: 16px;">
+                </div>
+            `;
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+            
+            <div style="display: flex; gap: 15px; position: sticky; bottom: 20px; background: var(--light-bg); padding: 20px 0;">
+                <button onclick="cancelQuickWorkout()" style="background: #6c757d; color: white; border: none; padding: 15px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 1;">
+                    Cancel
+                </button>
+                <button onclick="saveQuickWorkoutData('${workout.name}')" style="background: var(--gradient-1); color: white; border: none; padding: 15px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; flex: 2;">
+                    💾 Save Workout
+                </button>
+            </div>
+        </div>
+    `;
+    
+    trackerDiv.innerHTML = html;
+    document.body.appendChild(trackerDiv);
+}
+
+function cancelQuickWorkout() {
+    const tracker = document.getElementById('quick-workout-tracker');
+    if (tracker) {
+        tracker.remove();
+    }
+}
+
+function saveQuickWorkoutData(workoutName) {
+    const workout = JSON.parse(localStorage.getItem('activeWorkout'));
+    const workoutData = {
+        name: workoutName,
+        date: new Date().toISOString(),
+        exercises: []
+    };
+    
+    workout.exercises.forEach((exercise, exerciseIndex) => {
+        const exerciseData = {
+            name: exercise.name,
+            sets: []
+        };
+        
+        for (let set = 1; set <= exercise.sets; set++) {
+            const input = document.getElementById(`exercise-${exerciseIndex}-set-${set}`);
+            const value = input ? input.value : '';
+            if (value) {
+                exerciseData.sets.push({
+                    setNumber: set,
+                    reps: value
+                });
+            }
+        }
+        
+        if (exerciseData.sets.length > 0) {
+            workoutData.exercises.push(exerciseData);
+        }
+    });
+    
+    // Save to localStorage
+    let savedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+    savedWorkouts.push(workoutData);
+    localStorage.setItem('completedWorkouts', JSON.stringify(savedWorkouts));
+    
+    // Show success message and close tracker
+    alert(`✅ Workout saved!\n\n${workoutData.exercises.length} exercises completed`);
+    cancelQuickWorkout();
+    
+    // Optionally show the track workouts screen
+    showScreen('track-workouts');
+}
+
 function startQuickWorkoutTracker(workoutType) {
     const workoutDetails = {
         'muscle-30': {
@@ -2515,7 +2635,7 @@ function startQuickWorkoutTracker(workoutType) {
     const workout = workoutDetails[workoutType];
     if (workout) {
         localStorage.setItem('activeWorkout', JSON.stringify(workout));
-        showScreen('track-workouts');
+        showQuickWorkoutTracker(workout);
     }
 }
 
