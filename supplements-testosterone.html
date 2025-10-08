@@ -6,1167 +6,578 @@
     <title>Testosterone Supplements - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .testosterone-gradient {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 50%, #34495e 100%);
-        }
-
-        .supplements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
         .supplement-card {
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .supplement-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-            border-color: #34495e;
         }
 
         .supplement-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 50%, #34495e 100%);
+            background: linear-gradient(135deg, #2c3e50, #34495e);
             color: white;
-            padding: 20px;
-            position: relative;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
         }
 
-        .supplement-name {
-            font-size: 24px;
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #34495e, #566573);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #566573, #707b7c);
+        }
+
+        .supplement-title {
+            font-size: 18px;
             font-weight: bold;
-            margin: 0 0 10px 0;
+            margin: 0;
         }
 
-        .research-rating {
+        .supplement-rating {
             display: flex;
             align-items: center;
             gap: 5px;
-            margin-top: 10px;
+            font-size: 12px;
         }
 
-        .star {
-            color: #FFD700;
-            font-size: 18px;
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
         }
 
-        .star.empty {
-            color: rgba(255,255,255,0.3);
+        .expand-icon.rotated {
+            transform: rotate(180deg);
         }
 
         .supplement-content {
-            padding: 25px;
-        }
-
-        .supplement-badges {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .natural-badge {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .pharmaceutical-badge {
-            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .testosterone-level {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .dosage-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
             background: #f8f9fa;
-            border-left: 4px solid #34495e;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
         }
 
-        .dosage-title {
+        .supplement-content.expanded {
+            max-height: 1000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
             font-weight: bold;
-            color: #34495e;
+            color: #2c3e50;
             margin-bottom: 8px;
-        }
-
-        .timing-badge {
-            display: inline-block;
-            background: #ecf0f1;
-            color: #34495e;
-            padding: 5px 12px;
-            border-radius: 15px;
             font-size: 14px;
-            margin-top: 8px;
         }
 
-        .benefits-list {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
         }
 
-        .benefits-list li {
-            padding: 8px 0;
-            padding-left: 25px;
-            position: relative;
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #2c3e50;
+            margin-bottom: 10px;
         }
 
-        .benefits-list li:before {
-            content: "💪";
-            position: absolute;
-            left: 0;
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
             font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
         }
 
-        .warning-section {
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
             background: #fff3cd;
-            border: 1px solid #ffe69c;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
         }
 
         .warning-title {
             color: #856404;
             font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .age-warning {
-            background: #f8d7da;
-            border: 2px solid #f5c6cb;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .age-warning-title {
-            color: #721c24;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .interaction-badge {
-            background: #dc3545;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            display: inline-block;
-            margin: 2px;
-        }
-
-        .quality-indicators {
-            background: #e8f5e9;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        .quality-title {
-            color: #2e7d32;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .disclaimer {
-            background: linear-gradient(135deg, #1a1a1a, #2c3e50);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .disclaimer-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .study-link {
-            color: #34495e;
-            text-decoration: none;
+            margin-bottom: 5px;
             font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 10px;
-        }
-
-        .study-link:hover {
-            text-decoration: underline;
-        }
-
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 500;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .back-button:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            transform: translateY(-2px);
-        }
-
-        .testosterone-info {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .level-indicators {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .level-indicator {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            border-radius: 10px;
-            text-align: center;
-            min-width: 120px;
-        }
-
-        .level-number {
-            font-size: 18px;
-            font-weight: bold;
-            color: #f39c12;
-        }
-
-        .level-label {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-
-        .safety-warning {
-            background: #f8d7da;
-            border: 2px solid #f5c6cb;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .safety-warning-icon {
-            font-size: 36px;
-            color: #721c24;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .supplements-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .supplement-card {
-                margin: 0 10px;
-            }
-
-            .supplement-name {
-                font-size: 20px;
-            }
-
-            .level-indicators {
-                flex-direction: column;
-                align-items: center;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="supplements.html" class="back-button">
-            <span>←</span> Back to Supplements
-        </a>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar">
+                <span id="time">9:41</span>
+                <span>100%</span>
+            </div>
+            
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">💪 Testosterone</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">💪 Testosterone Support Supplements</h2>
+                        <p style="color: #666; font-size: 14px;">Natural supplements that may support healthy testosterone levels</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    
+                    <!-- Supplements List -->
+                    <div id="supplements-container">
+                        <!-- Vitamin D3 -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(0)">
+                                <div>
+                                    <div class="supplement-title">Vitamin D3</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-0">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-0">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">2000-5000 IU</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Fat</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Supports healthy testosterone levels in deficient men<br>
+                                            • Essential for bone health and immune function<br>
+                                            • May improve muscle strength and recovery<br>
+                                            • Critical for overall hormonal health
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 2000-5000 IU daily (based on blood levels)<br>
+                                            <strong>Timing:</strong> With meals containing fat<br>
+                                            <strong>Testing:</strong> Check blood levels first<br>
+                                            <strong>Target:</strong> 30-50 ng/ml (75-125 nmol/L)
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Very safe at recommended doses. High doses may cause hypercalcemia</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Get blood levels tested before supplementing. Most beneficial if you're deficient.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="header-section">
-            <h1>Testosterone Supplements</h1>
-            <p class="subtitle">Evidence-based natural testosterone boosters for men</p>
-        </div>
+                        <!-- Zinc -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(1)">
+                                <div>
+                                    <div class="supplement-title">Zinc</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-1">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-1">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">10-15mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Empty Stomach</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Essential for testosterone production<br>
+                                            • Supports immune function<br>
+                                            • May increase testosterone in deficient men<br>
+                                            • Important for wound healing and protein synthesis
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 10-15mg elemental zinc daily<br>
+                                            <strong>Timing:</strong> Empty stomach or with meals if upset<br>
+                                            <strong>Form:</strong> Picolinate or bisglycinate for better absorption<br>
+                                            <strong>Balance:</strong> Consider copper supplementation if long-term
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Nausea if taken on empty stomach, copper deficiency with long-term high doses</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Don't exceed 40mg daily. May interfere with iron absorption.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="testosterone-info">
-            <div class="disclaimer-icon">💪</div>
-            <h3>Healthy Testosterone Levels by Age</h3>
-            <div class="level-indicators">
-                <div class="level-indicator">
-                    <div class="level-number">600-1000</div>
-                    <div class="level-label">20-30 years (ng/dL)</div>
-                </div>
-                <div class="level-indicator">
-                    <div class="level-number">500-800</div>
-                    <div class="level-label">30-40 years (ng/dL)</div>
-                </div>
-                <div class="level-indicator">
-                    <div class="level-number">400-700</div>
-                    <div class="level-label">40-50 years (ng/dL)</div>
-                </div>
-                <div class="level-indicator">
-                    <div class="level-number">300-600</div>
-                    <div class="level-label">50+ years (ng/dL)</div>
+                        <!-- Magnesium -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(2)">
+                                <div>
+                                    <div class="supplement-title">Magnesium</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-2">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-2">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">200-400mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Evening</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May increase free testosterone levels<br>
+                                            • Improves sleep quality (crucial for T production)<br>
+                                            • Reduces cortisol and inflammation<br>
+                                            • Supports muscle function and recovery
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 200-400mg daily<br>
+                                            <strong>Timing:</strong> Evening for sleep benefits<br>
+                                            <strong>Form:</strong> Glycinate or malate for better tolerance<br>
+                                            <strong>Note:</strong> Start low to avoid digestive upset
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Diarrhea at high doses. Start with 200mg and increase gradually</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ashwagandha -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(3)">
+                                <div>
+                                    <div class="supplement-title">Ashwagandha</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-3">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-3">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">300-600mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Food</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May increase testosterone by 10-15%<br>
+                                            • Reduces cortisol and stress<br>
+                                            • Improves strength and muscle mass<br>
+                                            • Enhances sleep quality and recovery
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 300-600mg daily<br>
+                                            <strong>Timing:</strong> With meals, split if needed<br>
+                                            <strong>Standardization:</strong> Look for KSM-66 or Sensoril extracts<br>
+                                            <strong>Duration:</strong> Takes 2-8 weeks for full effects
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Generally well tolerated. Rare: drowsiness, stomach upset</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">May interact with medications for diabetes, blood pressure, and immunosuppressants.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- D-Aspartic Acid -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(4)">
+                                <div>
+                                    <div class="supplement-title">D-Aspartic Acid</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐☆☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-4">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-4">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Morning</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May temporarily increase testosterone in some men<br>
+                                            • Results are inconsistent and short-lived<br>
+                                            • Mixed research results<br>
+                                            • May work better in men with low baseline T
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 3g daily<br>
+                                            <strong>Timing:</strong> Morning with breakfast<br>
+                                            <strong>Cycling:</strong> 2-3 weeks on, 1-2 weeks off<br>
+                                            <strong>Note:</strong> Effects may diminish with continued use
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Generally safe. Some report mood changes or acne</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Inconsistent results. Consider proven options like Vitamin D and Zinc first.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fenugreek -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(5)">
+                                <div>
+                                    <div class="supplement-title">Fenugreek Extract</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-5">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-5">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">500mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Food</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May increase free testosterone levels<br>
+                                            • Supports healthy libido<br>
+                                            • May improve strength and body composition<br>
+                                            • Traditional herb with modern research backing
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 500mg standardized extract daily<br>
+                                            <strong>Timing:</strong> With meals<br>
+                                            <strong>Standardization:</strong> Look for 50% saponins<br>
+                                            <strong>Duration:</strong> Effects seen after 8-12 weeks
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Generally safe. May cause maple syrup-like body odor in some people</div>
+                                    </div>
+                                    
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">May affect blood sugar levels. Monitor if diabetic.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="safety-warning">
-            <div class="safety-warning-icon">🚨</div>
-            <h3>Important Safety Warning</h3>
-            <p><strong>Men under 25:</strong> Your testosterone levels are naturally at their peak. These supplements are generally unnecessary and could interfere with natural hormone production. Consult a healthcare provider before use.</p>
-            <p><strong>Always get lab testing:</strong> Test your testosterone levels before and during supplementation. Work with a healthcare professional for proper monitoring.</p>
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
         </div>
-
-        <div class="disclaimer">
-            <div class="disclaimer-icon">⚕️</div>
-            <h3>Medical Disclaimer & Lab Testing</h3>
-            <p>Testosterone supplementation requires medical supervision. Get baseline hormone panels including Total T, Free T, LH, FSH, and Estradiol. These supplements may interact with medications and are not appropriate for everyone. Never exceed recommended dosages.</p>
-        </div>
-
-        <div class="supplements-grid">
-            <!-- Vitamin D3 -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Vitamin D3</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Foundation Support</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Maintenance:</strong> 2000-4000 IU daily</p>
-                        <p><strong>Deficiency:</strong> 5000-10000 IU daily (short-term)</p>
-                        <p><strong>Target blood level:</strong> 40-60 ng/mL (25-hydroxyvitamin D)</p>
-                        <div class="timing-badge">🕐 Take with fatty meal for absorption</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Increases testosterone by 10-25% in deficient men</li>
-                        <li>Supports healthy sperm production</li>
-                        <li>Improves muscle strength and function</li>
-                        <li>Enhances mood and energy levels</li>
-                        <li>Supports immune system function</li>
-                        <li>Critical for bone health</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> 1000-2000 IU (unless deficient)</p>
-                        <p><strong>25-40:</strong> 2000-4000 IU</p>
-                        <p><strong>40+:</strong> 3000-5000 IU (higher needs with age)</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Hypercalcemia with excessive doses (>10,000 IU daily)</p>
-                        <p><strong>Who Should Avoid:</strong> Sarcoidosis, hyperparathyroidism, kidney stones</p>
-                        <span class="interaction-badge">Thiazide Diuretics</span>
-                        <span class="interaction-badge">Digoxin</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>D3 (cholecalciferol) not D2</li>
-                            <li>Oil-based softgels or liquid</li>
-                            <li>Third-party tested for purity</li>
-                            <li>Combined with K2 (MK-7) optional</li>
-                            <li>USP verified or NSF certified</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/21154195/" class="study-link" target="_blank">
-                        📚 View Research on Vitamin D & Testosterone
-                    </a>
-                </div>
-            </div>
-
-            <!-- Zinc -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Zinc</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Essential Mineral</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Daily:</strong> 15-30mg elemental zinc</p>
-                        <p><strong>Athletic/Deficient:</strong> 25-40mg</p>
-                        <p><strong>Max safe dose:</strong> 40mg daily long-term</p>
-                        <div class="timing-badge">🕐 Take on empty stomach or with light meal</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Prevents testosterone decline in deficient men</li>
-                        <li>Supports healthy sperm count and motility</li>
-                        <li>Enhances immune system function</li>
-                        <li>Improves wound healing and protein synthesis</li>
-                        <li>Supports prostate health</li>
-                        <li>May increase free testosterone</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> 15-20mg (focus on whole foods)</p>
-                        <p><strong>25-40:</strong> 20-30mg</p>
-                        <p><strong>40+:</strong> 25-30mg (higher needs with age)</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Nausea, metallic taste, stomach upset with high doses</p>
-                        <p><strong>Who Should Avoid:</strong> Wilson's disease, hemochromatosis</p>
-                        <span class="interaction-badge">Copper (blocks absorption)</span>
-                        <span class="interaction-badge">Iron (take separately)</span>
-                        <span class="interaction-badge">Antibiotics</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Zinc picolinate or bisglycinate (best absorption)</li>
-                            <li>Avoid zinc oxide (poor absorption)</li>
-                            <li>Clear elemental zinc content</li>
-                            <li>Third-party tested</li>
-                            <li>Includes copper (2mg) if long-term use</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/8875519/" class="study-link" target="_blank">
-                        📚 View Research on Zinc & Testosterone
-                    </a>
-                </div>
-            </div>
-
-            <!-- Magnesium -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Magnesium</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Recovery Support</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Daily:</strong> 200-400mg elemental magnesium</p>
-                        <p><strong>Athletes:</strong> 300-500mg</p>
-                        <p><strong>Forms:</strong> Glycinate, malate, or citrate</p>
-                        <div class="timing-badge">🕐 Take before bed or split doses</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Increases free and total testosterone</li>
-                        <li>Improves sleep quality and recovery</li>
-                        <li>Reduces cortisol and stress response</li>
-                        <li>Supports muscle function and strength</li>
-                        <li>Enhances exercise performance</li>
-                        <li>Supports heart and nerve function</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> 200-300mg</p>
-                        <p><strong>25-40:</strong> 300-400mg</p>
-                        <p><strong>40+:</strong> 400-500mg (higher stress/lower absorption)</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Diarrhea (dose-dependent), stomach cramping</p>
-                        <p><strong>Who Should Avoid:</strong> Severe kidney disease, myasthenia gravis</p>
-                        <span class="interaction-badge">Antibiotics (take 2h apart)</span>
-                        <span class="interaction-badge">Bisphosphonates</span>
-                        <span class="interaction-badge">Diuretics</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Chelated forms (glycinate, malate)</li>
-                            <li>Avoid magnesium oxide (poor absorption)</li>
-                            <li>Clear elemental content labeling</li>
-                            <li>Third-party tested for purity</li>
-                            <li>Albion or Creapure sourcing</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/21116018/" class="study-link" target="_blank">
-                        📚 View Research on Magnesium & Testosterone
-                    </a>
-                </div>
-            </div>
-
-            <!-- D-Aspartic Acid -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">D-Aspartic Acid (DAA)</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Short-term Boost</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Daily:</strong> 3-6g (3000-6000mg)</p>
-                        <p><strong>Cycling:</strong> 12 days on, 1 week off</p>
-                        <p><strong>Timing:</strong> Morning dose preferred</p>
-                        <div class="timing-badge">🕐 Take on empty stomach or with light meal</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>May increase testosterone 30-60% (short-term)</li>
-                        <li>Supports luteinizing hormone (LH) production</li>
-                        <li>May improve sperm quality</li>
-                        <li>Supports growth hormone release</li>
-                        <li>May enhance libido and mood</li>
-                        <li>Works best in men with low baseline T</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> Not recommended (T levels naturally high)</p>
-                        <p><strong>25-35:</strong> Use only if lab-confirmed low T</p>
-                        <p><strong>35+:</strong> May be beneficial with cycling</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Irritability, mood swings, headaches with prolonged use</p>
-                        <p><strong>Who Should Avoid:</strong> Men with normal/high testosterone, bipolar disorder</p>
-                        <span class="interaction-badge">Mood Medications</span>
-                        <span class="interaction-badge">Hormone Therapy</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Pure D-Aspartic acid (not L-form)</li>
-                            <li>Pharmaceutical grade powder</li>
-                            <li>Third-party tested for purity</li>
-                            <li>No artificial additives</li>
-                            <li>Clear labeling of D-form</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/19860889/" class="study-link" target="_blank">
-                        📚 View Research on D-Aspartic Acid
-                    </a>
-                </div>
-            </div>
-
-            <!-- Fenugreek -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Fenugreek Extract</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Free T Support</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Standardized extract:</strong> 500mg daily</p>
-                        <p><strong>Testofen (patented):</strong> 500-600mg daily</p>
-                        <p><strong>Raw powder:</strong> 2-5g daily</p>
-                        <div class="timing-badge">🕐 Take with meals to reduce stomach upset</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Increases free testosterone levels</li>
-                        <li>Reduces SHBG (sex hormone binding globulin)</li>
-                        <li>Improves libido and sexual function</li>
-                        <li>Supports healthy blood sugar levels</li>
-                        <li>May increase strength and muscle mass</li>
-                        <li>Reduces body fat percentage</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> Generally not needed</p>
-                        <p><strong>25-40:</strong> 500mg daily</p>
-                        <p><strong>40+:</strong> 500-600mg daily</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> GI upset, maple syrup body odor, hypoglycemia</p>
-                        <p><strong>Who Should Avoid:</strong> Diabetes, pregnancy, hormone-sensitive cancers</p>
-                        <span class="interaction-badge">Diabetes Medications</span>
-                        <span class="interaction-badge">Blood Thinners</span>
-                        <span class="interaction-badge">Thyroid Medications</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Testofen or Furosap patented extracts</li>
-                            <li>Standardized to 50% saponins</li>
-                            <li>Third-party tested</li>
-                            <li>Organic sourcing preferred</li>
-                            <li>Clear extract ratio (4:1 or 10:1)</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/21312304/" class="study-link" target="_blank">
-                        📚 View Research on Fenugreek
-                    </a>
-                </div>
-            </div>
-
-            <!-- Ashwagandha -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Ashwagandha</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Stress & Cortisol</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>KSM-66 extract:</strong> 600mg daily</p>
-                        <p><strong>Root extract (5% withanolides):</strong> 300-500mg twice daily</p>
-                        <p><strong>Raw powder:</strong> 1-6g daily</p>
-                        <div class="timing-badge">🕐 Take with food, evening for sleep support</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Increases testosterone by 10-22%</li>
-                        <li>Reduces cortisol levels by up to 30%</li>
-                        <li>Improves stress resilience and mood</li>
-                        <li>Enhances muscle mass and strength</li>
-                        <li>Improves sleep quality</li>
-                        <li>Supports sperm quality and fertility</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> 300mg (focus on stress management)</p>
-                        <p><strong>25-40:</strong> 600mg daily</p>
-                        <p><strong>40+:</strong> 600-900mg daily</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Drowsiness, stomach upset, headache (rare)</p>
-                        <p><strong>Who Should Avoid:</strong> Autoimmune conditions, pregnancy, hyperthyroidism</p>
-                        <span class="interaction-badge">Immunosuppressants</span>
-                        <span class="interaction-badge">Thyroid Medications</span>
-                        <span class="interaction-badge">Sedatives</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>KSM-66 or Sensoril patented extracts</li>
-                            <li>Standardized to 5-10% withanolides</li>
-                            <li>Third-party tested for heavy metals</li>
-                            <li>Organic certification</li>
-                            <li>Root extract (not leaves)</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/30854456/" class="study-link" target="_blank">
-                        📚 View Research on Ashwagandha
-                    </a>
-                </div>
-            </div>
-
-            <!-- Tongkat Ali -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Tongkat Ali (Longjack)</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Libido Support</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>LJ100 extract (100:1):</strong> 200-400mg daily</p>
-                        <p><strong>Standard extract (50:1):</strong> 400-600mg daily</p>
-                        <p><strong>Cycling:</strong> 5 days on, 2 days off</p>
-                        <div class="timing-badge">🕐 Take on empty stomach, morning preferred</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Increases free testosterone levels</li>
-                        <li>Reduces SHBG binding protein</li>
-                        <li>Improves libido and sexual performance</li>
-                        <li>Reduces stress and cortisol</li>
-                        <li>May increase muscle mass</li>
-                        <li>Supports energy and mood</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-25:</strong> Not recommended</p>
-                        <p><strong>25-35:</strong> 200mg daily if needed</p>
-                        <p><strong>35+:</strong> 200-400mg daily</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Insomnia, restlessness, increased body temperature</p>
-                        <p><strong>Who Should Avoid:</strong> Heart conditions, high blood pressure, insomnia</p>
-                        <span class="interaction-badge">Stimulants</span>
-                        <span class="interaction-badge">Blood Pressure Meds</span>
-                        <span class="interaction-badge">Diabetes Medications</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>LJ100 patented extract</li>
-                            <li>100:1 or 200:1 extract ratio</li>
-                            <li>Standardized eurycomanone content</li>
-                            <li>Malaysian or Indonesian sourcing</li>
-                            <li>Third-party tested for purity</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/23243445/" class="study-link" target="_blank">
-                        📚 View Research on Tongkat Ali
-                    </a>
-                </div>
-            </div>
-
-            <!-- DHEA -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">DHEA</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="pharmaceutical-badge">Pharmaceutical</div>
-                        <div class="testosterone-level">Hormone Precursor</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Men 30-40:</strong> 25-50mg daily</p>
-                        <p><strong>Men 40-50:</strong> 50-75mg daily</p>
-                        <p><strong>Men 50+:</strong> 75-100mg daily</p>
-                        <div class="timing-badge">🕐 Take in morning with food</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Precursor to testosterone and estrogen</li>
-                        <li>May improve mood and energy</li>
-                        <li>Supports adrenal function</li>
-                        <li>May increase muscle mass</li>
-                        <li>Supports immune function</li>
-                        <li>May improve libido</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-30:</strong> Not recommended (natural levels high)</p>
-                        <p><strong>30-40:</strong> 25-50mg only if tested low</p>
-                        <p><strong>40+:</strong> 50-100mg with monitoring</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Acne, hair loss, mood changes, liver stress</p>
-                        <p><strong>Who Should Avoid:</strong> Prostate/breast cancer, liver disease, under 30</p>
-                        <span class="interaction-badge">Hormone Therapy</span>
-                        <span class="interaction-badge">Antidepressants</span>
-                        <span class="interaction-badge">Insulin</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Pharmaceutical grade USP</li>
-                            <li>Micronized for better absorption</li>
-                            <li>Third-party tested for purity</li>
-                            <li>Time-release formulations available</li>
-                            <li>Clear potency labeling</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/17143827/" class="study-link" target="_blank">
-                        📚 View Research on DHEA
-                    </a>
-                </div>
-            </div>
-
-            <!-- Tribulus Terrestris -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Tribulus Terrestris</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                        <span class="star empty">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">Limited Evidence</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Standardized extract:</strong> 750-1500mg daily</p>
-                        <p><strong>Saponins (45%):</strong> 250-750mg daily</p>
-                        <p><strong>Cycling:</strong> 8 weeks on, 4 weeks off</p>
-                        <div class="timing-badge">🕐 Take with meals, split into 2-3 doses</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>May improve libido (limited evidence)</li>
-                        <li>Possible LH support in some studies</li>
-                        <li>May enhance athletic performance</li>
-                        <li>Traditional use for male vitality</li>
-                        <li>May support mood and energy</li>
-                        <li>Minimal testosterone effects in healthy men</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-30:</strong> Not recommended</p>
-                        <p><strong>30-40:</strong> Limited benefit likely</p>
-                        <p><strong>40+:</strong> May try if other options ineffective</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Stomach upset, sleep disturbances, potential prostate enlargement</p>
-                        <p><strong>Who Should Avoid:</strong> Prostate conditions, diabetes, heart disease</p>
-                        <span class="interaction-badge">Diabetes Medications</span>
-                        <span class="interaction-badge">Blood Pressure Meds</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Standardized to 40-45% saponins</li>
-                            <li>Bulgarian or Indian sourcing</li>
-                            <li>Third-party tested</li>
-                            <li>Aerial parts (not just roots)</li>
-                            <li>Clear protodioscin content</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/16004966/" class="study-link" target="_blank">
-                        📚 View Research on Tribulus
-                    </a>
-                </div>
-            </div>
-
-            <!-- Boron -->
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <h2 class="supplement-name">Boron</h2>
-                    <div class="research-rating">
-                        <span>Research Level:</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">★</span>
-                    </div>
-                </div>
-                <div class="supplement-content">
-                    <div class="supplement-badges">
-                        <div class="natural-badge">Natural</div>
-                        <div class="testosterone-level">SHBG Reducer</div>
-                    </div>
-
-                    <div class="dosage-section">
-                        <div class="dosage-title">Recommended Dosage</div>
-                        <p><strong>Daily:</strong> 3-10mg elemental boron</p>
-                        <p><strong>Athletic support:</strong> 10-20mg</p>
-                        <p><strong>Max safe dose:</strong> 20mg daily</p>
-                        <div class="timing-badge">🕐 Take with meals to reduce stomach upset</div>
-                    </div>
-
-                    <h4>Key Benefits</h4>
-                    <ul class="benefits-list">
-                        <li>Reduces SHBG by up to 23%</li>
-                        <li>Increases free testosterone levels</li>
-                        <li>Supports bone health and density</li>
-                        <li>May reduce inflammation</li>
-                        <li>Supports vitamin D metabolism</li>
-                        <li>Enhances magnesium absorption</li>
-                    </ul>
-
-                    <div class="age-warning">
-                        <div class="age-warning-title">
-                            👶 Age Recommendations
-                        </div>
-                        <p><strong>18-30:</strong> 3-5mg daily</p>
-                        <p><strong>30-40:</strong> 5-10mg daily</p>
-                        <p><strong>40+:</strong> 10-15mg daily</p>
-                    </div>
-
-                    <div class="warning-section">
-                        <div class="warning-title">
-                            ⚠️ Side Effects & Interactions
-                        </div>
-                        <p><strong>Side Effects:</strong> Nausea, vomiting, diarrhea with high doses (>50mg)</p>
-                        <p><strong>Who Should Avoid:</strong> Kidney disease, hormone-sensitive cancers</p>
-                        <span class="interaction-badge">Estrogen Therapy</span>
-                        <span class="interaction-badge">Chemotherapy</span>
-                    </div>
-
-                    <div class="quality-indicators">
-                        <div class="quality-title">🔍 Quality Indicators</div>
-                        <ul>
-                            <li>Boron citrate or glycinate forms</li>
-                            <li>Clear elemental boron content</li>
-                            <li>Third-party tested for purity</li>
-                            <li>No artificial additives</li>
-                            <li>Pharmaceutical grade</li>
-                        </ul>
-                    </div>
-
-                    <a href="https://pubmed.ncbi.nlm.nih.gov/21129941/" class="study-link" target="_blank">
-                        📚 View Research on Boron
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="disclaimer" style="margin-top: 40px;">
-            <div class="disclaimer-icon">🧪</div>
-            <h3>Essential Lab Testing & Monitoring</h3>
-            <p><strong>Before starting any testosterone supplements, get comprehensive lab work:</strong></p>
-            <p>• Total Testosterone (AM fasted)<br>
-            • Free Testosterone<br>
-            • SHBG (Sex Hormone Binding Globulin)<br>
-            • LH & FSH<br>
-            • Estradiol (E2)<br>
-            • DHT (Dihydrotestosterone)<br>
-            • Prolactin<br>
-            • Complete Blood Count<br>
-            • Comprehensive Metabolic Panel</p>
-            <p><strong>Retest every 3-6 months during supplementation.</strong> Work with a knowledgeable healthcare provider for proper interpretation and monitoring.</p>
-        </div>
-
-        <div class="safety-warning">
-            <div class="safety-warning-icon">⚠️</div>
-            <h3>Final Safety Reminders</h3>
-            <p><strong>These supplements are not magic bullets.</strong> Proper sleep (7-9 hours), regular strength training, stress management, and optimal nutrition are far more important for healthy testosterone levels.</p>
-            <p><strong>Start with one supplement at a time</strong> to assess individual response. Many of these can be combined, but begin conservatively.</p>
-            <p><strong>If you're under 25 with normal energy and libido,</strong> focus on lifestyle factors rather than supplementation.</p>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="window.location.href='index.html#create-workout'">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item active" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
         </div>
     </div>
 
     <script>
-        // Smooth scroll for any anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
             });
-        });
+            document.getElementById('time').textContent = time;
+        }
 
-        // Add animation to cards on scroll
-        const cards = document.querySelectorAll('.supplement-card');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '0';
-                    entry.target.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        entry.target.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, 100);
-                    observer.unobserve(entry.target);
-                }
-            });
-        });
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
 
-        cards.forEach(card => {
-            observer.observe(card);
-        });
+        function goToPage(page) {
+            window.location.href = page;
+        }
+        
+        function goBack() {
+            window.location.href = 'supplements.html';
+        }
 
-        // Add click tracking for research links
-        document.querySelectorAll('.study-link').forEach(link => {
-            link.addEventListener('click', function() {
-                console.log('Research link clicked:', this.href);
-            });
+        function toggleSupplement(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
         });
     </script>
 </body>
