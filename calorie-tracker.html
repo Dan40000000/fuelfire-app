@@ -529,10 +529,15 @@
                 
             } catch (error) {
                 console.error('❌ Voice processing error:', error);
-                document.getElementById('voice-text').textContent = `Error: ${error.message}`;
+                document.getElementById('voice-text').textContent = `Error: ${error.message}. Try typing your food instead.`;
                 document.getElementById('voice-button').textContent = 'Try Again';
                 document.getElementById('voice-button').style.background = '#FF6B6B';
                 document.getElementById('voice-status').textContent = '❌';
+                
+                // Auto-close modal after error
+                setTimeout(() => {
+                    closeVoiceModal();
+                }, 3000);
             }
         }
         
@@ -723,10 +728,12 @@
         
         // Log selected foods
         function logSelectedFoods() {
-            if (!window.currentFoods || !window.currentSource) {
-                alert('Error: No foods to log');
-                return;
-            }
+            try {
+                if (!window.currentFoods || !window.currentSource) {
+                    console.error('No foods to log', window.currentFoods, window.currentSource);
+                    alert('Error: No foods to log. Please try again.');
+                    return;
+                }
             
             // Get selected foods
             const selectedFoods = [];
@@ -779,14 +786,31 @@
             loggedMeals[today].totalCalories += totalCalories;
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
             
+            // Update UI and sync
+            syncWithHomePage();
+            loadTodaysMeals();
+            loadQuickAdds();
+            updateTodayProgress();
+            
+            // Close the voice modal if it's open
+            if (window.currentSource === 'voice') {
+                closeVoiceModal();
+            }
+            
             // Clear results
             document.getElementById('food-results').innerHTML = '';
-            document.getElementById('voice-btn').textContent = '🎤 Start Voice';
-            
-            updateTodayProgress();
-            syncWithHomePage();
             
             alert(`✅ Logged ${selectedFoods.length} items (${totalCalories} calories)`);
+            
+            // Clear the current foods after successful logging
+            window.currentFoods = null;
+            window.currentSource = null;
+            
+            } catch (error) {
+                console.error('Error logging foods:', error);
+                alert('Error logging foods. Please try again.');
+                // Don't clear currentFoods on error so user can retry
+            }
         }
         
         // Log all current foods (simplified for onclick) - DEPRECATED but kept for compatibility
@@ -840,11 +864,17 @@
             syncWithHomePage();
             
             // Close modals and refresh
-            if (window.currentSource === 'voice') closeVoiceModal();
-            if (window.currentSource === 'search') closeSmartEntry();
+            if (window.currentSource === 'voice') {
+                closeVoiceModal();
+            }
+            if (window.currentSource === 'search') {
+                closeSmartEntry();
+            }
             
+            // Reset the UI properly after logging
             loadTodaysMeals();
             loadQuickAdds();
+            updateTodayProgress(); // Add this to update the UI
             
             const foodNames = window.currentFoods.map(f => f.name).join('\n• ');
             alert(`✅ All foods logged as ${type}!\n\n• ${foodNames}\n\n📊 Total: ${totalCalories} calories\n🥩 ${totalProtein}g protein\n🍞 ${totalCarbs}g carbs\n🥑 ${totalFat}g fat\n🍭 ${totalSugar}g sugar`);
