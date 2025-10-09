@@ -25,6 +25,9 @@ export default async function handler(req, res) {
         console.log(`🍔 AI parsing food: "${query}"`);
 
         // Check if Claude API key is available
+        const hasApiKey = !!process.env.CLAUDE_API_KEY;
+        console.log(`🔑 API Key status: ${hasApiKey ? 'Found' : 'Missing'}`);
+        
         if (!process.env.CLAUDE_API_KEY) {
             console.warn('Claude API key not configured, using fallback parsing');
             return res.status(200).json({
@@ -82,6 +85,8 @@ Use accurate nutrition data from major brands/USDA. Include realistic serving si
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Claude API error ${response.status}:`, errorText);
             throw new Error(`Claude API error: ${response.status}`);
         }
 
@@ -92,6 +97,7 @@ Use accurate nutrition data from major brands/USDA. Include realistic serving si
 
         // Parse the AI response
         let foods;
+        let isAIResponse = true;
         try {
             // Clean up the response to extract just the JSON
             const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
@@ -104,17 +110,18 @@ Use accurate nutrition data from major brands/USDA. Include realistic serving si
             console.error('Failed to parse AI response:', parseError);
             // Fallback to basic parsing
             foods = parseWithFallback(query);
+            isAIResponse = false;
         }
 
-        // Validate and format the foods
+        // Validate and format the foods (don't add defaults if from AI)
         const validatedFoods = foods.map(food => ({
             name: food.name || 'Unknown Food',
-            calories: Math.round(food.calories || 200),
-            protein: Math.round(food.protein || 10),
-            carbs: Math.round(food.carbs || 20),
-            fat: Math.round(food.fat || 8),
+            calories: Math.round(food.calories || 0),
+            protein: Math.round(food.protein || 0),
+            carbs: Math.round(food.carbs || 0),
+            fat: Math.round(food.fat || 0),
             serving: food.serving || '1 serving',
-            source: 'ai'
+            source: isAIResponse ? 'ai' : 'fallback'
         }));
 
         console.log(`✅ AI parsed ${validatedFoods.length} foods from: "${query}"`);
