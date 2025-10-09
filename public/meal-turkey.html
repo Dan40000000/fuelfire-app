@@ -278,7 +278,7 @@
 
     <script>
         // Turkey Recipe Database
-        const turkeyRecipes = [
+        var turkeyRecipes = [
             {
                 name: "Grilled Turkey & Veggie Wrap",
                 description: "Lean grilled turkey breast with fresh vegetables in whole wheat wrap",
@@ -372,7 +372,7 @@
                     "Condiments of choice"
                 ],
                 instructions: [
-                    "Preheat grill or large skillet to medium-high heat",
+                    "Preheat grill or large skilvar to medium-high heat",
                     "Mix turkey, breadcrumbs, egg, Worcestershire, and seasonings",
                     "Form into 4 patties, slightly larger than buns",
                     "Create small indent in center of each patty",
@@ -549,7 +549,7 @@
                 instructions: [
                     "Mix soy sauce, mirin, brown sugar, and rice vinegar",
                     "Dissolve cornstarch in 2 tbsp water",
-                    "Heat oil in large skillet over medium-high heat",
+                    "Heat oil in large skilvar over medium-high heat",
                     "Cook turkey slices 3-4 minutes per side until golden",
                     "Remove turkey and keep warm",
                     "Add teriyaki sauce to pan, bring to simmer",
@@ -585,7 +585,7 @@
                     "Layer turkey, Swiss cheese, and sauerkraut on 4 slices",
                     "Top with remaining bread slices, dressing side down",
                     "Butter outside of sandwiches",
-                    "Cook in skillet over medium heat 3-4 minutes per side",
+                    "Cook in skilvar over medium heat 3-4 minutes per side",
                     "Press down gently while cooking until golden and cheese melts",
                     "Serve hot with dill pickles"
                 ]
@@ -629,142 +629,142 @@
         ];
 
         function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
+            var now = new Date();
+            var time = now.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
                 minute: '2-digit',
                 hour12: true 
-            });
+            }
             document.getElementById('time').textContent = time;
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.querySelector('.overlay');
+        window.toggleSidebar = function() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.querySelector('.overlay');
             sidebar.classList.toggle('open');
             overlay.classList.toggle('show');
         }
 
-        function goToPage(page) {
+        window.goToPage = function(page) {
             window.location.href = page;
         }
         
-        function goBack() {
+        window.goBack = function() {
             window.location.href = 'meal-ideas.html';
         }
 
         function generateDifficultyStars(difficulty) {
-            const filledStars = '★'.repeat(difficulty);
-            const emptyStars = '☆'.repeat(5 - difficulty);
+            var filledStars = '★'.repeat(difficulty);
+            var emptyStars = '☆'.repeat(5 - difficulty);
             return filledStars + emptyStars;
         }
 
         function generateRatingStars(rating) {
-            const filledStars = '★'.repeat(rating);
-            const emptyStars = '☆'.repeat(5 - rating);
+            var filledStars = '★'.repeat(rating);
+            var emptyStars = '☆'.repeat(5 - rating);
             return filledStars + emptyStars;
         }
 
         function displayMeals() {
-            const container = document.getElementById('meals-container');
-            let html = '';
+            var container = document.getElementById('meals-container');
+            var html = '';
             
-            turkeyRecipes.forEach((meal, index) => {
-                html += `
-                    <div class="meal-card" onclick="openRecipeModal(${index})">
-                        <div class="meal-image" style="background: linear-gradient(135deg, #D2691E, #CD853F);">
-                            <div class="difficulty-badge">
-                                Difficulty: ${generateDifficultyStars(meal.difficulty)}
-                            </div>
-                            <span class="category-icon">${meal.icon}</span>
-                        </div>
-                        <div class="meal-content">
-                            <div class="meal-title">${meal.name}</div>
-                            <div class="meal-description">${meal.description}</div>
-                            <div class="meal-stats">
-                                <div class="meal-time">⏱️ ${meal.time}</div>
-                                <div class="rating-stars">${generateRatingStars(meal.rating)}</div>
-                            </div>
-                            <div class="meal-nutrition">
-                                <div class="nutrition-item">
-                                    <div class="nutrition-value">${meal.calories}</div>
-                                    <div class="nutrition-label">Cal</div>
-                                </div>
-                                <div class="nutrition-item">
-                                    <div class="nutrition-value">${meal.protein}g</div>
-                                    <div class="nutrition-label">Protein</div>
-                                </div>
-                                <div class="nutrition-item">
-                                    <div class="nutrition-value">${meal.carbs}g</div>
-                                    <div class="nutrition-label">Carbs</div>
-                                </div>
-                                <div class="nutrition-item">
-                                    <div class="nutrition-value">${meal.fat}g</div>
-                                    <div class="nutrition-label">Fat</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+            for (var index = 0; index < turkeyRecipes.length; index++) {
+                var meal = turkeyRecipes[index];
+                html += '<div class="meal-card" onclick="openRecipeModal(' + index + ')" ' + cardStyle + '>' +
+                    championBadge +
+                    '<div class="meal-image" style="' + imageGradient + '">' +
+                        '<div class="difficulty-badge">' +
+                            'Difficulty: ' + generateDifficultyStars(meal.difficulty) +
+                        '</div>' +
+                        '<span class="category-icon">' + meal.icon + '</span>' +
+                    '</div>' +
+                    '<div class="meal-content">' +
+                        '<div class="meal-title">' + meal.name + '</div>' +
+                        '<div class="meal-description">' + meal.description + '</div>' +
+                        '<div class="meal-stats">' +
+                            '<div class="meal-time">⏱️ ' + meal.time + '</div>' +
+                            '<div class="rating-stars">' + generateRatingStars(meal.rating) + '</div>' +
+                        '</div>' +
+                        '<div class="meal-nutrition">' +
+                            '<div class="nutrition-item">' +
+                                '<div class="nutrition-value">' + meal.calories + '</div>' +
+                                '<div class="nutrition-label">Cal</div>' +
+                            '</div>' +
+                            '<div class="nutrition-item">' +
+                                '<div class="nutrition-value">' + meal.protein + 'g</div>' +
+                                '<div class="nutrition-label">Protein</div>' +
+                            '</div>' +
+                            '<div class="nutrition-item">' +
+                                '<div class="nutrition-value">' + meal.carbs + 'g</div>' +
+                                '<div class="nutrition-label">Carbs</div>' +
+                            '</div>' +
+                            '<div class="nutrition-item">' +
+                                '<div class="nutrition-value">' + meal.fat + 'g</div>' +
+                                '<div class="nutrition-label">Fat</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            }
             
             container.innerHTML = html;
         }
 
         function openRecipeModal(index) {
-            const meal = turkeyRecipes[index];
-            const modal = document.getElementById('recipe-modal');
+            var meal = turkeyRecipes[index];
+            var modal = document.getElementById('recipe-modal');
             
             document.getElementById('modal-title').textContent = meal.name;
-            document.getElementById('modal-subtitle').innerHTML = `
-                ${meal.icon} ${meal.description} • ⏱️ ${meal.time} • Difficulty: ${generateDifficultyStars(meal.difficulty)}
-            `;
+            document.getElementById('modal-subtitle').innerHTML = 
+                '
+                ' + meal.icon + ' ' + meal.description + ' • ⏱️ ' + meal.time + ' • Difficulty: ' + generateDifficultyStars(meal.difficulty) + '
+            ';
             
-            let ingredientsHtml = '<h3 style="color: var(--primary); margin-bottom: 15px;">🛒 Shopping List</h3><div class="ingredient-list">';
-            meal.ingredients.forEach(ingredient => {
-                ingredientsHtml += `
-                    <div class="ingredient-item">
-                        <input type="checkbox" class="ingredient-checkbox">
-                        <span>${ingredient}</span>
-                    </div>
-                `;
-            });
+            var ingredientsHtml = '<h3 style="color: var(--primary); margin-bottom: 15px;">🛒 Shopping List</h3><div class="ingredient-list">';
+            for (var i = 0; i < meal.ingredients.length; i++) {
+                var ingredient = meal.ingredients[i];
+                ingredientsHtml += 
+                    '<div class="ingredient-item">' +
+                        '<input type="checkbox" class="ingredient-checkbox">' +
+                        '<span>' + ingredient + '</span>' +
+                    '</div>';
+            }
             ingredientsHtml += '</div>';
             
-            let instructionsHtml = '<h3 style="color: var(--primary); margin: 25px 0 15px 0;">👨‍🍳 Instructions</h3><div class="instruction-list">';
-            meal.instructions.forEach((instruction, i) => {
-                instructionsHtml += `
-                    <div class="instruction-item">
-                        <strong>Step ${i + 1}:</strong> ${instruction}
-                    </div>
-                `;
-            });
+            var instructionsHtml = '<h3 style="color: var(--primary); margin: 25px 0 15px 0;">👨‍🍳 Instructions</h3><div class="instruction-list">';
+            for (var i = 0; i < meal.instructions.length; i++) {
+                var instruction = meal.instructions[i];
+                instructionsHtml += 
+                    '<div class="instruction-item">' +
+                        '<strong>Step ' + (i + 1) + ':</strong> ' + instruction +
+                    '</div>';
+            }
             instructionsHtml += '</div>';
             
-            const nutritionHtml = `
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9ff; border-radius: 10px;">
-                    <div style="text-align: center;">
-                        <div style="font-weight: bold; color: var(--primary);">${meal.calories}</div>
-                        <div style="font-size: 12px; color: #666;">Calories</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-weight: bold; color: var(--primary);">${meal.protein}g</div>
-                        <div style="font-size: 12px; color: #666;">Protein</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-weight: bold; color: var(--primary);">${meal.carbs}g</div>
-                        <div style="font-size: 12px; color: #666;">Carbs</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-weight: bold; color: var(--primary);">${meal.fat}g</div>
-                        <div style="font-size: 12px; color: #666;">Fat</div>
-                    </div>
-                </div>
-            `;
+            var nutritionHtml = 
+                '<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9ff; border-radius: 10px;">' +
+                    '<div style="text-align: center;">' +
+                        '<div style="font-weight: bold; color: var(--primary);">' + meal.calories + '</div>' +
+                        '<div style="font-size: 12px; color: #666;">Calories</div>' +
+                    '</div>' +
+                    '<div style="text-align: center;">' +
+                        '<div style="font-weight: bold; color: var(--primary);">' + meal.protein + 'g</div>' +
+                        '<div style="font-size: 12px; color: #666;">Protein</div>' +
+                    '</div>' +
+                    '<div style="text-align: center;">' +
+                        '<div style="font-weight: bold; color: var(--primary);">' + meal.carbs + 'g</div>' +
+                        '<div style="font-size: 12px; color: #666;">Carbs</div>' +
+                    '</div>' +
+                    '<div style="text-align: center;">' +
+                        '<div style="font-weight: bold; color: var(--primary);">' + meal.fat + 'g</div>' +
+                        '<div style="font-size: 12px; color: #666;">Fat</div>' +
+                    '</div>' +
+                '</div>';
             
             document.getElementById('modal-content-body').innerHTML = 
                 nutritionHtml + ingredientsHtml + instructionsHtml + 
-                `<button class="log-recipe-btn" onclick="logRecipe(${index})">✅ Log This Recipe</button>`;
+                '<button class="log-recipe-btn" onclick="logRecipe(' + index + ')">✅ Log This Recipe</button>';
             
             modal.style.display = 'block';
         }
@@ -774,17 +774,17 @@
         }
 
         function logRecipe(index) {
-            const meal = turkeyRecipes[index];
-            const today = new Date().toISOString().split('T')[0];
+            var meal = turkeyRecipes[index];
+            var today = new Date().toISOString().split('T')[0];
             
             // Get existing logged meals
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            var loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = {
                     meals: [],
                     totalCalories: 0
-                };
+                }
             }
             
             // Add this recipe
@@ -797,7 +797,7 @@
                 time: new Date().toISOString(),
                 fromRecipe: true,
                 category: 'turkey'
-            });
+            }
             
             loggedMeals[today].totalCalories += meal.calories;
             
@@ -805,13 +805,13 @@
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
             
             // Show success message
-            alert(`✅ ${meal.name} logged! (+${meal.calories} calories)`);
+            alert('✅ ' + meal.name + ' logged! (+' + meal.calories + ' calories)');
             closeModal();
         }
 
         // Click outside modal to close
         window.onclick = function(event) {
-            const modal = document.getElementById('recipe-modal');
+            var modal = document.getElementById('recipe-modal');
             if (event.target == modal) {
                 closeModal();
             }
@@ -822,7 +822,7 @@
             updateTime();
             setInterval(updateTime, 1000);
             displayMeals();
-        });
+        }
     </script>
 </body>
 </html>
