@@ -178,32 +178,29 @@
     </div>
 
     <script>
-        // TEST IF JAVASCRIPT EVEN LOADS
-        console.log('JavaScript loaded on meal-ideas page');
-        
-        // ULTRA SIMPLE FUNCTIONS
-        function toggleSidebar() {
+        // Attach all functions to window to make them globally accessible
+        window.toggleSidebar = function() {
             var sidebar = document.getElementById('sidebar');
             var overlay = document.querySelector('.overlay');
             if (sidebar) sidebar.classList.toggle('open');
             if (overlay) overlay.classList.toggle('show');
-        }
+        };
 
-        function goToPage(page) {
+        window.goToPage = function(page) {
             window.location.href = page;
-        }
+        };
         
-        function goToCategory(category) {
+        window.goToCategory = function(category) {
             var currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
             window.location.href = 'meal-' + category + '.html?mode=' + currentMode;
-        }
+        };
 
-        function setBulkMode(mode) {
+        window.setBulkMode = function(mode) {
             localStorage.setItem('fuelfire_bulk_mode', mode);
             updateModeDisplay(mode);
             updateButtonStyles(mode);
             updatePageTheme(mode);
-        }
+        };
         
         function updatePageTheme(mode) {
             var themes = {

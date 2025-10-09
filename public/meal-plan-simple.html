@@ -288,16 +288,16 @@
             window.location.href = 'meal-plans.html';
         }
         
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.querySelector('.overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
-        }
+        window.toggleSidebar = function() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.querySelector('.overlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('show');
+        };
         
-        function goToPage(page) {
+        window.goToPage = function(page) {
             window.location.href = page;
-        }
+        };
         
         function updateTime() {
             const now = new Date();
