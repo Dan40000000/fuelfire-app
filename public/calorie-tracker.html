@@ -2071,17 +2071,8 @@
                 const foodName = parts[0].replace(/[🥗🍕🍔🥤🍎🍳] /, '');
                 const calories = parseInt(parts[1]);
                 
-                const food = {
-                    name: foodName,
-                    calories: calories,
-                    protein: Math.round(calories * 0.15 / 4), // Estimate
-                    carbs: Math.round(calories * 0.45 / 4),
-                    fat: Math.round(calories * 0.35 / 9),
-                    meal: getMealType()
-                };
-                
-                addFoodToLog(food);
-                alert('✅ Added to your food log!');
+                // This function is deprecated - use the smart entry modal instead
+                alert('Please use the Type or Voice button to add foods.');
             }
         }
         
@@ -2103,17 +2094,8 @@
             const carbs = parseInt(prompt('Enter carbs (g):') || '0');
             const fat = parseInt(prompt('Enter fat (g):') || '0');
             
-            const food = {
-                name: name,
-                calories: calories,
-                protein: protein,
-                carbs: carbs,
-                fat: fat,
-                meal: getMealType()
-            };
-            
-            addFoodToLog(food);
-            alert(`✅ Added ${name} to your food log!`);
+            // This function is deprecated
+            alert('Please use the Type or Voice button to add foods.');
         }
         
         // Sync with home page overview
