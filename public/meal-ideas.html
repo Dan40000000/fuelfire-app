@@ -206,7 +206,7 @@
         }
         
         function updatePageTheme(mode) {
-            const themes = {
+            var themes = {
                 'male-bulk': {
                     headerBg: 'linear-gradient(135deg, #1a1a1a, #444)',
                     categoryBg: 'linear-gradient(135deg, #2a2a2a, #555)',
@@ -233,31 +233,31 @@
                 }
             };
             
-            const theme = themes[mode];
+            var theme = themes[mode];
+            if (!theme) return;
             
             // Update header background
-            const header = document.querySelector('.header');
+            var header = document.querySelector('.header');
             if (header) {
                 header.style.background = theme.headerBg;
             }
             
             // Update category cards
-            const categoryCards = document.querySelectorAll('.category-card');
-            categoryCards.forEach((card, index) => {
-                // Keep unique colors for each category but apply theme shadow
-                card.style.boxShadow = `0 5px 20px ${theme.shadowColor}`;
-            });
+            var categoryCards = document.querySelectorAll('.category-card');
+            for (var i = 0; i < categoryCards.length; i++) {
+                categoryCards[i].style.boxShadow = '0 5px 20px ' + theme.shadowColor;
+            }
             
             // Update current mode text color
-            const currentModeDiv = document.getElementById('current-mode');
+            var currentModeDiv = document.getElementById('current-mode');
             if (currentModeDiv) {
                 currentModeDiv.style.color = theme.modeColor;
             }
             
             // Update content background with subtle theme
-            const content = document.querySelector('.content');
+            var content = document.querySelector('.content');
             if (content) {
-                content.style.background = `linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))`;
+                content.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.98))';
             }
         }
         
@@ -275,11 +275,12 @@
         }
         
         function updateButtonStyles(activeMode) {
-            const buttons = ['male-bulk-btn', 'male-cut-btn', 'female-bulk-btn', 'female-cut-btn'];
-            buttons.forEach(btnId => {
-                const btn = document.getElementById(btnId);
-                if (btn) {  // Check if button exists
-                    const mode = btnId.replace('-btn', '');
+            var buttons = ['male-bulk-btn', 'male-cut-btn', 'female-bulk-btn', 'female-cut-btn'];
+            for (var i = 0; i < buttons.length; i++) {
+                var btnId = buttons[i];
+                var btn = document.getElementById(btnId);
+                if (btn) {
+                    var mode = btnId.replace('-btn', '');
                     if (mode === activeMode) {
                         btn.style.transform = 'scale(1.05)';
                         btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
@@ -288,7 +289,7 @@
                         btn.style.boxShadow = btn.getAttribute('data-original-shadow') || '0 4px 15px rgba(0,0,0,0.2)';
                     }
                 }
-            });
+            }
         }
 
         // Initialize on page load - SIMPLIFIED
