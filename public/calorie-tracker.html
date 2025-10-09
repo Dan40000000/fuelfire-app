@@ -11,7 +11,7 @@
         <div class="screen">
             
             <div class="header">
-                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
                 <div class="header-title">Calorie Tracker</div>
             </div>
             
@@ -122,13 +122,13 @@
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
                         <h3 style="color: white; text-align: center; margin: 0 0 15px 0; font-size: 20px;">🔥 LOG YOUR FUEL 🔥</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                            <button onclick="startVoiceLogging()" ontouchstart="" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                            <button onclick="startVoiceLogging()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
                                 🎤<br>Voice
                             </button>
-                            <button onclick="startBarcodeScanning()" ontouchstart="" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                            <button onclick="startBarcodeScanning()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
                                 📷<br>Scan
                             </button>
-                            <button onclick="showSmartEntry()" ontouchstart="" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                            <button onclick="showSmartEntry()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
                                 ⌨️<br>Type
                             </button>
                         </div>
@@ -144,10 +144,10 @@
                     <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <h3 style="color: var(--primary); margin: 0 0 15px 0; text-align: center; font-size: 18px;">⚡ Quick Import</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <button onclick="showMealPlanSelector()" ontouchstart="" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                            <button onclick="showMealPlanSelector()" style="background: linear-gradient(135deg, #4CAF50, #45a049); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(76, 175, 80, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
                                 🍽️<br>Meal Plans
                             </button>
-                            <button onclick="showMealIdeasSelector()" ontouchstart="" style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(255, 152, 0, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                            <button onclick="showMealIdeasSelector()" style="background: linear-gradient(135deg, #ff9800, #f57c00); color: white; padding: 15px 12px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 15px rgba(255, 152, 0, 0.3); font-size: 14px; cursor: pointer; transition: all 0.3s ease;">
                                 💡<br>Meal Ideas
                             </button>
                         </div>
@@ -177,7 +177,7 @@
     </div>
     
     <!-- Overlay for sidebar -->
-    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
+    <div class="overlay" onclick="toggleSidebar()"></div>
     
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -185,29 +185,58 @@
             <div class="sidebar-brand">🔥 Well Fit</div>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏠 Home</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💪 Create Workout</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📊 Track Workouts</div>
-            <div class="menu-item active" onclick="goToPage('calorie-tracker.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🔥 Calorie Tracker</div>
-            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🎯 Diet Creation</div>
-            <div class="menu-item" onclick="goToPage('meal-plans.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍽️ Meal Plans</div>
-            <div class="menu-item" onclick="goToPage('meal-ideas.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💡 Meal Ideas</div>
-            <div class="menu-item" onclick="goToPage('supplements.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💊 Supplements</div>
-            <div class="menu-item" onclick="goToPage('workout-techniques.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏋️ Workout Techniques</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📈 Progress & Analytics</div>
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')">📊 Track Workouts</div>
+            <div class="menu-item active" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')">📈 Progress & Analytics</div>
         </div>
     </div>
     
     <!-- Manual Entry Modal -->
     <div id="manual-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 350px;">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">➕ Add Food</h3>
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">🍎 Log Your Fuel</h3>
+            
+            <!-- Saved Meals Quick Import -->
+            <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 14px;">⚡ Quick Import</h4>
+                <select id="saved-meals-select" onchange="loadSavedMeal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                    <option value="">Select saved meal...</option>
+                </select>
+            </div>
+
+            <!-- Manual Entry Form -->
             <input type="text" id="food-name" placeholder="Food name" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
-            <input type="number" id="food-calories" placeholder="Calories" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 20px;">
+            
+            <!-- Macro Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <input type="number" id="food-calories" placeholder="Calories" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                <input type="number" id="food-protein" placeholder="Protein (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                <input type="number" id="food-carbs" placeholder="Carbs (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                <input type="number" id="food-fat" placeholder="Fat (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+            </div>
+            
+            <!-- Sugar Input -->
+            <input type="number" id="food-sugar" placeholder="Sugar (g)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 15px;">
+            
+            <!-- Save Option -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; font-size: 14px; color: #666;">
+                    <input type="checkbox" id="save-meal-checkbox" style="margin-right: 8px;">
+                    💾 Save this meal for future use
+                </label>
+            </div>
+            
             <div style="display: flex; gap: 10px;">
-                <button onclick="addManualFood()" ontouchstart="" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">Add</button>
-                <button onclick="hideManualEntry()" ontouchstart="" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">Cancel</button>
+                <button onclick="addManualFood()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Add to Log</button>
+                <button onclick="hideManualEntry()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
     </div>
@@ -233,16 +262,16 @@
                 <div id="meal-type-selector" style="display: none; margin-bottom: 20px;">
                     <label style="display: block; font-weight: bold; margin-bottom: 8px;">Log as:</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button onclick="logMealFromPlan('breakfast')" ontouchstart="" style="background: #FF6B6B; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍳 Breakfast</button>
-                        <button onclick="logMealFromPlan('lunch')" ontouchstart="" style="background: #4ECDC4; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🥗 Lunch</button>
-                        <button onclick="logMealFromPlan('dinner')" ontouchstart="" style="background: #3AA69D; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍽️ Dinner</button>
-                        <button onclick="logMealFromPlan('snack')" ontouchstart="" style="background: #F38181; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍎 Snack</button>
+                        <button onclick="logMealFromPlan('breakfast')" style="background: #FF6B6B; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍳 Breakfast</button>
+                        <button onclick="logMealFromPlan('lunch')" style="background: #4ECDC4; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🥗 Lunch</button>
+                        <button onclick="logMealFromPlan('dinner')" style="background: #3AA69D; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍽️ Dinner</button>
+                        <button onclick="logMealFromPlan('snack')" style="background: #F38181; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍎 Snack</button>
                     </div>
                 </div>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="hideMealPlanSelector()" ontouchstart="" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">Cancel</button>
+                <button onclick="hideMealPlanSelector()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
     </div>
@@ -276,16 +305,16 @@
                 <div id="meal-idea-type-selector" style="display: none; margin-bottom: 20px;">
                     <label style="display: block; font-weight: bold; margin-bottom: 8px;">Log as:</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button onclick="logMealFromIdea('breakfast')" ontouchstart="" style="background: #FF6B6B; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍳 Breakfast</button>
-                        <button onclick="logMealFromIdea('lunch')" ontouchstart="" style="background: #4ECDC4; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🥗 Lunch</button>
-                        <button onclick="logMealFromIdea('dinner')" ontouchstart="" style="background: #3AA69D; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍽️ Dinner</button>
-                        <button onclick="logMealFromIdea('snack')" ontouchstart="" style="background: #F38181; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍎 Snack</button>
+                        <button onclick="logMealFromIdea('breakfast')" style="background: #FF6B6B; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍳 Breakfast</button>
+                        <button onclick="logMealFromIdea('lunch')" style="background: #4ECDC4; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🥗 Lunch</button>
+                        <button onclick="logMealFromIdea('dinner')" style="background: #3AA69D; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍽️ Dinner</button>
+                        <button onclick="logMealFromIdea('snack')" style="background: #F38181; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px;">🍎 Snack</button>
                     </div>
                 </div>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button onclick="hideMealIdeasSelector()" ontouchstart="" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">Cancel</button>
+                <button onclick="hideMealIdeasSelector()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
     </div>
@@ -298,10 +327,10 @@
             <div id="voice-text" style="min-height: 50px; padding: 15px; background: #f0f0f0; border-radius: 10px; margin-bottom: 20px; font-style: italic;">
                 Click the microphone to start speaking...
             </div>
-            <button onclick="toggleVoiceRecording()" ontouchstart="" id="voice-button" style="background: #FF6B6B; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+            <button onclick="toggleVoiceRecording()" id="voice-button" style="background: #FF6B6B; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer;">
                 Start Recording
             </button>
-            <button onclick="closeVoiceModal()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-left: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+            <button onclick="closeVoiceModal()" style="background: #6c757d; color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; margin-left: 10px;">
                 Cancel
             </button>
             <div id="food-results" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
@@ -315,7 +344,7 @@
             <canvas id="scanner-canvas" style="display: none;"></canvas>
             <div style="text-align: center; margin-top: 20px;">
                 <div style="color: white; font-size: 18px; margin-bottom: 10px;">📷 Point at barcode</div>
-                <button onclick="closeScannerModal()" ontouchstart="" style="background: #dc3545; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <button onclick="closeScannerModal()" style="background: #dc3545; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold;">
                     Cancel
                 </button>
             </div>
@@ -329,7 +358,7 @@
             <h3 style="color: var(--primary); margin-bottom: 20px;">⌨️ Smart Food Search</h3>
             <input type="text" id="smart-search" placeholder="Type food name..." onkeyup="searchFood(this.value)" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
             <div id="search-results" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
-            <button onclick="closeSmartEntry()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+            <button onclick="closeSmartEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%;">
                 Cancel
             </button>
         </div>
@@ -344,45 +373,63 @@
         let isRecording = false;
         
         function startVoiceLogging() {
+            // Check if we're in iOS WebView (no speech recognition support)
+            const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+            
+            if (isIOSWebView || !('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                // Use text input fallback for iOS WebView
+                const voiceInput = prompt('🎤 Describe what you ate:\n\nExample: "chicken breast with rice and broccoli" or "2 eggs, toast, and orange juice"');
+                
+                if (voiceInput && voiceInput.trim()) {
+                    // Show processing
+                    document.getElementById('voice-modal').style.display = 'block';
+                    document.getElementById('voice-text').textContent = voiceInput;
+                    document.getElementById('voice-button').textContent = 'Processing...';
+                    document.getElementById('voice-button').style.background = '#6c757d';
+                    document.getElementById('voice-status').textContent = '🤖';
+                    
+                    // Process with AI
+                    searchFoodByVoice(voiceInput);
+                }
+                return;
+            }
+            
+            // Original web speech API code for browsers
             document.getElementById('voice-modal').style.display = 'block';
             document.getElementById('voice-text').textContent = 'Click the microphone to start speaking...';
             document.getElementById('voice-button').textContent = 'Start Recording';
             document.getElementById('voice-button').style.background = '#FF6B6B';
             document.getElementById('voice-status').textContent = '🎤';
             
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                recognition.continuous = false;
-                recognition.interimResults = true;
-                recognition.lang = 'en-US';
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('voice-text').textContent = transcript;
                 
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('voice-text').textContent = transcript;
-                    
-                    if (event.results[0].isFinal) {
-                        // Stop recording automatically when final result is received
-                        recognition.stop();
-                        isRecording = false;
-                        document.getElementById('voice-button').textContent = 'Processing...';
-                        document.getElementById('voice-button').style.background = '#6c757d';
-                        document.getElementById('voice-status').textContent = '🤖';
-                        
-                        // Search for food using AI
-                        searchFoodByVoice(transcript);
-                    }
-                };
-                
-                recognition.onerror = function(event) {
-                    document.getElementById('voice-text').textContent = 'Error: ' + event.error;
+                if (event.results[0].isFinal) {
+                    // Stop recording automatically when final result is received
+                    recognition.stop();
                     isRecording = false;
-                    document.getElementById('voice-button').textContent = 'Start Recording';
-                    document.getElementById('voice-button').style.background = '#FF6B6B';
-                    document.getElementById('voice-status').textContent = '🎤';
-                };
-            } else {
-                alert('Voice recognition not supported on this browser. Try Chrome or Safari.');
-            }
+                    document.getElementById('voice-button').textContent = 'Processing...';
+                    document.getElementById('voice-button').style.background = '#6c757d';
+                    document.getElementById('voice-status').textContent = '🤖';
+                    
+                    // Search for food using AI
+                    searchFoodByVoice(transcript);
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                document.getElementById('voice-text').textContent = 'Error: ' + event.error;
+                isRecording = false;
+                document.getElementById('voice-button').textContent = 'Start Recording';
+                document.getElementById('voice-button').style.background = '#FF6B6B';
+                document.getElementById('voice-status').textContent = '🎤';
+            };
         }
         
         function toggleVoiceRecording() {
@@ -458,18 +505,42 @@
                     // Auto-log single food item
                     const food = results[0];
                     const mealType = prompt(`Found: ${food.name} (${food.calories} cal)\n\nLog as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):`);
+                    
+                    if (!mealType) {
+                        // User cancelled
+                        closeVoiceModal();
+                        return;
+                    }
+                    
                     const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
                     const type = types[parseInt(mealType)] || 'snack';
                     
-                    // Add to food log
-                    addFoodToLog({
+                    // Log the food using the correct function
+                    const today = new Date().toISOString().split('T')[0];
+                    let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                    
+                    if (!loggedMeals[today]) {
+                        loggedMeals[today] = { meals: [], totalCalories: 0 };
+                    }
+                    
+                    loggedMeals[today].meals.push({
                         name: food.name,
+                        type: type,
                         calories: food.calories,
-                        protein: food.protein,
-                        carbs: food.carbs,
-                        fat: food.fat,
-                        meal: type
+                        protein: food.protein || 0,
+                        carbs: food.carbs || 0,
+                        fat: food.fat || 0,
+                        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                     });
+                    
+                    loggedMeals[today].totalCalories += food.calories;
+                    localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+                    
+                    // Update UI
+                    syncWithHomePage();
+                    updateTodayProgress();
+                    loadTodaysMeals();
+                    loadQuickAdds();
                     
                     // Close voice modal
                     closeVoiceModal();
@@ -482,10 +553,15 @@
                 
             } catch (error) {
                 console.error('❌ Voice processing error:', error);
-                document.getElementById('voice-text').textContent = `Error: ${error.message}`;
+                document.getElementById('voice-text').textContent = `Error: ${error.message}. Try typing your food instead.`;
                 document.getElementById('voice-button').textContent = 'Try Again';
                 document.getElementById('voice-button').style.background = '#FF6B6B';
                 document.getElementById('voice-status').textContent = '❌';
+                
+                // Auto-close modal after error
+                setTimeout(() => {
+                    closeVoiceModal();
+                }, 3000);
             }
         }
         
@@ -608,38 +684,49 @@
                 window.currentFoods = foods;
                 window.currentSource = source;
                 
-                // Show "Log All" button
-                html += `
-                    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;" 
-                         onclick="logAllCurrentFoods()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                        <div style="font-weight: bold;">✅ Log All Foods</div>
-                        <div style="font-size: 14px; opacity: 0.9;">Total: ${foods.reduce((sum, f) => sum + f.calories, 0)} calories</div>
-                    </div>
-                `;
-                
-                html += '<div style="font-size: 14px; margin-bottom: 8px; color: #666;">Or select individual foods:</div>';
-                
+                // Add checkboxes for each food item
+                html += '<div style="margin-bottom: 15px;">';
                 foods.forEach((food, index) => {
-                    // Clean the food name for onclick
-                    const cleanName = food.name.replace(/'/g, "\\'");
                     html += `
-                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
-                             onclick="selectFood('${cleanName}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                            <div style="font-weight: bold;">${food.name}</div>
-                            <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
-                            ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="food-check-${index}" checked style="width: 20px; height: 20px; cursor: pointer;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">${food.name}</div>
+                                <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
+                                ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                            </div>
                         </div>
                     `;
                 });
+                html += '</div>';
+                
+                // Show "Log Selected" button
+                html += `
+                    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;" 
+                         onclick="logSelectedFoods()">
+                        <div style="font-weight: bold;">✅ Log Selected Foods</div>
+                        <div style="font-size: 14px; opacity: 0.9;" id="selected-total">Total: ${foods.reduce((sum, f) => sum + f.calories, 0)} calories</div>
+                    </div>
+                `;
                 
                 resultsDiv.innerHTML = html;
+                
+                // Add event listeners to checkboxes to update total - use setTimeout to ensure DOM is ready
+                setTimeout(() => {
+                    foods.forEach((food, index) => {
+                        const checkbox = document.getElementById(`food-check-${index}`);
+                        if (checkbox) {
+                            checkbox.addEventListener('change', updateSelectedTotal);
+                        }
+                    });
+                }, 100);
             } else {
                 // Single food - show normal selection
                 let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select food to log:</div>';
                 foods.forEach((food, index) => {
                     html += `
                         <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
-                             onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                             onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
                             <div style="font-weight: bold;">${food.name}</div>
                             <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
                             ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
@@ -650,7 +737,117 @@
             }
         }
         
-        // Log all current foods (simplified for onclick)
+        // Update total when checkboxes change
+        function updateSelectedTotal() {
+            if (!window.currentFoods) return;
+            
+            let total = 0;
+            window.currentFoods.forEach((food, index) => {
+                const checkbox = document.getElementById(`food-check-${index}`);
+                if (checkbox && checkbox.checked) {
+                    total += food.calories;
+                }
+            });
+            
+            const totalDiv = document.getElementById('selected-total');
+            if (totalDiv) {
+                totalDiv.textContent = `Total: ${total} calories`;
+            }
+        }
+        
+        // Log selected foods
+        function logSelectedFoods() {
+            try {
+                if (!window.currentFoods || !window.currentSource) {
+                    alert('Error: No foods to log. Please try again.');
+                    return;
+                }
+            
+            // Get selected foods
+            const selectedFoods = [];
+            window.currentFoods.forEach((food, index) => {
+                const checkbox = document.getElementById(`food-check-${index}`);
+                if (checkbox && checkbox.checked) {
+                    selectedFoods.push(food);
+                }
+            });
+            
+            if (selectedFoods.length === 0) {
+                alert('Please select at least one food item');
+                return;
+            }
+            
+            const mealType = prompt('Log selected foods as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
+            
+            // Handle cancel or invalid input
+            if (!mealType) {
+                return;
+            }
+            
+            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
+            const type = types[parseInt(mealType)] || 'snack';
+            
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalCarbs = 0;
+            let totalFat = 0;
+            
+            selectedFoods.forEach(food => {
+                const meal = {
+                    name: food.name,
+                    calories: food.calories,
+                    protein: food.protein || 0,
+                    carbs: food.carbs || 0,
+                    fat: food.fat || 0,
+                    type: type,
+                    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                };
+                
+                loggedMeals[today].meals.push(meal);
+                totalCalories += food.calories;
+                totalProtein += food.protein || 0;
+                totalCarbs += food.carbs || 0;
+                totalFat += food.fat || 0;
+            });
+            
+            loggedMeals[today].totalCalories += totalCalories;
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Update UI and sync
+            syncWithHomePage();
+            updateTodayProgress();
+            loadTodaysMeals();
+            loadQuickAdds();
+            
+            // Close the voice modal if it's open
+            if (window.currentSource === 'voice') {
+                closeVoiceModal();
+            }
+            
+            // Clear results
+            document.getElementById('food-results').innerHTML = '';
+            
+            alert(`✅ Logged ${selectedFoods.length} items (${totalCalories} calories)`);
+            
+            // Clear the current foods after successful logging
+            window.currentFoods = null;
+            window.currentSource = null;
+            
+            } catch (error) {
+                console.error('Error logging foods:', error);
+                alert('There was an error logging your foods. Please try again.');
+                // Don't clear currentFoods on error so user can retry
+            }
+        }
+        
+        // Log all current foods (simplified for onclick) - DEPRECATED but kept for compatibility
         function logAllCurrentFoods() {
             if (!window.currentFoods || !window.currentSource) {
                 alert('Error: No foods to log');
@@ -698,11 +895,18 @@
             
             loggedMeals[today].totalCalories += totalCalories;
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            syncWithHomePage();
             
             // Close modals and refresh
-            if (window.currentSource === 'voice') closeVoiceModal();
-            if (window.currentSource === 'search') closeSmartEntry();
+            if (window.currentSource === 'voice') {
+                closeVoiceModal();
+            }
+            if (window.currentSource === 'search') {
+                closeSmartEntry();
+            }
             
+            // Reset the UI properly after logging
+            updateTodayProgress();
             loadTodaysMeals();
             loadQuickAdds();
             
@@ -742,6 +946,7 @@
             
             loggedMeals[today].totalCalories += calories;
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            syncWithHomePage();
             
             // Close modal and refresh
             if (source === 'voice') closeVoiceModal();
@@ -755,6 +960,28 @@
         
         // Barcode Scanner
         function startBarcodeScanning() {
+            // Check if we're in iOS WebView
+            const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+            
+            if (isIOSWebView) {
+                // Use manual barcode entry for iOS WebView
+                const barcode = prompt('📷 Enter the barcode number:\n\n(Camera scanning not available in app mode - enter the numbers below the barcode)');
+                
+                if (barcode && barcode.trim()) {
+                    searchByBarcode(barcode.trim());
+                }
+                return;
+            }
+            
+            // Try to use Quagga for web browsers
+            if (typeof Quagga === 'undefined') {
+                const barcode = prompt('📷 Enter the barcode number:\n\n(Scanner not available - enter the numbers below the barcode)');
+                if (barcode && barcode.trim()) {
+                    searchByBarcode(barcode.trim());
+                }
+                return;
+            }
+            
             document.getElementById('scanner-modal').style.display = 'block';
             
             Quagga.init({
@@ -854,8 +1081,9 @@
         
         // Load quick adds from history
         function loadQuickAdds() {
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-            const foodCounts = {};
+            try {
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const foodCounts = {};
             
             // Count frequency of foods
             Object.values(loggedMeals).forEach(day => {
@@ -879,23 +1107,18 @@
             quickAddsDiv.innerHTML = topFoods.map(([foodData, count]) => {
                 const [name, calories, protein, carbs, fat] = foodData.split('|');
                 return `
-                    <button onclick="selectFood('${name}', ${calories}, ${protein}, ${carbs}, ${fat}, 'quick')" ontouchstart="" 
+                    <button onclick="selectFood('${name}', ${calories}, ${protein}, ${carbs}, ${fat}, 'quick')" 
                             style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
                                    padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;">
                         ${name} (${calories}cal)
                     </button>
                 `;
             }).join('');
-        }
-        
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('time').textContent = time;
+            
+            } catch (error) {
+                console.error('Error in loadQuickAdds:', error);
+                // Don't throw error, just log it
+            }
         }
         
         function toggleSidebar() {
@@ -971,9 +1194,10 @@
         }
         
         function loadTodaysMeals() {
-            const today = new Date().toISOString().split('T')[0];
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-            const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
             
             // Get user's targets from most recent diet goals
             const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
@@ -1075,7 +1299,7 @@
                                             📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
                                         </div>
                                     </div>
-                                    <button onclick="removeMeal(${meal.originalIndex})" ontouchstart="" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">×</button>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
                                 </div>
                             </div>
                         `;
@@ -1125,7 +1349,7 @@
                                             📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
                                         </div>
                                     </div>
-                                    <button onclick="removeMeal(${meal.originalIndex})" ontouchstart="" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">×</button>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
                                 </div>
                             </div>
                         `;
@@ -1175,7 +1399,7 @@
                                             📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
                                         </div>
                                     </div>
-                                    <button onclick="removeMeal(${meal.originalIndex})" ontouchstart="" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">×</button>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
                                 </div>
                             </div>
                         `;
@@ -1225,7 +1449,7 @@
                                             📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • 🥑 ${Math.round(meal.fat || 0)}g fat
                                         </div>
                                     </div>
-                                    <button onclick="removeMeal(${meal.originalIndex})" ontouchstart="" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">×</button>
+                                    <button onclick="removeMeal(${meal.originalIndex})" style="background: rgba(255,255,255,0.3); color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; margin-left: 10px;">×</button>
                                 </div>
                             </div>
                         `;
@@ -1238,6 +1462,38 @@
             
             // Load weekly chart
             loadWeeklyChart();
+            
+            } catch (error) {
+                console.error('Error in loadTodaysMeals:', error, error.stack);
+                // Don't throw error, just log it to prevent breaking the UI
+            }
+        }
+        
+        function updateTodayProgress() {
+            // This function updates the UI to reflect today's progress
+            // It's called after logging food to refresh the display
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+                
+                // Update the calories display
+                const caloriesElement = document.getElementById('calories-today');
+                if (caloriesElement) {
+                    caloriesElement.textContent = todayData.totalCalories;
+                }
+                
+                // Update the progress bar if it exists
+                const progressBar = document.querySelector('.progress');
+                if (progressBar) {
+                    const target = parseInt(document.getElementById('calorie-target')?.textContent || '2000');
+                    const progress = Math.min((todayData.totalCalories / target) * 100, 100);
+                    progressBar.style.width = progress + '%';
+                }
+                
+            } catch (error) {
+                console.error('Error in updateTodayProgress:', error);
+            }
         }
         
         function loadWeeklyChart() {
@@ -1283,6 +1539,7 @@
                     loggedMeals[today].totalCalories -= removedCalories;
                     
                     localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+                    syncWithHomePage();
                     loadTodaysMeals();
                 }
             }
@@ -1290,24 +1547,86 @@
         
         function showManualEntry() {
             document.getElementById('manual-entry-modal').style.display = 'block';
+            loadSavedMealsToSelect();
             document.getElementById('food-name').focus();
         }
         
         function hideManualEntry() {
             document.getElementById('manual-entry-modal').style.display = 'none';
+            clearManualEntryForm();
+        }
+        
+        function clearManualEntryForm() {
             document.getElementById('food-name').value = '';
             document.getElementById('food-calories').value = '';
+            document.getElementById('food-protein').value = '';
+            document.getElementById('food-carbs').value = '';
+            document.getElementById('food-fat').value = '';
+            document.getElementById('food-sugar').value = '';
+            document.getElementById('save-meal-checkbox').checked = false;
+            document.getElementById('saved-meals-select').value = '';
+        }
+        
+        function loadSavedMealsToSelect() {
+            const select = document.getElementById('saved-meals-select');
+            const savedMeals = JSON.parse(localStorage.getItem('fuelfire_saved_meals') || '[]');
+            
+            // Clear existing options except first
+            select.innerHTML = '<option value="">Select saved meal...</option>';
+            
+            savedMeals.forEach((meal, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${meal.name} (${meal.calories} cal)`;
+                select.appendChild(option);
+            });
+        }
+        
+        function loadSavedMeal() {
+            const select = document.getElementById('saved-meals-select');
+            const selectedIndex = select.value;
+            
+            if (selectedIndex === '') return;
+            
+            const savedMeals = JSON.parse(localStorage.getItem('fuelfire_saved_meals') || '[]');
+            const meal = savedMeals[selectedIndex];
+            
+            if (meal) {
+                document.getElementById('food-name').value = meal.name;
+                document.getElementById('food-calories').value = meal.calories;
+                document.getElementById('food-protein').value = meal.protein || 0;
+                document.getElementById('food-carbs').value = meal.carbs || 0;
+                document.getElementById('food-fat').value = meal.fat || 0;
+                document.getElementById('food-sugar').value = meal.sugar || 0;
+            }
         }
         
         function addManualFood() {
             const name = document.getElementById('food-name').value;
-            const calories = parseInt(document.getElementById('food-calories').value);
+            const calories = parseInt(document.getElementById('food-calories').value) || 0;
+            const protein = parseInt(document.getElementById('food-protein').value) || 0;
+            const carbs = parseInt(document.getElementById('food-carbs').value) || 0;
+            const fat = parseInt(document.getElementById('food-fat').value) || 0;
+            const sugar = parseInt(document.getElementById('food-sugar').value) || 0;
+            const shouldSave = document.getElementById('save-meal-checkbox').checked;
             
-            if (!name || !calories) {
-                alert('Please enter both food name and calories');
+            if (!name) {
+                alert('Please enter a food name');
                 return;
             }
             
+            const foodItem = {
+                name: name,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                sugar: sugar,
+                time: new Date().toISOString(),
+                fromMealPlan: false
+            };
+            
+            // Save to today's log
             const today = new Date().toISOString().split('T')[0];
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
@@ -1315,15 +1634,28 @@
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
             }
             
-            loggedMeals[today].meals.push({
-                name: name,
-                calories: calories,
-                time: new Date().toISOString(),
-                fromMealPlan: false
-            });
-            
+            loggedMeals[today].meals.push(foodItem);
             loggedMeals[today].totalCalories += calories;
+            
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            syncWithHomePage();
+            
+            // Save to saved meals if requested
+            if (shouldSave) {
+                let savedMeals = JSON.parse(localStorage.getItem('fuelfire_saved_meals') || '[]');
+                const savedMeal = {
+                    name: name,
+                    calories: calories,
+                    protein: protein,
+                    carbs: carbs,
+                    fat: fat,
+                    sugar: sugar,
+                    savedAt: new Date().toISOString()
+                };
+                savedMeals.push(savedMeal);
+                localStorage.setItem('fuelfire_saved_meals', JSON.stringify(savedMeals));
+                loadSavedMealsToSelect();
+            }
             
             hideManualEntry();
             loadTodaysMeals();
@@ -1565,6 +1897,7 @@
             loggedMeals[today].totalCalories += selectedMealData.calories;
             
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            syncWithHomePage();
             
             alert(`✅ ${selectedMealData.name} logged as ${logAsType}!\n\n📊 ${selectedMealData.calories} calories\n🥩 ${selectedMealData.protein}g protein\n🍞 ${selectedMealData.carbs}g carbs\n🥑 ${selectedMealData.fat}g fat\n🍭 ${selectedMealData.sugar || 0}g sugar`);
             
@@ -1706,6 +2039,7 @@
             loggedMeals[today].totalCalories += selectedMealIdeaData.calories;
             
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            syncWithHomePage();
             
             alert(`✅ ${selectedMealIdeaData.name} logged as ${logAsType}!\n\n📊 ${selectedMealIdeaData.calories} calories\n🥩 ${selectedMealIdeaData.protein}g protein\n🍞 ${selectedMealIdeaData.carbs}g carbs\n🥑 ${selectedMealIdeaData.fat}g fat\n🍭 ${selectedMealIdeaData.sugar || 0}g sugar`);
             
@@ -1715,10 +2049,12 @@
         
         // Voice logging function is defined earlier in the file
         
-        // Barcode scanning function is implemented above (line 761)
+        // Barcode Scanning Function
+        // Removed duplicate startBarcodeScanning function - using the one above
         
         // Smart Entry Function
-        function showSmartEntry() {
+        function showSmartEntryDuplicate_REMOVED() {
+            // REMOVED - This was a duplicate function causing conflicts
             const smartSuggestions = [
                 '🥗 Grilled Chicken Salad - 320 cal',
                 '🍕 2 Slices Pizza - 540 cal',
@@ -1780,10 +2116,20 @@
             alert(`✅ Added ${name} to your food log!`);
         }
         
+        // Sync with home page overview
+        function syncWithHomePage() {
+            // This ensures the home page always shows current data when navigating back
+            const today = new Date().toISOString().split('T')[0];
+            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+            
+            // Trigger storage event to update other tabs/pages
+            window.localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
+        }
+        
         // Initialize
         window.addEventListener('load', function() {
             updateTime();
-            setInterval(updateTime, 1000);
             loadTodaysMeals();
             loadQuickAdds();
         });
