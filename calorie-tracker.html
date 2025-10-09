@@ -354,22 +354,52 @@
     
     <!-- Smart Entry Modal -->
     <div id="smart-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px;">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">⌨️ Smart Food Search</h3>
-            <input type="text" id="smart-search" placeholder="e.g. 'Big Mac with fries' or 'grilled chicken salad'" onkeyup="searchFood(this.value)" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 450px; max-height: 90%; overflow-y: auto;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">⌨️ Add Food</h3>
             
-            <!-- Quick suggestions -->
-            <div style="margin-top: 15px;">
-                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">QUICK SUGGESTIONS:</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                    <button onclick="document.getElementById('smart-search').value='chicken breast'; searchFood('chicken breast')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🍗 Chicken Breast</button>
-                    <button onclick="document.getElementById('smart-search').value='eggs and toast'; searchFood('eggs and toast')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🍳 Eggs & Toast</button>
-                    <button onclick="document.getElementById('smart-search').value='protein shake'; searchFood('protein shake')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🥤 Protein Shake</button>
-                    <button onclick="document.getElementById('smart-search').value='salad with chicken'; searchFood('salad with chicken')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🥗 Salad</button>
-                </div>
+            <!-- Tab buttons -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="ai-search-tab" onclick="showAISearch()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold;">🤖 AI Search</button>
+                <button id="manual-entry-tab" onclick="showManualEntry()" style="flex: 1; padding: 10px; background: #e0e0e0; color: #666; border: none; border-radius: 10px; font-weight: bold;">✏️ Manual Entry</button>
             </div>
             
-            <div id="search-results" style="margin-top: 20px; max-height: 250px; overflow-y: auto;"></div>
+            <!-- AI Search Tab -->
+            <div id="ai-search-content">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="smart-search" placeholder="e.g. 'Big Mac with fries'" 
+                           onkeypress="if(event.key==='Enter') searchFood(this.value)" 
+                           style="flex: 1; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                    <button onclick="searchFood(document.getElementById('smart-search').value)" style="background: var(--primary); color: white; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold;">Search</button>
+                </div>
+                
+                <!-- Quick suggestions -->
+                <div style="margin-top: 15px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;">QUICK PICKS:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <button onclick="document.getElementById('smart-search').value='chicken breast'; searchFood('chicken breast')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🍗 Chicken</button>
+                        <button onclick="document.getElementById('smart-search').value='eggs and toast'; searchFood('eggs and toast')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🍳 Eggs</button>
+                        <button onclick="document.getElementById('smart-search').value='protein shake'; searchFood('protein shake')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🥤 Shake</button>
+                        <button onclick="document.getElementById('smart-search').value='salad'; searchFood('salad')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🥗 Salad</button>
+                    </div>
+                </div>
+                
+                <div id="search-results" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+            
+            <!-- Manual Entry Tab -->
+            <div id="manual-entry-content" style="display: none;">
+                <input type="text" id="manual-food-name" placeholder="Food name" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; margin-bottom: 15px;">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <input type="number" id="manual-calories" placeholder="Calories" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                    <input type="number" id="manual-protein" placeholder="Protein (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                    <input type="number" id="manual-carbs" placeholder="Carbs (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                    <input type="number" id="manual-fat" placeholder="Fat (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                </div>
+                
+                <button onclick="addManualFood()" style="width: 100%; background: #4CAF50; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold;">Add Food</button>
+            </div>
+            
             <button onclick="closeSmartEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%;">
                 Cancel
             </button>
@@ -1023,8 +1053,8 @@
         }
         
         async function searchFood(query) {
-            if (query.length < 2) {
-                document.getElementById('search-results').innerHTML = '';
+            if (!query || query.length < 2) {
+                document.getElementById('search-results').innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Enter at least 2 characters to search</div>';
                 return;
             }
             
@@ -1035,6 +1065,25 @@
             const results = await parseWithAI(query);
             
             displayFoodResults(results, 'search');
+        }
+        
+        // Tab switching functions
+        function showAISearch() {
+            document.getElementById('ai-search-content').style.display = 'block';
+            document.getElementById('manual-entry-content').style.display = 'none';
+            document.getElementById('ai-search-tab').style.background = 'var(--primary)';
+            document.getElementById('ai-search-tab').style.color = 'white';
+            document.getElementById('manual-entry-tab').style.background = '#e0e0e0';
+            document.getElementById('manual-entry-tab').style.color = '#666';
+        }
+        
+        function showManualEntry() {
+            document.getElementById('ai-search-content').style.display = 'none';
+            document.getElementById('manual-entry-content').style.display = 'block';
+            document.getElementById('manual-entry-tab').style.background = 'var(--primary)';
+            document.getElementById('manual-entry-tab').style.color = 'white';
+            document.getElementById('ai-search-tab').style.background = '#e0e0e0';
+            document.getElementById('ai-search-tab').style.color = '#666';
         }
         
         // Load quick adds from history
@@ -2040,20 +2089,70 @@
             window.location.href = 'meal-ideas.html';
         }
         
-        // Manual Food Entry
+        // Manual Food Entry - New version for the modal
         function addManualFood() {
-            const name = prompt('Enter food name:');
-            if (!name) return;
+            const name = document.getElementById('manual-food-name').value;
+            const calories = parseInt(document.getElementById('manual-calories').value) || 0;
+            const protein = parseInt(document.getElementById('manual-protein').value) || 0;
+            const carbs = parseInt(document.getElementById('manual-carbs').value) || 0;
+            const fat = parseInt(document.getElementById('manual-fat').value) || 0;
             
-            const calories = parseInt(prompt('Enter calories:') || '0');
-            if (!calories) return;
+            if (!name) {
+                alert('Please enter a food name');
+                return;
+            }
             
-            const protein = parseInt(prompt('Enter protein (g):') || '0');
-            const carbs = parseInt(prompt('Enter carbs (g):') || '0');
-            const fat = parseInt(prompt('Enter fat (g):') || '0');
+            if (!calories) {
+                alert('Please enter calories');
+                return;
+            }
             
-            // This function is deprecated
-            alert('Please use the Type or Voice button to add foods.');
+            // Ask for meal type
+            const mealType = prompt('Log as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
+            if (!mealType) return;
+            
+            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
+            const type = types[parseInt(mealType)] || 'snack';
+            
+            // Log the food
+            const today = new Date().toISOString().split('T')[0];
+            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            
+            if (!loggedMeals[today]) {
+                loggedMeals[today] = { meals: [], totalCalories: 0 };
+            }
+            
+            loggedMeals[today].meals.push({
+                name: name,
+                type: type,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                source: 'manual'
+            });
+            
+            loggedMeals[today].totalCalories += calories;
+            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            
+            // Update UI
+            syncWithHomePage();
+            updateTodayProgress();
+            loadTodaysMeals();
+            loadQuickAdds();
+            
+            // Clear form
+            document.getElementById('manual-food-name').value = '';
+            document.getElementById('manual-calories').value = '';
+            document.getElementById('manual-protein').value = '';
+            document.getElementById('manual-carbs').value = '';
+            document.getElementById('manual-fat').value = '';
+            
+            // Close modal
+            closeSmartEntry();
+            
+            alert(`✅ Added ${name} (${calories} cal) to ${type}!`);
         }
         
         // Sync with home page overview
