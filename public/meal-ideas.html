@@ -189,19 +189,35 @@
         }
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.querySelector('.overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.overlay');
+                if (sidebar) sidebar.classList.toggle('open');
+                if (overlay) overlay.classList.toggle('show');
+            } catch (error) {
+                console.error('Error toggling sidebar:', error);
+            }
         }
 
         function goToPage(page) {
-            window.location.href = page;
+            try {
+                window.location.href = page;
+            } catch (error) {
+                console.error('Error navigating to page:', error);
+            }
         }
         
         function goToCategory(category) {
-            const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
-            window.location.href = `meal-${category}.html?mode=${currentMode}`;
+            try {
+                console.log('Going to category:', category);
+                const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+                const url = `meal-${category}.html?mode=${currentMode}`;
+                console.log('Navigating to:', url);
+                window.location.href = url;
+            } catch (error) {
+                console.error('Error going to category:', error);
+                alert('Error loading meal category. Please try again.');
+            }
         }
 
         // BULK MODE FUNCTIONS
@@ -294,6 +310,12 @@
         }
 
         // Initialize
+        // Ensure functions are globally available
+        window.goToCategory = goToCategory;
+        window.setBulkMode = setBulkMode;
+        window.toggleSidebar = toggleSidebar;
+        window.goToPage = goToPage;
+        
         window.addEventListener('load', function() {
             updateTime();
             setInterval(updateTime, 1000);
@@ -303,6 +325,17 @@
             updateModeDisplay(currentMode);
             updateButtonStyles(currentMode);
             updatePageTheme(currentMode);
+            
+            // Add touch event listeners for mobile
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const category = this.getAttribute('onclick').match(/goToCategory\('(.+?)'\)/)[1];
+                    goToCategory(category);
+                });
+            });
+            
+            console.log('Meal Ideas page initialized successfully');
         });
     </script>
 </body>
