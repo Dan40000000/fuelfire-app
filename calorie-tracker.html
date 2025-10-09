@@ -687,10 +687,15 @@
                 
                 resultsDiv.innerHTML = html;
                 
-                // Add event listeners to checkboxes to update total
-                foods.forEach((food, index) => {
-                    document.getElementById(`food-check-${index}`).addEventListener('change', updateSelectedTotal);
-                });
+                // Add event listeners to checkboxes to update total - use setTimeout to ensure DOM is ready
+                setTimeout(() => {
+                    foods.forEach((food, index) => {
+                        const checkbox = document.getElementById(`food-check-${index}`);
+                        if (checkbox) {
+                            checkbox.addEventListener('change', updateSelectedTotal);
+                        }
+                    });
+                }, 100);
             } else {
                 // Single food - show normal selection
                 let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select food to log:</div>';
@@ -729,6 +734,11 @@
         // Log selected foods
         function logSelectedFoods() {
             try {
+                console.log('Starting logSelectedFoods...', {
+                    currentFoods: window.currentFoods,
+                    currentSource: window.currentSource
+                });
+                
                 if (!window.currentFoods || !window.currentSource) {
                     console.error('No foods to log', window.currentFoods, window.currentSource);
                     alert('Error: No foods to log. Please try again.');
@@ -739,6 +749,7 @@
             const selectedFoods = [];
             window.currentFoods.forEach((food, index) => {
                 const checkbox = document.getElementById(`food-check-${index}`);
+                console.log(`Checking checkbox food-check-${index}:`, checkbox, checkbox?.checked);
                 if (checkbox && checkbox.checked) {
                     selectedFoods.push(food);
                 }
@@ -750,8 +761,17 @@
             }
             
             const mealType = prompt('Log selected foods as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
+            
+            // Handle cancel or invalid input
+            if (!mealType) {
+                console.log('User cancelled meal type selection');
+                return;
+            }
+            
             const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
             const type = types[parseInt(mealType)] || 'snack';
+            
+            console.log('Selected meal type:', type);
             
             const today = new Date().toISOString().split('T')[0];
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
@@ -788,9 +808,9 @@
             
             // Update UI and sync
             syncWithHomePage();
+            updateTodayProgress();
             loadTodaysMeals();
             loadQuickAdds();
-            updateTodayProgress();
             
             // Close the voice modal if it's open
             if (window.currentSource === 'voice') {
@@ -807,8 +827,8 @@
             window.currentSource = null;
             
             } catch (error) {
-                console.error('Error logging foods:', error);
-                alert('Error logging foods. Please try again.');
+                console.error('Error logging foods:', error, error.stack);
+                alert(`Error logging foods: ${error.message}\n\nPlease check the console for details.`);
                 // Don't clear currentFoods on error so user can retry
             }
         }
@@ -872,9 +892,9 @@
             }
             
             // Reset the UI properly after logging
+            updateTodayProgress();
             loadTodaysMeals();
             loadQuickAdds();
-            updateTodayProgress(); // Add this to update the UI
             
             const foodNames = window.currentFoods.map(f => f.name).join('\n• ');
             alert(`✅ All foods logged as ${type}!\n\n• ${foodNames}\n\n📊 Total: ${totalCalories} calories\n🥩 ${totalProtein}g protein\n🍞 ${totalCarbs}g carbs\n🥑 ${totalFat}g fat\n🍭 ${totalSugar}g sugar`);
@@ -1047,8 +1067,9 @@
         
         // Load quick adds from history
         function loadQuickAdds() {
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-            const foodCounts = {};
+            try {
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const foodCounts = {};
             
             // Count frequency of foods
             Object.values(loggedMeals).forEach(day => {
@@ -1079,6 +1100,11 @@
                     </button>
                 `;
             }).join('');
+            
+            } catch (error) {
+                console.error('Error in loadQuickAdds:', error);
+                // Don't throw error, just log it
+            }
         }
         
         function toggleSidebar() {
@@ -1154,9 +1180,10 @@
         }
         
         function loadTodaysMeals() {
-            const today = new Date().toISOString().split('T')[0];
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-            const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
             
             // Get user's targets from most recent diet goals
             const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
@@ -1421,6 +1448,38 @@
             
             // Load weekly chart
             loadWeeklyChart();
+            
+            } catch (error) {
+                console.error('Error in loadTodaysMeals:', error, error.stack);
+                // Don't throw error, just log it to prevent breaking the UI
+            }
+        }
+        
+        function updateTodayProgress() {
+            // This function updates the UI to reflect today's progress
+            // It's called after logging food to refresh the display
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+                
+                // Update the calories display
+                const caloriesElement = document.getElementById('calories-today');
+                if (caloriesElement) {
+                    caloriesElement.textContent = todayData.totalCalories;
+                }
+                
+                // Update the progress bar if it exists
+                const progressBar = document.querySelector('.progress');
+                if (progressBar) {
+                    const target = parseInt(document.getElementById('calorie-target')?.textContent || '2000');
+                    const progress = Math.min((todayData.totalCalories / target) * 100, 100);
+                    progressBar.style.width = progress + '%';
+                }
+                
+            } catch (error) {
+                console.error('Error in updateTodayProgress:', error);
+            }
         }
         
         function loadWeeklyChart() {
