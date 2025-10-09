@@ -1019,19 +1019,63 @@
                 if (data.status === 1) {
                     const product = data.product;
                     const name = product.product_name || 'Unknown Product';
-                    const calories = product.nutriments['energy-kcal_100g'] || 0;
-                    const protein = product.nutriments.proteins_100g || 0;
-                    const carbs = product.nutriments.carbohydrates_100g || 0;
-                    const fat = product.nutriments.fat_100g || 0;
+                    const brand = product.brands || '';
+                    const fullName = brand ? `${brand} ${name}` : name;
+                    
+                    // Get serving size info
+                    const servingSize = product.serving_size || '100g';
+                    
+                    // Calculate nutrition per serving (not per 100g)
+                    let calories, protein, carbs, fat;
+                    
+                    if (product.nutriments['energy-kcal_serving']) {
+                        // Use per-serving values if available
+                        calories = product.nutriments['energy-kcal_serving'] || 0;
+                        protein = product.nutriments['proteins_serving'] || 0;
+                        carbs = product.nutriments['carbohydrates_serving'] || 0;
+                        fat = product.nutriments['fat_serving'] || 0;
+                    } else {
+                        // Fall back to per-100g values
+                        calories = product.nutriments['energy-kcal_100g'] || product.nutriments['energy-kcal'] || 0;
+                        protein = product.nutriments['proteins_100g'] || product.nutriments['proteins'] || 0;
+                        carbs = product.nutriments['carbohydrates_100g'] || product.nutriments['carbohydrates'] || 0;
+                        fat = product.nutriments['fat_100g'] || product.nutriments['fat'] || 0;
+                    }
                     
                     closeScannerModal();
-                    selectFood(name, Math.round(calories), Math.round(protein), Math.round(carbs), Math.round(fat), 'barcode');
+                    
+                    // Show the food with checklist like voice/type
+                    const foodData = [{
+                        name: fullName,
+                        calories: Math.round(calories),
+                        protein: Math.round(protein),
+                        carbs: Math.round(carbs),
+                        fat: Math.round(fat),
+                        serving: servingSize,
+                        source: 'barcode'
+                    }];
+                    
+                    // Display in modal for user to confirm
+                    document.getElementById('voice-modal').style.display = 'block';
+                    document.getElementById('voice-text').textContent = `Found: ${fullName} (${Math.round(calories)} cal per ${servingSize})`;
+                    displayFoodResults(foodData, 'voice');
+                    
                 } else {
                     document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Product not found. Try manual entry.</div>';
+                    setTimeout(() => {
+                        closeScannerModal();
+                        showSmartEntry();
+                        showManualEntry(); // Switch to manual tab
+                    }, 2000);
                 }
             } catch (error) {
                 console.error('Barcode search error:', error);
-                document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Error searching product</div>';
+                document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Error searching product. Try manual entry.</div>';
+                setTimeout(() => {
+                    closeScannerModal();
+                    showSmartEntry();
+                    showManualEntry(); // Switch to manual tab
+                }, 2000);
             }
         }
         
