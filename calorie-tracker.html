@@ -1066,15 +1066,8 @@
             // Show loading
             document.getElementById('search-results').innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🤖 AI analyzing...</div>';
             
-            // Use AI parsing for complex queries, USDA for simple ones
-            let results;
-            if (query.includes(' and ') || query.includes(' with ') || query.split(' ').length > 2) {
-                // Complex query - use AI
-                results = await parseWithAI(query);
-            } else {
-                // Simple query - use USDA
-                results = await searchUSDA(query);
-            }
+            // Always use AI for better results
+            const results = await parseWithAI(query);
             
             displayFoodResults(results, 'search');
         }
