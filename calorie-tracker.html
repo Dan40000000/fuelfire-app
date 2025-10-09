@@ -505,18 +505,42 @@
                     // Auto-log single food item
                     const food = results[0];
                     const mealType = prompt(`Found: ${food.name} (${food.calories} cal)\n\nLog as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):`);
+                    
+                    if (!mealType) {
+                        // User cancelled
+                        closeVoiceModal();
+                        return;
+                    }
+                    
                     const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
                     const type = types[parseInt(mealType)] || 'snack';
                     
-                    // Add to food log
-                    addFoodToLog({
+                    // Log the food using the correct function
+                    const today = new Date().toISOString().split('T')[0];
+                    let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                    
+                    if (!loggedMeals[today]) {
+                        loggedMeals[today] = { meals: [], totalCalories: 0 };
+                    }
+                    
+                    loggedMeals[today].meals.push({
                         name: food.name,
+                        type: type,
                         calories: food.calories,
-                        protein: food.protein,
-                        carbs: food.carbs,
-                        fat: food.fat,
-                        meal: type
+                        protein: food.protein || 0,
+                        carbs: food.carbs || 0,
+                        fat: food.fat || 0,
+                        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                     });
+                    
+                    loggedMeals[today].totalCalories += food.calories;
+                    localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+                    
+                    // Update UI
+                    syncWithHomePage();
+                    updateTodayProgress();
+                    loadTodaysMeals();
+                    loadQuickAdds();
                     
                     // Close voice modal
                     closeVoiceModal();
@@ -734,13 +758,7 @@
         // Log selected foods
         function logSelectedFoods() {
             try {
-                console.log('Starting logSelectedFoods...', {
-                    currentFoods: window.currentFoods,
-                    currentSource: window.currentSource
-                });
-                
                 if (!window.currentFoods || !window.currentSource) {
-                    console.error('No foods to log', window.currentFoods, window.currentSource);
                     alert('Error: No foods to log. Please try again.');
                     return;
                 }
@@ -749,7 +767,6 @@
             const selectedFoods = [];
             window.currentFoods.forEach((food, index) => {
                 const checkbox = document.getElementById(`food-check-${index}`);
-                console.log(`Checking checkbox food-check-${index}:`, checkbox, checkbox?.checked);
                 if (checkbox && checkbox.checked) {
                     selectedFoods.push(food);
                 }
@@ -764,14 +781,11 @@
             
             // Handle cancel or invalid input
             if (!mealType) {
-                console.log('User cancelled meal type selection');
                 return;
             }
             
             const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
             const type = types[parseInt(mealType)] || 'snack';
-            
-            console.log('Selected meal type:', type);
             
             const today = new Date().toISOString().split('T')[0];
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
@@ -827,8 +841,8 @@
             window.currentSource = null;
             
             } catch (error) {
-                console.error('Error logging foods:', error, error.stack);
-                alert(`Error logging foods: ${error.message}\n\nPlease check the console for details.`);
+                console.error('Error logging foods:', error);
+                alert('There was an error logging your foods. Please try again.');
                 // Don't clear currentFoods on error so user can retry
             }
         }
