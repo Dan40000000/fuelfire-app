@@ -178,57 +178,70 @@
     </div>
 
     <script>
-        function updateTime() {
+        // Define all functions in global scope immediately
+        
+        window.updateTime = function() {
             const now = new Date();
             const time = now.toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
                 minute: '2-digit',
                 hour12: true 
             });
-            document.getElementById('time').textContent = time;
+            const timeEl = document.getElementById('time');
+            if (timeEl) timeEl.textContent = time;
         }
 
-        function toggleSidebar() {
+        window.toggleSidebar = function() {
+            console.log('Toggle sidebar called');
             try {
                 const sidebar = document.getElementById('sidebar');
                 const overlay = document.querySelector('.overlay');
-                if (sidebar) sidebar.classList.toggle('open');
-                if (overlay) overlay.classList.toggle('show');
+                if (sidebar) {
+                    sidebar.classList.toggle('open');
+                    console.log('Sidebar toggled');
+                }
+                if (overlay) {
+                    overlay.classList.toggle('show');
+                }
             } catch (error) {
                 console.error('Error toggling sidebar:', error);
+                alert('Error opening menu. Please refresh the page.');
             }
         }
 
-        function goToPage(page) {
+        window.goToPage = function(page) {
+            console.log('Going to page:', page);
             try {
                 window.location.href = page;
             } catch (error) {
                 console.error('Error navigating to page:', error);
+                alert('Error navigating. Please try again.');
             }
         }
         
-        function goToCategory(category) {
+        window.goToCategory = function(category) {
+            console.log('Going to category:', category);
             try {
-                console.log('Going to category:', category);
                 const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
                 const url = `meal-${category}.html?mode=${currentMode}`;
                 console.log('Navigating to:', url);
                 window.location.href = url;
             } catch (error) {
                 console.error('Error going to category:', error);
-                alert('Error loading meal category. Please try again.');
+                alert('Error loading meal category: ' + error.message);
             }
         }
 
         // BULK MODE FUNCTIONS
-        function setBulkMode(mode) {
+        window.setBulkMode = function(mode) {
+            console.log('Setting bulk mode:', mode);
             localStorage.setItem('fuelfire_bulk_mode', mode);
             updateModeDisplay(mode);
             updateButtonStyles(mode);
             updatePageTheme(mode);
         }
         
-        function updatePageTheme(mode) {
+        window.updatePageTheme = function(mode) {
             const themes = {
                 'male-bulk': {
                     headerBg: 'linear-gradient(135deg, #1a1a1a, #444)',
@@ -284,7 +297,7 @@
             }
         }
         
-        function updateModeDisplay(mode) {
+        window.updateModeDisplay = function(mode) {
             const modeNames = {
                 'male-bulk': '🔥 MALE BULK',
                 'male-cut': '⚡ MALE CUT', 
@@ -294,7 +307,7 @@
             document.getElementById('current-mode').textContent = `Current Mode: ${modeNames[mode]}`;
         }
         
-        function updateButtonStyles(activeMode) {
+        window.updateButtonStyles = function(activeMode) {
             const buttons = ['male-bulk-btn', 'male-cut-btn', 'female-bulk-btn', 'female-cut-btn'];
             buttons.forEach(btnId => {
                 const btn = document.getElementById(btnId);
@@ -309,30 +322,22 @@
             });
         }
 
-        // Initialize
-        // Ensure functions are globally available
-        window.goToCategory = goToCategory;
-        window.setBulkMode = setBulkMode;
-        window.toggleSidebar = toggleSidebar;
-        window.goToPage = goToPage;
-        
-        window.addEventListener('load', function() {
-            updateTime();
-            setInterval(updateTime, 1000);
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing meal ideas page...');
             
             // Load saved bulk mode or default to male-bulk
             const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
-            updateModeDisplay(currentMode);
-            updateButtonStyles(currentMode);
-            updatePageTheme(currentMode);
+            window.updateModeDisplay(currentMode);
+            window.updateButtonStyles(currentMode);
+            window.updatePageTheme(currentMode);
             
-            // Add touch event listeners for mobile
-            document.querySelectorAll('.category-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const category = this.getAttribute('onclick').match(/goToCategory\('(.+?)'\)/)[1];
-                    goToCategory(category);
-                });
+            // Test if functions are available
+            console.log('Functions available:', {
+                toggleSidebar: typeof window.toggleSidebar,
+                goToCategory: typeof window.goToCategory,
+                setBulkMode: typeof window.setBulkMode,
+                goToPage: typeof window.goToPage
             });
             
             console.log('Meal Ideas page initialized successfully');
