@@ -57,7 +57,7 @@
         <div class="screen">
             
             <div class="header">
-                <div class="hamburger" onclick="alert('Menu clicked'); toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
                 <div class="header-title">Meal Ideas</div>
             </div>
             
@@ -90,7 +90,7 @@
                     
                     <!-- Meat Category Grid -->
                     <div class="category-grid">
-                        <div class="category-card" onclick="alert('Beef clicked'); goToCategory('beef')" ontouchstart="" style="background: linear-gradient(135deg, #8B4513, #A0522D); box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);">
+                        <div class="category-card" onclick="goToCategory('beef')" ontouchstart="" style="background: linear-gradient(135deg, #8B4513, #A0522D); box-shadow: 0 5px 20px rgba(139, 69, 19, 0.3);">
                             <div class="category-icon">🥩</div>
                             <h3 class="category-title">Beef</h3>
                             <p class="category-subtitle">10 Premium Recipes</p>
@@ -178,11 +178,15 @@
     </div>
 
     <script>
-        // SIMPLE DIRECT FUNCTIONS - NO FANCY STUFF
+        // TEST IF JAVASCRIPT EVEN LOADS
+        console.log('JavaScript loaded on meal-ideas page');
         
+        // ULTRA SIMPLE FUNCTIONS
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.querySelector('.overlay').classList.toggle('show');
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.querySelector('.overlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('show');
         }
 
         function goToPage(page) {
@@ -190,8 +194,8 @@
         }
         
         function goToCategory(category) {
-            const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
-            window.location.href = `meal-${category}.html?mode=${currentMode}`;
+            var currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            window.location.href = 'meal-' + category + '.html?mode=' + currentMode;
         }
 
         function setBulkMode(mode) {
@@ -258,36 +262,46 @@
         }
         
         function updateModeDisplay(mode) {
-            const modeNames = {
+            var modeNames = {
                 'male-bulk': '🔥 MALE BULK',
                 'male-cut': '⚡ MALE CUT', 
                 'female-bulk': '💎 FEMALE BULK',
                 'female-cut': '✨ FEMALE CUT'
             };
-            document.getElementById('current-mode').textContent = `Current Mode: ${modeNames[mode]}`;
+            var modeEl = document.getElementById('current-mode');
+            if (modeEl) {
+                modeEl.textContent = 'Current Mode: ' + modeNames[mode];
+            }
         }
         
         function updateButtonStyles(activeMode) {
             const buttons = ['male-bulk-btn', 'male-cut-btn', 'female-bulk-btn', 'female-cut-btn'];
             buttons.forEach(btnId => {
                 const btn = document.getElementById(btnId);
-                const mode = btnId.replace('-btn', '');
-                if (mode === activeMode) {
-                    btn.style.transform = 'scale(1.05)';
-                    btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
-                } else {
-                    btn.style.transform = 'scale(1)';
-                    btn.style.boxShadow = btn.getAttribute('data-original-shadow') || '0 4px 15px rgba(0,0,0,0.2)';
+                if (btn) {  // Check if button exists
+                    const mode = btnId.replace('-btn', '');
+                    if (mode === activeMode) {
+                        btn.style.transform = 'scale(1.05)';
+                        btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+                    } else {
+                        btn.style.transform = 'scale(1)';
+                        btn.style.boxShadow = btn.getAttribute('data-original-shadow') || '0 4px 15px rgba(0,0,0,0.2)';
+                    }
                 }
             });
         }
 
-        // Initialize on page load
+        // Initialize on page load - SIMPLIFIED
         window.onload = function() {
-            const currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
-            updateModeDisplay(currentMode);
-            updateButtonStyles(currentMode);
-            updatePageTheme(currentMode);
+            console.log('Page loaded - initializing');
+            try {
+                var currentMode = localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+                updateModeDisplay(currentMode);
+                updateButtonStyles(currentMode);
+                updatePageTheme(currentMode);
+            } catch (e) {
+                console.error('Init error:', e);
+            }
         };
     </script>
 </body>
