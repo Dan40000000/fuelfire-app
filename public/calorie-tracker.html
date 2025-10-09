@@ -356,8 +356,20 @@
     <div id="smart-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000;">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 400px;">
             <h3 style="color: var(--primary); margin-bottom: 20px;">⌨️ Smart Food Search</h3>
-            <input type="text" id="smart-search" placeholder="Type food name..." onkeyup="searchFood(this.value)" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-            <div id="search-results" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+            <input type="text" id="smart-search" placeholder="e.g. 'Big Mac with fries' or 'grilled chicken salad'" onkeyup="searchFood(this.value)" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+            
+            <!-- Quick suggestions -->
+            <div style="margin-top: 15px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">QUICK SUGGESTIONS:</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <button onclick="document.getElementById('smart-search').value='chicken breast'; searchFood('chicken breast')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🍗 Chicken Breast</button>
+                    <button onclick="document.getElementById('smart-search').value='eggs and toast'; searchFood('eggs and toast')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🍳 Eggs & Toast</button>
+                    <button onclick="document.getElementById('smart-search').value='protein shake'; searchFood('protein shake')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🥤 Protein Shake</button>
+                    <button onclick="document.getElementById('smart-search').value='salad with chicken'; searchFood('salad with chicken')" style="background: #f0f0f0; border: 1px solid #ddd; padding: 6px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">🥗 Salad</button>
+                </div>
+            </div>
+            
+            <div id="search-results" style="margin-top: 20px; max-height: 250px; overflow-y: auto;"></div>
             <button onclick="closeSmartEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%;">
                 Cancel
             </button>
@@ -501,55 +513,8 @@
                     return;
                 }
                 
-                if (results.length === 1) {
-                    // Auto-log single food item
-                    const food = results[0];
-                    const mealType = prompt(`Found: ${food.name} (${food.calories} cal)\n\nLog as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):`);
-                    
-                    if (!mealType) {
-                        // User cancelled
-                        closeVoiceModal();
-                        return;
-                    }
-                    
-                    const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
-                    const type = types[parseInt(mealType)] || 'snack';
-                    
-                    // Log the food using the correct function
-                    const today = new Date().toISOString().split('T')[0];
-                    let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-                    
-                    if (!loggedMeals[today]) {
-                        loggedMeals[today] = { meals: [], totalCalories: 0 };
-                    }
-                    
-                    loggedMeals[today].meals.push({
-                        name: food.name,
-                        type: type,
-                        calories: food.calories,
-                        protein: food.protein || 0,
-                        carbs: food.carbs || 0,
-                        fat: food.fat || 0,
-                        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-                    });
-                    
-                    loggedMeals[today].totalCalories += food.calories;
-                    localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
-                    
-                    // Update UI
-                    syncWithHomePage();
-                    updateTodayProgress();
-                    loadTodaysMeals();
-                    loadQuickAdds();
-                    
-                    // Close voice modal
-                    closeVoiceModal();
-                    
-                    alert(`✅ Added ${food.name} to ${type}!`);
-                } else {
-                    // Show multiple results for selection
-                    displayFoodResults(results, 'voice');
-                }
+                // Always show checklist for all voice results
+                displayFoodResults(results, 'voice');
                 
             } catch (error) {
                 console.error('❌ Voice processing error:', error);
