@@ -1075,6 +1075,9 @@
         function getCurrentRecipes() {
             var urlParams = new URLSearchParams(window.location.search);
             var mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            console.log('getCurrentRecipes - mode:', mode);
+            console.log('bulkModeRecipes available:', Object.keys(bulkModeRecipes));
+            console.log('Recipes for mode:', bulkModeRecipes[mode]);
             return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
         }
         
@@ -1096,6 +1099,9 @@
         function displayMeals() {
             var container = document.getElementById('meals-container');
             var html = '';
+            
+            console.log('DisplayMeals called. beefRecipes:', beefRecipes);
+            console.log('Number of recipes:', beefRecipes ? beefRecipes.length : 0);
             
             for (var index = 0; index < beefRecipes.length; index++) {
                 var meal = beefRecipes[index];

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Beef Page</title>
+</head>
+<body>
+    <h1>Testing Beef Recipes</h1>
+    <button onclick="testRecipes()">Test Recipes</button>
+    <div id="output"></div>
+    
+    <script>
+        function testRecipes() {
+            // Check localStorage
+            var mode = localStorage.getItem('fuelfire_bulk_mode');
+            var output = document.getElementById('output');
+            
+            output.innerHTML = '<h2>Current Mode: ' + mode + '</h2>';
+            
+            // Test different modes
+            var modes = ['male-bulk', 'male-cut', 'female-bulk', 'female-cut'];
+            
+            modes.forEach(function(m) {
+                output.innerHTML += '<h3>Testing mode: ' + m + '</h3>';
+                localStorage.setItem('fuelfire_bulk_mode', m);
+                output.innerHTML += '<p>Set mode to: ' + m + '</p>';
+                output.innerHTML += '<p><a href="public/meal-beef.html" target="_blank">Open Beef Page</a></p>';
+            });
+            
+            // Reset to male-bulk
+            localStorage.setItem('fuelfire_bulk_mode', 'male-bulk');
+            output.innerHTML += '<h2>Reset to male-bulk</h2>';
+            output.innerHTML += '<p><a href="public/meal-beef.html" target="_blank">Open Beef Page (male-bulk)</a></p>';
+        }
+    </script>
+</body>
+</html>
