@@ -1281,9 +1281,15 @@
 
         // Initialize
         window.addEventListener('load', function() {
-            updateTime();
-            setInterval(updateTime, 1000);
-            displayMeals();
+            console.log('Page loaded, initializing...');
+            try {
+                updateTime();
+                setInterval(updateTime, 1000);
+                displayMeals();
+            } catch(e) {
+                console.error('Error during initialization:', e);
+                alert('Error loading recipes: ' + e.message);
+            }
         });
     </script>
 </body>
