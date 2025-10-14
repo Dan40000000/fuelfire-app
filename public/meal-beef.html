@@ -1926,10 +1926,14 @@
         function getCurrentRecipes() {
             const urlParams = new URLSearchParams(window.location.search);
             const mode = urlParams.get('mode') || localStorage.getItem('fuelfire_bulk_mode') || 'male-bulk';
+            console.log('Current mode:', mode);
+            console.log('Available modes:', Object.keys(bulkModeRecipes));
+            console.log('Recipes for mode:', bulkModeRecipes[mode] ? bulkModeRecipes[mode].length : 'NONE');
             return bulkModeRecipes[mode] || bulkModeRecipes['male-bulk'];
         }
-        
+
         const beefRecipes = getCurrentRecipes();
+        console.log('Loaded beef recipes:', beefRecipes.length);
         
         // Display functions
         function generateDifficultyStars(difficulty) {
@@ -1946,8 +1950,11 @@
 
         function displayMeals() {
             const container = document.getElementById('meals-container');
+            console.log('displayMeals called');
+            console.log('Container element:', container);
+            console.log('Number of recipes to display:', beefRecipes.length);
             let html = '';
-            
+
             beefRecipes.forEach((meal, index) => {
                 const isChampion = meal.mealPrepChampion;
                 const cardStyle = isChampion ? 'style="border: 3px solid #FFD700; box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4); transform: scale(1.02);"' : '';
