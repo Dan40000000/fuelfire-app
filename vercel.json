@@ -1,11 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "buildCommand": "npm run build",
-  "outputDirectory": "public",
-  "functions": {
-    "public/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "outputDirectory": "public"
 }
