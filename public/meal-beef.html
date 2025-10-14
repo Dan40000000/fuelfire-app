@@ -2102,13 +2102,16 @@
         }
 
         function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('time').textContent = time;
+            const timeElement = document.getElementById('time');
+            if (timeElement) {
+                const now = new Date();
+                const time = now.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                timeElement.textContent = time;
+            }
         }
 
         function toggleSidebar() {
@@ -2121,7 +2124,7 @@
         function goToPage(page) {
             window.location.href = page;
         }
-        
+
         function goBack() {
             window.location.href = 'meal-ideas.html';
         }
@@ -2136,9 +2139,9 @@
 
         // Initialize
         window.addEventListener('load', function() {
+            displayMeals();
             updateTime();
             setInterval(updateTime, 1000);
-            displayMeals();
         });
     </script>
 </body>
