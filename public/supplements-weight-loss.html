@@ -3,1241 +3,845 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weight Loss & Fat Burning Supplements Guide | Evidence-Based</title>
+    <title>Weight Loss Supplements - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #2d1b69 0%, #1a1a2e 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #e91e63 0%, #9c27b0 50%, #673ab7 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.3);
-        }
-
-        .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header .subtitle {
-            font-size: 1.3em;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-
-        .weight-icon {
-            font-size: 2em;
-            margin: 0 10px;
-        }
-
-        .disclaimer-section {
-            background: linear-gradient(135deg, #ff5722 0%, #e91e63 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            text-align: center;
-        }
-
-        .disclaimer-section h2 {
-            color: #fff;
-            margin-bottom: 20px;
-            font-size: 2em;
-        }
-
-        .disclaimer-text {
-            font-size: 1.1em;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .realistic-expectations {
-            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .realistic-expectations h2 {
-            color: #e91e63;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 2em;
-        }
-
-        .expectations-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .expectation-card {
-            background: rgba(233, 30, 99, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #e91e63;
-            text-align: center;
-        }
-
-        .expectation-card h3 {
-            color: #e91e63;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .expectation-card ul {
-            list-style: none;
-            padding: 0;
-            text-align: left;
-        }
-
-        .expectation-card li {
-            margin: 8px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(233, 30, 99, 0.2);
-        }
-
-        .supplement-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
         .supplement-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            background: white;
             border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 3px solid transparent;
-            background-clip: padding-box;
-            position: relative;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .supplement-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #e91e63, #9c27b0, #673ab7);
-        }
-
         .supplement-header {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            transition: all 0.3s ease;
         }
 
-        .supplement-name {
-            font-size: 1.6em;
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #e84393, #d63384);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #d63384, #c92d7a);
+        }
+
+        .supplement-title {
+            font-size: 18px;
             font-weight: bold;
-            color: #2d3436;
-            margin-bottom: 10px;
+            margin: 0;
         }
 
-        .research-rating {
+        .supplement-rating {
             display: flex;
             align-items: center;
             gap: 5px;
+            font-size: 12px;
         }
 
-        .star {
-            color: #e91e63;
-            font-size: 1.2em;
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
         }
 
-        .star.empty {
-            color: #ddd;
+        .expand-icon.rotated {
+            transform: rotate(180deg);
         }
 
-        .effect-indicators {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .effect-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .fat-burning {
-            background: #ff6b35;
-            color: white;
-        }
-
-        .appetite {
-            background: #9c27b0;
-            color: white;
-        }
-
-        .metabolism {
-            background: #e91e63;
-            color: white;
-        }
-
-        .energy {
-            background: #ff5722;
-            color: white;
-        }
-
-        .stimulant-warning {
-            background: linear-gradient(45deg, #ff3838, #ff6b35);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin: 10px 0;
-            text-align: center;
-            border: 2px solid #fff;
-            box-shadow: 0 4px 15px rgba(255, 56, 56, 0.3);
-        }
-
-        .non-stimulant {
-            background: linear-gradient(45deg, #00b894, #00cec9);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin: 5px 5px 5px 0;
-            display: inline-block;
-        }
-
-        .dosage-section {
-            background: linear-gradient(135deg, #e91e63, #9c27b0);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .dosage-section h4 {
-            margin-bottom: 10px;
-            font-size: 1.3em;
-        }
-
-        .benefits-list {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-        }
-
-        .benefits-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            position: relative;
-            padding-left: 30px;
-        }
-
-        .benefits-list li::before {
-            content: '🔥';
-            position: absolute;
-            left: 0;
-            top: 8px;
-        }
-
-        .weight-loss-potential {
-            background: linear-gradient(45deg, #9c27b0, #673ab7);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            display: inline-block;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-
-        .side-effects {
-            background: #fff5f5;
-            border-left: 4px solid #e74c3c;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .contraindications {
-            background: #ffebee;
-            border: 2px solid #ff5252;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-        }
-
-        .contraindications h5 {
-            color: #d32f2f;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .quality-indicators {
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 2px solid #dee2e6;
         }
 
-        .quality-indicators h5 {
-            color: #495057;
+        .supplement-content.expanded {
+            max-height: 1200px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #fd79a8;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #fd79a8;
             margin-bottom: 10px;
         }
 
-        .timing-info {
-            background: linear-gradient(135deg, #673ab7, #9c27b0);
-            color: white;
-            padding: 15px;
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
             border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        .timing-badge {
-            display: inline-block;
-            background: linear-gradient(45deg, #e91e63, #9c27b0);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin: 5px 5px 5px 0;
-        }
-
-        .icon {
-            font-size: 1.5em;
-            margin-right: 10px;
-        }
-
-        .limitations-section {
-            background: linear-gradient(135deg, #455a64 0%, #37474f 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .limitations-section h2 {
-            color: #e91e63;
-            margin-bottom: 20px;
             text-align: center;
-            font-size: 2em;
         }
 
-        .limitation-points {
-            font-size: 1.1em;
-            line-height: 1.8;
+        .stat-value {
+            font-weight: bold;
+            color: #fd79a8;
+            font-size: 16px;
         }
 
-        .limitation-points li {
-            margin: 10px 0;
-            padding-left: 25px;
-            position: relative;
+        .stat-label {
+            font-size: 12px;
+            color: #666;
         }
 
-        .limitation-points li::before {
-            content: '⚠️';
-            position: absolute;
-            left: 0;
-            top: 2px;
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
         }
 
-        @media (max-width: 768px) {
-            .supplement-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .expectations-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .supplement-card {
-                padding: 20px;
-            }
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
 
-            .supplement-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        .page-warning {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .page-warning h3 {
+            color: #721c24;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><span class="weight-icon">🔥</span>WEIGHT LOSS SUPPLEMENTS<span class="weight-icon">⚖️</span></h1>
-            <div class="subtitle">Evidence-Based Guide for Fat Burning & Appetite Control</div>
-        </div>
+    <div class="phone-container">
+        <div class="screen">
 
-        <div class="disclaimer-section">
-            <h2><span class="icon">⚠️</span>Critical Weight Loss Facts</h2>
-            <div class="disclaimer-text">
-                <strong>Supplements are NOT magic pills.</strong> They provide modest benefits (5-15% enhancement) when combined with proper diet and exercise.
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">🔥 Weight Loss</div>
             </div>
-            <div class="disclaimer-text">
-                <strong>Diet is 70-80% of weight loss success.</strong> No supplement can overcome poor eating habits or create a caloric deficit for you.
-            </div>
-            <div class="disclaimer-text">
-                <strong>Exercise accelerates results.</strong> Cardio burns calories; resistance training preserves muscle mass during weight loss.
-            </div>
-        </div>
 
-        <div class="realistic-expectations">
-            <h2><span class="icon">📊</span>Realistic Weight Loss Expectations</h2>
-            <div class="expectations-grid">
-                <div class="expectation-card">
-                    <h3>With Diet Alone</h3>
-                    <ul>
-                        <li>1-2 lbs per week maximum</li>
-                        <li>Sustainable long-term approach</li>
-                        <li>Requires 500-1000 calorie deficit daily</li>
-                        <li>May lose muscle mass without exercise</li>
-                    </ul>
-                </div>
-                <div class="expectation-card">
-                    <h3>Diet + Exercise</h3>
-                    <ul>
-                        <li>1.5-2.5 lbs per week possible</li>
-                        <li>Better body composition changes</li>
-                        <li>Improved metabolic health</li>
-                        <li>Higher long-term success rate</li>
-                    </ul>
-                </div>
-                <div class="expectation-card">
-                    <h3>Adding Supplements</h3>
-                    <ul>
-                        <li>Additional 0.2-0.5 lbs per week</li>
-                        <li>May reduce appetite slightly</li>
-                        <li>Small metabolic boost (5-10%)</li>
-                        <li>Improved energy for workouts</li>
-                    </ul>
-                </div>
-                <div class="expectation-card">
-                    <h3>Timeline Reality Check</h3>
-                    <ul>
-                        <li>10 lbs: 5-10 weeks minimum</li>
-                        <li>25 lbs: 3-6 months realistic</li>
-                        <li>50+ lbs: 8-12 months or more</li>
-                        <li>Plateaus are normal and expected</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="supplement-grid">
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">☕</span>Caffeine</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🔥 Weight Loss Supplements</h2>
+                        <p style="color: #666; font-size: 14px;">Evidence-based fat burning and appetite control</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
                     </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge fat-burning">Fat Burning</span>
-                    <span class="effect-badge metabolism">Metabolism</span>
-                    <span class="effect-badge energy">Energy</span>
-                </div>
 
-                <div class="stimulant-warning">
-                    ⚡ STIMULANT - Monitor heart rate and blood pressure
-                </div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 5-10% enhancement
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Fat Loss:</strong> 100-400mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Beginners:</strong> Start with 100mg, assess tolerance</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Maximum:</strong> 400mg daily (FDA safe limit)</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> 30-60 minutes before fasted cardio or workouts. Avoid within 6 hours of bedtime.
-                </div>
-
-                <div class="timing-badge">Fasted Cardio</div>
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">Morning</div>
-
-                <ul class="benefits-list">
-                    <li>Increases metabolic rate by 3-11%</li>
-                    <li>Enhances fat oxidation during exercise</li>
-                    <li>Improves workout performance and energy</li>
-                    <li>Mild appetite suppression</li>
-                    <li>Most researched fat loss compound</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Jitters, anxiety, insomnia, increased heart rate, digestive upset, tolerance buildup
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Pregnant/nursing women<br>
-                    • Heart conditions or high blood pressure<br>
-                    • Anxiety disorders<br>
-                    • Sleep disorders<br>
-                    • Those on certain medications</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• USP verified or third-party tested<br>
-                    • Clearly labeled caffeine content<br>
-                    • No proprietary blends<br>
-                    • Anhydrous form preferred for consistency</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🍃</span>Green Tea Extract (EGCG)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
+                    <div class="page-warning">
+                        <h3>Critical Weight Loss Facts</h3>
+                        <p><strong>Supplements are NOT magic pills.</strong> They provide modest benefits (5-15% enhancement) when combined with proper diet and exercise.</p>
+                        <p style="margin-top: 10px;"><strong>Diet is 70-80% of success.</strong> No supplement can overcome poor eating habits or create a caloric deficit for you.</p>
                     </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge fat-burning">Fat Burning</span>
-                    <span class="effect-badge metabolism">Metabolism</span>
-                </div>
 
-                <div class="stimulant-warning">
-                    ⚡ MILD STIMULANT - Contains natural caffeine
-                </div>
+                    <!-- Supplements List -->
+                    <div id="supplements-container">
+                        <!-- Caffeine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(0)">
+                                <div>
+                                    <div class="supplement-title">Caffeine</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-0">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-0">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">100-400mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Pre-Workout</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
 
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 2-4 lbs over 12 weeks
-                </div>
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases metabolic rate by 3-11%<br>
+                                            • Enhances fat oxidation during exercise<br>
+                                            • Improves workout performance and energy<br>
+                                            • Mild appetite suppression<br>
+                                            • Most researched fat loss compound
+                                        </div>
+                                    </div>
 
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>EGCG:</strong> 300-500mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Green Tea Extract:</strong> 400-800mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Timing:</strong> Between meals on empty stomach</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Fat Loss:</strong> 100-400mg daily<br>
+                                            <strong>Beginners:</strong> Start with 100mg<br>
+                                            <strong>Maximum:</strong> 400mg daily (FDA safe limit)<br>
+                                            <strong>Timing:</strong> 30-60 minutes before fasted cardio
+                                        </div>
+                                    </div>
 
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> 30-60 minutes before meals or exercise. Take with vitamin C for enhanced absorption.
-                </div>
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Jitters, anxiety, insomnia, increased heart rate, digestive upset. Tolerance builds with continued use.</div>
+                                    </div>
 
-                <div class="timing-badge">Before Meals</div>
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">Empty Stomach</div>
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">STIMULANT - Monitor heart rate. Avoid with heart conditions, high blood pressure, anxiety disorders. Avoid within 6 hours of bedtime.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <ul class="benefits-list">
-                    <li>Increases fat oxidation by 10-16%</li>
-                    <li>Boosts metabolic rate modestly</li>
-                    <li>Reduces abdominal fat specifically</li>
-                    <li>Provides antioxidant benefits</li>
-                    <li>May reduce appetite slightly</li>
-                </ul>
+                        <!-- Green Tea Extract -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(1)">
+                                <div>
+                                    <div class="supplement-title">Green Tea Extract (EGCG)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-1">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-1">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">300-500mg</div>
+                                            <div class="stat-label">EGCG Daily</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Empty Stomach</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
 
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Nausea on empty stomach, mild jitters from caffeine content, rare liver issues with very high doses
-                </div>
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases fat oxidation by 10-16%<br>
+                                            • Boosts metabolic rate modestly<br>
+                                            • Reduces abdominal fat specifically<br>
+                                            • Provides antioxidant benefits<br>
+                                            • May reduce appetite slightly
+                                        </div>
+                                    </div>
 
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with liver problems<br>
-                    • Iron deficiency (inhibits absorption)<br>
-                    • Caffeine sensitive individuals<br>
-                    • Those on blood thinning medications</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>EGCG:</strong> 300-500mg daily<br>
+                                            <strong>Green Tea Extract:</strong> 400-800mg daily<br>
+                                            <strong>Timing:</strong> 30-60 minutes before meals<br>
+                                            <strong>Enhancement:</strong> Take with vitamin C
+                                        </div>
+                                    </div>
 
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Standardized to 50%+ EGCG<br>
-                    • Decaffeinated options available<br>
-                    • Third-party tested for purity<br>
-                    • Enteric-coated to reduce nausea</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Nausea on empty stomach. Mild jitters from caffeine content. Rare liver issues at very high doses.</div>
+                                    </div>
 
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🧬</span>L-Carnitine</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Mild stimulant (contains natural caffeine). Avoid with liver problems, iron deficiency. Look for 50%+ EGCG standardization.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- L-Carnitine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(2)">
+                                <div>
+                                    <div class="supplement-title">L-Carnitine</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-2">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-2">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">2-3g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Pre-Workout</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Enhances fat burning during exercise<br>
+                                            • May reduce muscle damage and soreness<br>
+                                            • Supports energy production from fats<br>
+                                            • No stimulant side effects<br>
+                                            • May improve exercise recovery
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>L-Carnitine:</strong> 2-3g daily<br>
+                                            <strong>Acetyl-L-Carnitine:</strong> 1-2g daily<br>
+                                            <strong>Split:</strong> 500mg-1g per serving<br>
+                                            <strong>Timing:</strong> 30-60 minutes before exercise
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Fishy body odor at high doses. Nausea, diarrhea possible. Generally well-tolerated.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Avoid with seizure disorders, hypothyroid, warfarin. Most effective with higher carb intake.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CLA -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(3)">
+                                <div>
+                                    <div class="supplement-title">CLA (Conjugated Linoleic Acid)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-3">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-3">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3-6g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May reduce body fat percentage slightly<br>
+                                            • Potentially preserves lean muscle mass<br>
+                                            • Natural fatty acid with minimal side effects<br>
+                                            • May improve body composition over time<br>
+                                            • Research shows modest but consistent effects
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>CLA:</strong> 3-6g daily<br>
+                                            <strong>Split:</strong> 1-2g with each main meal<br>
+                                            <strong>Duration:</strong> Minimum 12 weeks for benefits<br>
+                                            <strong>Absorption:</strong> Take with meals containing fat
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Digestive upset, diarrhea, nausea. Potential insulin resistance with long-term use.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Avoid with diabetes, bleeding disorders. Stop 2 weeks before surgery. Look for 80% active isomers.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Glucomannan -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(4)">
+                                <div>
+                                    <div class="supplement-title">Glucomannan (Fiber)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-4">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-4">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">1-4g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Before Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Expands in stomach for satiety<br>
+                                            • Reduces caloric intake naturally<br>
+                                            • Slows gastric emptying<br>
+                                            • May improve cholesterol levels<br>
+                                            • Natural soluble fiber with good safety
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Glucomannan:</strong> 1-4g daily<br>
+                                            <strong>Per dose:</strong> 1g with 8-16oz water<br>
+                                            <strong>Timing:</strong> 15-60 minutes before meals<br>
+                                            <strong>CRITICAL:</strong> MUST take with adequate fluid
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Choking risk if not taken with enough water. Bloating, gas, diarrhea, constipation possible.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Avoid with swallowing difficulties, esophageal/intestinal blockages. Never take dry powder form. Capsule form safer.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chromium -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(5)">
+                                <div>
+                                    <div class="supplement-title">Chromium Picolinate</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-5">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-5">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">200-400mcg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May reduce carbohydrate cravings<br>
+                                            • Supports healthy blood sugar levels<br>
+                                            • May improve insulin sensitivity<br>
+                                            • Essential mineral with safety profile<br>
+                                            • Most effective for those with cravings
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Chromium:</strong> 200-400mcg daily<br>
+                                            <strong>Form:</strong> Picolinate for best absorption<br>
+                                            <strong>Maximum safe:</strong> 1000mcg daily<br>
+                                            <strong>Timing:</strong> With carbohydrate-containing meals
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Headaches, sleep disturbances, mood changes. Rare kidney or liver damage at high doses.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Monitor blood sugar with diabetes. Avoid with kidney/liver disease, insulin, psychiatric disorders.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Garcinia Cambogia -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(6)">
+                                <div>
+                                    <div class="supplement-title">Garcinia Cambogia (HCA)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐☆☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-6">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-6">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">500-1500mg</div>
+                                            <div class="stat-label">HCA Daily</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Before Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May reduce appetite in some individuals<br>
+                                            • Potentially blocks fat production from carbs<br>
+                                            • Natural fruit extract<br>
+                                            • No stimulant effects<br>
+                                            • Research results are mixed and modest
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>HCA content:</strong> 500-1500mg daily<br>
+                                            <strong>Extract:</strong> 60% HCA standardization<br>
+                                            <strong>Timing:</strong> 30-60 minutes before meals<br>
+                                            <strong>Note:</strong> Effects are modest and inconsistent
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Digestive upset, headaches, nausea. Rare liver toxicity with poor quality products.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Avoid with liver problems, diabetes, pregnancy. May interact with cholesterol medications. Mixed research results.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Forskolin -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(7)">
+                                <div>
+                                    <div class="supplement-title">Forskolin</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐☆☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-7">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-7">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">250-500mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May increase cAMP levels (theoretical fat loss)<br>
+                                            • Potentially preserves lean muscle mass<br>
+                                            • Natural plant extract from Coleus forskohlii<br>
+                                            • May support thyroid function<br>
+                                            • Very limited human weight loss data
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Forskolin:</strong> 250-500mg daily<br>
+                                            <strong>Standardization:</strong> 10-20% forskolin extract<br>
+                                            <strong>Split:</strong> Twice daily with meals<br>
+                                            <strong>Note:</strong> Limited research on optimal timing
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Low blood pressure, increased heart rate, digestive upset. Potential drug interactions.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Avoid with low blood pressure, heart conditions, bleeding disorders. Very limited human data.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Yohimbine -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(8)">
+                                <div>
+                                    <div class="supplement-title">Yohimbine HCl</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-8">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-8">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">5-20mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Fasted Only</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Targets stubborn fat areas specifically<br>
+                                            • Enhances fat burning during fasted cardio<br>
+                                            • May improve blood flow<br>
+                                            • Works by blocking alpha-2 receptors<br>
+                                            • Most effective for lean individuals
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Dose:</strong> 0.2-0.8mg per kg body weight<br>
+                                            <strong>Average:</strong> 5-20mg daily<br>
+                                            <strong>Start low:</strong> 2.5-5mg to assess tolerance<br>
+                                            <strong>Timing:</strong> 15-30 minutes before fasted cardio
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Anxiety, panic attacks, high blood pressure, nausea, sweating, insomnia, heart palpitations.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">STRONG STIMULANT - Advanced users only! Fasted state required (insulin blocks effects). Avoid with anxiety, heart conditions, MAOIs.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cayenne Pepper -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(9)">
+                                <div>
+                                    <div class="supplement-title">Cayenne Pepper Extract (Capsaicin)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-9">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-9">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">2-9mg</div>
+                                            <div class="stat-label">Capsaicin Daily</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Small increase in metabolic rate (3-5%)<br>
+                                            • May reduce appetite and caloric intake<br>
+                                            • Increases thermogenesis temporarily<br>
+                                            • Natural compound with good safety<br>
+                                            • May enhance fat oxidation
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Capsaicin:</strong> 2-9mg daily<br>
+                                            <strong>Cayenne extract:</strong> 100-200mg daily<br>
+                                            <strong>Timing:</strong> With meals to reduce irritation<br>
+                                            <strong>Start low:</strong> Assess tolerance gradually
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Stomach irritation, heartburn, sweating, runny nose, mouth burning sensation.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Non-stimulant. Avoid with stomach ulcers, GERD, IBS. Monitor with blood thinners, high blood pressure. Enteric-coated reduces irritation.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge fat-burning">Fat Burning</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 1-3 lbs over 10 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>L-Carnitine:</strong> 2-3g daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Acetyl-L-Carnitine:</strong> 1-2g daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Split doses:</strong> 500mg-1g per serving</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> 30-60 minutes before exercise or with meals. Most effective with higher carb intake.
-                </div>
-
-                <div class="timing-badge">Pre-Workout</div>
-                <div class="timing-badge">With Meals</div>
-                <div class="timing-badge">Post-Workout</div>
-
-                <ul class="benefits-list">
-                    <li>Enhances fat burning during exercise</li>
-                    <li>May reduce muscle damage and soreness</li>
-                    <li>Supports energy production from fats</li>
-                    <li>No stimulant side effects</li>
-                    <li>May improve exercise recovery</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Fishy body odor at high doses, nausea, diarrhea, rare allergic reactions
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with seizure disorders<br>
-                    • Underactive thyroid (hypothyroid)<br>
-                    • Those on warfarin (blood thinner)<br>
-                    • Kidney or liver disease</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• L-Carnitine tartrate or acetyl forms<br>
-                    • Pharmaceutical grade purity<br>
-                    • Third-party tested<br>
-                    • Avoid D-Carnitine (inactive form)</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🥩</span>CLA (Conjugated Linoleic Acid)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge fat-burning">Fat Burning</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 1-2 lbs over 12 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>CLA:</strong> 3-6g daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Split doses:</strong> 1-2g with each main meal</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Duration:</strong> Minimum 12 weeks for benefits</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> With meals containing fat for better absorption. Consistent daily use required for 12+ weeks.
-                </div>
-
-                <div class="timing-badge">With Breakfast</div>
-                <div class="timing-badge">With Lunch</div>
-                <div class="timing-badge">With Dinner</div>
-
-                <ul class="benefits-list">
-                    <li>May reduce body fat percentage slightly</li>
-                    <li>Potentially preserves lean muscle mass</li>
-                    <li>Natural fatty acid with minimal side effects</li>
-                    <li>May improve body composition over time</li>
-                    <li>Research shows modest but consistent effects</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Digestive upset, diarrhea, nausea, potential insulin resistance with long-term use
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with diabetes (may affect insulin)<br>
-                    • Bleeding disorders<br>
-                    • Scheduled for surgery (stop 2 weeks prior)<br>
-                    • Dairy allergies (if derived from dairy)</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• 80% active CLA isomers minimum<br>
-                    • Safflower oil derived preferred<br>
-                    • Softgel capsules for stability<br>
-                    • Third-party tested for purity</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🥭</span>Garcinia Cambogia (HCA)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge appetite">Appetite</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 0-2 lbs over 12 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>HCA content:</strong> 500-1500mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Extract:</strong> 60% HCA standardization</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Timing:</strong> 30-60 minutes before meals</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> 30-60 minutes before main meals on empty stomach. Effects are modest and inconsistent.
-                </div>
-
-                <div class="timing-badge">Before Meals</div>
-                <div class="timing-badge">Empty Stomach</div>
-
-                <ul class="benefits-list">
-                    <li>May reduce appetite in some individuals</li>
-                    <li>Potentially blocks fat production from carbs</li>
-                    <li>Natural fruit extract</li>
-                    <li>No stimulant effects</li>
-                    <li>Research results are mixed and modest</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Digestive upset, headaches, nausea, rare liver toxicity with poor quality products
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with liver problems<br>
-                    • Diabetes (may affect blood sugar)<br>
-                    • Those on cholesterol medications<br>
-                    • Pregnant or nursing women</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• 50-60% HCA standardization<br>
-                    • Calcium or potassium bound HCA<br>
-                    • Third-party tested for purity<br>
-                    • Avoid products with fillers/additives</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🌿</span>Forskolin</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge metabolism">Metabolism</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: Minimal evidence, 0-1 lb
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Forskolin:</strong> 250-500mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Standardization:</strong> 10-20% forskolin extract</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Split doses:</strong> Twice daily with meals</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> With meals to reduce potential stomach upset. Limited research on optimal timing.
-                </div>
-
-                <div class="timing-badge">With Meals</div>
-                <div class="timing-badge">Morning</div>
-                <div class="timing-badge">Evening</div>
-
-                <ul class="benefits-list">
-                    <li>May increase cAMP levels (theoretical fat loss)</li>
-                    <li>Potentially preserves lean muscle mass</li>
-                    <li>Natural plant extract from Coleus forskohlii</li>
-                    <li>May support thyroid function</li>
-                    <li>Very limited human weight loss data</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Low blood pressure, increased heart rate, digestive upset, potential drug interactions
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with low blood pressure<br>
-                    • Heart conditions or arrhythmias<br>
-                    • Those on blood pressure medications<br>
-                    • Bleeding disorders</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• 10-20% forskolin standardization<br>
-                    • Coleus forskohlii root extract<br>
-                    • Third-party tested<br>
-                    • Avoid proprietary blends</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">⚗️</span>Chromium Picolinate</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge appetite">Appetite</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 1-2 lbs over 10-16 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Chromium:</strong> 200-400mcg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Picolinate form:</strong> Best absorption</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Maximum safe:</strong> 1000mcg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> With carbohydrate-containing meals to help with glucose metabolism and cravings.
-                </div>
-
-                <div class="timing-badge">With Meals</div>
-                <div class="timing-badge">Before Carbs</div>
-
-                <ul class="benefits-list">
-                    <li>May reduce carbohydrate cravings</li>
-                    <li>Supports healthy blood sugar levels</li>
-                    <li>May improve insulin sensitivity</li>
-                    <li>Essential mineral with safety profile</li>
-                    <li>Most effective for those with cravings</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Headaches, sleep disturbances, mood changes, rare kidney or liver damage at high doses
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with diabetes (monitor blood sugar)<br>
-                    • Kidney or liver disease<br>
-                    • Those on insulin or diabetes medications<br>
-                    • Behavioral/psychiatric disorders</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Chromium picolinate form<br>
-                    • USP verified or third-party tested<br>
-                    • 200mcg dosage per capsule<br>
-                    • No unnecessary additives</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🌾</span>Glucomannan (Fiber)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge appetite">Appetite</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 2-5 lbs over 8-16 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Glucomannan:</strong> 1-4g daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Per dose:</strong> 1g with 8-16oz water</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Timing:</strong> 15-60 minutes before meals</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> 15-60 minutes before meals with plenty of water. MUST take with adequate fluid to prevent choking.
-                </div>
-
-                <div class="timing-badge">Before Meals</div>
-                <div class="timing-badge">With Water</div>
-
-                <ul class="benefits-list">
-                    <li>Expands in stomach for satiety</li>
-                    <li>Reduces caloric intake naturally</li>
-                    <li>Slows gastric emptying</li>
-                    <li>May improve cholesterol levels</li>
-                    <li>Natural soluble fiber with good safety</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Choking risk if not taken with enough water, bloating, gas, diarrhea, constipation
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Swallowing difficulties<br>
-                    • Esophageal or intestinal blockages<br>
-                    • Those on diabetes medications<br>
-                    • Should not take dry powder form</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• High molecular weight glucomannan<br>
-                    • Capsule form safer than powder<br>
-                    • Third-party tested for purity<br>
-                    • Clear dosing instructions included</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🌳</span>Yohimbine HCl</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge fat-burning">Fat Burning</span>
-                </div>
-
-                <div class="stimulant-warning">
-                    ⚡ STRONG STIMULANT - Advanced users only!
-                </div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 1-3 lbs over 8-12 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Yohimbine HCl:</strong> 0.2-0.8mg per kg body weight</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Average:</strong> 5-20mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Start low:</strong> 2.5-5mg to assess tolerance</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> Fasted state only - insulin blocks its effects. 15-30 minutes before fasted cardio.
-                </div>
-
-                <div class="timing-badge">Fasted Only</div>
-                <div class="timing-badge">Pre-Cardio</div>
-
-                <ul class="benefits-list">
-                    <li>Targets stubborn fat areas specifically</li>
-                    <li>Enhances fat burning during fasted cardio</li>
-                    <li>May improve blood flow</li>
-                    <li>Works by blocking alpha-2 receptors</li>
-                    <li>Most effective for lean individuals</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Anxiety, panic attacks, high blood pressure, nausea, sweating, insomnia, heart palpitations
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with anxiety or panic disorders<br>
-                    • Heart conditions or high blood pressure<br>
-                    • Those on antidepressants (MAOIs)<br>
-                    • Kidney or liver disease<br>
-                    • Beginners to stimulants</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Yohimbine HCl (not bark extract)<br>
-                    • Pharmaceutical grade purity<br>
-                    • Precisely dosed (2.5-5mg capsules)<br>
-                    • Third-party tested for potency</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-
-            <div class="supplement-card">
-                <div class="supplement-header">
-                    <div class="supplement-name"><span class="icon">🌶️</span>Cayenne Pepper Extract (Capsaicin)</div>
-                    <div class="research-rating">
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star">★</span>
-                        <span class="star empty">☆</span>
-                        <span class="star empty">☆</span>
-                    </div>
-                </div>
-                
-                <div class="effect-indicators">
-                    <span class="effect-badge metabolism">Metabolism</span>
-                    <span class="effect-badge appetite">Appetite</span>
-                </div>
-
-                <div class="non-stimulant">NON-STIMULANT</div>
-
-                <div class="weight-loss-potential">
-                    <span class="icon">📈</span>Weight Loss Potential: 0.5-1 lb over 12 weeks
-                </div>
-
-                <div class="dosage-section">
-                    <h4><span class="icon">⚖️</span>Optimal Dosage</h4>
-                    <p><strong>Capsaicin:</strong> 2-9mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>Cayenne extract:</strong> 100-200mg daily</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                    <p><strong>With meals:</strong> To reduce stomach irritation</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="timing-info">
-                    <strong>Best Timing:</strong> With meals to reduce stomach irritation. Start with lower doses to assess tolerance.
-                </div>
-
-                <div class="timing-badge">With Meals</div>
-                <div class="timing-badge">Before Exercise</div>
-
-                <ul class="benefits-list">
-                    <li>Small increase in metabolic rate (3-5%)</li>
-                    <li>May reduce appetite and caloric intake</li>
-                    <li>Increases thermogenesis temporarily</li>
-                    <li>Natural compound with good safety</li>
-                    <li>May enhance fat oxidation</li>
-                </ul>
-
-                <div class="side-effects">
-                    <strong>Potential Side Effects:</strong> Stomach irritation, heartburn, sweating, runny nose, mouth burning sensation
-                </div>
-
-                <div class="contraindications">
-                    <h5>Who Should Avoid:</h5>
-                    <p>• Those with stomach ulcers or GERD<br>
-                    • Irritable bowel syndrome<br>
-                    • Those on blood thinning medications<br>
-                    • High blood pressure (monitor closely)</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-
-                <div class="quality-indicators">
-                    <h5>Quality Indicators:</h5>
-                    <p>• Standardized capsaicin content<br>
-                    • Enteric-coated to reduce irritation<br>
-                    • Capsicum annuum source<br>
-                    • Third-party tested for purity</p>
-                        <button onclick="goBack()" ontouchstart="" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="limitations-section">
-            <h2><span class="icon">⚠️</span>Supplement Limitations & Reality Check</h2>
-            <ul class="limitation-points">
-                <li><strong>Supplements cannot create a caloric deficit</strong> - You must eat fewer calories than you burn</li>
-                <li><strong>No supplement burns significant calories</strong> - Even the best ones add 50-200 calories burned per day</li>
-                <li><strong>Appetite suppression is temporary</strong> - Body adapts and hunger returns within weeks</li>
-                <li><strong>Stimulant tolerance develops quickly</strong> - Effects diminish with continued use</li>
-                <li><strong>Individual responses vary greatly</strong> - What works for others may not work for you</li>
-                <li><strong>Quality and purity issues are common</strong> - Many products are underdosed or contaminated</li>
-                <li><strong>Expensive compared to food changes</strong> - Better diet provides more benefit per dollar</li>
-                <li><strong>Long-term safety data is limited</strong> - Most studies are short-term (8-16 weeks)</li>
-                <li><strong>Placebo effect is significant</strong> - Belief in a supplement can influence results</li>
-                <li><strong>Diet and exercise are 90% of success</strong> - Focus your energy there first</li>
-            </ul>
-        </div>
-
-        <div class="realistic-expectations">
-            <h2><span class="icon">💡</span>Supplement Priority Ranking</h2>
-            <div class="expectations-grid">
-                <div class="expectation-card">
-                    <h3>Tier 1: Evidence-Based</h3>
-                    <ul>
-                        <li><strong>Caffeine:</strong> Most proven effects</li>
-                        <li><strong>Green Tea Extract:</strong> Modest but consistent</li>
-                        <li><strong>Glucomannan:</strong> Works via satiety</li>
-                        <li>Consider these first if supplementing</li>
-                    </ul>
-                </div>
-                <div class="expectation-card">
-                    <h3>Tier 2: Some Evidence</h3>
-                    <ul>
-                        <li><strong>L-Carnitine:</strong> Exercise-dependent</li>
-                        <li><strong>CLA:</strong> Very modest effects</li>
-                        <li><strong>Chromium:</strong> Helps some with cravings</li>
-                        <li>Limited but positive research</li>
-                    </ul>
-                </div>
-                <div class="expectation-card">
-                    <h3>Tier 3: Advanced/Risky</h3>
-                    <ul>
-                        <li><strong>Yohimbine HCl:</strong> Advanced users only</li>
-                        <li><strong>Capsaicin:</strong> Minimal effects</li>
-                        <li>Higher risk-to-benefit ratio</li>
-                        <li>Not recommended for beginners</li>
-                    </ul>
-                </div>
-                <div class="expectation-card">
-                    <h3>Tier 4: Questionable</h3>
-                    <ul>
-                        <li><strong>Garcinia Cambogia:</strong> Inconsistent results</li>
-                        <li><strong>Forskolin:</strong> Limited human data</li>
-                        <li>Save your money for better options</li>
-                        <li>Focus on diet and exercise instead</li>
-                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
+            <div class="menu-item" onclick="goToPage('index.html')">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
+            <div class="menu-item active" onclick="goToPage('supplements.html')">💊 Supplements</div>
+            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToPage('index.html')">📈 Progress & Analytics</div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function goBack() {
+            window.location.href = 'supplements.html';
+        }
+
+        function toggleSupplement(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
 </body>
 </html>
