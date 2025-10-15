@@ -5521,4 +5521,18 @@ window.onload = function() {
             loadTodaysNutrition();
         }
     }, 1000);
+
+    // Also refresh when page becomes visible (e.g., when navigating back from calorie tracker)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            console.log('📱 Page became visible, refreshing nutrition data');
+            loadTodaysNutrition();
+        }
+    });
+
+    // Force refresh on page focus (for iOS navigation)
+    window.addEventListener('focus', function() {
+        console.log('📱 Window focused, refreshing nutrition data');
+        loadTodaysNutrition();
+    });
 };
