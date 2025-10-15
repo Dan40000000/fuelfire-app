@@ -83,20 +83,34 @@ body {
 }
 
 .header {
-    height: 60px;
+    height: auto;
+    min-height: 60px;
     background: var(--gradient-1);
     display: flex;
     align-items: center;
     padding: 0 20px;
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: 15px;
     color: white;
     position: relative;
     box-shadow: 0 4px 20px rgba(75, 156, 211, 0.3);
 }
 
 .hamburger {
-    font-size: 24px;
+    font-size: 28px;
     cursor: pointer;
     z-index: 1000;
+    padding: 12px 15px;
+    margin-right: 10px;
+    min-width: 50px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    -webkit-tap-highlight-color: rgba(255,255,255,0.3);
+    touch-action: manipulation;
 }
 
 .header-title {
