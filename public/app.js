@@ -4887,21 +4887,29 @@ function loadTodaysNutrition() {
     const today = new Date().toISOString().split('T')[0];
     const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
     const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
-    
+
+    console.log('🏠 Home page loading nutrition for', today);
+    console.log('📊 Logged meals:', todayData);
+
     // Calculate consumed macros
     let totalProtein = 0;
     let totalCarbs = 0;
     let totalFat = 0;
-    
+
     todayData.meals.forEach(meal => {
         totalProtein += meal.protein || 0;
         totalCarbs += meal.carbs || 0;
         totalFat += meal.fat || 0;
     });
-    
+
+    console.log('📈 Totals - Cals:', todayData.totalCalories, 'Protein:', totalProtein, 'Carbs:', totalCarbs, 'Fat:', totalFat);
+
     // Update home screen display
     if (document.getElementById('home-calories')) {
         document.getElementById('home-calories').textContent = todayData.totalCalories.toLocaleString();
+        console.log('✅ Updated home-calories element');
+    } else {
+        console.log('❌ home-calories element not found');
     }
     if (document.getElementById('home-protein')) {
         document.getElementById('home-protein').textContent = Math.round(totalProtein) + 'g';

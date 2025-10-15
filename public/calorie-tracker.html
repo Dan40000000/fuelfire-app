@@ -771,6 +771,11 @@
                         console.log('📝', data.message);
                     }
 
+                    // Log sugar content to verify it's being returned
+                    data.foods.forEach(food => {
+                        console.log(`🍭 ${food.name}: ${food.sugar || 0}g sugar`);
+                    });
+
                     // Update the voice text to show what was found
                     if (data.foods.length > 1) {
                         const foodNames = data.foods.map(f => f.name).join(' + ');
@@ -1051,7 +1056,7 @@
             
             // Log each food
             window.currentFoods.forEach(food => {
-                loggedMeals[today].meals.push({
+                const mealEntry = {
                     name: food.name,
                     type: type,
                     calories: food.calories,
@@ -1062,8 +1067,11 @@
                     time: new Date().toISOString(),
                     source: window.currentSource,
                     serving: food.serving || '1 serving'
-                });
-                
+                };
+
+                console.log('💾 Logging meal:', mealEntry);
+                loggedMeals[today].meals.push(mealEntry);
+
                 totalCalories += food.calories;
                 totalProtein += food.protein || 0;
                 totalCarbs += food.carbs || 0;
@@ -1403,6 +1411,8 @@
             document.getElementById('manual-entry-tab').style.color = 'white';
             document.getElementById('ai-search-tab').style.background = '#e0e0e0';
             document.getElementById('ai-search-tab').style.color = '#666';
+            // Clear AI search results when switching to manual entry
+            document.getElementById('search-results').innerHTML = '';
         }
         
         // Load quick adds from history
@@ -2487,9 +2497,12 @@
             const today = new Date().toISOString().split('T')[0];
             const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
-            
+
+            console.log('🔄 Syncing with home page:', todayData);
+
             // Trigger storage event to update other tabs/pages
             window.localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
+            console.log('✅ Set fuelfire_nutrition_updated to', Date.now());
         }
         
         // Check if we need to reset for a new day
