@@ -624,7 +624,7 @@
             return filledStars + emptyStars;
         }
 
-        function displayExercises(exercisesToShow = legsExercises) {
+        function displayExercises(exercisesToShow = legExercises) {
             const container = document.getElementById('exercises-container');
             let html = '';
             
@@ -668,7 +668,7 @@
                 return;
             }
 
-            const filtered = legsExercises.filter(exercise => {
+            const filtered = legExercises.filter(exercise => {
                 return exercise.name.toLowerCase().includes(searchTerm) ||
                        exercise.description.toLowerCase().includes(searchTerm) ||
                        exercise.equipment.toLowerCase().includes(searchTerm) ||

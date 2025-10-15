@@ -17,65 +17,72 @@
             
             <div class="content">
                 <div style="padding: 20px;">
-                    <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
                         <h2 style="color: var(--primary); margin-bottom: 10px;">🏋️ Perfect Form Library</h2>
                         <p style="color: #666; font-size: 14px;">Master proper technique for every exercise with detailed form guides</p>
                     </div>
-                    
+
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="category-search" placeholder="🔍 Search muscle groups..."
+                               onkeyup="filterCategories()"
+                               style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
+                    </div>
+
                     <!-- Categories Grid -->
                     <div class="categories-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                         
                         <!-- Chest -->
-                        <div class="category-card" onclick="goToCategory('chest')" ontouchstart="" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="chest" data-keywords="chest pecs upper body pectorals push" onclick="goToCategory('chest')" ontouchstart="" style="background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">💪</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Chest</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Pecs & Upper Body</p>
                         </div>
                         
                         <!-- Back -->
-                        <div class="category-card" onclick="goToCategory('back')" ontouchstart="" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="back" data-keywords="back lats rhomboids traps pull rowing" onclick="goToCategory('back')" ontouchstart="" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">🦵</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Back</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Lats & Rhomboids</p>
                         </div>
-                        
+
                         <!-- Legs -->
-                        <div class="category-card" onclick="goToCategory('legs')" ontouchstart="" style="background: linear-gradient(135deg, #27ae60, #229954); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="legs" data-keywords="legs quads glutes hamstrings thighs squat" onclick="goToCategory('legs')" ontouchstart="" style="background: linear-gradient(135deg, #27ae60, #229954); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">🦵</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Legs</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Quads & Glutes</p>
                         </div>
-                        
+
                         <!-- Shoulders -->
-                        <div class="category-card" onclick="goToCategory('shoulders')" ontouchstart="" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="shoulders" data-keywords="shoulders delts deltoids rotators press overhead" onclick="goToCategory('shoulders')" ontouchstart="" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">🏋️</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Shoulders</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Delts & Rotators</p>
                         </div>
-                        
+
                         <!-- Arms -->
-                        <div class="category-card" onclick="goToCategory('arms')" ontouchstart="" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="arms" data-keywords="arms biceps triceps curls extensions" onclick="goToCategory('arms')" ontouchstart="" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">💪</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Arms</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Biceps & Triceps</p>
                         </div>
-                        
+
                         <!-- Core -->
-                        <div class="category-card" onclick="goToCategory('core')" ontouchstart="" style="background: linear-gradient(135deg, #e67e22, #d68910); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="core" data-keywords="core abs obliques abdominals plank crunch" onclick="goToCategory('core')" ontouchstart="" style="background: linear-gradient(135deg, #e67e22, #d68910); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(230, 126, 34, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">🔥</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Core</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Abs & Obliques</p>
                         </div>
-                        
+
                         <!-- Cardio -->
-                        <div class="category-card" onclick="goToCategory('cardio')" ontouchstart="" style="background: linear-gradient(135deg, #e91e63, #ad1457); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="cardio" data-keywords="cardio running endurance hiit conditioning aerobic" onclick="goToCategory('cardio')" ontouchstart="" style="background: linear-gradient(135deg, #e91e63, #ad1457); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">🏃</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Cardio</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Endurance & HIIT</p>
                         </div>
-                        
+
                         <!-- Calves -->
-                        <div class="category-card" onclick="goToCategory('calves')" ontouchstart="" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="category-card" data-category="calves" data-keywords="calves lower leg calf raises ankle" onclick="goToCategory('calves')" ontouchstart="" style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3); transition: transform 0.3s ease; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="category-icon" style="font-size: 40px; margin-bottom: 10px;">🦵</div>
                             <h3 class="category-title" style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Calves</h3>
                             <p class="category-subtitle" style="margin: 0; font-size: 12px; opacity: 0.9;">Lower Leg Power</p>
@@ -169,6 +176,29 @@
         
         function goToCategory(category) {
             window.location.href = `workout-${category}.html`;
+        }
+
+        function filterCategories() {
+            const searchTerm = document.getElementById('category-search').value.toLowerCase();
+            const categoryCards = document.querySelectorAll('.category-card');
+
+            categoryCards.forEach(card => {
+                const category = card.dataset.category;
+                const keywords = card.dataset.keywords;
+                const title = card.querySelector('.category-title').textContent.toLowerCase();
+                const subtitle = card.querySelector('.category-subtitle').textContent.toLowerCase();
+
+                const matches = category.includes(searchTerm) ||
+                              keywords.includes(searchTerm) ||
+                              title.includes(searchTerm) ||
+                              subtitle.includes(searchTerm);
+
+                if (matches || searchTerm === '') {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
 
         // Initialize
