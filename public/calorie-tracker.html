@@ -1396,8 +1396,23 @@
         
         // Tab switching functions
         function showAISearch() {
-            document.getElementById('ai-search-content').style.display = 'block';
-            document.getElementById('manual-entry-content').style.display = 'none';
+            console.log('🔄 Switching to AI Search tab');
+
+            const aiContent = document.getElementById('ai-search-content');
+            const manualContent = document.getElementById('manual-entry-content');
+
+            // Show AI search
+            aiContent.style.display = 'block';
+            aiContent.style.visibility = 'visible';
+            aiContent.style.opacity = '1';
+            aiContent.style.pointerEvents = 'auto';
+
+            // Hide manual entry
+            manualContent.style.display = 'none';
+            manualContent.style.visibility = 'hidden';
+            manualContent.style.opacity = '0';
+
+            // Update tab buttons
             document.getElementById('ai-search-tab').style.background = 'var(--primary)';
             document.getElementById('ai-search-tab').style.color = 'white';
             document.getElementById('manual-entry-tab').style.background = '#e0e0e0';
@@ -1408,28 +1423,47 @@
             if (searchResults) {
                 searchResults.style.display = 'block';
             }
+
+            console.log('✅ AI Search tab active');
         }
         
         function showManualEntry() {
-            document.getElementById('ai-search-content').style.display = 'none';
-            document.getElementById('manual-entry-content').style.display = 'block';
+            console.log('🔄 Switching to Manual Entry tab');
+
+            const aiContent = document.getElementById('ai-search-content');
+            const manualContent = document.getElementById('manual-entry-content');
+
+            // Hide AI search completely
+            aiContent.style.display = 'none';
+            aiContent.style.visibility = 'hidden';
+            aiContent.style.opacity = '0';
+            aiContent.style.pointerEvents = 'none';
+
+            // Show manual entry
+            manualContent.style.display = 'block';
+            manualContent.style.visibility = 'visible';
+            manualContent.style.opacity = '1';
+
+            // Update tab buttons
             document.getElementById('manual-entry-tab').style.background = 'var(--primary)';
             document.getElementById('manual-entry-tab').style.color = 'white';
             document.getElementById('ai-search-tab').style.background = '#e0e0e0';
             document.getElementById('ai-search-tab').style.color = '#666';
 
-            // Clear AI search results when switching to manual entry
+            // Clear AI search results
             const searchResults = document.getElementById('search-results');
             if (searchResults) {
                 searchResults.innerHTML = '';
                 searchResults.style.display = 'none';
             }
 
-            // Also clear the search input
-            const searchInput = document.getElementById('food-search');
+            // Clear the search input
+            const searchInput = document.getElementById('smart-search');
             if (searchInput) {
                 searchInput.value = '';
             }
+
+            console.log('✅ Manual Entry tab active, AI content hidden');
         }
         
         // Load quick adds from history
