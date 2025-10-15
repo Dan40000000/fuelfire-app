@@ -1402,6 +1402,12 @@
             document.getElementById('ai-search-tab').style.color = 'white';
             document.getElementById('manual-entry-tab').style.background = '#e0e0e0';
             document.getElementById('manual-entry-tab').style.color = '#666';
+
+            // Re-show search results div when switching back to AI
+            const searchResults = document.getElementById('search-results');
+            if (searchResults) {
+                searchResults.style.display = 'block';
+            }
         }
         
         function showManualEntry() {
@@ -1411,8 +1417,19 @@
             document.getElementById('manual-entry-tab').style.color = 'white';
             document.getElementById('ai-search-tab').style.background = '#e0e0e0';
             document.getElementById('ai-search-tab').style.color = '#666';
+
             // Clear AI search results when switching to manual entry
-            document.getElementById('search-results').innerHTML = '';
+            const searchResults = document.getElementById('search-results');
+            if (searchResults) {
+                searchResults.innerHTML = '';
+                searchResults.style.display = 'none';
+            }
+
+            // Also clear the search input
+            const searchInput = document.getElementById('food-search');
+            if (searchInput) {
+                searchInput.value = '';
+            }
         }
         
         // Load quick adds from history
