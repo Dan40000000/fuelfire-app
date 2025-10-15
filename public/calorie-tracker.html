@@ -517,7 +517,7 @@
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
 
             if (!loggedMeals[today]) {
-                loggedMeals[today] = { meals: [], water: 0 };
+                loggedMeals[today] = { meals: [], water: 0, totalCalories: 0 };
             }
 
             const meal = {
@@ -526,16 +526,18 @@
                 protein: food.protein || 0,
                 carbs: food.carbs || 0,
                 fat: food.fat || 0,
-                type: 'snack',
-                time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                time: new Date().toISOString(),
+                fromMealPlan: false
             };
 
             loggedMeals[today].meals.push(meal);
+            loggedMeals[today].totalCalories = (loggedMeals[today].totalCalories || 0) + meal.calories;
             localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
             console.log('✅ Food logged successfully');
 
-            // Reload the page to update dashboard
-            location.reload();
+            // Update the UI without reloading
+            syncWithHomePage();
+            loadTodaysMeals();
         }
 
         function closeVoiceModal() {
