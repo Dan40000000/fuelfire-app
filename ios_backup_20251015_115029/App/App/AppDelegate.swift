@@ -1,5 +1,5 @@
 import UIKit
-import Capacitor
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +7,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        window = UIWindow(frame: UIScreen.main.bounds)
+        
+        // Create WebView configuration with cache clearing
+        let webConfiguration = WKWebViewConfiguration()
+        webConfiguration.allowsInlineMediaPlayback = true
+        
+        // Clear all website data to force fresh load
+        let websiteDataTypes = WKWebsiteDataStore.allWebsiteDataTypes()
+        WKWebsiteDataStore.default().removeData(ofTypes: websiteDataTypes, modifiedSince: Date(timeIntervalSince1970: 0), completionHandler: {})
+        
+        // Create WebView with proper configuration
+        let webView = WKWebView(frame: window!.bounds, configuration: webConfiguration)
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        webView.scrollView.bounces = false
+        
+        // Load the website with aggressive cache busting
+        let timestamp = Date().timeIntervalSince1970
+        if let url = URL(string: "https://well-fit-app.vercel.app") {
+            var request = URLRequest(url: url)
+            request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+            request.setValue("no-cache", forHTTPHeaderField: "Pragma")
+            webView.load(request)
+        }
+        
+        // Create view controller and set up window
+        let viewController = UIViewController()
+        viewController.view = webView
+        
+        // Create navigation controller for proper iPad support
+        let navController = UINavigationController(rootViewController: viewController)
+        navController.isNavigationBarHidden = true
+        
+        window?.rootViewController = navController
+        window?.makeKeyAndVisible()
+        
         return true
     }
 
@@ -36,14 +72,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         // Called when the app was launched with a url. Feel free to add additional processing here,
         // but if you want the App API to support tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+        // return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
+        return true
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         // Called when the app was launched with an activity, including Universal Links.
         // Feel free to add additional processing here, but if you want the App API to support
         // tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        // return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        return true
     }
 
 }

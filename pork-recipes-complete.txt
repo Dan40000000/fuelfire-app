@@ -1,0 +1,29 @@
+COMPLETE PORK RECIPE REWRITE PLAN
+===================================
+
+This file tracks all the recipes that need to be rewritten with actual pork-specific content.
+
+MALE-BULK MODE (8 recipes):
+✅ 1. Weekly Meal Prep Champion - Slow-Cooker Pulled Pork (KEEP AS IS)
+✅ 2. Honey Garlic Pork Chops & Sweet Potato (DONE)
+✅ 3. Asian Pork Tenderloin Stir-Fry & Rice (DONE)
+✅ 4. Italian Pork Sausage & Pasta Muscle Mass (DONE)
+✅ 5. BBQ Pork Ribs & Loaded Sweet Potato (DONE)
+✅ 6. Savory Pork Sausage & Oatmeal Power Breakfast (DONE)
+✅ 7. Herb-Crusted Pork Tenderloin & Creamy Mash (DONE)
+✅ 8. Mexican Pork Carnitas Power Wrap (DONE)
+
+MALE-CUT MODE (10 recipes):
+✅ 1. Weekly Baked Pork Chops & Rice Prep (DONE)
+✅ 2. Massive Pork Carnitas Burrito Bowl (DONE)
+⏳ 3-10. Need to replace remaining 8 recipes
+
+FEMALE-BULK MODE (9 recipes):
+⏳ 1. Weekly meal prep champion - needs pork rewrite
+⏳ 2-9. Need to replace all remaining recipes
+
+FEMALE-CUT MODE (9 recipes):
+⏳ 1. Weekly meal prep champion - needs pork rewrite
+⏳ 2-9. Need to replace all remaining recipes
+
+Total recipes to rewrite: ~28 more recipes needed
