@@ -583,32 +583,58 @@
 
                 const foodListHtml = results.map((food, idx) => `
                     <div style="text-align: left; padding: 10px; margin: 5px 0; background: white; border-radius: 8px;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" checked data-food-index="${idx}" style="margin-right: 10px; width: 20px; height: 20px;">
-                            <div>
+                        <label style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
+                            <input type="checkbox" checked class="food-checkbox" data-food-index="${idx}" style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
+                            <div style="flex: 1;">
                                 <div style="font-weight: bold;">${food.name}</div>
-                                <div style="font-size: 12px; color: #666;">${food.calories} cal | ${food.protein}g protein</div>
+                                <div style="font-size: 12px; color: #666; margin: 4px 0;">${food.calories} cal | ${food.protein}g protein</div>
+                                <div style="display: flex; align-items: center; gap: 5px; margin-top: 6px;">
+                                    <label style="font-size: 11px; color: #666;">Qty:</label>
+                                    <input type="number" class="food-quantity" data-food-index="${idx}" value="1" min="0.25" step="0.25"
+                                           style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;"
+                                           onclick="event.stopPropagation();">
+                                </div>
                             </div>
                         </label>
                     </div>
                 `).join('');
 
                 document.getElementById('voice-text').innerHTML = `
-                    <div style="text-align: left;">
+                    <div id="food-confirmation-list" style="text-align: left;">
                         <div style="font-weight: bold; margin-bottom: 10px;">Found ${results.length} items:</div>
                         ${foodListHtml}
                     </div>
                 `;
 
-                document.getElementById('voice-button').textContent = 'Log Selected Foods';
-                document.getElementById('voice-button').style.background = '#28a745';
-                document.getElementById('voice-button').onclick = () => {
-                    // Get checked items
-                    const checkboxes = document.querySelectorAll('#voice-text input[type="checkbox"]');
+                const logBtn = document.getElementById('voice-button');
+                logBtn.textContent = 'Log Selected Foods';
+                logBtn.style.background = '#28a745';
+
+                // Remove old event listener by cloning the button
+                const newLogBtn = logBtn.cloneNode(true);
+                logBtn.parentNode.replaceChild(newLogBtn, logBtn);
+
+                // Add fresh event listener
+                newLogBtn.onclick = () => {
+                    // Get checked items with quantities
+                    const checkboxes = document.querySelectorAll('.food-checkbox');
                     const selectedFoods = [];
-                    checkboxes.forEach((cb, idx) => {
+
+                    checkboxes.forEach((cb) => {
                         if (cb.checked) {
-                            selectedFoods.push(results[idx]);
+                            const idx = parseInt(cb.dataset.foodIndex);
+                            const quantityInput = document.querySelector(`.food-quantity[data-food-index="${idx}"]`);
+                            const quantity = parseFloat(quantityInput.value) || 1;
+
+                            // Clone the food object and multiply by quantity
+                            const foodToLog = {
+                                name: quantity !== 1 ? `${quantity}x ${results[idx].name}` : results[idx].name,
+                                calories: Math.round(results[idx].calories * quantity),
+                                protein: Math.round(results[idx].protein * quantity),
+                                carbs: Math.round((results[idx].carbs || 0) * quantity),
+                                fat: Math.round((results[idx].fat || 0) * quantity)
+                            };
+                            selectedFoods.push(foodToLog);
                         }
                     });
 
@@ -618,13 +644,14 @@
                             logFood(food);
                         });
 
-                        // Show success and close
+                        // Show success message
                         document.getElementById('voice-text').textContent = `Logged ${selectedFoods.length} food(s)!`;
                         document.getElementById('voice-status').textContent = '🎉';
 
+                        // Close modal after short delay
                         setTimeout(() => {
                             closeVoiceModal();
-                        }, 1000);
+                        }, 800);
                     } else {
                         alert('Please select at least one food item');
                     }
@@ -1142,11 +1169,17 @@
 
                     const foodListHtml = `
                         <div style="text-align: left; padding: 10px; margin: 5px 0; background: white; border-radius: 8px;">
-                            <label style="display: flex; align-items: center; cursor: pointer;">
-                                <input type="checkbox" checked data-food-index="0" style="margin-right: 10px; width: 20px; height: 20px;">
-                                <div>
+                            <label style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
+                                <input type="checkbox" checked class="food-checkbox" data-food-index="0" style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
+                                <div style="flex: 1;">
                                     <div style="font-weight: bold;">${fullName}</div>
-                                    <div style="font-size: 12px; color: #666;">${Math.round(calories)} cal | ${Math.round(protein)}g protein | Serving: ${servingSize}</div>
+                                    <div style="font-size: 12px; color: #666; margin: 4px 0;">${Math.round(calories)} cal | ${Math.round(protein)}g protein | Serving: ${servingSize}</div>
+                                    <div style="display: flex; align-items: center; gap: 5px; margin-top: 6px;">
+                                        <label style="font-size: 11px; color: #666;">Qty:</label>
+                                        <input type="number" class="food-quantity" data-food-index="0" value="1" min="0.25" step="0.25"
+                                               style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;"
+                                               onclick="event.stopPropagation();">
+                                    </div>
                                 </div>
                             </label>
                         </div>
@@ -1159,17 +1192,35 @@
                         </div>
                     `;
 
-                    document.getElementById('voice-button').textContent = 'Log This Food';
-                    document.getElementById('voice-button').style.background = '#28a745';
-                    document.getElementById('voice-button').onclick = () => {
-                        const checkbox = document.querySelector('#voice-text input[type="checkbox"]');
+                    const logBtn = document.getElementById('voice-button');
+                    logBtn.textContent = 'Log This Food';
+                    logBtn.style.background = '#28a745';
+
+                    // Remove old event listener by cloning the button
+                    const newLogBtn = logBtn.cloneNode(true);
+                    logBtn.parentNode.replaceChild(newLogBtn, logBtn);
+
+                    // Add fresh event listener
+                    newLogBtn.onclick = () => {
+                        const checkbox = document.querySelector('.food-checkbox');
                         if (checkbox && checkbox.checked) {
-                            logFood(foodData[0]);
+                            const quantityInput = document.querySelector('.food-quantity');
+                            const quantity = parseFloat(quantityInput.value) || 1;
+
+                            const foodToLog = {
+                                name: quantity !== 1 ? `${quantity}x ${foodData[0].name}` : foodData[0].name,
+                                calories: Math.round(foodData[0].calories * quantity),
+                                protein: Math.round(foodData[0].protein * quantity),
+                                carbs: Math.round(foodData[0].carbs * quantity),
+                                fat: Math.round(foodData[0].fat * quantity)
+                            };
+
+                            logFood(foodToLog);
                             document.getElementById('voice-text').textContent = 'Logged!';
                             document.getElementById('voice-status').textContent = '🎉';
                             setTimeout(() => {
                                 closeVoiceModal();
-                            }, 1000);
+                            }, 800);
                         } else {
                             closeVoiceModal();
                         }
