@@ -2521,7 +2521,33 @@
             window.localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
             console.log('✅ Set fuelfire_nutrition_updated to', Date.now());
         }
-        
+
+        // Migration: Add sugar estimates to meals that don't have it
+        function migrateSugarData() {
+            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let updated = false;
+
+            Object.keys(loggedMeals).forEach(date => {
+                loggedMeals[date].meals.forEach(meal => {
+                    if (meal.sugar === undefined || meal.sugar === null) {
+                        // Estimate sugar based on carbs (roughly 20-30% of carbs might be sugar)
+                        // This is a rough estimate - fruits/sweets are higher, veggies/grains are lower
+                        const estimatedSugar = Math.round((meal.carbs || 0) * 0.2);
+                        meal.sugar = estimatedSugar;
+                        updated = true;
+                        console.log(`🍭 Added estimated ${estimatedSugar}g sugar to "${meal.name}"`);
+                    }
+                });
+            });
+
+            if (updated) {
+                localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+                console.log('✅ Sugar migration complete');
+                return true;
+            }
+            return false;
+        }
+
         // Check if we need to reset for a new day
         function checkAndResetForNewDay() {
             const lastDate = localStorage.getItem('fuelfire_last_active_date');
@@ -2538,6 +2564,13 @@
         // Initialize
         window.addEventListener('load', function() {
             checkAndResetForNewDay();
+
+            // Run sugar migration for existing meals
+            const migrated = migrateSugarData();
+            if (migrated) {
+                console.log('🔄 Reloading meals after sugar migration');
+            }
+
             updateTodayProgress();
             loadTodaysMeals();
             loadQuickAdds();
