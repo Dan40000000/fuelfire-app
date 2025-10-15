@@ -47,12 +47,15 @@ function toggleSidebar() {
 // Update time
 function updateTime() {
     const now = new Date();
-    const time = now.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
+    const time = now.toLocaleTimeString('en-US', {
+        hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true
     });
-    document.getElementById('time').textContent = time;
+    const timeElement = document.getElementById('time');
+    if (timeElement) {
+        timeElement.textContent = time;
+    }
 }
 
 // Custom Workout Quiz Variables
