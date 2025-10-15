@@ -118,12 +118,14 @@
                     <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: var(--gradient-1); border-radius: 20px; box-shadow: 0 8px 25px rgba(75, 156, 211, 0.4);">
                         <h3 style="color: white; margin-bottom: 10px;">🤖 Want an AI-Powered Custom Workout?</h3>
                         <p style="color: white; margin-bottom: 15px; opacity: 0.9;">Get a personalized program designed just for your goals</p>
-                        <button onclick="startCustomWorkout()" ontouchstart="" style="background: white; color: var(--carolina-blue); border: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease; margin-right: 10px;">
-                            ✨ Create My Custom Workout
-                        </button>
-                        <button onclick="window.location.href='workout-techniques.html'" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 15px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
-                            🏋️ View Proper Form
-                        </button>
+                        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="startCustomWorkout()" ontouchstart="" style="background: white; color: var(--carolina-blue); border: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
+                                ✨ Create My Custom Workout
+                            </button>
+                            <button onclick="startQuickWorkoutQuiz()" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
+                                ⚡ Quick Workout
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Suggested Quick Workouts Section -->
@@ -1281,7 +1283,245 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Quick Workout Quiz -->
+    <div class="screen-content" id="quick-workout-quiz" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
+        <div style="max-width: 375px; margin: 0 auto; padding: 20px;">
+            <div style="margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--dark); margin: 0;">⚡ Quick Workout</h2>
+                    <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quick-quiz-step">1</span> of 5</span>
+                </div>
+                <div style="background: var(--lighter-bg); height: 8px; border-radius: 10px; overflow: hidden;">
+                    <div id="quick-quiz-progress" style="background: var(--gradient-1); height: 100%; width: 20%; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- Question Container -->
+            <div id="quick-quiz-container">
+                <!-- Question 1: Muscle Groups -->
+                <div class="quick-quiz-question" data-step="1" style="display: block;">
+                    <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">💪 What do you want to work on?</h3>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 15px; color: var(--primary-dark); font-weight: 600;">Select muscle groups (one or more):</label>
+
+                        <!-- High-Level Options -->
+                        <div style="margin-bottom: 15px;">
+                            <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Major Muscle Groups:</p>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="chest" style="width: 20px; height: 20px;">
+                                    <span>💪 Chest</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="back" style="width: 20px; height: 20px;">
+                                    <span>🔨 Back</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="legs" style="width: 20px; height: 20px;">
+                                    <span>🦵 Legs</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="arms" style="width: 20px; height: 20px;">
+                                    <span>💪 Arms</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="shoulders" style="width: 20px; height: 20px;">
+                                    <span>🏋️ Shoulders</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="core" style="width: 20px; height: 20px;">
+                                    <span>🎯 Core</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Specific Muscle Groups -->
+                        <div style="margin-top: 20px;">
+                            <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Specific Muscles:</p>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="quads" style="width: 18px; height: 18px;">
+                                    <span>Quads</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="hamstrings" style="width: 18px; height: 18px;">
+                                    <span>Hamstrings</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="calves" style="width: 18px; height: 18px;">
+                                    <span>Calves</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="glutes" style="width: 18px; height: 18px;">
+                                    <span>Glutes</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="biceps" style="width: 18px; height: 18px;">
+                                    <span>Biceps</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="triceps" style="width: 18px; height: 18px;">
+                                    <span>Triceps</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="forearms" style="width: 18px; height: 18px;">
+                                    <span>Forearms</span>
+                                </label>
+                                <label style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                                    <input type="checkbox" class="quick-muscle-check" value="traps" style="width: 18px; height: 18px;">
+                                    <span>Traps</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2: Workout Time -->
+                <div class="quick-quiz-question" data-step="2" style="display: none;">
+                    <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">⏱️ How much time do you have?</h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '15')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">⚡</div>
+                            <div style="font-weight: bold;">15 min</div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '30')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">🔥</div>
+                            <div style="font-weight: bold;">30 min</div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '45')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">💪</div>
+                            <div style="font-weight: bold;">45 min</div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '60')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">🏋️</div>
+                            <div style="font-weight: bold;">60 min</div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '75')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">💯</div>
+                            <div style="font-weight: bold;">75 min</div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '90')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">🔋</div>
+                            <div style="font-weight: bold;">90 min</div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'time', '120')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; grid-column: span 2;">
+                            <div style="font-size: 24px; margin-bottom: 5px;">🦾</div>
+                            <div style="font-weight: bold;">120 min (Beast Mode)</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question 3: Location -->
+                <div class="quick-quiz-question" data-step="3" style="display: none;">
+                    <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">📍 Where are you working out?</h3>
+
+                    <div style="display: grid; gap: 15px;">
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'location', 'full-gym')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">🏋️‍♂️</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Full Gym</div>
+                                    <div style="color: #666; font-size: 14px;">Access to all equipment</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'location', 'hotel-gym')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">🏨</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Hotel Gym (Limited)</div>
+                                    <div style="color: #666; font-size: 14px;">Basic equipment, dumbbells</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'location', 'home')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">🏠</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">At Home</div>
+                                    <div style="color: #666; font-size: 14px;">Minimal or no equipment</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question 4: Workout Style -->
+                <div class="quick-quiz-question" data-step="4" style="display: none;">
+                    <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🎯 What style do you prefer?</h3>
+
+                    <div style="display: grid; gap: 15px;">
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'style', 'standard')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">📋</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Standard Workouts</div>
+                                    <div style="color: #666; font-size: 14px;">Classic exercises you know and trust</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'style', 'unique')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">✨</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Unique Workouts</div>
+                                    <div style="color: #666; font-size: 14px;">Try something new and different</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question 5: Intensity -->
+                <div class="quick-quiz-question" data-step="5" style="display: none;">
+                    <h3 style="color: var(--dark); margin-bottom: 25px; font-size: 22px;">🔥 How hard do you want to go?</h3>
+
+                    <div style="display: grid; gap: 15px;">
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'intensity', 'light')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">🌱</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Light & Easy</div>
+                                    <div style="color: #666; font-size: 14px;">Recovery or active rest day</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'intensity', 'moderate')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">💪</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Moderate</div>
+                                    <div style="color: #666; font-size: 14px;">Solid workout, sustainable pace</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="quick-select-btn" onclick="quickSelectOption(this, 'intensity', 'intense')" style="background: var(--card-bg); border: 2px solid var(--lighter-bg); padding: 25px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; text-align: left;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 32px;">🔥</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 18px; margin-bottom: 5px;">Intense</div>
+                                    <div style="color: #666; font-size: 14px;">Push your limits today</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                <button id="quick-quiz-back-btn" onclick="previousQuickQuestion()" style="background: transparent; border: 2px solid var(--lighter-bg); color: var(--primary-dark); padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; display: none;">← Back</button>
+                <button id="quick-quiz-next-btn" onclick="nextQuickQuestion()" style="background: var(--gradient-1); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-left: auto;">Next →</button>
+            </div>
+
+            <!-- Close button -->
+            <button onclick="closeQuickWorkoutQuiz()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 24px; cursor: pointer; color: #999;">×</button>
+        </div>
+    </div>
+
     <!-- Custom Workout Questionnaire -->
     <div class="screen-content" id="custom-workout-quiz" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
         <div style="max-width: 375px; margin: 0 auto; padding: 20px;">

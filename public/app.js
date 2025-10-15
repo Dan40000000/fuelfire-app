@@ -1726,9 +1726,79 @@ function closeGeneratedWorkout() {
 
 // Start workout now
 function startWorkoutNow() {
-    localStorage.setItem('activeWorkout', JSON.stringify(workoutData));
+    // Check if we have a quick workout or regular workout
+    const quickWorkout = localStorage.getItem('currentQuickWorkout');
+    let workout;
+
+    if (quickWorkout) {
+        // Use the quick workout
+        workout = JSON.parse(quickWorkout);
+        localStorage.setItem('activeWorkout', quickWorkout);
+    } else if (typeof workoutData !== 'undefined') {
+        // Use the custom workout data
+        workout = workoutData;
+        localStorage.setItem('activeWorkout', JSON.stringify(workoutData));
+    }
+
     closeGeneratedWorkout();
-    showScreen('track-workouts');
+
+    // Show the workout tracker modal with the actual exercises
+    if (workout) {
+        // Populate the tracker with exercises
+        const trackerContent = document.getElementById('tracker-content');
+        const trackerTitle = document.getElementById('tracker-title');
+
+        trackerTitle.textContent = workout.name || 'Your Workout';
+
+        let html = `
+            <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
+                <h3 style="margin: 0 0 5px 0;">${workout.name}</h3>
+                <p style="margin: 0; opacity: 0.9; font-size: 14px;">${workout.duration} minutes • ${workout.exercises.length} exercises</p>
+            </div>
+        `;
+
+        workout.exercises.forEach((exercise, index) => {
+            html += `
+                <div style="background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="color: var(--dark); margin: 0; font-size: 15px;">
+                            ${index + 1}. ${exercise.name}
+                        </h4>
+                        <span style="background: var(--gradient-1); color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px;">
+                            ${exercise.sets} × ${exercise.reps}
+                        </span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 35px 1fr 1fr 40px; gap: 6px; align-items: center; margin-bottom: 6px;">
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px;">Set</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Wt</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Reps</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">✓</div>
+                    </div>
+            `;
+
+            // Add input rows for each set
+            for (let set = 1; set <= parseInt(exercise.sets); set++) {
+                html += `
+                    <div style="display: grid; grid-template-columns: 35px 1fr 1fr 40px; gap: 6px; align-items: center; margin-bottom: 5px;">
+                        <div style="text-align: center; font-weight: bold; font-size: 12px;">${set}</div>
+                        <input type="number" placeholder="lbs"
+                               style="padding: 6px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 13px;">
+                        <input type="number" placeholder="${exercise.reps}"
+                               style="padding: 6px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 13px;">
+                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer; justify-self: center;">
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+        });
+
+        trackerContent.innerHTML = html;
+
+        // Show the tracker modal
+        document.getElementById('workout-tracker').style.display = 'block';
+    }
 }
 
 // Quick start workout function
@@ -1816,6 +1886,332 @@ function startQuickWorkout(workoutType) {
         localStorage.setItem('activeWorkout', JSON.stringify(workout));
         showScreen('track-workouts');
     }
+}
+
+// Quick Workout Quiz Functions
+let quickQuizData = {
+    currentStep: 1,
+    muscles: [],
+    time: null,
+    location: null,
+    style: null,
+    intensity: null
+};
+
+function startQuickWorkoutQuiz() {
+    // Reset quiz data
+    quickQuizData = {
+        currentStep: 1,
+        muscles: [],
+        time: null,
+        location: null,
+        style: null,
+        intensity: null
+    };
+
+    // Show the quiz
+    document.getElementById('quick-workout-quiz').style.display = 'block';
+
+    // Reset all questions
+    document.querySelectorAll('.quick-quiz-question').forEach((q, index) => {
+        q.style.display = index === 0 ? 'block' : 'none';
+    });
+
+    // Reset progress
+    updateQuickQuizProgress();
+
+    // Reset navigation buttons
+    document.getElementById('quick-quiz-back-btn').style.display = 'none';
+    document.getElementById('quick-quiz-next-btn').textContent = 'Next →';
+
+    // Uncheck all muscle checkboxes
+    document.querySelectorAll('.quick-muscle-check').forEach(cb => cb.checked = false);
+}
+
+function closeQuickWorkoutQuiz() {
+    document.getElementById('quick-workout-quiz').style.display = 'none';
+}
+
+function quickSelectOption(button, field, value) {
+    // Remove selected class from all buttons in this question
+    const parentQuestion = button.closest('.quick-quiz-question');
+    parentQuestion.querySelectorAll('.quick-select-btn').forEach(btn => {
+        btn.style.background = 'var(--card-bg)';
+        btn.style.borderColor = 'var(--lighter-bg)';
+    });
+
+    // Add selected class to this button
+    button.style.background = 'rgba(75, 156, 211, 0.1)';
+    button.style.borderColor = 'var(--carolina-blue)';
+
+    // Store the value
+    quickQuizData[field] = value;
+
+    console.log('Quick quiz data:', quickQuizData);
+}
+
+function nextQuickQuestion() {
+    // Validate current question
+    if (quickQuizData.currentStep === 1) {
+        // Check if at least one muscle is selected
+        const checkedMuscles = document.querySelectorAll('.quick-muscle-check:checked');
+        if (checkedMuscles.length === 0) {
+            alert('Please select at least one muscle group');
+            return;
+        }
+        quickQuizData.muscles = Array.from(checkedMuscles).map(cb => cb.value);
+    } else if (quickQuizData.currentStep === 2 && !quickQuizData.time) {
+        alert('Please select a workout duration');
+        return;
+    } else if (quickQuizData.currentStep === 3 && !quickQuizData.location) {
+        alert('Please select a location');
+        return;
+    } else if (quickQuizData.currentStep === 4 && !quickQuizData.style) {
+        alert('Please select a workout style');
+        return;
+    } else if (quickQuizData.currentStep === 5 && !quickQuizData.intensity) {
+        alert('Please select an intensity level');
+        return;
+    }
+
+    // If on last question, generate workout
+    if (quickQuizData.currentStep === 5) {
+        generateQuickWorkout();
+        return;
+    }
+
+    // Move to next question
+    quickQuizData.currentStep++;
+
+    // Hide current question, show next
+    document.querySelectorAll('.quick-quiz-question').forEach((q, index) => {
+        q.style.display = (index + 1) === quickQuizData.currentStep ? 'block' : 'none';
+    });
+
+    // Update progress
+    updateQuickQuizProgress();
+
+    // Update navigation buttons
+    document.getElementById('quick-quiz-back-btn').style.display = quickQuizData.currentStep > 1 ? 'block' : 'none';
+    if (quickQuizData.currentStep === 5) {
+        document.getElementById('quick-quiz-next-btn').textContent = '🚀 Generate Workout';
+    }
+}
+
+function previousQuickQuestion() {
+    if (quickQuizData.currentStep > 1) {
+        quickQuizData.currentStep--;
+
+        // Hide current question, show previous
+        document.querySelectorAll('.quick-quiz-question').forEach((q, index) => {
+            q.style.display = (index + 1) === quickQuizData.currentStep ? 'block' : 'none';
+        });
+
+        // Update progress
+        updateQuickQuizProgress();
+
+        // Update navigation buttons
+        document.getElementById('quick-quiz-back-btn').style.display = quickQuizData.currentStep > 1 ? 'block' : 'none';
+        document.getElementById('quick-quiz-next-btn').textContent = 'Next →';
+    }
+}
+
+function updateQuickQuizProgress() {
+    const progress = (quickQuizData.currentStep / 5) * 100;
+    document.getElementById('quick-quiz-progress').style.width = progress + '%';
+    document.getElementById('quick-quiz-step').textContent = quickQuizData.currentStep;
+}
+
+function generateQuickWorkout() {
+    console.log('Generating quick workout with:', quickQuizData);
+
+    // Close the quiz
+    closeQuickWorkoutQuiz();
+
+    // Show generating screen
+    document.getElementById('generating-workout').style.display = 'block';
+    document.getElementById('generating-status').textContent = 'Analyzing your preferences...';
+
+    // Simulate workout generation
+    setTimeout(() => {
+        document.getElementById('generating-status').textContent = 'Selecting optimal exercises...';
+    }, 1000);
+
+    setTimeout(() => {
+        document.getElementById('generating-status').textContent = 'Finalizing your workout plan...';
+    }, 2000);
+
+    setTimeout(() => {
+        // Generate the workout based on quiz answers
+        const generatedWorkout = createQuickWorkoutPlan(quickQuizData);
+
+        // Store in localStorage
+        localStorage.setItem('currentQuickWorkout', JSON.stringify(generatedWorkout));
+
+        // Hide generating screen
+        document.getElementById('generating-workout').style.display = 'none';
+
+        // Show the generated workout
+        displayGeneratedQuickWorkout(generatedWorkout);
+    }, 3000);
+}
+
+function createQuickWorkoutPlan(data) {
+    const workoutName = `${data.time}-Min ${data.intensity.charAt(0).toUpperCase() + data.intensity.slice(1)} Workout`;
+    const exercises = [];
+
+    // Calculate number of exercises and sets based on time (realistic schedule)
+    const timeMinutes = parseInt(data.time);
+    let numExercises, setsPerExercise;
+
+    if (timeMinutes <= 15) {
+        numExercises = 4;
+        setsPerExercise = [1, 2]; // 1-2 sets
+    } else if (timeMinutes <= 30) {
+        numExercises = 5;
+        setsPerExercise = [2, 2]; // 2 sets
+    } else if (timeMinutes <= 45) {
+        numExercises = 6;
+        setsPerExercise = [3, 3]; // 3 sets
+    } else if (timeMinutes <= 60) {
+        numExercises = 7;
+        setsPerExercise = [3, 4]; // 3-4 sets
+    } else if (timeMinutes <= 75) {
+        numExercises = 8;
+        setsPerExercise = [4, 4]; // 4 sets
+    } else if (timeMinutes <= 90) {
+        numExercises = 9;
+        setsPerExercise = [4, 4]; // 4 sets
+    } else { // 120 min
+        numExercises = 10;
+        setsPerExercise = [4, 5]; // 4-5 sets
+    }
+
+    // Exercise database
+    const exerciseDB = {
+        chest: ['Push-Ups', 'Bench Press', 'Dumbbell Flyes', 'Incline Press', 'Cable Crossover'],
+        back: ['Pull-Ups', 'Rows', 'Lat Pulldown', 'Deadlifts', 'Face Pulls'],
+        legs: ['Squats', 'Lunges', 'Leg Press', 'Romanian Deadlifts', 'Leg Curls'],
+        arms: ['Bicep Curls', 'Tricep Dips', 'Hammer Curls', 'Overhead Extension', 'Cable Curls'],
+        shoulders: ['Shoulder Press', 'Lateral Raises', 'Front Raises', 'Arnold Press', 'Shrugs'],
+        core: ['Plank', 'Crunches', 'Russian Twists', 'Leg Raises', 'Mountain Climbers'],
+        quads: ['Squats', 'Leg Extensions', 'Lunges', 'Bulgarian Split Squats', 'Front Squats'],
+        hamstrings: ['Romanian Deadlifts', 'Leg Curls', 'Good Mornings', 'Stiff-Leg Deadlifts'],
+        calves: ['Calf Raises', 'Seated Calf Raises', 'Jump Rope', 'Box Jumps'],
+        glutes: ['Hip Thrusts', 'Glute Bridges', 'Bulgarian Split Squats', 'Deadlifts'],
+        biceps: ['Barbell Curls', 'Dumbbell Curls', 'Hammer Curls', 'Concentration Curls'],
+        triceps: ['Tricep Dips', 'Skull Crushers', 'Overhead Extension', 'Cable Pushdowns'],
+        forearms: ['Wrist Curls', 'Reverse Curls', 'Farmer Walks', 'Plate Pinches'],
+        traps: ['Shrugs', 'Upright Rows', 'Face Pulls', 'Deadlifts']
+    };
+
+    // Build a pool of all available exercises from selected muscles
+    const availableExercises = [];
+    data.muscles.forEach(muscle => {
+        if (exerciseDB[muscle]) {
+            const muscleExercises = exerciseDB[muscle];
+            muscleExercises.forEach(exerciseName => {
+                availableExercises.push({ muscle, exercise: exerciseName });
+            });
+        }
+    });
+
+    // Shuffle the available exercises to randomize
+    for (let i = availableExercises.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableExercises[i], availableExercises[j]] = [availableExercises[j], availableExercises[i]];
+    }
+
+    // Pick unique exercises (no duplicates!)
+    const usedExercises = new Set();
+    for (let i = 0; i < availableExercises.length && exercises.length < numExercises; i++) {
+        const item = availableExercises[i];
+
+        // Skip if we've already used this exercise
+        if (usedExercises.has(item.exercise)) {
+            continue;
+        }
+
+        usedExercises.add(item.exercise);
+
+        // Determine sets (alternate between min and max from setsPerExercise)
+        const sets = exercises.length % 2 === 0 ? setsPerExercise[0] : setsPerExercise[1];
+
+        // Determine reps based on intensity
+        let reps;
+        if (data.intensity === 'light') {
+            reps = '12-15';
+        } else if (data.intensity === 'moderate') {
+            reps = '10-12';
+        } else { // intense
+            reps = '6-8';
+        }
+
+        exercises.push({
+            name: item.exercise,
+            muscle: item.muscle,
+            sets: sets,
+            reps: reps
+        });
+    }
+
+    return {
+        name: workoutName,
+        duration: timeMinutes,
+        location: data.location,
+        style: data.style,
+        intensity: data.intensity,
+        muscles: data.muscles,
+        exercises: exercises
+    };
+}
+
+function displayGeneratedQuickWorkout(workout) {
+    const content = document.getElementById('workout-plan-content');
+
+    let html = `
+        <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px;">
+            <h3 style="color: var(--dark); margin-bottom: 15px;">${workout.name}</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: bold; color: var(--carolina-blue);">${workout.duration} min</div>
+                    <div style="font-size: 12px; color: #666;">Duration</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: bold; color: var(--carolina-blue);">${workout.exercises.length}</div>
+                    <div style="font-size: 12px; color: #666;">Exercises</div>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <div style="font-size: 14px; color: #666;">
+                    <strong>Intensity:</strong> ${workout.intensity.charAt(0).toUpperCase() + workout.intensity.slice(1)}<br>
+                    <strong>Location:</strong> ${workout.location === 'full-gym' ? 'Full Gym' : workout.location === 'hotel-gym' ? 'Hotel Gym' : 'Home'}
+                </div>
+            </div>
+        </div>
+
+        <h4 style="color: var(--dark); margin-bottom: 15px;">Your Exercises:</h4>
+    `;
+
+    workout.exercises.forEach((exercise, index) => {
+        html += `
+            <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 12px; border-left: 4px solid var(--carolina-blue);">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">${index + 1}. ${exercise.name}</div>
+                        <div style="font-size: 12px; color: #666; text-transform: capitalize;">${exercise.muscle}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; color: var(--carolina-blue);">${exercise.sets} sets</div>
+                        <div style="font-size: 12px; color: #666;">${exercise.reps} reps</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    content.innerHTML = html;
+    document.getElementById('generated-workout').style.display = 'block';
 }
 
 // Saved Workouts Functions
@@ -5101,4 +5497,20 @@ window.onload = function() {
     
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);
+
+    // Listen for nutrition updates from calorie tracker
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'fuelfire_nutrition_updated' || e.key === 'fuelfire_logged_meals') {
+            loadTodaysNutrition();
+        }
+    });
+
+    // Also poll for updates every second (for same-page updates)
+    setInterval(function() {
+        const lastUpdate = localStorage.getItem('fuelfire_nutrition_updated');
+        if (lastUpdate && window.lastNutritionUpdate !== lastUpdate) {
+            window.lastNutritionUpdate = lastUpdate;
+            loadTodaysNutrition();
+        }
+    }, 1000);
 };

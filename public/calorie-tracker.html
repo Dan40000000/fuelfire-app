@@ -415,15 +415,27 @@
         let isRecording = false;
 
         function startVoiceLogging() {
-            // Always use Web Speech API (works in iOS WebView with proper permissions)
-            
-            // Original web speech API code for browsers
+            // Stop and clear any existing recognition
+            if (recognition) {
+                try {
+                    recognition.stop();
+                    recognition.abort();
+                } catch (e) {
+                    console.log('Clearing old recognition:', e);
+                }
+                recognition = null;
+            }
+            isRecording = false;
+
+            // Reset modal UI
             document.getElementById('voice-modal').style.display = 'block';
             document.getElementById('voice-text').textContent = 'Click the microphone to start speaking...';
             document.getElementById('voice-button').textContent = 'Start Recording';
             document.getElementById('voice-button').style.background = '#FF6B6B';
             document.getElementById('voice-status').textContent = '🎤';
-            
+            document.getElementById('food-results').innerHTML = '';
+
+            // Create FRESH recognition object every time
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.continuous = true;
             recognition.interimResults = true;
@@ -542,15 +554,31 @@
 
         function closeVoiceModal() {
             document.getElementById('voice-modal').style.display = 'none';
-            if (recognition) recognition.stop();
+
+            // Properly stop and clear recognition
+            if (recognition) {
+                try {
+                    recognition.stop();
+                    recognition.abort();
+                } catch (e) {
+                    console.log('Error stopping recognition:', e);
+                }
+            }
             isRecording = false;
 
             // Reset modal state
             document.getElementById('voice-text').textContent = 'Click the microphone to start speaking...';
-            document.getElementById('voice-button').textContent = 'Start Recording';
-            document.getElementById('voice-button').style.background = '#FF6B6B';
             document.getElementById('voice-status').textContent = '🎤';
             document.getElementById('food-results').innerHTML = '';
+
+            // CRITICAL: Reset the button to original onclick handler
+            const voiceBtn = document.getElementById('voice-button');
+            const newBtn = voiceBtn.cloneNode(true);
+            newBtn.textContent = 'Start Recording';
+            newBtn.style.background = '#FF6B6B';
+            newBtn.onclick = toggleVoiceRecording;
+            voiceBtn.parentNode.replaceChild(newBtn, voiceBtn);
+            newBtn.id = 'voice-button';
         }
         
         // Search food from voice input using AI
@@ -584,7 +612,14 @@
                 const foodListHtml = results.map((food, idx) => `
                     <div style="text-align: left; padding: 10px; margin: 5px 0; background: white; border-radius: 8px;">
                         <label style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
-                            <input type="checkbox" checked class="food-checkbox" data-food-index="${idx}" style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
+                            <input type="checkbox" checked class="food-checkbox" data-food-index="${idx}"
+                                   data-food-name="${food.name.replace(/"/g, '&quot;')}"
+                                   data-food-calories="${food.calories}"
+                                   data-food-protein="${food.protein}"
+                                   data-food-carbs="${food.carbs || 0}"
+                                   data-food-fat="${food.fat || 0}"
+                                   data-food-sugar="${food.sugar || 0}"
+                                   style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
                             <div style="flex: 1;">
                                 <div style="font-weight: bold;">${food.name}</div>
                                 <div style="font-size: 12px; color: #666; margin: 4px 0;">${food.calories} cal | ${food.protein}g protein</div>
@@ -601,8 +636,17 @@
 
                 document.getElementById('voice-text').innerHTML = `
                     <div id="food-confirmation-list" style="text-align: left;">
-                        <div style="font-weight: bold; margin-bottom: 10px;">Found ${results.length} items:</div>
+                        <div style="font-weight: bold; margin-bottom: 15px;">Found ${results.length} items:</div>
                         ${foodListHtml}
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                            <label style="font-weight: bold; margin-bottom: 8px; display: block;">Which meal?</label>
+                            <select id="meal-type-select" style="width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 8px; font-size: 14px;">
+                                <option value="breakfast">🌅 Breakfast</option>
+                                <option value="lunch">☀️ Lunch</option>
+                                <option value="dinner">🌙 Dinner</option>
+                                <option value="snack">🍿 Snack</option>
+                            </select>
+                        </div>
                     </div>
                 `;
 
@@ -616,9 +660,15 @@
 
                 // Add fresh event listener
                 newLogBtn.onclick = () => {
-                    // Get checked items with quantities
-                    const checkboxes = document.querySelectorAll('.food-checkbox');
+                    // Get meal type
+                    const mealType = document.getElementById('meal-type-select')?.value || 'snack';
+
+                    // Get checked items with quantities (ONLY from voice modal)
+                    const voiceModal = document.getElementById('voice-modal');
+                    const checkboxes = voiceModal.querySelectorAll('.food-checkbox');
                     const selectedFoods = [];
+
+                    console.log('Voice log button clicked, found checkboxes:', checkboxes.length);
 
                     checkboxes.forEach((cb) => {
                         if (cb.checked) {
@@ -626,13 +676,23 @@
                             const quantityInput = document.querySelector(`.food-quantity[data-food-index="${idx}"]`);
                             const quantity = parseFloat(quantityInput.value) || 1;
 
-                            // Clone the food object and multiply by quantity
+                            // Get food data from data attributes
+                            const foodName = cb.dataset.foodName;
+                            const calories = parseFloat(cb.dataset.foodCalories);
+                            const protein = parseFloat(cb.dataset.foodProtein);
+                            const carbs = parseFloat(cb.dataset.foodCarbs);
+                            const fat = parseFloat(cb.dataset.foodFat);
+                            const sugar = parseFloat(cb.dataset.foodSugar) || 0;
+
+                            // Build food object with quantity multiplied
                             const foodToLog = {
-                                name: quantity !== 1 ? `${quantity}x ${results[idx].name}` : results[idx].name,
-                                calories: Math.round(results[idx].calories * quantity),
-                                protein: Math.round(results[idx].protein * quantity),
-                                carbs: Math.round((results[idx].carbs || 0) * quantity),
-                                fat: Math.round((results[idx].fat || 0) * quantity)
+                                name: quantity !== 1 ? `${quantity}x ${foodName}` : foodName,
+                                calories: Math.round(calories * quantity),
+                                protein: Math.round(protein * quantity),
+                                carbs: Math.round(carbs * quantity),
+                                fat: Math.round(fat * quantity),
+                                sugar: Math.round(sugar * quantity),
+                                meal: mealType
                             };
                             selectedFoods.push(foodToLog);
                         }
@@ -645,7 +705,14 @@
                         });
 
                         // Show success message
-                        document.getElementById('voice-text').textContent = `Logged ${selectedFoods.length} food(s)!`;
+                        const mealEmoji = {
+                            'breakfast': '🌅',
+                            'lunch': '☀️',
+                            'dinner': '🌙',
+                            'snack': '🍿'
+                        }[mealType] || '🍴';
+
+                        document.getElementById('voice-text').textContent = `Logged ${selectedFoods.length} food(s) to ${mealEmoji} ${mealType}!`;
                         document.getElementById('voice-status').textContent = '🎉';
 
                         // Close modal after short delay
@@ -773,71 +840,68 @@
         // Display food search results
         function displayFoodResults(foods, source) {
             const resultsDiv = document.getElementById(source === 'voice' ? 'food-results' : 'search-results');
-            
+
             if (foods.length === 0) {
                 resultsDiv.innerHTML = '<p style="color: #666;">No foods found</p>';
                 return;
             }
-            
-            // Check if multiple foods (from AI parsing)
-            if (foods.length > 1) {
-                let html = '<div style="font-weight: bold; margin-bottom: 10px; color: #4CAF50;">🤖 AI found multiple foods:</div>';
-                
-                // Store foods globally for onclick handlers
-                window.currentFoods = foods;
-                window.currentSource = source;
-                
-                // Add checkboxes for each food item
-                html += '<div style="margin-bottom: 15px;">';
-                foods.forEach((food, index) => {
-                    html += `
-                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="food-check-${index}" checked style="width: 20px; height: 20px; cursor: pointer;">
+
+            // Show all foods with checkboxes and quantity
+            let html = `<div style="font-weight: bold; margin-bottom: 10px; color: #4CAF50;">🤖 Found ${foods.length} item(s):</div>`;
+
+            // Add checkboxes for each food item with quantity input
+            html += '<div style="margin-bottom: 15px;">';
+            foods.forEach((food, index) => {
+                html += `
+                    <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px;">
+                        <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" class="manual-food-check" data-index="${index}"
+                                   data-food-name="${food.name.replace(/"/g, '&quot;')}"
+                                   data-food-calories="${food.calories}"
+                                   data-food-protein="${food.protein || 0}"
+                                   data-food-carbs="${food.carbs || 0}"
+                                   data-food-fat="${food.fat || 0}"
+                                   data-food-sugar="${food.sugar || 0}"
+                                   checked style="width: 20px; height: 20px; margin-top: 3px; flex-shrink: 0;">
                             <div style="flex: 1;">
                                 <div style="font-weight: bold;">${food.name}</div>
                                 <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
                                 ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
+                                <div style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                                    <label style="font-size: 12px; color: #666;">Qty:</label>
+                                    <input type="number" class="manual-food-quantity" data-index="${index}" value="1" min="0.25" step="0.25"
+                                           style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;"
+                                           onclick="event.stopPropagation();">
+                                </div>
                             </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                
-                // Show "Log Selected" button
-                html += `
-                    <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;" 
-                         onclick="logSelectedFoods()">
-                        <div style="font-weight: bold;">✅ Log Selected Foods</div>
-                        <div style="font-size: 14px; opacity: 0.9;" id="selected-total">Total: ${foods.reduce((sum, f) => sum + f.calories, 0)} calories</div>
+                        </label>
                     </div>
                 `;
-                
-                resultsDiv.innerHTML = html;
-                
-                // Add event listeners to checkboxes to update total - use setTimeout to ensure DOM is ready
-                setTimeout(() => {
-                    foods.forEach((food, index) => {
-                        const checkbox = document.getElementById(`food-check-${index}`);
-                        if (checkbox) {
-                            checkbox.addEventListener('change', updateSelectedTotal);
-                        }
-                    });
-                }, 100);
-            } else {
-                // Single food - show normal selection
-                let html = '<div style="font-weight: bold; margin-bottom: 10px;">Select food to log:</div>';
-                foods.forEach((food, index) => {
-                    html += `
-                        <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer;" 
-                             onclick="selectFood('${food.name}', ${food.calories}, ${food.protein || 0}, ${food.carbs || 0}, ${food.fat || 0}, '${source}')">
-                            <div style="font-weight: bold;">${food.name}</div>
-                            <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
-                            ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
-                        </div>
-                    `;
-                });
-                resultsDiv.innerHTML = html;
-            }
+            });
+            html += '</div>';
+
+            // Add meal selector
+            html += `
+                <div style="background: white; padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                    <label style="font-weight: bold; margin-bottom: 8px; display: block;">Which meal?</label>
+                    <select id="manual-meal-select" style="width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 8px; font-size: 14px;">
+                        <option value="breakfast">🌅 Breakfast</option>
+                        <option value="lunch">☀️ Lunch</option>
+                        <option value="dinner">🌙 Dinner</option>
+                        <option value="snack">🍿 Snack</option>
+                    </select>
+                </div>
+            `;
+
+            // Show "Log Selected" button
+            html += `
+                <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;"
+                     onclick="logSelectedFoods()">
+                    <div style="font-weight: bold;">✅ Log Selected Foods</div>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
         }
         
         // Update total when checkboxes change
@@ -861,34 +925,43 @@
         // Log selected foods
         function logSelectedFoods() {
             try {
-                if (!window.currentFoods || !window.currentSource) {
-                    alert('Error: No foods to log. Please try again.');
+                // Get meal type from selector
+                const mealType = document.getElementById('manual-meal-select')?.value || 'snack';
+
+                // Get checked items with quantities
+                const checkboxes = document.querySelectorAll('.manual-food-check');
+                const selectedFoods = [];
+
+                checkboxes.forEach((cb) => {
+                    if (cb.checked) {
+                        const index = cb.dataset.index;
+                        const quantityInput = document.querySelector(`.manual-food-quantity[data-index="${index}"]`);
+                        const quantity = parseFloat(quantityInput?.value) || 1;
+
+                        // Get food data from data attributes
+                        const foodName = cb.dataset.foodName;
+                        const calories = parseFloat(cb.dataset.foodCalories);
+                        const protein = parseFloat(cb.dataset.foodProtein);
+                        const carbs = parseFloat(cb.dataset.foodCarbs);
+                        const fat = parseFloat(cb.dataset.foodFat);
+                        const sugar = parseFloat(cb.dataset.foodSugar) || 0;
+
+                        selectedFoods.push({
+                            name: quantity !== 1 ? `${quantity}x ${foodName}` : foodName,
+                            calories: Math.round(calories * quantity),
+                            protein: Math.round(protein * quantity),
+                            carbs: Math.round(carbs * quantity),
+                            fat: Math.round(fat * quantity),
+                            sugar: Math.round(sugar * quantity),
+                            meal: mealType
+                        });
+                    }
+                });
+
+                if (selectedFoods.length === 0) {
+                    alert('Please select at least one food item');
                     return;
                 }
-            
-            // Get selected foods
-            const selectedFoods = [];
-            window.currentFoods.forEach((food, index) => {
-                const checkbox = document.getElementById(`food-check-${index}`);
-                if (checkbox && checkbox.checked) {
-                    selectedFoods.push(food);
-                }
-            });
-            
-            if (selectedFoods.length === 0) {
-                alert('Please select at least one food item');
-                return;
-            }
-            
-            const mealType = prompt('Log selected foods as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
-            
-            // Handle cancel or invalid input
-            if (!mealType) {
-                return;
-            }
-            
-            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
-            const type = types[parseInt(mealType)] || 'snack';
             
             const today = new Date().toISOString().split('T')[0];
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
@@ -909,7 +982,7 @@
                     protein: food.protein || 0,
                     carbs: food.carbs || 0,
                     fat: food.fat || 0,
-                    type: type,
+                    type: food.meal,
                     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                 };
                 
@@ -928,17 +1001,19 @@
             updateTodayProgress();
             loadTodaysMeals();
             loadQuickAdds();
-            
+
             // Close the voice modal if it's open
             if (window.currentSource === 'voice') {
                 closeVoiceModal();
             }
-            
-            // Clear results
+
+            // Clear results and close the smart entry modal
             document.getElementById('food-results').innerHTML = '';
-            
+            document.getElementById('search-results').innerHTML = '';
+            document.getElementById('smart-entry-modal').style.display = 'none';
+
             alert(`✅ Logged ${selectedFoods.length} items (${totalCalories} calories)`);
-            
+
             // Clear the current foods after successful logging
             window.currentFoods = null;
             window.currentSource = null;
@@ -1170,7 +1245,13 @@
                     const foodListHtml = `
                         <div style="text-align: left; padding: 10px; margin: 5px 0; background: white; border-radius: 8px;">
                             <label style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
-                                <input type="checkbox" checked class="food-checkbox" data-food-index="0" style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
+                                <input type="checkbox" checked class="food-checkbox" data-food-index="0"
+                                       data-food-name="${fullName.replace(/"/g, '&quot;')}"
+                                       data-food-calories="${Math.round(calories)}"
+                                       data-food-protein="${Math.round(protein)}"
+                                       data-food-carbs="${Math.round(carbs)}"
+                                       data-food-fat="${Math.round(fat)}"
+                                       style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: bold;">${fullName}</div>
                                     <div style="font-size: 12px; color: #666; margin: 4px 0;">${Math.round(calories)} cal | ${Math.round(protein)}g protein | Serving: ${servingSize}</div>
@@ -1189,6 +1270,15 @@
                         <div style="text-align: left;">
                             <div style="font-weight: bold; margin-bottom: 10px;">Scanned product:</div>
                             ${foodListHtml}
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
+                                <label style="font-weight: bold; margin-bottom: 8px; display: block;">Which meal?</label>
+                                <select id="meal-type-select" style="width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 8px; font-size: 14px;">
+                                    <option value="breakfast">🌅 Breakfast</option>
+                                    <option value="lunch">☀️ Lunch</option>
+                                    <option value="dinner">🌙 Dinner</option>
+                                    <option value="snack">🍿 Snack</option>
+                                </select>
+                            </div>
                         </div>
                     `;
 
@@ -1202,21 +1292,40 @@
 
                     // Add fresh event listener
                     newLogBtn.onclick = () => {
+                        // Get meal type
+                        const mealType = document.getElementById('meal-type-select')?.value || 'snack';
+
                         const checkbox = document.querySelector('.food-checkbox');
                         if (checkbox && checkbox.checked) {
                             const quantityInput = document.querySelector('.food-quantity');
                             const quantity = parseFloat(quantityInput.value) || 1;
 
+                            // Get food data from data attributes
+                            const foodName = checkbox.dataset.foodName;
+                            const calories = parseFloat(checkbox.dataset.foodCalories);
+                            const protein = parseFloat(checkbox.dataset.foodProtein);
+                            const carbs = parseFloat(checkbox.dataset.foodCarbs);
+                            const fat = parseFloat(checkbox.dataset.foodFat);
+
                             const foodToLog = {
-                                name: quantity !== 1 ? `${quantity}x ${foodData[0].name}` : foodData[0].name,
-                                calories: Math.round(foodData[0].calories * quantity),
-                                protein: Math.round(foodData[0].protein * quantity),
-                                carbs: Math.round(foodData[0].carbs * quantity),
-                                fat: Math.round(foodData[0].fat * quantity)
+                                name: quantity !== 1 ? `${quantity}x ${foodName}` : foodName,
+                                calories: Math.round(calories * quantity),
+                                protein: Math.round(protein * quantity),
+                                carbs: Math.round(carbs * quantity),
+                                fat: Math.round(fat * quantity),
+                                meal: mealType
                             };
 
                             logFood(foodToLog);
-                            document.getElementById('voice-text').textContent = 'Logged!';
+
+                            const mealEmoji = {
+                                'breakfast': '🌅',
+                                'lunch': '☀️',
+                                'dinner': '🌙',
+                                'snack': '🍿'
+                            }[mealType] || '🍴';
+
+                            document.getElementById('voice-text').textContent = `Logged to ${mealEmoji} ${mealType}!`;
                             document.getElementById('voice-status').textContent = '🎉';
                             setTimeout(() => {
                                 closeVoiceModal();
@@ -1415,6 +1524,10 @@
                 const today = new Date().toISOString().split('T')[0];
                 const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
                 const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+
+                console.log('📅 Loading meals for:', today);
+                console.log('📊 Today\'s data:', todayData);
+                console.log('🍔 Meal count:', todayData.meals.length);
             
             // Get user's targets from most recent diet goals
             const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
@@ -1675,11 +1788,14 @@
                 }
                 
                 mealsDiv.innerHTML = mealsHTML;
+                console.log('✅ Updated meals display with HTML length:', mealsHTML.length);
             }
-            
+
+            console.log('🎯 Calories display updated:', document.getElementById('calories-today').textContent);
+
             // Load weekly chart
             loadWeeklyChart();
-            
+
             } catch (error) {
                 console.error('Error in loadTodaysMeals:', error, error.stack);
                 // Don't throw error, just log it to prevent breaking the UI
@@ -2376,11 +2492,37 @@
             window.localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
         }
         
+        // Check if we need to reset for a new day
+        function checkAndResetForNewDay() {
+            const lastDate = localStorage.getItem('fuelfire_last_active_date');
+            const today = new Date().toISOString().split('T')[0];
+
+            if (lastDate && lastDate !== today) {
+                // It's a new day - data persists but we just update the date
+                console.log('New day detected - meals from previous days remain in storage');
+            }
+
+            localStorage.setItem('fuelfire_last_active_date', today);
+        }
+
         // Initialize
         window.addEventListener('load', function() {
-            updateTime();
+            checkAndResetForNewDay();
+            updateTodayProgress();
             loadTodaysMeals();
             loadQuickAdds();
+
+            // Set up interval to check for day change (every minute)
+            setInterval(() => {
+                const lastDate = localStorage.getItem('fuelfire_last_active_date');
+                const today = new Date().toISOString().split('T')[0];
+
+                if (lastDate !== today) {
+                    checkAndResetForNewDay();
+                    updateTodayProgress();
+                    loadTodaysMeals();
+                }
+            }, 60000); // Check every minute
         });
     </script>
 </body>
