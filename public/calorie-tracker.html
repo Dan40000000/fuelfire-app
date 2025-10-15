@@ -1401,16 +1401,11 @@
             const aiContent = document.getElementById('ai-search-content');
             const manualContent = document.getElementById('manual-entry-content');
 
-            // Show AI search
-            aiContent.style.display = 'block';
-            aiContent.style.visibility = 'visible';
-            aiContent.style.opacity = '1';
-            aiContent.style.pointerEvents = 'auto';
+            // Show AI search with !important via cssText
+            aiContent.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;';
 
             // Hide manual entry
-            manualContent.style.display = 'none';
-            manualContent.style.visibility = 'hidden';
-            manualContent.style.opacity = '0';
+            manualContent.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
 
             // Update tab buttons
             document.getElementById('ai-search-tab').style.background = 'var(--primary)';
@@ -1421,7 +1416,7 @@
             // Re-show search results div when switching back to AI
             const searchResults = document.getElementById('search-results');
             if (searchResults) {
-                searchResults.style.display = 'block';
+                searchResults.style.cssText = 'display: block !important;';
             }
 
             console.log('✅ AI Search tab active');
@@ -1433,16 +1428,11 @@
             const aiContent = document.getElementById('ai-search-content');
             const manualContent = document.getElementById('manual-entry-content');
 
-            // Hide AI search completely
-            aiContent.style.display = 'none';
-            aiContent.style.visibility = 'hidden';
-            aiContent.style.opacity = '0';
-            aiContent.style.pointerEvents = 'none';
+            // Hide AI search completely with !important via cssText
+            aiContent.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;';
 
             // Show manual entry
-            manualContent.style.display = 'block';
-            manualContent.style.visibility = 'visible';
-            manualContent.style.opacity = '1';
+            manualContent.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important;';
 
             // Update tab buttons
             document.getElementById('manual-entry-tab').style.background = 'var(--primary)';
@@ -1454,7 +1444,7 @@
             const searchResults = document.getElementById('search-results');
             if (searchResults) {
                 searchResults.innerHTML = '';
-                searchResults.style.display = 'none';
+                searchResults.style.cssText = 'display: none !important;';
             }
 
             // Clear the search input
