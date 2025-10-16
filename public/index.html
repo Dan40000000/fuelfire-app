@@ -2168,21 +2168,13 @@
         function loadJourneyStats() {
             // Workouts completed
             const workouts = JSON.parse(localStorage.getItem('fuelfire_tracked_workouts') || '[]');
-            document.getElementById('workouts-completed').textContent = workouts.length;
+            const workoutsEl = document.getElementById('workouts-completed');
+            if (workoutsEl) workoutsEl.textContent = workouts.length;
 
             // Current streak
             const streak = calculateWorkoutStreak(workouts);
-            document.getElementById('current-streak').textContent = streak;
-
-            // Calories tracked days
-            const calorieData = JSON.parse(localStorage.getItem('fuelfire_nutrition') || '{}');
-            const trackedDays = Object.keys(calorieData).length;
-            document.getElementById('calories-tracked').textContent = trackedDays;
-
-            // Weight entries
-            const bodyStats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
-            const weightEntries = (bodyStats.weightHistory || []).length;
-            document.getElementById('weight-entries').textContent = weightEntries;
+            const streakEl = document.getElementById('current-streak');
+            if (streakEl) streakEl.textContent = streak;
         }
 
         // Calculate workout streak

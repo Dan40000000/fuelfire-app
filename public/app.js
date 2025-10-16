@@ -1694,7 +1694,7 @@ function showScreen(screenId) {
         'track-workouts': 'Track Workouts',
         'diet-tracker': 'Diet Tracker',
         'diet-creation': 'Diet Creation',
-        'progress': 'Progress & Analytics',
+        'progress': 'Goals & Progress',
         'workout-muscle-30': '30-Min Muscle',
         'workout-hiit-20': '20-Min HIIT',
         'workout-mobility-15': '15-Min Mobility',
@@ -1726,7 +1726,7 @@ function getMenuTextForScreen(screenId) {
         'track-workouts': 'Track Workouts',
         'diet-tracker': 'Diet Tracker',
         'diet-creation': 'Diet Creation',
-        'progress': 'Progress & Analytics'
+        'progress': 'Goals & Progress'
     };
     return screenToMenu[screenId] || '';
 }
