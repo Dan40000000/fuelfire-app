@@ -6,192 +6,133 @@
     <title>Leg Exercises - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .exercise-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .exercise-card {
+        .supplement-card {
             background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .exercise-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        
-        .exercise-image {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #27ae60, #219a52);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            line-height: 1.2;
-        }
-        
-        .form-illustration {
-            font-size: 14px;
-            margin-top: 8px;
-            opacity: 0.9;
-            max-width: 90%;
-        }
-        
-        .difficulty-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .exercise-content {
-            padding: 20px;
-        }
-        
-        .exercise-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .exercise-description {
-            color: #666;
-            font-size: 14px;
+            border-radius: 15px;
             margin-bottom: 15px;
-            line-height: 1.4;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        
-        .exercise-stats {
+
+        .supplement-header {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            transition: all 0.3s ease;
         }
-        
-        .muscle-tags {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
+
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #219a52, #1e8449);
         }
-        
-        .muscle-tag {
-            background: #f0f8ff;
-            color: #3498db;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #1e8449, #196f3d);
+        }
+
+        .supplement-title {
+            font-size: 18px;
             font-weight: bold;
+            margin: 0;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5px;
-            padding: 0;
-            border-radius: 20px;
-            max-width: 600px;
-            margin: 10px auto;
-            max-height: 95vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #27ae60, #219a52);
-            color: white;
-            padding: 15px;
-            border-radius: 20px 20px 0 0;
-            position: relative;
-        }
-
-        .close-modal {
-            color: white;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            background: none;
-            border: none;
-            cursor: pointer;
-            position: absolute;
-            right: 15px;
-            top: 15px;
-        }
-
-        .modal-body {
-            padding: 12px;
-        }
-
-        .form-section {
-            margin-bottom: 15px;
-        }
-
-        .form-step {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            padding: 8px;
-            background: #f8f9ff;
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-        }
-
-        .step-number {
-            background: #3498db;
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
+        .supplement-rating {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 11px;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 2000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
             font-weight: bold;
-            margin-right: 8px;
-            flex-shrink: 0;
+            color: #27ae60;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
-        .risk-warning {
-            background: #fff5f5;
-            border: 2px solid #e74c3c;
-            border-radius: 10px;
-            padding: 10px;
-            margin: 10px 0;
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
         }
 
-        .tip-box {
-            background: #f0f8ff;
-            border: 2px solid #3498db;
-            border-radius: 10px;
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
             padding: 10px;
-            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -223,11 +164,8 @@
                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
                     </div>
 
-                    
-                    <!-- Exercises Grid -->
-
-                    
-                    <div id="exercises-container" class="exercise-grid">
+                    <!-- Exercises List -->
+                    <div id="exercises-container">
                         <!-- Exercises will be populated by JavaScript -->
                     </div>
                 </div>
@@ -255,22 +193,6 @@
             <div class="menu-item" onclick="goToPage('supplements.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💊 Supplements</div>
             <div class="menu-item active" onclick="goToPage('workout-techniques.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏋️ Workout Techniques</div>
             <div class="menu-item" onclick="goToScreen('index.html', 'progress')"  ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📈 Goals &amp; Progress</div>
-        </div>
-    </div>
-    
-    <!-- Exercise Modal -->
-    <div id="exercise-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button class="close-modal" onclick="closeModal()">&times;</button>
-                <h2 id="modal-title">Exercise Title</h2>
-                <div id="modal-subtitle" style="opacity: 0.9; margin-top: 8px;"></div>
-            </div>
-            <div class="modal-body">
-                <div id="modal-content-body">
-                    <!-- Content will be inserted here -->
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1185,38 +1107,90 @@
         function displayExercises(exercisesToShow = legExercises) {
             const container = document.getElementById('exercises-container');
             let html = '';
-            
-            legExercises.forEach((exercise, index) => {
+
+            exercisesToShow.forEach((exercise, index) => {
                 html += `
-                    <div class="exercise-card" onclick="openExerciseModal(${index})">
-                        <div class="exercise-image">
-                            <div class="difficulty-badge">
-                                ${generateDifficultyStars(exercise.difficulty)}
-                            </div>
-                            ${exercise.icon}
-                            <div class="form-illustration">${exercise.formIllustration || ''}</div>
-                        </div>
-                        <div class="exercise-content">
-                            <div class="exercise-title">${exercise.name}</div>
-                            <div class="exercise-description">${exercise.description}</div>
-                            <div class="exercise-stats">
-                                <div style="font-size: 12px; color: #666;">
-                                    Equipment: ${exercise.equipment}
+                    <div class="supplement-card">
+                        <div class="supplement-header" onclick="toggleExercise(${index})">
+                            <div>
+                                <div class="supplement-title">${exercise.name}</div>
+                                <div class="supplement-rating">
+                                    <span>${generateDifficultyStars(exercise.difficulty)}</span>
+                                    <span>Difficulty</span>
                                 </div>
                             </div>
-                            <div class="muscle-tags">
-                                ${exercise.primaryMuscles.map(muscle => 
-                                    `<span class="muscle-tag">${muscle}</span>`
-                                ).join('')}
+                            <div class="expand-icon" id="icon-${index}">▼</div>
+                        </div>
+                        <div class="supplement-content" id="content-${index}">
+                            <div class="content-inner">
+                                <div class="quick-info">
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${exercise.equipment}</div>
+                                        <div class="stat-label">Equipment</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${generateDifficultyStars(exercise.difficulty)}</div>
+                                        <div class="stat-label">Difficulty</div>
+                                    </div>
+                                </div>
+
+                                <div class="dosage-box">
+                                    <div class="info-title">🎯 Proper Form</div>
+                                    <div class="info-text">
+                                        ${exercise.steps.map(step => `• ${step}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">❌ Common Mistakes</div>
+                                    <div class="info-text">
+                                        ${exercise.commonMistakes.map(mistake => `• ${mistake}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">✅ Safety Tips</div>
+                                    <div class="info-text">
+                                        ${exercise.safetyTips.map(tip => `• ${tip}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="warning-box">
+                                    <div class="warning-title">⚠️ Injury Risks</div>
+                                    <div style="font-size: 12px; color: #856404;">${exercise.risks}</div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">💡 Energy Conservation</div>
+                                    <div class="info-text">${exercise.energySaving}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
         }
 
+
+        function toggleExercise(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
 
         function filterExercises() {
             const searchTerm = document.getElementById('exercise-search').value.toLowerCase();
@@ -1234,78 +1208,6 @@
             });
 
             displayExercises(filtered);
-        }
-
-        function openExerciseModal(index) {
-            const exercise = legExercises[index];
-            const modal = document.getElementById('exercise-modal');
-            
-            document.getElementById('modal-title').textContent = exercise.name;
-            document.getElementById('modal-subtitle').innerHTML = `
-                ${exercise.icon} ${exercise.description} • Equipment: ${exercise.equipment} • Difficulty: ${generateDifficultyStars(exercise.difficulty)}
-            `;
-            
-            let contentHtml = `
-                <div class="form-section">
-                    <h3 style="color: #3498db; margin-bottom: 10px; font-size: 16px;">🎯 Proper Form</h3>
-                    ${exercise.steps.map((step, i) => `
-                        <div class="form-step">
-                            <div class="step-number">${i + 1}</div>
-                            <div style="font-size: 13px;">${step}</div>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="risk-warning">
-                    <h4 style="color: #e74c3c; margin: 0 0 10px 0; font-size: 14px;">⚠️ Injury Risks</h4>
-                    <p style="margin: 0; font-size: 13px;">${exercise.risks}</p>
-                </div>
-
-                <div class="form-section">
-                    <h3 style="color: #e74c3c; margin-bottom: 10px; font-size: 16px;">❌ Common Mistakes</h3>
-                    <ul style="margin: 0; padding-left: 16px;">
-                        ${exercise.commonMistakes.map(mistake => `<li style="margin-bottom: 5px; font-size: 13px;">${mistake}</li>`).join('')}
-                    </ul>
-                </div>
-
-                <div class="form-section">
-                    <h3 style="color: #27ae60; margin-bottom: 10px; font-size: 16px;">✅ Safety Tips</h3>
-                    <ul style="margin: 0; padding-left: 16px;">
-                        ${exercise.safetyTips.map(tip => `<li style="margin-bottom: 5px; font-size: 13px;">${tip}</li>`).join('')}
-                    </ul>
-                </div>
-
-                <div class="tip-box">
-                    <h4 style="color: #3498db; margin: 0 0 10px 0; font-size: 14px;">💡 Energy Conservation Tip</h4>
-                    <p style="margin: 0; font-size: 13px;">${exercise.energySaving}</p>
-                </div>
-
-                <div style="text-align: center; margin-top: 20px;">
-                    <div style="background: #f8f9ff; padding: 15px; border-radius: 10px;">
-                        <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 14px;">Target Muscles</h4>
-                        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                            ${exercise.primaryMuscles.map(muscle =>
-                                `<span style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px;">${muscle}</span>`
-                            ).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('modal-content-body').innerHTML = contentHtml;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('exercise-modal').style.display = 'none';
-        }
-
-        // Click outside modal to close
-        window.onclick = function(event) {
-            const modal = document.getElementById('exercise-modal');
-            if (event.target == modal) {
-                closeModal();
-            }
         }
 
         // Initialize
