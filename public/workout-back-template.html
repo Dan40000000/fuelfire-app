@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leg Exercises - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .supplement-card {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .supplement-header {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #219a52, #1e8449);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #1e8449, #196f3d);
+        }
+
+        .supplement-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .supplement-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 2000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #27ae60;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span>9:41</span>
+                <span id="time">9:41 AM</span>
+            </div>
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="header-title">🦵 Leg Exercises</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦵 Leg Exercise Library</h2>
+                        <p style="color: #666; font-size: 14px;">Build powerful legs with proper form and technique</p>
+                        <button onclick="goBack()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="exercise-search" placeholder="🔍 Search exercises..."
+                               onkeyup="filterExercises()"
+                               style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
+                    </div>
+
+                    <!-- Exercises List -->
+                    <div id="exercises-container">
+                        <!-- Exercises will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToPage('index.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏠 Home</div>
+            <div class="menu-item" onclick="goToScreen(\'index.html\', \'create-workout\')"  ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💪 Create Workout</div>
+            <div class="menu-item" onclick="goToScreen(\'index.html\', \'saved-workouts\')"  ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📚 Saved Workouts</div>
+            <div class="menu-item" onclick="goToScreen(\'index.html\', \'track-workouts\')"  ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📊 Track Workouts</div>
+            <div class="menu-item" onclick="goToPage('calorie-tracker.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🔥 Calorie Tracker</div>
+            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🎯 Diet Creation</div>
+            <div class="menu-item" onclick="goToPage('meal-plans.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🍽️ Meal Plans</div>
+            <div class="menu-item" onclick="goToPage('meal-ideas.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💡 Meal Ideas</div>
+            <div class="menu-item" onclick="goToPage('supplements.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💊 Supplements</div>
+            <div class="menu-item active" onclick="goToPage('workout-techniques.html')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')"  ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📈 Goals &amp; Progress</div>
+        </div>
+    </div>
+
+    <script>
+        // Leg Exercise Database
+        const legExercises = [
+            {
+                name: "Barbell Back Squat",
+                description: "The king of leg exercises - builds overall lower body mass and strength",
+                difficulty: 4,
+                equipment: "Barbell, Squat Rack",
+                primaryMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
+                icon: "🏋️",
+                formIllustration: "🧍🏋️ ↓🤸‍♂️ ⬆️💪 ↓🤸‍♂️\nStand tall • Squat down • Drive up",
+                steps: [
+                    "Position bar on upper back (trapezius) in squat rack",
+                    "Step back and set feet shoulder-width apart",
+                    "Keep chest up, core tight, and knees tracking over toes",
+                    "Lower by pushing hips back and bending knees to 90 degrees",
+                    "Drive through heels to return to starting position",
+                    "Maintain neutral spine throughout entire movement"
+                ],
+                commonMistakes: [
+                    "Knees caving inward during the movement",
+                    "Leaning too far forward and losing chest position",
+                    "Not reaching proper depth (thighs parallel to floor)",
+                    "Rising on toes instead of staying flat-footed"
+                ],
+                safetyTips: [
+                    "Always use safety bars set just below lowest squat position",
+                    "Start with bodyweight or empty barbell to learn form",
+                    "Never look up or down - maintain neutral neck position",
+                    "Warm up thoroughly with dynamic stretching"
+                ],
+                risks: "Knee injury, lower back strain, falling backwards with heavy weight",
+                energySaving: "Focus on controlled tempo and proper depth rather than maximum weight"
+            },
+            {
+                name: "Romanian Deadlift",
+                description: "Premier hamstring and glute developer with hip hinge movement",
+                difficulty: 3,
+                equipment: "Barbell or Dumbbells",
+                primaryMuscles: ["Hamstrings", "Glutes", "Lower Back"],
+                icon: "🎯",
+                formIllustration: "🧍→🤸‍♂️ ↙️🏋️ ↖️💪 ↓🤸‍♂️\nHip hinge • Lower bar • Drive hips",
+                steps: [
+                    "Hold barbell with overhand grip, hands shoulder-width apart",
+                    "Start standing with slight bend in knees",
+                    "Push hips back while lowering weight toward floor",
+                    "Keep bar close to legs throughout movement",
+                    "Lower until you feel stretch in hamstrings",
+                    "Drive hips forward to return to starting position"
+                ],
+                commonMistakes: [
+                    "Bending knees too much (becomes a squat)",
+                    "Allowing back to round during descent",
+                    "Lowering weight too far without flexibility",
+                    "Not keeping the bar close to body"
+                ],
+                safetyTips: [
+                    "Start with light weight to master hip hinge pattern",
+                    "Stop descent when you feel hamstring stretch",
+                    "Keep shoulder blades pulled back throughout",
+                    "Progress weight gradually as flexibility improves"
+                ],
+                risks: "Hamstring tears, lower back injury, dropping weight on feet",
+                energySaving: "Focus on the eccentric (lowering) phase for maximum muscle activation"
+            },
+            {
+                name: "Bulgarian Split Squat",
+                description: "Unilateral leg exercise for balance, stability and muscle imbalances",
+                difficulty: 3,
+                equipment: "Bench or Elevated Surface",
+                primaryMuscles: ["Quadriceps", "Glutes", "Calves"],
+                icon: "🏃",
+                formIllustration: "🦵🪑 ↓🤸‍♂️ ⬆️💪 ↓🤸‍♂️\nRear foot up • Lunge down • Push up",
+                steps: [
+                    "Stand 2-3 feet in front of bench or elevated surface",
+                    "Place top of one foot on bench behind you",
+                    "Lower body by bending front knee to 90 degrees",
+                    "Keep most weight on front leg, back leg provides balance",
+                    "Push through front heel to return to starting position",
+                    "Complete all reps on one leg before switching"
+                ],
+                commonMistakes: [
+                    "Putting too much weight on back leg",
+                    "Leaning too far forward during descent",
+                    "Not going deep enough in the movement",
+                    "Rushing through the exercise"
+                ],
+                safetyTips: [
+                    "Start with bodyweight before adding resistance",
+                    "Hold onto something for balance if needed initially",
+                    "Ensure bench height allows proper range of motion",
+                    "Focus on controlled movement over speed"
+                ],
+                risks: "Loss of balance, knee strain, ankle injury from elevated surface",
+                energySaving: "Master bodyweight version before adding dumbbells or barbell"
+            },
+            {
+                name: "Walking Lunges",
+                description: "Dynamic leg exercise that builds strength, balance, and coordination",
+                difficulty: 2,
+                equipment: "None (can add dumbbells)",
+                primaryMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
+                icon: "🚶",
+                formIllustration: "🚶➡️ ↓🤸‍♂️ ⬆️🚶 ➡️🤸‍♂️\nStep forward • Lunge down • Walk through",
+                steps: [
+                    "Start standing with feet hip-width apart",
+                    "Step forward with one leg into lunge position",
+                    "Lower back knee toward ground, front thigh parallel to floor",
+                    "Push off back foot to step forward into next lunge",
+                    "Alternate legs with each step forward",
+                    "Maintain upright torso throughout movement"
+                ],
+                commonMistakes: [
+                    "Taking steps that are too short or too long",
+                    "Allowing front knee to cave inward",
+                    "Touching back knee hard to ground",
+                    "Leaning forward excessively"
+                ],
+                safetyTips: [
+                    "Start with bodyweight to master movement pattern",
+                    "Take appropriately sized steps (avoid overstriding)",
+                    "Keep core engaged for stability",
+                    "Land softly on each step"
+                ],
+                risks: "Knee impact injury, loss of balance, ankle rolls",
+                energySaving: "Focus on smooth, controlled movement rather than speed or added weight"
+            },
+            {
+                name: "Leg Press",
+                description: "Machine-based leg exercise allowing heavy loading with back support",
+                difficulty: 2,
+                equipment: "Leg Press Machine",
+                primaryMuscles: ["Quadriceps", "Glutes", "Hamstrings"],
+                icon: "🏗️",
+                formIllustration: "🪑🔴 ↓🦵 ⬆️💪 ↓🦵\nSit back • Lower weight • Press up",
+                steps: [
+                    "Sit in leg press machine with back flat against pad",
+                    "Place feet on platform shoulder-width apart",
+                    "Release safety handles and lower weight with control",
+                    "Lower until knees reach 90-degree angle",
+                    "Press weight up without locking knees completely",
+                    "Maintain steady breathing throughout movement"
+                ],
+                commonMistakes: [
+                    "Lowering weight too far and losing lower back position",
+                    "Placing feet too high or too low on platform",
+                    "Pressing with only toes instead of full foot",
+                    "Holding breath during heavy sets"
+                ],
+                safetyTips: [
+                    "Never place hands on knees during pressing",
+                    "Keep feet flat on platform throughout movement",
+                    "Don't lower weight if lower back rounds",
+                    "Always use safety catches when available"
+                ],
+                risks: "Lower back injury, knee hyperextension, weight falling if machine fails",
+                energySaving: "Use full range of motion with moderate weight rather than partial reps with heavy weight"
+            },
+            {
+                name: "Goblet Squat",
+                description: "Beginner-friendly squat variation using dumbbell or kettlebell",
+                difficulty: 1,
+                equipment: "Dumbbell or Kettlebell",
+                primaryMuscles: ["Quadriceps", "Glutes", "Core"],
+                icon: "🏆",
+                formIllustration: "🤗🏋️ ↓🤸‍♂️ ⬆️💪 ↓🤸‍♂️\nHold weight • Squat down • Drive up",
+                steps: [
+                    "Hold dumbbell or kettlebell close to chest",
+                    "Stand with feet slightly wider than shoulder-width",
+                    "Keep chest up and core engaged throughout",
+                    "Lower by sitting back into squat position",
+                    "Go down until thighs are parallel to floor",
+                    "Drive through heels to return to standing"
+                ],
+                commonMistakes: [
+                    "Holding weight too far from body",
+                    "Not squatting to proper depth",
+                    "Allowing knees to cave inward",
+                    "Rounding shoulders forward"
+                ],
+                safetyTips: [
+                    "Start with lighter weight to perfect form",
+                    "Keep weight close to body throughout movement",
+                    "Focus on sitting back rather than bending knees first",
+                    "Land on full foot, not toes"
+                ],
+                risks: "Dropping weight, knee strain, loss of balance",
+                energySaving: "Perfect form with lighter weight builds strength more efficiently than poor form with heavy weight"
+            },
+            {
+                name: "Single-Leg Deadlift",
+                description: "Unilateral exercise for hamstrings, glutes, and balance",
+                difficulty: 3,
+                equipment: "Dumbbell (optional)",
+                primaryMuscles: ["Hamstrings", "Glutes", "Core"],
+                icon: "⚖️",
+                formIllustration: "🧍🦵 ↙️↗️ ↖️💪 ↓🧍\nStand one leg • Hinge forward • Return up",
+                steps: [
+                    "Stand on one leg with soft bend in knee",
+                    "Hinge at hip and reach forward while lifting back leg",
+                    "Keep raised leg in line with torso",
+                    "Lower until you feel hamstring stretch in standing leg",
+                    "Return to upright position by driving hip forward",
+                    "Complete all reps before switching legs"
+                ],
+                commonMistakes: [
+                    "Twisting or rotating hips during movement",
+                    "Bending standing leg too much",
+                    "Not keeping raised leg aligned with torso",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Start with bodyweight before adding resistance",
+                    "Use wall or chair for balance support if needed",
+                    "Focus on hip hinge rather than knee bend",
+                    "Move slowly and with control"
+                ],
+                risks: "Loss of balance, hamstring strain, ankle injury",
+                energySaving: "Master the movement pattern with bodyweight before adding external weight"
+            },
+            {
+                name: "Step-Ups",
+                description: "Functional leg exercise mimicking climbing movements",
+                difficulty: 2,
+                equipment: "Bench or Step Platform",
+                primaryMuscles: ["Quadriceps", "Glutes", "Calves"],
+                icon: "📶",
+                formIllustration: "🪑⬆️ 🦵↗️ ⬆️💪 ↙️🦵\nStep on box • Drive up • Step down",
+                steps: [
+                    "Stand facing bench or step at knee height",
+                    "Step up with one foot, placing entire foot on surface",
+                    "Drive through heel to lift body up to standing",
+                    "Step down with same leg in controlled manner",
+                    "Complete all reps on one leg before switching",
+                    "Maintain upright posture throughout"
+                ],
+                commonMistakes: [
+                    "Using back leg to push off instead of front leg lifting",
+                    "Placing only toes on step instead of full foot",
+                    "Leaning too far forward during step-up",
+                    "Stepping down too quickly"
+                ],
+                safetyTips: [
+                    "Choose appropriate step height (knee level or below)",
+                    "Place entire foot securely on step",
+                    "Control the descent to protect knees",
+                    "Start with bodyweight before adding dumbbells"
+                ],
+                risks: "Falls, knee impact from dropping down, ankle rolls",
+                energySaving: "Focus on slow, controlled movement to maximize muscle engagement"
+            },
+            {
+                name: "Wall Sit",
+                description: "Isometric exercise building leg endurance and mental toughness",
+                difficulty: 2,
+                equipment: "Wall",
+                primaryMuscles: ["Quadriceps", "Glutes", "Core"],
+                icon: "🧱",
+                formIllustration: "🧱🧍 ↓🤸‍♂️ ⏰💪 ⬆️🧍\nBack to wall • Slide down • Hold",
+                steps: [
+                    "Stand with back against wall, feet shoulder-width apart",
+                    "Walk feet forward while sliding down wall",
+                    "Stop when thighs are parallel to floor",
+                    "Keep knees at 90-degree angle directly over ankles",
+                    "Hold position while breathing normally",
+                    "Focus on keeping core tight and back flat against wall"
+                ],
+                commonMistakes: [
+                    "Not going down to proper 90-degree angle",
+                    "Placing feet too close to wall",
+                    "Holding breath during the hold",
+                    "Allowing knees to cave inward"
+                ],
+                safetyTips: [
+                    "Start with shorter holds and build up time gradually",
+                    "Stop if you feel knee pain",
+                    "Keep breathing throughout the entire hold",
+                    "Ensure feet are firmly planted for stability"
+                ],
+                risks: "Knee strain from improper position, fainting from holding breath",
+                energySaving: "Build endurance gradually - start with 30 seconds and progress"
+            },
+            {
+                name: "Jump Squats",
+                description: "Explosive plyometric exercise for power and athletic performance",
+                difficulty: 3,
+                equipment: "None",
+                primaryMuscles: ["Quadriceps", "Glutes", "Calves"],
+                icon: "💥",
+                formIllustration: "🤸‍♂️💥 ⬆️💫 ↓🤸‍♂️ 💥⬆️\nSquat • Explode up • Land soft",
+                steps: [
+                    "Start in squat position with feet shoulder-width apart",
+                    "Lower into squat until thighs parallel to floor",
+                    "Explode upward jumping as high as possible",
+                    "Land softly on balls of feet, immediately into squat",
+                    "Absorb landing by bending knees and hips",
+                    "Repeat for desired number of explosive jumps"
+                ],
+                commonMistakes: [
+                    "Landing with straight legs (hard impact)",
+                    "Not going deep enough into squat before jumping",
+                    "Landing on heels instead of balls of feet",
+                    "Pausing between jumps instead of continuous movement"
+                ],
+                safetyTips: [
+                    "Always land softly and absorb impact",
+                    "Start with lower jumps and build height gradually",
+                    "Ensure adequate space above and around you",
+                    "Stop if you feel any joint pain"
+                ],
+                risks: "Knee impact injuries, ankle sprains, falls from loss of balance",
+                energySaving: "Focus on quality explosive movement rather than quantity"
+            },
+            {
+                name: "Front Squat",
+                description: "Quad-dominant squat variation with bar held in front",
+                difficulty: 4,
+                equipment: "Barbell, Squat Rack",
+                primaryMuscles: ["Quadriceps", "Core", "Upper Back"],
+                icon: "🔝",
+                formIllustration: "🏋️🔝 ↓🤸‍♂️ ⬆️💪\nBar on front • Squat down • Drive up",
+                steps: [
+                    "Rest bar on front of shoulders with elbows high",
+                    "Use clean grip or crossed arms to hold bar",
+                    "Keep chest up and core extremely tight",
+                    "Squat down keeping torso upright",
+                    "Go to at least parallel depth",
+                    "Drive through heels to return to standing"
+                ],
+                commonMistakes: [
+                    "Allowing elbows to drop during squat",
+                    "Leaning forward and losing bar position",
+                    "Not going deep enough",
+                    "Losing core tightness"
+                ],
+                safetyTips: [
+                    "Master regular squats before attempting",
+                    "Start with empty bar to learn position",
+                    "Keep elbows as high as possible",
+                    "Drop bar forward if you fail a rep"
+                ],
+                risks: "Dropping bar, wrist strain, thoracic spine strain",
+                energySaving: "Lighter weights than back squat - focus on perfect upright posture"
+            },
+            {
+                name: "Sumo Deadlift",
+                description: "Wide-stance deadlift emphasizing inner thighs and glutes",
+                difficulty: 3,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Glutes", "Adductors", "Hamstrings", "Quads"],
+                icon: "🤼",
+                formIllustration: "↔️🏋️ ↓🤸‍♂️ ⬆️💪\nWide stance • Grip bar • Stand up",
+                steps: [
+                    "Stand with feet wider than shoulder-width, toes out",
+                    "Grip bar with hands inside legs, narrower grip",
+                    "Keep chest up and back flat",
+                    "Drive through heels to stand up",
+                    "Push knees out and hips forward",
+                    "Lower bar back to floor with control"
+                ],
+                commonMistakes: [
+                    "Stance not wide enough",
+                    "Not pushing knees out over toes",
+                    "Rounding back during lift",
+                    "Starting with hips too high or low"
+                ],
+                safetyTips: [
+                    "Find your optimal stance width",
+                    "Keep knees tracking over toes",
+                    "Engage lats to keep bar close",
+                    "Start lighter than conventional deadlift"
+                ],
+                risks: "Lower back injury, adductor strains, bicep tears",
+                energySaving: "Often allows heavier weight due to shorter range of motion"
+            },
+            {
+                name: "Hack Squat",
+                description: "Machine squat for quad isolation with back support",
+                difficulty: 2,
+                equipment: "Hack Squat Machine",
+                primaryMuscles: ["Quadriceps", "Glutes"],
+                icon: "🎰",
+                formIllustration: "🎰↘️ ↓🦵 ⬆️💪\nLean back • Squat down • Press up",
+                steps: [
+                    "Position back and shoulders against pads",
+                    "Place feet shoulder-width on platform",
+                    "Release safety handles and lower weight",
+                    "Go down until thighs are parallel or deeper",
+                    "Press through heels to extend legs",
+                    "Don't lock knees at top"
+                ],
+                commonMistakes: [
+                    "Feet placement too high or too low",
+                    "Not going deep enough",
+                    "Letting knees cave inward",
+                    "Lifting off pads during rep"
+                ],
+                safetyTips: [
+                    "Keep back and shoulders pressed to pads",
+                    "Control the descent - don't drop",
+                    "Adjust foot position to find comfort",
+                    "Use safety stops appropriately"
+                ],
+                risks: "Knee strain, lower back stress if lifting off pad",
+                energySaving: "Great for heavy quad work without spinal loading"
+            },
+            {
+                name: "Lying Leg Curls",
+                description: "Isolation exercise for hamstring development",
+                difficulty: 1,
+                equipment: "Leg Curl Machine",
+                primaryMuscles: ["Hamstrings"],
+                icon: "🔽",
+                formIllustration: "🛏️🦵 ⬆️💪 ⬇️🦵\nLie flat • Curl up • Lower slow",
+                steps: [
+                    "Lie face down on machine with pad on ankles",
+                    "Grip handles and keep hips down on pad",
+                    "Curl legs up toward glutes",
+                    "Squeeze hamstrings at top position",
+                    "Lower weight slowly under control",
+                    "Don't let weight stack crash down"
+                ],
+                commonMistakes: [
+                    "Lifting hips off pad during curl",
+                    "Using momentum to swing weight up",
+                    "Not achieving full range of motion",
+                    "Letting weight drop on negative"
+                ],
+                safetyTips: [
+                    "Keep hips pressed to pad throughout",
+                    "Use controlled tempo both directions",
+                    "Don't hyperextend knees at bottom",
+                    "Focus on hamstring contraction"
+                ],
+                risks: "Hamstring cramps, lower back strain from hip lifting",
+                energySaving: "Perfect isolation exercise - use moderate weight for high quality reps"
+            },
+            {
+                name: "Leg Extensions",
+                description: "Quad isolation exercise using machine",
+                difficulty: 1,
+                equipment: "Leg Extension Machine",
+                primaryMuscles: ["Quadriceps"],
+                icon: "⬆️",
+                formIllustration: "🪑⬇️ ⬆️💪 ⬇️🦵\nSit back • Extend legs • Lower slow",
+                steps: [
+                    "Sit in machine with back against pad",
+                    "Position ankles under pad at bottom",
+                    "Grip handles at sides",
+                    "Extend legs until fully straight",
+                    "Squeeze quads at top position",
+                    "Lower weight slowly with control"
+                ],
+                commonMistakes: [
+                    "Using too much weight and swinging",
+                    "Not achieving full extension",
+                    "Lifting butt off seat",
+                    "Dropping weight instead of controlling descent"
+                ],
+                safetyTips: [
+                    "Keep back pressed against pad",
+                    "Don't lock knees aggressively at top",
+                    "Use as accessory, not primary movement",
+                    "Stop if you feel knee pain"
+                ],
+                risks: "Knee joint stress, patellar tendon strain",
+                energySaving: "Great for finishing quads after compound movements"
+            },
+            {
+                name: "Glute Bridges",
+                description: "Bodyweight or weighted exercise for glute activation",
+                difficulty: 1,
+                equipment: "None (can add barbell)",
+                primaryMuscles: ["Glutes", "Hamstrings", "Core"],
+                icon: "🌉",
+                formIllustration: "😴⬇️ ⬆️🌉 ⬇️😴\nLie down • Lift hips • Squeeze glutes",
+                steps: [
+                    "Lie on back with knees bent, feet flat",
+                    "Place arms at sides for stability",
+                    "Drive through heels to lift hips",
+                    "Squeeze glutes hard at top position",
+                    "Form straight line from knees to shoulders",
+                    "Lower hips slowly back to floor"
+                ],
+                commonMistakes: [
+                    "Overextending and arching lower back",
+                    "Not squeezing glutes at top",
+                    "Pushing through toes instead of heels",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Focus on glute contraction, not height",
+                    "Keep core engaged throughout",
+                    "Don't hyperextend lower back",
+                    "Master bodyweight before adding weight"
+                ],
+                risks: "Lower back strain from overextension",
+                energySaving: "Perfect glute activation exercise - use before heavy squats"
+            },
+            {
+                name: "Nordic Hamstring Curls",
+                description: "Advanced bodyweight hamstring exercise",
+                difficulty: 5,
+                equipment: "Partner or Anchor Point",
+                primaryMuscles: ["Hamstrings", "Glutes", "Core"],
+                icon: "🇳🇴",
+                formIllustration: "🧎⬆️ ↘️💪 ⬇️🧎\nKneel tall • Lower slow • Catch yourself",
+                steps: [
+                    "Kneel with ankles secured by partner or under bar",
+                    "Keep body straight from knees to head",
+                    "Slowly lower torso forward using hamstrings",
+                    "Go as far as you can control",
+                    "Catch yourself with hands at bottom",
+                    "Push back up to starting position"
+                ],
+                commonMistakes: [
+                    "Bending at hips instead of staying straight",
+                    "Dropping too fast at bottom",
+                    "Not using full range of motion",
+                    "Attempting without proper strength"
+                ],
+                safetyTips: [
+                    "Build up to this exercise progressively",
+                    "Use resistance bands for assistance initially",
+                    "Have soft surface to catch yourself",
+                    "Don't force deeper than you can control"
+                ],
+                risks: "Hamstring tears, face plant if strength fails",
+                energySaving: "One of the best hamstring builders - progress slowly"
+            },
+            {
+                name: "Box Jumps",
+                description: "Explosive plyometric exercise for power development",
+                difficulty: 3,
+                equipment: "Plyometric Box or Bench",
+                primaryMuscles: ["Quadriceps", "Glutes", "Calves", "Core"],
+                icon: "📦",
+                formIllustration: "🧍📦 💥⬆️ 🦵📦\nFace box • Explode up • Land soft",
+                steps: [
+                    "Stand facing box at appropriate height",
+                    "Swing arms back and dip into quarter squat",
+                    "Explode up swinging arms forward",
+                    "Land softly on box with both feet",
+                    "Stand fully upright on box",
+                    "Step down carefully (don't jump down)"
+                ],
+                commonMistakes: [
+                    "Jumping down instead of stepping down",
+                    "Using box that's too high",
+                    "Landing with straight legs",
+                    "Not standing fully upright on box"
+                ],
+                safetyTips: [
+                    "Start with lower box height",
+                    "Always step down, never jump down",
+                    "Land softly in athletic position",
+                    "Clear area around box"
+                ],
+                risks: "Shin scrapes from missed jumps, ankle injuries, falls",
+                energySaving: "Focus on explosion and soft landing - quality over height"
+            },
+            {
+                name: "Sissy Squats",
+                description: "Advanced quad isolation exercise with backward lean",
+                difficulty: 4,
+                equipment: "None (can hold support)",
+                primaryMuscles: ["Quadriceps"],
+                icon: "⏰",
+                formIllustration: "🧍⬆️ ↙️💪 ⬆️🧍\nStand tall • Lean back • Rise up",
+                steps: [
+                    "Stand with feet hip-width, hold support if needed",
+                    "Rise onto balls of feet",
+                    "Lean torso backward while bending knees forward",
+                    "Lower body keeping straight line from knees to head",
+                    "Go as deep as flexibility allows",
+                    "Contract quads to return to starting position"
+                ],
+                commonMistakes: [
+                    "Bending at hips instead of staying straight",
+                    "Going too deep too soon",
+                    "Losing balance and falling backward",
+                    "Not keeping knees together"
+                ],
+                safetyTips: [
+                    "Use support until you build strength",
+                    "Start with small range of motion",
+                    "Build up gradually over weeks",
+                    "Stop if you feel knee pain"
+                ],
+                risks: "Knee strain, falling backward, patellar tendon stress",
+                energySaving: "Advanced exercise - build quad strength with other movements first"
+            },
+            {
+                name: "Calf Raises (Standing)",
+                description: "Primary exercise for calf development",
+                difficulty: 1,
+                equipment: "Machine or Smith Machine",
+                primaryMuscles: ["Calves (Gastrocnemius)"],
+                icon: "👠",
+                formIllustration: "🧍⬇️ ⬆️👠 ⬇️🧍\nFeet flat • Rise up • Lower slow",
+                steps: [
+                    "Position shoulders under pads on machine",
+                    "Stand with balls of feet on edge of platform",
+                    "Let heels drop below platform level",
+                    "Rise up onto toes as high as possible",
+                    "Hold peak contraction briefly",
+                    "Lower heels slowly to full stretch"
+                ],
+                commonMistakes: [
+                    "Not using full range of motion",
+                    "Bouncing at bottom",
+                    "Bending knees during movement",
+                    "Rushing through reps"
+                ],
+                safetyTips: [
+                    "Keep legs straight throughout",
+                    "Control both up and down phases",
+                    "Get full stretch at bottom",
+                    "Don't bounce - smooth motion"
+                ],
+                risks: "Achilles tendon strain, calf cramps",
+                energySaving: "High reps and full ROM more effective than heavy weight"
+            },
+            {
+                name: "Seated Calf Raises",
+                description: "Calf exercise targeting soleus muscle",
+                difficulty: 1,
+                equipment: "Seated Calf Machine",
+                primaryMuscles: ["Calves (Soleus)"],
+                icon: "🪑",
+                formIllustration: "🪑⬇️ ⬆️💪 ⬇️🪑\nSit down • Lift heels • Lower slow",
+                steps: [
+                    "Sit in machine with balls of feet on platform",
+                    "Place thighs under pads",
+                    "Lower heels below platform for stretch",
+                    "Raise heels as high as possible",
+                    "Squeeze calves at top",
+                    "Lower slowly to full stretch"
+                ],
+                commonMistakes: [
+                    "Using partial range of motion",
+                    "Bouncing weight at bottom",
+                    "Moving too quickly",
+                    "Not getting full stretch"
+                ],
+                safetyTips: [
+                    "Smooth controlled movement",
+                    "Full range of motion essential",
+                    "Higher reps work best",
+                    "Don't slam weight down"
+                ],
+                risks: "Calf cramps, Achilles strain",
+                energySaving: "Complement standing calf raises for complete calf development"
+            },
+            {
+                name: "Goblet Bulgarian Split Squat",
+                description: "Challenging single-leg variation with front-loaded weight",
+                difficulty: 4,
+                equipment: "Dumbbell or Kettlebell, Bench",
+                primaryMuscles: ["Quadriceps", "Glutes", "Core"],
+                icon: "🏋️",
+                formIllustration: "🏋️🦵🪑 ↓💪 ⬆️🏋️\nHold weight • Rear foot up • Squat",
+                steps: [
+                    "Hold weight at chest like goblet squat",
+                    "Place rear foot on bench behind you",
+                    "Keep torso upright with core engaged",
+                    "Lower into deep split squat position",
+                    "Drive through front heel to stand",
+                    "Complete all reps before switching legs"
+                ],
+                commonMistakes: [
+                    "Leaning too far forward",
+                    "Not keeping weight close to body",
+                    "Putting too much weight on back leg",
+                    "Not going deep enough"
+                ],
+                safetyTips: [
+                    "Master regular Bulgarian split squats first",
+                    "Start with lighter weight than goblet squats",
+                    "Keep chest up and core tight",
+                    "Focus on balance and control"
+                ],
+                risks: "Loss of balance with weight, knee strain, dropping weight",
+                energySaving: "Combines benefits of both exercises - start light"
+            },
+            {
+                name: "Pistol Squats",
+                description: "Advanced single-leg squat to full depth",
+                difficulty: 5,
+                equipment: "None (can use support)",
+                primaryMuscles: ["Quadriceps", "Glutes", "Core", "Balance"],
+                icon: "🔫",
+                formIllustration: "🧍🦵 ↓💪 ⬆️🧍\nStand one leg • Squat deep • Stand up",
+                steps: [
+                    "Stand on one leg with other leg extended forward",
+                    "Extend arms forward for balance",
+                    "Squat down on standing leg",
+                    "Keep elevated leg straight and off ground",
+                    "Go as deep as possible (goal: full depth)",
+                    "Drive through heel to return to standing"
+                ],
+                commonMistakes: [
+                    "Attempting without proper prerequisites",
+                    "Allowing knee to cave inward",
+                    "Not maintaining balance throughout",
+                    "Dropping down instead of controlling descent"
+                ],
+                safetyTips: [
+                    "Build up through progressions",
+                    "Use TRX or pole for assistance initially",
+                    "Master box pistol squats first",
+                    "Requires excellent mobility and strength"
+                ],
+                risks: "Falls, knee injury, ankle strain",
+                energySaving: "Ultimate single-leg challenge - progress slowly over months"
+            },
+            {
+                name: "Zercher Squats",
+                description: "Squat variation with bar held in elbow crooks",
+                difficulty: 4,
+                equipment: "Barbell",
+                primaryMuscles: ["Quadriceps", "Glutes", "Core", "Upper Back"],
+                icon: "💪",
+                formIllustration: "💪🏋️ ↓🤸‍♂️ ⬆️💪\nBar in elbows • Squat down • Drive up",
+                steps: [
+                    "Hold bar in crook of elbows, hands clasped",
+                    "Keep elbows high and core extremely tight",
+                    "Stand with feet shoulder-width apart",
+                    "Squat down keeping torso upright",
+                    "Go to at least parallel depth",
+                    "Drive through heels to stand up"
+                ],
+                commonMistakes: [
+                    "Letting elbows drop during squat",
+                    "Not keeping core tight enough",
+                    "Leaning too far forward",
+                    "Using too much weight initially"
+                ],
+                safetyTips: [
+                    "Wrap bar with towel or use pad",
+                    "Start with light weight to learn",
+                    "Requires excellent core strength",
+                    "Unique exercise for posterior chain"
+                ],
+                risks: "Dropping bar, elbow pain, core strain",
+                energySaving: "Builds incredible core and upper back strength alongside legs"
+            },
+            {
+                name: "Good Mornings",
+                description: "Hip hinge exercise for hamstrings and lower back",
+                difficulty: 3,
+                equipment: "Barbell",
+                primaryMuscles: ["Hamstrings", "Glutes", "Erector Spinae"],
+                icon: "🙇",
+                formIllustration: "🧍🏋️ ↘️🙇 ⬆️🧍\nBar on back • Hinge forward • Stand up",
+                steps: [
+                    "Rest bar on upper back like back squat",
+                    "Stand with feet hip-width apart",
+                    "Keep slight bend in knees throughout",
+                    "Hinge at hips and push butt back",
+                    "Lower torso until parallel to floor",
+                    "Drive hips forward to return upright"
+                ],
+                commonMistakes: [
+                    "Rounding back during hinge",
+                    "Bending knees too much (becomes squat)",
+                    "Going too deep without flexibility",
+                    "Using too much weight"
+                ],
+                safetyTips: [
+                    "Start with very light weight or PVC pipe",
+                    "Master hip hinge pattern first",
+                    "Keep back flat throughout",
+                    "Build up weight very gradually"
+                ],
+                risks: "Lower back injury, hamstring strains, losing balance",
+                energySaving: "Excellent assistance exercise for deadlifts - use conservatively"
+            },
+            {
+                name: "Walking Lunges with Twist",
+                description: "Dynamic lunge variation adding rotational core work",
+                difficulty: 3,
+                equipment: "Medicine Ball or Plate",
+                primaryMuscles: ["Quadriceps", "Glutes", "Core", "Obliques"],
+                icon: "🔄",
+                formIllustration: "🚶🔄 ↓💪 ⬆️🚶\nLunge forward • Rotate • Walk through",
+                steps: [
+                    "Hold medicine ball or plate at chest",
+                    "Step forward into lunge position",
+                    "At bottom of lunge, rotate torso toward front leg",
+                    "Keep arms extended throughout rotation",
+                    "Rotate back to center",
+                    "Push off to walk forward into next lunge"
+                ],
+                commonMistakes: [
+                    "Rotating before reaching bottom of lunge",
+                    "Moving too quickly through movement",
+                    "Not maintaining lunge depth during twist",
+                    "Twisting at lower back instead of mid-back"
+                ],
+                safetyTips: [
+                    "Master regular walking lunges first",
+                    "Start with light weight",
+                    "Keep core tight during rotation",
+                    "Focus on controlled movement"
+                ],
+                risks: "Loss of balance, knee strain, lower back strain from rotation",
+                energySaving: "Great functional exercise combining strength and mobility"
+            },
+            {
+                name: "Sled Push",
+                description: "Functional pushing exercise for legs and conditioning",
+                difficulty: 3,
+                equipment: "Weighted Sled",
+                primaryMuscles: ["Quadriceps", "Glutes", "Calves", "Core"],
+                icon: "🛷",
+                formIllustration: "🛷→ 💪⬆️ →🛷\nGrip sled • Drive legs • Push forward",
+                steps: [
+                    "Load sled with appropriate weight",
+                    "Grip handles with arms extended",
+                    "Lean forward at 45-degree angle",
+                    "Drive through legs to push sled forward",
+                    "Take powerful steps with full leg extension",
+                    "Maintain forward lean throughout"
+                ],
+                commonMistakes: [
+                    "Standing too upright",
+                    "Not driving through full leg extension",
+                    "Taking short choppy steps",
+                    "Letting sled stop between steps"
+                ],
+                safetyTips: [
+                    "Start with lighter weight than expected",
+                    "Wear appropriate shoes with good traction",
+                    "Clear path ahead before starting",
+                    "Build distance gradually"
+                ],
+                risks: "Calf strains, hamstring pulls, cardiovascular overexertion",
+                energySaving: "Incredible leg developer with no eccentric - allows higher frequency"
+            },
+            {
+                name: "Barbell Hip Thrusts",
+                description: "Best exercise for glute hypertrophy and strength",
+                difficulty: 2,
+                equipment: "Barbell, Bench, Pad",
+                primaryMuscles: ["Glutes", "Hamstrings", "Core"],
+                icon: "🔥",
+                formIllustration: "🪑⬇️ ⬆️🔥 ⬇️🪑\nBack on bench • Thrust hips • Squeeze glutes",
+                steps: [
+                    "Sit on floor with upper back against bench",
+                    "Roll loaded barbell over hips (use pad)",
+                    "Plant feet flat, shoulder-width apart",
+                    "Drive through heels to lift hips",
+                    "Squeeze glutes hard at top (hips fully extended)",
+                    "Lower bar slowly back to starting position"
+                ],
+                commonMistakes: [
+                    "Not achieving full hip extension",
+                    "Hyperextending lower back at top",
+                    "Feet placed too close or too far",
+                    "Not squeezing glutes at top"
+                ],
+                safetyTips: [
+                    "Use thick pad over bar for comfort",
+                    "Keep chin tucked at top position",
+                    "Focus on glute contraction",
+                    "Don't overarch lower back"
+                ],
+                risks: "Lower back strain from hyperextension, bruising without pad",
+                energySaving: "Most effective glute exercise - can use very heavy weights safely"
+            }
+        ];
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function goToScreen(page, screenId) {
+            window.location.href = `${page}#${screenId}`;
+        }
+        
+        function goBack() {
+            window.location.href = 'workout-techniques.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function displayExercises(exercisesToShow = legExercises) {
+            const container = document.getElementById('exercises-container');
+            let html = '';
+
+            exercisesToShow.forEach((exercise, index) => {
+                html += `
+                    <div class="supplement-card">
+                        <div class="supplement-header" onclick="toggleExercise(${index})">
+                            <div>
+                                <div class="supplement-title">${exercise.name}</div>
+                                <div class="supplement-rating">
+                                    <span>${generateDifficultyStars(exercise.difficulty)}</span>
+                                    <span>Difficulty</span>
+                                </div>
+                            </div>
+                            <div class="expand-icon" id="icon-${index}">▼</div>
+                        </div>
+                        <div class="supplement-content" id="content-${index}">
+                            <div class="content-inner">
+                                <div class="quick-info">
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${exercise.equipment}</div>
+                                        <div class="stat-label">Equipment</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${generateDifficultyStars(exercise.difficulty)}</div>
+                                        <div class="stat-label">Difficulty</div>
+                                    </div>
+                                </div>
+
+                                <div class="dosage-box">
+                                    <div class="info-title">🎯 Proper Form</div>
+                                    <div class="info-text">
+                                        ${exercise.steps.map(step => `• ${step}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">❌ Common Mistakes</div>
+                                    <div class="info-text">
+                                        ${exercise.commonMistakes.map(mistake => `• ${mistake}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">✅ Safety Tips</div>
+                                    <div class="info-text">
+                                        ${exercise.safetyTips.map(tip => `• ${tip}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="warning-box">
+                                    <div class="warning-title">⚠️ Injury Risks</div>
+                                    <div style="font-size: 12px; color: #856404;">${exercise.risks}</div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">💡 Energy Conservation</div>
+                                    <div class="info-text">${exercise.energySaving}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+
+        function toggleExercise(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        function filterExercises() {
+            const searchTerm = document.getElementById('exercise-search').value.toLowerCase();
+
+            if (!searchTerm) {
+                displayExercises();
+                return;
+            }
+
+            const filtered = legExercises.filter(exercise => {
+                return exercise.name.toLowerCase().includes(searchTerm) ||
+                       exercise.description.toLowerCase().includes(searchTerm) ||
+                       exercise.equipment.toLowerCase().includes(searchTerm) ||
+                       exercise.primaryMuscles.some(muscle => muscle.toLowerCase().includes(searchTerm));
+            });
+
+            displayExercises(filtered);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            displayExercises();
+        });
+    </script>
+</body>
+</html>
