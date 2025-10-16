@@ -1688,7 +1688,7 @@ function showScreen(screenId) {
 
     // Update header
     const titles = {
-        'home': 'FuelFire',
+        'home': '',
         'create-workout': 'Create Workout',
         'saved-workouts': 'Saved Workouts',
         'track-workouts': 'Track Workouts',
@@ -1700,7 +1700,7 @@ function showScreen(screenId) {
         'workout-mobility-15': '15-Min Mobility',
         'workout-core-10': '10-Min Core'
     };
-    document.querySelector('.header-title').textContent = titles[screenId] || 'FuelFire';
+    document.querySelector('.header-title').textContent = titles[screenId] || '';
 
     // Load screen-specific content
     if (screenId === 'track-workouts') {
