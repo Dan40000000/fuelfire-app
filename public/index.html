@@ -1987,30 +1987,26 @@
             const display = document.getElementById('nutrition-goals-display');
             if (display) {
                 display.innerHTML = `
-                    <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #667eea; margin-bottom: 5px;">${goals.calories}</div>
-                                <div style="font-size: 12px; color: #666; font-weight: 600;">🔥 Calories</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #e74c3c; margin-bottom: 5px;">${goals.protein}g</div>
-                                <div style="font-size: 12px; color: #666; font-weight: 600;">🥩 Protein</div>
-                            </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; text-align: center; backdrop-filter: blur(10px);">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">${goals.calories}</div>
+                            <div style="font-size: 13px; opacity: 0.95; font-weight: 600;">🔥 Calories</div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #f39c12; margin-bottom: 5px;">${goals.carbs}g</div>
-                                <div style="font-size: 12px; color: #666; font-weight: 600;">🍞 Carbs</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #27ae60; margin-bottom: 5px;">${goals.fat}g</div>
-                                <div style="font-size: 12px; color: #666; font-weight: 600;">🥑 Fat</div>
-                            </div>
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; text-align: center; backdrop-filter: blur(10px);">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">${goals.protein}g</div>
+                            <div style="font-size: 13px; opacity: 0.95; font-weight: 600;">🥩 Protein</div>
                         </div>
-                        <div style="border-top: 2px solid rgba(0,0,0,0.1); margin-top: 12px; padding-top: 12px; text-align: center;">
-                            <div style="font-size: 22px; font-weight: bold; color: #3498db; margin-bottom: 5px;">${goals.sugar}g</div>
-                            <div style="font-size: 12px; color: #666; font-weight: 600;">🍭 Sugar Limit</div>
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; text-align: center; backdrop-filter: blur(10px);">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">${goals.carbs}g</div>
+                            <div style="font-size: 13px; opacity: 0.95; font-weight: 600;">🍞 Carbs</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; text-align: center; backdrop-filter: blur(10px);">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">${goals.fat}g</div>
+                            <div style="font-size: 13px; opacity: 0.95; font-weight: 600;">🥑 Fat</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; text-align: center; backdrop-filter: blur(10px); grid-column: span 2;">
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;">${goals.sugar}g</div>
+                            <div style="font-size: 13px; opacity: 0.95; font-weight: 600;">🍭 Sugar Limit</div>
                         </div>
                     </div>
                 `;
