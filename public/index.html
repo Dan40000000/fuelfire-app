@@ -745,8 +745,108 @@
 
                 <!-- PROGRESS SCREEN -->
                 <div class="screen-content" id="progress">
-                    <div style="background: #00FF00; color: black; padding: 20px; text-align: center; font-weight: bold; font-size: 24px;">
-                        ✅ PROGRESS PAGE DELETED AND REBUILT! ✅
+                    <!-- Hero Section -->
+                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 15px; margin-bottom: 18px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🎯</div>
+                        <h2 style="font-size: 18px; margin-bottom: 8px; font-weight: bold;">Your Fitness Journey</h2>
+                        <p style="font-size: 12px; opacity: 0.9; line-height: 1.4;">"Progress is progress, no matter how small. Keep showing up!"</p>
+                    </div>
+
+                    <!-- Body Metrics Cards -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                        <!-- Weight Card -->
+                        <div onclick="editWeight()" style="background: var(--card-bg); padding: 15px; border-radius: 15px; cursor: pointer; border: 2px solid var(--lighter-bg); transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 6px;">⚖️</div>
+                            <div style="font-size: 11px; color: var(--primary-dark); font-weight: 600; margin-bottom: 4px;">WEIGHT</div>
+                            <div id="current-weight" style="font-size: 18px; font-weight: bold; color: var(--dark); margin-bottom: 4px;">--</div>
+                            <div id="weight-trend" style="font-size: 10px; color: #666;">Tap to track</div>
+                        </div>
+
+                        <!-- Body Fat Card -->
+                        <div onclick="editBodyFat()" style="background: var(--card-bg); padding: 15px; border-radius: 15px; cursor: pointer; border: 2px solid var(--lighter-bg); transition: all 0.3s ease;">
+                            <div style="font-size: 24px; margin-bottom: 6px;">📊</div>
+                            <div style="font-size: 11px; color: var(--primary-dark); font-weight: 600; margin-bottom: 4px;">BODY FAT</div>
+                            <div id="current-bodyfat" style="font-size: 18px; font-weight: bold; color: var(--dark); margin-bottom: 4px;">--</div>
+                            <div id="bodyfat-trend" style="font-size: 10px; color: #666;">Tap to track</div>
+                        </div>
+                    </div>
+
+                    <!-- Nutrition Goals Section -->
+                    <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 18px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="font-size: 16px; color: var(--dark); font-weight: bold;">🍽️ Nutrition Goals</h3>
+                            <button onclick="showScreen('diet-quiz')" style="background: var(--gradient-1); color: white; border: none; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                                Edit
+                            </button>
+                        </div>
+                        <div id="nutrition-goals-display">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Journey Stats -->
+                    <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 18px;">
+                        <h3 style="font-size: 16px; color: var(--dark); font-weight: bold; margin-bottom: 12px;">📈 Your Journey Stats</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
+                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="workouts-completed">0</div>
+                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Workouts Done</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
+                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="current-streak">0</div>
+                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Day Streak 🔥</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
+                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="calories-tracked">0</div>
+                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Days Tracked</div>
+                            </div>
+                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
+                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="weight-entries">0</div>
+                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Weight Logs</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Start Guide (Empty State) -->
+                    <div id="quick-start-guide" style="background: var(--gradient-light); padding: 18px; border-radius: 15px; margin-bottom: 18px;">
+                        <h3 style="font-size: 16px; color: var(--dark); font-weight: bold; margin-bottom: 12px; text-align: center;">🚀 Quick Start Guide</h3>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div onclick="showScreen('diet-quiz')" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">1️⃣</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Set Nutrition Goals</div>
+                                    <div style="font-size: 10px; color: #666;">Calculate your daily calorie & macro targets</div>
+                                </div>
+                            </div>
+                            <div onclick="editWeight()" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">2️⃣</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Track Your Weight</div>
+                                    <div style="font-size: 10px; color: #666;">Log your starting weight & goal</div>
+                                </div>
+                            </div>
+                            <div onclick="showScreen('create-workout')" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">3️⃣</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Start Working Out</div>
+                                    <div style="font-size: 10px; color: #666;">Create your first workout plan</div>
+                                </div>
+                            </div>
+                            <div onclick="goToPage('calorie-tracker.html')" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <div style="font-size: 24px;">4️⃣</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Track Your Meals</div>
+                                    <div style="font-size: 10px; color: #666;">Log your daily food intake</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motivational Footer -->
+                    <div style="background: var(--gradient-1); color: white; padding: 15px; border-radius: 15px; text-align: center;">
+                        <p style="font-size: 13px; font-style: italic; line-height: 1.5; margin: 0;">
+                            "The only bad workout is the one that didn't happen. You've got this! 💪"
+                        </p>
                     </div>
                 </div>
 
@@ -1938,25 +2038,27 @@
             const display = document.getElementById('nutrition-goals-display');
             if (display) {
                 display.innerHTML = `
-                    <div style="background: rgba(255,255,255,0.95); color: #667eea; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 3px;">${goals.calories}</div>
-                        <div style="font-size: 10px; opacity: 0.8;">🔥 Calories</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.95); color: #e74c3c; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 3px;">${goals.protein}g</div>
-                        <div style="font-size: 10px; opacity: 0.8;">🥩 Protein</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.95); color: #f39c12; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 3px;">${goals.carbs}g</div>
-                        <div style="font-size: 10px; opacity: 0.8;">🍞 Carbs</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.95); color: #27ae60; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 3px;">${goals.fat}g</div>
-                        <div style="font-size: 10px; opacity: 0.8;">🥑 Fat</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.95); color: #3498db; border-radius: 10px; padding: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); grid-column: span 2;">
-                        <div style="font-size: 18px; font-weight: bold; margin-bottom: 3px;">${goals.sugar}g</div>
-                        <div style="font-size: 10px; opacity: 0.8;">🍭 Sugar Limit</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                        <div style="background: var(--lighter-bg); border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 16px; font-weight: bold; color: var(--primary); margin-bottom: 3px;">${goals.calories}</div>
+                            <div style="font-size: 9px; color: #666;">🔥 Calories</div>
+                        </div>
+                        <div style="background: var(--lighter-bg); border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 16px; font-weight: bold; color: #e74c3c; margin-bottom: 3px;">${goals.protein}g</div>
+                            <div style="font-size: 9px; color: #666;">🥩 Protein</div>
+                        </div>
+                        <div style="background: var(--lighter-bg); border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 16px; font-weight: bold; color: #f39c12; margin-bottom: 3px;">${goals.carbs}g</div>
+                            <div style="font-size: 9px; color: #666;">🍞 Carbs</div>
+                        </div>
+                        <div style="background: var(--lighter-bg); border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 16px; font-weight: bold; color: #27ae60; margin-bottom: 3px;">${goals.fat}g</div>
+                            <div style="font-size: 9px; color: #666;">🥑 Fat</div>
+                        </div>
+                        <div style="background: var(--lighter-bg); border-radius: 10px; padding: 10px; text-align: center; grid-column: span 2;">
+                            <div style="font-size: 16px; font-weight: bold; color: #3498db; margin-bottom: 3px;">${goals.sugar}g</div>
+                            <div style="font-size: 9px; color: #666;">🍭 Sugar Limit</div>
+                        </div>
                     </div>
                 `;
             }
@@ -2076,14 +2178,14 @@
                 }
             } else {
                 weightEl.textContent = '--';
-                trendEl.textContent = 'Click to set';
+                trendEl.textContent = 'Tap to track';
             }
         }
 
         // Load body fat stats and display
         function loadBodyFatStats() {
             const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
-            const bfEl = document.getElementById('body-fat');
+            const bfEl = document.getElementById('current-bodyfat');
             const trendEl = document.getElementById('bodyfat-trend');
 
             if (stats.currentBodyFat) {
@@ -2104,8 +2206,59 @@
                 }
             } else {
                 bfEl.textContent = '--';
-                trendEl.textContent = 'Click to set';
+                trendEl.textContent = 'Tap to track';
             }
+        }
+
+        // Load journey stats
+        function loadJourneyStats() {
+            // Workouts completed
+            const workouts = JSON.parse(localStorage.getItem('fuelfire_tracked_workouts') || '[]');
+            document.getElementById('workouts-completed').textContent = workouts.length;
+
+            // Current streak
+            const streak = calculateWorkoutStreak(workouts);
+            document.getElementById('current-streak').textContent = streak;
+
+            // Calories tracked days
+            const calorieData = JSON.parse(localStorage.getItem('fuelfire_nutrition') || '{}');
+            const trackedDays = Object.keys(calorieData).length;
+            document.getElementById('calories-tracked').textContent = trackedDays;
+
+            // Weight entries
+            const bodyStats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            const weightEntries = (bodyStats.weightHistory || []).length;
+            document.getElementById('weight-entries').textContent = weightEntries;
+        }
+
+        // Calculate workout streak
+        function calculateWorkoutStreak(workouts) {
+            if (!workouts || workouts.length === 0) return 0;
+
+            // Sort workouts by date (most recent first)
+            const sortedWorkouts = workouts
+                .map(w => new Date(w.date))
+                .sort((a, b) => b - a);
+
+            let streak = 0;
+            let currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+
+            for (let workout of sortedWorkouts) {
+                const workoutDate = new Date(workout);
+                workoutDate.setHours(0, 0, 0, 0);
+
+                const diffDays = Math.floor((currentDate - workoutDate) / (1000 * 60 * 60 * 24));
+
+                if (diffDays === streak) {
+                    streak++;
+                    currentDate.setDate(currentDate.getDate() - 1);
+                } else if (diffDays > streak) {
+                    break;
+                }
+            }
+
+            return streak;
         }
 
         // Load all progress data when progress screen is shown
@@ -2113,6 +2266,7 @@
             displayNutritionGoals();
             loadWeightStats();
             loadBodyFatStats();
+            loadJourneyStats();
         });
 
         // Also update when showScreen('progress') is called
@@ -2124,6 +2278,7 @@
                     displayNutritionGoals();
                     loadWeightStats();
                     loadBodyFatStats();
+                    loadJourneyStats();
                 }
             };
         }
