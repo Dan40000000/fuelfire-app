@@ -32,7 +32,7 @@
             
             <div class="content">
                 <!-- HOME SCREEN -->
-                <div class="screen-content home-content active" id="home">
+                <div class="screen-content home-content" id="home">
                     <div class="brand-logo">Well Fit</div>
                     <div class="brand-tagline">Ignite Your Fitness Journey</div>
                     
@@ -1896,6 +1896,22 @@
             <div class="menu-item" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📈 Goals & Progress</div>
         </div>
     </div>
+
+    <script>
+        // Load correct screen IMMEDIATELY based on hash - before anything else
+        document.addEventListener('DOMContentLoaded', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash && document.getElementById(hash)) {
+                // Hide all screens first
+                document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+                // Show the hashed screen
+                document.getElementById(hash).classList.add('active');
+            } else {
+                // Show home by default
+                document.getElementById('home').classList.add('active');
+            }
+        });
+    </script>
 
     <script src="app.js?v=2.0"></script>
 

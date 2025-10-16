@@ -5504,6 +5504,9 @@ window.onload = function() {
     const hash = window.location.hash.substring(1); // Remove the # symbol
     if (hash && document.getElementById(hash)) {
         showScreen(hash);
+    } else {
+        // Default to home if no hash
+        showScreen('home');
     }
     
     // Load recent workouts
