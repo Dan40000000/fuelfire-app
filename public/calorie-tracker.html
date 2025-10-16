@@ -411,6 +411,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     
     <script>
+        // Helper function to get local date in YYYY-MM-DD format (not UTC)
+        function getLocalDateString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // Voice Recognition
         let recognition = null;
         let isRecording = false;
@@ -525,7 +534,7 @@
         
         function logFood(food) {
             console.log('🍔 Logging food:', food);
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
 
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
 
@@ -970,7 +979,7 @@
                     return;
                 }
             
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
@@ -1043,7 +1052,7 @@
             const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
             const type = types[parseInt(mealType)] || 'snack';
             
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
@@ -1113,7 +1122,7 @@
             const type = types[parseInt(mealType)] || 'snack';
             
             // Log the food
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
@@ -1574,7 +1583,7 @@
         
         function loadTodaysMeals() {
             try {
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
                 const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
                 const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
 
@@ -1859,7 +1868,7 @@
             // This function updates the UI to reflect today's progress
             // It's called after logging food to refresh the display
             try {
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
                 const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
                 const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
                 
@@ -1916,7 +1925,7 @@
         
         function removeMeal(index) {
             if (confirm('Remove this meal?')) {
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
                 const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
                 
                 if (loggedMeals[today] && loggedMeals[today].meals[index]) {
@@ -2013,7 +2022,7 @@
             };
             
             // Save to today's log
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
@@ -2258,7 +2267,7 @@
                 return;
             }
             
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
@@ -2402,7 +2411,7 @@
                 return;
             }
             
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             
             if (!loggedMeals[today]) {
@@ -2495,7 +2504,7 @@
             const type = types[parseInt(mealType)] || 'snack';
 
             // Log the food
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
 
             if (!loggedMeals[today]) {
@@ -2540,7 +2549,7 @@
         // Sync with home page overview
         function syncWithHomePage() {
             // This ensures the home page always shows current data when navigating back
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
             const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
 
@@ -2554,7 +2563,7 @@
         // Check if we need to reset for a new day
         function checkAndResetForNewDay() {
             const lastDate = localStorage.getItem('fuelfire_last_active_date');
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
 
             if (lastDate && lastDate !== today) {
                 // It's a new day - data persists but we just update the date
@@ -2574,7 +2583,7 @@
             // Set up interval to check for day change (every minute)
             setInterval(() => {
                 const lastDate = localStorage.getItem('fuelfire_last_active_date');
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
 
                 if (lastDate !== today) {
                     checkAndResetForNewDay();
