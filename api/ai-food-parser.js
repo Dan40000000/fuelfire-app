@@ -47,6 +47,10 @@ Extract each individual food item and return accurate nutrition per serving. For
 - "Big Mac with fries" = Big Mac + medium fries
 - "pizza and beer" = pizza slice + beer
 - "chicken and rice" = chicken breast + cup of rice
+- "2 eggs" = egg (quantity: 2)
+- "half a pizza" = pizza slice (quantity: 0.5)
+
+IMPORTANT: If the user mentions a quantity (like "2 eggs", "3 slices", "half a burger"), extract it as a separate "quantity" field.
 
 Return format (JSON array only):
 [
@@ -57,7 +61,8 @@ Return format (JSON array only):
     "carbs": 45,
     "fat": 33,
     "sugar": 9,
-    "serving": "1 sandwich"
+    "serving": "1 sandwich",
+    "quantity": 1
   },
   {
     "name": "French fries, medium",
@@ -66,11 +71,12 @@ Return format (JSON array only):
     "carbs": 48,
     "fat": 17,
     "sugar": 0,
-    "serving": "medium order"
+    "serving": "medium order",
+    "quantity": 1
   }
 ]
 
-Use accurate nutrition data from major brands/USDA. Include realistic serving sizes. ALWAYS include sugar content in grams.`;
+Use accurate nutrition data from major brands/USDA. Include realistic serving sizes. ALWAYS include sugar content in grams. ALWAYS include quantity field (default 1 if not specified).`;
 
         const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -124,6 +130,7 @@ Use accurate nutrition data from major brands/USDA. Include realistic serving si
             fat: Math.round(food.fat || 0),
             sugar: Math.round(food.sugar || 0),
             serving: food.serving || '1 serving',
+            quantity: parseFloat(food.quantity) || 1,
             source: isAIResponse ? 'ai' : 'fallback'
         }));
 
