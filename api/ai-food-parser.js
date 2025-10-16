@@ -203,6 +203,7 @@ function parseWithFallback(query) {
             foods.push({
                 ...foodDatabase[key],
                 serving: '1 serving',
+                quantity: 1,
                 source: 'estimated'
             });
             foundFoods.add(key);
@@ -228,6 +229,7 @@ function parseWithFallback(query) {
             fat: 15,
             sugar: 6,
             serving: '1 serving',
+            quantity: 1,
             source: 'estimated'
         });
     }
