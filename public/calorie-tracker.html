@@ -236,7 +236,7 @@
             
             <div style="display: flex; gap: 10px;">
                 <button onclick="addManualFood()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Add to Log</button>
-                <button onclick="hideManualEntry()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
+                <button onclick="hideManualEntryModal()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold;">Cancel</button>
             </div>
         </div>
     </div>
@@ -1930,13 +1930,13 @@
             }
         }
         
-        function showManualEntry() {
+        function showManualEntryModal() {
             document.getElementById('manual-entry-modal').style.display = 'block';
             loadSavedMealsToSelect();
             document.getElementById('food-name').focus();
         }
-        
-        function hideManualEntry() {
+
+        function hideManualEntryModal() {
             document.getElementById('manual-entry-modal').style.display = 'none';
             clearManualEntryForm();
         }
@@ -2041,8 +2041,8 @@
                 localStorage.setItem('fuelfire_saved_meals', JSON.stringify(savedMeals));
                 loadSavedMealsToSelect();
             }
-            
-            hideManualEntry();
+
+            hideManualEntryModal();
             loadTodaysMeals();
         }
         
