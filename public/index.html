@@ -771,7 +771,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <h4 style="margin: 0; font-size: 18px;">🍽️ Nutrition Goals</h4>
                             <div style="display: flex; gap: 8px;">
-                                <button onclick="goToPage('enhanced-diet-quiz.html')" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit</button>
+                                <button onclick="editNutritionGoals()" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit</button>
                                 <button onclick="deleteNutritionGoals()" style="background: rgba(0,0,0,0.2); color: white; border: none; padding: 10px 14px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.3s;">🗑️</button>
                             </div>
                         </div>
@@ -2011,6 +2011,39 @@
                     </div>
                 `;
             }
+        }
+
+        // Edit nutrition goals
+        function editNutritionGoals() {
+            const currentGoals = JSON.parse(localStorage.getItem('fuelfire_nutrition_goals') || '{}');
+
+            const calories = prompt('Daily Calorie Goal:', currentGoals.calories || 2000);
+            if (!calories || isNaN(calories)) return;
+
+            const protein = prompt('Daily Protein Goal (grams):', currentGoals.protein || 150);
+            if (!protein || isNaN(protein)) return;
+
+            const carbs = prompt('Daily Carbs Goal (grams):', currentGoals.carbs || 225);
+            if (!carbs || isNaN(carbs)) return;
+
+            const fat = prompt('Daily Fat Goal (grams):', currentGoals.fat || 67);
+            if (!fat || isNaN(fat)) return;
+
+            const sugar = prompt('Daily Sugar Limit (grams):', currentGoals.sugar || 25);
+            if (!sugar || isNaN(sugar)) return;
+
+            // Save the goals
+            const newGoals = {
+                calories: parseInt(calories),
+                protein: parseInt(protein),
+                carbs: parseInt(carbs),
+                fat: parseInt(fat),
+                sugar: parseInt(sugar)
+            };
+
+            localStorage.setItem('fuelfire_nutrition_goals', JSON.stringify(newGoals));
+            displayNutritionGoals();
+            alert('✅ Nutrition goals updated!');
         }
 
         // Delete nutrition goals
