@@ -2004,29 +2004,29 @@
             const display = document.getElementById('nutrition-goals-display');
             if (display) {
                 display.innerHTML = `
-                    <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px);">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 15px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${goals.calories}</div>
-                                <div style="font-size: 12px; opacity: 0.95; font-weight: 600;">🔥 Calories</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 95%;">
+                            <div style="background: rgba(255,255,255,0.95); border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                <div style="font-size: 26px; font-weight: bold; color: #667eea; margin-bottom: 4px;">${goals.calories}</div>
+                                <div style="font-size: 11px; color: #666; font-weight: 600;">🔥 Calories</div>
                             </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${goals.protein}g</div>
-                                <div style="font-size: 12px; opacity: 0.95; font-weight: 600;">🥩 Protein</div>
+                            <div style="background: rgba(255,255,255,0.95); border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                <div style="font-size: 26px; font-weight: bold; color: #e74c3c; margin-bottom: 4px;">${goals.protein}g</div>
+                                <div style="font-size: 11px; color: #666; font-weight: 600;">🥩 Protein</div>
                             </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${goals.carbs}g</div>
-                                <div style="font-size: 12px; opacity: 0.95; font-weight: 600;">🍞 Carbs</div>
+                            <div style="background: rgba(255,255,255,0.95); border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                <div style="font-size: 26px; font-weight: bold; color: #f39c12; margin-bottom: 4px;">${goals.carbs}g</div>
+                                <div style="font-size: 11px; color: #666; font-weight: 600;">🍞 Carbs</div>
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${goals.fat}g</div>
-                                <div style="font-size: 12px; opacity: 0.95; font-weight: 600;">🥑 Fat</div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 63%;">
+                            <div style="background: rgba(255,255,255,0.95); border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                <div style="font-size: 26px; font-weight: bold; color: #27ae60; margin-bottom: 4px;">${goals.fat}g</div>
+                                <div style="font-size: 11px; color: #666; font-weight: 600;">🥑 Fat</div>
                             </div>
-                            <div style="text-align: center;">
-                                <div style="font-size: 28px; font-weight: bold; margin-bottom: 5px;">${goals.sugar}g</div>
-                                <div style="font-size: 12px; opacity: 0.95; font-weight: 600;">🍭 Sugar</div>
+                            <div style="background: rgba(255,255,255,0.95); border-radius: 12px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                <div style="font-size: 26px; font-weight: bold; color: #3498db; margin-bottom: 4px;">${goals.sugar}g</div>
+                                <div style="font-size: 11px; color: #666; font-weight: 600;">🍭 Sugar</div>
                             </div>
                         </div>
                     </div>
@@ -2300,11 +2300,15 @@
             const reps = prompt('Reps (optional, press OK to skip):', '1');
             const finalReps = reps && !isNaN(reps) ? parseInt(reps) : 1;
 
+            const goal = prompt('Goal weight (optional - your dream lift!):', '');
+            const finalGoal = goal && !isNaN(goal) ? parseFloat(goal) : null;
+
             const pr = {
                 id: Date.now(),
                 exercise: exercise.trim(),
                 weight: parseFloat(weight),
                 reps: finalReps,
+                goal: finalGoal,
                 date: new Date().toISOString()
             };
 
@@ -2351,17 +2355,49 @@
                 const bestPR = exercisePRs[0];
                 const improvement = exercisePRs.length > 1 ? bestPR.weight - exercisePRs[exercisePRs.length - 1].weight : 0;
 
+                // Goal tracking
+                const hasGoal = bestPR.goal && bestPR.goal > bestPR.weight;
+                let goalHTML = '';
+                let progressColor = '#FFA500';
+
+                if (hasGoal) {
+                    const toGo = bestPR.goal - bestPR.weight;
+                    const percentage = Math.min(100, Math.round((bestPR.weight / bestPR.goal) * 100));
+
+                    // Color based on progress: red (<60%), yellow (60-85%), green (>85%)
+                    if (percentage >= 85) progressColor = '#27ae60';
+                    else if (percentage >= 60) progressColor = '#f39c12';
+                    else progressColor = '#e74c3c';
+
+                    goalHTML = `
+                        <div style="margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <div style="font-size: 11px; color: #666; font-weight: 600;">Goal: ${bestPR.goal} lbs</div>
+                                <div style="font-size: 11px; color: ${progressColor}; font-weight: bold;">${percentage}%</div>
+                            </div>
+                            <div style="background: #e0e0e0; border-radius: 10px; height: 8px; overflow: hidden;">
+                                <div style="background: ${progressColor}; width: ${percentage}%; height: 100%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div style="font-size: 10px; color: ${progressColor}; margin-top: 4px; font-weight: 600;">${toGo > 0 ? toGo.toFixed(1) + ' lbs to go! 💪' : 'Goal reached! 🎉'}</div>
+                        </div>
+                    `;
+                }
+
                 return `
-                    <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 10px rgba(0,0,0,0.2);">
-                        <div style="flex: 1;">
-                            <div style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 5px;">${exercise}</div>
-                            <div style="font-size: 20px; font-weight: bold; color: #FFA500;">${bestPR.weight} lbs ${bestPR.reps > 1 ? 'x ' + bestPR.reps : ''}</div>
-                            ${improvement > 0 ? `<div style="font-size: 11px; color: #27ae60; margin-top: 3px;">📈 +${improvement} lbs improvement</div>` : ''}
+                    <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 5px;">${exercise}</div>
+                                <div style="font-size: 22px; font-weight: bold; color: ${progressColor};">${bestPR.weight} lbs ${bestPR.reps > 1 ? 'x ' + bestPR.reps : ''}</div>
+                                ${improvement > 0 ? `<div style="font-size: 11px; color: #27ae60; margin-top: 3px;">📈 +${improvement} lbs improvement</div>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="updatePR('${exercise}')" style="background: #4ECDC4; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">📝</button>
+                                <button onclick="setGoalPR('${exercise}')" style="background: #667eea; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🎯</button>
+                                <button onclick="deletePR('${exercise}')" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🗑️</button>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="updatePR('${exercise}')" style="background: #4ECDC4; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">📝</button>
-                            <button onclick="deletePR('${exercise}')" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🗑️</button>
-                        </div>
+                        ${goalHTML}
                     </div>
                 `;
             }).join('');
@@ -2388,6 +2424,31 @@
 
             savePR(pr);
             loadPRs();
+        }
+
+        // Set goal for an exercise
+        function setGoalPR(exercise) {
+            const goal = prompt(`Set your goal weight for ${exercise}:`, '');
+            if (!goal || isNaN(goal)) {
+                alert('Please enter a valid goal weight');
+                return;
+            }
+
+            // Update the most recent PR with the goal
+            const prs = JSON.parse(localStorage.getItem('fuelfire_personal_records') || '[]');
+            const exercisePRs = prs.filter(pr => pr.exercise === exercise);
+
+            if (exercisePRs.length > 0) {
+                // Update all PRs for this exercise with the goal
+                prs.forEach(pr => {
+                    if (pr.exercise === exercise) {
+                        pr.goal = parseFloat(goal);
+                    }
+                });
+
+                localStorage.setItem('fuelfire_personal_records', JSON.stringify(prs));
+                loadPRs();
+            }
         }
 
         // Delete all PRs for an exercise
