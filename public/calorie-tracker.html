@@ -395,6 +395,7 @@
                     <input type="number" id="manual-protein" placeholder="Protein (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
                     <input type="number" id="manual-carbs" placeholder="Carbs (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
                     <input type="number" id="manual-fat" placeholder="Fat (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                    <input type="number" id="manual-sugar" placeholder="Sugar (g)" style="padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
                 </div>
                 
                 <button onclick="addManualFood()" style="width: 100%; background: #4CAF50; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold;">Add Food</button>
@@ -2474,32 +2475,33 @@
             const protein = parseInt(document.getElementById('manual-protein').value) || 0;
             const carbs = parseInt(document.getElementById('manual-carbs').value) || 0;
             const fat = parseInt(document.getElementById('manual-fat').value) || 0;
-            
+            const sugar = parseInt(document.getElementById('manual-sugar').value) || 0;
+
             if (!name) {
                 alert('Please enter a food name');
                 return;
             }
-            
+
             if (!calories) {
                 alert('Please enter calories');
                 return;
             }
-            
+
             // Ask for meal type
             const mealType = prompt('Log as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
             if (!mealType) return;
-            
+
             const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
             const type = types[parseInt(mealType)] || 'snack';
-            
+
             // Log the food
             const today = new Date().toISOString().split('T')[0];
             let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-            
+
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
             }
-            
+
             loggedMeals[today].meals.push({
                 name: name,
                 type: type,
@@ -2507,6 +2509,7 @@
                 protein: protein,
                 carbs: carbs,
                 fat: fat,
+                sugar: sugar,
                 time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
                 source: 'manual'
             });
@@ -2526,6 +2529,7 @@
             document.getElementById('manual-protein').value = '';
             document.getElementById('manual-carbs').value = '';
             document.getElementById('manual-fat').value = '';
+            document.getElementById('manual-sugar').value = '';
             
             // Close modal
             closeSmartEntry();
