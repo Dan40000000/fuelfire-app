@@ -756,15 +756,17 @@
                     
                     <!-- Quick Stats Cards -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;">
-                        <div style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; padding: 12px; border-radius: 12px; text-align: center; box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);">
-                            <div style="font-size: 20px; font-weight: bold;" id="current-weight">175</div>
+                        <div onclick="editWeight()" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; padding: 12px; border-radius: 12px; text-align: center; box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3); cursor: pointer; transition: all 0.3s;">
+                            <div style="font-size: 20px; font-weight: bold;" id="current-weight">--</div>
                             <div style="font-size: 11px; opacity: 0.9;">Current Weight</div>
-                            <div style="font-size: 9px; margin-top: 4px; background: rgba(255,255,255,0.2); padding: 3px 6px; border-radius: 8px; display: inline-block;" id="weight-trend">📉 -5 lbs</div>
+                            <div style="font-size: 9px; margin-top: 4px; background: rgba(255,255,255,0.2); padding: 3px 6px; border-radius: 8px; display: inline-block;" id="weight-trend">Click to set</div>
+                            <div style="font-size: 10px; margin-top: 6px; opacity: 0.8;">✏️ Click to edit</div>
                         </div>
-                        <div style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; padding: 12px; border-radius: 12px; text-align: center; box-shadow: 0 3px 10px rgba(78, 205, 196, 0.3);">
-                            <div style="font-size: 20px; font-weight: bold;" id="body-fat">18.5</div>
+                        <div onclick="editBodyFat()" style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; padding: 12px; border-radius: 12px; text-align: center; box-shadow: 0 3px 10px rgba(78, 205, 196, 0.3); cursor: pointer; transition: all 0.3s;">
+                            <div style="font-size: 20px; font-weight: bold;" id="body-fat">--</div>
                             <div style="font-size: 11px; opacity: 0.9;">Body Fat %</div>
-                            <div style="font-size: 9px; margin-top: 4px; background: rgba(255,255,255,0.2); padding: 3px 6px; border-radius: 8px; display: inline-block;" id="bodyfat-trend">📉 -2.5%</div>
+                            <div style="font-size: 9px; margin-top: 4px; background: rgba(255,255,255,0.2); padding: 3px 6px; border-radius: 8px; display: inline-block;" id="bodyfat-trend">Click to set</div>
+                            <div style="font-size: 10px; margin-top: 6px; opacity: 0.8;">✏️ Click to edit</div>
                         </div>
                     </div>
                     
@@ -2033,9 +2035,146 @@
             }
         }
 
-        // Load nutrition goals when progress screen is shown
+        // ==================== WEIGHT & BODY FAT TRACKING ====================
+
+        // Edit weight
+        function editWeight() {
+            const currentWeight = prompt('Enter your current weight (lbs):', getCurrentWeight() || '');
+            if (currentWeight && !isNaN(currentWeight)) {
+                const weightGoal = prompt('Enter your goal weight (lbs, optional):', getWeightGoal() || '');
+                saveWeightEntry(parseFloat(currentWeight), weightGoal ? parseFloat(weightGoal) : null);
+                loadWeightStats();
+            }
+        }
+
+        // Edit body fat
+        function editBodyFat() {
+            const currentBF = prompt('Enter your current body fat % (e.g., 18.5):', getCurrentBodyFat() || '');
+            if (currentBF && !isNaN(currentBF)) {
+                const bfGoal = prompt('Enter your goal body fat % (optional):', getBodyFatGoal() || '');
+                saveBodyFatEntry(parseFloat(currentBF), bfGoal ? parseFloat(bfGoal) : null);
+                loadBodyFatStats();
+            }
+        }
+
+        // Get current values
+        function getCurrentWeight() {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            return stats.currentWeight || null;
+        }
+
+        function getCurrentBodyFat() {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            return stats.currentBodyFat || null;
+        }
+
+        function getWeightGoal() {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            return stats.weightGoal || null;
+        }
+
+        function getBodyFatGoal() {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            return stats.bodyFatGoal || null;
+        }
+
+        // Save weight entry
+        function saveWeightEntry(weight, goal) {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            const history = stats.weightHistory || [];
+
+            // Add new entry with timestamp
+            history.push({
+                weight: weight,
+                date: new Date().toISOString()
+            });
+
+            stats.currentWeight = weight;
+            stats.weightHistory = history;
+            if (goal !== null) stats.weightGoal = goal;
+
+            localStorage.setItem('fuelfire_body_stats', JSON.stringify(stats));
+        }
+
+        // Save body fat entry
+        function saveBodyFatEntry(bodyFat, goal) {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            const history = stats.bodyFatHistory || [];
+
+            // Add new entry with timestamp
+            history.push({
+                bodyFat: bodyFat,
+                date: new Date().toISOString()
+            });
+
+            stats.currentBodyFat = bodyFat;
+            stats.bodyFatHistory = history;
+            if (goal !== null) stats.bodyFatGoal = goal;
+
+            localStorage.setItem('fuelfire_body_stats', JSON.stringify(stats));
+        }
+
+        // Load weight stats and display
+        function loadWeightStats() {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            const weightEl = document.getElementById('current-weight');
+            const trendEl = document.getElementById('weight-trend');
+
+            if (stats.currentWeight) {
+                weightEl.textContent = stats.currentWeight + ' lbs';
+
+                // Calculate trend
+                const history = stats.weightHistory || [];
+                if (history.length >= 2) {
+                    const previous = history[history.length - 2].weight;
+                    const change = stats.currentWeight - previous;
+                    const arrow = change > 0 ? '📈' : change < 0 ? '📉' : '➡️';
+                    trendEl.textContent = `${arrow} ${change > 0 ? '+' : ''}${change.toFixed(1)} lbs`;
+                } else if (stats.weightGoal) {
+                    const toGo = stats.weightGoal - stats.currentWeight;
+                    trendEl.textContent = `🎯 ${Math.abs(toGo).toFixed(1)} lbs to goal`;
+                } else {
+                    trendEl.textContent = 'First entry';
+                }
+            } else {
+                weightEl.textContent = '--';
+                trendEl.textContent = 'Click to set';
+            }
+        }
+
+        // Load body fat stats and display
+        function loadBodyFatStats() {
+            const stats = JSON.parse(localStorage.getItem('fuelfire_body_stats') || '{}');
+            const bfEl = document.getElementById('body-fat');
+            const trendEl = document.getElementById('bodyfat-trend');
+
+            if (stats.currentBodyFat) {
+                bfEl.textContent = stats.currentBodyFat + '%';
+
+                // Calculate trend
+                const history = stats.bodyFatHistory || [];
+                if (history.length >= 2) {
+                    const previous = history[history.length - 2].bodyFat;
+                    const change = stats.currentBodyFat - previous;
+                    const arrow = change > 0 ? '📈' : change < 0 ? '📉' : '➡️';
+                    trendEl.textContent = `${arrow} ${change > 0 ? '+' : ''}${change.toFixed(1)}%`;
+                } else if (stats.bodyFatGoal) {
+                    const toGo = stats.bodyFatGoal - stats.currentBodyFat;
+                    trendEl.textContent = `🎯 ${Math.abs(toGo).toFixed(1)}% to goal`;
+                } else {
+                    trendEl.textContent = 'First entry';
+                }
+            } else {
+                bfEl.textContent = '--';
+                trendEl.textContent = 'Click to set';
+            }
+        }
+
+        // Load all progress data when progress screen is shown
         window.addEventListener('load', function() {
             displayNutritionGoals();
+            loadWeightStats();
+            loadBodyFatStats();
         });
 
         // Also update when showScreen('progress') is called
@@ -2045,6 +2184,8 @@
                 originalShowScreen(screenId);
                 if (screenId === 'progress') {
                     displayNutritionGoals();
+                    loadWeightStats();
+                    loadBodyFatStats();
                 }
             };
         }
