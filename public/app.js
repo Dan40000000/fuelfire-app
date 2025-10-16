@@ -4959,23 +4959,32 @@ function updateProgressDisplay() {
         document.getElementById('current-weight').textContent = progress.currentWeight;
         const weightChange = progress.currentWeight - progress.startWeight;
         const weightChangeText = weightChange < 0 ? `${weightChange} lbs from start` : `+${weightChange} lbs from start`;
-        document.getElementById('weight-change').textContent = weightChangeText;
+        const weightChangeEl = document.getElementById('weight-change');
+        if (weightChangeEl) {
+            weightChangeEl.textContent = weightChangeText;
+        }
     }
-    
+
     // Update body fat
     if (document.getElementById('body-fat')) {
         document.getElementById('body-fat').textContent = progress.bodyFat;
         const fatChange = progress.bodyFat - progress.startBodyFat;
         const fatChangeText = fatChange < 0 ? `${fatChange.toFixed(1)}% from start` : `+${fatChange.toFixed(1)}% from start`;
-        document.getElementById('bodyfat-change').textContent = fatChangeText;
+        const bodyfatChangeEl = document.getElementById('bodyfat-change');
+        if (bodyfatChangeEl) {
+            bodyfatChangeEl.textContent = fatChangeText;
+        }
     }
-    
+
     // Update monthly workouts
     if (document.getElementById('monthly-workouts')) {
         document.getElementById('monthly-workouts').textContent = progress.monthlyWorkouts;
         const workoutChange = progress.monthlyWorkouts - progress.lastMonthWorkouts;
         const workoutChangeText = workoutChange > 0 ? `+${workoutChange} from last month` : `${workoutChange} from last month`;
-        document.getElementById('workout-change').textContent = workoutChangeText;
+        const workoutChangeEl = document.getElementById('workout-change');
+        if (workoutChangeEl) {
+            workoutChangeEl.textContent = workoutChangeText;
+        }
     }
 }
 
