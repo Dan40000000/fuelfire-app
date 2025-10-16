@@ -1652,29 +1652,32 @@ function completeWorkout() {
 
 // Update showScreen to load saved workouts
 function showScreen(screenId) {
+    // Update URL hash for persistence on refresh
+    window.location.hash = screenId;
+
     // Hide all screens
     document.querySelectorAll('.screen-content').forEach(screen => {
         screen.classList.remove('active');
     });
-    
+
     // Show selected screen
     document.getElementById(screenId).classList.add('active');
-    
+
     // Load saved workouts if showing that screen
     if (screenId === 'saved-workouts') {
         loadSavedWorkouts();
     }
-    
+
     // Load fitness dashboard if showing track-workouts
     if (screenId === 'track-workouts') {
         setTimeout(updateFitnessDashboard, 100);
     }
-    
+
     // Update menu
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     // Find and highlight the correct menu item
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
@@ -1682,7 +1685,7 @@ function showScreen(screenId) {
             item.classList.add('active');
         }
     });
-    
+
     // Update header
     const titles = {
         'home': 'FuelFire',
@@ -1698,7 +1701,7 @@ function showScreen(screenId) {
         'workout-core-10': '10-Min Core'
     };
     document.querySelector('.header-title').textContent = titles[screenId] || 'FuelFire';
-    
+
     // Load screen-specific content
     if (screenId === 'track-workouts') {
         loadWorkoutHistory();
@@ -1707,7 +1710,7 @@ function showScreen(screenId) {
     } else if (screenId === 'diet-creation') {
         loadDietCreation();
     }
-    
+
     // Close sidebar if it's open
     if (document.getElementById('sidebar').classList.contains('open')) {
         toggleSidebar();
@@ -5490,12 +5493,18 @@ window.onload = function() {
     updateTime();
     setInterval(updateTime, 1000);
     updateDailyQuote();
-    
+
     // Load today's nutrition data
     loadTodaysNutrition();
-    
+
     // Load progress data
     updateProgressDisplay();
+
+    // Check URL hash and show the correct screen on page load
+    const hash = window.location.hash.substring(1); // Remove the # symbol
+    if (hash && document.getElementById(hash)) {
+        showScreen(hash);
+    }
     
     // Load recent workouts
     if (document.getElementById('recent-workouts')) {
