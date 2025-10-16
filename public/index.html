@@ -797,6 +797,23 @@
                         </div>
                     </div>
 
+                    <!-- Personal Records Section -->
+                    <div style="background: linear-gradient(135deg, #FFA500, #FF8C00); color: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(255, 165, 0, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4 style="margin: 0; font-size: 18px;">🏆 Personal Records</h4>
+                            <button onclick="addPR()" style="background: rgba(255,255,255,0.95); color: #FFA500; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">➕ Add PR</button>
+                        </div>
+
+                        <div id="pr-list" style="display: flex; flex-direction: column; gap: 12px;">
+                            <!-- PRs will be populated here -->
+                        </div>
+
+                        <div id="pr-empty-state" style="text-align: center; padding: 30px 20px; background: rgba(255,255,255,0.1); border-radius: 15px;">
+                            <div style="font-size: 48px; margin-bottom: 15px; opacity: 0.8;">💪</div>
+                            <p style="opacity: 0.9; font-size: 14px; line-height: 1.6;">Track your personal bests! Add exercises and log your max lifts to watch your strength grow over time.</p>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- 30-MIN MUSCLE WORKOUT SCREEN -->
@@ -2253,6 +2270,7 @@
                     loadWeightStats();
                     loadBodyFatStats();
                     loadJourneyStats();
+                    loadPRs();
                 }
             };
         }
@@ -2261,6 +2279,127 @@
         function goToPage(page) {
             window.location.href = page;
         }
+
+        // ==================== PERSONAL RECORDS TRACKING ====================
+
+        // Add new PR
+        function addPR() {
+            const exercise = prompt('Exercise name (e.g., Bench Press, Squat, Deadlift):');
+            if (!exercise || exercise.trim() === '') return;
+
+            const weight = prompt('Weight (lbs):');
+            if (!weight || isNaN(weight)) {
+                alert('Please enter a valid weight');
+                return;
+            }
+
+            const reps = prompt('Reps (optional, press OK to skip):', '1');
+            const finalReps = reps && !isNaN(reps) ? parseInt(reps) : 1;
+
+            const pr = {
+                id: Date.now(),
+                exercise: exercise.trim(),
+                weight: parseFloat(weight),
+                reps: finalReps,
+                date: new Date().toISOString()
+            };
+
+            savePR(pr);
+            loadPRs();
+        }
+
+        // Save PR to localStorage
+        function savePR(pr) {
+            const prs = JSON.parse(localStorage.getItem('fuelfire_personal_records') || '[]');
+            prs.push(pr);
+            localStorage.setItem('fuelfire_personal_records', JSON.stringify(prs));
+        }
+
+        // Load and display PRs
+        function loadPRs() {
+            const prs = JSON.parse(localStorage.getItem('fuelfire_personal_records') || '[]');
+            const prList = document.getElementById('pr-list');
+            const emptyState = document.getElementById('pr-empty-state');
+
+            if (!prList || !emptyState) return;
+
+            if (prs.length === 0) {
+                prList.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            prList.style.display = 'flex';
+            emptyState.style.display = 'none';
+
+            // Group PRs by exercise and get the best for each
+            const prsByExercise = {};
+            prs.forEach(pr => {
+                if (!prsByExercise[pr.exercise]) {
+                    prsByExercise[pr.exercise] = [];
+                }
+                prsByExercise[pr.exercise].push(pr);
+            });
+
+            // Build PR cards
+            prList.innerHTML = Object.keys(prsByExercise).map(exercise => {
+                const exercisePRs = prsByExercise[exercise].sort((a, b) => b.weight - a.weight);
+                const bestPR = exercisePRs[0];
+                const improvement = exercisePRs.length > 1 ? bestPR.weight - exercisePRs[exercisePRs.length - 1].weight : 0;
+
+                return `
+                    <div style="background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 3px 10px rgba(0,0,0,0.2);">
+                        <div style="flex: 1;">
+                            <div style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 5px;">${exercise}</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #FFA500;">${bestPR.weight} lbs ${bestPR.reps > 1 ? 'x ' + bestPR.reps : ''}</div>
+                            ${improvement > 0 ? `<div style="font-size: 11px; color: #27ae60; margin-top: 3px;">📈 +${improvement} lbs improvement</div>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="updatePR('${exercise}')" style="background: #4ECDC4; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">📝</button>
+                            <button onclick="deletePR('${exercise}')" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update PR for an exercise
+        function updatePR(exercise) {
+            const weight = prompt(`New PR for ${exercise} - Weight (lbs):`);
+            if (!weight || isNaN(weight)) {
+                alert('Please enter a valid weight');
+                return;
+            }
+
+            const reps = prompt('Reps (optional, press OK to skip):', '1');
+            const finalReps = reps && !isNaN(reps) ? parseInt(reps) : 1;
+
+            const pr = {
+                id: Date.now(),
+                exercise: exercise,
+                weight: parseFloat(weight),
+                reps: finalReps,
+                date: new Date().toISOString()
+            };
+
+            savePR(pr);
+            loadPRs();
+        }
+
+        // Delete all PRs for an exercise
+        function deletePR(exercise) {
+            if (!confirm(`Delete all records for ${exercise}?`)) return;
+
+            const prs = JSON.parse(localStorage.getItem('fuelfire_personal_records') || '[]');
+            const filtered = prs.filter(pr => pr.exercise !== exercise);
+            localStorage.setItem('fuelfire_personal_records', JSON.stringify(filtered));
+            loadPRs();
+        }
+
+        // Load PRs when page loads
+        window.addEventListener('load', function() {
+            loadPRs();
+        });
     </script>
 </body>
 </html>
