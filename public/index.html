@@ -746,108 +746,62 @@
                 <!-- PROGRESS SCREEN -->
                 <div class="screen-content" id="progress">
                     <!-- Hero Section -->
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 15px; margin-bottom: 18px; text-align: center;">
-                        <div style="font-size: 32px; margin-bottom: 8px;">🎯</div>
-                        <h2 style="font-size: 18px; margin-bottom: 8px; font-weight: bold;">Your Fitness Journey</h2>
-                        <p style="font-size: 12px; opacity: 0.9; line-height: 1.4;">"Progress is progress, no matter how small. Keep showing up!"</p>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; border-radius: 25px; margin-bottom: 25px; text-align: center; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);">
+                        <div style="font-size: 48px; margin-bottom: 15px;">🎯</div>
+                        <h3 style="font-size: 26px; margin-bottom: 12px; font-weight: bold;">Goals & Progress</h3>
+                        <p style="opacity: 0.95; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Every champion was once a contender who refused to give up. Track your journey, celebrate your wins, and keep pushing forward!</p>
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="goToPage('enhanced-diet-quiz.html')" style="background: rgba(255,255,255,0.95); color: #667eea; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s;">
+                                🍽️ Set Nutrition Goals
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Body Metrics Cards -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
-                        <!-- Weight Card -->
-                        <div onclick="editWeight()" style="background: var(--card-bg); padding: 15px; border-radius: 15px; cursor: pointer; border: 2px solid var(--lighter-bg); transition: all 0.3s ease;">
-                            <div style="font-size: 24px; margin-bottom: 6px;">⚖️</div>
-                            <div style="font-size: 11px; color: var(--primary-dark); font-weight: 600; margin-bottom: 4px;">WEIGHT</div>
-                            <div id="current-weight" style="font-size: 18px; font-weight: bold; color: var(--dark); margin-bottom: 4px;">--</div>
-                            <div id="weight-trend" style="font-size: 10px; color: #666;">Tap to track</div>
+                    <!-- Quick Stats Cards -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                        <div onclick="editWeight()" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3); cursor: pointer;">
+                            <div style="font-size: 28px; font-weight: bold;" id="current-weight">--</div>
+                            <div style="font-size: 13px; opacity: 0.9;">Current Weight</div>
+                            <div style="font-size: 11px; margin-top: 5px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 10px; display: inline-block;" id="weight-trend">Tap to track</div>
                         </div>
-
-                        <!-- Body Fat Card -->
-                        <div onclick="editBodyFat()" style="background: var(--card-bg); padding: 15px; border-radius: 15px; cursor: pointer; border: 2px solid var(--lighter-bg); transition: all 0.3s ease;">
-                            <div style="font-size: 24px; margin-bottom: 6px;">📊</div>
-                            <div style="font-size: 11px; color: var(--primary-dark); font-weight: 600; margin-bottom: 4px;">BODY FAT</div>
-                            <div id="current-bodyfat" style="font-size: 18px; font-weight: bold; color: var(--dark); margin-bottom: 4px;">--</div>
-                            <div id="bodyfat-trend" style="font-size: 10px; color: #666;">Tap to track</div>
+                        <div onclick="editBodyFat()" style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3); cursor: pointer;">
+                            <div style="font-size: 28px; font-weight: bold;" id="current-bodyfat">--</div>
+                            <div style="font-size: 13px; opacity: 0.9;">Body Fat %</div>
+                            <div style="font-size: 11px; margin-top: 5px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 10px; display: inline-block;" id="bodyfat-trend">Tap to track</div>
                         </div>
                     </div>
 
                     <!-- Nutrition Goals Section -->
-                    <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 18px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <h3 style="font-size: 16px; color: var(--dark); font-weight: bold;">🍽️ Nutrition Goals</h3>
-                            <button onclick="showScreen('diet-quiz')" style="background: var(--gradient-1); color: white; border: none; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer;">
-                                Edit
-                            </button>
+                    <div style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4 style="margin: 0; font-size: 18px;">🍽️ Nutrition Goals</h4>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="goToPage('enhanced-diet-quiz.html')" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit</button>
+                                <button onclick="deleteNutritionGoals()" style="background: rgba(0,0,0,0.2); color: white; border: none; padding: 10px 14px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.3s;">🗑️</button>
+                            </div>
                         </div>
-                        <div id="nutrition-goals-display">
-                            <!-- Will be populated by JavaScript -->
+
+                        <div id="nutrition-goals-display" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <!-- Will be populated by displayNutritionGoals() -->
                         </div>
                     </div>
 
-                    <!-- Journey Stats -->
-                    <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 18px;">
-                        <h3 style="font-size: 16px; color: var(--dark); font-weight: bold; margin-bottom: 12px;">📈 Your Journey Stats</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
-                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="workouts-completed">0</div>
-                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Workouts Done</div>
+                    <!-- Motivational Stats -->
+                    <div style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; text-align: center; box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);">
+                        <div style="font-size: 42px; margin-bottom: 15px;">💪</div>
+                        <h4 style="margin: 0 0 10px 0; font-size: 20px; font-weight: bold;">Your Journey Stats</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 15px;">
+                                <div style="font-size: 28px; font-weight: bold;" id="workouts-completed">0</div>
+                                <div style="font-size: 13px; opacity: 0.9;">Total Workouts</div>
                             </div>
-                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
-                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="current-streak">0</div>
-                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Day Streak 🔥</div>
-                            </div>
-                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
-                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="calories-tracked">0</div>
-                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Days Tracked</div>
-                            </div>
-                            <div style="text-align: center; padding: 12px; background: var(--lighter-bg); border-radius: 12px;">
-                                <div style="font-size: 20px; font-weight: bold; color: var(--primary);" id="weight-entries">0</div>
-                                <div style="font-size: 10px; color: #666; margin-top: 4px;">Weight Logs</div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 15px;">
+                                <div style="font-size: 28px; font-weight: bold;" id="current-streak">0</div>
+                                <div style="font-size: 13px; opacity: 0.9;">Day Streak</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Quick Start Guide (Empty State) -->
-                    <div id="quick-start-guide" style="background: var(--gradient-light); padding: 18px; border-radius: 15px; margin-bottom: 18px;">
-                        <h3 style="font-size: 16px; color: var(--dark); font-weight: bold; margin-bottom: 12px; text-align: center;">🚀 Quick Start Guide</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <div onclick="showScreen('diet-quiz')" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                <div style="font-size: 24px;">1️⃣</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Set Nutrition Goals</div>
-                                    <div style="font-size: 10px; color: #666;">Calculate your daily calorie & macro targets</div>
-                                </div>
-                            </div>
-                            <div onclick="editWeight()" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                <div style="font-size: 24px;">2️⃣</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Track Your Weight</div>
-                                    <div style="font-size: 10px; color: #666;">Log your starting weight & goal</div>
-                                </div>
-                            </div>
-                            <div onclick="showScreen('create-workout')" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                <div style="font-size: 24px;">3️⃣</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Start Working Out</div>
-                                    <div style="font-size: 10px; color: #666;">Create your first workout plan</div>
-                                </div>
-                            </div>
-                            <div onclick="goToPage('calorie-tracker.html')" style="background: white; padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                <div style="font-size: 24px;">4️⃣</div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: bold; color: var(--dark); font-size: 13px; margin-bottom: 2px;">Track Your Meals</div>
-                                    <div style="font-size: 10px; color: #666;">Log your daily food intake</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Motivational Footer -->
-                    <div style="background: var(--gradient-1); color: white; padding: 15px; border-radius: 15px; text-align: center;">
-                        <p style="font-size: 13px; font-style: italic; line-height: 1.5; margin: 0;">
-                            "The only bad workout is the one that didn't happen. You've got this! 💪"
-                        </p>
-                    </div>
                 </div>
 
                 <!-- 30-MIN MUSCLE WORKOUT SCREEN -->
