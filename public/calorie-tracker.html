@@ -1591,15 +1591,16 @@
                 console.log('📊 Today\'s data:', todayData);
                 console.log('🍔 Meal count:', todayData.meals.length);
             
-            // Get user's targets from most recent diet goals
+            // Get user's targets from nutrition goals (set in Goals & Progress page)
+            const nutritionGoals = JSON.parse(localStorage.getItem('fuelfire_nutrition_goals') || '{}');
             const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
             const recentDietGoals = JSON.parse(localStorage.getItem('fuelfire_recent_diet_goals') || '{}');
-            
-            // Calculate targets based on stored goals or use defaults
-            const calorieTarget = userProfile.calorieTarget || recentDietGoals.calorieTarget || 2000;
-            const proteinTarget = userProfile.proteinTarget || recentDietGoals.proteinTarget || Math.round(calorieTarget * 0.3 / 4);
-            const carbsTarget = userProfile.carbsTarget || recentDietGoals.carbsTarget || Math.round(calorieTarget * 0.4 / 4);
-            const fatTarget = userProfile.fatTarget || recentDietGoals.fatTarget || Math.round(calorieTarget * 0.3 / 9);
+
+            // Calculate targets - prioritize nutrition goals, then user profile, then diet quiz, then defaults
+            const calorieTarget = nutritionGoals.calories || userProfile.calorieTarget || recentDietGoals.calorieTarget || 2000;
+            const proteinTarget = nutritionGoals.protein || userProfile.proteinTarget || recentDietGoals.proteinTarget || 150;
+            const carbsTarget = nutritionGoals.carbs || userProfile.carbsTarget || recentDietGoals.carbsTarget || 225;
+            const fatTarget = nutritionGoals.fat || userProfile.fatTarget || recentDietGoals.fatTarget || 67;
             
             // Calculate consumed macros
             let totalProtein = 0;
@@ -1620,8 +1621,8 @@
             document.getElementById('calories-remaining').textContent = Math.max(0, calorieTarget - todayData.totalCalories);
             document.getElementById('percent-complete').textContent = Math.round((todayData.totalCalories / calorieTarget) * 100) + '%';
             
-            // Set sugar target (WHO recommendation: max 25g/day for adults)
-            const sugarTarget = 25;
+            // Set sugar target from nutrition goals or WHO recommendation (max 25g/day for adults)
+            const sugarTarget = nutritionGoals.sugar || 25;
             
             // Update macro tracking
             updateMacroDisplay('protein', totalProtein, proteinTarget);
