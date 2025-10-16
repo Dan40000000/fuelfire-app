@@ -115,19 +115,19 @@
 
         .modal-content {
             background-color: white;
-            margin: 10px;
+            margin: 5px;
             padding: 0;
             border-radius: 20px;
             max-width: 600px;
-            margin: 20px auto;
-            max-height: 90vh;
+            margin: 10px auto;
+            max-height: 95vh;
             overflow-y: auto;
         }
 
         .modal-header {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 20px 20px 0 0;
             position: relative;
         }
@@ -146,18 +146,18 @@
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 12px;
         }
 
         .form-section {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
 
         .form-step {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 15px;
-            padding: 12px;
+            margin-bottom: 10px;
+            padding: 8px;
             background: #f8f9ff;
             border-radius: 10px;
             border-left: 4px solid #3498db;
@@ -166,15 +166,15 @@
         .step-number {
             background: #3498db;
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            margin-right: 12px;
+            margin-right: 8px;
             flex-shrink: 0;
         }
 
@@ -182,16 +182,16 @@
             background: #fff5f5;
             border: 2px solid #e74c3c;
             border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
+            padding: 10px;
+            margin: 10px 0;
         }
 
         .tip-box {
             background: #f0f8ff;
             border: 2px solid #3498db;
             border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
+            padding: 10px;
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -1128,7 +1128,7 @@
             if (exercisesToShow.length === 0) {
                 html = `
                     <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">🔍</div>
+                        <div style="font-size: 48px; margin-bottom: 10px; font-size: 16px;">🔍</div>
                         <div style="color: #666; font-size: 16px;">No exercises found</div>
                         <div style="color: #999; font-size: 14px; margin-top: 8px;">Try a different search term</div>
                     </div>
@@ -1200,42 +1200,42 @@
             
             let contentHtml = `
                 <div class="form-section">
-                    <h3 style="color: #3498db; margin-bottom: 15px;">🎯 Proper Form</h3>
+                    <h3 style="color: #3498db; margin-bottom: 10px; font-size: 16px;">🎯 Proper Form</h3>
                     ${exercise.steps.map((step, i) => `
                         <div class="form-step">
                             <div class="step-number">${i + 1}</div>
-                            <div>${step}</div>
+                            <div style="font-size: 13px;">${step}</div>
                         </div>
                     `).join('')}
                 </div>
                 
                 <div class="risk-warning">
-                    <h4 style="color: #e74c3c; margin: 0 0 10px 0;">⚠️ Injury Risks</h4>
-                    <p style="margin: 0; font-size: 14px;">${exercise.risks}</p>
+                    <h4 style="color: #e74c3c; margin: 0 0 10px 0; font-size: 14px;">⚠️ Injury Risks</h4>
+                    <p style="margin: 0; font-size: 13px;">${exercise.risks}</p>
                 </div>
                 
                 <div class="form-section">
-                    <h3 style="color: #e74c3c; margin-bottom: 15px;">❌ Common Mistakes</h3>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        ${exercise.commonMistakes.map(mistake => `<li style="margin-bottom: 8px;">${mistake}</li>`).join('')}
+                    <h3 style="color: #e74c3c; margin-bottom: 10px; font-size: 16px;">❌ Common Mistakes</h3>
+                    <ul style="margin: 0; padding-left: 16px;">
+                        ${exercise.commonMistakes.map(mistake => `<li style="margin-bottom: 5px; font-size: 13px;">${mistake}</li>`).join('')}
                     </ul>
                 </div>
                 
                 <div class="form-section">
-                    <h3 style="color: #27ae60; margin-bottom: 15px;">✅ Safety Tips</h3>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        ${exercise.safetyTips.map(tip => `<li style="margin-bottom: 8px;">${tip}</li>`).join('')}
+                    <h3 style="color: #27ae60; margin-bottom: 10px; font-size: 16px;">✅ Safety Tips</h3>
+                    <ul style="margin: 0; padding-left: 16px;">
+                        ${exercise.safetyTips.map(tip => `<li style="margin-bottom: 5px; font-size: 13px;">${tip}</li>`).join('')}
                     </ul>
                 </div>
                 
                 <div class="tip-box">
-                    <h4 style="color: #3498db; margin: 0 0 10px 0;">💡 Energy Conservation Tip</h4>
-                    <p style="margin: 0; font-size: 14px;">${exercise.energySaving}</p>
+                    <h4 style="color: #3498db; margin: 0 0 10px 0; font-size: 14px;">💡 Energy Conservation Tip</h4>
+                    <p style="margin: 0; font-size: 13px;">${exercise.energySaving}</p>
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;">
                     <div style="background: #f8f9ff; padding: 15px; border-radius: 10px;">
-                        <h4 style="color: var(--primary); margin: 0 0 8px 0;">Target Muscles</h4>
+                        <h4 style="color: var(--primary); margin: 0 0 8px 0; font-size: 14px;">Target Muscles</h4>
                         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
                             ${exercise.primaryMuscles.map(muscle => 
                                 `<span style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px;">${muscle}</span>`
