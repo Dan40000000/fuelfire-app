@@ -16,8 +16,14 @@ function getDailyQuote() {
 // Update quote
 function updateDailyQuote() {
     const quote = getDailyQuote();
-    document.getElementById('daily-quote').textContent = quote;
-    document.getElementById('notification-quote').textContent = '"' + quote + '"';
+    const dailyQuoteEl = document.getElementById('daily-quote');
+    if (dailyQuoteEl) {
+        dailyQuoteEl.textContent = quote;
+    }
+    const notificationQuoteEl = document.getElementById('notification-quote');
+    if (notificationQuoteEl) {
+        notificationQuoteEl.textContent = '"' + quote + '"';
+    }
 }
 
 // Show notification
