@@ -742,12 +742,15 @@
 
                 <!-- PROGRESS SCREEN -->
                 <div class="screen-content" id="progress">
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
-                        <h3 style="font-size: 22px; margin-bottom: 10px;">🎯 Goals & Progress</h3>
-                        <p style="opacity: 0.9; font-size: 14px;">Set your targets and track your incredible journey</p>
-                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-                            <button onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; backdrop-filter: blur(10px);">🎯 Set Nutrition Goals</button>
-                            <button onclick="updateProgressData()" style="background: white; color: var(--primary); border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">📊 Update Stats</button>
+                    <!-- Hero Section -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; border-radius: 25px; margin-bottom: 25px; text-align: center; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);">
+                        <div style="font-size: 48px; margin-bottom: 15px;">🎯</div>
+                        <h3 style="font-size: 26px; margin-bottom: 12px; font-weight: bold;">Goals & Progress</h3>
+                        <p style="opacity: 0.95; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Every champion was once a contender who refused to give up. Track your journey, celebrate your wins, and keep pushing forward!</p>
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.95); color: #667eea; border: none; padding: 12px 24px; border-radius: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s;">
+                                🍽️ Set Nutrition Goals
+                            </button>
                         </div>
                     </div>
                     
@@ -768,8 +771,11 @@
                     <!-- Nutrition Goals Section -->
                     <div style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E); color: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h4 style="margin: 0; font-size: 18px;">🎯 Nutrition Goals</h4>
-                            <button onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit Goals</button>
+                            <h4 style="margin: 0; font-size: 18px;">🍽️ Nutrition Goals</h4>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit</button>
+                                <button onclick="deleteNutritionGoals()" style="background: rgba(0,0,0,0.2); color: white; border: none; padding: 10px 14px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.3s;">🗑️</button>
+                            </div>
                         </div>
 
                         <div id="nutrition-goals-display" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
@@ -777,147 +783,45 @@
                         </div>
                     </div>
 
-                    <!-- Active Goals with Progress -->
+                    <!-- Motivational Stats -->
+                    <div style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; text-align: center; box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);">
+                        <div style="font-size: 42px; margin-bottom: 15px;">💪</div>
+                        <h4 style="margin: 0 0 10px 0; font-size: 20px; font-weight: bold;">Your Journey Stats</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 15px;">
+                                <div style="font-size: 28px; font-weight: bold;" id="total-workouts">0</div>
+                                <div style="font-size: 13px; opacity: 0.9;">Total Workouts</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 15px;">
+                                <div style="font-size: 28px; font-weight: bold;" id="workout-streak">0</div>
+                                <div style="font-size: 13px; opacity: 0.9;">Day Streak</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Over Time -->
                     <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h4 style="color: var(--dark); margin: 0;">🏋️ Fitness Goals</h4>
-                            <button onclick="alert('Coming soon! Set workout frequency, strength, and body composition goals.')" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; cursor: pointer;">+ Add Goal</button>
-                        </div>
-                        
-                        <div id="active-goals-list">
-                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; padding: 20px; margin-bottom: 15px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                    <span style="font-size: 16px; font-weight: bold;">🏃 Lose 10 lbs</span>
-                                    <span style="font-size: 18px; font-weight: bold;">50%</span>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.3); border-radius: 10px; height: 8px; margin-bottom: 8px;">
-                                    <div style="background: white; height: 100%; width: 50%; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
-                                </div>
-                                <div style="font-size: 13px; opacity: 0.9;">5 lbs lost • 5 lbs to go • Target: Dec 2025</div>
-                            </div>
-                            
-                            <div style="background: linear-gradient(135deg, #4ECDC4, #44A08D); color: white; border-radius: 15px; padding: 20px; margin-bottom: 15px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                    <span style="font-size: 16px; font-weight: bold;">💪 Workout 4x/week</span>
-                                    <span style="font-size: 18px; font-weight: bold;">125%</span>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.3); border-radius: 10px; height: 8px; margin-bottom: 8px;">
-                                    <div style="background: white; height: 100%; width: 100%; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
-                                </div>
-                                <div style="font-size: 13px; opacity: 0.9;">5 workouts this week • Goal exceeded! 🎉</div>
-                            </div>
-                            
-                            <div style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border-radius: 15px; padding: 20px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                    <span style="font-size: 16px; font-weight: bold;">🏋️ Bench 250 lbs</span>
-                                    <span style="font-size: 18px; font-weight: bold;">90%</span>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.3); border-radius: 10px; height: 8px; margin-bottom: 8px;">
-                                    <div style="background: white; height: 100%; width: 90%; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
-                                </div>
-                                <div style="font-size: 13px; opacity: 0.9;">225 lbs current • 25 lbs to go • Almost there!</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Charts -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; margin-bottom: 25px;">
-                        <h4 style="color: var(--dark); margin-bottom: 20px;">📈 Progress Trends</h4>
-                        
-                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 20px; margin-bottom: 15px;">
-                            <h5 style="color: var(--dark); margin-bottom: 15px; font-size: 16px;">📊 Weight Progress (Last 4 weeks)</h5>
-                            <div style="display: flex; align-items: end; gap: 8px; height: 80px; margin-bottom: 10px;">
-                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                                    <div style="background: var(--primary); width: 20px; height: 45px; border-radius: 10px 10px 0 0; margin-bottom: 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">Week 1</span>
-                                </div>
-                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                                    <div style="background: var(--primary); width: 20px; height: 50px; border-radius: 10px 10px 0 0; margin-bottom: 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">Week 2</span>
-                                </div>
-                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                                    <div style="background: var(--primary); width: 20px; height: 60px; border-radius: 10px 10px 0 0; margin-bottom: 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">Week 3</span>
-                                </div>
-                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                                    <div style="background: #27ae60; width: 20px; height: 70px; border-radius: 10px 10px 0 0; margin-bottom: 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">Week 4</span>
+                        <h4 style="color: var(--dark); margin: 0 0 20px 0; text-align: center;">📊 Your Progress Journey</h4>
+
+                        <!-- Empty State -->
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.7;">🚀</div>
+                            <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 20px;">Your Journey Starts Here!</h3>
+                            <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+                                Track your workouts, log your meals, and watch your progress grow. Every small step counts toward your big goals!
+                            </p>
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Quick Start Guide:</div>
+                                <div style="text-align: left; font-size: 14px; line-height: 2;">
+                                    ✅ Set your nutrition goals above<br>
+                                    ✅ Log your meals in Calorie Tracker<br>
+                                    ✅ Create and track your workouts<br>
+                                    ✅ Watch your progress build day by day
                                 </div>
                             </div>
-                            <div style="text-align: center; font-size: 12px; color: #666;">Consistent progress! Down 5 lbs total 📉</div>
-                        </div>
-                        
-                        <div style="background: var(--lighter-bg); border-radius: 15px; padding: 20px;">
-                            <h5 style="color: var(--dark); margin-bottom: 15px; font-size: 16px;">💪 Workout Frequency</h5>
-                            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 10px;">
-                                <div style="text-align: center;">
-                                    <div style="background: #27ae60; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">M</span>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="background: var(--lighter-bg); border: 2px solid #ddd; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">T</span>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="background: #27ae60; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">W</span>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="background: #27ae60; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">T</span>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="background: #27ae60; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">F</span>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="background: #27ae60; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">S</span>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="background: var(--lighter-bg); border: 2px solid #ddd; width: 25px; height: 25px; border-radius: 50%; margin: 0 auto 5px;"></div>
-                                    <span style="font-size: 10px; color: #666;">S</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center; font-size: 12px; color: #666;">5/7 days this week - Crushing it! 🔥</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Personal Records -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 25px;">
-                        <h4 style="color: var(--dark); margin-bottom: 20px;">🏆 Recent PRs & Achievements</h4>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: linear-gradient(135deg, #FFD93D, #FF9800); color: white; border-radius: 15px; margin-bottom: 10px;">
-                            <div>
-                                <div style="font-weight: bold; font-size: 16px;">🏋️ Bench Press PR!</div>
-                                <div style="font-size: 12px; opacity: 0.9;">Set 3 days ago</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-weight: bold; font-size: 18px;">225 lbs</div>
-                                <div style="font-size: 12px; opacity: 0.9;">+10 lbs</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px;">
-                            <div>
-                                <div style="font-weight: bold; color: var(--dark);">💪 Pull-ups</div>
-                                <div style="color: #666; font-size: 12px;">Yesterday</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--primary); font-weight: bold;">15 reps</div>
-                                <div style="color: #27ae60; font-size: 12px;">+3 reps</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px;">
-                            <div>
-                                <div style="font-weight: bold; color: var(--dark);">🏃 5K Run</div>
-                                <div style="color: #666; font-size: 12px;">2 weeks ago</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: var(--primary); font-weight: bold;">22:15</div>
-                                <div style="color: #27ae60; font-size: 12px;">-1:30</div>
-                            </div>
+                            <p style="color: var(--primary); font-style: italic; font-size: 16px; font-weight: bold;">
+                                "The secret of getting ahead is getting started." - Mark Twain
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -2115,6 +2019,17 @@
                         <div style="font-size: 12px; opacity: 0.8;">🍭 Sugar Limit</div>
                     </div>
                 `;
+            }
+        }
+
+        // Delete nutrition goals
+        function deleteNutritionGoals() {
+            if (confirm('Are you sure you want to delete your nutrition goals? This will reset them to defaults.')) {
+                localStorage.removeItem('fuelfire_nutrition_goals');
+                displayNutritionGoals();
+
+                // Show confirmation
+                alert('✅ Nutrition goals have been reset to defaults!');
             }
         }
 
