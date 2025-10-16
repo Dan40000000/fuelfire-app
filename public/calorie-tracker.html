@@ -667,6 +667,7 @@
 
                 // Remove old event listener by cloning the button
                 const newLogBtn = logBtn.cloneNode(true);
+                newLogBtn.id = 'voice-button'; // IMPORTANT: Maintain the ID!
                 logBtn.parentNode.replaceChild(newLogBtn, logBtn);
 
                 // Add fresh event listener
