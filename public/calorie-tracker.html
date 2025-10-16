@@ -1229,20 +1229,22 @@
                     const servingSize = product.serving_size || '100g';
                     
                     // Calculate nutrition per serving (not per 100g)
-                    let calories, protein, carbs, fat;
-                    
+                    let calories, protein, carbs, fat, sugar;
+
                     if (product.nutriments['energy-kcal_serving']) {
                         // Use per-serving values if available
                         calories = product.nutriments['energy-kcal_serving'] || 0;
                         protein = product.nutriments['proteins_serving'] || 0;
                         carbs = product.nutriments['carbohydrates_serving'] || 0;
                         fat = product.nutriments['fat_serving'] || 0;
+                        sugar = product.nutriments['sugars_serving'] || 0;
                     } else {
                         // Fall back to per-100g values
                         calories = product.nutriments['energy-kcal_100g'] || product.nutriments['energy-kcal'] || 0;
                         protein = product.nutriments['proteins_100g'] || product.nutriments['proteins'] || 0;
                         carbs = product.nutriments['carbohydrates_100g'] || product.nutriments['carbohydrates'] || 0;
                         fat = product.nutriments['fat_100g'] || product.nutriments['fat'] || 0;
+                        sugar = product.nutriments['sugars_100g'] || product.nutriments['sugars'] || 0;
                     }
                     
                     closeScannerModal();
@@ -1254,6 +1256,7 @@
                         protein: Math.round(protein),
                         carbs: Math.round(carbs),
                         fat: Math.round(fat),
+                        sugar: Math.round(sugar),
                         serving: servingSize,
                         source: 'barcode'
                     }];
@@ -1271,6 +1274,7 @@
                                        data-food-protein="${Math.round(protein)}"
                                        data-food-carbs="${Math.round(carbs)}"
                                        data-food-fat="${Math.round(fat)}"
+                                       data-food-sugar="${Math.round(sugar)}"
                                        style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
                                 <div style="flex: 1;">
                                     <div style="font-weight: bold;">${fullName}</div>
@@ -1326,6 +1330,7 @@
                             const protein = parseFloat(checkbox.dataset.foodProtein);
                             const carbs = parseFloat(checkbox.dataset.foodCarbs);
                             const fat = parseFloat(checkbox.dataset.foodFat);
+                            const sugar = parseFloat(checkbox.dataset.foodSugar) || 0;
 
                             const foodToLog = {
                                 name: quantity !== 1 ? `${quantity}x ${foodName}` : foodName,
@@ -1333,6 +1338,7 @@
                                 protein: Math.round(protein * quantity),
                                 carbs: Math.round(carbs * quantity),
                                 fat: Math.round(fat * quantity),
+                                sugar: Math.round(sugar * quantity),
                                 meal: mealType
                             };
 
