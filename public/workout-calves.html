@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Calf Exercises - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -141,8 +141,8 @@
         <div class="screen">
             <!-- Status Bar -->
             <div class="status-bar">
-                <span>9:41</span>
-                <span id="time">9:41 AM</span>
+                
+                
             </div>
 
             <div class="header">
@@ -511,15 +511,6 @@
             }
         ];
 
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('time').textContent = time;
-        }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -654,8 +645,6 @@
 
         // Initialize
         window.addEventListener('load', function() {
-            updateTime();
-            setInterval(updateTime, 1000);
             displayExercises();
         });
     </script>
