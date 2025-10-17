@@ -89,7 +89,7 @@ body {
     display: flex;
     align-items: center;
     padding: 0 20px;
-    padding-top: max(20px, env(safe-area-inset-top));
+    padding-top: max(30px, calc(env(safe-area-inset-top) + 10px));
     padding-bottom: 15px;
     color: white;
     position: relative;
@@ -100,15 +100,15 @@ body {
     font-size: 28px;
     cursor: pointer;
     z-index: 1000;
-    padding: 12px 15px;
+    padding: 15px 18px;
     margin-right: 10px;
-    min-width: 50px;
-    min-height: 50px;
+    min-width: 56px;
+    min-height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255,255,255,0.2);
-    border-radius: 10px;
+    border-radius: 12px;
     -webkit-tap-highlight-color: rgba(255,255,255,0.3);
     touch-action: manipulation;
 }
@@ -124,6 +124,8 @@ body {
 
 .content {
     padding: 20px;
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
     height: calc(100% - 104px);
     overflow-y: auto;
     background: var(--light-bg);
@@ -636,14 +638,18 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 85px;
+    height: auto;
+    min-height: 85px;
     background: linear-gradient(135deg, rgba(58, 124, 165, 0.98) 0%, rgba(75, 156, 211, 0.95) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 8px 20px 20px 20px;
+    padding: 8px 20px;
+    padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px));
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
     box-shadow: 0 -10px 40px rgba(75, 156, 211, 0.4), 0 -2px 10px rgba(75, 156, 211, 0.6);
     border-top: 2px solid rgba(255, 255, 255, 0.3);
     z-index: 900;
@@ -763,7 +769,7 @@ body {
 
 /* Adjust content to not be hidden by bottom nav */
 .content {
-    padding-bottom: 100px !important;
+    padding-bottom: max(120px, calc(85px + env(safe-area-inset-bottom) + 20px)) !important;
 }
 
 /* ==================== LOG FOOD MENU MODAL ==================== */
