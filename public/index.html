@@ -1860,19 +1860,24 @@
 
     <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
-        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="">
+        <div class="nav-item" onclick="showLogFoodMenu()" ontouchstart="">
             <div class="nav-icon">🍽️</div>
             <div class="nav-label">Log Food</div>
             <div class="nav-glow"></div>
         </div>
-        <div class="nav-item" onclick="showScreen('create-workout')" ontouchstart="">
-            <div class="nav-icon">💪</div>
-            <div class="nav-label">Workout</div>
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'" ontouchstart="">
+            <div class="nav-icon">⚡</div>
+            <div class="nav-label">Quick Workout</div>
             <div class="nav-glow"></div>
         </div>
         <div class="nav-item" onclick="window.location.href='meal-plans.html'" ontouchstart="">
             <div class="nav-icon">📋</div>
             <div class="nav-label">Meal Plan</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="showScreen('progress')" ontouchstart="">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">Progress</div>
             <div class="nav-glow"></div>
         </div>
     </div>
@@ -2484,6 +2489,48 @@
         window.addEventListener('load', function() {
             loadPRs();
         });
+
+        // Log Food Menu Functions
+        function showLogFoodMenu() {
+            document.getElementById('logFoodModal').style.display = 'flex';
+        }
+
+        function closeLogFoodMenu() {
+            document.getElementById('logFoodModal').style.display = 'none';
+        }
+
+        function navigateToLogFood(mode) {
+            // Navigate to calorie tracker with the selected mode
+            window.location.href = `calorie-tracker.html?mode=${mode}`;
+        }
     </script>
+
+    <!-- Log Food Menu Modal -->
+    <div id="logFoodModal" class="log-food-modal" onclick="closeLogFoodMenu()">
+        <div class="log-food-menu" onclick="event.stopPropagation()">
+            <div class="log-food-header">
+                <h2>Log Your Food</h2>
+                <button class="close-btn" onclick="closeLogFoodMenu()">✕</button>
+            </div>
+            <div class="log-food-options">
+                <div class="log-option" onclick="navigateToLogFood('scan')">
+                    <div class="log-option-icon">📷</div>
+                    <div class="log-option-title">Scan Barcode</div>
+                    <div class="log-option-desc">Quick scan of packaged foods</div>
+                </div>
+                <div class="log-option" onclick="navigateToLogFood('voice')">
+                    <div class="log-option-icon">🎤</div>
+                    <div class="log-option-title">Voice Log</div>
+                    <div class="log-option-desc">Speak your meal naturally</div>
+                </div>
+                <div class="log-option" onclick="navigateToLogFood('manual')">
+                    <div class="log-option-icon">✍️</div>
+                    <div class="log-option-title">Manual Entry</div>
+                    <div class="log-option-desc">Type nutrition details</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

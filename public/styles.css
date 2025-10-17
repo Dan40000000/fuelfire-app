@@ -765,3 +765,203 @@ body {
 .content {
     padding-bottom: 100px !important;
 }
+
+/* ==================== LOG FOOD MENU MODAL ==================== */
+.log-food-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.log-food-menu {
+    background: white;
+    border-radius: 30px;
+    padding: 35px 30px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUpFade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.log-food-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--lighter-bg);
+}
+
+.log-food-header h2 {
+    font-size: 28px;
+    font-weight: bold;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.close-btn {
+    background: var(--lighter-bg);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 24px;
+    color: var(--primary-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.close-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.log-food-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.log-option {
+    background: var(--gradient-light);
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.log-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.log-option:hover::before {
+    left: 100%;
+}
+
+.log-option:hover {
+    transform: translateX(10px) scale(1.02);
+    border-color: var(--carolina-blue);
+    box-shadow: 0 10px 30px rgba(75, 156, 211, 0.3);
+    background: white;
+}
+
+.log-option:active {
+    transform: translateX(10px) scale(0.98);
+}
+
+.log-option-icon {
+    font-size: 48px;
+    min-width: 60px;
+    text-align: center;
+    filter: drop-shadow(0 2px 8px rgba(75, 156, 211, 0.3));
+}
+
+.log-option-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--dark);
+    margin-bottom: 5px;
+}
+
+.log-option-desc {
+    font-size: 14px;
+    color: var(--primary-dark);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .log-food-menu {
+        padding: 30px 25px;
+        max-width: 90%;
+    }
+
+    .log-food-header h2 {
+        font-size: 24px;
+    }
+
+    .log-option {
+        padding: 20px;
+        gap: 15px;
+    }
+
+    .log-option-icon {
+        font-size: 40px;
+        min-width: 50px;
+    }
+
+    .log-option-title {
+        font-size: 18px;
+    }
+
+    .log-option-desc {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .log-food-menu {
+        padding: 25px 20px;
+    }
+
+    .log-option {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .log-option:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    .log-option:active {
+        transform: translateY(-5px) scale(0.98);
+    }
+}

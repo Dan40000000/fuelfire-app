@@ -2628,6 +2628,28 @@
                     loadTodaysMeals();
                 }
             }, 60000); // Check every minute
+
+            // Check for mode parameter in URL (from Log Food modal menu)
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+
+            if (mode) {
+                // Auto-open the selected input method
+                setTimeout(() => {
+                    switch(mode) {
+                        case 'scan':
+                            startBarcodeScanning();
+                            break;
+                        case 'voice':
+                            startVoiceLogging();
+                            break;
+                        case 'manual':
+                            showSmartEntry();
+                            showManualEntry();
+                            break;
+                    }
+                }, 500); // Small delay to ensure page is fully loaded
+            }
         });
     </script>
 </body>
