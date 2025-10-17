@@ -206,6 +206,7 @@
                 equipment: "Barbell, Bench",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 iconClass: "bench-press-icon",
+                image: "images/exercises/bench-press.svg",
                 steps: [
                     "Lie flat on bench with eyes directly under the bar",
                     "Grip bar slightly wider than shoulder-width apart",
@@ -296,6 +297,7 @@
                 equipment: "None",
                 primaryMuscles: ["Chest", "Triceps", "Core"],
                 iconClass: "pushup-icon",
+                image: "images/exercises/push-up.svg",
                 steps: [
                     "Start in plank position with hands under shoulders",
                     "Keep body in straight line from head to heels",
@@ -326,6 +328,7 @@
                 equipment: "Dumbbells, Bench",
                 primaryMuscles: ["Chest", "Front Delts"],
                 iconClass: "flyes-icon",
+                image: "images/exercises/dumbbell-flyes.svg",
                 steps: [
                     "Lie on bench with dumbbells over chest",
                     "Start with slight bend in elbows (maintain throughout)",
@@ -356,6 +359,7 @@
                 equipment: "Dip Station or Parallel Bars",
                 primaryMuscles: ["Lower Chest", "Triceps", "Shoulders"],
                 iconClass: "weight-icon",
+                image: "images/exercises/dips.svg",
                 steps: [
                     "Grip parallel bars with arms fully extended",
                     "Lean slightly forward to target chest more",
@@ -795,6 +799,14 @@
                         </div>
                         <div class="supplement-content" id="content-${index}">
                             <div class="content-inner">
+                                ${exercise.image ? `
+                                    <div style="margin-bottom: 20px; text-align: center; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 3px 15px rgba(155, 89, 182, 0.1);">
+                                        <img src="${exercise.image}"
+                                             alt="${exercise.name} form diagram"
+                                             style="width: 100%; max-width: 400px; height: auto; border-radius: 10px;">
+                                    </div>
+                                ` : ''}
+
                                 <div class="quick-info">
                                     <div class="quick-stat">
                                         <div class="stat-value">${exercise.equipment}</div>

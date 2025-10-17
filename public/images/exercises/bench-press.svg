@@ -1,0 +1,47 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bench -->
+  <rect x="50" y="180" width="300" height="20" fill="#8B4513" rx="5"/>
+  <rect x="40" y="200" width="20" height="60" fill="#654321"/>
+  <rect x="340" y="200" width="20" height="60" fill="#654321"/>
+
+  <!-- Barbell -->
+  <line x1="100" y1="140" x2="300" y2="140" stroke="#333" stroke-width="4"/>
+  <rect x="90" y="135" width="20" height="10" fill="#666" rx="2"/>
+  <rect x="290" y="135" width="20" height="10" fill="#666" rx="2"/>
+
+  <!-- Person lying down -->
+  <!-- Head -->
+  <circle cx="120" cy="170" r="15" fill="#FFB6C1" stroke="#333" stroke-width="2"/>
+
+  <!-- Body -->
+  <rect x="135" y="165" width="100" height="30" fill="#4B9CD3" rx="5"/>
+
+  <!-- Arms pushing up -->
+  <line x1="150" y1="165" x2="150" y2="145" stroke="#FFB6C1" stroke-width="8" stroke-linecap="round"/>
+  <line x1="220" y1="165" x2="220" y2="145" stroke="#FFB6C1" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Hands on bar -->
+  <circle cx="150" cy="140" r="6" fill="#FFB6C1"/>
+  <circle cx="220" cy="140" r="6" fill="#FFB6C1"/>
+
+  <!-- Legs -->
+  <rect x="230" y="180" width="12" height="40" fill="#13294B" rx="3"/>
+  <rect x="245" y="180" width="12" height="40" fill="#13294B" rx="3"/>
+
+  <!-- Feet -->
+  <ellipse cx="236" cy="225" rx="8" ry="5" fill="#333"/>
+  <ellipse cx="251" cy="225" rx="8" ry="5" fill="#333"/>
+
+  <!-- Movement arrows -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#27ae60"/>
+    </marker>
+  </defs>
+  <line x1="185" y1="130" x2="185" y2="110" stroke="#27ae60" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <text x="195" y="120" font-family="Arial" font-size="14" font-weight="bold" fill="#27ae60">PUSH UP</text>
+
+  <!-- Title -->
+  <text x="200" y="30" font-family="Arial" font-size="24" font-weight="bold" fill="#4B9CD3" text-anchor="middle">BENCH PRESS</text>
+  <text x="200" y="50" font-family="Arial" font-size="14" fill="#666" text-anchor="middle">Lower to chest, press up to full extension</text>
+</svg>
