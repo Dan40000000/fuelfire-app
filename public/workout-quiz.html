@@ -138,6 +138,26 @@
             line-height: 1.6;
         }
 
+        .view-form-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .view-form-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(75, 156, 211, 0.3);
+        }
+
         .single-column {
             grid-template-columns: 1fr;
         }
@@ -727,6 +747,65 @@
             document.getElementById('generate-btn').disabled = !allSelected;
         }
 
+        // Map exercise names to technique pages
+        function getExerciseTechniquePage(exerciseName) {
+            const name = exerciseName.toLowerCase();
+
+            // Leg exercises
+            if (name.includes('squat') || name.includes('lunge') || name.includes('deadlift') ||
+                name.includes('leg press') || name.includes('leg curl') || name.includes('leg extension') ||
+                name.includes('step-up') || name.includes('glute bridge') || name.includes('nordic') ||
+                name.includes('hack squat')) {
+                return 'workout-legs.html';
+            }
+
+            // Shoulder exercises
+            if (name.includes('shoulder press') || name.includes('overhead press') ||
+                name.includes('lateral raise') || name.includes('front raise') ||
+                name.includes('pike push') || name.includes('face pull')) {
+                return 'workout-shoulders.html';
+            }
+
+            // Arm exercises
+            if (name.includes('curl') || name.includes('tricep') || name.includes('bicep')) {
+                return 'workout-arms.html';
+            }
+
+            // Chest exercises
+            if (name.includes('bench press') || name.includes('push-up') || name.includes('push up') ||
+                name.includes('flye') || name.includes('flies') || name.includes('dip')) {
+                return 'workout-chest.html';
+            }
+
+            // Back exercises
+            if (name.includes('row') || name.includes('pull-up') || name.includes('pullup') ||
+                name.includes('pulldown') || name.includes('pullover') || name.includes('superman')) {
+                return 'workout-back.html';
+            }
+
+            // Core exercises
+            if (name.includes('plank') || name.includes('crunch') || name.includes('sit-up') ||
+                name.includes('ab') || name.includes('core') || name.includes('mountain climber')) {
+                return 'workout-core.html';
+            }
+
+            // Calf exercises
+            if (name.includes('calf')) {
+                return 'workout-calves.html';
+            }
+
+            // Cardio exercises
+            if (name.includes('burpee') || name.includes('jump') || name.includes('sprint') ||
+                name.includes('run') || name.includes('cardio') || name.includes('hiit') ||
+                name.includes('treadmill') || name.includes('bike') || name.includes('row') ||
+                name.includes('battle rope') || name.includes('high knee') || name.includes('jumping jack')) {
+                return 'workout-cardio.html';
+            }
+
+            // Default to workout techniques main page
+            return 'workout-techniques.html';
+        }
+
         function generateWorkout() {
             const { time, focus, equipment } = selections;
 
@@ -738,6 +817,7 @@
             let html = '';
 
             workout.forEach(exercise => {
+                const techniquePage = getExerciseTechniquePage(exercise.name);
                 html += `
                     <div class="exercise-item">
                         <div class="exercise-name">${exercise.name}</div>
@@ -746,6 +826,7 @@
                             ${exercise.reps ? ` • ${exercise.reps}` : ''}
                             ${exercise.rest ? ` • ${exercise.rest}` : ''}
                         </div>
+                        <a href="${techniquePage}" class="view-form-btn">📖 View Form & Technique</a>
                     </div>
                 `;
             });
