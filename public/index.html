@@ -2450,6 +2450,36 @@
             loadBodyFatStats();
             loadJourneyStats();
             loadHomeHealthData();
+
+            // Start real-time health data polling (every 2 minutes)
+            startHealthDataPolling();
+        });
+
+        // Real-time health data polling
+        let healthPollingInterval = null;
+
+        function startHealthDataPolling() {
+            // Poll every 2 minutes for updated steps, HR, calories
+            healthPollingInterval = setInterval(async () => {
+                try {
+                    if (window.healthSync && window.healthSync.isAvailable) {
+                        const data = await window.healthSync.syncAllData();
+                        if (data) {
+                            updateHomeHealthUI(data);
+                            console.log('🔄 Health data refreshed');
+                        }
+                    }
+                } catch (error) {
+                    console.log('Health polling error:', error);
+                }
+            }, 120000); // 2 minutes
+        }
+
+        // Stop polling when page unloads
+        window.addEventListener('beforeunload', function() {
+            if (healthPollingInterval) {
+                clearInterval(healthPollingInterval);
+            }
         });
 
         // Load Apple Health data for home page
@@ -2532,6 +2562,77 @@
             } catch (error) {
                 console.error('Error syncing workout calories:', error);
             }
+        }
+
+        // Calculate total calories burned using HR data (more accurate) or fallback to BMR + activity
+        async function calculateTotalCaloriesBurned(healthData) {
+            try {
+                // Try to get user profile for BMR calculation
+                const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                const age = userProfile.age || 30;
+                const weight = healthData.weight || userProfile.weight || 70; // kg
+                const heightCm = userProfile.height || 175;
+                const sex = userProfile.sex || 'male';
+
+                // If we have heart rate data, use HR-based calculation (more accurate)
+                if (healthData.heartRate && healthData.heartRate > 0) {
+                    const hrCalories = calculateHRBasedCalories(healthData.heartRate, age, weight, sex);
+                    console.log(`💓 Using HR-based calorie calculation: ${hrCalories} cal`);
+                    return hrCalories;
+                }
+
+                // Fallback: BMR + activity multiplier
+                const bmr = calculateBMR(weight, heightCm, age, sex);
+                const activityMultiplier = getActivityMultiplier(healthData.steps || 0);
+                const totalCalories = Math.round(bmr * activityMultiplier);
+
+                console.log(`📊 Using BMR + activity calculation: ${totalCalories} cal (BMR: ${bmr}, multiplier: ${activityMultiplier})`);
+                return totalCalories;
+
+            } catch (error) {
+                console.error('Error calculating calories:', error);
+                return 2000; // Default fallback
+            }
+        }
+
+        // HR-based calorie calculation (Keytel formula)
+        function calculateHRBasedCalories(avgHeartRate, age, weightKg, sex) {
+            // Keytel et al. formula for calories per minute
+            // Male: (-55.0969 + (0.6309 x HR) + (0.1988 x W) + (0.2017 x A))/4.184
+            // Female: (-20.4022 + (0.4472 x HR) - (0.1263 x W) + (0.074 x A))/4.184
+
+            const isMale = sex === 'male';
+            let calPerMin;
+
+            if (isMale) {
+                calPerMin = (-55.0969 + (0.6309 * avgHeartRate) + (0.1988 * weightKg) + (0.2017 * age)) / 4.184;
+            } else {
+                calPerMin = (-20.4022 + (0.4472 * avgHeartRate) - (0.1263 * weightKg) + (0.074 * age)) / 4.184;
+            }
+
+            // Assume 16 hours awake per day (960 minutes)
+            const totalCalories = calPerMin * 960;
+            return Math.round(totalCalories);
+        }
+
+        // Calculate Basal Metabolic Rate (BMR) - Mifflin-St Jeor Equation
+        function calculateBMR(weightKg, heightCm, age, sex) {
+            const isMale = sex === 'male';
+
+            if (isMale) {
+                return Math.round((10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5);
+            } else {
+                return Math.round((10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161);
+            }
+        }
+
+        // Get activity multiplier based on steps
+        function getActivityMultiplier(steps) {
+            if (steps < 3000) return 1.2;        // Sedentary
+            if (steps < 5000) return 1.375;      // Lightly active
+            if (steps < 7500) return 1.55;       // Moderately active
+            if (steps < 10000) return 1.725;     // Very active
+            return 1.9;                          // Extremely active (10k+ steps)
         }
 
         // Update home food calories display
