@@ -2492,6 +2492,68 @@
             if (caloriesBurnedEl && data.caloriesBurned !== undefined) {
                 caloriesBurnedEl.textContent = data.caloriesBurned.toLocaleString();
             }
+
+            // Sync workout calories to daily calorie budget
+            if (data.caloriesBurned && data.caloriesBurned > 0) {
+                syncWorkoutCaloriesToDailyBudget(data.caloriesBurned);
+            }
+
+            // Update the home calories display with food calories
+            updateHomeFoodCalories();
+        }
+
+        // Sync workout calories from Apple Health to daily calorie budget
+        function syncWorkoutCaloriesToDailyBudget(caloriesBurned) {
+            try {
+                // Get today's date key
+                const today = new Date().toISOString().split('T')[0];
+
+                // Get or create daily nutrition data
+                let dailyNutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}');
+
+                if (!dailyNutrition[today]) {
+                    dailyNutrition[today] = {
+                        calories: 0,
+                        protein: 0,
+                        carbs: 0,
+                        fat: 0,
+                        meals: [],
+                        workoutCaloriesBurned: 0
+                    };
+                }
+
+                // Store workout calories separately (don't double-count)
+                dailyNutrition[today].workoutCaloriesBurned = caloriesBurned;
+
+                // Save back to localStorage
+                localStorage.setItem('dailyNutrition', JSON.stringify(dailyNutrition));
+
+                console.log(`✅ Synced ${caloriesBurned} workout calories from Apple Health`);
+            } catch (error) {
+                console.error('Error syncing workout calories:', error);
+            }
+        }
+
+        // Update home food calories display
+        function updateHomeFoodCalories() {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const dailyNutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}');
+                const todayData = dailyNutrition[today] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+                // Update displays
+                const homeCalories = document.getElementById('home-calories');
+                const homeProtein = document.getElementById('home-protein');
+                const homeCarbs = document.getElementById('home-carbs');
+                const homeFat = document.getElementById('home-fat');
+
+                if (homeCalories) homeCalories.textContent = Math.round(todayData.calories).toLocaleString();
+                if (homeProtein) homeProtein.textContent = Math.round(todayData.protein) + 'g';
+                if (homeCarbs) homeCarbs.textContent = Math.round(todayData.carbs) + 'g';
+                if (homeFat) homeFat.textContent = Math.round(todayData.fat) + 'g';
+            } catch (error) {
+                console.error('Error updating home food calories:', error);
+            }
         }
 
         // Also update when showScreen('progress') is called

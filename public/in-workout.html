@@ -6,6 +6,7 @@
     <title>Active Workout - Well Fit</title>
     <link rel="stylesheet" href="styles.css">
     <script src="global-nav.js"></script>
+    <script src="health-sync.js"></script>
     <style>
         .workout-header {
             background: var(--gradient-1);
@@ -689,7 +690,7 @@
             }, 1000);
         }
 
-        function finishWorkout() {
+        async function finishWorkout() {
             const caloriesBurned = parseInt(document.getElementById('calories-burned').value) || 0;
 
             if (caloriesBurned <= 0) {
@@ -716,6 +717,18 @@
 
             workoutHistory.unshift(completedWorkout);
             localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+            // Write workout to Apple Health if available
+            if (window.logWorkoutToAppleHealth) {
+                try {
+                    const success = await window.logWorkoutToAppleHealth('strength_training', duration, caloriesBurned);
+                    if (success) {
+                        console.log('✅ Workout logged to Apple Health');
+                    }
+                } catch (error) {
+                    console.error('Error logging to Apple Health:', error);
+                }
+            }
 
             // Clear current workout
             localStorage.removeItem('currentWorkout');
