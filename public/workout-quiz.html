@@ -287,6 +287,93 @@
             opacity: 0.9;
             margin-top: 10px;
         }
+
+        .template-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 15px rgba(75, 156, 211, 0.1);
+            border-left: 5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(75, 156, 211, 0.2);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .template-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .template-meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .template-action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-template-btn {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .delete-template-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .template-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .load-templates-btn {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(156, 39, 176, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .load-templates-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(156, 39, 176, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -424,6 +511,10 @@
                         <button class="generate-btn" onclick="generateWorkout()" id="generate-btn" disabled>
                             Generate My Workout ⚡
                         </button>
+
+                        <button class="load-templates-btn" onclick="loadSavedTemplates()">
+                            📚 Load Saved Workouts
+                        </button>
                     </div>
 
                     <div id="workout-result" class="workout-result">
@@ -435,9 +526,23 @@
                         <button class="generate-btn" onclick="startWorkout()">
                             💪 Start Workout
                         </button>
+                        <button class="generate-btn" onclick="saveWorkoutTemplate()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); margin-top: 15px;">
+                            💾 Save as Template
+                        </button>
                         <button class="generate-btn" onclick="startOver()" style="background: transparent; color: var(--primary); border: 2px solid var(--primary); margin-top: 15px;">
                             Create New Workout
                         </button>
+                    </div>
+
+                    <!-- Saved Templates Section -->
+                    <div id="saved-templates-section" style="display: none;">
+                        <div class="question-card">
+                            <div class="question-title">📚 Your Saved Workouts</div>
+                            <div id="saved-templates-list"></div>
+                            <button class="generate-btn" onclick="showQuiz()" style="margin-top: 20px;">
+                                ⚡ Create New Workout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -721,6 +826,160 @@
         function showScreen(screenId) {
             window.location.href = 'index.html#' + screenId;
         }
+
+        // Workout Template Management Functions
+        function saveWorkoutTemplate() {
+            const { muscles, time, location, style } = selections;
+            const workout = buildWorkout(muscles, time, location, style);
+            const summary = `${time} min • ${location} • ${muscles.join(', ')} • ${style === 'unique' ? 'Unique exercises' : 'Classic routine'}`;
+
+            // Prompt user for template name
+            const templateName = prompt('Give this workout a name:', `${location} ${muscles.join(' & ')}`);
+
+            if (!templateName) {
+                return; // User cancelled
+            }
+
+            // Create template object
+            const template = {
+                id: Date.now(),
+                name: templateName,
+                exercises: workout,
+                summary: summary,
+                muscles: muscles,
+                time: time,
+                location: location,
+                style: style,
+                createdAt: new Date().toISOString()
+            };
+
+            // Get existing templates
+            const savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+
+            // Add new template
+            savedTemplates.unshift(template);
+
+            // Save back to localStorage
+            localStorage.setItem('workoutTemplates', JSON.stringify(savedTemplates));
+
+            alert(`✅ Workout "${templateName}" saved successfully!`);
+        }
+
+        function loadSavedTemplates() {
+            const savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+
+            if (savedTemplates.length === 0) {
+                alert('No saved workouts yet. Create and save a workout first!');
+                return;
+            }
+
+            // Hide quiz and result sections
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('workout-result').classList.remove('show');
+
+            // Show saved templates section
+            const templatesSection = document.getElementById('saved-templates-section');
+            templatesSection.style.display = 'block';
+
+            // Render templates
+            renderSavedTemplates(savedTemplates);
+        }
+
+        function renderSavedTemplates(templates) {
+            const container = document.getElementById('saved-templates-list');
+
+            let html = '';
+            templates.forEach((template, index) => {
+                const exerciseCount = template.exercises.length;
+                const date = new Date(template.createdAt).toLocaleDateString();
+
+                html += `
+                    <div class="template-card">
+                        <div class="template-header">
+                            <div class="template-name">${template.name}</div>
+                            <div style="font-size: 24px;">💪</div>
+                        </div>
+                        <div class="template-meta">
+                            ${template.summary}
+                        </div>
+                        <div class="template-meta">
+                            ${exerciseCount} exercises • Created ${date}
+                        </div>
+                        <div class="template-actions">
+                            <button class="template-action-btn start-template-btn" onclick="startSavedWorkout(${template.id})">
+                                ▶️ Start Workout
+                            </button>
+                            <button class="template-action-btn delete-template-btn" onclick="deleteTemplate(${template.id})">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function startSavedWorkout(templateId) {
+            const savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+            const template = savedTemplates.find(t => t.id === templateId);
+
+            if (!template) {
+                alert('Workout template not found!');
+                return;
+            }
+
+            // Save as current workout
+            const workoutData = {
+                exercises: template.exercises,
+                summary: template.summary,
+                muscles: template.muscles,
+                time: template.time,
+                location: template.location,
+                style: template.style
+            };
+
+            localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
+
+            // Navigate to in-workout page
+            window.location.href = 'in-workout.html';
+        }
+
+        function deleteTemplate(templateId) {
+            if (!confirm('Are you sure you want to delete this workout template?')) {
+                return;
+            }
+
+            let savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+            savedTemplates = savedTemplates.filter(t => t.id !== templateId);
+            localStorage.setItem('workoutTemplates', JSON.stringify(savedTemplates));
+
+            // Re-render templates
+            if (savedTemplates.length === 0) {
+                showQuiz();
+            } else {
+                renderSavedTemplates(savedTemplates);
+            }
+        }
+
+        function showQuiz() {
+            // Hide saved templates section
+            document.getElementById('saved-templates-section').style.display = 'none';
+
+            // Show quiz section
+            document.getElementById('quiz-section').style.display = 'block';
+
+            // Reset workout result if showing
+            document.getElementById('workout-result').classList.remove('show');
+        }
+
+        // Check on page load if we should show templates
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('view') === 'templates') {
+                loadSavedTemplates();
+            }
+        });
     </script>
 </body>
 </html>
