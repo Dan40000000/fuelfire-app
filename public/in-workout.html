@@ -597,7 +597,8 @@
                                        id="weight-${index}-${i}"
                                        placeholder="0"
                                        min="0"
-                                       step="5">
+                                       step="5"
+                                       oninput="updateProgress()">
                             </div>
                             <div class="input-group">
                                 <label class="input-label">Reps</label>
@@ -605,7 +606,8 @@
                                        class="set-input"
                                        id="reps-${index}-${i}"
                                        placeholder="0"
-                                       min="0">
+                                       min="0"
+                                       oninput="updateProgress()">
                             </div>
                             <div class="input-group">
                                 <label class="input-label">Rest</label>
@@ -622,61 +624,41 @@
 
                 html += `
                         </div>
-                        <button class="complete-exercise-btn" onclick="completeExercise(${index})">
-                            ✓ Complete Exercise
-                        </button>
                     </div>
                 `;
             });
 
             container.innerHTML = html;
-        }
 
-        function completeExercise(index) {
-            const exerciseElement = document.getElementById(`exercise-${index}`);
-            const button = exerciseElement.querySelector('.complete-exercise-btn');
-
-            exerciseStates[index].completed = !exerciseStates[index].completed;
-
-            if (exerciseStates[index].completed) {
-                exerciseElement.classList.add('completed');
-                button.classList.add('completed');
-                button.textContent = '✓ Completed';
-
-                // Collect set data
-                const numSets = parseInt(workoutData.exercises[index].sets) || 3;
-                for (let i = 0; i < numSets; i++) {
-                    const weight = document.getElementById(`weight-${index}-${i}`).value;
-                    const reps = document.getElementById(`reps-${index}-${i}`).value;
-                    const rest = document.getElementById(`rest-${index}-${i}`).value;
-
-                    exerciseStates[index].sets.push({ weight, reps, rest });
-                }
-            } else {
-                exerciseElement.classList.remove('completed');
-                button.classList.remove('completed');
-                button.textContent = '✓ Complete Exercise';
-                exerciseStates[index].sets = [];
-            }
-
-            updateProgress();
+            // Show finish section immediately (no need to complete exercises individually)
+            document.getElementById('finish-section').style.display = 'block';
         }
 
         function updateProgress() {
-            const completed = exerciseStates.filter(e => e.completed).length;
-            const total = exerciseStates.length;
-            const percentage = (completed / total) * 100;
+            // Progress based on number of exercises with at least one set logged
+            let completed = 0;
+            const total = workoutData.exercises.length;
 
+            workoutData.exercises.forEach((exercise, index) => {
+                const numSets = parseInt(exercise.sets) || 3;
+                let hasData = false;
+
+                for (let i = 0; i < numSets; i++) {
+                    const weight = document.getElementById(`weight-${index}-${i}`)?.value;
+                    const reps = document.getElementById(`reps-${index}-${i}`)?.value;
+
+                    if (weight && reps && parseInt(weight) > 0 && parseInt(reps) > 0) {
+                        hasData = true;
+                        break;
+                    }
+                }
+
+                if (hasData) completed++;
+            });
+
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
             document.getElementById('progress-fill').style.width = percentage + '%';
-            document.getElementById('progress-text').textContent = `${completed} of ${total} exercises completed`;
-
-            // Show finish section if all exercises are done
-            if (completed === total && total > 0) {
-                document.getElementById('finish-section').style.display = 'block';
-                document.getElementById('finish-section').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                document.getElementById('finish-section').style.display = 'none';
-            }
+            document.getElementById('progress-text').textContent = `${completed} of ${total} exercises logged`;
         }
 
         function startTimer() {
@@ -691,6 +673,12 @@
         }
 
         async function finishWorkout() {
+            // Confirmation dialog
+            const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
+            if (!confirm(`Are you sure you want to finish your workout?\n\nDuration: ${duration} minutes`)) {
+                return;
+            }
+
             const caloriesBurned = parseInt(document.getElementById('calories-burned').value) || 0;
 
             if (caloriesBurned <= 0) {
@@ -698,7 +686,41 @@
                 return;
             }
 
-            const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
+            // Collect all exercise data, filtering out zero values
+            const exercisesWithData = [];
+
+            workoutData.exercises.forEach((exercise, exerciseIndex) => {
+                const numSets = parseInt(exercise.sets) || 3;
+                const sets = [];
+
+                // Collect only sets with valid data (non-zero weight and reps)
+                for (let i = 0; i < numSets; i++) {
+                    const weight = parseInt(document.getElementById(`weight-${exerciseIndex}-${i}`)?.value) || 0;
+                    const reps = parseInt(document.getElementById(`reps-${exerciseIndex}-${i}`)?.value) || 0;
+                    const rest = parseInt(document.getElementById(`rest-${exerciseIndex}-${i}`)?.value) || 0;
+
+                    // Only save sets with non-zero weight and reps
+                    if (weight > 0 && reps > 0) {
+                        sets.push({ weight, reps, rest });
+                    }
+                }
+
+                // Only include exercise if it has at least one valid set
+                if (sets.length > 0) {
+                    exercisesWithData.push({
+                        name: exercise.name,
+                        sets: sets,
+                        completed: true
+                    });
+                }
+            });
+
+            // Check if any exercises were logged
+            if (exercisesWithData.length === 0) {
+                if (!confirm('No exercises logged with weight/reps. Save workout anyway?')) {
+                    return;
+                }
+            }
 
             // Save workout to history
             const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
@@ -708,11 +730,7 @@
                 duration: duration,
                 calories: caloriesBurned,
                 summary: workoutData.summary,
-                exercises: workoutData.exercises.map((ex, i) => ({
-                    name: ex.name,
-                    sets: exerciseStates[i].sets,
-                    completed: exerciseStates[i].completed
-                }))
+                exercises: exercisesWithData
             };
 
             workoutHistory.unshift(completedWorkout);
@@ -737,7 +755,7 @@
             clearInterval(timerInterval);
 
             // Redirect to success page or home
-            alert(`Workout completed!\n${duration} minutes\n${caloriesBurned} calories burned`);
+            alert(`Workout completed!\n${duration} minutes\n${caloriesBurned} calories burned\n${exercisesWithData.length} exercises logged`);
             window.location.href = 'index.html';
         }
 
