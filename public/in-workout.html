@@ -679,11 +679,13 @@
                 return;
             }
 
-            const caloriesBurned = parseInt(document.getElementById('calories-burned').value) || 0;
+            // Calories are optional - if not entered, estimate or use 0
+            let caloriesBurned = parseInt(document.getElementById('calories-burned').value) || 0;
 
-            if (caloriesBurned <= 0) {
-                alert('Please enter calories burned or enable Apple Health sync');
-                return;
+            // If no calories entered, make a rough estimate based on duration
+            if (caloriesBurned <= 0 && duration > 0) {
+                caloriesBurned = duration * 8; // Rough estimate: 8 cal/min for strength training
+                console.log(`📊 Estimated calories: ${caloriesBurned} (${duration} min x 8 cal/min)`);
             }
 
             // Collect all exercise data, filtering out zero values
