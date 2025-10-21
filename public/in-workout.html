@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Active Workout - Well Fit</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="global-nav.js"></script>
+    <style>
+        .workout-header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .workout-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .workout-meta {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .exercise-tracker {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(75, 156, 211, 0.15);
+        }
+
+        .exercise-tracker.completed {
+            opacity: 0.6;
+            background: #f0f0f0;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .exercise-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .exercise-number {
+            background: var(--gradient-1);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .exercise-target {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--lighter-bg);
+            border-radius: 10px;
+        }
+
+        .set-inputs {
+            margin-bottom: 15px;
+        }
+
+        .set-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+        }
+
+        .set-label {
+            font-weight: bold;
+            font-size: 12px;
+            color: var(--dark);
+            margin-bottom: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .set-label:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .input-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .set-input {
+            padding: 8px 4px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .set-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(75, 156, 211, 0.05);
+        }
+
+        .complete-exercise-btn {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .complete-exercise-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(75, 156, 211, 0.3);
+        }
+
+        .complete-exercise-btn.completed {
+            background: #4CAF50;
+        }
+
+        .finish-workout-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(75, 156, 211, 0.15);
+        }
+
+        .calories-input-group {
+            margin-bottom: 20px;
+        }
+
+        .calories-input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .calories-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .calories-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(75, 156, 211, 0.05);
+        }
+
+        .health-sync-option {
+            background: var(--lighter-bg);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .health-sync-text {
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: #ccc;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(22px);
+        }
+
+        .finish-workout-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+            transition: all 0.3s;
+        }
+
+        .finish-workout-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+        }
+
+        .cancel-workout-btn {
+            background: transparent;
+            color: #999;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .cancel-workout-btn:hover {
+            border-color: #f44336;
+            color: #f44336;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar"></div>
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">💪 Active Workout</div>
+            </div>
+
+            <div class="content">
+                <!-- Workout Header -->
+                <div class="workout-header">
+                    <div class="workout-title" id="workout-title">Loading...</div>
+                    <div class="workout-meta" id="workout-meta"></div>
+                    <div class="timer-display" id="timer">00:00</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">0 of 0 exercises completed</div>
+                </div>
+
+                <!-- Exercise Trackers -->
+                <div id="exercise-list"></div>
+
+                <!-- Finish Workout Section -->
+                <div class="finish-workout-section" id="finish-section" style="display: none;">
+                    <h3 style="margin-top: 0; color: var(--dark);">Complete Your Workout</h3>
+
+                    <!-- Apple Health Sync Option -->
+                    <div class="health-sync-option">
+                        <div class="health-sync-text">
+                            <strong>Sync with Apple Health</strong><br>
+                            <span style="font-size: 12px; color: #666;">Auto-calculate calories from watch</span>
+                        </div>
+                        <div class="toggle-switch" id="health-toggle" onclick="toggleHealthSync()">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+
+                    <!-- Manual Calories Input -->
+                    <div class="calories-input-group" id="manual-calories-group">
+                        <label for="calories-burned">Calories Burned</label>
+                        <input type="number"
+                               id="calories-burned"
+                               class="calories-input"
+                               placeholder="Enter calories"
+                               min="0"
+                               step="10">
+                    </div>
+
+                    <button class="finish-workout-btn" onclick="finishWorkout()">
+                        ✓ Complete Workout
+                    </button>
+
+                    <button class="cancel-workout-btn" onclick="cancelWorkout()">
+                        Cancel Workout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item" onclick="window.location.href='index.html'">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Home</div>
+                </div>
+                <div class="nav-item" onclick="showLogFoodMenu()">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Log Food</div>
+                    <div class="nav-glow"></div>
+                </div>
+                <div class="nav-item active" onclick="window.location.href='workout-quiz.html'">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="1" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
+                            <rect x="18" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
+                            <rect x="6" y="10.5" width="12" height="3" rx="1" fill="currentColor"/>
+                            <circle cx="3.5" cy="12" r="2" fill="currentColor" stroke="#fff" stroke-width="1"/>
+                            <circle cx="20.5" cy="12" r="2" fill="currentColor" stroke="#fff" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Workout</div>
+                </div>
+                <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Health</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
+                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Well Fit
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="window.location.href='index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item active" onclick="window.location.href='workout-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                </svg>
+                Quick Workout
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M12 2 C12 2 16 8 16 12 C16 14.2 14.2 16 12 16 C9.8 16 8 14.2 8 12 C8 8 12 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
+                    <line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="window.location.href='index.html#goals'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <line x1="12" y1="20" x2="12" y2="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="18" y1="20" x2="18" y2="4" stroke="currentColor" stroke-width="2"/>
+                    <line x1="6" y1="20" x2="6" y2="16" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Goals & Progress
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workoutData = null;
+        let startTime = null;
+        let timerInterval = null;
+        let healthSyncEnabled = false;
+        let exerciseStates = [];
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function toggleHealthSync() {
+            healthSyncEnabled = !healthSyncEnabled;
+            const toggle = document.getElementById('health-toggle');
+            const manualGroup = document.getElementById('manual-calories-group');
+
+            toggle.classList.toggle('active');
+
+            if (healthSyncEnabled) {
+                manualGroup.style.display = 'none';
+                // Try to get calories from Apple Health
+                fetchHealthCalories();
+            } else {
+                manualGroup.style.display = 'block';
+            }
+        }
+
+        async function fetchHealthCalories() {
+            // TODO: Integrate with Apple Health API
+            // For now, estimate based on workout duration and type
+            const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
+            const estimatedCalories = duration * 8; // Rough estimate: 8 cal/min
+
+            document.getElementById('calories-burned').value = estimatedCalories;
+        }
+
+        function initWorkout() {
+            // Get workout data from localStorage
+            const storedWorkout = localStorage.getItem('currentWorkout');
+            if (!storedWorkout) {
+                alert('No workout found. Please create a workout first.');
+                window.location.href = 'workout-quiz.html';
+                return;
+            }
+
+            workoutData = JSON.parse(storedWorkout);
+
+            // Set title and meta
+            document.getElementById('workout-title').textContent = 'Your Workout';
+            document.getElementById('workout-meta').textContent = workoutData.summary;
+
+            // Initialize exercise states
+            exerciseStates = workoutData.exercises.map(() => ({ completed: false, sets: [] }));
+
+            // Render exercises
+            renderExercises();
+
+            // Start timer
+            startTime = Date.now();
+            startTimer();
+
+            // Update progress
+            updateProgress();
+        }
+
+        function renderExercises() {
+            const container = document.getElementById('exercise-list');
+            let html = '';
+
+            workoutData.exercises.forEach((exercise, index) => {
+                const numSets = parseInt(exercise.sets) || 3;
+
+                html += `
+                    <div class="exercise-tracker" id="exercise-${index}">
+                        <div class="exercise-header">
+                            <div class="exercise-name">${exercise.name}</div>
+                            <div class="exercise-number">${index + 1}</div>
+                        </div>
+                        <div class="exercise-target">
+                            Target: ${exercise.sets} • ${exercise.reps} • ${exercise.rest} rest
+                            ${exercise.notes ? `<br><em style="font-size: 12px;">${exercise.notes}</em>` : ''}
+                        </div>
+                        <div class="set-inputs">
+                `;
+
+                // Generate input fields for each set
+                for (let i = 0; i < numSets; i++) {
+                    html += `
+                        <div class="set-label">Set ${i + 1}</div>
+                        <div class="set-row">
+                            <div class="input-group">
+                                <label class="input-label">Weight</label>
+                                <input type="number"
+                                       class="set-input"
+                                       id="weight-${index}-${i}"
+                                       placeholder="0"
+                                       min="0"
+                                       step="5">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Reps</label>
+                                <input type="number"
+                                       class="set-input"
+                                       id="reps-${index}-${i}"
+                                       placeholder="0"
+                                       min="0">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Rest</label>
+                                <input type="number"
+                                       class="set-input"
+                                       id="rest-${index}-${i}"
+                                       placeholder="60"
+                                       min="0"
+                                       step="15">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        </div>
+                        <button class="complete-exercise-btn" onclick="completeExercise(${index})">
+                            ✓ Complete Exercise
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function completeExercise(index) {
+            const exerciseElement = document.getElementById(`exercise-${index}`);
+            const button = exerciseElement.querySelector('.complete-exercise-btn');
+
+            exerciseStates[index].completed = !exerciseStates[index].completed;
+
+            if (exerciseStates[index].completed) {
+                exerciseElement.classList.add('completed');
+                button.classList.add('completed');
+                button.textContent = '✓ Completed';
+
+                // Collect set data
+                const numSets = parseInt(workoutData.exercises[index].sets) || 3;
+                for (let i = 0; i < numSets; i++) {
+                    const weight = document.getElementById(`weight-${index}-${i}`).value;
+                    const reps = document.getElementById(`reps-${index}-${i}`).value;
+                    const rest = document.getElementById(`rest-${index}-${i}`).value;
+
+                    exerciseStates[index].sets.push({ weight, reps, rest });
+                }
+            } else {
+                exerciseElement.classList.remove('completed');
+                button.classList.remove('completed');
+                button.textContent = '✓ Complete Exercise';
+                exerciseStates[index].sets = [];
+            }
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const completed = exerciseStates.filter(e => e.completed).length;
+            const total = exerciseStates.length;
+            const percentage = (completed / total) * 100;
+
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = `${completed} of ${total} exercises completed`;
+
+            // Show finish section if all exercises are done
+            if (completed === total && total > 0) {
+                document.getElementById('finish-section').style.display = 'block';
+                document.getElementById('finish-section').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                document.getElementById('finish-section').style.display = 'none';
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+
+                document.getElementById('timer').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function finishWorkout() {
+            const caloriesBurned = parseInt(document.getElementById('calories-burned').value) || 0;
+
+            if (caloriesBurned <= 0) {
+                alert('Please enter calories burned or enable Apple Health sync');
+                return;
+            }
+
+            const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
+
+            // Save workout to history
+            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+
+            const completedWorkout = {
+                date: new Date().toISOString(),
+                duration: duration,
+                calories: caloriesBurned,
+                summary: workoutData.summary,
+                exercises: workoutData.exercises.map((ex, i) => ({
+                    name: ex.name,
+                    sets: exerciseStates[i].sets,
+                    completed: exerciseStates[i].completed
+                }))
+            };
+
+            workoutHistory.unshift(completedWorkout);
+            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+            // Clear current workout
+            localStorage.removeItem('currentWorkout');
+
+            // Stop timer
+            clearInterval(timerInterval);
+
+            // Redirect to success page or home
+            alert(`Workout completed!\n${duration} minutes\n${caloriesBurned} calories burned`);
+            window.location.href = 'index.html';
+        }
+
+        function cancelWorkout() {
+            if (confirm('Are you sure you want to cancel this workout? All progress will be lost.')) {
+                localStorage.removeItem('currentWorkout');
+                clearInterval(timerInterval);
+                window.location.href = 'workout-quiz.html';
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initWorkout);
+    </script>
+</body>
+</html>

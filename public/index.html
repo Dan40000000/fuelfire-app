@@ -7,23 +7,20 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>FuelFire - Fitness & Nutrition Tracker v2.0</title>
-    <link rel="stylesheet" href="styles.css?v=2.0">
+    <link rel="stylesheet" href="styles.css?v=24.0">
+    <script src="daily-quotes.js"></script>
+    <script src="health-sync.js"></script>
+    <script src="global-nav.js"></script>
 </head>
 <body>
-    <!-- Notification -->
-    <div class="notification" id="notification" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 20px 25px; padding-right: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 350px; width: 90%; z-index: 1000; display: none;">
-        <div class="notification-close" onclick="closeNotification()" ontouchstart="" style="position: absolute; top: 10px; right: 15px; cursor: pointer; color: #999; font-size: 28px; line-height: 1; padding: 5px;">×</div>
-        <div class="notification-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #4B9CD3; font-weight: bold;">
-            <span style="font-size: 24px;">💪</span>
-            <span>Daily Motivation</span>
-        </div>
-        <div class="notification-content" id="notification-quote" style="color: #13294B; font-style: italic; line-height: 1.5;">
-            "Loading quote..."
-        </div>
-    </div>
-    
     <div class="phone-container">
         <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+
+
+            </div>
+
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()" ontouchstart="">☰</div>
@@ -32,66 +29,137 @@
             
             <div class="content">
                 <!-- HOME SCREEN -->
-                <div class="screen-content home-content" id="home">
-                    <div class="brand-logo">Well Fit</div>
-                    <div class="brand-tagline">Ignite Your Fitness Journey</div>
-                    
+                <div class="screen-content home-content active" id="home">
+                    <div style="padding: 20px;">
+
+                    <!-- Hero Header -->
+                    <div class="hero-section" style="margin-bottom: 25px;">
+                        <h1 class="hero-title">Well Fit</h1>
+                        <div class="hero-subtitle">Ignite your fitness journey</div>
+                    </div>
+
+                    <!-- Motivational Quote Banner -->
+                    <div id="quote-banner" style="background: white; padding: 30px 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.15); position: relative; display: block; animation: slideDown 0.5s ease; border: 3px solid var(--carolina-blue);">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div style="font-size: 32px; margin-bottom: 5px;">💪</div>
+                            <div style="font-size: 16px; font-weight: bold; color: var(--carolina-blue); letter-spacing: 1px; text-transform: uppercase;">Daily Motivation</div>
+                        </div>
+                        <button onclick="closeQuoteBanner(event)" style="position: absolute; top: 15px; right: 15px; background: var(--light-bg); border: 2px solid var(--carolina-blue); color: var(--carolina-blue); width: 35px; height: 35px; border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">✕</button>
+                        <div style="font-size: 20px; font-weight: 600; font-style: italic; line-height: 1.7; text-align: center; padding: 0 30px 0 10px; color: var(--dark);" id="daily-quote">Loading quote...</div>
+                        <div style="font-size: 15px; text-align: center; margin-top: 15px; color: var(--primary-dark); font-weight: bold;" id="quote-author">- Author</div>
+                    </div>
+
                     <!-- Today's Overview -->
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(75, 156, 211, 0.3); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" onclick="window.location.href='calorie-tracker.html'" ontouchstart="">
-                        <h3 style="font-size: 18px; margin-bottom: 15px;">📅 Today's Overview</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; text-align: center;">
+                    <div style="background: var(--gradient-1); color: white; padding: 35px 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(75, 156, 211, 0.3); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" onclick="window.location.href='calorie-tracker.html'" ontouchstart="">
+                        <h2 style="font-size: 24px; margin-bottom: 20px; text-align: center;">Today's Overview</h2>
+
+                        <!-- Calories - Featured on top -->
+                        <div style="text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.3);">
+                            <div style="font-size: 48px; font-weight: bold; line-height: 1;" id="home-calories">0</div>
+                            <div style="font-size: 16px; opacity: 0.9; margin-top: 8px; letter-spacing: 1px;">CALORIES</div>
+                        </div>
+
+                        <!-- Macros Breakdown -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
                             <div>
-                                <div style="font-size: 20px; font-weight: bold;" id="home-calories">0</div>
-                                <div style="font-size: 11px; opacity: 0.9;">Calories</div>
+                                <div style="font-size: 28px; font-weight: bold;" id="home-protein">0g</div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Protein</div>
                             </div>
                             <div>
-                                <div style="font-size: 20px; font-weight: bold;" id="home-protein">0g</div>
-                                <div style="font-size: 11px; opacity: 0.9;">Protein</div>
+                                <div style="font-size: 28px; font-weight: bold;" id="home-carbs">0g</div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Carbs</div>
                             </div>
                             <div>
-                                <div style="font-size: 20px; font-weight: bold;" id="home-carbs">0g</div>
-                                <div style="font-size: 11px; opacity: 0.9;">Carbs</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 20px; font-weight: bold;" id="home-fat">0g</div>
-                                <div style="font-size: 11px; opacity: 0.9;">Fat</div>
+                                <div style="font-size: 28px; font-weight: bold;" id="home-fat">0g</div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Fat</div>
                             </div>
                         </div>
-                        <div style="margin-top: 15px; font-size: 12px; opacity: 0.8; text-align: center;">
+
+                        <div style="margin-top: 25px; font-size: 14px; opacity: 0.9; text-align: center; font-weight: 600;">
                             Tap to log meals →
                         </div>
                     </div>
-                    
-                    <div class="hero-section">
-                        <div class="hero-title">Welcome back, Champion! 💪</div>
-                        <div class="hero-subtitle">You're 3 workouts away from your weekly goal</div>
-                        
-                        <div class="fitness-icons">
-                            <div class="fitness-icon">💪</div>
-                            <div class="fitness-icon">🏃</div>
-                            <div class="fitness-icon">🥗</div>
-                            <div class="fitness-icon">📊</div>
+
+                    <!-- Apple Health Stats -->
+                    <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer;" onclick="window.location.href='health-dashboard.html'">
+                        <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                            </svg>
+                            Health Today
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 10px;">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #4CAF50;">
+                                        <path d="M13.5 5.5C13.5 3.5 15.5 1.5 17.5 3.5C19.5 5.5 19.5 7.5 18 9L13 14L8 9C6.5 7.5 6.5 5.5 8.5 3.5C10.5 1.5 12.5 3.5 12.5 5.5H13.5Z" fill="currentColor"/>
+                                        <path d="M7 14L9 16V22H8L7 14Z" fill="currentColor"/>
+                                        <path d="M17 14L15 16V22H16L17 14Z" fill="currentColor"/>
+                                        <circle cx="7" cy="22" r="1.5" fill="currentColor"/>
+                                        <circle cx="17" cy="22" r="1.5" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--dark);" id="home-steps">--</div>
+                                <div style="font-size: 12px; color: #666;">Steps</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 10px;">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #FF5722;">
+                                        <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67ZM14.5 20.8C11.82 21.4 9.15 19.88 8.5 17.2C8.29 16.38 8.34 15.47 8.68 14.67C9.03 13.87 9.68 13.16 10.55 12.73L11.1 13.68C10.6 13.93 10.21 14.3 9.95 14.77C9.69 15.24 9.57 15.78 9.61 16.33C9.99 18.11 11.92 19.16 13.7 18.78C15.47 18.4 16.53 16.47 16.15 14.69C16.09 14.39 15.98 14.1 15.83 13.83L16.8 13.27C17.36 14.27 17.55 15.47 17.32 16.63C16.97 18.28 15.82 19.58 14.5 20.8Z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--dark);" id="home-calories-burned">--</div>
+                                <div style="font-size: 12px; color: #666;">Cal Burned</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center; font-size: 12px; color: var(--primary); font-weight: 600;">
+                            Tap for full health dashboard →
                         </div>
                     </div>
-                    
+
+                    <!-- Quick Actions -->
                     <div class="quick-actions">
-                        <div class="action-card" onclick="showScreen('create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                            <div class="action-icon">🔥</div>
-                            <div class="action-title">Start Workout</div>
-                            <div class="action-desc">Jump into your routine</div>
+                        <div class="action-card" onclick="window.location.href='workout-quiz.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                            <div class="action-icon">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                                </svg>
+                            </div>
+                            <div class="action-title">Quick Workout</div>
+                            <div class="action-desc">Start your workout now</div>
                         </div>
                         <div class="action-card" onclick="showScreen('track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                            <div class="action-icon">📈</div>
+                            <div class="action-icon">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 20L9 14L13 18L21 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M21 10V15M21 10H16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                                </svg>
+                            </div>
                             <div class="action-title">Track Progress</div>
                             <div class="action-desc">Log today's session</div>
                         </div>
                         <div class="action-card" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                            <div class="action-icon">🍎</div>
+                            <div class="action-icon">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                                </svg>
+                            </div>
                             <div class="action-title">Log Nutrition</div>
                             <div class="action-desc">Track your meals</div>
                         </div>
                         <div class="action-card" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                            <div class="action-icon">🎯</div>
+                            <div class="action-icon">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                                    <path d="M12 3V12L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                                </svg>
+                            </div>
                             <div class="action-title">Set Goals</div>
                             <div class="action-desc">Track your progress</div>
                         </div>
@@ -109,9 +177,6 @@
                             <div style="color: #666; font-size: 14px;">Hit protein target 5 days straight</div>
                         </div>
                     </div>
-                    
-                    <div class="motivation-quote" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 20px; text-align: center; font-style: italic; font-size: 15px; line-height: 1.7; margin: 20px 10px 20px 10px; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);">
-                        "<span id="daily-quote">Success isn't given. It's earned in the gym, kitchen, and every choice you make. Fuel your fire today.</span>"
                     </div>
                 </div>
 
@@ -125,8 +190,8 @@
                             <button onclick="startCustomWorkout()" ontouchstart="" style="background: white; color: var(--carolina-blue); border: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
                                 ✨ Create My Custom Workout
                             </button>
-                            <button onclick="startQuickWorkoutQuiz()" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
-                                ⚡ Quick Workout
+                            <button onclick="window.location.href='workout-quiz.html'" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
+                                🏋️ Quick Workout
                             </button>
                         </div>
                     </div>
@@ -657,7 +722,7 @@
                         </div>
                         
                         <button onclick="showQuickLog()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 25px; border-radius: 20px; margin-top: 15px; font-weight: bold; cursor: pointer; width: 100%;">
-                            ⚡ Quick Log Workout
+                            🏋️ Quick Log Workout
                         </button>
                     </div>
                     
@@ -713,7 +778,7 @@
                     <!-- Quick Log Modal -->
                     <div id="quick-log-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
                         <div style="background: white; border-radius: 20px; padding: 25px; max-width: 400px; width: 90%;">
-                            <h3 style="color: var(--dark); margin: 0 0 20px 0;">⚡ Quick Log Workout</h3>
+                            <h3 style="color: var(--dark); margin: 0 0 20px 0;">🏋️ Quick Log Workout</h3>
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                                 <select id="quick-workout-type" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
@@ -1195,7 +1260,7 @@
         <div style="max-width: 375px; margin: 0 auto; padding: 20px;">
             <div style="margin-bottom: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: var(--dark); margin: 0;">⚡ Quick Workout</h2>
+                    <h2 style="color: var(--dark); margin: 0;">🏋️ Quick Workout</h2>
                     <span style="color: var(--carolina-blue); font-size: 14px;">Step <span id="quick-quiz-step">1</span> of 5</span>
                 </div>
                 <div style="background: var(--lighter-bg); height: 8px; border-radius: 10px; overflow: hidden;">
@@ -1861,23 +1926,46 @@
     <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
         <div class="nav-item" onclick="showLogFoodMenu()" ontouchstart="">
-            <div class="nav-icon">🍽️</div>
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
             <div class="nav-label">Log Food</div>
             <div class="nav-glow"></div>
         </div>
         <div class="nav-item" onclick="window.location.href='workout-quiz.html'" ontouchstart="">
-            <div class="nav-icon">⚡</div>
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
+                    <rect x="18" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
+                    <rect x="6" y="10.5" width="12" height="3" rx="1" fill="currentColor"/>
+                    <circle cx="3.5" cy="12" r="2" fill="currentColor" stroke="#fff" stroke-width="1"/>
+                    <circle cx="20.5" cy="12" r="2" fill="currentColor" stroke="#fff" stroke-width="1"/>
+                </svg>
+            </div>
             <div class="nav-label">Quick Workout</div>
             <div class="nav-glow"></div>
         </div>
         <div class="nav-item" onclick="window.location.href='meal-plans.html'" ontouchstart="">
-            <div class="nav-icon">📋</div>
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                    <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
             <div class="nav-label">Meal Plan</div>
             <div class="nav-glow"></div>
         </div>
-        <div class="nav-item" onclick="showScreen('progress')" ontouchstart="">
-            <div class="nav-icon">📈</div>
-            <div class="nav-label">Progress</div>
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="">
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="nav-label">Health</div>
             <div class="nav-glow"></div>
         </div>
     </div>
@@ -1887,17 +1975,90 @@
             <div class="sidebar-brand">🔥 Well Fit</div>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item active" onclick="showScreen('home')">🏠 Home</div>
-            <div class="menu-item" onclick="showScreen('create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">💪 Create Workout</div>
-            <div class="menu-item" onclick="showScreen('saved-workouts')">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="showScreen('track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📊 Track Workouts</div>
-            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🔥 Calorie Tracker</div>
-            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">🎯 Diet Creation</div>
-            <div class="menu-item" onclick="window.location.href='meal-plans.html'">🍽️ Meal Plans</div>
-            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">💡 Meal Ideas</div>
-            <div class="menu-item" onclick="window.location.href='supplements.html'">💊 Supplements</div>
-            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">🏋️ Workout Techniques</div>
-            <div class="menu-item" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">📈 Goals & Progress</div>
+            <div class="menu-item active" onclick="showScreen('home')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="showScreen('create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="showScreen('saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="showScreen('track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals & Progress
+            </div>
         </div>
     </div>
 
@@ -1905,19 +2066,21 @@
         // Load correct screen IMMEDIATELY based on hash - before anything else
         document.addEventListener('DOMContentLoaded', function() {
             const hash = window.location.hash.substring(1);
+
+            // Hide all screens first
+            document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
+
+            // If there's a hash, show that screen
             if (hash && document.getElementById(hash)) {
-                // Hide all screens first
-                document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
-                // Show the hashed screen
-                document.getElementById(hash).classList.add('active');
+                showScreen(hash);
             } else {
-                // Show home by default
+                // Otherwise show home by default
                 document.getElementById('home').classList.add('active');
             }
         });
     </script>
 
-    <script src="app.js?v=2.0"></script>
+    <script src="app.js?v=3.0"></script>
 
     <script>
         // ==================== NUTRITION GOALS SYSTEM ====================
@@ -2286,7 +2449,50 @@
             loadWeightStats();
             loadBodyFatStats();
             loadJourneyStats();
+            loadHomeHealthData();
         });
+
+        // Load Apple Health data for home page
+        async function loadHomeHealthData() {
+            try {
+                // First, load cached data for instant display
+                const cached = localStorage.getItem('healthData');
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    updateHomeHealthUI(data);
+                }
+
+                // Then, auto-sync in the background if health sync is available
+                if (window.healthSync) {
+                    // Initialize health sync
+                    const initialized = await window.healthSync.initialize();
+                    if (initialized) {
+                        // Silently sync in background (no permission prompt if already granted)
+                        const data = await window.healthSync.syncAllData();
+                        if (data) {
+                            updateHomeHealthUI(data);
+                            console.log('✅ Health data auto-synced on home page');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Health auto-sync skipped:', error);
+            }
+        }
+
+        function updateHomeHealthUI(data) {
+            // Update steps display
+            const stepsEl = document.getElementById('home-steps');
+            if (stepsEl && data.steps !== undefined) {
+                stepsEl.textContent = data.steps.toLocaleString();
+            }
+
+            // Update calories burned display
+            const caloriesBurnedEl = document.getElementById('home-calories-burned');
+            if (caloriesBurnedEl && data.caloriesBurned !== undefined) {
+                caloriesBurnedEl.textContent = data.caloriesBurned.toLocaleString();
+            }
+        }
 
         // Also update when showScreen('progress') is called
         const originalShowScreen = window.showScreen;

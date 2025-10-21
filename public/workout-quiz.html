@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Quick Workout - Well Fit</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="global-nav.js"></script>
     <style>
         .quiz-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .quiz-header {
@@ -45,13 +47,82 @@
             margin-bottom: 20px;
         }
 
-        .option-grid {
+        .muscle-group-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-option:hover {
+            border-color: var(--primary);
+            background: rgba(75, 156, 211, 0.1);
+        }
+
+        .checkbox-option.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .time-btn {
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .time-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .time-btn.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .location-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
 
-        .option-btn {
+        .location-btn {
             background: var(--lighter-bg);
             border: 2px solid transparent;
             border-radius: 15px;
@@ -61,26 +132,70 @@
             text-align: center;
         }
 
-        .option-btn:hover {
+        .location-btn:hover {
             border-color: var(--primary);
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(75, 156, 211, 0.2);
         }
 
-        .option-btn.selected {
+        .location-btn.selected {
             background: var(--gradient-1);
             color: white;
             border-color: var(--primary);
         }
 
-        .option-icon {
+        .location-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .location-label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .style-btn {
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 25px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .style-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(75, 156, 211, 0.2);
+        }
+
+        .style-btn.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .style-icon {
             font-size: 36px;
             margin-bottom: 10px;
         }
 
-        .option-label {
+        .style-label {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .style-desc {
+            font-size: 12px;
+            opacity: 0.8;
         }
 
         .generate-btn {
@@ -158,14 +273,28 @@
             box-shadow: 0 5px 15px rgba(75, 156, 211, 0.3);
         }
 
-        .single-column {
-            grid-template-columns: 1fr;
+        .workout-header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .workout-summary {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="phone-container">
         <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar"></div>
+
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
                 <div class="header-title">⚡ Quick Workout</div>
@@ -175,71 +304,119 @@
                 <div class="quiz-container">
                     <div class="quiz-header">
                         <div class="quiz-title">⚡ Quick Workout Generator</div>
-                        <div class="quiz-subtitle">Answer a few questions to get your perfect workout</div>
+                        <div class="quiz-subtitle">Customize your perfect workout in seconds</div>
                     </div>
 
                     <div id="quiz-section">
-                        <!-- Question 1: Time -->
+                        <!-- Question 1: Muscle Groups -->
+                        <div class="question-card">
+                            <div class="question-title">What muscle groups do you want to train?</div>
+                            <div class="muscle-group-grid">
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('full-body', event)">
+                                    <input type="checkbox" id="full-body" onchange="toggleMuscleGroup('full-body', event)">
+                                    <label for="full-body">Full Body</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('chest', event)">
+                                    <input type="checkbox" id="chest" onchange="toggleMuscleGroup('chest', event)">
+                                    <label for="chest">Chest</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('lats', event)">
+                                    <input type="checkbox" id="lats" onchange="toggleMuscleGroup('lats', event)">
+                                    <label for="lats">Lats</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('traps', event)">
+                                    <input type="checkbox" id="traps" onchange="toggleMuscleGroup('traps', event)">
+                                    <label for="traps">Traps</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('shoulders', event)">
+                                    <input type="checkbox" id="shoulders" onchange="toggleMuscleGroup('shoulders', event)">
+                                    <label for="shoulders">Shoulders</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('biceps', event)">
+                                    <input type="checkbox" id="biceps" onchange="toggleMuscleGroup('biceps', event)">
+                                    <label for="biceps">Biceps</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('triceps', event)">
+                                    <input type="checkbox" id="triceps" onchange="toggleMuscleGroup('triceps', event)">
+                                    <label for="triceps">Triceps</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('quads', event)">
+                                    <input type="checkbox" id="quads" onchange="toggleMuscleGroup('quads', event)">
+                                    <label for="quads">Quads</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('hamstrings', event)">
+                                    <input type="checkbox" id="hamstrings" onchange="toggleMuscleGroup('hamstrings', event)">
+                                    <label for="hamstrings">Hamstrings</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('glutes', event)">
+                                    <input type="checkbox" id="glutes" onchange="toggleMuscleGroup('glutes', event)">
+                                    <label for="glutes">Glutes</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('calves', event)">
+                                    <input type="checkbox" id="calves" onchange="toggleMuscleGroup('calves', event)">
+                                    <label for="calves">Calves</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('core', event)">
+                                    <input type="checkbox" id="core" onchange="toggleMuscleGroup('core', event)">
+                                    <label for="core">Core</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('cardio', event)">
+                                    <input type="checkbox" id="cardio" onchange="toggleMuscleGroup('cardio', event)">
+                                    <label for="cardio">Cardio</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question 2: Time -->
                         <div class="question-card">
                             <div class="question-title">How much time do you have?</div>
-                            <div class="option-grid">
-                                <div class="option-btn" onclick="selectOption('time', '15')">
-                                    <div class="option-icon">⚡</div>
-                                    <div class="option-label">15 min</div>
+                            <div class="time-grid">
+                                <div class="time-btn" onclick="selectTime('15')">15 min</div>
+                                <div class="time-btn" onclick="selectTime('30')">30 min</div>
+                                <div class="time-btn" onclick="selectTime('45')">45 min</div>
+                                <div class="time-btn" onclick="selectTime('60')">60 min</div>
+                                <div class="time-btn" onclick="selectTime('75')">75 min</div>
+                                <div class="time-btn" onclick="selectTime('90')">90 min</div>
+                                <div class="time-btn" onclick="selectTime('120')">120 min</div>
+                            </div>
+                        </div>
+
+                        <!-- Question 3: Location -->
+                        <div class="question-card">
+                            <div class="question-title">Where are you working out?</div>
+                            <div class="location-grid">
+                                <div class="location-btn" onclick="selectLocation('home')">
+                                    <div class="location-icon">🏠</div>
+                                    <div class="location-label">Home</div>
                                 </div>
-                                <div class="option-btn" onclick="selectOption('time', '30')">
-                                    <div class="option-icon">💪</div>
-                                    <div class="option-label">30 min</div>
+                                <div class="location-btn" onclick="selectLocation('gym')">
+                                    <div class="location-icon">🏋️</div>
+                                    <div class="location-label">Gym</div>
                                 </div>
-                                <div class="option-btn" onclick="selectOption('time', '45')">
-                                    <div class="option-icon">🔥</div>
-                                    <div class="option-label">45 min</div>
+                                <div class="location-btn" onclick="selectLocation('hotel')">
+                                    <div class="location-icon">🏨</div>
+                                    <div class="location-label">Hotel Gym</div>
                                 </div>
-                                <div class="option-btn" onclick="selectOption('time', '60')">
-                                    <div class="option-icon">💯</div>
-                                    <div class="option-label">60+ min</div>
+                                <div class="location-btn" onclick="selectLocation('park')">
+                                    <div class="location-icon">🌳</div>
+                                    <div class="location-label">Park/Outdoor</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Question 2: Focus -->
+                        <!-- Question 4: Style -->
                         <div class="question-card">
-                            <div class="question-title">What's your focus today?</div>
-                            <div class="option-grid">
-                                <div class="option-btn" onclick="selectOption('focus', 'upper')">
-                                    <div class="option-icon">💪</div>
-                                    <div class="option-label">Upper Body</div>
+                            <div class="question-title">What style of workout?</div>
+                            <div class="style-grid">
+                                <div class="style-btn" onclick="selectStyle('routine')">
+                                    <div class="style-icon">📋</div>
+                                    <div class="style-label">Routine</div>
+                                    <div class="style-desc">Classic proven exercises</div>
                                 </div>
-                                <div class="option-btn" onclick="selectOption('focus', 'lower')">
-                                    <div class="option-icon">🦵</div>
-                                    <div class="option-label">Lower Body</div>
-                                </div>
-                                <div class="option-btn" onclick="selectOption('focus', 'full')">
-                                    <div class="option-icon">🏋️</div>
-                                    <div class="option-label">Full Body</div>
-                                </div>
-                                <div class="option-btn" onclick="selectOption('focus', 'cardio')">
-                                    <div class="option-icon">🏃</div>
-                                    <div class="option-label">Cardio</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Question 3: Equipment -->
-                        <div class="question-card">
-                            <div class="question-title">What equipment do you have?</div>
-                            <div class="option-grid single-column">
-                                <div class="option-btn" onclick="selectOption('equipment', 'none')">
-                                    <div class="option-icon">🧘</div>
-                                    <div class="option-label">No Equipment (Bodyweight)</div>
-                                </div>
-                                <div class="option-btn" onclick="selectOption('equipment', 'minimal')">
-                                    <div class="option-icon">🏋️</div>
-                                    <div class="option-label">Minimal (Dumbbells/Bands)</div>
-                                </div>
-                                <div class="option-btn" onclick="selectOption('equipment', 'full')">
-                                    <div class="option-icon">🏢</div>
-                                    <div class="option-label">Full Gym Access</div>
+                                <div class="style-btn" onclick="selectStyle('unique')">
+                                    <div class="style-icon">🎨</div>
+                                    <div class="style-label">Unique</div>
+                                    <div class="style-desc">Creative & uncommon moves</div>
                                 </div>
                             </div>
                         </div>
@@ -250,14 +427,61 @@
                     </div>
 
                     <div id="workout-result" class="workout-result">
-                        <div class="question-card">
-                            <div class="question-title">Your Custom Workout 🔥</div>
-                            <div id="workout-exercises"></div>
+                        <div class="workout-header">
+                            <div class="question-title" style="color: white; margin: 0;">Your Custom Workout 🔥</div>
+                            <div class="workout-summary" id="workout-summary"></div>
                         </div>
-                        <button class="generate-btn" onclick="startOver()">
+                        <div id="workout-exercises"></div>
+                        <button class="generate-btn" onclick="startWorkout()">
+                            💪 Start Workout
+                        </button>
+                        <button class="generate-btn" onclick="startOver()" style="background: transparent; color: var(--primary); border: 2px solid var(--primary); margin-top: 15px;">
                             Create New Workout
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item" onclick="window.location.href='index.html'">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Home</div>
+                </div>
+                <div class="nav-item" onclick="showLogFoodMenu()">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Log Food</div>
+                    <div class="nav-glow"></div>
+                </div>
+                <div class="nav-item active" onclick="window.location.href='workout-quiz.html'">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="1" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
+                            <rect x="18" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
+                            <rect x="6" y="10.5" width="12" height="3" rx="1" fill="currentColor"/>
+                            <circle cx="3.5" cy="12" r="2" fill="currentColor" stroke="#fff" stroke-width="1"/>
+                            <circle cx="20.5" cy="12" r="2" fill="currentColor" stroke="#fff" stroke-width="1"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Quick Workout</div>
+                </div>
+                <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="nav-label">Health</div>
                 </div>
             </div>
         </div>
@@ -267,457 +491,95 @@
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-brand">🔥 Well Fit</div>
+            <div class="sidebar-brand">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
+                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Well Fit
+            </div>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item" onclick="window.location.href='index.html'">🏠 Home</div>
-            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'">🔥 Calorie Tracker</div>
-            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">🎯 Diet Creation</div>
-            <div class="menu-item" onclick="window.location.href='meal-plans.html'">🍽️ Meal Plans</div>
-            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">💡 Meal Ideas</div>
-            <div class="menu-item" onclick="window.location.href='supplements.html'">💊 Supplements</div>
-            <div class="menu-item active" onclick="window.location.href='workout-quiz.html'">⚡ Quick Workout</div>
-            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">🏋️ Workout Techniques</div>
+            <div class="menu-item" onclick="window.location.href='index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item active" onclick="window.location.href='workout-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                </svg>
+                Quick Workout
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M12 2 C12 2 16 8 16 12 C16 14.2 14.2 16 12 16 C9.8 16 8 14.2 8 12 C8 8 12 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
+                    <line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="showScreen('goals')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <line x1="12" y1="20" x2="12" y2="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="18" y1="20" x2="18" y2="4" stroke="currentColor" stroke-width="2"/>
+                    <line x1="6" y1="20" x2="6" y2="16" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Goals & Progress
+            </div>
         </div>
     </div>
 
+    <script src="workout-database.js"></script>
     <script>
         const selections = {
+            muscles: [],
             time: null,
-            focus: null,
-            equipment: null
-        };
-
-        const workoutDatabase = {
-            upper: {
-                none: {
-                    15: [
-                        { name: 'Push-ups', sets: '3 sets', reps: '10-15 reps', rest: '30 sec rest' },
-                        { name: 'Pike Push-ups', sets: '3 sets', reps: '8-12 reps', rest: '30 sec rest' },
-                        { name: 'Tricep Dips', sets: '3 sets', reps: '10-15 reps', rest: '30 sec rest' },
-                        { name: 'Plank Hold', sets: '3 sets', reps: '30-45 sec', rest: '20 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Push-ups', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Pike Push-ups', sets: '4 sets', reps: '10-12 reps', rest: '45 sec rest' },
-                        { name: 'Diamond Push-ups', sets: '3 sets', reps: '8-12 reps', rest: '45 sec rest' },
-                        { name: 'Tricep Dips', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Superman Hold', sets: '3 sets', reps: '30-45 sec', rest: '30 sec rest' },
-                        { name: 'Plank to Downward Dog', sets: '3 sets', reps: '10 reps', rest: '30 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Push-ups', sets: '4 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Pike Push-ups', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Diamond Push-ups', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Decline Push-ups', sets: '3 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Tricep Dips', sets: '4 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Plank to Push-up', sets: '4 sets', reps: '10-12 reps', rest: '45 sec rest' },
-                        { name: 'Superman Hold', sets: '4 sets', reps: '45-60 sec', rest: '45 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Push-ups', sets: '5 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Pike Push-ups', sets: '5 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Diamond Push-ups', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Wide Push-ups', sets: '4 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Decline Push-ups', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Tricep Dips', sets: '5 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Plank to Push-up', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Superman Pulses', sets: '4 sets', reps: '20 reps', rest: '45 sec rest' },
-                        { name: 'Arm Circles', sets: '3 sets', reps: '30 sec each direction', rest: '30 sec rest' }
-                    ]
-                },
-                minimal: {
-                    15: [
-                        { name: 'Dumbbell Bench Press', sets: '3 sets', reps: '10-12 reps', rest: '45 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '3 sets', reps: '10-12 reps', rest: '45 sec rest' },
-                        { name: 'Dumbbell Shoulder Press', sets: '3 sets', reps: '8-10 reps', rest: '45 sec rest' },
-                        { name: 'Bicep Curls', sets: '3 sets', reps: '12-15 reps', rest: '30 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Dumbbell Bench Press', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Shoulder Press', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Flyes', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Bicep Curls', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Tricep Extensions', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Dumbbell Bench Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Incline Dumbbell Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Shoulder Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Lateral Raises', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Bicep Curls', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Tricep Extensions', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Dumbbell Bench Press', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Incline Dumbbell Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Flyes', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Pullovers', sets: '3 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Shoulder Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Lateral Raises', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Front Raises', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Bicep Curls', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Hammer Curls', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Tricep Extensions', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ]
-                },
-                full: {
-                    15: [
-                        { name: 'Barbell Bench Press', sets: '3 sets', reps: '8-10 reps', rest: '60 sec rest' },
-                        { name: 'Cable Rows', sets: '3 sets', reps: '10-12 reps', rest: '45 sec rest' },
-                        { name: 'Overhead Press', sets: '3 sets', reps: '8-10 reps', rest: '60 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Barbell Bench Press', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Incline Dumbbell Press', sets: '3 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Cable Rows', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Lat Pulldowns', sets: '3 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Overhead Press', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Barbell Bench Press', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Incline Dumbbell Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Cable Flyes', sets: '3 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Barbell Rows', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Lat Pulldowns', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Overhead Press', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Cable Lateral Raises', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Barbell Bench Press', sets: '5 sets', reps: '6-8 reps', rest: '120 sec rest' },
-                        { name: 'Incline Dumbbell Press', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Cable Flyes', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Barbell Rows', sets: '5 sets', reps: '6-8 reps', rest: '120 sec rest' },
-                        { name: 'Lat Pulldowns', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Cable Rows', sets: '3 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Overhead Press', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Lateral Raises', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Face Pulls', sets: '3 sets', reps: '15-20 reps', rest: '45 sec rest' },
-                        { name: 'Barbell Curls', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Tricep Pushdowns', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ]
-                }
-            },
-            lower: {
-                none: {
-                    15: [
-                        { name: 'Bodyweight Squats', sets: '3 sets', reps: '15-20 reps', rest: '30 sec rest' },
-                        { name: 'Lunges', sets: '3 sets', reps: '10-12 each leg', rest: '30 sec rest' },
-                        { name: 'Glute Bridges', sets: '3 sets', reps: '15-20 reps', rest: '30 sec rest' },
-                        { name: 'Calf Raises', sets: '3 sets', reps: '20-25 reps', rest: '30 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Jump Squats', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Walking Lunges', sets: '4 sets', reps: '12-15 each leg', rest: '45 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '3 sets', reps: '10-12 each leg', rest: '45 sec rest' },
-                        { name: 'Single Leg Deadlifts', sets: '3 sets', reps: '10-12 each leg', rest: '45 sec rest' },
-                        { name: 'Glute Bridges', sets: '4 sets', reps: '15-20 reps', rest: '30 sec rest' },
-                        { name: 'Wall Sit', sets: '3 sets', reps: '45-60 sec', rest: '30 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Pistol Squats', sets: '4 sets', reps: '8-10 each leg', rest: '60 sec rest' },
-                        { name: 'Jump Squats', sets: '4 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Walking Lunges', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Single Leg Deadlifts', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Nordic Hamstring Curls', sets: '3 sets', reps: '6-8 reps', rest: '90 sec rest' },
-                        { name: 'Glute Bridges', sets: '4 sets', reps: '20-25 reps', rest: '45 sec rest' },
-                        { name: 'Calf Raises', sets: '4 sets', reps: '25-30 reps', rest: '30 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Pistol Squats', sets: '5 sets', reps: '8-10 each leg', rest: '90 sec rest' },
-                        { name: 'Jump Squats', sets: '5 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Walking Lunges', sets: '5 sets', reps: '20-25 each leg', rest: '60 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Single Leg Deadlifts', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Nordic Hamstring Curls', sets: '4 sets', reps: '6-8 reps', rest: '90 sec rest' },
-                        { name: 'Glute Bridges', sets: '5 sets', reps: '20-25 reps', rest: '45 sec rest' },
-                        { name: 'Step-ups', sets: '4 sets', reps: '15-20 each leg', rest: '45 sec rest' },
-                        { name: 'Wall Sit', sets: '4 sets', reps: '60-90 sec', rest: '45 sec rest' },
-                        { name: 'Calf Raises', sets: '5 sets', reps: '30-40 reps', rest: '30 sec rest' }
-                    ]
-                },
-                minimal: {
-                    15: [
-                        { name: 'Goblet Squats', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '3 sets', reps: '10-12 each leg', rest: '45 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '3 sets', reps: '10-12 reps', rest: '45 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Goblet Squats', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '3 sets', reps: '10-12 each leg', rest: '60 sec rest' },
-                        { name: 'Dumbbell Step-ups', sets: '3 sets', reps: '12-15 each leg', rest: '45 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Goblet Squats', sets: '5 sets', reps: '12-15 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Single Leg Deadlifts', sets: '3 sets', reps: '10-12 each leg', rest: '60 sec rest' },
-                        { name: 'Dumbbell Step-ups', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Dumbbell Calf Raises', sets: '4 sets', reps: '20-25 reps', rest: '45 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Goblet Squats', sets: '5 sets', reps: '15-20 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Front Squats', sets: '4 sets', reps: '12-15 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '5 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Single Leg Deadlifts', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Dumbbell Step-ups', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Goblet Bulgarian Split Squats', sets: '3 sets', reps: '10-12 each leg', rest: '60 sec rest' },
-                        { name: 'Dumbbell Calf Raises', sets: '5 sets', reps: '20-25 reps', rest: '45 sec rest' }
-                    ]
-                },
-                full: {
-                    15: [
-                        { name: 'Back Squats', sets: '3 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Leg Press', sets: '3 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Leg Curls', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Back Squats', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Leg Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '3 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Leg Curls', sets: '3 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Leg Extensions', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Back Squats', sets: '5 sets', reps: '6-8 reps', rest: '120 sec rest' },
-                        { name: 'Front Squats', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Leg Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Leg Curls', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Leg Extensions', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Standing Calf Raises', sets: '4 sets', reps: '15-20 reps', rest: '45 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Back Squats', sets: '5 sets', reps: '5-6 reps', rest: '180 sec rest' },
-                        { name: 'Front Squats', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Leg Press', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Hack Squats', sets: '4 sets', reps: '12-15 reps', rest: '90 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Leg Curls', sets: '5 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Leg Extensions', sets: '5 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Walking Lunges', sets: '3 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Standing Calf Raises', sets: '5 sets', reps: '15-20 reps', rest: '45 sec rest' },
-                        { name: 'Seated Calf Raises', sets: '4 sets', reps: '20-25 reps', rest: '45 sec rest' }
-                    ]
-                }
-            },
-            full: {
-                none: {
-                    15: [
-                        { name: 'Burpees', sets: '3 sets', reps: '10-12 reps', rest: '30 sec rest' },
-                        { name: 'Push-ups', sets: '3 sets', reps: '12-15 reps', rest: '30 sec rest' },
-                        { name: 'Squats', sets: '3 sets', reps: '15-20 reps', rest: '30 sec rest' },
-                        { name: 'Mountain Climbers', sets: '3 sets', reps: '20 reps', rest: '30 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Burpees', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Push-ups', sets: '4 sets', reps: '15-20 reps', rest: '45 sec rest' },
-                        { name: 'Jump Squats', sets: '4 sets', reps: '15-20 reps', rest: '45 sec rest' },
-                        { name: 'Lunges', sets: '3 sets', reps: '12-15 each leg', rest: '45 sec rest' },
-                        { name: 'Mountain Climbers', sets: '4 sets', reps: '30 reps', rest: '30 sec rest' },
-                        { name: 'Plank Hold', sets: '3 sets', reps: '45-60 sec', rest: '30 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Burpees', sets: '5 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Push-ups', sets: '5 sets', reps: '20-25 reps', rest: '60 sec rest' },
-                        { name: 'Jump Squats', sets: '4 sets', reps: '20-25 reps', rest: '60 sec rest' },
-                        { name: 'Walking Lunges', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Pike Push-ups', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Mountain Climbers', sets: '4 sets', reps: '40 reps', rest: '45 sec rest' },
-                        { name: 'Plank to Push-up', sets: '4 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'High Knees', sets: '4 sets', reps: '30 sec', rest: '30 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Burpees', sets: '5 sets', reps: '20-25 reps', rest: '60 sec rest' },
-                        { name: 'Push-ups', sets: '5 sets', reps: '25-30 reps', rest: '60 sec rest' },
-                        { name: 'Jump Squats', sets: '5 sets', reps: '20-25 reps', rest: '60 sec rest' },
-                        { name: 'Walking Lunges', sets: '5 sets', reps: '20-25 each leg', rest: '60 sec rest' },
-                        { name: 'Pike Push-ups', sets: '4 sets', reps: '15-20 reps', rest: '60 sec rest' },
-                        { name: 'Bulgarian Split Squats', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Diamond Push-ups', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Mountain Climbers', sets: '5 sets', reps: '50 reps', rest: '45 sec rest' },
-                        { name: 'Plank to Push-up', sets: '4 sets', reps: '15-20 reps', rest: '45 sec rest' },
-                        { name: 'High Knees', sets: '5 sets', reps: '45 sec', rest: '30 sec rest' },
-                        { name: 'Jump Lunges', sets: '4 sets', reps: '20 reps', rest: '45 sec rest' }
-                    ]
-                },
-                minimal: {
-                    15: [
-                        { name: 'Dumbbell Thrusters', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '3 sets', reps: '10-12 reps', rest: '45 sec rest' },
-                        { name: 'Goblet Squats', sets: '3 sets', reps: '12-15 reps', rest: '45 sec rest' },
-                        { name: 'Dumbbell Push Press', sets: '3 sets', reps: '10-12 reps', rest: '45 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Dumbbell Thrusters', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Goblet Squats', sets: '4 sets', reps: '12-15 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Bench Press', sets: '4 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '3 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Dumbbell Push Press', sets: '3 sets', reps: '10-12 reps', rest: '60 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Dumbbell Thrusters', sets: '5 sets', reps: '12-15 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Goblet Squats', sets: '4 sets', reps: '15-20 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Bench Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '4 sets', reps: '12-15 each leg', rest: '60 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Push Press', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Renegade Rows', sets: '3 sets', reps: '10-12 each side', rest: '60 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Dumbbell Thrusters', sets: '5 sets', reps: '15-20 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Rows', sets: '5 sets', reps: '12-15 reps', rest: '90 sec rest' },
-                        { name: 'Goblet Squats', sets: '5 sets', reps: '15-20 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Bench Press', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Lunges', sets: '5 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '5 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dumbbell Push Press', sets: '5 sets', reps: '12-15 reps', rest: '90 sec rest' },
-                        { name: 'Renegade Rows', sets: '4 sets', reps: '12-15 each side', rest: '60 sec rest' },
-                        { name: 'Dumbbell Step-ups', sets: '4 sets', reps: '15-20 each leg', rest: '60 sec rest' },
-                        { name: 'Man Makers', sets: '3 sets', reps: '8-10 reps', rest: '90 sec rest' }
-                    ]
-                },
-                full: {
-                    15: [
-                        { name: 'Barbell Complexes', sets: '3 sets', reps: '6-8 reps each exercise', rest: '90 sec rest' },
-                        { name: 'Box Jumps', sets: '3 sets', reps: '10-12 reps', rest: '60 sec rest' },
-                        { name: 'Battle Ropes', sets: '3 sets', reps: '30 sec', rest: '30 sec rest' }
-                    ],
-                    30: [
-                        { name: 'Deadlifts', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Barbell Bench Press', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Barbell Rows', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Front Squats', sets: '3 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Overhead Press', sets: '3 sets', reps: '8-10 reps', rest: '90 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Deadlifts', sets: '5 sets', reps: '6-8 reps', rest: '120 sec rest' },
-                        { name: 'Barbell Bench Press', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Barbell Rows', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Front Squats', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Overhead Press', sets: '4 sets', reps: '8-10 reps', rest: '90 sec rest' },
-                        { name: 'Pull-ups', sets: '3 sets', reps: '8-12 reps', rest: '60 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '3 sets', reps: '10-12 reps', rest: '90 sec rest' }
-                    ],
-                    60: [
-                        { name: 'Deadlifts', sets: '5 sets', reps: '5-6 reps', rest: '180 sec rest' },
-                        { name: 'Back Squats', sets: '5 sets', reps: '6-8 reps', rest: '180 sec rest' },
-                        { name: 'Barbell Bench Press', sets: '5 sets', reps: '6-8 reps', rest: '120 sec rest' },
-                        { name: 'Barbell Rows', sets: '5 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Front Squats', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Overhead Press', sets: '4 sets', reps: '8-10 reps', rest: '120 sec rest' },
-                        { name: 'Pull-ups', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Romanian Deadlifts', sets: '4 sets', reps: '10-12 reps', rest: '90 sec rest' },
-                        { name: 'Dips', sets: '3 sets', reps: '10-15 reps', rest: '60 sec rest' },
-                        { name: 'Face Pulls', sets: '3 sets', reps: '15-20 reps', rest: '45 sec rest' }
-                    ]
-                }
-            },
-            cardio: {
-                none: {
-                    15: [
-                        { name: 'High Knees', sets: '3 rounds', reps: '45 sec on / 15 sec rest', rest: '' },
-                        { name: 'Burpees', sets: '3 rounds', reps: '30 sec on / 30 sec rest', rest: '' },
-                        { name: 'Mountain Climbers', sets: '3 rounds', reps: '45 sec on / 15 sec rest', rest: '' },
-                        { name: 'Jumping Jacks', sets: '3 rounds', reps: '60 sec on / 30 sec rest', rest: '' }
-                    ],
-                    30: [
-                        { name: 'HIIT Circuit (4 rounds):', sets: '', reps: '', rest: '' },
-                        { name: 'High Knees', sets: '', reps: '45 sec', rest: '' },
-                        { name: 'Burpees', sets: '', reps: '30 sec', rest: '' },
-                        { name: 'Mountain Climbers', sets: '', reps: '45 sec', rest: '' },
-                        { name: 'Jump Squats', sets: '', reps: '30 sec', rest: '' },
-                        { name: 'Rest', sets: '', reps: '60 sec between rounds', rest: '' }
-                    ],
-                    45: [
-                        { name: 'HIIT Tabata (8 rounds):', sets: '', reps: '', rest: '' },
-                        { name: 'Burpees', sets: '', reps: '20 sec on / 10 sec rest', rest: '' },
-                        { name: 'High Knees', sets: '', reps: '20 sec on / 10 sec rest', rest: '' },
-                        { name: 'Mountain Climbers', sets: '', reps: '20 sec on / 10 sec rest', rest: '' },
-                        { name: 'Jump Squats', sets: '', reps: '20 sec on / 10 sec rest', rest: '' },
-                        { name: 'Repeat 2x with 2 min rest between', sets: '', reps: '', rest: '' }
-                    ],
-                    60: [
-                        { name: 'EMOM (Every Minute On the Minute) for 30 min:', sets: '', reps: '', rest: '' },
-                        { name: 'Minute 1: Burpees', sets: '', reps: '12-15 reps', rest: '' },
-                        { name: 'Minute 2: High Knees', sets: '', reps: '50 reps', rest: '' },
-                        { name: 'Minute 3: Mountain Climbers', sets: '', reps: '40 reps', rest: '' },
-                        { name: 'Minute 4: Jump Squats', sets: '', reps: '20 reps', rest: '' },
-                        { name: 'Minute 5: Rest', sets: '', reps: '', rest: '' },
-                        { name: 'Repeat 6x', sets: '', reps: '', rest: '' }
-                    ]
-                },
-                minimal: {
-                    15: [
-                        { name: 'Jump Rope', sets: '3 rounds', reps: '2 min on / 1 min rest', rest: '' },
-                        { name: 'Dumbbell Thrusters', sets: '3 rounds', reps: '30 sec on / 30 sec rest', rest: '' },
-                        { name: 'High Knees', sets: '3 rounds', reps: '45 sec on / 15 sec rest', rest: '' }
-                    ],
-                    30: [
-                        { name: 'Jump Rope', sets: '5 rounds', reps: '3 min on / 1 min rest', rest: '' },
-                        { name: 'Dumbbell Swing', sets: '4 sets', reps: '20 reps', rest: '30 sec rest' },
-                        { name: 'Dumbbell Thrusters', sets: '4 sets', reps: '15 reps', rest: '30 sec rest' },
-                        { name: 'Mountain Climbers', sets: '4 sets', reps: '30 sec', rest: '30 sec rest' }
-                    ],
-                    45: [
-                        { name: 'Jump Rope', sets: '5 rounds', reps: '4 min on / 1 min rest', rest: '' },
-                        { name: 'Dumbbell Complex (3 rounds):', sets: '', reps: '', rest: '' },
-                        { name: '- Swings', sets: '', reps: '15 reps', rest: '' },
-                        { name: '- Thrusters', sets: '', reps: '12 reps', rest: '' },
-                        { name: '- Renegade Rows', sets: '', reps: '10 each side', rest: '' },
-                        { name: '- Burpees', sets: '', reps: '8 reps', rest: '' },
-                        { name: 'Rest 2 min between rounds', sets: '', reps: '', rest: '' }
-                    ],
-                    60: [
-                        { name: 'Warm-up: Jump Rope', sets: '', reps: '5 min', rest: '' },
-                        { name: 'Circuit (5 rounds):', sets: '', reps: '', rest: '' },
-                        { name: '- Dumbbell Swings', sets: '', reps: '20 reps', rest: '' },
-                        { name: '- Burpees', sets: '', reps: '15 reps', rest: '' },
-                        { name: '- Dumbbell Thrusters', sets: '', reps: '15 reps', rest: '' },
-                        { name: '- Mountain Climbers', sets: '', reps: '40 reps', rest: '' },
-                        { name: '- Jump Rope', sets: '', reps: '2 min', rest: '' },
-                        { name: 'Rest 2 min between rounds', sets: '', reps: '', rest: '' }
-                    ]
-                },
-                full: {
-                    15: [
-                        { name: 'Treadmill Sprints', sets: '6 rounds', reps: '30 sec sprint / 90 sec walk', rest: '' },
-                        { name: 'Rowing Machine', sets: '3 rounds', reps: '2 min hard / 1 min easy', rest: '' }
-                    ],
-                    30: [
-                        { name: 'Treadmill or Track:', sets: '', reps: '', rest: '' },
-                        { name: 'Warm-up', sets: '', reps: '5 min easy jog', rest: '' },
-                        { name: 'Intervals (8 rounds)', sets: '', reps: '1 min hard / 1 min easy', rest: '' },
-                        { name: 'Cool-down', sets: '', reps: '5 min easy jog', rest: '' },
-                        { name: 'Core finisher: Plank holds', sets: '3 sets', reps: '60 sec', rest: '' }
-                    ],
-                    45: [
-                        { name: 'Bike/Treadmill/Rower:', sets: '', reps: '', rest: '' },
-                        { name: 'Warm-up', sets: '', reps: '5 min easy', rest: '' },
-                        { name: 'Intervals (10 rounds)', sets: '', reps: '2 min hard / 1 min easy', rest: '' },
-                        { name: 'Cool-down', sets: '', reps: '5 min easy', rest: '' },
-                        { name: 'Battle Ropes', sets: '5 sets', reps: '30 sec on / 30 sec rest', rest: '' }
-                    ],
-                    60: [
-                        { name: 'Bike/Treadmill/Rower:', sets: '', reps: '', rest: '' },
-                        { name: 'Warm-up', sets: '', reps: '10 min easy', rest: '' },
-                        { name: 'Steady State', sets: '', reps: '30 min moderate intensity', rest: '' },
-                        { name: 'Intervals (5 rounds)', sets: '', reps: '2 min hard / 1 min easy', rest: '' },
-                        { name: 'Cool-down', sets: '', reps: '5 min easy', rest: '' }
-                    ]
-                }
-            }
+            location: null,
+            style: null
         };
 
         function toggleSidebar() {
@@ -727,97 +589,67 @@
             overlay.classList.toggle('show');
         }
 
-        function selectOption(category, value) {
-            selections[category] = value;
+        function toggleMuscleGroup(muscle, event) {
+            if (event && event.target.tagName !== 'INPUT') {
+                event.stopPropagation();
+                const checkbox = document.getElementById(muscle);
+                checkbox.checked = !checkbox.checked;
+            }
 
-            // Remove selected class from all options in this category
-            event.target.closest('.question-card').querySelectorAll('.option-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
+            const index = selections.muscles.indexOf(muscle);
+            const option = document.getElementById(muscle).closest('.checkbox-option');
 
-            // Add selected class to clicked option
-            event.target.closest('.option-btn').classList.add('selected');
+            if (document.getElementById(muscle).checked) {
+                if (index === -1) selections.muscles.push(muscle);
+                option.classList.add('selected');
+            } else {
+                if (index > -1) selections.muscles.splice(index, 1);
+                option.classList.remove('selected');
+            }
 
-            // Check if all selections are made
+            checkAllSelected();
+        }
+
+        function selectTime(time) {
+            selections.time = time;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkAllSelected();
+        }
+
+        function selectLocation(location) {
+            selections.location = location;
+            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkAllSelected();
+        }
+
+        function selectStyle(style) {
+            selections.style = style;
+            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
             checkAllSelected();
         }
 
         function checkAllSelected() {
-            const allSelected = selections.time && selections.focus && selections.equipment;
+            const allSelected = selections.muscles.length > 0 && selections.time && selections.location && selections.style;
             document.getElementById('generate-btn').disabled = !allSelected;
         }
 
-        // Map exercise names to technique pages
-        function getExerciseTechniquePage(exerciseName) {
-            const name = exerciseName.toLowerCase();
-
-            // Leg exercises
-            if (name.includes('squat') || name.includes('lunge') || name.includes('deadlift') ||
-                name.includes('leg press') || name.includes('leg curl') || name.includes('leg extension') ||
-                name.includes('step-up') || name.includes('glute bridge') || name.includes('nordic') ||
-                name.includes('hack squat')) {
-                return 'workout-legs.html';
-            }
-
-            // Shoulder exercises
-            if (name.includes('shoulder press') || name.includes('overhead press') ||
-                name.includes('lateral raise') || name.includes('front raise') ||
-                name.includes('pike push') || name.includes('face pull')) {
-                return 'workout-shoulders.html';
-            }
-
-            // Arm exercises
-            if (name.includes('curl') || name.includes('tricep') || name.includes('bicep')) {
-                return 'workout-arms.html';
-            }
-
-            // Chest exercises
-            if (name.includes('bench press') || name.includes('push-up') || name.includes('push up') ||
-                name.includes('flye') || name.includes('flies') || name.includes('dip')) {
-                return 'workout-chest.html';
-            }
-
-            // Back exercises
-            if (name.includes('row') || name.includes('pull-up') || name.includes('pullup') ||
-                name.includes('pulldown') || name.includes('pullover') || name.includes('superman')) {
-                return 'workout-back.html';
-            }
-
-            // Core exercises
-            if (name.includes('plank') || name.includes('crunch') || name.includes('sit-up') ||
-                name.includes('ab') || name.includes('core') || name.includes('mountain climber')) {
-                return 'workout-core.html';
-            }
-
-            // Calf exercises
-            if (name.includes('calf')) {
-                return 'workout-calves.html';
-            }
-
-            // Cardio exercises
-            if (name.includes('burpee') || name.includes('jump') || name.includes('sprint') ||
-                name.includes('run') || name.includes('cardio') || name.includes('hiit') ||
-                name.includes('treadmill') || name.includes('bike') || name.includes('row') ||
-                name.includes('battle rope') || name.includes('high knee') || name.includes('jumping jack')) {
-                return 'workout-cardio.html';
-            }
-
-            // Default to workout techniques main page
-            return 'workout-techniques.html';
-        }
-
         function generateWorkout() {
-            const { time, focus, equipment } = selections;
+            const { muscles, time, location, style } = selections;
 
-            // Get workout from database
-            const workout = workoutDatabase[focus][equipment][time];
+            // Get exercises from massive database
+            const workout = buildWorkout(muscles, time, location, style);
 
             // Display workout
             const container = document.getElementById('workout-exercises');
-            let html = '';
+            const summary = document.getElementById('workout-summary');
 
+            summary.textContent = `${time} min • ${location} • ${muscles.join(', ')} • ${style === 'unique' ? 'Unique exercises' : 'Classic routine'}`;
+
+            let html = '';
             workout.forEach(exercise => {
-                const techniquePage = getExerciseTechniquePage(exercise.name);
                 html += `
                     <div class="exercise-item">
                         <div class="exercise-name">${exercise.name}</div>
@@ -826,7 +658,7 @@
                             ${exercise.reps ? ` • ${exercise.reps}` : ''}
                             ${exercise.rest ? ` • ${exercise.rest}` : ''}
                         </div>
-                        <a href="${techniquePage}" class="view-form-btn">📖 View Form & Technique</a>
+                        ${exercise.notes ? `<div style="margin-top: 8px; font-size: 13px; font-style: italic; color: #666;">${exercise.notes}</div>` : ''}
                     </div>
                 `;
             });
@@ -840,14 +672,17 @@
 
         function startOver() {
             // Reset selections
+            selections.muscles = [];
             selections.time = null;
-            selections.focus = null;
-            selections.equipment = null;
+            selections.location = null;
+            selections.style = null;
 
-            // Remove all selected classes
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
+            // Uncheck all checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.checkbox-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected'));
 
             // Hide result, show quiz
             document.getElementById('workout-result').classList.remove('show');
@@ -855,6 +690,36 @@
 
             // Disable generate button
             document.getElementById('generate-btn').disabled = true;
+        }
+
+        // Helper function to build workout from database
+        function buildWorkout(muscles, time, location, style) {
+            return getWorkoutFromDatabase(muscles, parseInt(time), location, style);
+        }
+
+        function startWorkout() {
+            const { muscles, time, location, style } = selections;
+            const workout = buildWorkout(muscles, time, location, style);
+            const summary = `${time} min • ${location} • ${muscles.join(', ')} • ${style === 'unique' ? 'Unique exercises' : 'Classic routine'}`;
+
+            // Save workout to localStorage
+            const workoutData = {
+                exercises: workout,
+                summary: summary,
+                muscles: muscles,
+                time: time,
+                location: location,
+                style: style
+            };
+
+            localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
+
+            // Navigate to in-workout page
+            window.location.href = 'in-workout.html';
+        }
+
+        function showScreen(screenId) {
+            window.location.href = 'index.html#' + screenId;
         }
     </script>
 </body>

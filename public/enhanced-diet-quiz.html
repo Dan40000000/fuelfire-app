@@ -6,10 +6,17 @@
     <title>Enhanced Diet Quiz - Well Fit</title>
     <link rel="stylesheet" href="styles.css">
     <script src="fuelfire-auth.js"></script>
+    <script src="global-nav.js"></script>
 </head>
 <body>
     <div class="phone-container">
         <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                
+                
+            </div>
+
             
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
@@ -1502,7 +1509,32 @@
                             <button class="print-button" onclick="window.print()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🖨️ Print This Plan</button>
                         </div>
                     </div>
-                </body>
+                
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="showLogFoodMenu()" ontouchstart="">
+            <div class="nav-icon">🍽️</div>
+            <div class="nav-label">Log Food</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'" ontouchstart="">
+            <div class="nav-icon">🏋️</div>
+            <div class="nav-label">Quick Workout</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='meal-plans.html'" ontouchstart="">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Meal Plan</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='index.html#progress'" ontouchstart="">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">Progress</div>
+            <div class="nav-glow"></div>
+        </div>
+    </div>
+
+</body>
                 </html>
             `);
             
@@ -2316,5 +2348,30 @@
         setInterval(updateTime, 1000);
         showStep(1);
     </script>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="showLogFoodMenu()" ontouchstart="">
+            <div class="nav-icon">🍽️</div>
+            <div class="nav-label">Log Food</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'" ontouchstart="">
+            <div class="nav-icon">🏋️</div>
+            <div class="nav-label">Quick Workout</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='meal-plans.html'" ontouchstart="">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Meal Plan</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='index.html#progress'" ontouchstart="">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">Progress</div>
+            <div class="nav-glow"></div>
+        </div>
+    </div>
+
 </body>
 </html>

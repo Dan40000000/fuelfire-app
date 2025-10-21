@@ -1655,6 +1655,12 @@ function showScreen(screenId) {
     // Update URL hash for persistence on refresh
     window.location.hash = screenId;
 
+    // Scroll content to top
+    const contentDiv = document.querySelector('.content');
+    if (contentDiv) {
+        contentDiv.scrollTop = 0;
+    }
+
     // Hide all screens
     document.querySelectorAll('.screen-content').forEach(screen => {
         screen.classList.remove('active');

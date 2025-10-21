@@ -206,7 +206,10 @@
                 equipment: "Barbell, Bench",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 iconClass: "bench-press-icon",
-                image: "images/exercises/bench-press.svg",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Bench_Press_-_Medium_Grip/1.jpg"
+                ],
                 steps: [
                     "Lie flat on bench with eyes directly under the bar",
                     "Grip bar slightly wider than shoulder-width apart",
@@ -267,6 +270,10 @@
                 equipment: "Incline Bench, Barbell",
                 primaryMuscles: ["Upper Chest", "Shoulders", "Triceps"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Incline_Bench_Press_-_Medium_Grip/1.jpg"
+                ],
                 steps: [
                     "Set bench to 30-45 degree incline",
                     "Position body with head higher than hips",
@@ -297,7 +304,6 @@
                 equipment: "None",
                 primaryMuscles: ["Chest", "Triceps", "Core"],
                 iconClass: "pushup-icon",
-                image: "images/exercises/push-up.svg",
                 steps: [
                     "Start in plank position with hands under shoulders",
                     "Keep body in straight line from head to heels",
@@ -328,7 +334,10 @@
                 equipment: "Dumbbells, Bench",
                 primaryMuscles: ["Chest", "Front Delts"],
                 iconClass: "flyes-icon",
-                image: "images/exercises/dumbbell-flyes.svg",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Around_The_Worlds/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Around_The_Worlds/1.jpg"
+                ],
                 steps: [
                     "Lie on bench with dumbbells over chest",
                     "Start with slight bend in elbows (maintain throughout)",
@@ -359,7 +368,10 @@
                 equipment: "Dip Station or Parallel Bars",
                 primaryMuscles: ["Lower Chest", "Triceps", "Shoulders"],
                 iconClass: "weight-icon",
-                image: "images/exercises/dips.svg",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/1.jpg"
+                ],
                 steps: [
                     "Grip parallel bars with arms fully extended",
                     "Lean slightly forward to target chest more",
@@ -790,7 +802,27 @@
                         </div>
                         <div class="supplement-content" id="content-${index}">
                             <div class="content-inner">
-                                ${exercise.image ? `
+                                ${exercise.images ? `
+                                    <div style="margin-bottom: 20px; text-align: center; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 3px 15px rgba(155, 89, 182, 0.1);">
+                                        <img id="exercise-img-${index}"
+                                             src="${exercise.images[0]}"
+                                             alt="${exercise.name} form diagram"
+                                             style="width: 100%; max-width: 400px; height: auto; border-radius: 10px;">
+                                        <div style="margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 15px;">
+                                            <button onclick="previousImage(${index}, ${exercise.images.length})"
+                                                    style="background: #4B9CD3; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 18px; cursor: pointer;">
+                                                ◀
+                                            </button>
+                                            <span id="step-indicator-${index}" style="font-weight: bold; color: #9b59b6;">
+                                                Step 1 of ${exercise.images.length}
+                                            </span>
+                                            <button onclick="nextImage(${index}, ${exercise.images.length})"
+                                                    style="background: #4B9CD3; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 18px; cursor: pointer;">
+                                                ▶
+                                            </button>
+                                        </div>
+                                    </div>
+                                ` : exercise.image ? `
                                     <div style="margin-bottom: 20px; text-align: center; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 3px 15px rgba(155, 89, 182, 0.1);">
                                         <img src="${exercise.image}"
                                              alt="${exercise.name} form diagram"
@@ -883,6 +915,43 @@
             });
 
             displayExercises(filtered);
+        }
+
+        // Track current step for each exercise
+        const currentSteps = {};
+
+        function initializeExerciseStep(index) {
+            if (!(index in currentSteps)) {
+                currentSteps[index] = 0;
+            }
+        }
+
+        function updateImage(exerciseIndex, totalSteps) {
+            initializeExerciseStep(exerciseIndex);
+            const currentStep = currentSteps[exerciseIndex];
+            const exercise = chestExercises[exerciseIndex];
+
+            if (exercise.images && exercise.images.length > 0) {
+                const img = document.getElementById(`exercise-img-${exerciseIndex}`);
+                const indicator = document.getElementById(`step-indicator-${exerciseIndex}`);
+
+                if (img && indicator) {
+                    img.src = exercise.images[currentStep];
+                    indicator.textContent = `Step ${currentStep + 1} of ${totalSteps}`;
+                }
+            }
+        }
+
+        function nextImage(exerciseIndex, totalSteps) {
+            initializeExerciseStep(exerciseIndex);
+            currentSteps[exerciseIndex] = (currentSteps[exerciseIndex] + 1) % totalSteps;
+            updateImage(exerciseIndex, totalSteps);
+        }
+
+        function previousImage(exerciseIndex, totalSteps) {
+            initializeExerciseStep(exerciseIndex);
+            currentSteps[exerciseIndex] = (currentSteps[exerciseIndex] - 1 + totalSteps) % totalSteps;
+            updateImage(exerciseIndex, totalSteps);
         }
 
         // Initialize
