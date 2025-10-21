@@ -34,7 +34,11 @@
 
                     <!-- Hero Header -->
                     <div class="hero-section" style="margin-bottom: 25px;">
-                        <h1 class="hero-title">Well Fit</h1>
+                        <h1 class="hero-title" style="color: var(--carolina-blue); display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: nowrap; white-space: nowrap;">
+                            <span style="font-size: 48px;">🔥</span>
+                            <span>Well Fit</span>
+                            <span style="font-size: 48px;">🔥</span>
+                        </h1>
                         <div class="hero-subtitle">Ignite your fitness journey</div>
                     </div>
 
@@ -73,6 +77,13 @@
                                 <div style="font-size: 28px; font-weight: bold;" id="home-fat">0g</div>
                                 <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">Fat</div>
                             </div>
+                        </div>
+
+                        <!-- Deficit/Surplus Indicator -->
+                        <div id="deficit-surplus" style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.15); border-radius: 15px; text-align: center;">
+                            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px; letter-spacing: 0.5px;">TODAY'S BALANCE</div>
+                            <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;" id="deficit-surplus-amount">--</div>
+                            <div style="font-size: 14px; font-weight: 600; letter-spacing: 1px;" id="deficit-surplus-label">CALCULATING...</div>
                         </div>
 
                         <div style="margin-top: 25px; font-size: 14px; opacity: 0.9; text-align: center; font-weight: 600;">
@@ -2077,6 +2088,9 @@
                 // Otherwise show home by default
                 document.getElementById('home').classList.add('active');
             }
+
+            // Update home food calories and deficit/surplus on page load
+            updateHomeFoodCalories();
         });
     </script>
 
@@ -2652,8 +2666,89 @@
                 if (homeProtein) homeProtein.textContent = Math.round(todayData.protein) + 'g';
                 if (homeCarbs) homeCarbs.textContent = Math.round(todayData.carbs) + 'g';
                 if (homeFat) homeFat.textContent = Math.round(todayData.fat) + 'g';
+
+                // Update deficit/surplus
+                updateDeficitSurplus(todayData.calories);
             } catch (error) {
                 console.error('Error updating home food calories:', error);
+            }
+        }
+
+        // Calculate BMR (Basal Metabolic Rate) using Mifflin-St Jeor equation
+        function calculateBMR() {
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+
+            if (!userProfile.weight || !userProfile.age || !userProfile.gender) {
+                // Default BMR if no profile data
+                return 2000;
+            }
+
+            const weight = userProfile.weight; // in lbs
+            const age = userProfile.age;
+            const gender = userProfile.gender;
+            const height = userProfile.height || 70; // default to 5'10" (70 inches) if not set
+
+            // Convert weight from lbs to kg
+            const weightKg = weight * 0.453592;
+            // Convert height from inches to cm
+            const heightCm = height * 2.54;
+
+            let bmr;
+            if (gender === 'male') {
+                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+            }
+
+            // Apply activity multiplier (moderate activity = 1.55)
+            const tdee = bmr * 1.55;
+
+            return Math.round(tdee);
+        }
+
+        async function updateDeficitSurplus(caloriesConsumed) {
+            try {
+                const amountEl = document.getElementById('deficit-surplus-amount');
+                const labelEl = document.getElementById('deficit-surplus-label');
+
+                if (!amountEl || !labelEl) return;
+
+                let caloriesBurned = 0;
+
+                // Try to get calories burned from Apple Health first
+                if (window.HealthSync && window.HealthSync.healthData && window.HealthSync.healthData.caloriesBurned) {
+                    caloriesBurned = window.HealthSync.healthData.caloriesBurned;
+                    console.log('📱 Using Apple Health calories burned:', caloriesBurned);
+                } else {
+                    // Fallback to BMR calculation
+                    caloriesBurned = calculateBMR();
+                    console.log('📊 Using calculated BMR/TDEE:', caloriesBurned);
+                }
+
+                // Calculate deficit or surplus
+                const balance = caloriesConsumed - caloriesBurned;
+                const absBalance = Math.abs(balance);
+
+                // Update display
+                amountEl.textContent = absBalance.toLocaleString() + ' cal';
+
+                if (balance < 0) {
+                    // Deficit (good for weight loss)
+                    labelEl.textContent = '🔥 DEFICIT';
+                    labelEl.style.color = '#4CAF50'; // Green
+                } else if (balance > 0) {
+                    // Surplus (good for muscle gain)
+                    labelEl.textContent = '💪 SURPLUS';
+                    labelEl.style.color = '#FF9800'; // Orange
+                } else {
+                    labelEl.textContent = '⚖️ BALANCED';
+                    labelEl.style.color = '#2196F3'; // Blue
+                }
+
+            } catch (error) {
+                console.error('Error updating deficit/surplus:', error);
+                const labelEl = document.getElementById('deficit-surplus-label');
+                if (labelEl) labelEl.textContent = 'N/A';
             }
         }
 

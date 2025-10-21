@@ -293,17 +293,33 @@
         }
 
         async function syncHealthData() {
-            document.getElementById('sync-status').innerHTML = '🔄 Syncing...';
+            try {
+                document.getElementById('sync-status').innerHTML = '🔄 Syncing...';
 
-            const data = await window.healthSync.syncAllData();
+                // Make sure healthSync is initialized
+                if (!window.healthSync) {
+                    console.log('🔄 Initializing health sync...');
+                    const initialized = await window.healthSync.initialize();
+                    if (!initialized) {
+                        document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available';
+                        return;
+                    }
+                }
 
-            if (!data) {
-                document.getElementById('sync-status').innerHTML = '❌ Sync failed';
-                return;
+                const data = await window.healthSync.syncAllData();
+
+                if (!data) {
+                    document.getElementById('sync-status').innerHTML = '❌ Sync failed - Please grant Health permissions in Settings';
+                    return;
+                }
+
+                updateUI(data);
+                localStorage.setItem('healthData', JSON.stringify(data));
+                document.getElementById('sync-status').innerHTML = `✅ Synced at ${new Date().toLocaleTimeString()}`;
+            } catch (error) {
+                console.error('Sync error:', error);
+                document.getElementById('sync-status').innerHTML = `❌ Sync failed: ${error.message}`;
             }
-
-            updateUI(data);
-            document.getElementById('sync-status').innerHTML = `✅ Synced at ${new Date().toLocaleTimeString()}`;
         }
 
         function getStepGoal() {

@@ -1679,6 +1679,15 @@ function showScreen(screenId) {
         setTimeout(updateFitnessDashboard, 100);
     }
 
+    // Update home food calories when showing home screen
+    if (screenId === 'home') {
+        setTimeout(() => {
+            if (typeof updateHomeFoodCalories === 'function') {
+                updateHomeFoodCalories();
+            }
+        }, 100);
+    }
+
     // Update menu
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');

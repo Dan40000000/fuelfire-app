@@ -129,11 +129,11 @@
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
                         <h3 style="color: white; text-align: center; margin: 0 0 15px 0; font-size: 20px;">🔥 LOG YOUR FUEL 🔥</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                            <button onclick="startVoiceLogging()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
-                                🎤<br>Voice
-                            </button>
                             <button onclick="startBarcodeScanning()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
                                 📷<br>Scan
+                            </button>
+                            <button onclick="startVoiceLogging()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                                🎤<br>Voice
                             </button>
                             <button onclick="showSmartEntry()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
                                 ⌨️<br>Type
@@ -160,6 +160,19 @@
                         </div>
                         <div style="text-align: center; margin-top: 12px; font-size: 12px; color: #666;">
                             Import complete meals with one tap!
+                        </div>
+                    </div>
+
+                    <!-- Quick Add Common Items -->
+                    <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                            <h3 style="color: var(--primary); margin: 0; font-size: 18px;">⚡ Quick Add</h3>
+                            <button onclick="showQuickAddManager()" style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer;">
+                                + Manage
+                            </button>
+                        </div>
+                        <div id="quick-add-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <!-- Quick add items will be loaded here -->
                         </div>
                     </div>
                     
@@ -192,17 +205,90 @@
             <div class="sidebar-brand">🔥 Well Fit</div>
         </div>
         <div class="sidebar-menu">
-            <div class="menu-item" onclick="goToPage('index.html')">🏠 Home</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')">💪 Create Workout</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">📚 Saved Workouts</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')">📊 Track Workouts</div>
-            <div class="menu-item active" onclick="goToPage('calorie-tracker.html')">🔥 Calorie Tracker</div>
-            <div class="menu-item" onclick="goToPage('enhanced-diet-quiz.html')">🎯 Diet Creation</div>
-            <div class="menu-item" onclick="goToPage('meal-plans.html')">🍽️ Meal Plans</div>
-            <div class="menu-item" onclick="goToPage('meal-ideas.html')">💡 Meal Ideas</div>
-            <div class="menu-item" onclick="goToPage('supplements.html')">💊 Supplements</div>
-            <div class="menu-item" onclick="goToPage('workout-techniques.html')">🏋️ Workout Techniques</div>
-            <div class="menu-item" onclick="goToScreen('index.html', 'progress')">📈 Goals &amp; Progress</div>
+            <div class="menu-item" onclick="window.location.href='index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item active" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals & Progress
+            </div>
         </div>
     </div>
     
@@ -345,22 +431,7 @@
             <div id="food-results" style="margin-top: 20px;"></div>
         </div>
     </div>
-    
-    <!-- Barcode Scanner Modal -->
-    <div id="scanner-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px;">
-            <video id="scanner-video" style="width: 100%; border-radius: 10px;"></video>
-            <canvas id="scanner-canvas" style="display: none;"></canvas>
-            <div style="text-align: center; margin-top: 20px;">
-                <div style="color: white; font-size: 18px; margin-bottom: 10px;">📷 Point at barcode</div>
-                <button onclick="closeScannerModal()" style="background: #dc3545; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold;">
-                    Cancel
-                </button>
-            </div>
-            <div id="scan-result" style="color: white; text-align: center; margin-top: 20px;"></div>
-        </div>
-    </div>
-    
+
     <!-- Smart Entry Modal -->
     <div id="smart-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; overflow-y: auto;">
         <div style="position: relative; top: 5vh; left: 50%; transform: translateX(-50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 450px; margin-bottom: 5vh;">
@@ -415,9 +486,46 @@
             </button>
         </div>
     </div>
-    
-    <!-- QuaggaJS for barcode scanning -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
+    <!-- Quick Add Manager Modal -->
+    <div id="quick-add-manager-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; overflow-y: auto;">
+        <div style="position: relative; top: 5vh; left: 50%; transform: translateX(-50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 450px; margin-bottom: 5vh;">
+            <h3 style="color: var(--primary); margin-bottom: 20px;">⚡ Manage Quick Add Items</h3>
+
+            <!-- Current Quick Add Items -->
+            <div style="margin-bottom: 25px;">
+                <h4 style="font-size: 14px; color: #666; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Your Quick Add Items:</h4>
+                <div id="quick-add-items-list" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Add New Item Form -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                <h4 style="font-size: 14px; color: var(--primary); margin: 0 0 15px 0; font-weight: bold;">➕ Add New Item</h4>
+
+                <input type="text" id="qa-name" placeholder="Item name (e.g., Protein Powder)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 12px; box-sizing: border-box;">
+
+                <input type="text" id="qa-emoji" placeholder="Emoji (e.g., 💪)" maxlength="2" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 12px; box-sizing: border-box;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                    <input type="number" id="qa-calories" placeholder="Calories" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
+                    <input type="number" id="qa-protein" placeholder="Protein (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
+                    <input type="number" id="qa-carbs" placeholder="Carbs (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
+                    <input type="number" id="qa-fat" placeholder="Fat (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
+                </div>
+
+                <button onclick="addQuickAddItem()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                    ➕ Add Item
+                </button>
+            </div>
+
+            <button onclick="closeQuickAddManager()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                Done
+            </button>
+        </div>
+    </div>
+
     
     <script>
         // Helper function to get local date in YYYY-MM-DD format (not UTC)
@@ -540,7 +648,388 @@
                 }
             }
         }
-        
+
+        // Quick add common items (protein shakes, supplements, etc.)
+        function quickAddItem(name, calories, protein, carbs, fat) {
+            const food = {
+                name: name,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                sugar: 0
+            };
+
+            logFood(food);
+
+            // Show success feedback
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '✓ Added!';
+            btn.style.transform = 'scale(0.95)';
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.transform = 'scale(1)';
+            }, 1000);
+        }
+
+        // Quick Add Management Functions
+        function getDefaultQuickAddItems() {
+            return [
+                { name: 'Protein Powder', emoji: '💪', calories: 150, protein: 30, carbs: 3, fat: 2, color: '#9C27B0' }
+            ];
+        }
+
+        function loadQuickAdds() {
+            let quickAdds = JSON.parse(localStorage.getItem('quickAddItems') || 'null');
+
+            // Initialize with default if empty
+            if (!quickAdds || quickAdds.length === 0) {
+                quickAdds = getDefaultQuickAddItems();
+                localStorage.setItem('quickAddItems', JSON.stringify(quickAdds));
+            }
+
+            const grid = document.getElementById('quick-add-grid');
+            if (!grid) return;
+
+            const colors = ['#9C27B0', '#f44336', '#2196F3', '#00BCD4', '#795548', '#FF9800', '#4CAF50', '#E91E63', '#3F51B5'];
+
+            grid.innerHTML = quickAdds.map((item, index) => {
+                const color = item.color || colors[index % colors.length];
+                return `
+                    <button onclick="quickAddItem('${item.name.replace(/'/g, "\\'")}', ${item.calories}, ${item.protein}, ${item.carbs}, ${item.fat})"
+                            style="background: linear-gradient(135deg, ${color}, ${color}dd); color: white; padding: 20px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 12px ${color}40; font-size: 36px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                        ${item.emoji}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function showQuickAddManager() {
+            document.getElementById('quick-add-manager-modal').style.display = 'block';
+            loadQuickAddItemsList();
+        }
+
+        function closeQuickAddManager() {
+            document.getElementById('quick-add-manager-modal').style.display = 'none';
+            // Clear form
+            document.getElementById('qa-name').value = '';
+            document.getElementById('qa-emoji').value = '';
+            document.getElementById('qa-calories').value = '';
+            document.getElementById('qa-protein').value = '';
+            document.getElementById('qa-carbs').value = '';
+            document.getElementById('qa-fat').value = '';
+            // Reload quick add grid
+            loadQuickAdds();
+        }
+
+        function loadQuickAddItemsList() {
+            let quickAdds = JSON.parse(localStorage.getItem('quickAddItems') || 'null');
+            if (!quickAdds || quickAdds.length === 0) {
+                quickAdds = getDefaultQuickAddItems();
+            }
+
+            const list = document.getElementById('quick-add-items-list');
+            list.innerHTML = quickAdds.map((item, index) => `
+                <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 12px; border-radius: 10px; border: 2px solid #e0e0e0;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                        <div style="font-size: 32px;">${item.emoji}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: var(--primary);">${item.name}</div>
+                            <div style="font-size: 11px; color: #666;">${item.calories} cal | ${item.protein}g P | ${item.carbs}g C | ${item.fat}g F</div>
+                        </div>
+                    </div>
+                    <button onclick="deleteQuickAddItem(${index})" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                        Delete
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addQuickAddItem() {
+            const name = document.getElementById('qa-name').value.trim();
+            const emoji = document.getElementById('qa-emoji').value.trim();
+            const calories = parseFloat(document.getElementById('qa-calories').value) || 0;
+            const protein = parseFloat(document.getElementById('qa-protein').value) || 0;
+            const carbs = parseFloat(document.getElementById('qa-carbs').value) || 0;
+            const fat = parseFloat(document.getElementById('qa-fat').value) || 0;
+
+            if (!name) {
+                alert('Please enter an item name');
+                return;
+            }
+
+            if (!emoji) {
+                alert('Please enter an emoji');
+                return;
+            }
+
+            const colors = ['#9C27B0', '#f44336', '#2196F3', '#00BCD4', '#795548', '#FF9800', '#4CAF50', '#E91E63', '#3F51B5'];
+            const newItem = {
+                name,
+                emoji,
+                calories,
+                protein,
+                carbs,
+                fat,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            };
+
+            let quickAdds = JSON.parse(localStorage.getItem('quickAddItems') || 'null');
+            if (!quickAdds) quickAdds = [];
+
+            quickAdds.push(newItem);
+            localStorage.setItem('quickAddItems', JSON.stringify(quickAdds));
+
+            // Clear form
+            document.getElementById('qa-name').value = '';
+            document.getElementById('qa-emoji').value = '';
+            document.getElementById('qa-calories').value = '';
+            document.getElementById('qa-protein').value = '';
+            document.getElementById('qa-carbs').value = '';
+            document.getElementById('qa-fat').value = '';
+
+            // Reload list
+            loadQuickAddItemsList();
+        }
+
+        function deleteQuickAddItem(index) {
+            if (!confirm('Delete this quick add item?')) return;
+
+            let quickAdds = JSON.parse(localStorage.getItem('quickAddItems') || '[]');
+            quickAdds.splice(index, 1);
+            localStorage.setItem('quickAddItems', JSON.stringify(quickAdds));
+
+            loadQuickAddItemsList();
+        }
+
+        // Barcode Scanner using Capacitor ML Kit
+        async function startBarcodeScanning() {
+            try {
+                console.log('📷 Starting barcode scanner...');
+
+                // Check if running in browser (web) or native app
+                if (typeof Capacitor === 'undefined' || Capacitor.getPlatform() === 'web') {
+                    alert('📷 Barcode scanning is only available in the mobile app.\n\nPlease use Voice or Manual entry for now.');
+                    return;
+                }
+
+                // Import BarcodeScanner from Capacitor
+                const { BarcodeScanner } = Capacitor.Plugins;
+
+                if (!BarcodeScanner) {
+                    console.error('BarcodeScanner plugin not found');
+                    alert('Barcode scanner not available. Please use Voice or Manual entry.');
+                    return;
+                }
+
+                // Check and request camera permissions
+                console.log('📷 Checking camera permissions...');
+                const permissionStatus = await BarcodeScanner.checkPermissions();
+                console.log('📷 Permission status:', permissionStatus);
+
+                if (permissionStatus.camera !== 'granted') {
+                    console.log('📷 Requesting camera permission...');
+                    const result = await BarcodeScanner.requestPermissions();
+                    console.log('📷 Permission request result:', result);
+
+                    if (result.camera !== 'granted') {
+                        alert('📷 Camera access is required to scan barcodes.\n\nTo enable:\n1. Go to iPhone Settings\n2. Find "Well Fit Pro"\n3. Enable Camera access');
+                        return;
+                    }
+                }
+
+                // Start the scanner
+                console.log('📷 Starting scan...');
+                document.body.style.background = 'transparent';
+                document.body.classList.add('barcode-scanning-active');
+
+                const { barcodes } = await BarcodeScanner.scan();
+
+                console.log('📷 Scan result:', barcodes);
+                document.body.style.background = '';
+                document.body.classList.remove('barcode-scanning-active');
+
+                if (barcodes && barcodes.length > 0) {
+                    const barcode = barcodes[0];
+                    console.log('📷 Barcode detected:', barcode.displayValue || barcode.rawValue);
+                    await searchByBarcode(barcode.displayValue || barcode.rawValue);
+                } else {
+                    console.log('📷 No barcode detected');
+                    alert('No barcode detected. Please try again.');
+                }
+
+            } catch (error) {
+                console.error('📷 Barcode scanning error:', error);
+                document.body.style.background = '';
+
+                alert('Camera Error: ' + (error.message || 'Unable to start scanner') + '\n\nPlease try again or use Voice/Manual entry.');
+            }
+        }
+
+        async function searchByBarcode(barcode) {
+            console.log('🔍 Searching for barcode:', barcode);
+
+            try {
+                // Show loading in voice modal (reusing it for barcode results)
+                document.getElementById('voice-modal').style.display = 'block';
+                document.getElementById('voice-status').textContent = '🔍';
+                document.getElementById('voice-text').textContent = `Searching for barcode ${barcode}...`;
+                document.getElementById('voice-button').style.display = 'none';
+
+                // Search OpenFoodFacts API (completely free, no API key needed)
+                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const data = await response.json();
+
+                console.log('🔍 OpenFoodFacts response:', data);
+
+                if (data.status === 1 && data.product) {
+                    const product = data.product;
+                    const name = product.product_name || 'Unknown Product';
+                    const brand = product.brands || '';
+                    const fullName = brand ? `${brand} ${name}` : name;
+
+                    // Get nutrition info (per serving if available, otherwise per 100g)
+                    const servingSize = product.serving_size || '100g';
+                    let calories = 0, protein = 0, carbs = 0, fat = 0, sugar = 0;
+
+                    if (product.nutriments) {
+                        // Try to get per-serving values first
+                        if (product.nutriments['energy-kcal_serving']) {
+                            calories = product.nutriments['energy-kcal_serving'] || 0;
+                            protein = product.nutriments['proteins_serving'] || 0;
+                            carbs = product.nutriments['carbohydrates_serving'] || 0;
+                            fat = product.nutriments['fat_serving'] || 0;
+                            sugar = product.nutriments['sugars_serving'] || 0;
+                        } else {
+                            // Fall back to per-100g values
+                            calories = product.nutriments['energy-kcal_100g'] || product.nutriments['energy-kcal'] || 0;
+                            protein = product.nutriments['proteins_100g'] || product.nutriments['proteins'] || 0;
+                            carbs = product.nutriments['carbohydrates_100g'] || product.nutriments['carbohydrates'] || 0;
+                            fat = product.nutriments['fat_100g'] || product.nutriments['fat'] || 0;
+                            sugar = product.nutriments['sugars_100g'] || product.nutriments['sugars'] || 0;
+                        }
+                    }
+
+                    // Round values
+                    calories = Math.round(calories);
+                    protein = Math.round(protein);
+                    carbs = Math.round(carbs);
+                    fat = Math.round(fat);
+                    sugar = Math.round(sugar);
+
+                    console.log('✅ Product found:', { fullName, calories, protein, carbs, fat, sugar, servingSize });
+
+                    // Show results with meal type selector
+                    document.getElementById('voice-status').textContent = '✅';
+                    document.getElementById('voice-text').innerHTML = `
+                        <div style="text-align: left;">
+                            <div style="font-weight: bold; margin-bottom: 10px; color: var(--primary);">Found Product:</div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                                <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${fullName}</div>
+                                <div style="font-size: 13px; color: #666;">
+                                    📊 ${calories} cal | 🥩 ${protein}g protein | 🍞 ${carbs}g carbs | 🥑 ${fat}g fat
+                                    <br>📏 Serving: ${servingSize}
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-weight: bold; margin-bottom: 8px; display: block;">Quantity:</label>
+                                <input type="number" id="barcode-quantity" value="1" min="0.25" step="0.25"
+                                       style="width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 8px; font-size: 14px;">
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; margin-bottom: 8px; display: block;">Log as:</label>
+                                <select id="barcode-meal-type" style="width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 8px; font-size: 14px;">
+                                    <option value="breakfast">🌅 Breakfast</option>
+                                    <option value="lunch">☀️ Lunch</option>
+                                    <option value="dinner">🌙 Dinner</option>
+                                    <option value="snack">🍿 Snack</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+
+                    // Show button and set up click handler
+                    const logBtn = document.getElementById('voice-button');
+                    logBtn.style.display = 'block';
+                    logBtn.textContent = 'Log This Food';
+                    logBtn.style.background = '#28a745';
+
+                    // Remove old click handler
+                    const newLogBtn = logBtn.cloneNode(true);
+                    logBtn.parentNode.replaceChild(newLogBtn, logBtn);
+
+                    // Add new click handler
+                    newLogBtn.onclick = () => {
+                        const quantity = parseFloat(document.getElementById('barcode-quantity').value) || 1;
+                        const mealType = document.getElementById('barcode-meal-type').value;
+
+                        const foodToLog = {
+                            name: quantity !== 1 ? `${quantity}x ${fullName}` : fullName,
+                            calories: Math.round(calories * quantity),
+                            protein: Math.round(protein * quantity),
+                            carbs: Math.round(carbs * quantity),
+                            fat: Math.round(fat * quantity),
+                            sugar: Math.round(sugar * quantity),
+                            meal: mealType
+                        };
+
+                        logFood(foodToLog);
+
+                        const mealEmoji = { 'breakfast': '🌅', 'lunch': '☀️', 'dinner': '🌙', 'snack': '🍿' }[mealType] || '🍴';
+
+                        document.getElementById('voice-text').textContent = `✅ Logged to ${mealEmoji} ${mealType}!`;
+                        document.getElementById('voice-status').textContent = '🎉';
+                        setTimeout(() => closeVoiceModal(), 1000);
+                    };
+
+                } else {
+                    // Product not found
+                    console.log('❌ Product not found in database');
+                    document.getElementById('voice-status').textContent = '❌';
+                    document.getElementById('voice-text').innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-weight: bold; margin-bottom: 10px; color: #dc3545;">Product Not Found</div>
+                            <div style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                                Barcode: ${barcode}<br><br>
+                                This product isn't in our database yet.<br>
+                                Try using Voice or Manual entry instead.
+                            </div>
+                        </div>
+                    `;
+
+                    const logBtn = document.getElementById('voice-button');
+                    logBtn.style.display = 'block';
+                    logBtn.textContent = 'Try Manual Entry';
+                    logBtn.style.background = '#6c757d';
+
+                    const newLogBtn = logBtn.cloneNode(true);
+                    logBtn.parentNode.replaceChild(newLogBtn, logBtn);
+
+                    newLogBtn.onclick = () => {
+                        closeVoiceModal();
+                        showSmartEntry();
+                        showManualEntry();
+                    };
+                }
+
+            } catch (error) {
+                console.error('🔍 Search error:', error);
+                document.getElementById('voice-status').textContent = '❌';
+                document.getElementById('voice-text').textContent = 'Error searching for product. Please try again or use Manual entry.';
+
+                const logBtn = document.getElementById('voice-button');
+                logBtn.style.display = 'block';
+                logBtn.textContent = 'Close';
+                logBtn.style.background = '#6c757d';
+
+                const newLogBtn = logBtn.cloneNode(true);
+                logBtn.parentNode.replaceChild(newLogBtn, logBtn);
+                newLogBtn.onclick = closeVoiceModal;
+            }
+        }
+
         function logFood(food) {
             console.log('🍔 Logging food:', food);
             const today = getLocalDateString();
@@ -1190,222 +1679,6 @@
             loadQuickAdds();
             
             alert(`✅ ${name} logged!\n\n📊 ${calories} calories\n🥩 ${protein}g protein\n🍞 ${carbs}g carbs\n🥑 ${fat}g fat\n🍭 ${sugar || 0}g sugar`);
-        }
-        
-        // Barcode Scanner using Capacitor ML Kit
-        async function startBarcodeScanning() {
-            try {
-                // Check if Capacitor is available
-                if (typeof Capacitor === 'undefined') {
-                    // Fallback for web browser
-                    const barcode = prompt('📷 Enter the barcode number:\n\n(Enter the numbers below the barcode)');
-                    if (barcode && barcode.trim()) {
-                        searchByBarcode(barcode.trim());
-                    }
-                    return;
-                }
-
-                // Import the barcode scanner
-                const { BarcodeScanner } = await import('@capacitor-mlkit/barcode-scanning');
-
-                // Request camera permission
-                await BarcodeScanner.requestPermissions();
-
-                // Start scanning
-                document.querySelector('body').classList.add('barcode-scanner-active');
-
-                const listener = await BarcodeScanner.addListener('barcodeScanned', async (result) => {
-                    console.log('📷 Barcode scanned:', result.barcode);
-                    await BarcodeScanner.stopScan();
-                    document.querySelector('body').classList.remove('barcode-scanner-active');
-                    await listener.remove();
-
-                    // Search for the product
-                    if (result.barcode.displayValue) {
-                        searchByBarcode(result.barcode.displayValue);
-                    }
-                });
-
-                await BarcodeScanner.startScan();
-
-            } catch (error) {
-                console.error('Barcode scanning error:', error);
-                alert('Camera access denied or scanner unavailable. Please allow camera access in Settings.');
-            }
-        }
-        
-        async function searchByBarcode(barcode) {
-            document.getElementById('scan-result').innerHTML = `<div style="background: white; color: black; padding: 10px; border-radius: 10px;">Searching for ${barcode}...</div>`;
-            
-            try {
-                // OpenFoodFacts API (completely free)
-                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                const data = await response.json();
-                
-                if (data.status === 1) {
-                    const product = data.product;
-                    const name = product.product_name || 'Unknown Product';
-                    const brand = product.brands || '';
-                    const fullName = brand ? `${brand} ${name}` : name;
-                    
-                    // Get serving size info
-                    const servingSize = product.serving_size || '100g';
-                    
-                    // Calculate nutrition per serving (not per 100g)
-                    let calories, protein, carbs, fat, sugar;
-
-                    if (product.nutriments['energy-kcal_serving']) {
-                        // Use per-serving values if available
-                        calories = product.nutriments['energy-kcal_serving'] || 0;
-                        protein = product.nutriments['proteins_serving'] || 0;
-                        carbs = product.nutriments['carbohydrates_serving'] || 0;
-                        fat = product.nutriments['fat_serving'] || 0;
-                        sugar = product.nutriments['sugars_serving'] || 0;
-                    } else {
-                        // Fall back to per-100g values
-                        calories = product.nutriments['energy-kcal_100g'] || product.nutriments['energy-kcal'] || 0;
-                        protein = product.nutriments['proteins_100g'] || product.nutriments['proteins'] || 0;
-                        carbs = product.nutriments['carbohydrates_100g'] || product.nutriments['carbohydrates'] || 0;
-                        fat = product.nutriments['fat_100g'] || product.nutriments['fat'] || 0;
-                        sugar = product.nutriments['sugars_100g'] || product.nutriments['sugars'] || 0;
-                    }
-                    
-                    closeScannerModal();
-
-                    // Show the food with checklist like voice/type
-                    const foodData = [{
-                        name: fullName,
-                        calories: Math.round(calories),
-                        protein: Math.round(protein),
-                        carbs: Math.round(carbs),
-                        fat: Math.round(fat),
-                        sugar: Math.round(sugar),
-                        serving: servingSize,
-                        source: 'barcode'
-                    }];
-
-                    // Show in voice modal with confirmation UI
-                    document.getElementById('voice-modal').style.display = 'block';
-                    document.getElementById('voice-status').textContent = '✅';
-
-                    const foodListHtml = `
-                        <div style="text-align: left; padding: 10px; margin: 5px 0; background: white; border-radius: 8px;">
-                            <label style="display: flex; align-items: flex-start; cursor: pointer; width: 100%;">
-                                <input type="checkbox" checked class="food-checkbox" data-food-index="0"
-                                       data-food-name="${fullName.replace(/"/g, '&quot;')}"
-                                       data-food-calories="${Math.round(calories)}"
-                                       data-food-protein="${Math.round(protein)}"
-                                       data-food-carbs="${Math.round(carbs)}"
-                                       data-food-fat="${Math.round(fat)}"
-                                       data-food-sugar="${Math.round(sugar)}"
-                                       style="margin-right: 10px; margin-top: 3px; width: 20px; height: 20px; flex-shrink: 0;">
-                                <div style="flex: 1;">
-                                    <div style="font-weight: bold;">${fullName}</div>
-                                    <div style="font-size: 12px; color: #666; margin: 4px 0;">${Math.round(calories)} cal | ${Math.round(protein)}g protein | Serving: ${servingSize}</div>
-                                    <div style="display: flex; align-items: center; gap: 5px; margin-top: 6px;">
-                                        <label style="font-size: 11px; color: #666;">Qty:</label>
-                                        <input type="number" class="food-quantity" data-food-index="0" value="1" min="0.25" step="0.25"
-                                               style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;"
-                                               onclick="event.stopPropagation();">
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    `;
-
-                    document.getElementById('voice-text').innerHTML = `
-                        <div style="text-align: left;">
-                            <div style="font-weight: bold; margin-bottom: 10px;">Scanned product:</div>
-                            ${foodListHtml}
-                            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee;">
-                                <label style="font-weight: bold; margin-bottom: 8px; display: block;">Which meal?</label>
-                                <select id="meal-type-select" style="width: 100%; padding: 10px; border: 2px solid var(--primary); border-radius: 8px; font-size: 14px;">
-                                    <option value="breakfast">🌅 Breakfast</option>
-                                    <option value="lunch">☀️ Lunch</option>
-                                    <option value="dinner">🌙 Dinner</option>
-                                    <option value="snack">🍿 Snack</option>
-                                </select>
-                            </div>
-                        </div>
-                    `;
-
-                    const logBtn = document.getElementById('voice-button');
-                    logBtn.textContent = 'Log This Food';
-                    logBtn.style.background = '#28a745';
-
-                    // Remove old event listener by cloning the button
-                    const newLogBtn = logBtn.cloneNode(true);
-                    logBtn.parentNode.replaceChild(newLogBtn, logBtn);
-
-                    // Add fresh event listener
-                    newLogBtn.onclick = () => {
-                        // Get meal type
-                        const mealType = document.getElementById('meal-type-select')?.value || 'snack';
-
-                        const checkbox = document.querySelector('.food-checkbox');
-                        if (checkbox && checkbox.checked) {
-                            const quantityInput = document.querySelector('.food-quantity');
-                            const quantity = parseFloat(quantityInput.value) || 1;
-
-                            // Get food data from data attributes
-                            const foodName = checkbox.dataset.foodName;
-                            const calories = parseFloat(checkbox.dataset.foodCalories);
-                            const protein = parseFloat(checkbox.dataset.foodProtein);
-                            const carbs = parseFloat(checkbox.dataset.foodCarbs);
-                            const fat = parseFloat(checkbox.dataset.foodFat);
-                            const sugar = parseFloat(checkbox.dataset.foodSugar) || 0;
-
-                            const foodToLog = {
-                                name: quantity !== 1 ? `${quantity}x ${foodName}` : foodName,
-                                calories: Math.round(calories * quantity),
-                                protein: Math.round(protein * quantity),
-                                carbs: Math.round(carbs * quantity),
-                                fat: Math.round(fat * quantity),
-                                sugar: Math.round(sugar * quantity),
-                                meal: mealType
-                            };
-
-                            logFood(foodToLog);
-
-                            const mealEmoji = {
-                                'breakfast': '🌅',
-                                'lunch': '☀️',
-                                'dinner': '🌙',
-                                'snack': '🍿'
-                            }[mealType] || '🍴';
-
-                            document.getElementById('voice-text').textContent = `Logged to ${mealEmoji} ${mealType}!`;
-                            document.getElementById('voice-status').textContent = '🎉';
-                            setTimeout(() => {
-                                closeVoiceModal();
-                            }, 800);
-                        } else {
-                            closeVoiceModal();
-                        }
-                    };
-                    
-                } else {
-                    document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Product not found. Try manual entry.</div>';
-                    setTimeout(() => {
-                        closeScannerModal();
-                        showSmartEntry();
-                        showManualEntry(); // Switch to manual tab
-                    }, 2000);
-                }
-            } catch (error) {
-                console.error('Barcode search error:', error);
-                document.getElementById('scan-result').innerHTML = '<div style="background: #dc3545; color: white; padding: 10px; border-radius: 10px;">Error searching product. Try manual entry.</div>';
-                setTimeout(() => {
-                    closeScannerModal();
-                    showSmartEntry();
-                    showManualEntry(); // Switch to manual tab
-                }, 2000);
-            }
-        }
-        
-        function closeScannerModal() {
-            document.getElementById('scanner-modal').style.display = 'none';
-            Quagga.stop();
         }
         
         // Smart Entry
@@ -2474,10 +2747,7 @@
         }
         
         // Voice logging function is defined earlier in the file
-        
-        // Barcode Scanning Function
-        // Removed duplicate startBarcodeScanning function - using the one above
-        
+
         // Smart Entry Function
         function showSmartEntryDuplicate_REMOVED() {
             // REMOVED - This was a duplicate function causing conflicts

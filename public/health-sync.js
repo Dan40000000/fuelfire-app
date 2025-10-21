@@ -10,15 +10,23 @@ class HealthSync {
 
     async initialize() {
         try {
-            if (typeof Capacitor === 'undefined') {
+            if (typeof Capacitor === 'undefined' || Capacitor.getPlatform() === 'web') {
                 console.log('❌ Capacitor not available - Health sync disabled');
                 return false;
             }
 
-            // Import the health plugin
-            const { Health } = await import('@capgo/capacitor-health');
+            // Get the Health plugin from Capacitor.Plugins
+            const { Health } = Capacitor.Plugins;
             this.Health = Health;
-            this.isAvailable = true;
+
+            // Check if Health is available on this device
+            const availability = await Health.isAvailable();
+            this.isAvailable = availability.available;
+
+            if (!this.isAvailable) {
+                console.warn('❌ Health unavailable:', availability.reason);
+                return false;
+            }
 
             console.log('✅ Health plugin loaded');
             return true;
@@ -37,25 +45,8 @@ class HealthSync {
         try {
             // Request all health permissions
             const permissions = await this.Health.requestAuthorization({
-                read: [
-                    'steps',
-                    'distance',
-                    'calories',
-                    'heart_rate',
-                    'activity',
-                    'workout',
-                    'weight',
-                    'body_fat_percentage',
-                    'active_energy_burned'
-                ],
-                write: [
-                    'steps',
-                    'calories',
-                    'workout',
-                    'weight',
-                    'body_fat_percentage',
-                    'active_energy_burned'
-                ]
+                read: ['steps', 'distance', 'calories', 'heartRate', 'activity', 'workout', 'weight'],
+                write: ['steps', 'calories', 'workout', 'weight']
             });
 
             console.log('✅ Health permissions granted:', permissions);
@@ -74,8 +65,8 @@ class HealthSync {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            const result = await this.Health.queryHKitSampleType({
-                sampleName: 'steps',
+            const { samples } = await this.Health.readSamples({
+                dataType: 'steps',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
                 limit: 1000
@@ -83,9 +74,9 @@ class HealthSync {
 
             // Sum up all step counts for today
             let totalSteps = 0;
-            if (result.resultData && Array.isArray(result.resultData)) {
-                totalSteps = result.resultData.reduce((sum, record) => {
-                    return sum + (parseFloat(record.value) || 0);
+            if (samples && Array.isArray(samples)) {
+                totalSteps = samples.reduce((sum, sample) => {
+                    return sum + (parseFloat(sample.value) || 0);
                 }, 0);
             }
 
@@ -104,15 +95,15 @@ class HealthSync {
             const now = new Date();
             const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
 
-            const result = await this.Health.queryHKitSampleType({
-                sampleName: 'heart_rate',
+            const { samples } = await this.Health.readSamples({
+                dataType: 'heartRate',
                 startDate: oneHourAgo.toISOString(),
                 endDate: now.toISOString(),
                 limit: 1
             });
 
-            if (result.resultData && result.resultData.length > 0) {
-                const heartRate = Math.round(parseFloat(result.resultData[0].value));
+            if (samples && samples.length > 0) {
+                const heartRate = Math.round(parseFloat(samples[0].value));
                 console.log(`❤️ Heart rate: ${heartRate} bpm`);
                 return heartRate;
             }
@@ -131,17 +122,17 @@ class HealthSync {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            const result = await this.Health.queryHKitSampleType({
-                sampleName: 'active_energy_burned',
+            const { samples } = await this.Health.readSamples({
+                dataType: 'calories',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
                 limit: 1000
             });
 
             let totalCalories = 0;
-            if (result.resultData && Array.isArray(result.resultData)) {
-                totalCalories = result.resultData.reduce((sum, record) => {
-                    return sum + (parseFloat(record.value) || 0);
+            if (samples && Array.isArray(samples)) {
+                totalCalories = samples.reduce((sum, sample) => {
+                    return sum + (parseFloat(sample.value) || 0);
                 }, 0);
             }
 
@@ -160,16 +151,16 @@ class HealthSync {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            const result = await this.Health.queryHKitSampleType({
-                sampleName: 'workout',
+            const { samples } = await this.Health.readSamples({
+                dataType: 'workout',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
                 limit: 50
             });
 
             const workouts = [];
-            if (result.resultData && Array.isArray(result.resultData)) {
-                result.resultData.forEach(workout => {
+            if (samples && Array.isArray(samples)) {
+                samples.forEach(workout => {
                     workouts.push({
                         type: workout.workoutActivityType || 'Unknown',
                         duration: workout.duration || 0,
@@ -196,17 +187,17 @@ class HealthSync {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            const result = await this.Health.queryHKitSampleType({
-                sampleName: 'distance',
+            const { samples } = await this.Health.readSamples({
+                dataType: 'distance',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
                 limit: 1000
             });
 
             let totalDistance = 0;
-            if (result.resultData && Array.isArray(result.resultData)) {
-                totalDistance = result.resultData.reduce((sum, record) => {
-                    return sum + (parseFloat(record.value) || 0);
+            if (samples && Array.isArray(samples)) {
+                totalDistance = samples.reduce((sum, sample) => {
+                    return sum + (parseFloat(sample.value) || 0);
                 }, 0);
             }
 
@@ -226,15 +217,15 @@ class HealthSync {
         try {
             const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
 
-            const result = await this.Health.queryHKitSampleType({
-                sampleName: 'weight',
+            const { samples } = await this.Health.readSamples({
+                dataType: 'weight',
                 startDate: thirtyDaysAgo.toISOString(),
                 endDate: new Date().toISOString(),
                 limit: 1
             });
 
-            if (result.resultData && result.resultData.length > 0) {
-                const weightKg = parseFloat(result.resultData[0].value);
+            if (samples && samples.length > 0) {
+                const weightKg = parseFloat(samples[0].value);
                 const weightLbs = weightKg * 2.20462;
                 console.log(`⚖️ Weight: ${weightLbs.toFixed(1)} lbs`);
                 return weightLbs;
@@ -278,8 +269,8 @@ class HealthSync {
         if (!this.isAvailable) return false;
 
         try {
-            await this.Health.writeData({
-                sampleName: 'workout',
+            await this.Health.saveSample({
+                dataType: 'workout',
                 startDate: workoutData.startDate || new Date().toISOString(),
                 endDate: workoutData.endDate || new Date().toISOString(),
                 value: {

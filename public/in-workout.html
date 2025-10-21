@@ -334,26 +334,16 @@
                 <div class="finish-workout-section" id="finish-section" style="display: none;">
                     <h3 style="margin-top: 0; color: var(--dark);">Complete Your Workout</h3>
 
-                    <!-- Apple Health Sync Option -->
-                    <div class="health-sync-option">
-                        <div class="health-sync-text">
-                            <strong>Sync with Apple Health</strong><br>
-                            <span style="font-size: 12px; color: #666;">Auto-calculate calories from watch</span>
+                    <!-- Auto-Calculated Calories Display -->
+                    <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(69, 160, 73, 0.1)); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px solid rgba(76, 175, 80, 0.3);">
+                        <div style="text-align: center; margin-bottom: 10px;">
+                            <div style="font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Estimated Calories Burned</div>
+                            <div style="font-size: 48px; font-weight: bold; color: #4CAF50; margin: 10px 0;" id="estimated-calories">--</div>
+                            <div style="font-size: 12px; color: #666; font-style: italic;">
+                                💪 Based on your workout intensity, duration, and body weight<br>
+                                <span style="color: #FF9800; font-weight: bold;">Assuming training to failure with elevated heart rate</span>
+                            </div>
                         </div>
-                        <div class="toggle-switch" id="health-toggle" onclick="toggleHealthSync()">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-
-                    <!-- Manual Calories Input -->
-                    <div class="calories-input-group" id="manual-calories-group">
-                        <label for="calories-burned">Calories Burned</label>
-                        <input type="number"
-                               id="calories-burned"
-                               class="calories-input"
-                               placeholder="Enter calories"
-                               min="0"
-                               step="10">
                     </div>
 
                     <button class="finish-workout-btn" onclick="finishWorkout()">
@@ -511,31 +501,6 @@
             overlay.classList.toggle('show');
         }
 
-        function toggleHealthSync() {
-            healthSyncEnabled = !healthSyncEnabled;
-            const toggle = document.getElementById('health-toggle');
-            const manualGroup = document.getElementById('manual-calories-group');
-
-            toggle.classList.toggle('active');
-
-            if (healthSyncEnabled) {
-                manualGroup.style.display = 'none';
-                // Try to get calories from Apple Health
-                fetchHealthCalories();
-            } else {
-                manualGroup.style.display = 'block';
-            }
-        }
-
-        async function fetchHealthCalories() {
-            // TODO: Integrate with Apple Health API
-            // For now, estimate based on workout duration and type
-            const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
-            const estimatedCalories = duration * 8; // Rough estimate: 8 cal/min
-
-            document.getElementById('calories-burned').value = estimatedCalories;
-        }
-
         function initWorkout() {
             // Get workout data from localStorage
             const storedWorkout = localStorage.getItem('currentWorkout');
@@ -659,6 +624,64 @@
             const percentage = total > 0 ? (completed / total) * 100 : 0;
             document.getElementById('progress-fill').style.width = percentage + '%';
             document.getElementById('progress-text').textContent = `${completed} of ${total} exercises logged`;
+
+            // Update calorie estimate
+            updateCalorieEstimate();
+        }
+
+        function calculateWorkoutCalories() {
+            // Get user's weight from profile
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const userWeight = userProfile.weight || 170; // Default to 170 lbs if not set
+
+            // Calculate workout duration in minutes
+            const duration = Math.floor((Date.now() - startTime) / 1000 / 60);
+
+            // Calculate total volume (weight × reps for all sets)
+            let totalVolume = 0;
+            let totalSets = 0;
+
+            workoutData.exercises.forEach((exercise, exerciseIndex) => {
+                const numSets = parseInt(exercise.sets) || 3;
+
+                for (let i = 0; i < numSets; i++) {
+                    const weight = parseInt(document.getElementById(`weight-${exerciseIndex}-${i}`)?.value) || 0;
+                    const reps = parseInt(document.getElementById(`reps-${exerciseIndex}-${i}`)?.value) || 0;
+
+                    if (weight > 0 && reps > 0) {
+                        totalVolume += (weight * reps);
+                        totalSets++;
+                    }
+                }
+            });
+
+            // Calorie calculation formula for resistance training to failure:
+            // Base: 0.05 cal per lb of body weight per minute (moderate intensity)
+            // Multiply by 1.5 for high intensity (training to failure, elevated heart rate)
+            // Add bonus from total volume lifted
+
+            const baseCals = (userWeight * 0.05 * duration) * 1.5; // High intensity multiplier
+            const volumeBonus = totalVolume * 0.003; // Small bonus per lb lifted
+
+            const estimatedCalories = Math.round(baseCals + volumeBonus);
+
+            console.log(`📊 Calorie Calculation:
+                User Weight: ${userWeight} lbs
+                Duration: ${duration} min
+                Total Volume: ${totalVolume} lbs (${totalSets} sets)
+                Base Calories: ${Math.round(baseCals)}
+                Volume Bonus: ${Math.round(volumeBonus)}
+                Total: ${estimatedCalories} calories`);
+
+            return estimatedCalories;
+        }
+
+        function updateCalorieEstimate() {
+            const calories = calculateWorkoutCalories();
+            const calorieEl = document.getElementById('estimated-calories');
+            if (calorieEl) {
+                calorieEl.textContent = calories.toLocaleString();
+            }
         }
 
         function startTimer() {
@@ -673,19 +696,13 @@
         }
 
         async function finishWorkout() {
-            // Confirmation dialog
+            // Calculate calories burned automatically
+            const caloriesBurned = calculateWorkoutCalories();
             const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
-            if (!confirm(`Are you sure you want to finish your workout?\n\nDuration: ${duration} minutes`)) {
+
+            // Confirmation dialog with calorie estimate
+            if (!confirm(`Are you sure you want to finish your workout?\n\nDuration: ${duration} minutes\nEstimated Calories: ${caloriesBurned}\n\n(Based on workout intensity, volume, and your body weight)`)) {
                 return;
-            }
-
-            // Calories are optional - if not entered, estimate or use 0
-            let caloriesBurned = parseInt(document.getElementById('calories-burned').value) || 0;
-
-            // If no calories entered, make a rough estimate based on duration
-            if (caloriesBurned <= 0 && duration > 0) {
-                caloriesBurned = duration * 8; // Rough estimate: 8 cal/min for strength training
-                console.log(`📊 Estimated calories: ${caloriesBurned} (${duration} min x 8 cal/min)`);
             }
 
             // Collect all exercise data, filtering out zero values

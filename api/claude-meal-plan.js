@@ -17,23 +17,24 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { quizData, userId, imageUpload, image } = req.body;
+        const { quizData, userId, imageUpload, image, images, imageCount } = req.body;
 
-        // Handle image upload
-        if (imageUpload && image) {
-            console.log(`📷 Processing uploaded meal plan image for user: ${userId || 'anonymous'}`);
-            
+        // Handle image upload (single or multiple)
+        if (imageUpload && (image || images)) {
+            const imageArray = images || [image];
+            console.log(`📷 Processing ${imageArray.length} uploaded meal plan image(s) for user: ${userId || 'anonymous'}`);
+
             // Check if API key exists
             if (!process.env.CLAUDE_API_KEY) {
                 console.error('❌ CLAUDE_API_KEY not found in environment variables');
                 throw new Error('API configuration error - Claude API key not configured');
             }
-            
-            // Extract meal plan from image
-            const extractedMealPlan = await extractMealPlanFromImage(image);
-            
-            console.log(`✅ Successfully extracted meal plan from image for user: ${userId || 'anonymous'}`);
-            
+
+            // Extract meal plan from image(s)
+            const extractedMealPlan = await extractMealPlanFromImages(imageArray);
+
+            console.log(`✅ Successfully extracted meal plan from ${imageArray.length} image(s) for user: ${userId || 'anonymous'}`);
+
             return res.status(200).json({
                 success: true,
                 mealPlan: extractedMealPlan,
@@ -41,8 +42,9 @@ export default async function handler(req, res) {
                 metadata: {
                     generatedAt: new Date().toISOString(),
                     planDuration: 'custom',
-                    goal: 'custom',
-                    source: 'uploaded',
+                    goal: 'uploaded',
+                    source: 'uploaded_photos',
+                    imageCount: imageArray.length,
                     userId: userId || 'anonymous'
                 }
             });
@@ -199,6 +201,98 @@ Important:
         const error = await response.text();
         console.error('Claude API error:', error);
         throw new Error(`Failed to extract meal plan from image: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+}
+
+async function extractMealPlanFromImages(imageDataArray) {
+    // Build content array with prompt text first, then all images
+    const content = [
+        {
+            type: 'text',
+            text: `Analyze these ${imageDataArray.length} images of a meal plan and extract all the information into a single, organized meal plan.
+
+Please combine and format the extracted meal plan EXACTLY like this:
+
+### Day 1
+
+**🍳 Breakfast:**
+[meal with specific quantities - e.g., "3 eggs scrambled, 2 slices whole wheat toast, 1 tbsp butter"]
+Calories: [number]
+
+**🥗 Lunch:**
+[meal with specific quantities - e.g., "6oz grilled chicken breast, 1.5 cups mixed greens, 1/2 avocado"]
+Calories: [number]
+
+**🍽️ Dinner:**
+[meal with specific quantities - e.g., "6oz salmon fillet, 1 cup sweet potato, 1 cup steamed broccoli"]
+Calories: [number]
+
+**🍎 Snacks:**
+[snack items with quantities - e.g., "1 cup Greek yogurt, 1/4 cup blueberries"]
+Calories: [number]
+
+**Day Total:** [total] calories | P: [protein]g | C: [carbs]g | F: [fat]g
+
+[Continue for all days in the meal plan]
+
+### Shopping List
+[Extract and combine any shopping lists if visible across images]
+
+Important:
+- Extract ALL meals and days visible across ALL images
+- Combine information from multiple images into one cohesive meal plan
+- If the same day appears in multiple images, use the most complete information
+- Include calorie counts and macros if shown
+- Keep the exact formatting with emojis
+- If some information is not visible, make reasonable estimates based on the meals
+- Organize by days sequentially (Day 1, Day 2, Day 3, etc.)
+- If it's a weekly plan, expand it to cover 7-14 days as appropriate
+- Remove any duplicate information
+- Create a unified shopping list if multiple shopping lists are present`
+        }
+    ];
+
+    // Add all images to the content array
+    for (let i = 0; i < imageDataArray.length; i++) {
+        const imageData = imageDataArray[i];
+        // Extract the base64 data and media type
+        const [header, base64] = imageData.split(',');
+        const mediaType = header.match(/data:image\/(.*?);/)[1];
+
+        content.push({
+            type: 'image',
+            source: {
+                type: 'base64',
+                media_type: `image/${mediaType}`,
+                data: base64
+            }
+        });
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.CLAUDE_API_KEY,
+            'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 4000,
+            messages: [{
+                role: 'user',
+                content: content
+            }]
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        console.error('Claude API error:', error);
+        throw new Error(`Failed to extract meal plan from images: ${response.status}`);
     }
 
     const data = await response.json();
