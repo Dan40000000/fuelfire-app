@@ -3232,7 +3232,7 @@
             const workout = {
                 id: Date.now().toString(),
                 workoutName: type,
-                type: type,
+                type: type.toLowerCase(),
                 date: new Date().toISOString(),
                 duration: duration,
                 calories: calories,
@@ -3242,18 +3242,28 @@
                 quickLogged: true
             };
 
-            // Save to workout history
+            // Save to workout history (for Health Dashboard calories)
             let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
             workoutHistory.unshift(workout);
             localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+            // ALSO save to recentWorkouts (for Track Workouts dashboard)
+            let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts') || '[]');
+            recentWorkouts.unshift(workout);
+            localStorage.setItem('recentWorkouts', JSON.stringify(recentWorkouts));
 
             // Close modal
             closeQuickLog();
 
             // Show success message
-            alert(`✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal`);
+            alert(`✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal\n\n✨ Added to Track Workouts & Health Dashboard!`);
 
-            // Refresh workout history display if function exists
+            // Refresh Track Workouts dashboard if function exists
+            if (typeof updateFitnessDashboard === 'function') {
+                updateFitnessDashboard();
+            }
+
+            // Refresh workout history if that function exists too
             if (typeof loadWorkoutHistory === 'function') {
                 loadWorkoutHistory();
             }
