@@ -1002,25 +1002,28 @@
                 }
             });
 
-            // Update chart title
-            const titles = {
-                'bodyfat': 'Body Fat Progress (Last 30 Days)',
-                'muscle': 'Muscle Mass Progress (Last 30 Days)',
-                'weight': 'Weight Progress (Last 30 Days)',
-                'visceral': 'Visceral Fat Progress (Last 30 Days)'
-            };
-            document.getElementById('chart-title').textContent = titles[type];
-
-            // Get entries
+            // Get ALL entries (no date filter)
             const entries = JSON.parse(localStorage.getItem(`fuelfire_${type}_entries`) || '[]');
 
-            // Filter last 30 days
-            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-            const recentEntries = entries.filter(e => e.timestamp > thirtyDaysAgo);
+            // Update chart title with date range
+            const titles = {
+                'bodyfat': 'Body Fat Progress',
+                'muscle': 'Muscle Mass Progress',
+                'weight': 'Weight Progress',
+                'visceral': 'Visceral Fat Progress'
+            };
 
-            // Draw chart and history
-            drawCompositionChart(type, recentEntries);
-            showCompositionHistory(type, recentEntries);
+            let titleText = titles[type];
+            if (entries.length > 0) {
+                const firstDate = new Date(entries[0].date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                const lastDate = new Date(entries[entries.length - 1].date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                titleText += ` (${firstDate} - ${lastDate})`;
+            }
+            document.getElementById('chart-title').textContent = titleText;
+
+            // Draw chart and history with ALL data
+            drawCompositionChart(type, entries);
+            showCompositionHistory(type, entries);
         }
 
         // Draw Composition Chart
@@ -1037,14 +1040,22 @@
             const min = Math.min(...values);
             const range = max - min || (max * 0.1) || 5;
 
-            let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 100px; gap: 3px;">';
+            let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: flex-start; height: 100px; gap: 3px; overflow-x: auto; padding-right: 10px;">';
 
-            // Show last 10 entries
-            const displayEntries = entries.slice(-10);
+            // Show last 30 entries (or all if less than 30) to show more history
+            const displayEntries = entries.slice(-30);
 
             displayEntries.forEach((entry, i) => {
                 const height = entries.length === 1 ? 50 : ((entry.value - min) / range) * 70 + 20;
-                const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+                const date = new Date(entry.date);
+
+                // Show month/year if first of month or first entry, otherwise just day
+                let dateLabel;
+                if (i === 0 || date.getDate() === 1 || (i > 0 && new Date(displayEntries[i-1].date).getMonth() !== date.getMonth())) {
+                    dateLabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                } else {
+                    dateLabel = date.getDate().toString();
+                }
 
                 const units = {
                     'bodyfat': '%',
@@ -1054,15 +1065,23 @@
                 };
 
                 chartHTML += `
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.value.toFixed(1)}${units[type]}</div>
+                    <div style="min-width: 35px; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <div style="font-size: 10px; font-weight: bold; color: var(--primary);">${entry.value.toFixed(1)}${units[type]}</div>
                         <div style="width: 100%; background: var(--gradient-1); border-radius: 5px 5px 0 0; height: ${height}px;"></div>
-                        <div style="font-size: 9px; color: #666;">${date}</div>
+                        <div style="font-size: 8px; color: #666; writing-mode: horizontal-tb; white-space: nowrap;">${dateLabel}</div>
                     </div>
                 `;
             });
 
             chartHTML += '</div>';
+
+            // Add entry count info
+            if (entries.length > 30) {
+                chartHTML += `<div style="text-align: center; font-size: 11px; color: #999; margin-top: 10px;">Showing last 30 of ${entries.length} entries</div>`;
+            } else {
+                chartHTML += `<div style="text-align: center; font-size: 11px; color: #999; margin-top: 10px;">${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} total</div>`;
+            }
+
             chart.innerHTML = chartHTML;
         }
 
@@ -1084,8 +1103,8 @@
 
             let html = '<div style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">Recent Entries:</div>';
 
-            // Show last 5 entries
-            entries.slice(-5).reverse().forEach(entry => {
+            // Show last 10 entries (increased from 5)
+            entries.slice(-10).reverse().forEach(entry => {
                 const date = new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 
                 html += `
@@ -1095,6 +1114,10 @@
                     </div>
                 `;
             });
+
+            if (entries.length > 10) {
+                html += `<div style="text-align: center; font-size: 11px; color: #999; margin-top: 8px;">Showing 10 of ${entries.length} entries</div>`;
+            }
 
             history.innerHTML = html;
         }
