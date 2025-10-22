@@ -218,26 +218,66 @@
                         </div>
                     </div>
 
-                    <!-- Body Fat Tracking Card -->
-                    <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="font-size: 40px;">💪</div>
-                                <div>
-                                    <div style="font-size: 14px; color: #666;">Body Fat %</div>
-                                    <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="bodyfat">--%</div>
-                                </div>
+                    <!-- Body Composition Cards Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                        <!-- Body Fat -->
+                        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">💪</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Body Fat</div>
+                                <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="bodyfat-current">--%</div>
+                                <button onclick="showBodyFatEntry()" style="background: var(--gradient-1); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
                             </div>
-                            <button onclick="showBodyFatEntry()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-size: 14px; font-weight: bold; cursor: pointer;">+ Log Body Fat</button>
                         </div>
 
-                        <!-- Body Fat Progress Chart -->
-                        <div id="bodyfat-progress-container" style="margin-top: 20px; display: none;">
-                            <div style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;">Body Fat Progress (Last 30 Days)</div>
-                            <div id="bodyfat-chart" style="height: 120px; background: var(--lighter-bg); border-radius: 10px; padding: 15px; position: relative; overflow-x: auto;">
+                        <!-- Muscle Mass -->
+                        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">🏋️</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Muscle Mass</div>
+                                <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="muscle-current">-- lbs</div>
+                                <button onclick="showMuscleMassEntry()" style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
+                            </div>
+                        </div>
+
+                        <!-- Weight -->
+                        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">⚖️</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Weight</div>
+                                <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="weight-current">-- lbs</div>
+                                <button onclick="showWeightEntry()" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
+                            </div>
+                        </div>
+
+                        <!-- Visceral Fat -->
+                        <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Visceral Fat</div>
+                                <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="visceral-current">--</div>
+                                <button onclick="showVisceralFatEntry()" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Body Composition History & Trends -->
+                    <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">📊 Body Composition History</h3>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;">
+                            <button onclick="showCompositionMetric('bodyfat')" id="btn-bodyfat" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap;">Body Fat %</button>
+                            <button onclick="showCompositionMetric('muscle')" id="btn-muscle" style="background: #ccc; color: #333; border: none; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap;">Muscle Mass</button>
+                            <button onclick="showCompositionMetric('weight')" id="btn-weight" style="background: #ccc; color: #333; border: none; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap;">Weight</button>
+                            <button onclick="showCompositionMetric('visceral')" id="btn-visceral" style="background: #ccc; color: #333; border: none; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap;">Visceral Fat</button>
+                        </div>
+
+                        <div id="composition-chart-container">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;" id="chart-title">Body Fat Progress (Last 30 Days)</div>
+                            <div id="composition-chart" style="height: 140px; background: var(--lighter-bg); border-radius: 10px; padding: 15px; position: relative; overflow-x: auto;">
                                 <!-- Chart will be rendered here -->
                             </div>
-                            <div id="bodyfat-history" style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
+                            <div id="composition-history" style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
                                 <!-- Recent entries -->
                             </div>
                         </div>
@@ -800,27 +840,263 @@
             history.innerHTML = html;
         }
 
-        // Body Fat Tracking Functions
+        // UPDATED Body Composition Tracking Functions
+        // Supports: Weight, Body Fat %, Muscle Mass, Visceral Fat with back-dating
+
+        let currentCompositionMetric = 'bodyfat';
+
+        // Body Fat Entry
         function showBodyFatEntry() {
             const bodyfat = prompt('Enter your body fat percentage (%):', '');
-            if (bodyfat && !isNaN(bodyfat)) {
-                logBodyFat(parseFloat(bodyfat));
+            if (!bodyfat || isNaN(bodyfat)) return;
+
+            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
+            const date = dateStr ? new Date(dateStr) : new Date();
+
+            if (isNaN(date.getTime())) {
+                alert('Invalid date format. Please use YYYY-MM-DD');
+                return;
             }
+
+            logBodyComposition('bodyfat', parseFloat(bodyfat), date);
         }
 
-        function logBodyFat(bodyfat) {
-            const entries = JSON.parse(localStorage.getItem('fuelfire_bodyfat_entries') || '[]');
-            entries.push({
-                bodyfat: bodyfat,
-                date: new Date().toISOString(),
-                timestamp: Date.now()
-            });
-            localStorage.setItem('fuelfire_bodyfat_entries', JSON.stringify(entries));
+        // Muscle Mass Entry
+        function showMuscleMassEntry() {
+            const muscle = prompt('Enter your muscle mass (lbs):', '');
+            if (!muscle || isNaN(muscle)) return;
 
-            // Update display
-            document.getElementById('bodyfat').textContent = bodyfat.toFixed(1) + '%';
-            loadBodyFatProgress();
-            alert(`✅ Body Fat logged: ${bodyfat.toFixed(1)}%`);
+            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
+            const date = dateStr ? new Date(dateStr) : new Date();
+
+            if (isNaN(date.getTime())) {
+                alert('Invalid date format. Please use YYYY-MM-DD');
+                return;
+            }
+
+            logBodyComposition('muscle', parseFloat(muscle), date);
+        }
+
+        // Weight Entry (Updated)
+        function showWeightEntry() {
+            const weight = prompt('Enter your weight (lbs):', '');
+            if (!weight || isNaN(weight)) return;
+
+            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
+            const date = dateStr ? new Date(dateStr) : new Date();
+
+            if (isNaN(date.getTime())) {
+                alert('Invalid date format. Please use YYYY-MM-DD');
+                return;
+            }
+
+            logBodyComposition('weight', parseFloat(weight), date);
+        }
+
+        // Visceral Fat Entry
+        function showVisceralFatEntry() {
+            const visceral = prompt('Enter your visceral fat level (1-30):', '');
+            if (!visceral || isNaN(visceral)) return;
+
+            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
+            const date = dateStr ? new Date(dateStr) : new Date();
+
+            if (isNaN(date.getTime())) {
+                alert('Invalid date format. Please use YYYY-MM-DD');
+                return;
+            }
+
+            logBodyComposition('visceral', parseFloat(visceral), date);
+        }
+
+        // Universal Body Composition Logger
+        function logBodyComposition(type, value, date = new Date()) {
+            const storageKey = `fuelfire_${type}_entries`;
+            const entries = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+            entries.push({
+                value: value,
+                date: date.toISOString(),
+                timestamp: date.getTime()
+            });
+
+            // Sort by timestamp
+            entries.sort((a, b) => a.timestamp - b.timestamp);
+
+            localStorage.setItem(storageKey, JSON.stringify(entries));
+
+            // Update current value display
+            updateCurrentValues();
+
+            // Refresh chart if viewing this metric
+            if (currentCompositionMetric === type) {
+                showCompositionMetric(type);
+            }
+
+            const labels = {
+                'bodyfat': 'Body Fat',
+                'muscle': 'Muscle Mass',
+                'weight': 'Weight',
+                'visceral': 'Visceral Fat'
+            };
+
+            const units = {
+                'bodyfat': '%',
+                'muscle': ' lbs',
+                'weight': ' lbs',
+                'visceral': ''
+            };
+
+            alert(`✅ ${labels[type]} logged: ${value.toFixed(1)}${units[type]}\nDate: ${date.toLocaleDateString()}`);
+        }
+
+        // Update Current Value Displays
+        function updateCurrentValues() {
+            const metrics = ['bodyfat', 'muscle', 'weight', 'visceral'];
+            const elementIds = {
+                'bodyfat': 'bodyfat-current',
+                'muscle': 'muscle-current',
+                'weight': 'weight-current',
+                'visceral': 'visceral-current'
+            };
+            const units = {
+                'bodyfat': '%',
+                'muscle': ' lbs',
+                'weight': ' lbs',
+                'visceral': ''
+            };
+            const defaults = {
+                'bodyfat': '--%',
+                'muscle': '-- lbs',
+                'weight': '-- lbs',
+                'visceral': '--'
+            };
+
+            metrics.forEach(metric => {
+                const entries = JSON.parse(localStorage.getItem(`fuelfire_${metric}_entries`) || '[]');
+                const element = document.getElementById(elementIds[metric]);
+
+                if (entries.length > 0) {
+                    // Get most recent entry
+                    const latest = entries[entries.length - 1];
+                    element.textContent = latest.value.toFixed(1) + units[metric];
+                } else {
+                    element.textContent = defaults[metric];
+                }
+            });
+        }
+
+        // Show Composition Metric Chart
+        function showCompositionMetric(type) {
+            currentCompositionMetric = type;
+
+            // Update button styles
+            ['bodyfat', 'muscle', 'weight', 'visceral'].forEach(metric => {
+                const btn = document.getElementById(`btn-${metric}`);
+                if (metric === type) {
+                    btn.style.background = 'var(--gradient-1)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = '#ccc';
+                    btn.style.color = '#333';
+                }
+            });
+
+            // Update chart title
+            const titles = {
+                'bodyfat': 'Body Fat Progress (Last 30 Days)',
+                'muscle': 'Muscle Mass Progress (Last 30 Days)',
+                'weight': 'Weight Progress (Last 30 Days)',
+                'visceral': 'Visceral Fat Progress (Last 30 Days)'
+            };
+            document.getElementById('chart-title').textContent = titles[type];
+
+            // Get entries
+            const entries = JSON.parse(localStorage.getItem(`fuelfire_${type}_entries`) || '[]');
+
+            // Filter last 30 days
+            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            const recentEntries = entries.filter(e => e.timestamp > thirtyDaysAgo);
+
+            // Draw chart and history
+            drawCompositionChart(type, recentEntries);
+            showCompositionHistory(type, recentEntries);
+        }
+
+        // Draw Composition Chart
+        function drawCompositionChart(type, entries) {
+            const chart = document.getElementById('composition-chart');
+
+            if (entries.length === 0) {
+                chart.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No data yet. Log your first entry!</div>';
+                return;
+            }
+
+            const values = entries.map(e => e.value);
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+            const range = max - min || (max * 0.1) || 5;
+
+            let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 100px; gap: 3px;">';
+
+            // Show last 10 entries
+            const displayEntries = entries.slice(-10);
+
+            displayEntries.forEach((entry, i) => {
+                const height = entries.length === 1 ? 50 : ((entry.value - min) / range) * 70 + 20;
+                const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+
+                const units = {
+                    'bodyfat': '%',
+                    'muscle': '',
+                    'weight': '',
+                    'visceral': ''
+                };
+
+                chartHTML += `
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.value.toFixed(1)}${units[type]}</div>
+                        <div style="width: 100%; background: var(--gradient-1); border-radius: 5px 5px 0 0; height: ${height}px;"></div>
+                        <div style="font-size: 9px; color: #666;">${date}</div>
+                    </div>
+                `;
+            });
+
+            chartHTML += '</div>';
+            chart.innerHTML = chartHTML;
+        }
+
+        // Show Composition History
+        function showCompositionHistory(type, entries) {
+            const history = document.getElementById('composition-history');
+
+            if (entries.length === 0) {
+                history.innerHTML = '';
+                return;
+            }
+
+            const units = {
+                'bodyfat': '%',
+                'muscle': ' lbs',
+                'weight': ' lbs',
+                'visceral': ''
+            };
+
+            let html = '<div style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">Recent Entries:</div>';
+
+            // Show last 5 entries
+            entries.slice(-5).reverse().forEach(entry => {
+                const date = new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--lighter-bg); border-radius: 10px; margin-bottom: 5px;">
+                        <span style="font-weight: bold; font-size: 16px; color: var(--primary);">${entry.value.toFixed(1)}${units[type]}</span>
+                        <span style="font-size: 12px; color: #666;">${date}</span>
+                    </div>
+                `;
+            });
+
+            history.innerHTML = html;
         }
 
         function loadBodyFatProgress() {
@@ -1246,6 +1522,8 @@
             loadTrackingData();
             loadUserProfile();
             updateToggleSlider(); // Initialize toggle appearance
+            updateCurrentValues(); // Load current body composition values
+            showCompositionMetric('bodyfat'); // Show default chart
         });
     </script>
 </body>
