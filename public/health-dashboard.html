@@ -23,20 +23,14 @@
             <div class="content">
                 <div style="padding: 20px;">
 
-                    <!-- Sync Buttons -->
+                    <!-- Action Buttons -->
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                            <button onclick="requestHealthPermissions()" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
-                                🔐 Grant Permissions
-                            </button>
                             <button onclick="syncHealthData()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
-                                ♻️ Sync Data
+                                Sync Data
                             </button>
                             <button onclick="showQuickLogWorkout()" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);">
-                                💪 Quick Log Workout
-                            </button>
-                            <button onclick="clearCacheAndRefresh()" style="background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);">
-                                🗑️ Clear Cache & Refresh
+                                Quick Log Workout
                             </button>
                         </div>
                         <div id="sync-status" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
@@ -69,6 +63,11 @@
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Duration (minutes)</label>
                                 <input type="number" id="quick-workout-duration" placeholder="45" min="1" max="300" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; box-sizing: border-box;">
+                            </div>
+
+                            <div id="distance-field" style="margin-bottom: 20px; display: none;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">🏃 Distance (miles) - For Cardio/Running</label>
+                                <input type="number" id="quick-workout-distance" placeholder="3.1" min="0" max="100" step="0.1" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; box-sizing: border-box;">
                             </div>
 
                             <div style="margin-bottom: 20px;">
@@ -1467,7 +1466,23 @@
             // Set default duration
             document.getElementById('quick-workout-duration').value = 45;
             document.getElementById('quick-workout-calories').value = '';
+            document.getElementById('quick-workout-distance').value = '';
             document.getElementById('quick-workout-notes').value = '';
+
+            // Add event listener to show/hide distance field based on workout type
+            const typeSelect = document.getElementById('quick-workout-type');
+            typeSelect.addEventListener('change', function() {
+                const distanceField = document.getElementById('distance-field');
+                const cardioTypes = ['Cardio', 'HIIT', 'Sports'];
+                if (cardioTypes.includes(this.value)) {
+                    distanceField.style.display = 'block';
+                } else {
+                    distanceField.style.display = 'none';
+                }
+            });
+
+            // Trigger once to set initial state
+            typeSelect.dispatchEvent(new Event('change'));
         }
 
         function closeQuickWorkoutModal() {
@@ -1499,6 +1514,7 @@
             const type = document.getElementById('quick-workout-type').value;
             const duration = parseInt(document.getElementById('quick-workout-duration').value);
             const caloriesInput = document.getElementById('quick-workout-calories').value;
+            const distanceInput = document.getElementById('quick-workout-distance').value;
             const notes = document.getElementById('quick-workout-notes').value;
 
             if (!duration || duration < 1) {
@@ -1508,6 +1524,7 @@
 
             // Use entered calories or auto-calculate
             const calories = caloriesInput ? parseInt(caloriesInput) : calculateWorkoutCalories(type, duration);
+            const distance = distanceInput ? parseFloat(distanceInput) : null;
 
             // Create workout entry
             const workout = {
@@ -1517,6 +1534,7 @@
                 date: new Date().toISOString(),
                 duration: duration,
                 calories: calories,
+                distance: distance, // Add distance
                 exercises: [],
                 notes: notes || `Quick logged ${type} workout`,
                 completed: true,
@@ -1536,8 +1554,14 @@
             // Close modal
             closeQuickWorkoutModal();
 
-            // Show success message
-            alert(`✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal\n\n✨ Added to Track Workouts & Health Dashboard!`);
+            // Build success message
+            let message = `✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal`;
+            if (distance) {
+                message += `\nDistance: ${distance} miles`;
+            }
+            message += `\n\n✨ Added to Track Workouts & Health Dashboard!`;
+
+            alert(message);
 
             // Refresh health data to show updated workout stats
             loadActiveCaloriesData();

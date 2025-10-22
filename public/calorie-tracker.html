@@ -31,18 +31,22 @@
                         <div style="font-size: 48px; font-weight: bold; margin: 10px 0;" id="calories-today">0</div>
                         <div style="font-size: 14px; opacity: 0.9;">calories consumed</div>
                         <div style="margin-top: 20px; background: rgba(255,255,255,0.2); border-radius: 10px; padding: 10px;">
-                            <div style="display: flex; justify-content: space-around; font-size: 14px;">
-                                <div>
-                                    <div style="font-weight: bold;">Target</div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 14px;">
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold;">Base Target</div>
                                     <div id="calorie-target">2000</div>
                                 </div>
-                                <div>
-                                    <div style="font-weight: bold;">Remaining</div>
-                                    <div id="calories-remaining">2000</div>
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold;">Active Burned</div>
+                                    <div id="active-burned">0</div>
                                 </div>
-                                <div>
-                                    <div style="font-weight: bold;">% of Goal</div>
-                                    <div id="percent-complete">0%</div>
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold;">Adjusted Target</div>
+                                    <div id="adjusted-target">2000</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-weight: bold;">Balance</div>
+                                    <div id="calories-remaining">2000</div>
                                 </div>
                             </div>
                         </div>
@@ -593,6 +597,88 @@
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        // Active Calories Functions (for balance calculator)
+        function getTodayWorkoutCalories() {
+            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalWorkoutCalories = 0;
+
+            workoutHistory.forEach(workout => {
+                const workoutDate = new Date(workout.date);
+                workoutDate.setHours(0, 0, 0, 0);
+
+                if (workoutDate.getTime() === today.getTime()) {
+                    // Use calories from workout if available, otherwise estimate
+                    if (workout.calories) {
+                        totalWorkoutCalories += workout.calories;
+                    } else {
+                        const duration = workout.duration || 45;
+                        let caloriesPerMinute = 5;
+
+                        if (workout.type) {
+                            const type = workout.type.toLowerCase();
+                            if (type.includes('chest') || type.includes('back') || type.includes('legs')) {
+                                caloriesPerMinute = 7;
+                            } else if (type.includes('cardio') || type.includes('hiit')) {
+                                caloriesPerMinute = 10;
+                            } else if (type.includes('arms') || type.includes('core')) {
+                                caloriesPerMinute = 5;
+                            }
+                        }
+
+                        totalWorkoutCalories += duration * caloriesPerMinute;
+                    }
+                }
+            });
+
+            return Math.round(totalWorkoutCalories);
+        }
+
+        function getTodayManualCalories() {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalManualCalories = 0;
+
+            entries.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                entryDate.setHours(0, 0, 0, 0);
+
+                if (entryDate.getTime() === today.getTime()) {
+                    totalManualCalories += entry.calories;
+                }
+            });
+
+            return totalManualCalories;
+        }
+
+        function getAppleHealthActiveCalories() {
+            // Get from cached health data
+            const healthData = JSON.parse(localStorage.getItem('healthData') || '{}');
+            return healthData.activeEnergy || 0;
+        }
+
+        function getTotalActiveCalories() {
+            const appleHealthActive = getAppleHealthActiveCalories();
+            const manualActive = getTodayManualCalories();
+            const workoutActive = getTodayWorkoutCalories();
+
+            // Use the highest value to avoid double-counting
+            // (workouts might already be in Apple Health or manual entries)
+            const totalActive = appleHealthActive + manualActive + workoutActive;
+
+            console.log('🔥 Active Calories Breakdown:');
+            console.log('  Apple Health:', appleHealthActive);
+            console.log('  Manual:', manualActive);
+            console.log('  Workouts:', workoutActive);
+            console.log('  Total:', totalActive);
+
+            return totalActive;
         }
 
         // Voice Recognition
@@ -1976,11 +2062,33 @@
                 totalSugar += meal.sugar || 0;
             });
             
-            // Update calorie summary
+            // Get active calories burned (Apple Health + Manual + Workouts)
+            const activeCalories = getTotalActiveCalories();
+
+            // Calculate adjusted target (base + active burned)
+            const adjustedTarget = calorieTarget + activeCalories;
+
+            // Calculate remaining calories (can be negative for deficit)
+            const remaining = adjustedTarget - (todayData.totalCalories || 0);
+
+            // Update calorie summary displays
             document.getElementById('calories-today').textContent = Math.round(todayData.totalCalories || 0).toLocaleString();
             document.getElementById('calorie-target').textContent = calorieTarget.toLocaleString();
-            document.getElementById('calories-remaining').textContent = Math.max(0, calorieTarget - todayData.totalCalories).toLocaleString();
-            document.getElementById('percent-complete').textContent = Math.round((todayData.totalCalories / calorieTarget) * 100) + '%';
+            document.getElementById('active-burned').textContent = activeCalories.toLocaleString();
+            document.getElementById('adjusted-target').textContent = adjustedTarget.toLocaleString();
+
+            // Show deficit (negative) or surplus (positive)
+            const remainingEl = document.getElementById('calories-remaining');
+            if (remaining < 0) {
+                remainingEl.textContent = Math.abs(remaining).toLocaleString() + ' deficit';
+                remainingEl.style.color = '#4CAF50'; // Green for deficit (good for weight loss)
+            } else if (remaining > 0) {
+                remainingEl.textContent = remaining.toLocaleString() + ' remaining';
+                remainingEl.style.color = '#2196F3'; // Blue for remaining
+            } else {
+                remainingEl.textContent = '0 (balanced)';
+                remainingEl.style.color = '#666';
+            }
             
             // Set sugar target from nutrition goals or WHO recommendation (max 25g/day for adults)
             const sugarTarget = nutritionGoals.sugar || 25;
@@ -2950,6 +3058,11 @@
                     loadTodaysMeals();
                 }
             }, 60000); // Check every minute
+
+            // Set up interval to refresh active calories balance (every 10 seconds)
+            setInterval(() => {
+                loadTodaysMeals();
+            }, 10000); // Refresh every 10 seconds to show updated active calories
 
             // Check for mode parameter in URL (from Log Food modal menu)
             const urlParams = new URLSearchParams(window.location.search);

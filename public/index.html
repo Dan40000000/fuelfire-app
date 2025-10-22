@@ -2828,54 +2828,45 @@
 
                 if (!amountEl || !labelEl) return;
 
-                let caloriesBurned = 0;
-                let bmr = 0;
-                let activeEnergy = 0;
+                // Get values from the home page display (simple and accurate)
+                const baseCalText = document.getElementById('home-base-calories')?.textContent || '0';
+                const activeCalText = document.getElementById('home-active-calories')?.textContent || '0';
 
-                // Try to get calories burned from Apple Health (stored in localStorage)
-                const healthData = localStorage.getItem('healthData');
-                if (healthData) {
-                    const parsed = JSON.parse(healthData);
-                    if (parsed.caloriesBurned) {
-                        caloriesBurned = parsed.caloriesBurned; // This includes Active Energy + BMR
-                        bmr = parsed.bmr || 0;
-                        activeEnergy = parsed.activeEnergy || 0;
-                        console.log('📱 Using Apple Health total calories burned:', caloriesBurned);
-                        console.log('   (Active Energy: ' + activeEnergy + ' + BMR: ' + bmr + ')');
-                    }
-                }
+                // Parse the numbers (remove commas and convert to number)
+                const baseCal = parseInt(baseCalText.replace(/,/g, '').replace(/[^\d]/g, '')) || 0;
+                const activeCal = parseInt(activeCalText.replace(/,/g, '').replace(/[^\d]/g, '')) || 0;
 
-                // Fallback to BMR calculation if no health data
-                if (caloriesBurned === 0) {
-                    caloriesBurned = calculateBMR();
-                    bmr = caloriesBurned;
-                    activeEnergy = 0;
-                    console.log('📊 Using calculated BMR/TDEE:', caloriesBurned);
-                }
-
-                // Calculate deficit or surplus
-                const balance = caloriesConsumed - caloriesBurned;
+                // Simple formula: Consumed - (Base + Active) = Balance
+                const totalBurned = baseCal + activeCal;
+                const balance = caloriesConsumed - totalBurned;
                 const absBalance = Math.abs(balance);
 
-                // Update display
-                amountEl.textContent = absBalance.toLocaleString() + ' cal';
+                console.log('Balance Calculation:');
+                console.log('  Consumed:', caloriesConsumed);
+                console.log('  Base:', baseCal);
+                console.log('  Active:', activeCal);
+                console.log('  Total Burned:', totalBurned);
+                console.log('  Balance:', balance);
 
-                // Update formula with actual numbers and breakdown
+                // Update display
+                amountEl.textContent = absBalance.toLocaleString();
+
+                // Update formula with actual numbers
                 const formulaEl = document.getElementById('balance-formula');
                 if (formulaEl) {
-                    formulaEl.textContent = `${caloriesConsumed.toLocaleString()} eaten - ${caloriesBurned.toLocaleString()} burned (Base: ${bmr.toLocaleString()} + Active: ${activeEnergy.toLocaleString()})`;
+                    formulaEl.textContent = `${caloriesConsumed.toLocaleString()} - (${baseCal.toLocaleString()} + ${activeCal.toLocaleString()})`;
                 }
 
                 if (balance < 0) {
                     // Deficit (good for weight loss)
-                    labelEl.textContent = '🔥 DEFICIT';
+                    labelEl.textContent = 'DEFICIT';
                     labelEl.style.color = '#4CAF50'; // Green
                 } else if (balance > 0) {
                     // Surplus (good for muscle gain)
-                    labelEl.textContent = '💪 SURPLUS';
+                    labelEl.textContent = 'SURPLUS';
                     labelEl.style.color = '#FF9800'; // Orange
                 } else {
-                    labelEl.textContent = '⚖️ BALANCED';
+                    labelEl.textContent = 'BALANCED';
                     labelEl.style.color = '#2196F3'; // Blue
                 }
 

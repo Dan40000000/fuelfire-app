@@ -574,20 +574,20 @@
                                        min="0"
                                        oninput="updateProgress()">
                             </div>
-                            <div class="input-group">
-                                <label class="input-label">Rest</label>
-                                <input type="number"
-                                       class="set-input"
-                                       id="rest-${index}-${i}"
-                                       placeholder="60"
-                                       min="0"
-                                       step="15">
-                            </div>
                         </div>
                     `;
                 }
 
+                // Add notes field for the exercise
                 html += `
+                        <div style="margin-top: 15px;">
+                            <label class="input-label" style="display: block; margin-bottom: 8px;">📝 Notes (optional)</label>
+                            <textarea
+                                id="notes-${index}"
+                                placeholder="How did it feel? Any adjustments?"
+                                style="width: 100%; min-height: 60px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: inherit; resize: vertical;"
+                            ></textarea>
+                        </div>
                         </div>
                     </div>
                 `;
@@ -655,22 +655,33 @@
                 }
             });
 
-            // Calorie calculation formula for resistance training to failure:
-            // Base: 0.05 cal per lb of body weight per minute (moderate intensity)
-            // Multiply by 1.5 for high intensity (training to failure, elevated heart rate)
-            // Add bonus from total volume lifted
+            // IMPROVED Calorie calculation using MET values
+            // Weightlifting (vigorous) has MET value of 6.0
+            // Formula: (MET * 3.5 * weight_kg * duration) / 200
 
-            const baseCals = (userWeight * 0.05 * duration) * 1.5; // High intensity multiplier
-            const volumeBonus = totalVolume * 0.003; // Small bonus per lb lifted
+            const effectiveDuration = Math.max(duration, 1); // Minimum 1 minute
+            const weightKg = userWeight * 0.453592; // Convert lbs to kg
+            const MET = 6.0; // MET value for vigorous weight training
 
-            const estimatedCalories = Math.round(baseCals + volumeBonus);
+            // Base calories from MET formula
+            const baseCals = (MET * 3.5 * weightKg * effectiveDuration) / 200;
+
+            // Volume bonus: more weight lifted = more calories
+            const volumeBonus = totalVolume * 0.01; // 1 calorie per 100 lbs lifted
+
+            // Intensity multiplier based on sets completed
+            const intensityMultiplier = totalSets > 0 ? 1.2 : 0.8;
+
+            const estimatedCalories = Math.round((baseCals + volumeBonus) * intensityMultiplier);
 
             console.log(`📊 Calorie Calculation:
-                User Weight: ${userWeight} lbs
-                Duration: ${duration} min
+                User Weight: ${userWeight} lbs (${weightKg.toFixed(1)} kg)
+                Duration: ${effectiveDuration} min
+                MET Value: ${MET}
                 Total Volume: ${totalVolume} lbs (${totalSets} sets)
                 Base Calories: ${Math.round(baseCals)}
                 Volume Bonus: ${Math.round(volumeBonus)}
+                Intensity Multiplier: ${intensityMultiplier}
                 Total: ${estimatedCalories} calories`);
 
             return estimatedCalories;
@@ -716,19 +727,22 @@
                 for (let i = 0; i < numSets; i++) {
                     const weight = parseInt(document.getElementById(`weight-${exerciseIndex}-${i}`)?.value) || 0;
                     const reps = parseInt(document.getElementById(`reps-${exerciseIndex}-${i}`)?.value) || 0;
-                    const rest = parseInt(document.getElementById(`rest-${exerciseIndex}-${i}`)?.value) || 0;
 
                     // Only save sets with non-zero weight and reps
                     if (weight > 0 && reps > 0) {
-                        sets.push({ weight, reps, rest });
+                        sets.push({ weight, reps });
                     }
                 }
+
+                // Get notes for this exercise
+                const notes = document.getElementById(`notes-${exerciseIndex}`)?.value || '';
 
                 // Only include exercise if it has at least one valid set
                 if (sets.length > 0) {
                     exercisesWithData.push({
                         name: exercise.name,
                         sets: sets,
+                        notes: notes,
                         completed: true
                     });
                 }
