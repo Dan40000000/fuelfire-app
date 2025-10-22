@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Testosterone Supplements - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="global-nav.js"></script>
+    <style>
+        .supplement-card {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .supplement-header {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #1a252f, #1a1a1a);
+        }
+
+        .supplement-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .supplement-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 1200px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #34495e;
+            margin-bottom: 10px;
+        }
+
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #34495e;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .page-warning {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .page-warning h3 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script src="quick-food-entry.js"></script>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                
+                
+            </div>
+
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">💪 Testosterone</div>
+            </div>
+
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">💪 Testosterone Supplements</h2>
+                        <p style="color: #666; font-size: 14px;">Evidence-based natural testosterone support for men</p>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+
+                    <div class="page-warning">
+                        <h3>Important Safety Warning</h3>
+                        <p><strong>Men under 25:</strong> Your testosterone levels are naturally at their peak. These supplements are generally unnecessary and could interfere with natural hormone production.</p>
+                        <p style="margin-top: 10px;"><strong>Always get lab testing:</strong> Test testosterone levels before and during supplementation. Work with a healthcare professional for proper monitoring.</p>
+                    </div>
+
+                    <!-- Supplements List -->
+                    <div id="supplements-container">
+                        <!-- Vitamin D3 -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(0)">
+                                <div>
+                                    <div class="supplement-title">Vitamin D3</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-0">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-0">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">2000-4000 IU</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Food</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases testosterone by 10-25% in deficient men<br>
+                                            • Supports healthy sperm production<br>
+                                            • Improves muscle strength and function<br>
+                                            • Enhances mood and energy levels<br>
+                                            • Critical for bone and immune health
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Maintenance:</strong> 2000-4000 IU daily<br>
+                                            <strong>Deficiency:</strong> 5000-10000 IU (short-term)<br>
+                                            <strong>Target:</strong> 40-60 ng/mL blood level<br>
+                                            <strong>Timing:</strong> Take with fatty meal for absorption
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Hypercalcemia with excessive doses (>10,000 IU daily). Generally well-tolerated.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid if you have sarcoidosis, hyperparathyroidism, or kidney stones. May interact with thiazide diuretics.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Zinc -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(1)">
+                                <div>
+                                    <div class="supplement-title">Zinc</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-1">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-1">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">15-30mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Empty Stomach</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Prevents testosterone decline in deficient men<br>
+                                            • Supports healthy sperm count and motility<br>
+                                            • Enhances immune system function<br>
+                                            • Supports prostate health<br>
+                                            • May increase free testosterone
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Daily:</strong> 15-30mg elemental zinc<br>
+                                            <strong>Athletic:</strong> 25-40mg for high activity<br>
+                                            <strong>Max:</strong> 40mg daily long-term<br>
+                                            <strong>Form:</strong> Picolinate or bisglycinate best
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Nausea, metallic taste with high doses. Take with light meal if stomach upset occurs.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Blocks copper absorption. Include 2mg copper if using long-term. Take separately from iron and antibiotics.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Magnesium -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(2)">
+                                <div>
+                                    <div class="supplement-title">Magnesium</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-2">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-2">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">200-400mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Evening</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases free and total testosterone<br>
+                                            • Improves sleep quality and recovery<br>
+                                            • Reduces cortisol and stress response<br>
+                                            • Supports muscle function and strength<br>
+                                            • Enhances exercise performance
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Daily:</strong> 200-400mg elemental magnesium<br>
+                                            <strong>Athletes:</strong> 300-500mg<br>
+                                            <strong>Forms:</strong> Glycinate, malate, or citrate<br>
+                                            <strong>Timing:</strong> Before bed or split doses
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Diarrhea with high doses. Start low and increase gradually. Avoid magnesium oxide.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid with severe kidney disease. May interact with antibiotics and bisphosphonates.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ashwagandha -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(3)">
+                                <div>
+                                    <div class="supplement-title">Ashwagandha</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐⭐</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-3">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-3">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">600mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Food</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases testosterone by 10-22%<br>
+                                            • Reduces cortisol levels by up to 30%<br>
+                                            • Improves stress resilience and mood<br>
+                                            • Enhances muscle mass and strength<br>
+                                            • Supports sleep quality and fertility
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>KSM-66:</strong> 600mg daily<br>
+                                            <strong>Root extract:</strong> 300-500mg twice daily<br>
+                                            <strong>Standardized:</strong> 5% withanolides<br>
+                                            <strong>Timing:</strong> With food, evening for sleep
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Drowsiness, stomach upset, headache (rare). Generally well-tolerated.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid with autoimmune conditions, pregnancy, hyperthyroidism. May interact with immunosuppressants and thyroid medications.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fenugreek -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(4)">
+                                <div>
+                                    <div class="supplement-title">Fenugreek Extract</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-4">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-4">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">500mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases free testosterone levels<br>
+                                            • Reduces SHBG (sex hormone binding globulin)<br>
+                                            • Improves libido and sexual function<br>
+                                            • May increase strength and muscle mass<br>
+                                            • Supports healthy blood sugar levels
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Standardized:</strong> 500mg daily<br>
+                                            <strong>Testofen:</strong> 500-600mg daily<br>
+                                            <strong>Raw powder:</strong> 2-5g daily<br>
+                                            <strong>Timing:</strong> With meals to reduce upset
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">GI upset, maple syrup body odor, hypoglycemia possible at high doses.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid with diabetes, pregnancy, hormone-sensitive cancers. May interact with blood thinners and thyroid medications.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tongkat Ali -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(5)">
+                                <div>
+                                    <div class="supplement-title">Tongkat Ali (Longjack)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-5">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-5">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">200-400mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Morning</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Increases free testosterone levels<br>
+                                            • Reduces SHBG binding protein<br>
+                                            • Improves libido and sexual performance<br>
+                                            • Reduces stress and cortisol<br>
+                                            • May increase muscle mass
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>LJ100 (100:1):</strong> 200-400mg daily<br>
+                                            <strong>Standard (50:1):</strong> 400-600mg daily<br>
+                                            <strong>Cycling:</strong> 5 days on, 2 days off<br>
+                                            <strong>Timing:</strong> Empty stomach, morning
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Insomnia, restlessness, increased body temperature. Not recommended under 25.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid with heart conditions, high blood pressure, insomnia. May interact with stimulants and diabetes medications.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- D-Aspartic Acid -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(6)">
+                                <div>
+                                    <div class="supplement-title">D-Aspartic Acid (DAA)</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-6">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-6">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3-6g</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Morning</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May increase testosterone 30-60% short-term<br>
+                                            • Supports luteinizing hormone production<br>
+                                            • May improve sperm quality<br>
+                                            • May enhance libido and mood<br>
+                                            • Works best in men with low baseline T
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Daily:</strong> 3-6g (3000-6000mg)<br>
+                                            <strong>Cycling:</strong> 12 days on, 1 week off<br>
+                                            <strong>Timing:</strong> Morning on empty stomach<br>
+                                            <strong>Note:</strong> Effects diminish with continuous use
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Irritability, mood swings, headaches with prolonged use. Must be cycled.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Not recommended under 25 or for men with normal/high testosterone. Avoid with bipolar disorder.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DHEA -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(7)">
+                                <div>
+                                    <div class="supplement-title">DHEA</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-7">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-7">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">25-100mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">Morning</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Precursor to testosterone and estrogen<br>
+                                            • May improve mood and energy<br>
+                                            • Supports adrenal function<br>
+                                            • May increase muscle mass<br>
+                                            • May improve libido
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>30-40 years:</strong> 25-50mg daily<br>
+                                            <strong>40-50 years:</strong> 50-75mg daily<br>
+                                            <strong>50+ years:</strong> 75-100mg daily<br>
+                                            <strong>Timing:</strong> Morning with food
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Acne, hair loss, mood changes, liver stress at high doses. Requires monitoring.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Not recommended under 30. Avoid with prostate/breast cancer, liver disease. Requires medical supervision.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boron -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(8)">
+                                <div>
+                                    <div class="supplement-title">Boron</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐⭐⭐☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-8">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-8">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">3-10mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • Reduces SHBG by up to 23%<br>
+                                            • Increases free testosterone levels<br>
+                                            • Supports bone health and density<br>
+                                            • May reduce inflammation<br>
+                                            • Enhances magnesium absorption
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Daily:</strong> 3-10mg elemental boron<br>
+                                            <strong>Athletic:</strong> 10-20mg<br>
+                                            <strong>Max safe:</strong> 20mg daily<br>
+                                            <strong>Forms:</strong> Citrate or glycinate best
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Nausea, vomiting with very high doses (>50mg). Generally well-tolerated.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Avoid with kidney disease or hormone-sensitive cancers. May interact with estrogen therapy.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tribulus Terrestris -->
+                        <div class="supplement-card">
+                            <div class="supplement-header" onclick="toggleSupplement(9)">
+                                <div>
+                                    <div class="supplement-title">Tribulus Terrestris</div>
+                                    <div class="supplement-rating">
+                                        <span>⭐⭐☆☆☆</span>
+                                        <span>Research Rating</span>
+                                    </div>
+                                </div>
+                                <div class="expand-icon" id="icon-9">▼</div>
+                            </div>
+                            <div class="supplement-content" id="content-9">
+                                <div class="content-inner">
+                                    <div class="quick-info">
+                                        <div class="quick-stat">
+                                            <div class="stat-value">750-1500mg</div>
+                                            <div class="stat-label">Daily Dose</div>
+                                        </div>
+                                        <div class="quick-stat">
+                                            <div class="stat-value">With Meals</div>
+                                            <div class="stat-label">Best Timing</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">💪 Benefits</div>
+                                        <div class="info-text">
+                                            • May improve libido (limited evidence)<br>
+                                            • Traditional use for male vitality<br>
+                                            • May enhance athletic performance<br>
+                                            • May support mood and energy<br>
+                                            • Minimal testosterone effects in healthy men
+                                        </div>
+                                    </div>
+
+                                    <div class="dosage-box">
+                                        <div class="info-title">💊 Dosage & Timing</div>
+                                        <div class="info-text">
+                                            <strong>Extract:</strong> 750-1500mg daily<br>
+                                            <strong>Saponins (45%):</strong> 250-750mg daily<br>
+                                            <strong>Cycling:</strong> 8 weeks on, 4 weeks off<br>
+                                            <strong>Timing:</strong> Split into 2-3 doses with meals
+                                        </div>
+                                    </div>
+
+                                    <div class="info-section">
+                                        <div class="info-title">⚠️ Side Effects</div>
+                                        <div class="info-text">Stomach upset, sleep disturbances, potential prostate enlargement with long-term use.</div>
+                                    </div>
+
+                                    <div class="warning-box">
+                                        <div class="warning-title">⚠️ Important</div>
+                                        <div style="font-size: 12px; color: #856404;">Limited evidence for testosterone support. Avoid with prostate conditions, diabetes, heart disease.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToScreen('index.html', 'home')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item active" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals & Progress
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            document.getElementById('time').textContent = time;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function goBack() {
+            window.location.href = 'supplements.html';
+        }
+
+        function toggleSupplement(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Diet Plan -->
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</body>
+</html>

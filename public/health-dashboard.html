@@ -6,6 +6,7 @@
     <title>Health Dashboard - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
     <script src="health-sync.js"></script>
+    <script src="quick-food-entry.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -51,28 +52,137 @@
                             <div style="font-size: 13px; opacity: 0.9;">Heart Rate (bpm)</div>
                         </div>
 
-                        <!-- Calories Burned -->
-                        <div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
+                        <!-- Base Calories (BMR) -->
+                        <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
+                            <div style="font-size: 36px; margin-bottom: 5px;">⚡</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="base-calories">---</div>
+                            <div style="font-size: 13px; opacity: 0.9;">Base Calories (BMR)</div>
+                        </div>
+
+                        <!-- Active Calories -->
+                        <div style="background: linear-gradient(135deg, #FF5722 0%, #E64A19 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
                             <div style="font-size: 36px; margin-bottom: 5px;">🔥</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="active-calories">---</div>
+                            <div style="font-size: 13px; opacity: 0.9;">Active Calories</div>
+                        </div>
+
+                        <!-- Total Burned -->
+                        <div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
+                            <div style="font-size: 36px; margin-bottom: 5px;">💪</div>
                             <div style="font-size: 28px; font-weight: bold;" id="calories-burned">---</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Calories Burned</div>
+                            <div style="font-size: 13px; opacity: 0.9;">Total Burned</div>
                         </div>
 
                         <!-- Distance -->
-                        <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
+                        <div style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
                             <div style="font-size: 36px; margin-bottom: 5px;">🏃</div>
                             <div style="font-size: 28px; font-weight: bold;" id="distance">--</div>
                             <div style="font-size: 13px; opacity: 0.9;">Miles</div>
                         </div>
                     </div>
 
-                    <!-- Weight Card -->
+                    <!-- User Profile / BMR Settings -->
                     <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                            <div style="font-size: 40px;">⚖️</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: var(--primary); margin: 0;">👤 Profile for BMR Calculation</h3>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; color: #666;" id="unit-label">Imperial</span>
+                                <label style="position: relative; display: inline-block; width: 50px; height: 24px;">
+                                    <input type="checkbox" id="unit-toggle" onchange="toggleUnits()" style="opacity: 0; width: 0; height: 0;">
+                                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.4s; border-radius: 24px;"></span>
+                                    <span style="position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.4s; border-radius: 50%;"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <!-- Height Input - Changes based on unit system -->
+                            <div id="height-imperial-container">
+                                <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Height</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <div style="flex: 1;">
+                                        <input type="number" id="user-feet" placeholder="5" min="0" max="8" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                        <div style="font-size: 11px; color: #999; margin-top: 3px; text-align: center;">feet</div>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <input type="number" id="user-inches" placeholder="10" min="0" max="11" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                        <div style="font-size: 11px; color: #999; margin-top: 3px; text-align: center;">inches</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="height-metric-container" style="display: none;">
+                                <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Height (cm)</label>
+                                <input type="number" id="user-height-cm" placeholder="178" min="0" max="300" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                            </div>
+
                             <div>
-                                <div style="font-size: 14px; color: #666;">Current Weight</div>
-                                <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="weight">-- lbs</div>
+                                <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Age</label>
+                                <input type="number" id="user-age" placeholder="30" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Sex</label>
+                                <select id="user-sex" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button onclick="saveUserProfile()" style="width: 100%; background: var(--gradient-1); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">Save Profile</button>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 10px; text-align: center;">
+                            <div style="font-size: 13px; color: #666; margin-bottom: 5px;">Your BMR will be calculated using the Mifflin-St Jeor equation</div>
+                            <div style="font-size: 12px; color: #999;">Height + Weight + Age + Sex = Accurate Base Calories</div>
+                        </div>
+                    </div>
+
+                    <!-- Weight Tracking Card -->
+                    <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 40px;">⚖️</div>
+                                <div>
+                                    <div style="font-size: 14px; color: #666;">Current Weight</div>
+                                    <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="weight">-- lbs</div>
+                                </div>
+                            </div>
+                            <button onclick="showWeightEntry()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-size: 14px; font-weight: bold; cursor: pointer;">+ Log Weight</button>
+                        </div>
+
+                        <!-- Weight Progress Chart -->
+                        <div id="weight-progress-container" style="margin-top: 20px; display: none;">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;">Weight Progress (Last 30 Days)</div>
+                            <div id="weight-chart" style="height: 120px; background: var(--lighter-bg); border-radius: 10px; padding: 15px; position: relative; overflow-x: auto;">
+                                <!-- Chart will be rendered here -->
+                            </div>
+                            <div id="weight-history" style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
+                                <!-- Recent entries -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Body Fat Tracking Card -->
+                    <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 40px;">💪</div>
+                                <div>
+                                    <div style="font-size: 14px; color: #666;">Body Fat %</div>
+                                    <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="bodyfat">--%</div>
+                                </div>
+                            </div>
+                            <button onclick="showBodyFatEntry()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-size: 14px; font-weight: bold; cursor: pointer;">+ Log Body Fat</button>
+                        </div>
+
+                        <!-- Body Fat Progress Chart -->
+                        <div id="bodyfat-progress-container" style="margin-top: 20px; display: none;">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;">Body Fat Progress (Last 30 Days)</div>
+                            <div id="bodyfat-chart" style="height: 120px; background: var(--lighter-bg); border-radius: 10px; padding: 15px; position: relative; overflow-x: auto;">
+                                <!-- Chart will be rendered here -->
+                            </div>
+                            <div id="bodyfat-history" style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
+                                <!-- Recent entries -->
                             </div>
                         </div>
                     </div>
@@ -84,6 +194,34 @@
                             <div style="text-align: center; color: #999; padding: 20px;">
                                 Sync to see your workouts
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Calories Tracking Card -->
+                    <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 40px;">🔥</div>
+                                <div>
+                                    <div style="font-size: 14px; color: #666;">Manual Active Calories</div>
+                                    <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="manual-active-calories">0</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 5px;">From Workouts: <span id="workout-calories">0</span> cal</div>
+                                </div>
+                            </div>
+                            <button onclick="showActiveCaloriesEntry()" style="background: linear-gradient(135deg, #FF5722 0%, #E64A19 100%); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-size: 14px; font-weight: bold; cursor: pointer;">+ Log Activity</button>
+                        </div>
+
+                        <!-- Active Calories History -->
+                        <div id="active-calories-history-container" style="margin-top: 20px; display: none;">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;">Today's Activities</div>
+                            <div id="active-calories-history" style="max-height: 200px; overflow-y: auto;">
+                                <!-- History will be rendered here -->
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 10px;">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">💡 Tip</div>
+                            <div style="font-size: 13px; color: #555;">Log manual activities like workouts, sports, or other exercises. Completed workouts from the Track Workouts page are automatically included!</div>
                         </div>
                     </div>
 
@@ -112,45 +250,62 @@
                 </div>
             </div>
 
-            <!-- Bottom Navigation -->
-            <div class="bottom-nav">
-                <div class="nav-item" onclick="window.location.href='index.html'">
-                    <div class="nav-glow"></div>
-                    <div class="nav-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
-                    <div class="nav-glow"></div>
-                    <div class="nav-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
-                            <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="nav-item active" onclick="window.location.href='health-dashboard.html'">
-                    <div class="nav-glow"></div>
-                    <div class="nav-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
-                    <div class="nav-glow"></div>
-                    <div class="nav-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
-                            <circle cx="12" cy="12" r="2" fill="white"/>
-                            <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                </div>
+            <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
             </div>
+        </div>
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Diet Plan -->
+        <div class="nav-item" onclick="window.location.href='workout-techniques.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -384,8 +539,22 @@
             // Heart Rate
             document.getElementById('heart-rate').textContent = data.heartRate || '--';
 
-            // Calories
-            document.getElementById('calories-burned').textContent = data.caloriesBurned.toLocaleString();
+            // Base Calories (BMR)
+            document.getElementById('base-calories').textContent = (data.bmr || 0).toLocaleString();
+
+            // Active Calories (Apple Health + Manual + Workouts)
+            const appleHealthActive = data.activeEnergy || 0;
+            const manualActive = getTodayManualCalories();
+            const workoutActive = getTodayWorkoutCalories();
+            const totalActive = appleHealthActive + manualActive + workoutActive;
+            document.getElementById('active-calories').textContent = totalActive.toLocaleString();
+
+            // Total Calories Burned (BMR + Active)
+            const totalBurned = (data.bmr || 0) + totalActive;
+            document.getElementById('calories-burned').textContent = totalBurned.toLocaleString();
+
+            // Load manual active calories display
+            loadActiveCaloriesData();
 
             // Distance
             document.getElementById('distance').textContent = data.distance.toFixed(2);
@@ -456,8 +625,462 @@
             }
         }
 
+        // Weight Tracking Functions
+        function showWeightEntry() {
+            const weight = prompt('Enter your current weight (lbs):', '');
+            if (weight && !isNaN(weight)) {
+                logWeight(parseFloat(weight));
+            }
+        }
+
+        function logWeight(weight) {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
+            entries.push({
+                weight: weight,
+                date: new Date().toISOString(),
+                timestamp: Date.now()
+            });
+            localStorage.setItem('fuelfire_weight_entries', JSON.stringify(entries));
+
+            // Update display
+            document.getElementById('weight').textContent = weight.toFixed(1) + ' lbs';
+            loadWeightProgress();
+            alert(`✅ Weight logged: ${weight.toFixed(1)} lbs`);
+        }
+
+        function loadWeightProgress() {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
+            if (entries.length === 0) return;
+
+            // Show progress container
+            document.getElementById('weight-progress-container').style.display = 'block';
+
+            // Get last 30 days
+            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            const recentEntries = entries.filter(e => e.timestamp > thirtyDaysAgo);
+
+            // Draw simple chart
+            drawWeightChart(recentEntries);
+
+            // Show history
+            showWeightHistory(recentEntries);
+        }
+
+        function drawWeightChart(entries) {
+            const chart = document.getElementById('weight-chart');
+            if (entries.length === 0) {
+                chart.innerHTML = '<div style="text-align: center; color: #999;">No data yet</div>';
+                return;
+            }
+
+            const max = Math.max(...entries.map(e => e.weight));
+            const min = Math.min(...entries.map(e => e.weight));
+            const range = max - min || 10;
+
+            let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 90px; gap: 2px;">';
+
+            entries.slice(-7).forEach((entry, i) => {
+                const height = entries.length === 1 ? 50 : ((entry.weight - min) / range) * 70 + 20;
+                const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+                chartHTML += `
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.weight.toFixed(1)}</div>
+                        <div style="width: 100%; background: var(--gradient-1); border-radius: 5px 5px 0 0; height: ${height}px;"></div>
+                        <div style="font-size: 9px; color: #666;">${date}</div>
+                    </div>
+                `;
+            });
+            chartHTML += '</div>';
+
+            chart.innerHTML = chartHTML;
+        }
+
+        function showWeightHistory(entries) {
+            const history = document.getElementById('weight-history');
+            if (entries.length === 0) return;
+
+            let html = '<div style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">Recent Entries:</div>';
+            entries.slice(-5).reverse().forEach(entry => {
+                const date = new Date(entry.date).toLocaleString();
+                html += `
+                    <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">${entry.weight.toFixed(1)} lbs</span>
+                        <span style="font-size: 12px; color: #666;">${date}</span>
+                    </div>
+                `;
+            });
+            history.innerHTML = html;
+        }
+
+        // Body Fat Tracking Functions
+        function showBodyFatEntry() {
+            const bodyfat = prompt('Enter your body fat percentage (%):', '');
+            if (bodyfat && !isNaN(bodyfat)) {
+                logBodyFat(parseFloat(bodyfat));
+            }
+        }
+
+        function logBodyFat(bodyfat) {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_bodyfat_entries') || '[]');
+            entries.push({
+                bodyfat: bodyfat,
+                date: new Date().toISOString(),
+                timestamp: Date.now()
+            });
+            localStorage.setItem('fuelfire_bodyfat_entries', JSON.stringify(entries));
+
+            // Update display
+            document.getElementById('bodyfat').textContent = bodyfat.toFixed(1) + '%';
+            loadBodyFatProgress();
+            alert(`✅ Body Fat logged: ${bodyfat.toFixed(1)}%`);
+        }
+
+        function loadBodyFatProgress() {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_bodyfat_entries') || '[]');
+            if (entries.length === 0) return;
+
+            // Show progress container
+            document.getElementById('bodyfat-progress-container').style.display = 'block';
+
+            // Get last 30 days
+            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            const recentEntries = entries.filter(e => e.timestamp > thirtyDaysAgo);
+
+            // Draw simple chart
+            drawBodyFatChart(recentEntries);
+
+            // Show history
+            showBodyFatHistory(recentEntries);
+        }
+
+        function drawBodyFatChart(entries) {
+            const chart = document.getElementById('bodyfat-chart');
+            if (entries.length === 0) {
+                chart.innerHTML = '<div style="text-align: center; color: #999;">No data yet</div>';
+                return;
+            }
+
+            const max = Math.max(...entries.map(e => e.bodyfat));
+            const min = Math.min(...entries.map(e => e.bodyfat));
+            const range = max - min || 5;
+
+            let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 90px; gap: 2px;">';
+
+            entries.slice(-7).forEach((entry, i) => {
+                const height = entries.length === 1 ? 50 : ((entry.bodyfat - min) / range) * 70 + 20;
+                const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+                chartHTML += `
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.bodyfat.toFixed(1)}%</div>
+                        <div style="width: 100%; background: var(--gradient-1); border-radius: 5px 5px 0 0; height: ${height}px;"></div>
+                        <div style="font-size: 9px; color: #666;">${date}</div>
+                    </div>
+                `;
+            });
+            chartHTML += '</div>';
+
+            chart.innerHTML = chartHTML;
+        }
+
+        function showBodyFatHistory(entries) {
+            const history = document.getElementById('bodyfat-history');
+            if (entries.length === 0) return;
+
+            let html = '<div style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">Recent Entries:</div>';
+            entries.slice(-5).reverse().forEach(entry => {
+                const date = new Date(entry.date).toLocaleString();
+                html += `
+                    <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">${entry.bodyfat.toFixed(1)}%</span>
+                        <span style="font-size: 12px; color: #666;">${date}</span>
+                    </div>
+                `;
+            });
+            history.innerHTML = html;
+        }
+
+        // Active Calories Tracking Functions
+        function showActiveCaloriesEntry() {
+            const activity = prompt('Activity name (e.g., "Running", "Weightlifting"):', '');
+            if (!activity) return;
+
+            const calories = prompt('Calories burned:', '');
+            if (calories && !isNaN(calories)) {
+                logActiveCalories(activity, parseFloat(calories));
+            }
+        }
+
+        function logActiveCalories(activity, calories) {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            entries.push({
+                activity: activity,
+                calories: calories,
+                date: new Date().toISOString(),
+                timestamp: Date.now()
+            });
+            localStorage.setItem('fuelfire_active_calories', JSON.stringify(entries));
+
+            // Update display
+            loadActiveCaloriesData();
+            alert(`✅ Activity logged: ${activity} - ${calories} calories`);
+        }
+
+        function getTodayWorkoutCalories() {
+            // Get workouts from today
+            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalWorkoutCalories = 0;
+
+            workoutHistory.forEach(workout => {
+                const workoutDate = new Date(workout.date);
+                workoutDate.setHours(0, 0, 0, 0);
+
+                if (workoutDate.getTime() === today.getTime()) {
+                    // Estimate calories based on workout type and duration
+                    const duration = workout.duration || 45; // minutes
+                    let caloriesPerMinute = 5; // default estimate
+
+                    // Adjust based on workout type
+                    if (workout.type) {
+                        const type = workout.type.toLowerCase();
+                        if (type.includes('chest') || type.includes('back') || type.includes('legs')) {
+                            caloriesPerMinute = 7;
+                        } else if (type.includes('cardio') || type.includes('hiit')) {
+                            caloriesPerMinute = 10;
+                        } else if (type.includes('arms') || type.includes('core')) {
+                            caloriesPerMinute = 5;
+                        }
+                    }
+
+                    totalWorkoutCalories += duration * caloriesPerMinute;
+                }
+            });
+
+            return Math.round(totalWorkoutCalories);
+        }
+
+        function getTodayManualCalories() {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalManualCalories = 0;
+
+            entries.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                entryDate.setHours(0, 0, 0, 0);
+
+                if (entryDate.getTime() === today.getTime()) {
+                    totalManualCalories += entry.calories;
+                }
+            });
+
+            return totalManualCalories;
+        }
+
+        function loadActiveCaloriesData() {
+            const workoutCalories = getTodayWorkoutCalories();
+            const manualCalories = getTodayManualCalories();
+            const totalManual = workoutCalories + manualCalories;
+
+            document.getElementById('manual-active-calories').textContent = totalManual.toLocaleString();
+            document.getElementById('workout-calories').textContent = workoutCalories.toLocaleString();
+
+            // Show history if there are manual entries today
+            loadActiveCaloriesHistory();
+        }
+
+        function loadActiveCaloriesHistory() {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const todayEntries = entries.filter(entry => {
+                const entryDate = new Date(entry.date);
+                entryDate.setHours(0, 0, 0, 0);
+                return entryDate.getTime() === today.getTime();
+            });
+
+            if (todayEntries.length === 0) {
+                document.getElementById('active-calories-history-container').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('active-calories-history-container').style.display = 'block';
+            const history = document.getElementById('active-calories-history');
+
+            let html = '';
+            todayEntries.reverse().forEach(entry => {
+                const time = new Date(entry.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                html += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">${entry.activity}</div>
+                            <div style="font-size: 11px; color: #999;">${time}</div>
+                        </div>
+                        <div style="font-weight: bold; color: #FF5722;">${entry.calories} cal</div>
+                    </div>
+                `;
+            });
+            history.innerHTML = html;
+        }
+
+        // User Profile Functions
+        let isMetric = false;
+
+        function toggleUnits() {
+            isMetric = document.getElementById('unit-toggle').checked;
+            const label = document.getElementById('unit-label');
+            const imperialContainer = document.getElementById('height-imperial-container');
+            const metricContainer = document.getElementById('height-metric-container');
+
+            if (isMetric) {
+                label.textContent = 'Metric';
+                imperialContainer.style.display = 'none';
+                metricContainer.style.display = 'block';
+
+                // Convert existing imperial values to metric if present
+                const feet = document.getElementById('user-feet').value;
+                const inches = document.getElementById('user-inches').value;
+                if (feet && inches) {
+                    const totalInches = (parseInt(feet) * 12) + parseInt(inches);
+                    const cm = Math.round(totalInches * 2.54);
+                    document.getElementById('user-height-cm').value = cm;
+                }
+            } else {
+                label.textContent = 'Imperial';
+                imperialContainer.style.display = 'block';
+                metricContainer.style.display = 'none';
+
+                // Convert existing metric values to imperial if present
+                const cm = document.getElementById('user-height-cm').value;
+                if (cm) {
+                    const totalInches = Math.round(parseInt(cm) / 2.54);
+                    const feet = Math.floor(totalInches / 12);
+                    const inches = totalInches % 12;
+                    document.getElementById('user-feet').value = feet;
+                    document.getElementById('user-inches').value = inches;
+                }
+            }
+
+            // Update toggle slider appearance
+            updateToggleSlider();
+        }
+
+        function updateToggleSlider() {
+            const toggle = document.getElementById('unit-toggle');
+            const slider = toggle.nextElementSibling;
+            const knob = slider.nextElementSibling;
+
+            if (toggle.checked) {
+                slider.style.backgroundColor = '#4B9CD3';
+                knob.style.transform = 'translateX(26px)';
+            } else {
+                slider.style.backgroundColor = '#ccc';
+                knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function saveUserProfile() {
+            let heightInInches;
+
+            // Get height in inches based on current unit system
+            if (isMetric) {
+                const cm = document.getElementById('user-height-cm').value;
+                if (!cm) {
+                    alert('Please enter your height');
+                    return;
+                }
+                heightInInches = Math.round(parseFloat(cm) / 2.54);
+            } else {
+                const feet = document.getElementById('user-feet').value;
+                const inches = document.getElementById('user-inches').value;
+                if (!feet || !inches) {
+                    alert('Please enter your height (feet and inches)');
+                    return;
+                }
+                heightInInches = (parseInt(feet) * 12) + parseInt(inches);
+            }
+
+            const age = document.getElementById('user-age').value;
+            const sex = document.getElementById('user-sex').value;
+
+            if (!age) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const profile = {
+                height: heightInInches, // Always store in inches
+                age: parseInt(age),
+                sex: sex,
+                timestamp: Date.now()
+            };
+
+            localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+            alert('✅ Profile saved! Sync health data to recalculate BMR with your height.');
+
+            // Trigger a health data sync to recalculate BMR
+            syncHealthData();
+        }
+
+        function loadUserProfile() {
+            const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
+
+            if (profile.height) {
+                // Height is stored in inches, convert for display based on current unit
+                const totalInches = profile.height;
+
+                if (isMetric) {
+                    const cm = Math.round(totalInches * 2.54);
+                    document.getElementById('user-height-cm').value = cm;
+                } else {
+                    const feet = Math.floor(totalInches / 12);
+                    const inches = totalInches % 12;
+                    document.getElementById('user-feet').value = feet;
+                    document.getElementById('user-inches').value = inches;
+                }
+            }
+
+            if (profile.age) {
+                document.getElementById('user-age').value = profile.age;
+            }
+            if (profile.sex) {
+                document.getElementById('user-sex').value = profile.sex;
+            }
+        }
+
+        // Load progress on page load
+        function loadTrackingData() {
+            // Load weight progress
+            const weightEntries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
+            if (weightEntries.length > 0) {
+                const latest = weightEntries[weightEntries.length - 1];
+                document.getElementById('weight').textContent = latest.weight.toFixed(1) + ' lbs';
+                loadWeightProgress();
+            }
+
+            // Load body fat progress
+            const bodyfatEntries = JSON.parse(localStorage.getItem('fuelfire_bodyfat_entries') || '[]');
+            if (bodyfatEntries.length > 0) {
+                const latest = bodyfatEntries[bodyfatEntries.length - 1];
+                document.getElementById('bodyfat').textContent = latest.bodyfat.toFixed(1) + '%';
+                loadBodyFatProgress();
+            }
+
+            // Load active calories data
+            loadActiveCaloriesData();
+        }
+
         // Initialize on load
-        document.addEventListener('DOMContentLoaded', initHealthDashboard);
+        document.addEventListener('DOMContentLoaded', () => {
+            initHealthDashboard();
+            loadTrackingData();
+            loadUserProfile();
+            updateToggleSlider(); // Initialize toggle appearance
+        });
     </script>
 </body>
 </html>

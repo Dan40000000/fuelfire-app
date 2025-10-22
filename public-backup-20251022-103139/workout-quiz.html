@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Quick Workout - Well Fit</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="global-nav.js"></script>
+    <script src="quick-food-entry.js"></script>
+    <style>
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-title {
+            font-size: 32px;
+            font-weight: bold;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .quiz-subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(75, 156, 211, 0.15);
+        }
+
+        .question-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 20px;
+        }
+
+        .muscle-group-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-option:hover {
+            border-color: var(--primary);
+            background: rgba(75, 156, 211, 0.1);
+        }
+
+        .checkbox-option.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .time-btn {
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .time-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .time-btn.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .location-btn {
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .location-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(75, 156, 211, 0.2);
+        }
+
+        .location-btn.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .location-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .location-label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .style-btn {
+            background: var(--lighter-bg);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 25px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .style-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(75, 156, 211, 0.2);
+        }
+
+        .style-btn.selected {
+            background: var(--gradient-1);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .style-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .style-label {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .style-desc {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .generate-btn {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(75, 156, 211, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(75, 156, 211, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .workout-result {
+            display: none;
+        }
+
+        .workout-result.show {
+            display: block;
+        }
+
+        .exercise-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 15px rgba(75, 156, 211, 0.1);
+            border-left: 5px solid var(--primary);
+        }
+
+        .exercise-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .exercise-details {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .view-form-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .view-form-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(75, 156, 211, 0.3);
+        }
+
+        .workout-header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .workout-summary {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 15px rgba(75, 156, 211, 0.1);
+            border-left: 5px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(75, 156, 211, 0.2);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .template-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .template-meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .template-action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-template-btn {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .delete-template-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .template-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .load-templates-btn {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(156, 39, 176, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .load-templates-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(156, 39, 176, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar"></div>
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <div class="header-title">⚡ Quick Workout</div>
+            </div>
+
+            <div class="content">
+                <div class="quiz-container">
+                    <div class="quiz-header">
+                        <div class="quiz-title">⚡ Quick Workout Generator</div>
+                        <div class="quiz-subtitle">Customize your perfect workout in seconds</div>
+                    </div>
+
+                    <div id="quiz-section">
+                        <!-- Question 1: Muscle Groups -->
+                        <div class="question-card">
+                            <div class="question-title">What muscle groups do you want to train?</div>
+                            <div class="muscle-group-grid">
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('full-body', event)">
+                                    <input type="checkbox" id="full-body" onchange="toggleMuscleGroup('full-body', event)">
+                                    <label for="full-body">Full Body</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('chest', event)">
+                                    <input type="checkbox" id="chest" onchange="toggleMuscleGroup('chest', event)">
+                                    <label for="chest">Chest</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('lats', event)">
+                                    <input type="checkbox" id="lats" onchange="toggleMuscleGroup('lats', event)">
+                                    <label for="lats">Lats</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('traps', event)">
+                                    <input type="checkbox" id="traps" onchange="toggleMuscleGroup('traps', event)">
+                                    <label for="traps">Traps</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('shoulders', event)">
+                                    <input type="checkbox" id="shoulders" onchange="toggleMuscleGroup('shoulders', event)">
+                                    <label for="shoulders">Shoulders</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('biceps', event)">
+                                    <input type="checkbox" id="biceps" onchange="toggleMuscleGroup('biceps', event)">
+                                    <label for="biceps">Biceps</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('triceps', event)">
+                                    <input type="checkbox" id="triceps" onchange="toggleMuscleGroup('triceps', event)">
+                                    <label for="triceps">Triceps</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('quads', event)">
+                                    <input type="checkbox" id="quads" onchange="toggleMuscleGroup('quads', event)">
+                                    <label for="quads">Quads</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('hamstrings', event)">
+                                    <input type="checkbox" id="hamstrings" onchange="toggleMuscleGroup('hamstrings', event)">
+                                    <label for="hamstrings">Hamstrings</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('glutes', event)">
+                                    <input type="checkbox" id="glutes" onchange="toggleMuscleGroup('glutes', event)">
+                                    <label for="glutes">Glutes</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('calves', event)">
+                                    <input type="checkbox" id="calves" onchange="toggleMuscleGroup('calves', event)">
+                                    <label for="calves">Calves</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('core', event)">
+                                    <input type="checkbox" id="core" onchange="toggleMuscleGroup('core', event)">
+                                    <label for="core">Core</label>
+                                </div>
+                                <div class="checkbox-option" onclick="toggleMuscleGroup('cardio', event)">
+                                    <input type="checkbox" id="cardio" onchange="toggleMuscleGroup('cardio', event)">
+                                    <label for="cardio">Cardio</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question 2: Time -->
+                        <div class="question-card">
+                            <div class="question-title">How much time do you have?</div>
+                            <div class="time-grid">
+                                <div class="time-btn" onclick="selectTime('15')">15 min</div>
+                                <div class="time-btn" onclick="selectTime('30')">30 min</div>
+                                <div class="time-btn" onclick="selectTime('45')">45 min</div>
+                                <div class="time-btn" onclick="selectTime('60')">60 min</div>
+                                <div class="time-btn" onclick="selectTime('75')">75 min</div>
+                                <div class="time-btn" onclick="selectTime('90')">90 min</div>
+                                <div class="time-btn" onclick="selectTime('120')">120 min</div>
+                            </div>
+                        </div>
+
+                        <!-- Question 3: Location -->
+                        <div class="question-card">
+                            <div class="question-title">Where are you working out?</div>
+                            <div class="location-grid">
+                                <div class="location-btn" onclick="selectLocation('home')">
+                                    <div class="location-icon">🏠</div>
+                                    <div class="location-label">Home</div>
+                                </div>
+                                <div class="location-btn" onclick="selectLocation('gym')">
+                                    <div class="location-icon">🏋️</div>
+                                    <div class="location-label">Gym</div>
+                                </div>
+                                <div class="location-btn" onclick="selectLocation('hotel')">
+                                    <div class="location-icon">🏨</div>
+                                    <div class="location-label">Hotel Gym</div>
+                                </div>
+                                <div class="location-btn" onclick="selectLocation('park')">
+                                    <div class="location-icon">🌳</div>
+                                    <div class="location-label">Park/Outdoor</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Question 4: Style -->
+                        <div class="question-card">
+                            <div class="question-title">What style of workout?</div>
+                            <div class="style-grid">
+                                <div class="style-btn" onclick="selectStyle('routine')">
+                                    <div class="style-icon">📋</div>
+                                    <div class="style-label">Routine</div>
+                                    <div class="style-desc">Classic proven exercises</div>
+                                </div>
+                                <div class="style-btn" onclick="selectStyle('unique')">
+                                    <div class="style-icon">🎨</div>
+                                    <div class="style-label">Unique</div>
+                                    <div class="style-desc">Creative & uncommon moves</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="generate-btn" onclick="generateWorkout()" id="generate-btn" disabled>
+                            Generate My Workout ⚡
+                        </button>
+
+                        <button class="load-templates-btn" onclick="loadSavedTemplates()">
+                            📚 Load Saved Workouts
+                        </button>
+                    </div>
+
+                    <div id="workout-result" class="workout-result">
+                        <div class="workout-header">
+                            <div class="question-title" style="color: white; margin: 0;">Your Custom Workout 🔥</div>
+                            <div class="workout-summary" id="workout-summary"></div>
+                        </div>
+                        <div id="workout-exercises"></div>
+                        <button class="generate-btn" onclick="startWorkout()">
+                            💪 Start Workout
+                        </button>
+                        <button class="generate-btn" onclick="saveWorkoutTemplate()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); margin-top: 15px;">
+                            💾 Save as Template
+                        </button>
+                        <button class="generate-btn" onclick="startOver()" style="background: transparent; color: var(--primary); border: 2px solid var(--primary); margin-top: 15px;">
+                            Create New Workout
+                        </button>
+                    </div>
+
+                    <!-- Saved Templates Section -->
+                    <div id="saved-templates-section" style="display: none;">
+                        <div class="question-card">
+                            <div class="question-title">📚 Your Saved Workouts</div>
+                            <div id="saved-templates-list"></div>
+                            <button class="generate-btn" onclick="showQuiz()" style="margin-top: 20px;">
+                                ⚡ Create New Workout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Diet Plan -->
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
+                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Well Fit
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="window.location.href='index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item active" onclick="window.location.href='workout-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                </svg>
+                Quick Workout
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M12 2 C12 2 16 8 16 12 C16 14.2 14.2 16 12 16 C9.8 16 8 14.2 8 12 C8 8 12 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2"/>
+                    <line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="showScreen('goals')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+                    <line x1="12" y1="20" x2="12" y2="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="18" y1="20" x2="18" y2="4" stroke="currentColor" stroke-width="2"/>
+                    <line x1="6" y1="20" x2="6" y2="16" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Goals & Progress
+            </div>
+        </div>
+    </div>
+
+    <script src="workout-database.js"></script>
+    <script>
+        const selections = {
+            muscles: [],
+            time: null,
+            location: null,
+            style: null
+        };
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function toggleMuscleGroup(muscle, event) {
+            if (event && event.target.tagName !== 'INPUT') {
+                event.stopPropagation();
+                const checkbox = document.getElementById(muscle);
+                checkbox.checked = !checkbox.checked;
+            }
+
+            const index = selections.muscles.indexOf(muscle);
+            const option = document.getElementById(muscle).closest('.checkbox-option');
+
+            if (document.getElementById(muscle).checked) {
+                if (index === -1) selections.muscles.push(muscle);
+                option.classList.add('selected');
+            } else {
+                if (index > -1) selections.muscles.splice(index, 1);
+                option.classList.remove('selected');
+            }
+
+            checkAllSelected();
+        }
+
+        function selectTime(time) {
+            selections.time = time;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkAllSelected();
+        }
+
+        function selectLocation(location) {
+            selections.location = location;
+            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkAllSelected();
+        }
+
+        function selectStyle(style) {
+            selections.style = style;
+            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+            checkAllSelected();
+        }
+
+        function checkAllSelected() {
+            const allSelected = selections.muscles.length > 0 && selections.time && selections.location && selections.style;
+            document.getElementById('generate-btn').disabled = !allSelected;
+        }
+
+        function generateWorkout() {
+            const { muscles, time, location, style } = selections;
+
+            // Get exercises from massive database
+            const workout = buildWorkout(muscles, time, location, style);
+
+            // Display workout
+            const container = document.getElementById('workout-exercises');
+            const summary = document.getElementById('workout-summary');
+
+            summary.textContent = `${time} min • ${location} • ${muscles.join(', ')} • ${style === 'unique' ? 'Unique exercises' : 'Classic routine'}`;
+
+            let html = '';
+            workout.forEach(exercise => {
+                html += `
+                    <div class="exercise-item">
+                        <div class="exercise-name">${exercise.name}</div>
+                        <div class="exercise-details">
+                            ${exercise.sets ? `<strong>${exercise.sets}</strong>` : ''}
+                            ${exercise.reps ? ` • ${exercise.reps}` : ''}
+                            ${exercise.rest ? ` • ${exercise.rest}` : ''}
+                        </div>
+                        ${exercise.notes ? `<div style="margin-top: 8px; font-size: 13px; font-style: italic; color: #666;">${exercise.notes}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Show result, hide quiz
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('workout-result').classList.add('show');
+        }
+
+        function startOver() {
+            // Reset selections
+            selections.muscles = [];
+            selections.time = null;
+            selections.location = null;
+            selections.style = null;
+
+            // Uncheck all checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.checkbox-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // Hide result, show quiz
+            document.getElementById('workout-result').classList.remove('show');
+            document.getElementById('quiz-section').style.display = 'block';
+
+            // Disable generate button
+            document.getElementById('generate-btn').disabled = true;
+        }
+
+        // Helper function to build workout from database
+        function buildWorkout(muscles, time, location, style) {
+            return getWorkoutFromDatabase(muscles, parseInt(time), location, style);
+        }
+
+        function startWorkout() {
+            const { muscles, time, location, style } = selections;
+            const workout = buildWorkout(muscles, time, location, style);
+            const summary = `${time} min • ${location} • ${muscles.join(', ')} • ${style === 'unique' ? 'Unique exercises' : 'Classic routine'}`;
+
+            // Save workout to localStorage
+            const workoutData = {
+                exercises: workout,
+                summary: summary,
+                muscles: muscles,
+                time: time,
+                location: location,
+                style: style
+            };
+
+            localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
+
+            // Navigate to in-workout page
+            window.location.href = 'in-workout.html';
+        }
+
+        function showScreen(screenId) {
+            window.location.href = 'index.html#' + screenId;
+        }
+
+        // Workout Template Management Functions
+        function saveWorkoutTemplate() {
+            const { muscles, time, location, style } = selections;
+            const workout = buildWorkout(muscles, time, location, style);
+            const summary = `${time} min • ${location} • ${muscles.join(', ')} • ${style === 'unique' ? 'Unique exercises' : 'Classic routine'}`;
+
+            // Prompt user for template name
+            const templateName = prompt('Give this workout a name:', `${location} ${muscles.join(' & ')}`);
+
+            if (!templateName) {
+                return; // User cancelled
+            }
+
+            // Create template object
+            const template = {
+                id: Date.now(),
+                name: templateName,
+                exercises: workout,
+                summary: summary,
+                muscles: muscles,
+                time: time,
+                location: location,
+                style: style,
+                createdAt: new Date().toISOString()
+            };
+
+            // Get existing templates
+            const savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+
+            // Add new template
+            savedTemplates.unshift(template);
+
+            // Save back to localStorage
+            localStorage.setItem('workoutTemplates', JSON.stringify(savedTemplates));
+
+            alert(`✅ Workout "${templateName}" saved successfully!`);
+        }
+
+        function loadSavedTemplates() {
+            const savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+
+            if (savedTemplates.length === 0) {
+                alert('No saved workouts yet. Create and save a workout first!');
+                return;
+            }
+
+            // Hide quiz and result sections
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('workout-result').classList.remove('show');
+
+            // Show saved templates section
+            const templatesSection = document.getElementById('saved-templates-section');
+            templatesSection.style.display = 'block';
+
+            // Render templates
+            renderSavedTemplates(savedTemplates);
+        }
+
+        function renderSavedTemplates(templates) {
+            const container = document.getElementById('saved-templates-list');
+
+            let html = '';
+            templates.forEach((template, index) => {
+                const exerciseCount = template.exercises.length;
+                const date = new Date(template.createdAt).toLocaleDateString();
+
+                html += `
+                    <div class="template-card">
+                        <div class="template-header">
+                            <div class="template-name">${template.name}</div>
+                            <div style="font-size: 24px;">💪</div>
+                        </div>
+                        <div class="template-meta">
+                            ${template.summary}
+                        </div>
+                        <div class="template-meta">
+                            ${exerciseCount} exercises • Created ${date}
+                        </div>
+                        <div class="template-actions">
+                            <button class="template-action-btn start-template-btn" onclick="startSavedWorkout(${template.id})">
+                                ▶️ Start Workout
+                            </button>
+                            <button class="template-action-btn delete-template-btn" onclick="deleteTemplate(${template.id})">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function startSavedWorkout(templateId) {
+            const savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+            const template = savedTemplates.find(t => t.id === templateId);
+
+            if (!template) {
+                alert('Workout template not found!');
+                return;
+            }
+
+            // Save as current workout
+            const workoutData = {
+                exercises: template.exercises,
+                summary: template.summary,
+                muscles: template.muscles,
+                time: template.time,
+                location: template.location,
+                style: template.style
+            };
+
+            localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
+
+            // Navigate to in-workout page
+            window.location.href = 'in-workout.html';
+        }
+
+        function deleteTemplate(templateId) {
+            if (!confirm('Are you sure you want to delete this workout template?')) {
+                return;
+            }
+
+            let savedTemplates = JSON.parse(localStorage.getItem('workoutTemplates') || '[]');
+            savedTemplates = savedTemplates.filter(t => t.id !== templateId);
+            localStorage.setItem('workoutTemplates', JSON.stringify(savedTemplates));
+
+            // Re-render templates
+            if (savedTemplates.length === 0) {
+                showQuiz();
+            } else {
+                renderSavedTemplates(savedTemplates);
+            }
+        }
+
+        function showQuiz() {
+            // Hide saved templates section
+            document.getElementById('saved-templates-section').style.display = 'none';
+
+            // Show quiz section
+            document.getElementById('quiz-section').style.display = 'block';
+
+            // Reset workout result if showing
+            document.getElementById('workout-result').classList.remove('show');
+        }
+
+        // Check on page load if we should show templates
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('view') === 'templates') {
+                loadSavedTemplates();
+            }
+        });
+    </script>
+</body>
+</html>

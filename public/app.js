@@ -1669,6 +1669,18 @@ function showScreen(screenId) {
     // Show selected screen
     document.getElementById(screenId).classList.add('active');
 
+    // Force status bar height lock (prevents iOS shrinking on navigation)
+    setTimeout(() => {
+        const statusBar = document.querySelector('.status-bar');
+        if (statusBar) {
+            statusBar.style.height = '44px';
+            statusBar.style.minHeight = '44px';
+            statusBar.style.maxHeight = '44px';
+            statusBar.style.flexShrink = '0';
+            statusBar.style.flexGrow = '0';
+        }
+    }, 10);
+
     // Load saved workouts if showing that screen
     if (screenId === 'saved-workouts') {
         loadSavedWorkouts();

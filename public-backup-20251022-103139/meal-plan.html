@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Your AI Meal Plan - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="global-nav.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+        }
+        
+        .phone-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .screen {
+            background: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--gradient-1);
+            color: white;
+        }
+        
+        .hamburger {
+            font-size: 20px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .content {
+            padding: 0;
+            background: white;
+            min-height: calc(100vh - 120px);
+        }
+        
+        .plan-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+        
+        .plan-title {
+            color: #4B9CD3;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .plan-metadata {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .action-buttons {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            background: var(--gradient-1);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .day-plan {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .day-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .meal {
+            background: white;
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .meal-name {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        
+        .meal-details {
+            color: #666;
+            line-height: 1.4;
+            font-size: 13px;
+        }
+        
+        .shopping-section {
+            background: #e8f5e8;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .shopping-list {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .shopping-category {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .shopping-items {
+            line-height: 1.5;
+            color: #333;
+            font-size: 13px;
+        }
+        
+        .nutrition-summary {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .nutrition-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .tips-section {
+            background: #e7f3ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #007bff;
+        }
+        
+        .footer-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+        
+        @media print {
+            .action-buttons { display: none; }
+            .meal-plan-container { background: white !important; }
+        }
+        
+        @media (max-width: 768px) {
+            .meal-plan-container { padding: 10px; }
+            .meal-plan-content { padding: 20px; }
+            .plan-title { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                
+                
+            </div>
+
+            
+            <div class="header">
+                <div class="hamburger" onclick="goBack()">←</div>
+                <div class="header-title">Your Meal Plan</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div class="plan-header">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h2 style="color: var(--primary); margin: 0 0 10px 0; font-size: 24px;">🎯 AI Meal Plan</h2>
+                            <div class="plan-metadata" id="plan-metadata" style="background: #f8f9ff; padding: 10px; border-radius: 10px; font-size: 14px; color: #666;">
+                                <!-- Metadata will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons" style="text-align: center; margin-bottom: 20px; display: block !important; visibility: visible !important;">
+                        <button onclick="saveMealPlan()" style="background: #4CAF50 !important; color: white !important; border: none !important; padding: 12px 20px !important; border-radius: 15px !important; font-size: 14px !important; margin: 0 8px !important; cursor: pointer !important; display: inline-block !important;">💾 Save Plan</button>
+                        <button onclick="window.print()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; padding: 12px 20px !important; border-radius: 15px !important; font-size: 14px !important; margin: 0 8px !important; cursor: pointer !important; display: inline-block !important;">🖨️ Print</button>
+                        <button onclick="sharePlan()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; border: none !important; padding: 12px 20px !important; border-radius: 15px !important; font-size: 14px !important; margin: 0 8px !important; cursor: pointer !important; display: inline-block !important;">📤 Share</button>
+                    </div>
+                    
+                    <div id="meal-plan-content">
+                        <!-- Meal plan content will be inserted here -->
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px; padding: 15px; background: #f8f9ff; border-radius: 15px;">
+                        <h4 style="color: var(--primary); margin: 0 0 8px 0;">🔥 FuelFire & Claude AI</h4>
+                        <p style="color: #666; margin: 0; font-size: 12px;">Personalized meal plan generated using AI</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'meal-plans.html';
+        }
+        
+        function sharePlan() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My AI Meal Plan - FuelFire',
+                    text: 'Check out my personalized meal plan generated by AI!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('📋 Plan URL copied to clipboard!');
+                });
+            }
+        }
+        
+        // Function to receive and display meal plan data
+        function displayMealPlan(mealPlan, metadata) {
+            console.log('📋 Displaying meal plan:', {
+                mealPlanLength: mealPlan ? mealPlan.length : 0,
+                mealPlanType: typeof mealPlan,
+                metadataKeys: metadata ? Object.keys(metadata) : []
+            });
+            
+            // Set metadata
+            document.getElementById('plan-metadata').innerHTML = `
+                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
+                <strong>Goal:</strong> ${metadata.goal} | 
+                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
+            `;
+            
+            // Process and display meal plan content
+            if (!mealPlan || mealPlan.length === 0) {
+                document.getElementById('meal-plan-content').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>⚠️ Empty Meal Plan</h3>
+                        <p>The meal plan appears to be empty. Please try generating a new one.</p>
+                        <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">🎯 Start New Quiz</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const processedContent = processMealPlanContent(mealPlan);
+            
+            // Add save button at the top of content
+            const saveButtonHtml = `
+                <div style="background: #4CAF50; color: white; padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 20px; cursor: pointer;" onclick="saveMealPlan()">
+                    <strong style="font-size: 18px;">💾 Click Here to Save This Meal Plan</strong>
+                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.9;">Save to use in calorie tracker</div>
+                </div>
+            `;
+            
+            document.getElementById('meal-plan-content').innerHTML = saveButtonHtml + processedContent;
+            
+            // Restore checkbox states after content is loaded
+            restoreCheckboxStates();
+            
+            // Debug: Check if any shopping checkboxes were created
+            setTimeout(() => {
+                const checkboxCount = document.querySelectorAll('.shopping-checkbox').length;
+                console.log('🔍 Total shopping checkboxes found:', checkboxCount);
+                if (checkboxCount === 0) {
+                    console.log('⚠️ No checkboxes found! Checking for shopping lists...');
+                    const shoppingHeaders = document.querySelectorAll('h2, h4');
+                    shoppingHeaders.forEach(header => {
+                        if (header.textContent.includes('Shopping') || header.textContent.includes('PROTEINS') || header.textContent.includes('VEGETABLES')) {
+                            console.log('📋 Found shopping section:', header.textContent);
+                        }
+                    });
+                }
+            }, 500);
+        }
+        
+        // Helper function to format meal content with bullet points and log button
+        function formatMealWithBullets(content, mealType, dayNum) {
+            const parts = content.split('-');
+            if (parts.length >= 2) {
+                const meal = parts[0].trim();
+                const nutritionText = parts.slice(1).join('-').trim();
+                
+                // Parse nutrition info
+                const calories = nutritionText.match(/Cal:\s*(\d+)/i)?.[1] || '0';
+                const protein = nutritionText.match(/P:\s*(\d+)g/i)?.[1] || '0';
+                const carbs = nutritionText.match(/C:\s*(\d+)g/i)?.[1] || '0';
+                const fat = nutritionText.match(/F:\s*(\d+)g/i)?.[1] || '0';
+                
+                // Create meal data object
+                const mealData = {
+                    name: meal,
+                    type: mealType,
+                    calories: parseInt(calories),
+                    protein: parseInt(protein),
+                    carbs: parseInt(carbs),
+                    fat: parseInt(fat),
+                    day: dayNum
+                };
+                
+                return `<ul style="margin: 0; padding-left: 20px;">
+                    <li style="margin-bottom: 8px;"><strong>${meal}</strong></li>
+                    <li style="color: #666; font-size: 14px;">${nutritionText}</li>
+                    <li style="margin-top: 10px;">
+                        <button onclick='logMealToTracker(${JSON.stringify(mealData)})' 
+                                style="background: #4CAF50; color: white; border: none; padding: 5px 12px; 
+                                       border-radius: 15px; font-size: 12px; cursor: pointer;">
+                            📝 Log to Tracker
+                        </button>
+                    </li>
+                </ul>`;
+            }
+            return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
+        }
+        
+        // Helper function to format shopping lists with checkboxes
+        function formatListWithBullets(content, category) {
+            console.log('🛒 Formatting shopping list for category:', category);
+            console.log('📝 Raw content:', content);
+            
+            // First check if this is being called for shopping lists
+            if (!category || !content) {
+                console.log('⚠️ Missing category or content');
+                return `<ul style="margin: 0; padding-left: 20px;"><li>${content || 'Empty'}</li></ul>`;
+            }
+            
+            // More aggressive splitting - handle various formats
+            const items = content
+                .split(/[,\n]|(?=\d+\s*lbs)|(?=\d+\s*oz)|(?=\d+\s*dozen)/)
+                .map(item => item.trim())
+                .filter(item => item && item.length > 2 && !item.match(/^[,\s]+$/));
+            
+            console.log('📦 Parsed items:', items);
+            
+            if (items.length > 0) {
+                const checkboxes = items.map((item, index) => {
+                    const itemId = `shop-${category}-${index}`;
+                    return `<li style="margin: 8px 0; list-style: none;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="${itemId}" class="shopping-checkbox" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;" onchange="saveCheckboxState('${itemId}', this.checked)">
+                            <span style="font-size: 15px;">${item}</span>
+                        </label>
+                    </li>`;
+                }).join('');
+                console.log('✅ Generated checkboxes for', items.length, 'items');
+                return `<ul style="margin: 0; padding-left: 20px;">${checkboxes}</ul>`;
+            }
+            
+            console.log('❌ No items found to create checkboxes');
+            return `<ul style="margin: 0; padding-left: 20px;"><li>☐ ${content}</li></ul>`;
+        }
+        
+        function processMealPlanContent(rawContent) {
+            console.log('🔧 Processing meal plan content, length:', rawContent.length);
+            
+            if (!rawContent || rawContent.trim() === '') {
+                return `<div style="text-align: center; padding: 40px; color: #666;">
+                    <h3>⚠️ Empty meal plan</h3>
+                    <p>No content received. Please try generating again.</p>
+                </div>`;
+            }
+            
+            let formatted = rawContent;
+            
+            // Clean up and format the content
+            formatted = formatted
+                // Convert headers
+                .replace(/^# (.*$)/gm, '<h1 style="color: #4B9CD3; text-align: center; font-size: 32px; margin: 30px 0;">$1</h1>')
+                .replace(/^## (.*$)/gm, '<h2 style="text-align: center; font-size: 26px; margin: 35px 0 25px 0; font-weight: bold; text-decoration: underline; color: #28a745;">$1</h2>')
+                .replace(/^### (Day \d+):?/gm, '<h3 style="text-align: center; font-size: 22px; margin: 30px 0 20px 0; font-weight: bold; text-decoration: underline; color: #333;">DAY $1</h3>')
+                
+                // Format meals with centered headers and bullet points
+                .replace(/(### Day (\d+):?[\s\S]*?)\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, daySection, dayNum, content) {
+                    const formatted = formatMealWithBullets(content, 'breakfast', dayNum);
+                    return daySection.replace(/\*\*🍳 Breakfast:\*\*.*/, '') + `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #FF6B6B; margin: 15px 0; font-size: 18px;">BREAKFAST</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                .replace(/\*\*🥗 Lunch:\*\*(.*?)(?=\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, content, offset, string) {
+                    const dayMatch = string.substring(0, offset).match(/### Day (\d+)/g);
+                    const dayNum = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                    const formatted = formatMealWithBullets(content, 'lunch', dayNum);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #4ECDC4; margin: 15px 0; font-size: 18px;">LUNCH</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                .replace(/\*\*🍽️ Dinner:\*\*(.*?)(?=\*\*🍎|###|##|$)/gs, function(match, content, offset, string) {
+                    const dayMatch = string.substring(0, offset).match(/### Day (\d+)/g);
+                    const dayNum = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                    const formatted = formatMealWithBullets(content, 'dinner', dayNum);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #3AA69D; margin: 15px 0; font-size: 18px;">DINNER</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                .replace(/\*\*🍎 Snacks:\*\*(.*?)(?=\*\*Day Total|###|##|$)/gs, function(match, content, offset, string) {
+                    const dayMatch = string.substring(0, offset).match(/### Day (\d+)/g);
+                    const dayNum = dayMatch ? dayMatch[dayMatch.length - 1].match(/\d+/)[0] : '1';
+                    const formatted = formatMealWithBullets(content, 'snacks', dayNum);
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #F38181; margin: 15px 0; font-size: 18px;">SNACKS</h4>
+                        <div style="padding: 0 20px;">${formatted}</div>
+                    </div>`;
+                })
+                
+                // Format day totals
+                .replace(/\*\*Day Total:\*\*(.*?)(?=###|##|$)/gs, '<div style="background: #f0f8ff; border-radius: 8px; padding: 12px; margin: 25px 0; text-align: center;"><strong style="font-size: 14px;">Daily Total:$1</strong></div>')
+                
+                // Format shopping list with bullet points
+                .replace(/\*\*Proteins:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content, 'proteins');
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #e74c3c; margin: 15px 0;">PROTEINS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Vegetables:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content, 'vegetables');
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #27ae60; margin: 15px 0;">VEGETABLES</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Fruits:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content, 'fruits');
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #e67e22; margin: 15px 0;">FRUITS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Dairy & Eggs:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content, 'dairy');
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #3498db; margin: 15px 0;">DAIRY & EGGS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Pantry Items:\*\*(.*?)(?=\*\*|##|$)/gs, function(match, content) {
+                    const formatted = formatListWithBullets(content, 'pantry');
+                    return `<div style="margin: 20px 0;">
+                        <h4 style="text-align: center; font-weight: bold; text-decoration: underline; color: #9b59b6; margin: 15px 0;">PANTRY ITEMS</h4>
+                        ${formatted}
+                    </div>`;
+                })
+                .replace(/\*\*Cost Estimate:\*\*(.*?)(?=\*\*|##|$)/gs, '<div style="background: #fff3cd; border-radius: 10px; padding: 15px; text-align: center; margin: 20px 0;"><strong style="color: #856404; font-size: 18px;">💰 TOTAL COST:$1</strong></div>')
+                
+                // Clean up remaining bold text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                
+                // Clean up line breaks
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            return `<div style="background: white; border-radius: 20px; padding: 25px; margin: 20px 0; box-shadow: 0 2px 15px rgba(0,0,0,0.08); line-height: 1.6;">${formatted}</div>`;
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('time').textContent = time;
+        }
+        
+        // Save checkbox state to localStorage
+        function saveCheckboxState(itemId, isChecked) {
+            const planId = new URLSearchParams(window.location.search).get('planId') || 'default';
+            const storageKey = `shopping_checks_${planId}`;
+            
+            let checkedItems = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            checkedItems[itemId] = isChecked;
+            localStorage.setItem(storageKey, JSON.stringify(checkedItems));
+        }
+        
+        // Restore checkbox states after content loads
+        function restoreCheckboxStates() {
+            const planId = new URLSearchParams(window.location.search).get('planId') || 'default';
+            const storageKey = `shopping_checks_${planId}`;
+            const checkedItems = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            
+            // Wait a bit for checkboxes to be rendered
+            setTimeout(() => {
+                Object.keys(checkedItems).forEach(itemId => {
+                    const checkbox = document.getElementById(itemId);
+                    if (checkbox) {
+                        checkbox.checked = checkedItems[itemId];
+                    }
+                });
+            }, 100);
+        }
+        
+        // Save current meal plan with a name
+        function saveMealPlan() {
+            const currentPlanContent = document.getElementById('meal-plan-content').innerHTML;
+            const currentMetadata = document.getElementById('plan-metadata').innerHTML;
+            
+            if (!currentPlanContent || currentPlanContent.includes('Empty Meal Plan')) {
+                alert('No meal plan to save!');
+                return;
+            }
+            
+            // Get existing saved plans
+            let savedPlans = JSON.parse(localStorage.getItem('fuelfire_saved_meal_plans') || '[]');
+            
+            // Generate plan name
+            const planNumber = savedPlans.length + 1;
+            const defaultName = `Meal Plan #${planNumber}`;
+            
+            const planName = prompt('Enter a name for this meal plan:', defaultName);
+            if (!planName) return;
+            
+            // Extract structured meal data from content
+            const mealData = extractMealDataFromPlan(currentPlanContent);
+            
+            const planData = {
+                id: Date.now().toString(),
+                name: planName,
+                content: currentPlanContent,
+                metadata: currentMetadata,
+                meals: mealData,
+                savedAt: new Date().toISOString(),
+                createdAt: new Date().toLocaleDateString()
+            };
+            
+            savedPlans.push(planData);
+            localStorage.setItem('fuelfire_saved_meal_plans', JSON.stringify(savedPlans));
+            
+            alert(`✅ "${planName}" saved successfully!\n\nYou can now select meals from this plan in the calorie tracker.`);
+        }
+        
+        // Extract meal data from the meal plan content
+        function extractMealDataFromPlan(htmlContent) {
+            const meals = [];
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            // Find all meal buttons to extract data
+            const buttons = tempDiv.querySelectorAll('button[onclick*="logMealToTracker"]');
+            buttons.forEach(button => {
+                try {
+                    const onclickAttr = button.getAttribute('onclick');
+                    const mealDataMatch = onclickAttr.match(/logMealToTracker\((.*?)\)/);
+                    if (mealDataMatch) {
+                        const mealData = JSON.parse(mealDataMatch[1]);
+                        meals.push(mealData);
+                    }
+                } catch (e) {
+                    console.log('Error parsing meal data:', e);
+                }
+            });
+            
+            return meals;
+        }
+        
+        // Log meal to calorie tracker (simplified version)
+        function logMealToTracker(mealData) {
+            console.log('📝 Logging meal to tracker:', mealData);
+            
+            // Add current date and time
+            const now = new Date();
+            const logEntry = {
+                ...mealData,
+                date: now.toDateString(),
+                time: now.toTimeString().split(' ')[0],
+                logged_at: now.toISOString()
+            };
+            
+            // Save to localStorage for calorie tracker
+            let trackerData = JSON.parse(localStorage.getItem('fuelfire_calorie_log') || '[]');
+            trackerData.push(logEntry);
+            localStorage.setItem('fuelfire_calorie_log', JSON.stringify(trackerData));
+            
+            // Show confirmation
+            alert(`✅ ${mealData.name} logged to calorie tracker!\n\n📊 ${mealData.calories} calories\n🥩 ${mealData.protein}g protein\n🍞 ${mealData.carbs}g carbs\n🥑 ${mealData.fat}g fat`);
+            
+            // Optional: Open calorie tracker in new tab
+            const openTracker = confirm('Open calorie tracker to view logged meal?');
+            if (openTracker) {
+                window.open('calorie-tracker.html', '_blank');
+            }
+        }
+        
+        // Check if meal plan data was passed
+        window.addEventListener('load', function() {
+            // Update time
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const planId = urlParams.get('planId');
+            const planData = urlParams.get('data'); // Fallback for old method
+            
+            console.log('🔍 Checking for meal plan data...');
+            console.log('URL params:', urlParams.toString());
+            console.log('Plan ID:', planId);
+            console.log('Plan data exists:', !!planData);
+            
+            // Try to load from localStorage first (new method)
+            if (planId) {
+                try {
+                    const savedPlans = localStorage.getItem('fuelfire_meal_plans');
+                    const mealPlans = savedPlans ? JSON.parse(savedPlans) : [];
+                    const plan = mealPlans.find(p => p.id === planId);
+                    
+                    if (plan) {
+                        console.log('✅ Successfully loaded meal plan from localStorage');
+                        displayMealPlan(plan.mealPlan, plan.metadata);
+                    } else {
+                        throw new Error('Plan not found in localStorage');
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading from localStorage:', error);
+                    showErrorMessage();
+                }
+            } 
+            // Fallback to URL data method
+            else if (planData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(planData));
+                    console.log('✅ Successfully parsed meal plan data from URL:', Object.keys(data));
+                    displayMealPlan(data.mealPlan, data.metadata);
+                } catch (error) {
+                    console.error('❌ Error loading meal plan data:', error);
+                    showErrorMessage();
+                }
+            } else {
+                console.log('❌ No meal plan data found');
+                showErrorMessage();
+            }
+        });
+        
+        function showErrorMessage() {
+            document.getElementById('meal-plan-content').innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <h3>🔍 No Meal Plan Data</h3>
+                    <p>Please generate a meal plan from the quiz first.</p>
+                    <button onclick="goBack()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px;">← Back to Meal Plans</button>
+                    <button onclick="window.location.href='enhanced-diet-quiz.html'" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px; margin-left: 10px;">🎯 Start Quiz</button>
+                </div>
+            `;
+        }
+    </script>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="showLogFoodMenu()" ontouchstart="">
+            <div class="nav-icon">🍽️</div>
+            <div class="nav-label">Log Food</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'" ontouchstart="">
+            <div class="nav-icon">🏋️</div>
+            <div class="nav-label">Quick Workout</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='meal-plans.html'" ontouchstart="">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Meal Plan</div>
+            <div class="nav-glow"></div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='index.html#progress'" ontouchstart="">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">Progress</div>
+            <div class="nav-glow"></div>
+        </div>
+    </div>
+
+</body>
+</html>

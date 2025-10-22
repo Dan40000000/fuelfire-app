@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Calf Exercises - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .supplement-card {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .supplement-header {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #2c3e50, #273746);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #273746, #212f3c);
+        }
+
+        .supplement-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .supplement-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 2000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #34495e;
+            margin-bottom: 10px;
+        }
+
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #34495e;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+    </style>
+    <script src="quick-food-entry.js"></script>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                
+                
+            </div>
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="header-title">🦵 Calf Exercises</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">🦵 Calf Exercises Library</h2>
+                        <p style="color: #666; font-size: 14px;">Build powerful calves with proper form and technique</p>
+                        <button onclick="goBack()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="exercise-search" placeholder="🔍 Search exercises..."
+                               onkeyup="filterExercises()"
+                               style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
+                    </div>
+
+                    <!-- Exercises List -->
+                    <div id="exercises-container">
+                        <!-- Exercises will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToScreen('index.html', 'home')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item active" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals & Progress
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Leg Exercise Database
+        const calfExercises = [
+            {
+                name: "Standing Calf Raises",
+                description: "The fundamental calf exercise for building mass and strength",
+                difficulty: 1,
+                equipment: "None (can add weight)",
+                primaryMuscles: ["Gastrocnemius", "Soleus"],
+                icon: "⬆️",
+                formIllustration: "🧍🦶 ⬆️💪 ⬇️🦶 ⬆️💪\nStand tall • Rise on toes • Control down",
+                steps: [
+                    "Stand with feet hip-width apart on flat surface",
+                    "Place hands on wall or support for balance if needed",
+                    "Rise up onto balls of feet as high as possible",
+                    "Squeeze calf muscles at the top position",
+                    "Lower heels back down below starting level if possible",
+                    "Maintain control throughout entire range of motion"
+                ],
+                commonMistakes: [
+                    "Not achieving full range of motion",
+                    "Bouncing at the bottom instead of controlled movement",
+                    "Leaning forward and using other muscles to help",
+                    "Going too fast without muscle engagement"
+                ],
+                safetyTips: [
+                    "Start with bodyweight before adding external load",
+                    "Focus on full range of motion over heavy weight",
+                    "Use support for balance if needed",
+                    "Progress volume gradually to avoid soreness"
+                ],
+                risks: "Achilles tendon strain, calf muscle cramps, loss of balance",
+                energySaving: "Focus on time under tension and full range of motion rather than speed"
+            },
+            {
+                name: "Seated Calf Raises",
+                description: "Targets the soleus muscle specifically with bent knee position",
+                difficulty: 1,
+                equipment: "Chair and Weight (optional)",
+                primaryMuscles: ["Soleus", "Gastrocnemius"],
+                icon: "💺",
+                formIllustration: "🪑🦶 ⬆️💪 ⬇️🦶 ⬆️💪\nSit with weight • Raise heels • Control down",
+                steps: [
+                    "Sit on chair with feet flat on floor",
+                    "Place weight on thighs just above knees if using resistance",
+                    "Lift heels as high as possible while keeping toes down",
+                    "Squeeze calf muscles at top position",
+                    "Lower heels back down with control",
+                    "Keep thighs pressed down throughout movement"
+                ],
+                commonMistakes: [
+                    "Not placing weight properly on thighs",
+                    "Lifting thighs instead of just heels",
+                    "Not achieving full range of motion",
+                    "Moving too quickly without control"
+                ],
+                safetyTips: [
+                    "Start with bodyweight to learn movement",
+                    "Ensure weight is secure on thighs if using resistance",
+                    "Keep feet pointed straight ahead",
+                    "Focus on feeling the work in deep calf muscles"
+                ],
+                risks: "Weight slipping off thighs, knee discomfort, muscle cramps",
+                energySaving: "This exercise specifically targets deep calf muscles that standing raises miss"
+            },
+            {
+                name: "Single-Leg Calf Raises",
+                description: "Unilateral calf exercise for addressing imbalances and increasing difficulty",
+                difficulty: 3,
+                equipment: "Step or Platform",
+                primaryMuscles: ["Gastrocnemius", "Soleus", "Stabilizers"],
+                icon: "1️⃣",
+                formIllustration: "1️⃣🦶 ⬆️💪 ⬇️🦶 ⚖️💪\nOne foot • Rise up • Balance control",
+                steps: [
+                    "Stand on one foot on edge of step or platform",
+                    "Hold wall or rail for balance support",
+                    "Let heel drop below step level for pre-stretch",
+                    "Rise up as high as possible on ball of foot",
+                    "Control the lowering phase slowly",
+                    "Complete all reps before switching legs"
+                ],
+                commonMistakes: [
+                    "Using too much support from hands",
+                    "Not achieving full range of motion",
+                    "Rushing through the movement",
+                    "Not controlling the eccentric (lowering) phase"
+                ],
+                safetyTips: [
+                    "Master two-leg version before attempting single-leg",
+                    "Use adequate hand support for balance",
+                    "Start with higher step height for easier balance",
+                    "Progress gradually to avoid overuse"
+                ],
+                risks: "Loss of balance and falls, Achilles tendon strain, foot cramps",
+                energySaving: "Build up unilateral strength gradually rather than forcing high reps"
+            },
+            {
+                name: "Calf Raises on Step",
+                description: "Enhanced range of motion calf exercise using elevated platform",
+                difficulty: 2,
+                equipment: "Step or Platform",
+                primaryMuscles: ["Gastrocnemius", "Soleus"],
+                icon: "📶",
+                formIllustration: "📶🦶 ⬇️💫 ⬆️💪 ⬇️💫\nStep edge • Stretch low • Rise high",
+                steps: [
+                    "Stand on step with balls of feet on edge",
+                    "Let heels hang below step level",
+                    "Hold handrail or wall for balance",
+                    "Rise up as high as possible onto toes",
+                    "Lower heels below step level for full stretch",
+                    "Maintain smooth, controlled movement"
+                ],
+                commonMistakes: [
+                    "Standing too far forward on step",
+                    "Not utilizing full range of motion",
+                    "Bouncing at bottom of movement",
+                    "Gripping support too tightly and using arms"
+                ],
+                safetyTips: [
+                    "Ensure step is stable and non-slip",
+                    "Keep most of foot on step for safety",
+                    "Start with lower step height if balance is an issue",
+                    "Focus on controlled movement over speed"
+                ],
+                risks: "Falls from step, Achilles tendon rupture from overstretching",
+                energySaving: "The increased range of motion makes bodyweight more challenging"
+            },
+            {
+                name: "Donkey Calf Raises",
+                description: "Bent-over calf exercise allowing for heavy loading and unique angle",
+                difficulty: 3,
+                equipment: "Platform and Partner or Weight",
+                primaryMuscles: ["Gastrocnemius", "Soleus"],
+                icon: "🫏",
+                formIllustration: "🤸‍♂️💺 ⬆️💪 ⬇️🦶 🫏💪\nBend over • Partner weight • Calf raise",
+                steps: [
+                    "Bend forward at hips and place forearms on bench",
+                    "Have partner sit on lower back or use weight belt",
+                    "Stand on platform with balls of feet on edge",
+                    "Lower heels below platform level",
+                    "Rise up as high as possible on toes",
+                    "Focus on calf contraction throughout movement"
+                ],
+                commonMistakes: [
+                    "Too much weight too soon",
+                    "Not maintaining bent position throughout",
+                    "Partner sitting too high on back",
+                    "Not achieving full range of motion"
+                ],
+                safetyTips: [
+                    "Start with light partner weight or no weight",
+                    "Ensure partner sits on lower back, not upper back",
+                    "Communicate with partner about weight and position",
+                    "Stop if you feel lower back discomfort"
+                ],
+                risks: "Lower back strain, platform instability, partner falling off",
+                energySaving: "This position allows for heavier loading than standing versions"
+            },
+            {
+                name: "Jump Rope Calf Bounces",
+                description: "Dynamic calf exercise combining cardio with muscle building",
+                difficulty: 2,
+                equipment: "Jump Rope",
+                primaryMuscles: ["Calves", "Cardiovascular System"],
+                icon: "🪢",
+                formIllustration: "🪢🔄 ⬆️💫 ⬇️🦶 🔄💨\nRope rhythm • Light bounces • Stay on toes",
+                steps: [
+                    "Hold jump rope with proper length adjustment",
+                    "Start with small bounces on balls of feet",
+                    "Keep knees slightly bent and core engaged",
+                    "Land softly and quietly on each bounce",
+                    "Maintain rhythm and avoid landing on heels",
+                    "Start with short sessions and build endurance"
+                ],
+                commonMistakes: [
+                    "Jumping too high and wasting energy",
+                    "Landing on heels instead of balls of feet",
+                    "Rope too long or short for proper technique",
+                    "Starting with sessions too long for fitness level"
+                ],
+                safetyTips: [
+                    "Learn basic bounce without rope first",
+                    "Start with 30-60 second intervals",
+                    "Land softly to protect joints",
+                    "Ensure adequate ceiling height and floor space"
+                ],
+                risks: "Ankle sprains, calf strain from overuse, trip hazard from rope",
+                energySaving: "Focus on rhythm and efficiency rather than high intensity initially"
+            },
+            {
+                name: "Wall Sit Calf Raises",
+                description: "Isometric leg exercise combined with dynamic calf movement",
+                difficulty: 3,
+                equipment: "Wall",
+                primaryMuscles: ["Calves", "Quadriceps", "Glutes"],
+                icon: "🧱",
+                formIllustration: "🧱🤸‍♂️ ⬆️💪 ⬇️🦶 ⏰💪\nWall sit • Raise heels • Hold position",
+                steps: [
+                    "Position back against wall in sitting position",
+                    "Keep thighs parallel to floor, knees at 90 degrees",
+                    "Maintain wall sit position throughout exercise",
+                    "Perform calf raises by lifting heels off ground",
+                    "Lower heels back down while maintaining wall sit",
+                    "Continue calf raises for desired reps or time"
+                ],
+                commonMistakes: [
+                    "Breaking wall sit position during calf raises",
+                    "Not achieving full range of motion in calves",
+                    "Sliding down wall during exercise",
+                    "Holding breath during the combination movement"
+                ],
+                safetyTips: [
+                    "Master wall sits before adding calf raises",
+                    "Start with shorter duration and build up",
+                    "Focus on maintaining proper position",
+                    "Stop if form deteriorates significantly"
+                ],
+                risks: "Knee strain, lower back pressure, muscle fatigue causing form breakdown",
+                energySaving: "Combine two exercises for time efficiency while increasing difficulty"
+            },
+            {
+                name: "Farmer's Walk on Toes",
+                description: "Functional calf exercise with carrying component for strength and endurance",
+                difficulty: 3,
+                equipment: "Dumbbells or Heavy Objects",
+                primaryMuscles: ["Calves", "Forearms", "Core", "Traps"],
+                icon: "🚶",
+                formIllustration: "🏋️🚶 ⬆️🦶 ➡️💪 🚶💪\nHold weights • Rise on toes • Walk forward",
+                steps: [
+                    "Hold heavy dumbbells or weights at sides",
+                    "Rise up onto balls of feet",
+                    "Walk forward while staying on toes",
+                    "Keep core engaged and shoulders back",
+                    "Maintain upright posture throughout walk",
+                    "Start with short distances and build gradually"
+                ],
+                commonMistakes: [
+                    "Using weights too heavy to maintain toe position",
+                    "Allowing heels to touch ground during walk",
+                    "Leaning forward with poor posture",
+                    "Taking steps too large or too fast"
+                ],
+                safetyTips: [
+                    "Start with lighter weights to master technique",
+                    "Ensure clear path free of obstacles",
+                    "Focus on staying on toes rather than distance",
+                    "Have safe place to set weights down if needed"
+                ],
+                risks: "Dropping weights, loss of balance, calf cramping, forearm fatigue",
+                energySaving: "Functional exercise that builds real-world strength while targeting calves"
+            },
+            {
+                name: "Calf Raise Machine",
+                description: "Machine-based calf exercise allowing for progressive overload",
+                difficulty: 2,
+                equipment: "Calf Raise Machine",
+                primaryMuscles: ["Gastrocnemius", "Soleus"],
+                icon: "🏗️",
+                formIllustration: "🏗️🦶 ⬆️💪 ⬇️🦶 🏗️💪\nMachine setup • Rise up • Control down",
+                steps: [
+                    "Position shoulders under machine pads",
+                    "Stand on platform with balls of feet on edge",
+                    "Adjust machine weight to appropriate resistance",
+                    "Lower heels below platform level",
+                    "Rise up as high as possible",
+                    "Control both lifting and lowering phases"
+                ],
+                commonMistakes: [
+                    "Using too much weight and partial range of motion",
+                    "Not positioning shoulders properly under pads",
+                    "Bouncing at bottom of movement",
+                    "Not achieving full stretch at bottom"
+                ],
+                safetyTips: [
+                    "Start with lighter weight to learn machine",
+                    "Ensure machine is properly adjusted for height",
+                    "Use safety stops if available",
+                    "Focus on full range of motion over heavy weight"
+                ],
+                risks: "Machine malfunction, weight too heavy causing strain",
+                energySaving: "Machine provides stability allowing focus on pure calf work"
+            },
+            {
+                name: "Pogo Jumps",
+                description: "Plyometric calf exercise for power and explosive strength development",
+                difficulty: 4,
+                equipment: "None",
+                primaryMuscles: ["Calves", "Achilles Tendon", "Power"],
+                icon: "🦘",
+                formIllustration: "🦘⬆️ 💫💪 ⬆️⬇️ 🦘💨\nQuick jumps • Calves only • Fast rhythm",
+                steps: [
+                    "Stand with feet hip-width apart",
+                    "Keep knees slightly bent throughout movement",
+                    "Jump up using only calf muscles (minimal knee bend)",
+                    "Land softly on balls of feet",
+                    "Immediately jump again with minimal ground contact time",
+                    "Focus on quick, reactive jumps rather than height"
+                ],
+                commonMistakes: [
+                    "Using too much knee bend (becomes leg exercise)",
+                    "Landing hard on heels",
+                    "Jumping too high instead of focusing on speed",
+                    "Not maintaining rhythm between jumps"
+                ],
+                safetyTips: [
+                    "Start with low intensity and short durations",
+                    "Master basic calf raises before attempting",
+                    "Land softly and avoid heel contact",
+                    "Build up volume very gradually"
+                ],
+                risks: "Achilles tendon rupture, calf strain, ankle injury from hard landing",
+                energySaving: "Advanced exercise - build base strength with other calf exercises first"
+            }
+        ];
+
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function goToScreen(page, screenId) {
+            window.location.href = `${page}#${screenId}`;
+        }
+        
+        function goBack() {
+            window.location.href = 'workout-techniques.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function displayExercises(exercisesToShow = calfExercises) {
+            const container = document.getElementById('exercises-container');
+            let html = '';
+
+            exercisesToShow.forEach((exercise, index) => {
+                html += `
+                    <div class="supplement-card">
+                        <div class="supplement-header" onclick="toggleExercise(${index})">
+                            <div>
+                                <div class="supplement-title">${exercise.name}</div>
+                                <div class="supplement-rating">
+                                    <span>${generateDifficultyStars(exercise.difficulty)}</span>
+                                    <span>Difficulty</span>
+                                </div>
+                            </div>
+                            <div class="expand-icon" id="icon-${index}">▼</div>
+                        </div>
+                        <div class="supplement-content" id="content-${index}">
+                            <div class="content-inner">
+                                <div class="quick-info">
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${exercise.equipment}</div>
+                                        <div class="stat-label">Equipment</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${generateDifficultyStars(exercise.difficulty)}</div>
+                                        <div class="stat-label">Difficulty</div>
+                                    </div>
+                                </div>
+
+                                <div class="dosage-box">
+                                    <div class="info-title">🎯 Proper Form</div>
+                                    <div class="info-text">
+                                        ${exercise.steps.map(step => `• ${step}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">❌ Common Mistakes</div>
+                                    <div class="info-text">
+                                        ${exercise.commonMistakes.map(mistake => `• ${mistake}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">✅ Safety Tips</div>
+                                    <div class="info-text">
+                                        ${exercise.safetyTips.map(tip => `• ${tip}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="warning-box">
+                                    <div class="warning-title">⚠️ Injury Risks</div>
+                                    <div style="font-size: 12px; color: #856404;">${exercise.risks}</div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">💡 Energy Conservation</div>
+                                    <div class="info-text">${exercise.energySaving}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+
+        function toggleExercise(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        function filterExercises() {
+            const searchTerm = document.getElementById('exercise-search').value.toLowerCase();
+
+            if (!searchTerm) {
+                displayExercises();
+                return;
+            }
+
+            const filtered = calfExercises.filter(exercise => {
+                return exercise.name.toLowerCase().includes(searchTerm) ||
+                       exercise.description.toLowerCase().includes(searchTerm) ||
+                       exercise.equipment.toLowerCase().includes(searchTerm) ||
+                       exercise.primaryMuscles.some(muscle => muscle.toLowerCase().includes(searchTerm));
+            });
+
+            displayExercises(filtered);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            displayExercises();
+        });
+    </script>    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Diet Plan -->
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

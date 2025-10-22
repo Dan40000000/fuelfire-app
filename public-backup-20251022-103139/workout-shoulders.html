@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Shoulder Exercises - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .supplement-card {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .supplement-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #a93226, #922b21);
+        }
+
+        .supplement-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .supplement-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 2000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+    </style>
+    <script src="quick-food-entry.js"></script>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                
+                
+            </div>
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="header-title">💪 Shoulder Exercises</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">💪 Shoulder Exercises Library</h2>
+                        <p style="color: #666; font-size: 14px;">Build powerful shoulders with proper form and technique</p>
+                        <button onclick="goBack()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="exercise-search" placeholder="🔍 Search exercises..."
+                               onkeyup="filterExercises()"
+                               style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
+                    </div>
+
+                    <!-- Exercises List -->
+                    <div id="exercises-container">
+                        <!-- Exercises will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToScreen('index.html', 'home')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item active" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals & Progress
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Leg Exercise Database
+        const shoulderExercises = [
+            {
+                name: "Overhead Press",
+                description: "The ultimate shoulder mass and strength builder",
+                difficulty: 4,
+                equipment: "Barbell or Dumbbells",
+                primaryMuscles: ["Shoulders", "Triceps", "Core"],
+                icon: "🏋️",
+                formIllustration: "🧍🏋️ ⬆️💪 ↓🏋️ ⬆️💪\nStand tall • Press up • Control down",
+                steps: [
+                    "Stand with feet shoulder-width apart, core engaged",
+                    "Grip bar with hands slightly wider than shoulders",
+                    "Start with bar at shoulder level, elbows under bar",
+                    "Press bar straight up overhead without arching back",
+                    "Lock out arms fully at top position",
+                    "Lower bar under control back to shoulder level"
+                ],
+                commonMistakes: [
+                    "Arching back excessively to move more weight",
+                    "Pressing bar forward instead of straight up",
+                    "Not engaging core throughout movement",
+                    "Using legs to help press (making it a push press)"
+                ],
+                safetyTips: [
+                    "Start with lighter weight to master strict form",
+                    "Keep core tight to protect lower back",
+                    "Use safety bars in rack for heavy attempts",
+                    "Warm up shoulders thoroughly before heavy sets"
+                ],
+                risks: "Shoulder impingement, lower back injury from arching, dropped bar",
+                energySaving: "Focus on strict form and tempo rather than maximum weight"
+            },
+            {
+                name: "Lateral Raises",
+                description: "Isolation exercise for shoulder width and definition",
+                difficulty: 2,
+                equipment: "Dumbbells",
+                primaryMuscles: ["Side Delts", "Rear Delts"],
+                icon: "🪁",
+                formIllustration: "💪⬇️ ↖️↗️ 💪↕️ ↙️↘️\nArms down • Raise to sides • Control down",
+                steps: [
+                    "Stand with dumbbells at sides, slight bend in elbows",
+                    "Keep core engaged and chest up",
+                    "Raise weights out to sides until arms parallel to floor",
+                    "Lead with your pinkies to target side delts better",
+                    "Hold briefly at top position",
+                    "Lower weights under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight and swinging body",
+                    "Raising arms too high (above shoulder level)",
+                    "Not maintaining slight bend in elbows",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Start with very light weight to learn movement",
+                    "Stop at shoulder height to avoid impingement",
+                    "Focus on controlled movement over heavy weight",
+                    "Don't lift if you feel shoulder pain"
+                ],
+                risks: "Shoulder impingement, rotator cuff strain, neck tension",
+                energySaving: "Use lighter weight with perfect form for better muscle activation"
+            },
+            {
+                name: "Front Raises",
+                description: "Targets front deltoids for complete shoulder development",
+                difficulty: 2,
+                equipment: "Dumbbells or Barbell",
+                primaryMuscles: ["Front Delts", "Core"],
+                icon: "⬆️",
+                formIllustration: "💪⬇️ ⬆️💪 ↕️⏸️ ⬇️💪\nArms down • Raise forward • Control down",
+                steps: [
+                    "Stand with weights in front of thighs",
+                    "Keep slight bend in elbows throughout movement",
+                    "Raise one or both weights forward to shoulder height",
+                    "Keep core tight and avoid swinging motion",
+                    "Pause briefly at top position",
+                    "Lower weights under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Lifting weights above shoulder level",
+                    "Using momentum to swing weights up",
+                    "Leaning back to help lift the weight",
+                    "Not controlling the lowering phase"
+                ],
+                safetyTips: [
+                    "Use moderate weight to maintain control",
+                    "Keep movements smooth and deliberate",
+                    "Stop at shoulder height maximum",
+                    "Engage core to prevent back compensation"
+                ],
+                risks: "Shoulder impingement, lower back strain, wrist stress",
+                energySaving: "Alternate arms to allow brief rest between repetitions"
+            },
+            {
+                name: "Rear Delt Flyes",
+                description: "Essential exercise for rear deltoid strength and posture",
+                difficulty: 2,
+                equipment: "Dumbbells",
+                primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
+                icon: "🔄",
+                formIllustration: "🤸‍♂️💪 ↖️↗️ 🤗💪 ↙️↘️\nBend forward • Fly out • Squeeze back",
+                steps: [
+                    "Bend forward at hips with slight knee bend",
+                    "Hold dumbbells with arms hanging down",
+                    "Keep slight bend in elbows throughout",
+                    "Raise weights out to sides in reverse fly motion",
+                    "Squeeze shoulder blades together at top",
+                    "Lower weights under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight and poor form",
+                    "Not bending forward enough at hips",
+                    "Turning exercise into rowing motion",
+                    "Not squeezing shoulder blades together"
+                ],
+                safetyTips: [
+                    "Start with very light weight",
+                    "Maintain hip hinge position throughout",
+                    "Focus on feeling the movement in rear delts",
+                    "Keep core engaged for back support"
+                ],
+                risks: "Lower back strain, shoulder strain, loss of balance",
+                energySaving: "Focus on mind-muscle connection over heavy weight"
+            },
+            {
+                name: "Pike Push-Ups",
+                description: "Bodyweight exercise targeting shoulders and building overhead strength",
+                difficulty: 3,
+                equipment: "None",
+                primaryMuscles: ["Shoulders", "Triceps", "Core"],
+                icon: "🔺",
+                formIllustration: "🔺🤲 ↓🤕 ⬆️💪 ↓🤕\nPike position • Lower head • Press up",
+                steps: [
+                    "Start in downward dog position with hands shoulder-width apart",
+                    "Walk feet closer to hands to increase shoulder angle",
+                    "Keep legs as straight as possible",
+                    "Lower head toward floor by bending elbows",
+                    "Press back up to starting position",
+                    "Maintain inverted V-shape throughout movement"
+                ],
+                commonMistakes: [
+                    "Not getting enough elevation for shoulders",
+                    "Allowing elbows to flare too wide",
+                    "Not lowering head enough toward floor",
+                    "Losing the inverted V position"
+                ],
+                safetyTips: [
+                    "Start with feet on ground before elevating",
+                    "Warm up shoulders and wrists thoroughly",
+                    "Progress gradually to elevated versions",
+                    "Stop if you feel wrist or shoulder pain"
+                ],
+                risks: "Wrist strain, shoulder impingement, neck injury from falling",
+                energySaving: "Master ground version before progressing to elevated feet"
+            },
+            {
+                name: "Arnold Press",
+                description: "Rotational shoulder press for complete deltoid development",
+                difficulty: 3,
+                equipment: "Dumbbells",
+                primaryMuscles: ["All Deltoids", "Triceps"],
+                icon: "🌪️",
+                formIllustration: "💪🔄 ⬆️🌀 ⬇️🔄 💪↕️\nPalms in • Rotate & press • Reverse",
+                steps: [
+                    "Start seated with dumbbells at shoulder level",
+                    "Begin with palms facing you (like top of bicep curl)",
+                    "Press weights up while rotating palms to face forward",
+                    "Finish with arms fully extended overhead",
+                    "Reverse the motion on the way down",
+                    "End with palms facing you at starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight for the complex movement",
+                    "Rushing through the rotation",
+                    "Not controlling the lowering phase",
+                    "Pressing straight up without rotation"
+                ],
+                safetyTips: [
+                    "Start with lighter weight than regular press",
+                    "Focus on smooth rotation throughout",
+                    "Sit with back support if possible",
+                    "Stop if rotation causes pain"
+                ],
+                risks: "Shoulder strain from rotation, dropping weights, impingement",
+                energySaving: "Perfect the movement pattern with light weight first"
+            },
+            {
+                name: "Upright Rows",
+                description: "Compound movement for shoulders and upper traps",
+                difficulty: 3,
+                equipment: "Barbell, Dumbbells, or Cable",
+                primaryMuscles: ["Side Delts", "Traps", "Biceps"],
+                icon: "📏",
+                formIllustration: "🏋️⬇️ ⬆️💪 🔼⏸️ ⬇️🏋️\nHang weight • Pull up • Control down",
+                steps: [
+                    "Hold weight with overhand grip, hands close together",
+                    "Start with weight hanging in front of body",
+                    "Pull weight straight up along body to chest level",
+                    "Lead with elbows, keeping them higher than hands",
+                    "Stop when elbows reach shoulder height",
+                    "Lower weight under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Pulling weight too high (above chest level)",
+                    "Using grip that's too narrow",
+                    "Shrugging shoulders instead of using delts",
+                    "Leaning back to help lift the weight"
+                ],
+                safetyTips: [
+                    "Don't pull higher than mid-chest level",
+                    "Use wider grip if narrow grip causes wrist pain",
+                    "Stop immediately if you feel shoulder impingement",
+                    "Consider cable version for smoother movement"
+                ],
+                risks: "Shoulder impingement, wrist strain, trap overuse",
+                energySaving: "Use cables or dumbbells for smoother resistance curve"
+            },
+            {
+                name: "Face Pulls",
+                description: "Excellent exercise for rear delts and shoulder health",
+                difficulty: 2,
+                equipment: "Cable Machine with Rope",
+                primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
+                icon: "👥",
+                formIllustration: "🤲🔗 ↖️↗️ 👤💪 ↙️↘️\nGrip rope • Pull to face • Separate hands",
+                steps: [
+                    "Set cable at face height with rope attachment",
+                    "Grab rope with overhand grip, arms extended",
+                    "Pull rope toward face, separating hands as you pull",
+                    "Focus on pulling elbows back and squeezing shoulder blades",
+                    "Bring rope to face level with hands by ears",
+                    "Return to starting position under control"
+                ],
+                commonMistakes: [
+                    "Pulling too low or too high",
+                    "Not separating hands enough at end position",
+                    "Using too much weight and poor form",
+                    "Not squeezing shoulder blades together"
+                ],
+                safetyTips: [
+                    "Start with light weight to learn pattern",
+                    "Keep core engaged throughout movement",
+                    "Focus on shoulder blade movement",
+                    "Don't let cable snap back uncontrolled"
+                ],
+                risks: "Shoulder strain, losing balance, cable snapping back",
+                energySaving: "Perfect this movement for shoulder health and posture improvement"
+            },
+            {
+                name: "Handstand Push-Ups",
+                description: "Advanced bodyweight exercise for maximum shoulder strength",
+                difficulty: 5,
+                equipment: "Wall (for support)",
+                primaryMuscles: ["Shoulders", "Triceps", "Core"],
+                icon: "🤸",
+                formIllustration: "🤲🧱 ↓🤕 ⬆️💪 ↓🤕\nHandstand • Lower head • Press up",
+                steps: [
+                    "Start in handstand position against wall",
+                    "Place hands shoulder-width apart on ground",
+                    "Keep body straight in inverted position",
+                    "Lower head toward ground by bending elbows",
+                    "Press back up to full arm extension",
+                    "Maintain balance and control throughout"
+                ],
+                commonMistakes: [
+                    "Attempting without proper progression",
+                    "Not having enough shoulder or wrist strength",
+                    "Kicking up too aggressively against wall",
+                    "Not maintaining straight body line"
+                ],
+                safetyTips: [
+                    "Master pike push-ups first",
+                    "Build up with wall-assisted progressions",
+                    "Have spotter available for safety",
+                    "Ensure adequate ceiling height"
+                ],
+                risks: "Falling and head injury, wrist fractures, shoulder dislocation",
+                energySaving: "Build up through progressions rather than attempting full movement"
+            },
+            {
+                name: "Shrugs",
+                description: "Isolation exercise for upper trapezius development",
+                difficulty: 1,
+                equipment: "Dumbbells or Barbell",
+                primaryMuscles: ["Upper Traps", "Levator Scapulae"],
+                icon: "🤷",
+                formIllustration: "🧍💪 ⬆️🤷 ⬇️💪 ⬆️🤷\nStand tall • Lift shoulders • Control down",
+                steps: [
+                    "Hold weights at sides with arms fully extended",
+                    "Keep arms straight throughout entire movement",
+                    "Lift shoulders straight up toward ears",
+                    "Hold briefly at top position",
+                    "Lower shoulders back down under control",
+                    "Focus on moving only the shoulders"
+                ],
+                commonMistakes: [
+                    "Rolling shoulders instead of straight up movement",
+                    "Bending arms and turning into upright row",
+                    "Using too much weight and partial range",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Keep movements straight up and down",
+                    "Don't roll shoulders - increases injury risk",
+                    "Use full range of motion with moderate weight",
+                    "Stop if you feel neck pain"
+                ],
+                risks: "Neck strain, shoulder impingement from rolling, trap overuse",
+                energySaving: "Focus on full range of motion rather than heavy weight"
+            },
+            {
+                name: "Dumbbell Shoulder Press",
+                description: "Seated or standing shoulder press with independent arm movement",
+                difficulty: 3,
+                equipment: "Dumbbells, Bench",
+                primaryMuscles: ["Shoulders", "Triceps", "Core"],
+                icon: "🏋️",
+                formIllustration: "💪🪑 ⬆️🔥 ↓💪 ⬆️🔥\nSit with dumbbells • Press up • Control down",
+                steps: [
+                    "Sit on bench with back support, dumbbells at shoulder level",
+                    "Keep core engaged and feet flat on floor",
+                    "Press dumbbells straight up overhead",
+                    "Bring dumbbells together at top without clanging",
+                    "Lower dumbbells under control back to shoulder level",
+                    "Maintain neutral wrist position throughout"
+                ],
+                commonMistakes: [
+                    "Arching back excessively during press",
+                    "Pressing dumbbells forward instead of straight up",
+                    "Clanging dumbbells together at top",
+                    "Not achieving full lockout at top position"
+                ],
+                safetyTips: [
+                    "Use bench with back support for stability",
+                    "Have spotter for heavy attempts",
+                    "Control descent to prevent shoulder strain",
+                    "Keep core tight throughout movement"
+                ],
+                risks: "Shoulder strain, lower back injury, dropping weights",
+                energySaving: "Seated version with back support reduces core fatigue"
+            },
+            {
+                name: "Cable Lateral Raises",
+                description: "Constant tension lateral raise using cable machine",
+                difficulty: 2,
+                equipment: "Cable Machine",
+                primaryMuscles: ["Side Delts", "Core"],
+                icon: "🔗",
+                formIllustration: "🧍🔗 ↗️💪 ⏸️↕️ ↘️🔗\nStand sideways • Raise across • Control down",
+                steps: [
+                    "Stand sideways to cable machine with handle at hip level",
+                    "Grasp handle with hand furthest from machine",
+                    "Stand upright with slight lean away from machine",
+                    "Raise arm out to side to shoulder height",
+                    "Pause briefly at top with cable creating resistance",
+                    "Lower arm under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight and losing form",
+                    "Leaning excessively to help lift weight",
+                    "Raising arm too high above shoulder",
+                    "Not controlling the lowering phase"
+                ],
+                safetyTips: [
+                    "Start with light weight to learn movement",
+                    "Keep core engaged for stability",
+                    "Stop at shoulder height maximum",
+                    "Focus on smooth, controlled motion"
+                ],
+                risks: "Shoulder impingement, side strain, loss of balance",
+                energySaving: "Cable provides constant tension for better muscle activation"
+            },
+            {
+                name: "Military Press",
+                description: "Strict standing overhead press with feet together",
+                difficulty: 5,
+                equipment: "Barbell",
+                primaryMuscles: ["Shoulders", "Core", "Triceps"],
+                icon: "🎖️",
+                formIllustration: "🧍🏋️ ⬆️💪 🔒⏸️ ⬇️🏋️\nFeet together • Press strict • Lock out • Lower",
+                steps: [
+                    "Stand with feet together, bar at shoulder level",
+                    "Grip bar slightly wider than shoulders",
+                    "Engage core maximally for stability",
+                    "Press bar straight up with no leg drive",
+                    "Lock out arms fully overhead",
+                    "Lower bar under control to shoulders"
+                ],
+                commonMistakes: [
+                    "Using any leg drive or push press motion",
+                    "Standing with feet too wide for stability",
+                    "Arching back to complete the press",
+                    "Not maintaining strict vertical bar path"
+                ],
+                safetyTips: [
+                    "Master regular overhead press first",
+                    "Use significantly less weight than push press",
+                    "Keep core maximally engaged throughout",
+                    "Use safety bars for heavy attempts"
+                ],
+                risks: "Lower back injury, shoulder strain, dropped bar, loss of balance",
+                energySaving: "Extremely demanding - use moderate weight and perfect form"
+            },
+            {
+                name: "Seated Behind-the-Neck Press",
+                description: "Shoulder press variation pressing bar behind head",
+                difficulty: 4,
+                equipment: "Barbell, Bench",
+                primaryMuscles: ["Shoulders", "Triceps"],
+                icon: "🔙",
+                formIllustration: "🪑🏋️ ⬆️↖️ 🔒💪 ⬇️↙️\nBar behind neck • Press up • Lower controlled",
+                steps: [
+                    "Sit on bench with bar resting on upper back",
+                    "Grip bar slightly wider than regular press",
+                    "Ensure good shoulder mobility before attempting",
+                    "Press bar straight up from behind neck",
+                    "Lock out arms at top position",
+                    "Lower bar under control to upper back"
+                ],
+                commonMistakes: [
+                    "Attempting without adequate shoulder mobility",
+                    "Using too wide of a grip",
+                    "Lowering bar too far down back",
+                    "Leaning forward during press"
+                ],
+                safetyTips: [
+                    "Only perform if you have excellent shoulder mobility",
+                    "Start with very light weight",
+                    "Use safety bars in power rack",
+                    "Stop immediately if you feel shoulder discomfort"
+                ],
+                risks: "Shoulder impingement, rotator cuff injury, neck strain",
+                energySaving: "Only for advanced lifters with excellent mobility - otherwise use standard press"
+            },
+            {
+                name: "Reverse Pec Deck",
+                description: "Machine exercise for rear deltoid isolation",
+                difficulty: 1,
+                equipment: "Pec Deck Machine (Reverse)",
+                primaryMuscles: ["Rear Delts", "Rhomboids"],
+                icon: "🦅",
+                formIllustration: "🪑🤲 ↖️↗️ 🤗💪 ↙️↘️\nFace machine • Pull back • Squeeze • Return",
+                steps: [
+                    "Sit facing pec deck machine, chest against pad",
+                    "Adjust seat so arms are at shoulder height",
+                    "Grasp handles with arms extended forward",
+                    "Pull handles back in reverse fly motion",
+                    "Squeeze shoulder blades together at end",
+                    "Return handles forward under control"
+                ],
+                commonMistakes: [
+                    "Using too much weight and poor form",
+                    "Not squeezing shoulder blades together",
+                    "Allowing handles to clang at start position",
+                    "Setting seat height incorrectly"
+                ],
+                safetyTips: [
+                    "Adjust seat for proper arm height",
+                    "Start with light weight to learn pattern",
+                    "Keep chest firmly against pad",
+                    "Focus on rear delt contraction"
+                ],
+                risks: "Shoulder strain, poor posture from incorrect setup",
+                energySaving: "Excellent machine for rear delt isolation with minimal stabilization needed"
+            },
+            {
+                name: "Single-Arm Landmine Press",
+                description: "Unilateral shoulder press with natural arc of motion",
+                difficulty: 3,
+                equipment: "Barbell, Landmine Attachment",
+                primaryMuscles: ["Shoulders", "Core", "Chest"],
+                icon: "🎯",
+                formIllustration: "🧍💪 ↗️🔥 ⬆️💪 ↘️🔥\nHold at shoulder • Press up-forward • Control back",
+                steps: [
+                    "Stand facing landmine with barbell at shoulder",
+                    "Hold end of barbell with one hand",
+                    "Engage core and keep feet shoulder-width apart",
+                    "Press barbell up and forward in natural arc",
+                    "Fully extend arm at top position",
+                    "Lower barbell back to shoulder under control"
+                ],
+                commonMistakes: [
+                    "Standing too close or too far from landmine",
+                    "Not engaging core for stability",
+                    "Pressing straight up instead of natural arc",
+                    "Losing balance during movement"
+                ],
+                safetyTips: [
+                    "Find optimal stance distance from landmine",
+                    "Keep core tight throughout movement",
+                    "Start with lighter weight than dumbbell press",
+                    "Ensure landmine is securely anchored"
+                ],
+                risks: "Shoulder strain, core injury from instability, losing balance",
+                energySaving: "Natural arc reduces shoulder stress compared to strict vertical press"
+            },
+            {
+                name: "Y-Raises",
+                description: "Specialized raise for targeting lower traps and shoulder stabilizers",
+                difficulty: 2,
+                equipment: "Light Dumbbells",
+                primaryMuscles: ["Lower Traps", "Rear Delts", "Rotator Cuff"],
+                icon: "🔼",
+                formIllustration: "🤸‍♂️💪 ↗️↖️ Y-shape ↘️↙️\nBend forward • Raise in Y • Control down",
+                steps: [
+                    "Bend forward at hips with slight knee bend",
+                    "Hold light dumbbells with arms hanging down",
+                    "Raise arms up and out at 45-degree angles",
+                    "Form Y-shape with body and arms at top",
+                    "Focus on squeezing shoulder blades down and back",
+                    "Lower weights under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight for this finesse movement",
+                    "Not maintaining proper hip hinge position",
+                    "Raising arms too high or at wrong angle",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Use very light weight - focus on muscle activation",
+                    "Maintain hip hinge throughout movement",
+                    "Keep core engaged for back support",
+                    "Perform slowly and deliberately"
+                ],
+                risks: "Lower back strain, shoulder strain from too much weight",
+                energySaving: "Excellent for shoulder health and posture - use light weight"
+            },
+            {
+                name: "Bradford Press",
+                description: "Continuous overhead press alternating front and back positions",
+                difficulty: 4,
+                equipment: "Barbell",
+                primaryMuscles: ["All Deltoids", "Triceps"],
+                icon: "🔄",
+                formIllustration: "🏋️⬆️ 🔙⬇️ ⬆️🏋️ 🔙⬇️\nPress from front • Behind neck • Front • Repeat",
+                steps: [
+                    "Start seated with bar at front shoulders",
+                    "Press bar up until it clears your head",
+                    "Lower bar to behind neck position",
+                    "Press bar back up over head",
+                    "Lower bar to front shoulder position",
+                    "Continue alternating front and back"
+                ],
+                commonMistakes: [
+                    "Using too much weight for continuous reps",
+                    "Not clearing head properly with bar",
+                    "Lowering bar too far behind neck",
+                    "Losing rhythm and control"
+                ],
+                safetyTips: [
+                    "Requires excellent shoulder mobility",
+                    "Use light to moderate weight only",
+                    "Ensure clear head clearance on each rep",
+                    "Stop if you feel any shoulder discomfort"
+                ],
+                risks: "Hitting head with bar, shoulder impingement, rotator cuff strain",
+                energySaving: "Advanced technique - provides continuous shoulder tension"
+            },
+            {
+                name: "Cuban Press",
+                description: "Complex movement combining rotation and press for shoulder health",
+                difficulty: 4,
+                equipment: "Dumbbells or Barbell",
+                primaryMuscles: ["Shoulders", "Rotator Cuff", "Traps"],
+                icon: "🌀",
+                formIllustration: "💪⬆️ 🔄🌀 ⬆️💪 ⬇️🔄\nUpright row • Rotate • Press • Reverse",
+                steps: [
+                    "Start with weight hanging in front of body",
+                    "Perform upright row to chest height",
+                    "Rotate forearms up while keeping elbows high",
+                    "Press weight overhead from this position",
+                    "Reverse the entire sequence back to start",
+                    "Move smoothly through all phases"
+                ],
+                commonMistakes: [
+                    "Using too much weight for complex movement",
+                    "Rushing through the rotation phase",
+                    "Not keeping elbows high during rotation",
+                    "Poor control during lowering phase"
+                ],
+                safetyTips: [
+                    "Use light weight to learn movement pattern",
+                    "Master each phase separately first",
+                    "Move deliberately through all positions",
+                    "Excellent for shoulder health and mobility"
+                ],
+                risks: "Shoulder strain from rotation, rotator cuff injury, poor form",
+                energySaving: "Focus on movement quality over weight - therapeutic exercise"
+            },
+            {
+                name: "Plate Front Raises",
+                description: "Front raise variation using weight plate for grip variety",
+                difficulty: 2,
+                equipment: "Weight Plate",
+                primaryMuscles: ["Front Delts", "Core"],
+                icon: "🔘",
+                formIllustration: "🧍🔘 ⬆️💪 ⏸️↕️ ⬇️🔘\nHold plate • Raise forward • Pause • Lower",
+                steps: [
+                    "Stand holding plate with both hands at 3 and 9 o'clock positions",
+                    "Start with plate at thigh level, arms extended",
+                    "Keep slight bend in elbows throughout",
+                    "Raise plate forward to shoulder height",
+                    "Hold briefly at top position",
+                    "Lower plate under control back to thighs"
+                ],
+                commonMistakes: [
+                    "Using too heavy a plate and swinging",
+                    "Raising plate above shoulder level",
+                    "Leaning back to help lift weight",
+                    "Not controlling the lowering phase"
+                ],
+                safetyTips: [
+                    "Start with lighter plate than you think",
+                    "Keep movements smooth and controlled",
+                    "Stop at shoulder height maximum",
+                    "Engage core to prevent back compensation"
+                ],
+                risks: "Shoulder impingement, lower back strain, dropping plate",
+                energySaving: "Plate provides unique grip challenge - use moderate weight"
+            },
+            {
+                name: "Single-Arm Cable Press",
+                description: "Unilateral shoulder press with constant cable tension",
+                difficulty: 3,
+                equipment: "Cable Machine",
+                primaryMuscles: ["Shoulders", "Core", "Triceps"],
+                icon: "🔗",
+                formIllustration: "🧍🔗 ⬆️💪 🔒⏸️ ⬇️🔗\nCable at shoulder • Press up • Hold • Lower",
+                steps: [
+                    "Set cable at shoulder height with D-handle",
+                    "Stand facing away from machine, handle at shoulder",
+                    "Stagger stance for stability",
+                    "Press handle straight up overhead",
+                    "Maintain core engagement throughout",
+                    "Lower handle back to shoulder under control"
+                ],
+                commonMistakes: [
+                    "Not engaging core for stability",
+                    "Allowing cable to pull body backward",
+                    "Pressing forward instead of straight up",
+                    "Using too much weight and poor form"
+                ],
+                safetyTips: [
+                    "Use staggered stance for stability",
+                    "Keep core maximally engaged",
+                    "Start with lighter weight than dumbbell press",
+                    "Control cable throughout entire range"
+                ],
+                risks: "Loss of balance, shoulder strain, core injury",
+                energySaving: "Cable provides unique resistance curve - excellent for variety"
+            },
+            {
+                name: "Dumbbell Clean and Press",
+                description: "Dynamic full-body movement incorporating shoulder press",
+                difficulty: 4,
+                equipment: "Dumbbells",
+                primaryMuscles: ["Shoulders", "Legs", "Core", "Traps"],
+                icon: "⚡",
+                formIllustration: "💪⬇️ 🏋️⬆️ 💪🔥 ⬆️💪\nHang • Clean to shoulders • Press overhead",
+                steps: [
+                    "Start with dumbbells hanging at sides",
+                    "Perform slight dip with knees and hips",
+                    "Explosively extend and pull dumbbells to shoulders",
+                    "Catch dumbbells at shoulder level in quarter squat",
+                    "Stand up and press dumbbells overhead",
+                    "Lower dumbbells to shoulders then back to sides"
+                ],
+                commonMistakes: [
+                    "Curling dumbbells up instead of explosive clean",
+                    "Not using leg drive for clean portion",
+                    "Poor catch position at shoulders",
+                    "Rushing through press portion"
+                ],
+                safetyTips: [
+                    "Master clean and press separately first",
+                    "Use lighter weight than either movement alone",
+                    "Ensure good landing position after clean",
+                    "Perform in area with adequate space"
+                ],
+                risks: "Dropping weights, shoulder injury, poor landing position",
+                energySaving: "Full-body power movement - very demanding but efficient"
+            },
+            {
+                name: "Band Pull-Aparts",
+                description: "Rear delt and upper back exercise using resistance band",
+                difficulty: 1,
+                equipment: "Resistance Band",
+                primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
+                icon: "↔️",
+                formIllustration: "🤲➖ ↔️💪 🤗⏸️ ➖🤲\nHold band • Pull apart • Squeeze • Return",
+                steps: [
+                    "Hold resistance band with arms extended at chest height",
+                    "Hands should be shoulder-width apart on band",
+                    "Keep slight bend in elbows throughout",
+                    "Pull band apart by moving hands out to sides",
+                    "Squeeze shoulder blades together at end position",
+                    "Return to starting position under control"
+                ],
+                commonMistakes: [
+                    "Using band that's too light or too heavy",
+                    "Not squeezing shoulder blades together",
+                    "Allowing elbows to bend excessively",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Choose appropriate band resistance",
+                    "Keep movements smooth and controlled",
+                    "Focus on shoulder blade movement",
+                    "Excellent for warmup and shoulder health"
+                ],
+                risks: "Band snapping back if released improperly, shoulder strain",
+                energySaving: "Perfect for high-rep shoulder health work and warmups"
+            },
+            {
+                name: "Kettlebell Press",
+                description: "Shoulder press using kettlebell for unique grip and stability challenge",
+                difficulty: 3,
+                equipment: "Kettlebell",
+                primaryMuscles: ["Shoulders", "Core", "Forearms"],
+                icon: "🔔",
+                formIllustration: "💪🔔 ⬆️🔥 🔒💪 ⬇️🔔\nRack position • Press up • Lock out • Lower",
+                steps: [
+                    "Start with kettlebell in rack position at shoulder",
+                    "Bell rests on forearm, handle across palm",
+                    "Keep wrist straight and core engaged",
+                    "Press kettlebell straight up overhead",
+                    "Rotate hand slightly so palm faces forward at top",
+                    "Lower kettlebell back to rack position under control"
+                ],
+                commonMistakes: [
+                    "Not mastering proper rack position first",
+                    "Allowing wrist to bend backward",
+                    "Pressing kettlebell forward instead of straight up",
+                    "Not achieving full lockout at top"
+                ],
+                safetyTips: [
+                    "Learn proper rack position before pressing",
+                    "Keep wrist neutral throughout movement",
+                    "Use lighter weight than dumbbell press initially",
+                    "Focus on control and stability"
+                ],
+                risks: "Wrist strain, shoulder injury, dropping kettlebell",
+                energySaving: "Kettlebell grip provides unique stability challenge - master the basics first"
+            },
+            {
+                name: "Scaption",
+                description: "Front raise in scapular plane for optimal shoulder mechanics",
+                difficulty: 2,
+                equipment: "Light Dumbbells",
+                primaryMuscles: ["Front Delts", "Rotator Cuff", "Serratus Anterior"],
+                icon: "📐",
+                formIllustration: "💪⬇️ ↗️💪 ⏸️↕️ ↙️💪\nArms down • Raise at angle • Pause • Lower",
+                steps: [
+                    "Stand with light dumbbells at sides",
+                    "Position arms slightly forward (30 degrees from body)",
+                    "Thumbs pointing up or slightly up-and-in",
+                    "Raise dumbbells up at this angle to shoulder height",
+                    "Hold briefly at top position",
+                    "Lower dumbbells under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Raising arms directly to front instead of angled",
+                    "Using too much weight for this precise movement",
+                    "Not maintaining proper arm position throughout",
+                    "Raising above shoulder height"
+                ],
+                safetyTips: [
+                    "Use light weight - this is a precision exercise",
+                    "Maintain 30-degree forward angle throughout",
+                    "Stop at shoulder height maximum",
+                    "Excellent for shoulder health and rehab"
+                ],
+                risks: "Shoulder impingement if done incorrectly, strain from too much weight",
+                energySaving: "Scapular plane reduces shoulder stress - therapeutic exercise"
+            },
+            {
+                name: "Alternating Dumbbell Press",
+                description: "Unilateral press variation for core stability and shoulder balance",
+                difficulty: 3,
+                equipment: "Dumbbells, Bench",
+                primaryMuscles: ["Shoulders", "Core", "Triceps"],
+                icon: "🔀",
+                formIllustration: "💪🪑 ⬆️💪 ⬇️💪 ⬆️💪\nBoth at shoulders • Press one • Lower • Press other",
+                steps: [
+                    "Sit on bench with both dumbbells at shoulders",
+                    "Keep core maximally engaged for stability",
+                    "Press one dumbbell overhead while other stays at shoulder",
+                    "Lower pressing dumbbell back to shoulder",
+                    "Immediately press opposite dumbbell overhead",
+                    "Continue alternating arms with controlled tempo"
+                ],
+                commonMistakes: [
+                    "Not engaging core enough for stability",
+                    "Leaning side to side during press",
+                    "Rushing through alternating pattern",
+                    "Not achieving full lockout on each rep"
+                ],
+                safetyTips: [
+                    "Keep core maximally engaged throughout",
+                    "Maintain upright torso position",
+                    "Use slightly less weight than simultaneous press",
+                    "Focus on control and stability"
+                ],
+                risks: "Core strain from instability, shoulder imbalance, losing control",
+                energySaving: "Alternating allows brief recovery while maintaining tension"
+            },
+            {
+                name: "Push Press",
+                description: "Explosive overhead press using leg drive for heavier loads",
+                difficulty: 4,
+                equipment: "Barbell",
+                primaryMuscles: ["Shoulders", "Legs", "Core", "Triceps"],
+                icon: "💥",
+                formIllustration: "🏋️↓ 💥⬆️ 🔒💪 ⬇️🏋️\nDip • Explosive drive • Press • Lower",
+                steps: [
+                    "Start with barbell at shoulder level",
+                    "Perform shallow dip by bending knees slightly",
+                    "Explosively drive up through legs",
+                    "Use leg momentum to help drive bar overhead",
+                    "Finish press with arms locking out bar",
+                    "Lower bar under control back to shoulders"
+                ],
+                commonMistakes: [
+                    "Dipping too deep before drive",
+                    "Not timing leg drive with arm press",
+                    "Leaning back excessively",
+                    "Not catching bar with straight arms overhead"
+                ],
+                safetyTips: [
+                    "Master strict press before adding push press",
+                    "Keep dip shallow and controlled",
+                    "Ensure explosive leg drive is timed correctly",
+                    "Use safety bars for heavy attempts"
+                ],
+                risks: "Lower back injury from poor form, missed lift overhead, shoulder strain",
+                energySaving: "Allows heavier loads than strict press - use leg drive efficiently"
+            },
+            {
+                name: "Incline Lateral Raises",
+                description: "Lateral raise on incline bench for unique angle and constant tension",
+                difficulty: 3,
+                equipment: "Dumbbells, Incline Bench",
+                primaryMuscles: ["Side Delts", "Rear Delts"],
+                icon: "📈",
+                formIllustration: "🛌💪 ↗️💪 ⏸️↕️ ↘️💪\nLie on side • Raise top arm • Hold • Lower",
+                steps: [
+                    "Set incline bench to 45-60 degrees",
+                    "Lie sideways on bench with bottom arm stabilizing",
+                    "Hold dumbbell in top hand, arm hanging down",
+                    "Raise dumbbell out to side to shoulder height",
+                    "Maintain slight bend in elbow throughout",
+                    "Lower dumbbell under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight for this awkward position",
+                    "Not lying fully sideways on bench",
+                    "Raising arm too high above shoulder",
+                    "Losing stability on bench"
+                ],
+                safetyTips: [
+                    "Use much lighter weight than standing lateral raises",
+                    "Ensure stable position on bench",
+                    "Move slowly and deliberately",
+                    "Stop at shoulder height maximum"
+                ],
+                risks: "Falling off bench, shoulder strain, dropping dumbbell",
+                energySaving: "Removes momentum completely - excellent for strict isolation"
+            }
+        ];
+
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function goToScreen(page, screenId) {
+            window.location.href = `${page}#${screenId}`;
+        }
+        
+        function goBack() {
+            window.location.href = 'workout-techniques.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function displayExercises(exercisesToShow = shoulderExercises) {
+            const container = document.getElementById('exercises-container');
+            let html = '';
+
+            exercisesToShow.forEach((exercise, index) => {
+                html += `
+                    <div class="supplement-card">
+                        <div class="supplement-header" onclick="toggleExercise(${index})">
+                            <div>
+                                <div class="supplement-title">${exercise.name}</div>
+                                <div class="supplement-rating">
+                                    <span>${generateDifficultyStars(exercise.difficulty)}</span>
+                                    <span>Difficulty</span>
+                                </div>
+                            </div>
+                            <div class="expand-icon" id="icon-${index}">▼</div>
+                        </div>
+                        <div class="supplement-content" id="content-${index}">
+                            <div class="content-inner">
+                                <div class="quick-info">
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${exercise.equipment}</div>
+                                        <div class="stat-label">Equipment</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${generateDifficultyStars(exercise.difficulty)}</div>
+                                        <div class="stat-label">Difficulty</div>
+                                    </div>
+                                </div>
+
+                                <div class="dosage-box">
+                                    <div class="info-title">🎯 Proper Form</div>
+                                    <div class="info-text">
+                                        ${exercise.steps.map(step => `• ${step}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">❌ Common Mistakes</div>
+                                    <div class="info-text">
+                                        ${exercise.commonMistakes.map(mistake => `• ${mistake}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">✅ Safety Tips</div>
+                                    <div class="info-text">
+                                        ${exercise.safetyTips.map(tip => `• ${tip}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="warning-box">
+                                    <div class="warning-title">⚠️ Injury Risks</div>
+                                    <div style="font-size: 12px; color: #856404;">${exercise.risks}</div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">💡 Energy Conservation</div>
+                                    <div class="info-text">${exercise.energySaving}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+
+        function toggleExercise(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        function filterExercises() {
+            const searchTerm = document.getElementById('exercise-search').value.toLowerCase();
+
+            if (!searchTerm) {
+                displayExercises();
+                return;
+            }
+
+            const filtered = shoulderExercises.filter(exercise => {
+                return exercise.name.toLowerCase().includes(searchTerm) ||
+                       exercise.description.toLowerCase().includes(searchTerm) ||
+                       exercise.equipment.toLowerCase().includes(searchTerm) ||
+                       exercise.primaryMuscles.some(muscle => muscle.toLowerCase().includes(searchTerm));
+            });
+
+            displayExercises(filtered);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            displayExercises();
+        });
+    </script>    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Diet Plan -->
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

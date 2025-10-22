@@ -11,6 +11,7 @@
     <script src="daily-quotes.js"></script>
     <script src="health-sync.js"></script>
     <script src="global-nav.js"></script>
+    <script src="quick-food-entry.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -84,6 +85,7 @@
                             <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px; letter-spacing: 0.5px;">TODAY'S BALANCE</div>
                             <div style="font-size: 32px; font-weight: bold; margin-bottom: 5px;" id="deficit-surplus-amount">--</div>
                             <div style="font-size: 14px; font-weight: 600; letter-spacing: 1px;" id="deficit-surplus-label">CALCULATING...</div>
+                            <div style="font-size: 11px; opacity: 0.75; margin-top: 8px;" id="balance-formula">Calories Eaten - Calories Burned</div>
                         </div>
 
                         <div style="margin-top: 25px; font-size: 14px; opacity: 0.9; text-align: center; font-weight: 600;">
@@ -99,10 +101,10 @@
                             </svg>
                             Health Today
                         </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                             <div style="text-align: center;">
-                                <div style="margin-bottom: 10px;">
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #4CAF50;">
+                                <div style="margin-bottom: 8px;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #4CAF50;">
                                         <path d="M13.5 5.5C13.5 3.5 15.5 1.5 17.5 3.5C19.5 5.5 19.5 7.5 18 9L13 14L8 9C6.5 7.5 6.5 5.5 8.5 3.5C10.5 1.5 12.5 3.5 12.5 5.5H13.5Z" fill="currentColor"/>
                                         <path d="M7 14L9 16V22H8L7 14Z" fill="currentColor"/>
                                         <path d="M17 14L15 16V22H16L17 14Z" fill="currentColor"/>
@@ -110,17 +112,27 @@
                                         <circle cx="17" cy="22" r="1.5" fill="currentColor"/>
                                     </svg>
                                 </div>
-                                <div style="font-size: 24px; font-weight: bold; color: var(--dark);" id="home-steps">--</div>
-                                <div style="font-size: 12px; color: #666;">Steps</div>
+                                <div style="font-size: 20px; font-weight: bold; color: var(--dark);" id="home-steps">--</div>
+                                <div style="font-size: 11px; color: #666;">Steps</div>
                             </div>
                             <div style="text-align: center;">
-                                <div style="margin-bottom: 10px;">
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #FF5722;">
-                                        <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67ZM14.5 20.8C11.82 21.4 9.15 19.88 8.5 17.2C8.29 16.38 8.34 15.47 8.68 14.67C9.03 13.87 9.68 13.16 10.55 12.73L11.1 13.68C10.6 13.93 10.21 14.3 9.95 14.77C9.69 15.24 9.57 15.78 9.61 16.33C9.99 18.11 11.92 19.16 13.7 18.78C15.47 18.4 16.53 16.47 16.15 14.69C16.09 14.39 15.98 14.1 15.83 13.83L16.8 13.27C17.36 14.27 17.55 15.47 17.32 16.63C16.97 18.28 15.82 19.58 14.5 20.8Z" fill="currentColor"/>
+                                <div style="margin-bottom: 8px;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #2196F3;">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                                        <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                                     </svg>
                                 </div>
-                                <div style="font-size: 24px; font-weight: bold; color: var(--dark);" id="home-calories-burned">--</div>
-                                <div style="font-size: 12px; color: #666;">Cal Burned</div>
+                                <div style="font-size: 20px; font-weight: bold; color: var(--dark);" id="home-base-calories">--</div>
+                                <div style="font-size: 11px; color: #666;">Base Cal</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="margin-bottom: 8px;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #FF9800;">
+                                        <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div style="font-size: 20px; font-weight: bold; color: var(--dark);" id="home-active-calories">--</div>
+                                <div style="font-size: 11px; color: #666;">Active Cal</div>
                             </div>
                         </div>
                         <div style="margin-top: 15px; text-align: center; font-size: 12px; color: var(--primary); font-weight: 600;">
@@ -1936,16 +1948,21 @@
 
     <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="window.location.href='index.html'">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
                 </svg>
             </div>
         </div>
-        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1954,6 +1971,17 @@
                 </svg>
             </div>
         </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item active" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
         <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
@@ -1962,7 +1990,8 @@
                 </svg>
             </div>
         </div>
-        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+        <!-- Workout Techniques -->
+        <div class="nav-item" onclick="window.location.href='workout-techniques.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2084,6 +2113,13 @@
 
             // Update home food calories and deficit/surplus on page load
             updateHomeFoodCalories();
+        });
+
+        // Listen for nutrition updates from calorie tracker
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'fuelfire_nutrition_updated') {
+                updateHomeFoodCalories();
+            }
         });
     </script>
 
@@ -2524,10 +2560,20 @@
                 stepsEl.textContent = data.steps.toLocaleString();
             }
 
-            // Update calories burned display
-            const caloriesBurnedEl = document.getElementById('home-calories-burned');
-            if (caloriesBurnedEl && data.caloriesBurned !== undefined) {
-                caloriesBurnedEl.textContent = data.caloriesBurned.toLocaleString();
+            // Update base calories (BMR)
+            const baseCaloriesEl = document.getElementById('home-base-calories');
+            if (baseCaloriesEl && data.bmr !== undefined) {
+                baseCaloriesEl.textContent = (data.bmr || 0).toLocaleString();
+            }
+
+            // Update active calories (Apple Health + Manual + Workouts)
+            const activeCaloriesEl = document.getElementById('home-active-calories');
+            if (activeCaloriesEl && data.activeEnergy !== undefined) {
+                const appleHealthActive = data.activeEnergy || 0;
+                const manualActive = getTodayManualCalories();
+                const workoutActive = getTodayWorkoutCalories();
+                const totalActive = appleHealthActive + manualActive + workoutActive;
+                activeCaloriesEl.textContent = totalActive.toLocaleString();
             }
 
             // Sync workout calories to daily calorie budget
@@ -2543,7 +2589,7 @@
         function syncWorkoutCaloriesToDailyBudget(caloriesBurned) {
             try {
                 // Get today's date key
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString();
 
                 // Get or create daily nutrition data
                 let dailyNutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}');
@@ -2569,6 +2615,59 @@
             } catch (error) {
                 console.error('Error syncing workout calories:', error);
             }
+        }
+
+        // Helper functions for getting today's manual and workout calories
+        function getTodayWorkoutCalories() {
+            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalWorkoutCalories = 0;
+
+            workoutHistory.forEach(workout => {
+                const workoutDate = new Date(workout.date);
+                workoutDate.setHours(0, 0, 0, 0);
+
+                if (workoutDate.getTime() === today.getTime()) {
+                    const duration = workout.duration || 45;
+                    let caloriesPerMinute = 5;
+
+                    if (workout.type) {
+                        const type = workout.type.toLowerCase();
+                        if (type.includes('chest') || type.includes('back') || type.includes('legs')) {
+                            caloriesPerMinute = 7;
+                        } else if (type.includes('cardio') || type.includes('hiit')) {
+                            caloriesPerMinute = 10;
+                        } else if (type.includes('arms') || type.includes('core')) {
+                            caloriesPerMinute = 5;
+                        }
+                    }
+
+                    totalWorkoutCalories += duration * caloriesPerMinute;
+                }
+            });
+
+            return Math.round(totalWorkoutCalories);
+        }
+
+        function getTodayManualCalories() {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalManualCalories = 0;
+
+            entries.forEach(entry => {
+                const entryDate = new Date(entry.date);
+                entryDate.setHours(0, 0, 0, 0);
+
+                if (entryDate.getTime() === today.getTime()) {
+                    totalManualCalories += entry.calories;
+                }
+            });
+
+            return totalManualCalories;
         }
 
         // Calculate total calories burned using HR data (more accurate) or fallback to BMR + activity
@@ -2642,12 +2741,35 @@
             return 1.9;                          // Extremely active (10k+ steps)
         }
 
+        // Helper function to get local date in YYYY-MM-DD format (matches calorie-tracker.html)
+        function getLocalDateString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // Update home food calories display
         function updateHomeFoodCalories() {
             try {
-                const today = new Date().toISOString().split('T')[0];
-                const dailyNutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}');
-                const todayData = dailyNutrition[today] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+                const today = getLocalDateString();
+                // Read from same source as calorie-tracker.html
+                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+
+                // Calculate macros from logged meals
+                let totalProtein = 0;
+                let totalCarbs = 0;
+                let totalFat = 0;
+
+                if (todayData.meals && Array.isArray(todayData.meals)) {
+                    todayData.meals.forEach(meal => {
+                        totalProtein += meal.protein || 0;
+                        totalCarbs += meal.carbs || 0;
+                        totalFat += meal.fat || 0;
+                    });
+                }
 
                 // Update displays
                 const homeCalories = document.getElementById('home-calories');
@@ -2655,13 +2777,13 @@
                 const homeCarbs = document.getElementById('home-carbs');
                 const homeFat = document.getElementById('home-fat');
 
-                if (homeCalories) homeCalories.textContent = Math.round(todayData.calories).toLocaleString();
-                if (homeProtein) homeProtein.textContent = Math.round(todayData.protein) + 'g';
-                if (homeCarbs) homeCarbs.textContent = Math.round(todayData.carbs) + 'g';
-                if (homeFat) homeFat.textContent = Math.round(todayData.fat) + 'g';
+                if (homeCalories) homeCalories.textContent = Math.round(todayData.totalCalories || 0).toLocaleString();
+                if (homeProtein) homeProtein.textContent = Math.round(totalProtein) + 'g';
+                if (homeCarbs) homeCarbs.textContent = Math.round(totalCarbs) + 'g';
+                if (homeFat) homeFat.textContent = Math.round(totalFat) + 'g';
 
                 // Update deficit/surplus
-                updateDeficitSurplus(todayData.calories);
+                updateDeficitSurplus(todayData.totalCalories || 0);
             } catch (error) {
                 console.error('Error updating home food calories:', error);
             }
@@ -2707,14 +2829,27 @@
                 if (!amountEl || !labelEl) return;
 
                 let caloriesBurned = 0;
+                let bmr = 0;
+                let activeEnergy = 0;
 
-                // Try to get calories burned from Apple Health first
-                if (window.HealthSync && window.HealthSync.healthData && window.HealthSync.healthData.caloriesBurned) {
-                    caloriesBurned = window.HealthSync.healthData.caloriesBurned;
-                    console.log('📱 Using Apple Health calories burned:', caloriesBurned);
-                } else {
-                    // Fallback to BMR calculation
+                // Try to get calories burned from Apple Health (stored in localStorage)
+                const healthData = localStorage.getItem('healthData');
+                if (healthData) {
+                    const parsed = JSON.parse(healthData);
+                    if (parsed.caloriesBurned) {
+                        caloriesBurned = parsed.caloriesBurned; // This includes Active Energy + BMR
+                        bmr = parsed.bmr || 0;
+                        activeEnergy = parsed.activeEnergy || 0;
+                        console.log('📱 Using Apple Health total calories burned:', caloriesBurned);
+                        console.log('   (Active Energy: ' + activeEnergy + ' + BMR: ' + bmr + ')');
+                    }
+                }
+
+                // Fallback to BMR calculation if no health data
+                if (caloriesBurned === 0) {
                     caloriesBurned = calculateBMR();
+                    bmr = caloriesBurned;
+                    activeEnergy = 0;
                     console.log('📊 Using calculated BMR/TDEE:', caloriesBurned);
                 }
 
@@ -2724,6 +2859,12 @@
 
                 // Update display
                 amountEl.textContent = absBalance.toLocaleString() + ' cal';
+
+                // Update formula with actual numbers and breakdown
+                const formulaEl = document.getElementById('balance-formula');
+                if (formulaEl) {
+                    formulaEl.textContent = `${caloriesConsumed.toLocaleString()} eaten - ${caloriesBurned.toLocaleString()} burned (Base: ${bmr.toLocaleString()} + Active: ${activeEnergy.toLocaleString()})`;
+                }
 
                 if (balance < 0) {
                     // Deficit (good for weight loss)

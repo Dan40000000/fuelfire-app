@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Arm Exercises - FuelFire</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .supplement-card {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .supplement-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .supplement-header:hover {
+            background: linear-gradient(135deg, #2980b9, #21618c);
+        }
+
+        .supplement-header.active {
+            background: linear-gradient(135deg, #21618c, #1b4f72);
+        }
+
+        .supplement-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .supplement-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        .expand-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .supplement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .supplement-content.expanded {
+            max-height: 2000px;
+        }
+
+        .content-inner {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .dosage-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 10px;
+        }
+
+        .quick-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 16px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+    </style>
+    <script src="quick-food-entry.js"></script>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                
+                
+            </div>
+
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="header-title">💪 Arm Exercises</div>
+            </div>
+            
+            <div class="content">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: var(--primary); margin-bottom: 10px;">💪 Arm Exercises Library</h2>
+                        <p style="color: #666; font-size: 14px;">Build powerful arms with proper form and technique</p>
+                        <button onclick="goBack()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                    </div>
+                    <!-- Search Bar -->
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="exercise-search" placeholder="🔍 Search exercises..."
+                               onkeyup="filterExercises()"
+                               style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
+                    </div>
+
+                    <!-- Exercises List -->
+                    <div id="exercises-container">
+                        <!-- Exercises will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for sidebar -->
+    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="goToScreen('index.html', 'home')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item active" onclick="window.location.href='workout-techniques.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals & Progress
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Leg Exercise Database
+        const armExercises = [
+            {
+                name: "Barbell Bicep Curls",
+                description: "Classic bicep mass builder with maximum loading potential",
+                difficulty: 2,
+                equipment: "Barbell",
+                primaryMuscles: ["Biceps", "Forearms"],
+                icon: "🏋️",
+                formIllustration: "🧍🏋️ ⬆️💪 ↓🏋️ ⬆️💪\nArms down • Curl up • Control down",
+                steps: [
+                    "Stand with feet shoulder-width apart, core engaged",
+                    "Hold barbell with underhand grip, hands shoulder-width apart",
+                    "Keep elbows close to sides throughout movement",
+                    "Curl weight up by flexing biceps, avoid swinging",
+                    "Squeeze biceps at top position",
+                    "Lower weight under control back to starting position"
+                ],
+                commonMistakes: [
+                    "Swinging body to help lift the weight",
+                    "Moving elbows forward during curl",
+                    "Not using full range of motion",
+                    "Dropping weight too quickly on lowering phase"
+                ],
+                safetyTips: [
+                    "Start with lighter weight to master form",
+                    "Keep core tight to protect lower back",
+                    "Don't arch back to help lift weight",
+                    "Use controlled tempo on both lifting and lowering"
+                ],
+                risks: "Lower back strain from swinging, bicep tears from too much weight",
+                energySaving: "Focus on controlled movement and full range of motion over heavy weight"
+            },
+            {
+                name: "Dumbbell Hammer Curls",
+                description: "Targets biceps and forearms with neutral grip for balanced arm development",
+                difficulty: 2,
+                equipment: "Dumbbells",
+                primaryMuscles: ["Biceps", "Brachialis", "Forearms"],
+                icon: "🔨",
+                formIllustration: "🔨⬇️ ⬆️💪 ↓🔨 ⬆️💪\nNeutral grip • Hammer up • Control down",
+                steps: [
+                    "Hold dumbbells at sides with neutral grip (palms facing body)",
+                    "Keep elbows close to sides and shoulders back",
+                    "Curl weights up while maintaining neutral wrist position",
+                    "Focus on squeezing biceps and forearms at top",
+                    "Lower weights under control to starting position",
+                    "Keep core engaged throughout movement"
+                ],
+                commonMistakes: [
+                    "Rotating wrists during the movement",
+                    "Swinging weights instead of controlled curling",
+                    "Not keeping elbows stationary",
+                    "Using momentum to start each rep"
+                ],
+                safetyTips: [
+                    "Keep wrists in neutral position throughout",
+                    "Start with moderate weight to learn movement",
+                    "Focus on feeling the work in biceps and forearms",
+                    "Don't swing or use body momentum"
+                ],
+                risks: "Wrist strain, elbow pain, lower back strain from poor posture",
+                energySaving: "Alternate arms to allow brief rest between repetitions"
+            },
+            {
+                name: "Tricep Dips",
+                description: "Bodyweight exercise for tricep strength and definition",
+                difficulty: 3,
+                equipment: "Bench or Parallel Bars",
+                primaryMuscles: ["Triceps", "Shoulders", "Chest"],
+                icon: "📉",
+                formIllustration: "🪑🤲 ↓🦵 ⬆️💪 ↓🦵\nSit on edge • Dip down • Press up",
+                steps: [
+                    "Position hands on bench or bars with arms extended",
+                    "Keep legs extended in front or bent for easier variation",
+                    "Lower body by bending elbows until 90-degree angle",
+                    "Keep elbows close to body, don't flare out wide",
+                    "Press back up to starting position",
+                    "Maintain upright torso throughout movement"
+                ],
+                commonMistakes: [
+                    "Going too low and stressing shoulders",
+                    "Flaring elbows out wide instead of keeping close",
+                    "Using legs to push up instead of triceps",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Don't go below 90-degree elbow angle",
+                    "Start with bent knees if too difficult",
+                    "Stop if you feel shoulder pain",
+                    "Ensure stable surface for hands"
+                ],
+                risks: "Shoulder impingement, falling from unstable surface, elbow strain",
+                energySaving: "Use assistance bands or bent knees before progressing to full difficulty"
+            },
+            {
+                name: "Close-Grip Push-Ups",
+                description: "Bodyweight tricep exercise with hands positioned close together",
+                difficulty: 3,
+                equipment: "None",
+                primaryMuscles: ["Triceps", "Chest", "Shoulders"],
+                icon: "🤲",
+                formIllustration: "🔸🤲 ↓🦵 ⬆️💪 ↓🦵\nDiamond hands • Lower down • Press up",
+                steps: [
+                    "Start in push-up position with hands close together",
+                    "Form diamond shape with thumbs and index fingers",
+                    "Keep body in straight line from head to heels",
+                    "Lower chest toward hands by bending elbows",
+                    "Keep elbows close to body throughout movement",
+                    "Press back up to starting position"
+                ],
+                commonMistakes: [
+                    "Placing hands too close causing wrist strain",
+                    "Allowing elbows to flare out wide",
+                    "Sagging hips or raising butt too high",
+                    "Not going through full range of motion"
+                ],
+                safetyTips: [
+                    "Adjust hand position if wrists hurt",
+                    "Start with incline version if too difficult",
+                    "Keep core tight throughout movement",
+                    "Progress gradually to full difficulty"
+                ],
+                risks: "Wrist strain, lower back pain from poor form, tricep strain",
+                energySaving: "Master regular push-ups before progressing to close-grip variation"
+            },
+            {
+                name: "Overhead Tricep Extension",
+                description: "Isolation exercise targeting the long head of the triceps",
+                difficulty: 2,
+                equipment: "Dumbbell",
+                primaryMuscles: ["Triceps"],
+                icon: "⬆️",
+                formIllustration: "🏋️⬆️ ↙️💪 ⬆️🏋️ ↓💪\nWeight up • Lower behind • Extend up",
+                steps: [
+                    "Hold dumbbell with both hands overhead",
+                    "Keep elbows close to head and pointing forward",
+                    "Lower weight behind head by bending elbows only",
+                    "Keep upper arms stationary throughout movement",
+                    "Extend elbows to return weight to starting position",
+                    "Feel stretch in triceps at bottom position"
+                ],
+                commonMistakes: [
+                    "Moving upper arms instead of keeping them stationary",
+                    "Using too much weight and poor form",
+                    "Not going through full range of motion",
+                    "Allowing elbows to flare out wide"
+                ],
+                safetyTips: [
+                    "Start with lighter weight to learn movement",
+                    "Keep core engaged for stability",
+                    "Don't drop weight behind head",
+                    "Stop if you feel shoulder discomfort"
+                ],
+                risks: "Dropping weight on head, shoulder impingement, elbow strain",
+                energySaving: "Focus on feeling the stretch and contraction in triceps"
+            },
+            {
+                name: "Preacher Curls",
+                description: "Bicep isolation exercise using preacher bench for strict form",
+                difficulty: 2,
+                equipment: "Preacher Bench, Barbell or Dumbbells",
+                primaryMuscles: ["Biceps"],
+                icon: "⛪",
+                formIllustration: "🪑🔴 ⬆️💪 ↓🏋️ ⬆️💪\nSit at bench • Curl up • Control down",
+                steps: [
+                    "Sit at preacher bench with chest against pad",
+                    "Position arms over pad with slight bend at bottom",
+                    "Hold weight with underhand grip",
+                    "Curl weight up by flexing biceps only",
+                    "Squeeze biceps at top of movement",
+                    "Lower weight under control, don't fully extend"
+                ],
+                commonMistakes: [
+                    "Letting arms fully extend at bottom",
+                    "Using too much weight and poor form",
+                    "Not sitting properly against chest pad",
+                    "Rushing through the movement"
+                ],
+                safetyTips: [
+                    "Don't fully extend arms at bottom position",
+                    "Start with lighter weight than standing curls",
+                    "Keep chest pressed against pad",
+                    "Focus on controlled movement"
+                ],
+                risks: "Bicep tears from overextension, elbow hyperextension",
+                energySaving: "Use the preacher bench to eliminate cheating and maximize bicep work"
+            },
+            {
+                name: "Tricep Kickbacks",
+                description: "Isolation exercise for triceps using bent-over position",
+                difficulty: 2,
+                equipment: "Dumbbells",
+                primaryMuscles: ["Triceps"],
+                icon: "🦵",
+                formIllustration: "🤸‍♂️💪 ↘️💪 ⬅️💪 ↗️💪\nBend over • Arm bent • Kick back",
+                steps: [
+                    "Bend forward at hips with one knee on bench",
+                    "Hold dumbbell with arm bent at 90 degrees",
+                    "Keep upper arm parallel to floor",
+                    "Extend elbow to straighten arm behind you",
+                    "Squeeze tricep at full extension",
+                    "Lower weight back to 90-degree starting position"
+                ],
+                commonMistakes: [
+                    "Moving upper arm instead of keeping it stationary",
+                    "Not achieving full extension at the back",
+                    "Using too much weight and swinging",
+                    "Not maintaining bent-over position"
+                ],
+                safetyTips: [
+                    "Keep upper arm locked in position",
+                    "Use lighter weight for better form",
+                    "Support yourself with opposite hand",
+                    "Focus on tricep contraction"
+                ],
+                risks: "Lower back strain from bent position, shoulder strain",
+                energySaving: "Perfect the movement pattern with light weight before increasing load"
+            },
+            {
+                name: "21s Bicep Curls",
+                description: "Advanced bicep exercise using partial range of motion technique",
+                difficulty: 3,
+                equipment: "Barbell or Dumbbells",
+                primaryMuscles: ["Biceps"],
+                icon: "2️⃣1️⃣",
+                formIllustration: "7️⃣⬆️ 🔄 7️⃣⬆️ 🔄 7️⃣↕️\n7 bottom • 7 top • 7 full",
+                steps: [
+                    "Perform 7 reps from bottom to halfway up",
+                    "Focus on bottom half range of motion",
+                    "Immediately perform 7 reps from halfway to top",
+                    "Focus on top half range of motion",
+                    "Finish with 7 full range of motion reps",
+                    "Complete all 21 reps without rest"
+                ],
+                commonMistakes: [
+                    "Not clearly defining the halfway point",
+                    "Resting between the different rep ranges",
+                    "Using too much weight for the advanced technique",
+                    "Not maintaining strict form throughout"
+                ],
+                safetyTips: [
+                    "Use lighter weight than normal bicep curls",
+                    "Focus on muscle burn and pump",
+                    "Maintain strict form throughout all 21 reps",
+                    "This is an advanced finishing exercise"
+                ],
+                risks: "Muscle fatigue leading to form breakdown, overuse injury",
+                energySaving: "This technique maximizes muscle fatigue - use at end of workout"
+            },
+            {
+                name: "Cable Tricep Pushdowns",
+                description: "Cable exercise for tricep isolation with constant tension",
+                difficulty: 2,
+                equipment: "Cable Machine",
+                primaryMuscles: ["Triceps"],
+                icon: "🔗",
+                formIllustration: "🧍🔗 ⬇️💪 ⬆️🔗 ⬇️💪\nStand tall • Push down • Control up",
+                steps: [
+                    "Stand at cable machine with high pulley",
+                    "Grab rope or bar with overhand grip",
+                    "Keep elbows close to sides and stationary",
+                    "Push weight down by extending elbows fully",
+                    "Squeeze triceps at bottom position",
+                    "Allow weight to return under control"
+                ],
+                commonMistakes: [
+                    "Moving elbows away from sides",
+                    "Not achieving full extension at bottom",
+                    "Leaning forward to help push weight down",
+                    "Letting weight slam back up"
+                ],
+                safetyTips: [
+                    "Keep elbows locked at sides throughout",
+                    "Use controlled tempo on both directions",
+                    "Don't lean into the movement",
+                    "Focus on tricep contraction"
+                ],
+                risks: "Elbow strain, shoulder impingement, cable snapping back",
+                energySaving: "Use lighter weight with perfect form for better muscle activation"
+            },
+            {
+                name: "Concentration Curls",
+                description: "Single-arm bicep exercise for maximum isolation and focus",
+                difficulty: 2,
+                equipment: "Dumbbell, Bench",
+                primaryMuscles: ["Biceps"],
+                icon: "🎯",
+                formIllustration: "🪑🦵 ⬆️💪 ↓🏋️ ⬆️💪\nSit wide • Elbow on thigh • Focus curl",
+                steps: [
+                    "Sit on bench with legs spread wide",
+                    "Hold dumbbell in one hand between legs",
+                    "Rest elbow against inside of thigh",
+                    "Curl weight up by flexing bicep only",
+                    "Focus on squeezing bicep at top",
+                    "Lower weight under control and repeat"
+                ],
+                commonMistakes: [
+                    "Using body momentum to help lift",
+                    "Not resting elbow properly against thigh",
+                    "Rushing through the movement",
+                    "Not focusing on mind-muscle connection"
+                ],
+                safetyTips: [
+                    "Keep elbow firmly against thigh",
+                    "Use moderate weight for better control",
+                    "Focus on feeling the bicep work",
+                    "Complete all reps on one side before switching"
+                ],
+                risks: "Muscle strain from poor positioning, dropping weight",
+                energySaving: "Perfect exercise for mind-muscle connection - focus on quality over quantity"
+            }
+        ];
+
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function goToPage(page) {
+            window.location.href = page;
+        }
+
+        function goToScreen(page, screenId) {
+            window.location.href = `${page}#${screenId}`;
+        }
+        
+        function goBack() {
+            window.location.href = 'workout-techniques.html';
+        }
+
+        function generateDifficultyStars(difficulty) {
+            const filledStars = '★'.repeat(difficulty);
+            const emptyStars = '☆'.repeat(5 - difficulty);
+            return filledStars + emptyStars;
+        }
+
+        function displayExercises(exercisesToShow = armExercises) {
+            const container = document.getElementById('exercises-container');
+            let html = '';
+
+            exercisesToShow.forEach((exercise, index) => {
+                html += `
+                    <div class="supplement-card">
+                        <div class="supplement-header" onclick="toggleExercise(${index})">
+                            <div>
+                                <div class="supplement-title">${exercise.name}</div>
+                                <div class="supplement-rating">
+                                    <span>${generateDifficultyStars(exercise.difficulty)}</span>
+                                    <span>Difficulty</span>
+                                </div>
+                            </div>
+                            <div class="expand-icon" id="icon-${index}">▼</div>
+                        </div>
+                        <div class="supplement-content" id="content-${index}">
+                            <div class="content-inner">
+                                <div class="quick-info">
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${exercise.equipment}</div>
+                                        <div class="stat-label">Equipment</div>
+                                    </div>
+                                    <div class="quick-stat">
+                                        <div class="stat-value">${generateDifficultyStars(exercise.difficulty)}</div>
+                                        <div class="stat-label">Difficulty</div>
+                                    </div>
+                                </div>
+
+                                <div class="dosage-box">
+                                    <div class="info-title">🎯 Proper Form</div>
+                                    <div class="info-text">
+                                        ${exercise.steps.map(step => `• ${step}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">❌ Common Mistakes</div>
+                                    <div class="info-text">
+                                        ${exercise.commonMistakes.map(mistake => `• ${mistake}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">✅ Safety Tips</div>
+                                    <div class="info-text">
+                                        ${exercise.safetyTips.map(tip => `• ${tip}<br>`).join('')}
+                                    </div>
+                                </div>
+
+                                <div class="warning-box">
+                                    <div class="warning-title">⚠️ Injury Risks</div>
+                                    <div style="font-size: 12px; color: #856404;">${exercise.risks}</div>
+                                </div>
+
+                                <div class="info-section">
+                                    <div class="info-title">💡 Energy Conservation</div>
+                                    <div class="info-text">${exercise.energySaving}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+
+        function toggleExercise(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            const header = content.previousElementSibling;
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('rotated');
+                header.classList.remove('active');
+                content.style.maxHeight = '0px';
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
+                header.classList.add('active');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            }
+        }
+
+        function filterExercises() {
+            const searchTerm = document.getElementById('exercise-search').value.toLowerCase();
+
+            if (!searchTerm) {
+                displayExercises();
+                return;
+            }
+
+            const filtered = armExercises.filter(exercise => {
+                return exercise.name.toLowerCase().includes(searchTerm) ||
+                       exercise.description.toLowerCase().includes(searchTerm) ||
+                       exercise.equipment.toLowerCase().includes(searchTerm) ||
+                       exercise.primaryMuscles.some(muscle => muscle.toLowerCase().includes(searchTerm));
+            });
+
+            displayExercises(filtered);
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            displayExercises();
+        });
+    </script>    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <!-- Quick Workout -->
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Food Tracker -->
+        <div class="nav-item" onclick="showQuickFoodEntry()">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Home (Center, Larger) -->
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Health Dashboard -->
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <!-- Diet Plan -->
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
