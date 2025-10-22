@@ -181,10 +181,24 @@ class HealthSync {
             });
 
             if (samples && samples.length > 0) {
+                // PRIORITY: Filter to iPhone data only
+                let filteredSamples = samples;
+                const iphoneSamples = samples.filter(s =>
+                    s.sourceName && (
+                        s.sourceName.toLowerCase().includes('iphone') ||
+                        s.sourceName.toLowerCase().includes('phone')
+                    )
+                );
+
+                if (iphoneSamples.length > 0) {
+                    filteredSamples = iphoneSamples;
+                    console.log(`❤️ Using iPhone heart rate data only: ${iphoneSamples.length} samples`);
+                }
+
                 // Calculate average heart rate for the day
-                const total = samples.reduce((sum, sample) => sum + parseFloat(sample.value), 0);
-                const average = Math.round(total / samples.length);
-                console.log(`❤️ Average heart rate today: ${average} bpm (${samples.length} readings)`);
+                const total = filteredSamples.reduce((sum, sample) => sum + parseFloat(sample.value), 0);
+                const average = Math.round(total / filteredSamples.length);
+                console.log(`❤️ Average heart rate today: ${average} bpm (${filteredSamples.length} readings)`);
                 return average;
             }
 
@@ -209,9 +223,26 @@ class HealthSync {
                 limit: 1000
             });
 
+            let filteredSamples = samples || [];
+
+            // PRIORITY: Filter to iPhone data only
+            if (filteredSamples.length > 0) {
+                const iphoneSamples = filteredSamples.filter(s =>
+                    s.sourceName && (
+                        s.sourceName.toLowerCase().includes('iphone') ||
+                        s.sourceName.toLowerCase().includes('phone')
+                    )
+                );
+
+                if (iphoneSamples.length > 0) {
+                    filteredSamples = iphoneSamples;
+                    console.log(`🔥 Using iPhone calories only: ${iphoneSamples.length} samples`);
+                }
+            }
+
             let totalCalories = 0;
-            if (samples && Array.isArray(samples)) {
-                totalCalories = samples.reduce((sum, sample) => {
+            if (filteredSamples && Array.isArray(filteredSamples)) {
+                totalCalories = filteredSamples.reduce((sum, sample) => {
                     return sum + (parseFloat(sample.value) || 0);
                 }, 0);
             }
@@ -238,9 +269,26 @@ class HealthSync {
                 limit: 50
             });
 
+            let filteredSamples = samples || [];
+
+            // PRIORITY: Filter to iPhone data only
+            if (filteredSamples.length > 0) {
+                const iphoneSamples = filteredSamples.filter(s =>
+                    s.sourceName && (
+                        s.sourceName.toLowerCase().includes('iphone') ||
+                        s.sourceName.toLowerCase().includes('phone')
+                    )
+                );
+
+                if (iphoneSamples.length > 0) {
+                    filteredSamples = iphoneSamples;
+                    console.log(`💪 Using iPhone workouts only: ${iphoneSamples.length} samples`);
+                }
+            }
+
             const workouts = [];
-            if (samples && Array.isArray(samples)) {
-                samples.forEach(workout => {
+            if (filteredSamples && Array.isArray(filteredSamples)) {
+                filteredSamples.forEach(workout => {
                     workouts.push({
                         type: workout.workoutActivityType || 'Unknown',
                         duration: workout.duration || 0,
@@ -274,9 +322,26 @@ class HealthSync {
                 limit: 1000
             });
 
+            let filteredSamples = samples || [];
+
+            // PRIORITY: Filter to iPhone data only
+            if (filteredSamples.length > 0) {
+                const iphoneSamples = filteredSamples.filter(s =>
+                    s.sourceName && (
+                        s.sourceName.toLowerCase().includes('iphone') ||
+                        s.sourceName.toLowerCase().includes('phone')
+                    )
+                );
+
+                if (iphoneSamples.length > 0) {
+                    filteredSamples = iphoneSamples;
+                    console.log(`🏃 Using iPhone distance only: ${iphoneSamples.length} samples`);
+                }
+            }
+
             let totalDistance = 0;
-            if (samples && Array.isArray(samples)) {
-                totalDistance = samples.reduce((sum, sample) => {
+            if (filteredSamples && Array.isArray(filteredSamples)) {
+                totalDistance = filteredSamples.reduce((sum, sample) => {
                     return sum + (parseFloat(sample.value) || 0);
                 }, 0);
             }
@@ -332,9 +397,26 @@ class HealthSync {
                 limit: 100
             });
 
+            let filteredSamples = samples || [];
+
+            // PRIORITY: Filter to iPhone data only
+            if (filteredSamples.length > 0) {
+                const iphoneSamples = filteredSamples.filter(s =>
+                    s.sourceName && (
+                        s.sourceName.toLowerCase().includes('iphone') ||
+                        s.sourceName.toLowerCase().includes('phone')
+                    )
+                );
+
+                if (iphoneSamples.length > 0) {
+                    filteredSamples = iphoneSamples;
+                    console.log(`😴 Using iPhone sleep data only: ${iphoneSamples.length} samples`);
+                }
+            }
+
             let totalSleepMinutes = 0;
-            if (samples && Array.isArray(samples)) {
-                samples.forEach(sample => {
+            if (filteredSamples && Array.isArray(filteredSamples)) {
+                filteredSamples.forEach(sample => {
                     const start = new Date(sample.startDate);
                     const end = new Date(sample.endDate);
                     const minutes = (end - start) / (1000 * 60);
