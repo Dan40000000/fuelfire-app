@@ -10,50 +10,91 @@ class HealthSync {
 
     async initialize() {
         try {
-            if (typeof Capacitor === 'undefined' || Capacitor.getPlatform() === 'web') {
-                console.log('❌ Capacitor not available - Health sync disabled');
+            console.log('🔍 Checking Capacitor availability...');
+            if (typeof Capacitor === 'undefined') {
+                console.log('❌ Capacitor is undefined');
+                return false;
+            }
+
+            console.log('✅ Capacitor available, platform:', Capacitor.getPlatform());
+
+            if (Capacitor.getPlatform() === 'web') {
+                console.log('❌ Running on web - Health sync disabled');
                 return false;
             }
 
             // Get the Health plugin from Capacitor.Plugins
+            console.log('🔍 Looking for Health plugin...');
+            console.log('Available plugins:', Object.keys(Capacitor.Plugins));
+
             const { Health } = Capacitor.Plugins;
-            this.Health = Health;
 
-            // Check if Health is available on this device
-            const availability = await Health.isAvailable();
-            this.isAvailable = availability.available;
-
-            if (!this.isAvailable) {
-                console.warn('❌ Health unavailable:', availability.reason);
+            if (!Health) {
+                console.error('❌ Health plugin not found in Capacitor.Plugins');
                 return false;
             }
 
-            console.log('✅ Health plugin loaded');
+            console.log('✅ Health plugin found:', Health);
+            this.Health = Health;
+
+            // Check if Health is available on this device
+            console.log('🔍 Checking if Health is available on device...');
+            const availability = await Health.isAvailable();
+            console.log('Health availability result:', availability);
+
+            this.isAvailable = availability.available;
+
+            if (!this.isAvailable) {
+                console.warn('❌ Health unavailable:', availability.reason || availability);
+                return false;
+            }
+
+            console.log('✅ Health plugin loaded and available');
             return true;
         } catch (error) {
             console.error('❌ Health plugin error:', error);
+            console.error('Error stack:', error.stack);
             return false;
         }
     }
 
     async requestPermissions() {
         if (!this.isAvailable) {
-            console.log('❌ Health not available');
+            console.log('❌ Health not available - cannot request permissions');
             return false;
         }
 
         try {
-            // Request all health permissions
-            const permissions = await this.Health.requestAuthorization({
-                read: ['steps', 'distance', 'calories', 'heartRate', 'activity', 'workout', 'weight'],
-                write: ['steps', 'calories', 'workout', 'weight']
-            });
+            console.log('🔐 Requesting health permissions...');
+            console.log('Health object:', this.Health);
+            console.log('Health.requestAuthorization exists?', typeof this.Health.requestAuthorization);
 
-            console.log('✅ Health permissions granted:', permissions);
+            // Request all health permissions
+            // Note: Only use data types supported by @capgo/capacitor-health
+            const permissionRequest = {
+                read: ['steps', 'distance', 'calories', 'heartRate', 'weight', 'sleep'],
+                write: ['steps', 'calories', 'weight']
+            };
+
+            console.log('Permission request:', JSON.stringify(permissionRequest));
+
+            const permissions = await this.Health.requestAuthorization(permissionRequest);
+
+            console.log('✅ requestAuthorization returned:', JSON.stringify(permissions));
+
+            // Check if permission was granted
+            if (permissions && permissions.granted === false) {
+                console.log('❌ User denied permission');
+                return false;
+            }
+
+            console.log('✅ Permissions appear to be granted');
             return true;
         } catch (error) {
-            console.error('❌ Permission error:', error);
-            alert('Please enable Health access in Settings to track your fitness data');
+            console.error('❌ Permission request error:', error);
+            console.error('Error type:', error.constructor.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
             return false;
         }
     }
@@ -72,10 +113,33 @@ class HealthSync {
                 limit: 1000
             });
 
-            // Sum up all step counts for today
+            console.log('📊 Step samples received:', samples?.length || 0);
+
+            // The API returns data from BOTH iPhone AND Apple Watch with overlapping time periods
+            // This creates duplicates. We need to filter to only ONE source.
+            // Priority: Apple Watch (most accurate) > iPhone (fallback)
+            let filteredSamples = samples || [];
+
+            if (filteredSamples.length > 0) {
+                // Check if we have Apple Watch data
+                const watchSamples = filteredSamples.filter(s =>
+                    s.sourceName && s.sourceName.toLowerCase().includes('watch')
+                );
+
+                if (watchSamples.length > 0) {
+                    // Use ONLY Apple Watch data
+                    filteredSamples = watchSamples;
+                    console.log(`🚶 Using Apple Watch only: ${watchSamples.length} samples (filtered out iPhone duplicates)`);
+                } else {
+                    // No watch data, use iPhone
+                    console.log(`🚶 No Apple Watch data, using iPhone: ${filteredSamples.length} samples`);
+                }
+            }
+
+            // Sum up the filtered samples
             let totalSteps = 0;
-            if (samples && Array.isArray(samples)) {
-                totalSteps = samples.reduce((sum, sample) => {
+            if (filteredSamples && Array.isArray(filteredSamples)) {
+                totalSteps = filteredSamples.reduce((sum, sample) => {
                     return sum + (parseFloat(sample.value) || 0);
                 }, 0);
             }
@@ -88,24 +152,26 @@ class HealthSync {
         }
     }
 
-    async getLatestHeartRate() {
+    async getTodayAverageHeartRate() {
         if (!this.isAvailable) return null;
 
         try {
-            const now = new Date();
-            const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             const { samples } = await this.Health.readSamples({
                 dataType: 'heartRate',
-                startDate: oneHourAgo.toISOString(),
-                endDate: now.toISOString(),
-                limit: 1
+                startDate: today.toISOString(),
+                endDate: new Date().toISOString(),
+                limit: 1000
             });
 
             if (samples && samples.length > 0) {
-                const heartRate = Math.round(parseFloat(samples[0].value));
-                console.log(`❤️ Heart rate: ${heartRate} bpm`);
-                return heartRate;
+                // Calculate average heart rate for the day
+                const total = samples.reduce((sum, sample) => sum + parseFloat(sample.value), 0);
+                const average = Math.round(total / samples.length);
+                console.log(`❤️ Average heart rate today: ${average} bpm (${samples.length} readings)`);
+                return average;
             }
 
             return null;
@@ -238,6 +304,39 @@ class HealthSync {
         }
     }
 
+    async getTodaySleep() {
+        if (!this.isAvailable) return 0;
+
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const { samples } = await this.Health.readSamples({
+                dataType: 'sleep',
+                startDate: today.toISOString(),
+                endDate: new Date().toISOString(),
+                limit: 100
+            });
+
+            let totalSleepMinutes = 0;
+            if (samples && Array.isArray(samples)) {
+                samples.forEach(sample => {
+                    const start = new Date(sample.startDate);
+                    const end = new Date(sample.endDate);
+                    const minutes = (end - start) / (1000 * 60);
+                    totalSleepMinutes += minutes;
+                });
+            }
+
+            const hours = totalSleepMinutes / 60;
+            console.log(`😴 Sleep today: ${hours.toFixed(1)} hours`);
+            return hours;
+        } catch (error) {
+            console.error('❌ Error fetching sleep:', error);
+            return 0;
+        }
+    }
+
     async syncAllData() {
         if (!this.isAvailable) {
             console.log('❌ Health sync not available');
@@ -246,23 +345,44 @@ class HealthSync {
 
         console.log('🔄 Syncing all health data...');
 
-        const data = {
-            steps: await this.getTodaySteps(),
-            heartRate: await this.getLatestHeartRate(),
-            caloriesBurned: await this.getTodayCaloriesBurned(),
-            workouts: await this.getTodayWorkouts(),
-            distance: await this.getDistance(),
-            weight: await this.getWeight(),
-            syncTime: new Date().toISOString()
-        };
+        try {
+            const data = {
+                steps: await this.getTodaySteps(),
+                heartRate: await this.getTodayAverageHeartRate(),
+                caloriesBurned: await this.getTodayCaloriesBurned(),
+                workouts: await this.getTodayWorkouts(),
+                distance: await this.getDistance(),
+                weight: await this.getWeight(),
+                sleep: await this.getTodaySleep(),
+                syncTime: new Date().toISOString()
+            };
 
-        this.lastSync = data.syncTime;
-        console.log('✅ Health sync complete:', data);
+            // Check if we got any real data (not just zeros/nulls)
+            // This helps detect permission issues
+            const hasRealData = data.steps > 0 ||
+                               data.heartRate !== null ||
+                               data.caloriesBurned > 0 ||
+                               data.workouts.length > 0 ||
+                               data.distance > 0 ||
+                               data.weight !== null ||
+                               data.sleep > 0;
 
-        // Store in localStorage for quick access
-        localStorage.setItem('healthData', JSON.stringify(data));
+            if (!hasRealData) {
+                console.log('⚠️ No health data returned - permissions may not be granted');
+                return null;
+            }
 
-        return data;
+            this.lastSync = data.syncTime;
+            console.log('✅ Health sync complete:', data);
+
+            // Store in localStorage for quick access
+            localStorage.setItem('healthData', JSON.stringify(data));
+
+            return data;
+        } catch (error) {
+            console.error('❌ Error during health sync:', error);
+            return null;
+        }
     }
 
     async writeWorkout(workoutData) {

@@ -25,11 +25,11 @@
                     <!-- Sync Buttons -->
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                            <button onclick="syncHealthData()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
-                                ♻️ Sync Apple Health
+                            <button onclick="requestHealthPermissions()" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
+                                🔐 Grant Permissions
                             </button>
-                            <button onclick="testLogWorkout()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-                                💪 Log Test Workout
+                            <button onclick="syncHealthData()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
+                                ♻️ Sync Data
                             </button>
                         </div>
                         <div id="sync-status" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
@@ -117,42 +117,38 @@
                 <div class="nav-item" onclick="window.location.href='index.html'">
                     <div class="nav-glow"></div>
                     <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
-                    <div class="nav-label">Home</div>
                 </div>
                 <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
                     <div class="nav-glow"></div>
                     <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                            <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
                         </svg>
                     </div>
-                    <div class="nav-label">Food</div>
                 </div>
-                <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+                <div class="nav-item active" onclick="window.location.href='health-dashboard.html'">
                     <div class="nav-glow"></div>
                     <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
                         </svg>
                     </div>
-                    <div class="nav-label">Health</div>
                 </div>
                 <div class="nav-item" onclick="window.location.href='enhanced-diet-quiz.html'">
                     <div class="nav-glow"></div>
                     <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                            <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
+                            <circle cx="12" cy="12" r="2" fill="white"/>
+                            <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </div>
-                    <div class="nav-label">Plan</div>
                 </div>
             </div>
         </div>
@@ -270,18 +266,10 @@
                 return;
             }
 
-            // Request permissions
-            const permitted = await window.healthSync.requestPermissions();
-            if (!permitted) {
-                document.getElementById('sync-status').innerHTML = '❌ Health permissions denied';
-                return;
-            }
-
-            // Load cached data if available
+            // Load cached data if available (but don't auto-request permissions)
             loadCachedData();
 
-            // Auto-sync on load
-            setTimeout(syncHealthData, 500);
+            document.getElementById('sync-status').innerHTML = 'Tap "Sync Apple Health" to connect';
         }
 
         function loadCachedData() {
@@ -292,32 +280,67 @@
             }
         }
 
+        async function requestHealthPermissions() {
+            try {
+                console.log('🔐 Requesting health permissions...');
+                document.getElementById('sync-status').innerHTML = '🔐 Requesting permissions...';
+
+                // Make sure healthSync is initialized
+                if (!window.healthSync.isAvailable) {
+                    const initialized = await window.healthSync.initialize();
+                    if (!initialized) {
+                        document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available on this device';
+                        return;
+                    }
+                }
+
+                // Request permissions - this should show iOS permission dialog
+                const permitted = await window.healthSync.requestPermissions();
+
+                if (permitted) {
+                    console.log('✅ Permissions granted!');
+                    document.getElementById('sync-status').innerHTML = '✅ Permissions granted! Now tap "Sync Data"';
+                } else {
+                    console.log('❌ Permissions denied or dialog dismissed');
+                    document.getElementById('sync-status').innerHTML = '❌ Please grant permissions in Settings → Health → Data Access & Devices → Well Fit';
+                }
+            } catch (error) {
+                console.error('❌ Permission request error:', error);
+                document.getElementById('sync-status').innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+
         async function syncHealthData() {
             try {
+                console.log('🔄 Starting sync...');
                 document.getElementById('sync-status').innerHTML = '🔄 Syncing...';
 
                 // Make sure healthSync is initialized
-                if (!window.healthSync) {
-                    console.log('🔄 Initializing health sync...');
+                if (!window.healthSync.isAvailable) {
+                    console.log('⚠️ Health not initialized, initializing now...');
                     const initialized = await window.healthSync.initialize();
                     if (!initialized) {
+                        console.log('❌ Health initialization failed');
                         document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available';
                         return;
                     }
                 }
 
+                console.log('📊 Syncing all data...');
                 const data = await window.healthSync.syncAllData();
 
                 if (!data) {
-                    document.getElementById('sync-status').innerHTML = '❌ Sync failed - Please grant Health permissions in Settings';
+                    console.log('❌ No data returned from sync');
+                    document.getElementById('sync-status').innerHTML = '❌ No health data found. Tap "Grant Permissions" first, then grant access in Settings → Health';
                     return;
                 }
 
+                console.log('✅ Sync complete:', data);
                 updateUI(data);
                 localStorage.setItem('healthData', JSON.stringify(data));
                 document.getElementById('sync-status').innerHTML = `✅ Synced at ${new Date().toLocaleTimeString()}`;
             } catch (error) {
-                console.error('Sync error:', error);
+                console.error('❌ Sync error:', error);
                 document.getElementById('sync-status').innerHTML = `❌ Sync failed: ${error.message}`;
             }
         }
