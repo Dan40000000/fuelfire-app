@@ -32,12 +32,64 @@
                             <button onclick="syncHealthData()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
                                 ♻️ Sync Data
                             </button>
+                            <button onclick="showQuickLogWorkout()" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);">
+                                💪 Quick Log Workout
+                            </button>
                             <button onclick="clearCacheAndRefresh()" style="background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);">
                                 🗑️ Clear Cache & Refresh
                             </button>
                         </div>
                         <div id="sync-status" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
                         <div id="debug-info" style="margin-top: 10px; font-size: 11px; color: #999; font-family: monospace; text-align: left; background: #f5f5f5; padding: 10px; border-radius: 10px; max-height: 200px; overflow-y: auto; display: none;"></div>
+                    </div>
+
+                    <!-- Quick Log Workout Modal -->
+                    <div id="quick-workout-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center;">
+                        <div style="background: white; border-radius: 20px; padding: 30px; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                            <h2 style="color: var(--primary); margin: 0 0 20px 0; text-align: center;">💪 Quick Log Workout</h2>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Workout Type</label>
+                                <select id="quick-workout-type" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
+                                    <option value="Chest">🏋️ Chest</option>
+                                    <option value="Back">🏋️ Back</option>
+                                    <option value="Legs">🦵 Legs</option>
+                                    <option value="Shoulders">💪 Shoulders</option>
+                                    <option value="Arms">💪 Arms</option>
+                                    <option value="Core">🧘 Core</option>
+                                    <option value="Cardio">🏃 Cardio</option>
+                                    <option value="HIIT">⚡ HIIT</option>
+                                    <option value="Yoga">🧘 Yoga</option>
+                                    <option value="Stretching">🤸 Stretching</option>
+                                    <option value="Sports">⚽ Sports</option>
+                                    <option value="Other">🏃 Other</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Duration (minutes)</label>
+                                <input type="number" id="quick-workout-duration" placeholder="45" min="1" max="300" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; box-sizing: border-box;">
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Calories (optional - auto-calculated if empty)</label>
+                                <input type="number" id="quick-workout-calories" placeholder="Auto" min="0" max="2000" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; box-sizing: border-box;">
+                            </div>
+
+                            <div style="margin-bottom: 25px;">
+                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Notes (optional)</label>
+                                <textarea id="quick-workout-notes" placeholder="How did it go?" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; min-height: 80px; box-sizing: border-box; font-family: inherit;"></textarea>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="saveQuickWorkout()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer;">
+                                    ✅ Save Workout
+                                </button>
+                                <button onclick="closeQuickWorkoutModal()" style="flex: 1; background: #ccc; color: #333; border: none; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer;">
+                                    ❌ Cancel
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Quick Stats Grid -->
@@ -1108,6 +1160,84 @@
 
             // Load active calories data
             loadActiveCaloriesData();
+        }
+
+        // Quick Workout Logging Functions
+        function showQuickLogWorkout() {
+            document.getElementById('quick-workout-modal').style.display = 'flex';
+            // Set default duration
+            document.getElementById('quick-workout-duration').value = 45;
+            document.getElementById('quick-workout-calories').value = '';
+            document.getElementById('quick-workout-notes').value = '';
+        }
+
+        function closeQuickWorkoutModal() {
+            document.getElementById('quick-workout-modal').style.display = 'none';
+        }
+
+        function calculateWorkoutCalories(type, duration) {
+            // Calories per minute based on workout type
+            const caloriesPerMinute = {
+                'Chest': 7,
+                'Back': 7,
+                'Legs': 8,
+                'Shoulders': 6,
+                'Arms': 5,
+                'Core': 5,
+                'Cardio': 10,
+                'HIIT': 12,
+                'Yoga': 3,
+                'Stretching': 2,
+                'Sports': 8,
+                'Other': 6
+            };
+
+            const rate = caloriesPerMinute[type] || 6;
+            return Math.round(duration * rate);
+        }
+
+        function saveQuickWorkout() {
+            const type = document.getElementById('quick-workout-type').value;
+            const duration = parseInt(document.getElementById('quick-workout-duration').value);
+            const caloriesInput = document.getElementById('quick-workout-calories').value;
+            const notes = document.getElementById('quick-workout-notes').value;
+
+            if (!duration || duration < 1) {
+                alert('Please enter a valid duration');
+                return;
+            }
+
+            // Use entered calories or auto-calculate
+            const calories = caloriesInput ? parseInt(caloriesInput) : calculateWorkoutCalories(type, duration);
+
+            // Create workout entry
+            const workout = {
+                id: Date.now().toString(),
+                workoutName: type,
+                type: type,
+                date: new Date().toISOString(),
+                duration: duration,
+                calories: calories,
+                exercises: [],
+                notes: notes || `Quick logged ${type} workout`,
+                completed: true,
+                quickLogged: true
+            };
+
+            // Save to workout history
+            let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            workoutHistory.unshift(workout);
+            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+            // Close modal
+            closeQuickWorkoutModal();
+
+            // Show success message
+            alert(`✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal`);
+
+            // Refresh health data to show updated workout stats
+            loadActiveCaloriesData();
+            syncHealthData();
         }
 
         // Initialize on load
