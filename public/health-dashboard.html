@@ -32,8 +32,12 @@
                             <button onclick="syncHealthData()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
                                 ♻️ Sync Data
                             </button>
+                            <button onclick="clearCacheAndRefresh()" style="background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);">
+                                🗑️ Clear Cache & Refresh
+                            </button>
                         </div>
                         <div id="sync-status" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
+                        <div id="debug-info" style="margin-top: 10px; font-size: 11px; color: #999; font-family: monospace; text-align: left; background: #f5f5f5; padding: 10px; border-radius: 10px; max-height: 200px; overflow-y: auto; display: none;"></div>
                     </div>
 
                     <!-- Quick Stats Grid -->
@@ -465,38 +469,70 @@
             }
         }
 
+        async function clearCacheAndRefresh() {
+            if (confirm('This will clear all cached health data and force a fresh sync from Apple Health. Continue?')) {
+                localStorage.removeItem('healthData');
+                document.getElementById('sync-status').innerHTML = '🗑️ Cache cleared! Tap "Sync Data" to refresh';
+                document.getElementById('debug-info').style.display = 'block';
+                document.getElementById('debug-info').innerHTML = '✅ Cache cleared at ' + new Date().toLocaleTimeString();
+            }
+        }
+
         async function syncHealthData() {
             try {
                 console.log('🔄 Starting sync...');
                 document.getElementById('sync-status').innerHTML = '🔄 Syncing...';
+                document.getElementById('debug-info').style.display = 'block';
+                let debugLog = '';
 
                 // Make sure healthSync is initialized
                 if (!window.healthSync.isAvailable) {
                     console.log('⚠️ Health not initialized, initializing now...');
+                    debugLog += '⚠️ Initializing Health plugin...\n';
                     const initialized = await window.healthSync.initialize();
                     if (!initialized) {
                         console.log('❌ Health initialization failed');
                         document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available';
+                        debugLog += '❌ Health initialization failed\n';
+                        document.getElementById('debug-info').innerHTML = debugLog;
                         return;
                     }
+                    debugLog += '✅ Health plugin initialized\n';
                 }
 
                 console.log('📊 Syncing all data...');
+                debugLog += '📊 Fetching data from Apple Health...\n';
+                document.getElementById('debug-info').innerHTML = debugLog;
+
                 const data = await window.healthSync.syncAllData();
 
                 if (!data) {
                     console.log('❌ No data returned from sync');
                     document.getElementById('sync-status').innerHTML = '❌ No health data found. Tap "Grant Permissions" first, then grant access in Settings → Health';
+                    debugLog += '❌ No data returned - check permissions\n';
+                    document.getElementById('debug-info').innerHTML = debugLog;
                     return;
                 }
 
                 console.log('✅ Sync complete:', data);
+                debugLog += '✅ Data received:\n';
+                debugLog += `  Steps: ${data.steps}\n`;
+                debugLog += `  Distance: ${data.distance.toFixed(2)} miles\n`;
+                debugLog += `  Active Calories: ${data.activeEnergy}\n`;
+                debugLog += `  BMR: ${data.bmr}\n`;
+                debugLog += `  Heart Rate: ${data.heartRate || 'N/A'}\n`;
+                debugLog += `  Workouts: ${data.workouts?.length || 0}\n`;
+                debugLog += `  Sync Time: ${new Date(data.syncTime).toLocaleTimeString()}\n`;
+                document.getElementById('debug-info').innerHTML = debugLog;
+
                 updateUI(data);
                 localStorage.setItem('healthData', JSON.stringify(data));
                 document.getElementById('sync-status').innerHTML = `✅ Synced at ${new Date().toLocaleTimeString()}`;
             } catch (error) {
                 console.error('❌ Sync error:', error);
                 document.getElementById('sync-status').innerHTML = `❌ Sync failed: ${error.message}`;
+                document.getElementById('debug-info').style.display = 'block';
+                document.getElementById('debug-info').innerHTML = `❌ Error: ${error.message}\n${error.stack}`;
             }
         }
 

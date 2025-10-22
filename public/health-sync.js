@@ -115,24 +115,38 @@ class HealthSync {
 
             console.log('📊 Step samples received:', samples?.length || 0);
 
-            // The API returns data from BOTH iPhone AND Apple Watch with overlapping time periods
-            // This creates duplicates. We need to filter to only ONE source.
-            // Priority: Apple Watch (most accurate) > iPhone (fallback)
+            // Log ALL sources for debugging
+            if (samples && samples.length > 0) {
+                const sources = {};
+                samples.forEach(s => {
+                    const source = s.sourceName || 'Unknown';
+                    if (!sources[source]) sources[source] = { count: 0, steps: 0 };
+                    sources[source].count++;
+                    sources[source].steps += parseFloat(s.value) || 0;
+                });
+                console.log('📱 Data sources found:', sources);
+            }
+
+            // PRIORITY: ALWAYS use iPhone data first
+            // Filter to ONLY iPhone data, ignore Apple Watch
             let filteredSamples = samples || [];
 
             if (filteredSamples.length > 0) {
-                // Check if we have Apple Watch data
-                const watchSamples = filteredSamples.filter(s =>
-                    s.sourceName && s.sourceName.toLowerCase().includes('watch')
+                // Check if we have iPhone data
+                const iphoneSamples = filteredSamples.filter(s =>
+                    s.sourceName && (
+                        s.sourceName.toLowerCase().includes('iphone') ||
+                        s.sourceName.toLowerCase().includes('phone')
+                    )
                 );
 
-                if (watchSamples.length > 0) {
-                    // Use ONLY Apple Watch data
-                    filteredSamples = watchSamples;
-                    console.log(`🚶 Using Apple Watch only: ${watchSamples.length} samples (filtered out iPhone duplicates)`);
+                if (iphoneSamples.length > 0) {
+                    // Use ONLY iPhone data
+                    filteredSamples = iphoneSamples;
+                    console.log(`📱 Using iPhone only: ${iphoneSamples.length} samples (filtered out Watch duplicates)`);
                 } else {
-                    // No watch data, use iPhone
-                    console.log(`🚶 No Apple Watch data, using iPhone: ${filteredSamples.length} samples`);
+                    // No explicit iPhone data, use all data
+                    console.log(`📱 No explicit iPhone source, using all data: ${filteredSamples.length} samples`);
                 }
             }
 
