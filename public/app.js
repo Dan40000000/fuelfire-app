@@ -2125,45 +2125,9 @@ function displayWorkoutTracker(workout, selectedDay = null) {
 
         <div style="background: var(--gradient-1); color: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; text-align: center;">
             <h2 style="font-size: 18px; margin: 0 0 5px 0; font-weight: 700;">${workout.workoutName || workout.name || 'Your Workout'}</h2>
-            <p style="opacity: 0.95; margin: 0; font-size: 13px;">Let's crush today's session! 💪</p>
+            <p style="opacity: 0.95; margin: 0; font-size: 13px;">${displayDay} - Let's crush this session! 💪</p>
         </div>
     `;
-
-    // Add workout week view with clickable days
-    trackerHTML += `
-        <div style="margin-bottom: 15px;">
-            <h3 style="color: var(--dark); margin-bottom: 10px; font-size: 13px; font-weight: 700;">📅 Weekly Schedule</h3>
-            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px;">
-    `;
-
-    // Create weekly calendar view with clickable days
-    days.forEach(day => {
-        const isToday = day === today;
-        const isSelected = day === displayDay;
-        const isWorkoutDay = checkIfWorkoutDay(day, workout);
-
-        trackerHTML += `
-            <div onclick="switchWorkoutDay('${day}')"
-                 style="background: ${isSelected ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : isWorkoutDay ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' : '#f5f5f5'};
-                        color: ${isSelected || isWorkoutDay ? 'white' : '#999'};
-                        padding: 10px 6px;
-                        border-radius: 10px;
-                        text-align: center;
-                        font-size: 10px;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                        box-shadow: ${isSelected ? '0 4px 12px rgba(102, 126, 234, 0.3)' : isWorkoutDay ? '0 2px 8px rgba(79, 172, 254, 0.2)' : '0 2px 6px rgba(0,0,0,0.05)'};
-                        font-weight: ${isSelected || isWorkoutDay ? '700' : '500'};"
-                 onmouseover="if (!${isSelected}) this.style.transform='translateY(-2px)'"
-                 onmouseout="this.style.transform='translateY(0)'"
-            >
-                <div style="font-size: 11px; margin-bottom: 4px;">${day.substring(0, 3)}</div>
-                ${isWorkoutDay ? '<div style="font-size: 14px;">💪</div>' : '<div style="font-size: 12px; opacity: 0.6;">-</div>'}
-            </div>
-        `;
-    });
-
-    trackerHTML += '</div></div>';
 
     // Add selected day's workout details
     const todaysWorkout = getTodaysWorkout(displayDay, workout);
@@ -2235,7 +2199,7 @@ function displayWorkoutTracker(workout, selectedDay = null) {
     container.innerHTML = trackerHTML;
 }
 
-// Close workout tracker and return to dashboard
+// Close workout tracker and return to saved workouts
 function closeWorkoutTracker() {
     const container = document.getElementById('workout-tracker-content');
     if (container) {
@@ -2244,6 +2208,8 @@ function closeWorkoutTracker() {
     // Clear current workout data
     currentWorkoutData = null;
     selectedWorkoutDay = null;
+    // Navigate back to saved workouts
+    showScreen('saved-workouts');
 }
 
 // Check if a specific day has a workout
