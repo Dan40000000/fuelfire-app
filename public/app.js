@@ -2107,6 +2107,16 @@ function displayWorkoutTracker(workout, selectedDay = null) {
         return;
     }
 
+    // Hide the fitness dashboard sections when showing a workout
+    const trackWorkoutsScreen = document.getElementById('track-workouts');
+    if (trackWorkoutsScreen) {
+        Array.from(trackWorkoutsScreen.children).forEach(child => {
+            if (child.id !== 'workout-tracker-content') {
+                child.style.display = 'none';
+            }
+        });
+    }
+
     // Store workout data for day switching
     currentWorkoutData = workout;
 
@@ -2205,9 +2215,21 @@ function closeWorkoutTracker() {
     if (container) {
         container.innerHTML = ''; // Clear workout content
     }
+
+    // Show the fitness dashboard sections again
+    const trackWorkoutsScreen = document.getElementById('track-workouts');
+    if (trackWorkoutsScreen) {
+        Array.from(trackWorkoutsScreen.children).forEach(child => {
+            if (child.id !== 'workout-tracker-content') {
+                child.style.display = '';
+            }
+        });
+    }
+
     // Clear current workout data
     currentWorkoutData = null;
     selectedWorkoutDay = null;
+
     // Navigate back to saved workouts
     showScreen('saved-workouts');
 }
