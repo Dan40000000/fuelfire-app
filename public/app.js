@@ -914,12 +914,12 @@ function addToSavedWorkouts() {
     }
     
     // Check limit
-    if (savedWorkouts.length >= 3) {
+    if (savedWorkouts.length >= 6) {
         const confirmDelete = confirm(
-            'You already have 3 saved workouts (maximum limit).\n\n' +
+            'You already have 6 saved workouts (maximum limit).\n\n' +
             'Would you like to delete your oldest workout to save this one?'
         );
-        
+
         if (confirmDelete) {
             savedWorkouts.shift();
         } else {
@@ -953,6 +953,303 @@ function closeCustomWorkout() {
     document.getElementById('generating-workout').style.display = 'none';
 }
 
+// Manual Workout Builder Variables
+let manualWorkoutExercises = [];
+const exerciseDatabase = {
+    chest: [],
+    back: [],
+    shoulders: [],
+    arms: [],
+    legs: [],
+    core: [],
+    cardio: [],
+    calves: []
+};
+
+// Load exercise databases from the workout pages (will be populated dynamically)
+async function loadExerciseDatabases() {
+    // For now, we'll create a simplified database with key exercises
+    // In production, this would fetch from the actual workout pages
+    exerciseDatabase.chest = [
+        { name: "Barbell Bench Press", difficulty: 3, equipment: "Barbell, Bench", primaryMuscles: ["Chest", "Triceps"] },
+        { name: "Dumbbell Bench Press", difficulty: 2, equipment: "Dumbbells, Bench", primaryMuscles: ["Chest", "Triceps"] },
+        { name: "Incline Bench Press", difficulty: 3, equipment: "Barbell, Incline Bench", primaryMuscles: ["Upper Chest", "Triceps"] },
+        { name: "Decline Bench Press", difficulty: 3, equipment: "Barbell, Decline Bench", primaryMuscles: ["Lower Chest", "Triceps"] },
+        { name: "Push-Ups", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Chest", "Triceps"] },
+        { name: "Dumbbell Flyes", difficulty: 2, equipment: "Dumbbells, Bench", primaryMuscles: ["Chest"] },
+        { name: "Cable Crossovers", difficulty: 2, equipment: "Cable Machine", primaryMuscles: ["Chest"] },
+        { name: "Chest Dips", difficulty: 2, equipment: "Dip Bar", primaryMuscles: ["Chest", "Triceps"] }
+    ];
+
+    exerciseDatabase.back = [
+        { name: "Deadlifts", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Back", "Legs", "Core"], wristStress: false },
+        { name: "Pull-Ups", difficulty: 3, equipment: "Pull-up Bar", primaryMuscles: ["Back", "Biceps"], wristFriendly: true },
+        { name: "Bicep-Focused Pull-Ups", difficulty: 3, equipment: "Pull-up Bar", primaryMuscles: ["Biceps", "Back"], wristFriendly: true },
+        { name: "Barbell Rows", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Back", "Biceps"], wristStress: false },
+        { name: "Lat Pulldowns", difficulty: 2, equipment: "Cable Machine", primaryMuscles: ["Back", "Biceps"], wristStress: false },
+        { name: "T-Bar Rows", difficulty: 3, equipment: "T-Bar", primaryMuscles: ["Back", "Biceps"], wristStress: false },
+        { name: "Cable Rows", difficulty: 2, equipment: "Cable Machine", primaryMuscles: ["Back", "Biceps"], wristFriendly: true },
+        { name: "Dumbbell Rows", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Back", "Biceps"], wristStress: false },
+        { name: "Face Pulls", difficulty: 1, equipment: "Cable Machine", primaryMuscles: ["Rear Delts", "Upper Back"], wristFriendly: true }
+    ];
+
+    exerciseDatabase.shoulders = [
+        { name: "Overhead Press", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Shoulders", "Triceps"] },
+        { name: "Dumbbell Shoulder Press", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Shoulders", "Triceps"] },
+        { name: "Lateral Raises", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Side Delts"] },
+        { name: "Front Raises", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Front Delts"] },
+        { name: "Rear Delt Flyes", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Rear Delts"] },
+        { name: "Arnold Press", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Shoulders"] },
+        { name: "Upright Rows", difficulty: 2, equipment: "Barbell", primaryMuscles: ["Shoulders", "Traps"] },
+        { name: "Shrugs", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Traps"] }
+    ];
+
+    exerciseDatabase.arms = [
+        { name: "Barbell Curls", difficulty: 2, equipment: "Barbell", primaryMuscles: ["Biceps"], wristStress: true },
+        { name: "Dumbbell Curls", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Biceps"], wristStress: false },
+        { name: "Hammer Curls", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Biceps", "Forearms"], wristFriendly: true },
+        { name: "Tricep Dips", difficulty: 2, equipment: "Dip Bar", primaryMuscles: ["Triceps"], wristStress: false },
+        { name: "Tricep Pushdowns", difficulty: 1, equipment: "Cable Machine", primaryMuscles: ["Triceps"], wristFriendly: true },
+        { name: "Overhead Tricep Extension", difficulty: 2, equipment: "Dumbbell", primaryMuscles: ["Triceps"], wristStress: false },
+        { name: "Close-Grip Bench Press", difficulty: 2, equipment: "Barbell, Bench", primaryMuscles: ["Triceps", "Chest"], wristStress: true },
+        { name: "Preacher Curls", difficulty: 2, equipment: "EZ Bar, Preacher Bench", primaryMuscles: ["Biceps"], wristStress: true }
+    ];
+
+    exerciseDatabase.legs = [
+        { name: "Barbell Squats", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Quads", "Glutes", "Core"] },
+        { name: "Leg Press", difficulty: 2, equipment: "Leg Press Machine", primaryMuscles: ["Quads", "Glutes"] },
+        { name: "Romanian Deadlifts", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Hamstrings", "Glutes"] },
+        { name: "Leg Curls", difficulty: 1, equipment: "Leg Curl Machine", primaryMuscles: ["Hamstrings"] },
+        { name: "Leg Extensions", difficulty: 1, equipment: "Leg Extension Machine", primaryMuscles: ["Quads"] },
+        { name: "Lunges", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Quads", "Glutes"] },
+        { name: "Bulgarian Split Squats", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Quads", "Glutes"] },
+        { name: "Hack Squats", difficulty: 2, equipment: "Hack Squat Machine", primaryMuscles: ["Quads"] }
+    ];
+
+    exerciseDatabase.core = [
+        { name: "Planks", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Core"] },
+        { name: "Crunches", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Abs"] },
+        { name: "Bicycle Crunches", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Abs", "Obliques"] },
+        { name: "Leg Raises", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Lower Abs"] },
+        { name: "Russian Twists", difficulty: 2, equipment: "Medicine Ball", primaryMuscles: ["Obliques"] },
+        { name: "Mountain Climbers", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Core", "Cardio"] },
+        { name: "Ab Wheel Rollouts", difficulty: 3, equipment: "Ab Wheel", primaryMuscles: ["Core"] },
+        { name: "Hanging Knee Raises", difficulty: 2, equipment: "Pull-up Bar", primaryMuscles: ["Abs"] }
+    ];
+
+    exerciseDatabase.cardio = [
+        { name: "Running", difficulty: 1, equipment: "None", primaryMuscles: ["Cardiovascular"] },
+        { name: "Cycling", difficulty: 1, equipment: "Bike", primaryMuscles: ["Cardiovascular", "Legs"] },
+        { name: "Rowing", difficulty: 2, equipment: "Rowing Machine", primaryMuscles: ["Cardiovascular", "Back"] },
+        { name: "Jump Rope", difficulty: 2, equipment: "Jump Rope", primaryMuscles: ["Cardiovascular", "Calves"] },
+        { name: "Burpees", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Full Body", "Cardio"] },
+        { name: "Stair Climber", difficulty: 1, equipment: "Stair Climber", primaryMuscles: ["Cardiovascular", "Legs"] },
+        { name: "Battle Ropes", difficulty: 2, equipment: "Battle Ropes", primaryMuscles: ["Cardiovascular", "Arms"] }
+    ];
+
+    exerciseDatabase.calves = [
+        { name: "Standing Calf Raises", difficulty: 1, equipment: "Calf Raise Machine", primaryMuscles: ["Calves"] },
+        { name: "Seated Calf Raises", difficulty: 1, equipment: "Seated Calf Machine", primaryMuscles: ["Calves"] },
+        { name: "Single-Leg Calf Raises", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Calves"] },
+        { name: "Jump Rope", difficulty: 2, equipment: "Jump Rope", primaryMuscles: ["Calves", "Cardio"] }
+    ];
+}
+
+// Start manual workout builder
+function startManualWorkoutBuilder() {
+    manualWorkoutExercises = [];
+    document.getElementById('manual-workout-builder').style.display = 'block';
+    document.getElementById('manual-workout-name').value = '';
+    loadMuscleGroups();
+    loadExerciseDatabases();
+    updateSelectedExercisesList();
+}
+
+// Close manual workout builder
+function closeManualWorkoutBuilder() {
+    document.getElementById('manual-workout-builder').style.display = 'none';
+    document.getElementById('exercise-list-container').style.display = 'none';
+}
+
+// Load muscle groups
+function loadMuscleGroups() {
+    const muscleGroupsContainer = document.getElementById('muscle-groups');
+    const groups = [
+        { name: 'Chest', icon: '💪', color: '#e74c3c' },
+        { name: 'Back', icon: '🏋️', color: '#3498db' },
+        { name: 'Shoulders', icon: '🤸', color: '#9b59b6' },
+        { name: 'Arms', icon: '💪', color: '#e67e22' },
+        { name: 'Legs', icon: '🦵', color: '#2ecc71' },
+        { name: 'Core', icon: '🎯', color: '#f39c12' },
+        { name: 'Cardio', icon: '❤️', color: '#c0392b' },
+        { name: 'Calves', icon: '🦿', color: '#16a085' }
+    ];
+
+    muscleGroupsContainer.innerHTML = groups.map(group => `
+        <button onclick="showMuscleGroupExercises('${group.name.toLowerCase()}')" style="background: ${group.color}; color: white; border: none; padding: 20px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <span style="font-size: 32px;">${group.icon}</span>
+            ${group.name}
+        </button>
+    `).join('');
+}
+
+// Show exercises for selected muscle group
+function showMuscleGroupExercises(muscleGroup) {
+    const exercises = exerciseDatabase[muscleGroup] || [];
+    const exerciseListContainer = document.getElementById('exercise-list-container');
+    const exerciseList = document.getElementById('exercise-list');
+    const title = document.getElementById('selected-muscle-group-title');
+
+    title.textContent = muscleGroup.charAt(0).toUpperCase() + muscleGroup.slice(1) + ' Exercises';
+
+    exerciseList.innerHTML = exercises.map((exercise, index) => `
+        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+                <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">${exercise.name}</div>
+                <div style="font-size: 12px; color: #666;">${exercise.equipment}</div>
+                <div style="font-size: 12px; color: #999;">${exercise.primaryMuscles.join(', ')}</div>
+            </div>
+            <button onclick="addExerciseToWorkout(${index}, '${muscleGroup}')" style="background: var(--carolina-blue); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;">
+                + Add
+            </button>
+        </div>
+    `).join('');
+
+    exerciseListContainer.style.display = 'block';
+}
+
+// Close muscle group exercises
+function closeMuscleGroupExercises() {
+    document.getElementById('exercise-list-container').style.display = 'none';
+}
+
+// Add exercise to workout
+function addExerciseToWorkout(exerciseIndex, muscleGroup) {
+    const exercise = exerciseDatabase[muscleGroup][exerciseIndex];
+
+    // Check if already added
+    if (manualWorkoutExercises.some(e => e.name === exercise.name)) {
+        alert('This exercise is already in your workout!');
+        return;
+    }
+
+    // Add with default sets/reps
+    manualWorkoutExercises.push({
+        ...exercise,
+        sets: 3,
+        reps: 10,
+        muscleGroup: muscleGroup
+    });
+
+    updateSelectedExercisesList();
+    alert(`${exercise.name} added to your workout!`);
+}
+
+// Remove exercise from workout
+function removeExerciseFromWorkout(index) {
+    manualWorkoutExercises.splice(index, 1);
+    updateSelectedExercisesList();
+}
+
+// Clear all selected exercises
+function clearSelectedExercises() {
+    if (manualWorkoutExercises.length === 0) return;
+
+    if (confirm('Are you sure you want to clear all selected exercises?')) {
+        manualWorkoutExercises = [];
+        updateSelectedExercisesList();
+    }
+}
+
+// Update selected exercises list
+function updateSelectedExercisesList() {
+    const selectedList = document.getElementById('selected-exercises-list');
+    const selectedCount = document.getElementById('selected-count');
+
+    selectedCount.textContent = manualWorkoutExercises.length;
+
+    if (manualWorkoutExercises.length === 0) {
+        selectedList.innerHTML = '<p style="text-align: center; color: #999; font-style: italic;">No exercises selected yet</p>';
+        return;
+    }
+
+    selectedList.innerHTML = manualWorkoutExercises.map((exercise, index) => `
+        <div style="padding: 12px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+                <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">${exercise.name}</div>
+                <div style="display: flex; gap: 15px; align-items: center; margin-top: 8px;">
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <label style="font-size: 12px; color: #666;">Sets:</label>
+                        <input type="number" value="${exercise.sets}" min="1" max="10" onchange="updateExerciseSets(${index}, this.value)" style="width: 50px; padding: 4px; border: 1px solid #ddd; border-radius: 5px; text-align: center;">
+                    </div>
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <label style="font-size: 12px; color: #666;">Reps:</label>
+                        <input type="number" value="${exercise.reps}" min="1" max="50" onchange="updateExerciseReps(${index}, this.value)" style="width: 50px; padding: 4px; border: 1px solid #ddd; border-radius: 5px; text-align: center;">
+                    </div>
+                </div>
+            </div>
+            <button onclick="removeExerciseFromWorkout(${index})" style="background: #ff5252; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-left: 10px;">
+                Remove
+            </button>
+        </div>
+    `).join('');
+}
+
+// Update exercise sets
+function updateExerciseSets(index, value) {
+    manualWorkoutExercises[index].sets = parseInt(value) || 3;
+}
+
+// Update exercise reps
+function updateExerciseReps(index, value) {
+    manualWorkoutExercises[index].reps = parseInt(value) || 10;
+}
+
+// Save manual workout
+function saveManualWorkout() {
+    const workoutName = document.getElementById('manual-workout-name').value.trim() || 'My Custom Workout';
+
+    if (manualWorkoutExercises.length === 0) {
+        alert('Please add at least one exercise to your workout!');
+        return;
+    }
+
+    // Get existing saved workouts
+    let savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+
+    // Check if at 6-workout limit
+    if (savedWorkouts.length >= 6) {
+        const confirmDelete = confirm(
+            'You already have 6 saved workouts (maximum limit).\n\n' +
+            'Would you like to delete your oldest workout to save this new one?\n\n' +
+            'Oldest workout: ' + (savedWorkouts[0].workoutName || savedWorkouts[0].name || 'Unnamed Workout')
+        );
+
+        if (confirmDelete) {
+            savedWorkouts.shift();
+        } else {
+            alert('Workout not saved. Please delete a workout from your Saved Workouts page first.');
+            return;
+        }
+    }
+
+    // Create workout object
+    const workout = {
+        id: Date.now(),
+        workoutName: workoutName,
+        name: workoutName,
+        exercises: manualWorkoutExercises,
+        type: 'manual',
+        createdAt: new Date().toISOString()
+    };
+
+    savedWorkouts.push(workout);
+    localStorage.setItem('savedWorkouts', JSON.stringify(savedWorkouts));
+
+    alert(`Workout "${workoutName}" saved successfully! 💪`);
+    closeManualWorkoutBuilder();
+}
+
 // Select option in quiz
 function selectOption(button, field, value) {
     // Remove selected class from siblings
@@ -978,31 +1275,46 @@ function nextQuestion() {
             return;
         }
     }
-    
+
     if (currentStep === 6) {
         workoutData.injuryNotes = 'User injuries: ' + workoutData.injuries.join(', ');
     }
-    
+
     if (currentStep === 7) {
         workoutData.experience = document.getElementById('experience').value;
         workoutData.workoutName = document.getElementById('workout-name').value || 'My Custom Workout';
+
+        // Validate all required fields are filled
+        console.log('📝 Validating workout data before generation:', workoutData);
+
+        if (!workoutData.goal || !workoutData.days || !workoutData.duration || !workoutData.location) {
+            alert('⚠️ Please complete all quiz steps before generating your workout.');
+            console.error('Missing required fields:', {
+                goal: workoutData.goal,
+                days: workoutData.days,
+                duration: workoutData.duration,
+                location: workoutData.location
+            });
+            return;
+        }
+
         generateWorkout();
         return;
     }
-    
-    // Move to next step
-    document.querySelector(`[data-step="${currentStep}"]`).style.display = 'none';
+
+    // Move to next step - target only custom workout quiz sections
+    document.querySelector(`.quiz-question-section[data-step="${currentStep}"]`).style.display = 'none';
     currentStep++;
-    document.querySelector(`[data-step="${currentStep}"]`).style.display = 'block';
-    
+    document.querySelector(`.quiz-question-section[data-step="${currentStep}"]`).style.display = 'block';
+
     updateQuizProgress();
 }
 
 function previousQuestion() {
     if (currentStep > 1) {
-        document.querySelector(`[data-step="${currentStep}"]`).style.display = 'none';
+        document.querySelector(`.quiz-question-section[data-step="${currentStep}"]`).style.display = 'none';
         currentStep--;
-        document.querySelector(`[data-step="${currentStep}"]`).style.display = 'block';
+        document.querySelector(`.quiz-question-section[data-step="${currentStep}"]`).style.display = 'block';
         updateQuizProgress();
     }
 }
@@ -1101,49 +1413,181 @@ function displayGeneratedWorkout() {
     setTimeout(() => {
         document.getElementById('generating-workout').style.display = 'none';
         document.getElementById('generated-workout').style.display = 'block';
-        
+
         // Generate workout content based on user data
         const workoutPlan = createWorkoutPlan();
         document.getElementById('workout-plan-content').innerHTML = workoutPlan;
+
+        // Log workout data for debugging
+        console.log('✅ Workout generated with data:', {
+            name: workoutData.workoutName,
+            exerciseCount: workoutData.exercises?.length || 0,
+            exercises: workoutData.exercises
+        });
     }, 3000);
 }
 
+// Smart exercise selection based on injuries
+function selectExercisesForWorkout(muscleGroups, injuries, level, count = 3) {
+    const hasWristIssue = injuries.includes('wrist') || injuries.includes('hands/fingers');
+    const hasKneeIssue = injuries.includes('knee');
+    const hasShoulderIssue = injuries.includes('shoulder');
+    const hasBackIssue = injuries.includes('lower back');
+
+    console.log('🏋️ Selecting exercises for:', muscleGroups);
+
+    let selectedExercises = [];
+
+    muscleGroups.forEach(group => {
+        const exercises = exerciseDatabase[group] || [];
+        console.log(`  ${group}: ${exercises.length} exercises available`);
+
+        // Filter exercises based on injuries
+        let filteredExercises = exercises.filter(ex => {
+            // Avoid wrist-stressful exercises if wrist issues
+            if (hasWristIssue && ex.wristStress) return false;
+
+            // Filter by difficulty level
+            if (level === 'beginner' && ex.difficulty > 2) return false;
+
+            return true;
+        });
+
+        // Prioritize wrist-friendly exercises if wrist issues
+        if (hasWristIssue) {
+            const wristFriendly = filteredExercises.filter(ex => ex.wristFriendly);
+            if (wristFriendly.length > 0) {
+                selectedExercises.push(...wristFriendly.slice(0, Math.ceil(count / muscleGroups.length)));
+            } else {
+                selectedExercises.push(...filteredExercises.slice(0, Math.ceil(count / muscleGroups.length)));
+            }
+        } else {
+            selectedExercises.push(...filteredExercises.slice(0, Math.ceil(count / muscleGroups.length)));
+        }
+    });
+
+    return selectedExercises.slice(0, count);
+}
+
 // Create workout plan based on user data
+// Generate weekly schedule with different exercises for each day
+function generateWeeklySchedule(goal, days, level, injuries, sets, reps) {
+    const schedule = {};
+
+    // Define workout days and muscle groups for each split
+    const splits = {
+        '3': {
+            'Monday': { name: goal === 'muscle' ? 'Chest, Back, Legs, Shoulders' : 'Total Body', muscles: ['chest', 'back', 'legs', 'shoulders'] },
+            'Wednesday': { name: goal === 'muscle' ? 'Chest, Back, Shoulders, Arms' : 'Cardio & Core', muscles: ['chest', 'back', 'shoulders', 'arms'] },
+            'Friday': { name: goal === 'muscle' ? 'Legs & Core' : 'HIIT & Legs', muscles: ['legs', 'core'] }
+        },
+        '4': {
+            'Monday': { name: 'Chest, Shoulders, Arms', muscles: ['chest', 'shoulders', 'arms'] },
+            'Tuesday': { name: 'Legs & Core', muscles: ['legs', 'core'] },
+            'Thursday': { name: 'Back & Arms', muscles: ['back', 'arms'] },
+            'Friday': { name: 'Chest, Back, Legs', muscles: ['chest', 'back', 'legs', 'core'] }
+        },
+        '5': {
+            'Monday': { name: 'Chest, Shoulders, Arms', muscles: ['chest', 'shoulders', 'arms'] },
+            'Tuesday': { name: 'Legs', muscles: ['legs'] },
+            'Wednesday': { name: 'Back & Arms', muscles: ['back', 'arms'] },
+            'Friday': { name: 'Legs & Core', muscles: ['legs', 'core'] },
+            'Saturday': { name: 'Chest, Back, Legs', muscles: ['chest', 'back', 'legs', 'core'] }
+        },
+        '6': {
+            'Monday': { name: 'Chest, Shoulders, Arms', muscles: ['chest', 'shoulders', 'arms'] },
+            'Tuesday': { name: 'Back & Arms', muscles: ['back', 'arms'] },
+            'Wednesday': { name: 'Legs & Core', muscles: ['legs', 'core'] },
+            'Thursday': { name: 'Chest & Shoulders', muscles: ['chest', 'shoulders', 'arms'] },
+            'Friday': { name: 'Back & Arms', muscles: ['back', 'arms'] },
+            'Saturday': { name: 'Legs & Conditioning', muscles: ['legs', 'core', 'calves'] }
+        }
+    };
+
+    const split = splits[days];
+    if (!split) return schedule;
+
+    // Generate exercises for each workout day
+    for (const [day, workout] of Object.entries(split)) {
+        const numExercises = days === '3' ? 6 : days === '4' ? 6 : days === '5' ? 6 : 5;
+        const dayExercises = selectExercisesForWorkout(workout.muscles, injuries, level, numExercises);
+
+        schedule[day] = {
+            name: workout.name,
+            exercises: dayExercises.map(exercise => ({
+                name: exercise.name,
+                sets: sets,
+                reps: reps,
+                equipment: exercise.equipment,
+                primaryMuscles: exercise.primaryMuscles || [],
+                wristFriendly: exercise.wristFriendly || false
+            }))
+        };
+    }
+
+    return schedule;
+}
+
 function createWorkoutPlan() {
     const { sex, age, level, goal, style, days, duration, location, injuries, workoutName } = workoutData;
-    
+
     let planHTML = `
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 20px; margin-bottom: 20px; color: white;">
+            <h2 style="margin: 0 0 10px 0; font-size: 24px;">🎯 ${workoutName}</h2>
+            <p style="margin: 0; opacity: 0.9;">Your personalized ${goal.replace('-', ' ')} program</p>
+        </div>
+
         <div style="background: var(--card-bg); padding: 25px; border-radius: 20px; margin-bottom: 20px;">
-            <h3 style="color: var(--dark); margin-bottom: 20px;">${workoutName}</h3>
-            
+            <h3 style="color: var(--dark); margin-bottom: 15px;">📊 Program Overview</h3>
+
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
                 <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
+                    <div style="color: var(--primary-dark); font-size: 14px;">Goal</div>
+                    <div style="font-weight: bold; font-size: 16px;">${goal === 'muscle' ? 'Build Muscle' : goal === 'fat-loss' ? 'Fat Loss' : goal === 'endurance' ? 'Endurance' : 'General Fitness'}</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
+                    <div style="color: var(--primary-dark); font-size: 14px;">Level</div>
+                    <div style="font-weight: bold; font-size: 16px;">${level.charAt(0).toUpperCase() + level.slice(1)}</div>
+                </div>
+                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                     <div style="color: var(--primary-dark); font-size: 14px;">Duration</div>
-                    <div style="font-weight: bold; font-size: 18px;">${duration} min/day</div>
+                    <div style="font-weight: bold; font-size: 16px;">${duration} min/day</div>
                 </div>
                 <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                     <div style="color: var(--primary-dark); font-size: 14px;">Frequency</div>
-                    <div style="font-weight: bold; font-size: 18px;">${days} days/week</div>
+                    <div style="font-weight: bold; font-size: 16px;">${days} days/week</div>
                 </div>
             </div>
     `;
-    
+
     // Generate weekly split
     planHTML += `
         <h4 style="color: var(--dark); margin-bottom: 15px;">Your Weekly Schedule</h4>
         <div style="display: grid; gap: 10px;">
     `;
-    
+
     if (days === '3') {
         planHTML += `
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Monday:</strong> ${goal === 'muscle' ? 'Full Body Strength' : 'Total Body Circuit'}
             </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Tuesday:</strong> Rest / Light Cardio
+            </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Wednesday:</strong> ${goal === 'muscle' ? 'Upper Body Focus' : 'Cardio & Core'}
             </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Thursday:</strong> Rest / Light Cardio
+            </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Friday:</strong> ${goal === 'muscle' ? 'Lower Body & Core' : 'HIIT & Strength'}
+            </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Saturday:</strong> Rest / Light Cardio
+            </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Sunday:</strong> Rest
             </div>
         `;
     } else if (days === '4') {
@@ -1154,11 +1598,20 @@ function createWorkoutPlan() {
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Tuesday:</strong> Lower Body
             </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Wednesday:</strong> Rest / Light Cardio
+            </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Thursday:</strong> Upper Body Pull
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Friday:</strong> Full Body Circuit
+            </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Saturday:</strong> Rest / Light Cardio
+            </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Sunday:</strong> Rest
             </div>
         `;
     } else if (days === '5') {
@@ -1172,11 +1625,17 @@ function createWorkoutPlan() {
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Wednesday:</strong> Upper Pull
             </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Thursday:</strong> Rest / Light Cardio
+            </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Friday:</strong> Lower Body
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Saturday:</strong> Full Body/Conditioning
+            </div>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Sunday:</strong> Rest
             </div>
         `;
     } else if (days === '6') {
@@ -1199,23 +1658,89 @@ function createWorkoutPlan() {
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Saturday:</strong> Legs & Conditioning
             </div>
-        `;
-    }
-    
-    planHTML += '</div>';
-    
-    // Add injury modifications if needed
-    if (injuries.length > 0 && !injuries.includes('none')) {
-        planHTML += `
-            <div style="background: #fff3e0; padding: 20px; border-radius: 15px; margin-top: 20px;">
-                <h4 style="color: #f57c00; margin-bottom: 10px;">⚠️ Injury Modifications</h4>
-                <p style="color: #666;">Your program has been adjusted for: ${injuries.join(', ')}. Alternative exercises have been included.</p>
+            <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
+                <strong>Sunday:</strong> Rest
             </div>
         `;
     }
-    
+
     planHTML += '</div>';
-    
+
+    // Add injury modifications if needed
+    if (injuries.length > 0 && !injuries.includes('none')) {
+        const hasWristIssue = injuries.includes('wrist') || injuries.includes('hands/fingers');
+        planHTML += `
+            <div style="background: #fff3e0; padding: 20px; border-radius: 15px; margin-top: 20px;">
+                <h4 style="color: #f57c00; margin-bottom: 10px;">⚠️ Injury Modifications</h4>
+                <p style="color: #666;">Your program has been adjusted for: ${injuries.join(', ')}.${hasWristIssue ? ' Prioritizing wrist-friendly exercises like Hammer Curls, Pull-Ups, and Cable exercises.' : ' Alternative exercises have been included.'}</p>
+            </div>
+        `;
+    }
+
+    planHTML += '</div>';
+
+    // Generate intelligent exercise selection for today's workout
+    const hasWristIssue = injuries.includes('wrist') || injuries.includes('hands/fingers');
+    let todayExercises = [];
+
+    // More comprehensive exercise selection based on goal and days per week
+    if (goal === 'muscle') {
+        if (days === '3') {
+            // Full body workouts - hit all major muscle groups
+            todayExercises = selectExercisesForWorkout(['chest', 'back', 'legs', 'shoulders'], injuries, level, 6);
+        } else if (days === '4' || days === '5') {
+            // Upper/Lower split
+            todayExercises = selectExercisesForWorkout(['chest', 'back', 'shoulders', 'arms'], injuries, level, 7);
+        } else {
+            // Push/Pull/Legs split
+            todayExercises = selectExercisesForWorkout(['chest', 'shoulders', 'arms'], injuries, level, 6);
+        }
+    } else if (goal === 'fat-loss') {
+        // Circuit training with cardio elements
+        todayExercises = selectExercisesForWorkout(['chest', 'back', 'legs', 'core', 'cardio'], injuries, level, 8);
+    } else if (goal === 'endurance') {
+        // Higher rep, endurance focused
+        todayExercises = selectExercisesForWorkout(['core', 'cardio', 'legs', 'back'], injuries, level, 7);
+    } else {
+        // Overall fitness - balanced approach
+        todayExercises = selectExercisesForWorkout(['chest', 'back', 'legs', 'core'], injuries, level, 6);
+    }
+
+    // Calculate sets/reps based on level and goal
+    let sets, reps;
+    if (goal === 'muscle') {
+        sets = level === 'beginner' ? 3 : level === 'intermediate' ? 4 : 4;
+        reps = level === 'beginner' ? '8-10' : level === 'intermediate' ? '10-12' : '12-15';
+    } else if (goal === 'fat-loss') {
+        sets = 3;
+        reps = '12-15';
+    } else if (goal === 'endurance') {
+        sets = level === 'beginner' ? 2 : 3;
+        reps = '15-20';
+    } else {
+        sets = 3;
+        reps = '10-12';
+    }
+
+    // Store exercises in workoutData for saving (for backward compatibility)
+    workoutData.exercises = todayExercises.map(exercise => ({
+        name: exercise.name,
+        sets: sets,
+        reps: reps,
+        equipment: exercise.equipment,
+        primaryMuscles: exercise.primaryMuscles || [],
+        wristFriendly: exercise.wristFriendly || false
+    }));
+
+    // Generate full weekly schedule with different exercises for each day
+    workoutData.weeklySchedule = generateWeeklySchedule(goal, days, level, injuries, sets, reps);
+
+    console.log('💾 After generation, workoutData has:', {
+        exercises: workoutData.exercises?.length || 0,
+        weeklySchedule: workoutData.weeklySchedule ? Object.keys(workoutData.weeklySchedule).length + ' days' : 'none',
+        mondayExercises: workoutData.weeklySchedule?.Monday?.exercises?.length || 0
+    });
+
     // Add today's workout preview
     planHTML += `
         <div style="background: var(--card-bg); padding: 25px; border-radius: 20px;">
@@ -1225,36 +1750,53 @@ function createWorkoutPlan() {
                     <div style="font-weight: bold;">Warm-up</div>
                     <div style="color: #666; font-size: 14px;">5 min dynamic stretching</div>
                 </div>
+    `;
+
+    // Add selected exercises
+    todayExercises.forEach((exercise, index) => {
+        const isWristFriendly = exercise.wristFriendly ? ' 🟢' : '';
+        planHTML += `
+            <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
+                <div style="font-weight: bold;">Exercise ${index + 1}: ${exercise.name}${isWristFriendly}</div>
+                <div style="color: #666; font-size: 14px;">${sets} sets × ${reps} reps</div>
+                <div style="color: #999; font-size: 12px; margin-top: 5px;">${exercise.equipment}</div>
+            </div>
+        `;
+    });
+
+    planHTML += `
                 <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                    <div style="font-weight: bold;">Exercise 1: ${style === 'weights' ? 'Bench Press' : 'Push-ups'}</div>
-                    <div style="color: #666; font-size: 14px;">3 sets × ${level === 'beginner' ? '8-10' : '10-12'} reps</div>
-                </div>
-                <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                    <div style="font-weight: bold;">Exercise 2: ${style === 'weights' ? 'Dumbbell Rows' : 'Bodyweight Rows'}</div>
-                    <div style="color: #666; font-size: 14px;">3 sets × ${level === 'beginner' ? '8-10' : '10-12'} reps</div>
+                    <div style="font-weight: bold;">Cool-down</div>
+                    <div style="color: #666; font-size: 14px;">5-10 min stretching & mobility</div>
                 </div>
             </div>
         </div>
     `;
-    
+
     return planHTML;
 }
 
-// Save workout plan with 3-workout limit
+// Save workout plan with 6-workout limit
 function saveWorkoutPlan() {
     console.log('saveWorkoutPlan called'); // Debug log
-    
+    console.log('📦 Saving workout data:', {
+        name: workoutData.workoutName,
+        exerciseCount: workoutData.exercises?.length || 0,
+        weeklyScheduleKeys: workoutData.weeklySchedule ? Object.keys(workoutData.weeklySchedule) : [],
+        weeklyScheduleMonday: workoutData.weeklySchedule?.Monday?.exercises?.length || 0
+    });
+
     // Get existing saved workouts
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
-    
-    // Check if at 3-workout limit
-    if (savedWorkouts.length >= 3) {
+
+    // Check if at 6-workout limit
+    if (savedWorkouts.length >= 6) {
         const confirmDelete = confirm(
-            'You already have 3 saved workouts (maximum limit).\n\n' +
+            'You already have 6 saved workouts (maximum limit).\n\n' +
             'Would you like to delete your oldest workout to save this new one?\n\n' +
             'Oldest workout: ' + (savedWorkouts[0].workoutName || 'Unnamed Workout')
         );
-        
+
         if (confirmDelete) {
             // Remove oldest workout
             savedWorkouts.shift();
@@ -1263,89 +1805,124 @@ function saveWorkoutPlan() {
             return;
         }
     }
-    
+
+    // Ensure workoutName is set
+    const workoutName = workoutData.workoutName || 'My Custom Workout';
+
+    // Assign a color based on workout goal
+    const colorMap = {
+        'muscle': '#9b59b6',      // Purple for muscle building
+        'fat-loss': '#e74c3c',    // Red for fat loss
+        'endurance': '#3498db',   // Blue for endurance
+        'fitness': '#27ae60'      // Green for general fitness
+    };
+    const workoutColor = colorMap[workoutData.goal] || '#4B9CD3';  // Default carolina blue
+
     // Add new workout
     savedWorkouts.push({
         ...workoutData,
+        workoutName: workoutName,
+        name: workoutName,
         id: Date.now(),
+        type: 'ai-generated',
+        color: workoutColor,
         createdAt: new Date().toISOString()
     });
-    
+
     localStorage.setItem('savedWorkouts', JSON.stringify(savedWorkouts));
     localStorage.setItem('activeWorkout', JSON.stringify(workoutData));
-    
+
     alert('Workout saved successfully! You can find it in your Saved Workouts.');
     closeGeneratedWorkout();
     showScreen('saved-workouts');
 }
 
-// Load saved workouts
+// Load saved workouts - UNIFIED VERSION for both AI and preset workouts
 function loadSavedWorkouts() {
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
     const container = document.getElementById('saved-workouts-list');
-    
+
     if (savedWorkouts.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 20px;">
                 <div style="font-size: 48px; margin-bottom: 20px;">📭</div>
                 <h3 style="color: var(--dark); margin-bottom: 10px;">No Saved Workouts Yet</h3>
-                <p style="color: var(--primary-dark);">Create your first custom workout to see it here!</p>
+                <p style="color: var(--primary-dark);">Create your first custom workout or start a program!</p>
             </div>
         `;
         return;
     }
-    
-    container.innerHTML = savedWorkouts.map((workout, index) => `
-        <div style="background: var(--card-bg); padding: 25px; border-radius: 20px; margin-bottom: 20px; position: relative;">
-            <button onclick="deleteWorkout('${workout.id}')" style="position: absolute; top: 15px; right: 15px; background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;">
-                🗑️ Delete
-            </button>
-            
-            <h3 style="color: var(--dark); margin-bottom: 15px; padding-right: 80px;">${workout.workoutName || workout.name || 'Custom Workout'}</h3>
-            
-            ${workout.type === 'preset' ? `
-                <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px; margin-bottom: 15px;">
-                    <div style="color: var(--primary-dark); font-size: 12px;">Type</div>
-                    <div style="font-weight: bold;">${workout.difficulty} - ${workout.duration}</div>
+
+    container.innerHTML = savedWorkouts.map((workout, index) => {
+        // For preset workouts, get the program data from workoutPrograms
+        const program = workoutPrograms[workout.id];
+
+        // Determine the schedule source - AI workouts have weeklySchedule, presets use program.schedule
+        const schedule = workout.weeklySchedule || (program && program.schedule);
+        const dayOptions = schedule ? Object.keys(schedule) : [];
+
+        // Get color - AI workouts might not have one
+        const workoutColor = workout.color || getWorkoutColor(workout.id) || '#4B9CD3';
+
+        // Get workout name
+        const workoutName = workout.workoutName || workout.name || 'Custom Workout';
+
+        // Get type and duration
+        const workoutType = workout.type || 'Custom';
+        const duration = workout.duration || (program && program.duration) || 'Custom';
+        const daysPerWeek = workout.daysPerWeek || workout.days || (program && program.daysPerWeek) || workout.days;
+
+        return `
+            <div style="background: var(--card-bg); padding: 20px; border-radius: 15px; margin-bottom: 18px; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-left: 4px solid ${workoutColor};">
+                <button onclick="deleteSavedWorkout('${workout.id}')" style="position: absolute; top: 12px; right: 12px; background: #ff5252; color: white; border: none; padding: 6px 12px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: bold;">
+                    🗑️ Delete
+                </button>
+
+                <div style="margin-bottom: 12px; padding-right: 50px;">
+                    <h3 style="color: var(--dark); margin: 0 0 4px 0; font-size: 18px; font-weight: 700;">${workoutName}</h3>
+                    <div style="color: #888; font-size: 11px;">
+                        ${workout.type === 'ai-generated' ? 'Created: ' : 'Saved: '}${new Date(workout.createdAt || workout.dateAdded || Date.now()).toLocaleDateString()}
+                    </div>
                 </div>
-            ` : `
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
-                    <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px;">
-                        <div style="color: var(--primary-dark); font-size: 12px;">Goal</div>
-                        <div style="font-weight: bold;">${workout.goal === 'muscle' ? 'Build Muscle' : workout.goal === 'fat-loss' ? 'Lose Fat' : workout.goal === 'endurance' ? 'Endurance' : 'Overall Fitness'}</div>
-                    </div>
-                    <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px;">
-                        <div style="color: var(--primary-dark); font-size: 12px;">Frequency</div>
-                        <div style="font-weight: bold;">${workout.days} days/week</div>
-                    </div>
-                    <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px;">
-                        <div style="color: var(--primary-dark); font-size: 12px;">Duration</div>
-                        <div style="font-weight: bold;">${workout.duration} min</div>
-                    </div>
-                    <div style="background: var(--lighter-bg); padding: 12px; border-radius: 12px;">
-                        <div style="color: var(--primary-dark); font-size: 12px;">Level</div>
-                        <div style="font-weight: bold;">${workout.level ? workout.level.charAt(0).toUpperCase() + workout.level.slice(1) : 'Custom'}</div>
-                    </div>
+
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
+                    ${workout.goal ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600;">💪 ${workout.goal === 'muscle' ? 'Build Muscle' : workout.goal === 'fat-loss' ? 'Fat Loss' : workout.goal === 'endurance' ? 'Endurance' : 'Fitness'}</span>` : ''}
+                    ${daysPerWeek ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600;">📅 ${daysPerWeek} days/week</span>` : ''}
+                    ${workout.level ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600;">🎯 ${workout.level.charAt(0).toUpperCase() + workout.level.slice(1)}</span>` : ''}
                 </div>
-            `}
-            
-            <div style="color: #666; font-size: 12px; margin-bottom: 15px;">
-                ${workout.type === 'preset' ? 'Saved: ' : 'Created: '}${new Date(workout.createdAt || workout.savedAt).toLocaleDateString()}
+
+                ${dayOptions.length > 0 ? `
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 12px; color: var(--dark); font-weight: 700; margin-bottom: 8px; display: block;">Choose workout day:</label>
+                        <select id="day-${workout.id}" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; background: white; color: var(--dark); font-weight: 600;">
+                            ${dayOptions.map(day => {
+                                const dayWorkout = schedule[day];
+                                const dayName = dayWorkout && dayWorkout.name ? dayWorkout.name : day;
+                                return `<option value="${day}">${day} - ${dayName}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                ` : ''}
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button onclick="toggleWorkoutPreview('${workout.id}')" style="background: white; color: ${workoutColor}; border: 2px solid ${workoutColor}; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 13px;">
+                        👁️ View
+                    </button>
+                    <button onclick="startWorkout('${workout.id}')" style="background: ${workoutColor}; color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 13px;">
+                        🔥 Start
+                    </button>
+                </div>
             </div>
-            
-            <button onclick="loadWorkout('${workout.id}')" style="background: var(--gradient-1); color: white; border: none; padding: 12px 25px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%;">
-                🔥 Start This Workout
-            </button>
-        </div>
-    `).join('');
-    
+        `;
+    }).join('');
+
     // Show workout count
-    const countText = savedWorkouts.length === 3 ? ' (Maximum Reached)' : ` (${savedWorkouts.length}/3)`;
+    const countText = savedWorkouts.length === 6 ? 'Maximum Reached' : `${savedWorkouts.length} / 6`;
     container.innerHTML = `
         <div style="text-align: center; margin-bottom: 20px;">
-            <span style="background: var(--lighter-bg); padding: 8px 16px; border-radius: 20px; font-size: 14px; color: var(--primary-dark);">
-                Saved Workouts${countText}
-            </span>
+            <div style="background: var(--gradient-1); color: white; padding: 12px 20px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block;">
+                💪 Saved Workouts: ${countText}
+            </div>
         </div>
     ` + container.innerHTML;
 }
@@ -1372,11 +1949,131 @@ function deleteWorkout(workoutId) {
     }
 }
 
-// Load specific workout
+// Store selected days for each workout
+const selectedWorkoutDays = {};
+
+// Select a workout day (pill button)
+function selectWorkoutDay(workoutId, day) {
+    // Store the selected day
+    selectedWorkoutDays[workoutId] = day;
+
+    // Update pill button styles
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    const workout = savedWorkouts.find(w => String(w.id) === String(workoutId));
+
+    if (workout && workout.weeklySchedule) {
+        Object.keys(workout.weeklySchedule).forEach(d => {
+            const btn = document.getElementById(`day-btn-${workoutId}-${d}`);
+            if (btn) {
+                if (d === day) {
+                    btn.style.background = 'var(--gradient-1)';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = 'var(--carolina-blue)';
+                    btn.style.transform = 'scale(1.05)';
+                    btn.style.boxShadow = '0 2px 8px rgba(75, 156, 211, 0.3)';
+                } else {
+                    btn.style.background = 'var(--lighter-bg)';
+                    btn.style.color = 'var(--dark)';
+                    btn.style.borderColor = 'transparent';
+                    btn.style.transform = 'scale(1)';
+                    btn.style.boxShadow = 'none';
+                }
+            }
+        });
+    }
+}
+
+// Toggle workout preview (dropdown view)
+function toggleWorkoutPreview(workoutId) {
+    const previewDiv = document.getElementById(`workout-preview-${workoutId}`);
+
+    if (!previewDiv) return;
+
+    // If already showing, hide it
+    if (previewDiv.style.display === 'block') {
+        previewDiv.style.display = 'none';
+        return;
+    }
+
+    // Get selected day from dropdown
+    const daySelector = document.getElementById(`day-${workoutId}`);
+    const selectedDay = daySelector ? daySelector.value : null;
+
+    if (!selectedDay) {
+        alert('Please select a day first');
+        return;
+    }
+
+    // Get workout data
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    const workout = savedWorkouts.find(w => String(w.id) === String(workoutId));
+
+    // Check for preset workouts (need to get schedule from workoutPrograms)
+    const program = workoutPrograms[workout.id];
+    const schedule = workout.weeklySchedule || (program && program.schedule);
+
+    if (!schedule || !schedule[selectedDay]) {
+        alert('No workout found for this day');
+        return;
+    }
+
+    const dayWorkout = schedule[selectedDay];
+
+    // Build preview
+    let previewHTML = `
+        <div style="background: var(--gradient-1); padding: 15px; border-radius: 12px;">
+            <h4 style="color: white; margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">📋 ${selectedDay}: ${dayWorkout.name}</h4>
+            <div style="display: grid; gap: 8px;">
+    `;
+
+    dayWorkout.exercises.forEach((exercise, index) => {
+        previewHTML += `
+            <div style="background: white; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--dark); flex: 1;">
+                    ${index + 1}. ${exercise.name}
+                </div>
+                <div style="background: var(--carolina-blue); color: white; padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; white-space: nowrap;">
+                    ${exercise.sets} × ${exercise.reps}
+                </div>
+            </div>
+        `;
+    });
+
+    previewHTML += `
+            </div>
+        </div>
+    `;
+
+    previewDiv.innerHTML = previewHTML;
+    previewDiv.style.display = 'block';
+}
+
+// Start workout (full tracker)
+function startWorkout(workoutId) {
+    // Get selected day from dropdown
+    const daySelector = document.getElementById(`day-${workoutId}`);
+    const selectedDay = daySelector ? daySelector.value : null;
+
+    if (!selectedDay) {
+        alert('Please select a day first');
+        return;
+    }
+
+    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
+    const workout = savedWorkouts.find(w => String(w.id) === String(workoutId));
+
+    if (workout) {
+        localStorage.setItem('activeWorkout', JSON.stringify(workout));
+        showScreen('track-workouts');
+        displayWorkoutTracker(workout, selectedDay);
+    }
+}
+
+// Load specific workout (legacy - for backward compatibility)
 function loadWorkout(workoutId) {
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
     const workout = savedWorkouts.find(w => String(w.id) === String(workoutId));
-    
+
     if (workout) {
         localStorage.setItem('activeWorkout', JSON.stringify(workout));
         showScreen('track-workouts');
@@ -1384,102 +2081,138 @@ function loadWorkout(workoutId) {
     }
 }
 
+// Global variable to track selected day
+let selectedWorkoutDay = null;
+let currentWorkoutData = null;
+
+// Switch to a different day in the workout tracker
+function switchWorkoutDay(day) {
+    if (currentWorkoutData) {
+        displayWorkoutTracker(currentWorkoutData, day);
+    }
+}
+
 // Display workout tracker with days and exercises
-function displayWorkoutTracker(workout) {
+function displayWorkoutTracker(workout, selectedDay = null) {
     const container = document.getElementById('workout-tracker-content');
-    
+
+    // Safety check - container must exist
+    if (!container) {
+        console.error('❌ workout-tracker-content element not found');
+        alert('Error: Unable to display workout. Please refresh the page.');
+        return;
+    }
+
+    // Store workout data for day switching
+    currentWorkoutData = workout;
+
     // Get today's day
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const today = days[new Date().getDay()];
-    
+
+    // Use selected day or default to today
+    const displayDay = selectedDay || selectedWorkoutDay || today;
+    selectedWorkoutDay = displayDay; // Store for future use
+
     let trackerHTML = `
-        <div style="background: var(--gradient-1); color: white; padding: 25px; border-radius: 25px; margin-bottom: 25px; text-align: center;">
-            <h2 style="font-size: 24px; margin-bottom: 10px;">${workout.workoutName || workout.name || 'Your Workout'}</h2>
-            <p style="opacity: 0.9;">Let's crush today's session! 💪</p>
+        <button onclick="closeWorkoutTracker()" style="background: white; color: var(--carolina-blue); border: 2px solid var(--carolina-blue); padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px;">
+            <span>←</span> Back
+        </button>
+
+        <div style="background: var(--gradient-1); color: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; text-align: center;">
+            <h2 style="font-size: 18px; margin: 0 0 5px 0; font-weight: 700;">${workout.workoutName || workout.name || 'Your Workout'}</h2>
+            <p style="opacity: 0.95; margin: 0; font-size: 13px;">Let's crush today's session! 💪</p>
         </div>
     `;
-    
-    // Add workout week view
+
+    // Add workout week view with clickable days
     trackerHTML += `
-        <div style="margin-bottom: 25px;">
-            <h3 style="color: var(--dark); margin-bottom: 15px;">📅 Weekly Schedule</h3>
-            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px;">
+        <div style="margin-bottom: 15px;">
+            <h3 style="color: var(--dark); margin-bottom: 10px; font-size: 13px; font-weight: 700;">📅 Weekly Schedule</h3>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px;">
     `;
-    
-    // Create weekly calendar view
+
+    // Create weekly calendar view with clickable days
     days.forEach(day => {
         const isToday = day === today;
+        const isSelected = day === displayDay;
         const isWorkoutDay = checkIfWorkoutDay(day, workout);
-        
+
         trackerHTML += `
-            <div style="background: ${isToday ? 'var(--gradient-1)' : isWorkoutDay ? 'var(--carolina-light)' : 'var(--lighter-bg)'}; 
-                        color: ${isToday || isWorkoutDay ? 'white' : 'var(--primary-dark)'}; 
-                        padding: 12px 8px; 
-                        border-radius: 12px; 
-                        text-align: center; 
-                        font-size: 12px;
-                        ${isToday ? 'transform: scale(1.1); box-shadow: 0 4px 15px rgba(75, 156, 211, 0.4);' : ''}">
-                <div style="font-weight: bold;">${day.substring(0, 3)}</div>
-                ${isWorkoutDay ? '<div style="font-size: 10px; margin-top: 4px;">Workout</div>' : ''}
+            <div onclick="switchWorkoutDay('${day}')"
+                 style="background: ${isSelected ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : isWorkoutDay ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' : '#f5f5f5'};
+                        color: ${isSelected || isWorkoutDay ? 'white' : '#999'};
+                        padding: 10px 6px;
+                        border-radius: 10px;
+                        text-align: center;
+                        font-size: 10px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        box-shadow: ${isSelected ? '0 4px 12px rgba(102, 126, 234, 0.3)' : isWorkoutDay ? '0 2px 8px rgba(79, 172, 254, 0.2)' : '0 2px 6px rgba(0,0,0,0.05)'};
+                        font-weight: ${isSelected || isWorkoutDay ? '700' : '500'};"
+                 onmouseover="if (!${isSelected}) this.style.transform='translateY(-2px)'"
+                 onmouseout="this.style.transform='translateY(0)'"
+            >
+                <div style="font-size: 11px; margin-bottom: 4px;">${day.substring(0, 3)}</div>
+                ${isWorkoutDay ? '<div style="font-size: 14px;">💪</div>' : '<div style="font-size: 12px; opacity: 0.6;">-</div>'}
             </div>
         `;
     });
-    
+
     trackerHTML += '</div></div>';
-    
-    // Add today's workout details
-    const todaysWorkout = getTodaysWorkout(today, workout);
+
+    // Add selected day's workout details
+    const todaysWorkout = getTodaysWorkout(displayDay, workout);
     
     if (todaysWorkout) {
         trackerHTML += `
-            <div style="background: var(--card-bg); padding: 25px; border-radius: 20px; margin-bottom: 20px;">
-                <h3 style="color: var(--dark); margin-bottom: 20px;">🎯 Today's Workout: ${todaysWorkout.name}</h3>
-                <div style="display: grid; gap: 15px;">
+            <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);">
+                <h3 style="color: var(--dark); margin-bottom: 12px; font-size: 15px; font-weight: 700;">🎯 ${todaysWorkout.name}</h3>
+                <div style="display: grid; gap: 12px;">
         `;
-        
+
         // Add exercises
         todaysWorkout.exercises.forEach((exercise, index) => {
             trackerHTML += `
-                <div style="background: var(--lighter-bg); padding: 20px; border-radius: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h4 style="color: var(--dark); font-size: 18px;">
-                            ${index + 1}. ${exercise.name}
+                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="color: var(--dark); font-size: 13px; margin: 0; font-weight: 700;">
+                            <span style="color: var(--carolina-blue); margin-right: 4px;">${index + 1}.</span>${exercise.name}
                         </h4>
-                        <span style="background: var(--gradient-1); color: white; padding: 6px 12px; border-radius: 12px; font-size: 14px;">
+                        <span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; box-shadow: 0 2px 6px rgba(79,172,254,0.25);">
                             ${exercise.sets} × ${exercise.reps}
                         </span>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 60px 1fr 1fr 1fr; gap: 10px; align-items: center;">
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 14px;">Set</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 14px; text-align: center;">Weight (lbs)</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 14px; text-align: center;">Reps</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 14px; text-align: center;">✓</div>
+
+                    <div style="display: grid; grid-template-columns: 40px 1fr 1fr 40px; gap: 6px; align-items: center;">
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px;">Set</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Wt</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Reps</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">✓</div>
             `;
-            
+
             // Add input rows for each set
             for (let set = 1; set <= parseInt(exercise.sets); set++) {
                 trackerHTML += `
-                    <div style="text-align: center; font-weight: bold;">${set}</div>
-                    <input type="number" placeholder="${exercise.suggestedWeight || '---'}" 
-                           style="padding: 8px; border: 2px solid var(--lighter-bg); border-radius: 8px; text-align: center; background: white;">
-                    <input type="number" placeholder="${exercise.targetReps || exercise.reps.split('-')[1]}" 
-                           style="padding: 8px; border: 2px solid var(--lighter-bg); border-radius: 8px; text-align: center; background: white;">
-                    <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                    <div style="text-align: center; font-weight: bold; font-size: 12px;">${set}</div>
+                    <input type="number" placeholder="${exercise.suggestedWeight || '0'}"
+                           style="padding: 6px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 12px;">
+                    <input type="number" placeholder="${exercise.targetReps || exercise.reps.split('-')[1]}"
+                           style="padding: 6px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 12px;">
+                    <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; justify-self: center;">
                 `;
             }
-            
+
             trackerHTML += `
                     </div>
-                    ${exercise.notes ? `<p style="color: #666; font-size: 13px; margin-top: 10px; font-style: italic;">💡 ${exercise.notes}</p>` : ''}
                 </div>
             `;
         });
-        
+
         trackerHTML += `
                 </div>
-                
-                <button onclick="completeWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 25px; font-size: 18px;">
+
+                <button onclick="completeWorkout()" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none; padding: 14px 24px; border-radius: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; font-size: 15px; box-shadow: 0 4px 15px rgba(67,233,123,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(67,233,123,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(67,233,123,0.3)'">
                     ✅ Complete Workout
                 </button>
             </div>
@@ -1494,33 +2227,28 @@ function displayWorkoutTracker(workout) {
             </div>
         `;
     }
-    
-    // Add progress summary
-    trackerHTML += `
-        <div style="background: var(--gradient-light); padding: 20px; border-radius: 20px; margin-top: 20px;">
-            <h4 style="color: var(--dark); margin-bottom: 15px;">📊 This Week's Progress</h4>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
-                <div>
-                    <div style="font-size: 24px; font-weight: bold; color: var(--carolina-blue);">3</div>
-                    <div style="font-size: 12px; color: var(--primary-dark);">Workouts Complete</div>
-                </div>
-                <div>
-                    <div style="font-size: 24px; font-weight: bold; color: var(--carolina-blue);">12,450</div>
-                    <div style="font-size: 12px; color: var(--primary-dark);">Total Volume (lbs)</div>
-                </div>
-                <div>
-                    <div style="font-size: 24px; font-weight: bold; color: var(--carolina-blue);">92%</div>
-                    <div style="font-size: 12px; color: var(--primary-dark);">Completion Rate</div>
-                </div>
-            </div>
-        </div>
-    `;
-    
+
     container.innerHTML = trackerHTML;
+}
+
+// Close workout tracker and return to dashboard
+function closeWorkoutTracker() {
+    const container = document.getElementById('workout-tracker-content');
+    if (container) {
+        container.innerHTML = ''; // Clear workout content
+    }
+    // Clear current workout data
+    currentWorkoutData = null;
+    selectedWorkoutDay = null;
 }
 
 // Check if a specific day has a workout
 function checkIfWorkoutDay(day, workout) {
+    // Manual workouts are available any day
+    if (workout.type === 'manual') {
+        return true;
+    }
+
     // This is a simplified check - you would enhance this based on the workout program
     const workoutDays = {
         '3': ['Monday', 'Wednesday', 'Friday'],
@@ -1528,11 +2256,11 @@ function checkIfWorkoutDay(day, workout) {
         '5': ['Monday', 'Tuesday', 'Wednesday', 'Friday', 'Saturday'],
         '6': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     };
-    
+
     if (workout.days && workoutDays[workout.days]) {
         return workoutDays[workout.days].includes(day);
     }
-    
+
     // Default schedule for preset workouts
     return ['Monday', 'Wednesday', 'Friday'].includes(day);
 }
@@ -1559,7 +2287,51 @@ function getTodaysWorkout(day, workout) {
             return program.schedule[day];
         }
     }
-    
+
+    // Handle AI-generated workouts - use weekly schedule if available, otherwise use exercises
+    if (workout.type === 'ai-generated') {
+        // Check if today is a workout day
+        if (checkIfWorkoutDay(day, workout)) {
+            // Use weeklySchedule if available (new format with different exercises per day)
+            if (workout.weeklySchedule && workout.weeklySchedule[day]) {
+                const dayWorkout = workout.weeklySchedule[day];
+                return {
+                    name: dayWorkout.name,
+                    exercises: dayWorkout.exercises.map(ex => ({
+                        name: ex.name,
+                        sets: String(ex.sets || 3),
+                        reps: ex.reps ? String(ex.reps) : '10-12',
+                        rest: '60-90 sec',
+                        suggestedWeight: '---',
+                        notes: `${ex.equipment || ''}${ex.primaryMuscles && ex.primaryMuscles.length > 0 ? ' | Targets: ' + ex.primaryMuscles.join(', ') : ''}${ex.wristFriendly ? ' 🟢 Wrist-friendly' : ''}`
+                    }))
+                };
+            }
+            // Fallback to single exercises array (backward compatibility)
+            else if (workout.exercises && workout.exercises.length > 0) {
+                return {
+                    name: workout.workoutName || workout.name || 'Custom Workout',
+                    exercises: workout.exercises.map(ex => ({
+                        name: ex.name,
+                        sets: String(ex.sets || 3),
+                        reps: ex.reps ? String(ex.reps) : '10-12',
+                        rest: '60-90 sec',
+                        suggestedWeight: '---',
+                        notes: `${ex.equipment || ''}${ex.primaryMuscles && ex.primaryMuscles.length > 0 ? ' | Targets: ' + ex.primaryMuscles.join(', ') : ''}${ex.wristFriendly ? ' 🟢 Wrist-friendly' : ''}`
+                    }))
+                };
+            }
+        } else {
+            // Rest day
+            return {
+                name: 'Rest Day',
+                exercises: [
+                    { name: 'Active Recovery', sets: '1', reps: '20-30 min', rest: 'N/A', suggestedWeight: 'N/A', notes: 'Light walk, stretching, yoga, or complete rest' }
+                ]
+            };
+        }
+    }
+
     // For custom workouts, use generic templates based on the split
     if (workout.days) {
         const customWorkouts = {
@@ -1640,7 +2412,22 @@ function getTodaysWorkout(day, workout) {
             return customWorkouts[day];
         }
     }
-    
+
+    // Handle manually created workouts
+    if (workout.type === 'manual' && workout.exercises) {
+        return {
+            name: workout.workoutName || workout.name || 'Custom Workout',
+            exercises: workout.exercises.map(ex => ({
+                name: ex.name,
+                sets: String(ex.sets || 3),
+                reps: ex.reps ? String(ex.reps) : '10',
+                rest: '60-90 sec',
+                suggestedWeight: '---',
+                notes: `${ex.equipment}${ex.primaryMuscles ? ' | Targets: ' + ex.primaryMuscles.join(', ') : ''}`
+            }))
+        };
+    }
+
     return null;
 }
 
@@ -1782,17 +2569,17 @@ function startWorkoutNow() {
     closeGeneratedWorkout();
 
     // Show the workout tracker modal with the actual exercises
-    if (workout) {
+    if (workout && workout.exercises && workout.exercises.length > 0) {
         // Populate the tracker with exercises
         const trackerContent = document.getElementById('tracker-content');
         const trackerTitle = document.getElementById('tracker-title');
 
-        trackerTitle.textContent = workout.name || 'Your Workout';
+        trackerTitle.textContent = workout.workoutName || workout.name || 'Your Workout';
 
         let html = `
             <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
-                <h3 style="margin: 0 0 5px 0;">${workout.name}</h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">${workout.duration} minutes • ${workout.exercises.length} exercises</p>
+                <h3 style="margin: 0 0 5px 0;">${workout.workoutName || workout.name}</h3>
+                <p style="margin: 0; opacity: 0.9; font-size: 14px;">${workout.duration || 'Custom'} ${workout.duration ? 'minutes' : ''} • ${workout.exercises.length} exercises</p>
             </div>
         `;
 
@@ -1837,6 +2624,9 @@ function startWorkoutNow() {
 
         // Show the tracker modal
         document.getElementById('workout-tracker').style.display = 'block';
+    } else {
+        alert('⚠️ This workout does not have any exercises. Please try generating a new workout or building a custom one.');
+        console.error('Workout missing exercises:', workout);
     }
 }
 
@@ -2289,23 +3079,24 @@ function viewSavedWorkout(workoutId) {
         // Show the full program details
         displayWorkoutProgram(workoutId);
     } else {
-        alert(`Viewing ${workoutId} workout details! (This would show the workout details)`);
+        // Load the workout from saved workouts and display it
+        loadWorkout(workoutId);
     }
 }
 
 function deleteSavedWorkout(workoutId) {
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
-    const workout = savedWorkouts.find(w => w.id === workoutId);
-    
-    if (workout && confirm(`Are you sure you want to delete "${workout.name}"?`)) {
+    const workout = savedWorkouts.find(w => String(w.id) === String(workoutId));
+
+    if (workout && confirm(`Are you sure you want to delete "${workout.workoutName || workout.name}"?`)) {
         // Remove from saved workouts
-        const updatedWorkouts = savedWorkouts.filter(w => w.id !== workoutId);
+        const updatedWorkouts = savedWorkouts.filter(w => String(w.id) !== String(workoutId));
         localStorage.setItem('savedWorkouts', JSON.stringify(updatedWorkouts));
-        
+
         // Refresh the display
         loadSavedWorkouts();
-        
-        alert(`✅ "${workout.name}" removed from saved workouts!`);
+
+        alert(`✅ "${workout.workoutName || workout.name}" removed from saved workouts!`);
     }
 }
 
@@ -2530,7 +3321,13 @@ let currentWorkoutProgramId = null;
 function loadWorkoutHistory() {
     const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
     const content = document.getElementById('workout-tracker-content');
-    
+
+    // Safety check - element might not exist on this page
+    if (!content) {
+        console.log('⚠️ workout-tracker-content element not found, skipping history load');
+        return;
+    }
+
     // Calculate stats from history
     const stats = calculateWorkoutStats(workoutHistory);
     
@@ -4851,62 +5648,7 @@ function getWorkoutColor(programId) {
     return colors[programId] || '#4B9CD3';
 }
 
-function loadSavedWorkouts() {
-    const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
-    const savedWorkoutsList = document.getElementById('saved-workouts-list');
-    
-    if (savedWorkouts.length === 0) {
-        savedWorkoutsList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #666;">
-                <h4>No saved workouts yet!</h4>
-                <p>Start a workout program to add it here automatically.</p>
-                <button onclick="showScreen('create-workout')" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 20px; cursor: pointer; margin-top: 15px;">
-                    Browse Workouts
-                </button>
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '';
-    savedWorkouts.forEach(workout => {
-        const program = workoutPrograms[workout.id];
-        const dayOptions = program && program.schedule ? Object.keys(program.schedule) : [];
-        
-        html += `
-            <div class="workout-card" style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; border-left: 4px solid ${workout.color};">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h4 style="color: var(--dark); margin: 0;">${getWorkoutIcon(workout.id)} ${workout.name}</h4>
-                    <span style="background: ${workout.color}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">${workout.duration}</span>
-                </div>
-                <p style="color: #666; font-size: 14px; margin-bottom: 15px;">${workout.type} • ${workout.daysPerWeek} days/week</p>
-                
-                ${dayOptions.length > 0 ? `
-                    <div style="margin-bottom: 15px;">
-                        <label style="font-size: 12px; color: #666; margin-bottom: 5px; display: block;">Choose workout day:</label>
-                        <select id="day-${workout.id}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
-                            ${dayOptions.map(day => `<option value="${day}">${day} - ${program.schedule[day].name}</option>`).join('')}
-                        </select>
-                    </div>
-                ` : ''}
-                
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="startSavedWorkout('${workout.id}')" style="background: ${workout.color}; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
-                        ▶️ Start
-                    </button>
-                    <button onclick="viewSavedWorkout('${workout.id}')" style="background: var(--lighter-bg); color: ${workout.color}; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
-                        👁️ View
-                    </button>
-                    <button onclick="deleteSavedWorkout('${workout.id}')" style="background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 14px; cursor: pointer;">
-                        🗑️ Delete
-                    </button>
-                </div>
-            </div>
-        `;
-    });
-    
-    savedWorkoutsList.innerHTML = html;
-}
+// REMOVED: Duplicate loadSavedWorkouts() function - now using unified version at line 1831
 
 function getWorkoutIcon(programId) {
     const icons = {
@@ -5520,6 +6262,9 @@ window.onload = function() {
     updateTime();
     setInterval(updateTime, 1000);
     updateDailyQuote();
+
+    // Load exercise database for workout generation
+    loadExerciseDatabases();
 
     // Load today's nutrition data
     loadTodaysNutrition();
