@@ -1593,19 +1593,19 @@ function createWorkoutPlan() {
     } else if (days === '4') {
         planHTML += `
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Monday:</strong> Upper Body Push
+                <strong>Monday:</strong> Chest, Shoulders, Arms
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Tuesday:</strong> Lower Body
+                <strong>Tuesday:</strong> Legs & Core
             </div>
             <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
                 <strong>Wednesday:</strong> Rest / Light Cardio
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Thursday:</strong> Upper Body Pull
+                <strong>Thursday:</strong> Back & Arms
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Friday:</strong> Full Body Circuit
+                <strong>Friday:</strong> Chest, Back, Legs
             </div>
             <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
                 <strong>Saturday:</strong> Rest / Light Cardio
@@ -1617,22 +1617,22 @@ function createWorkoutPlan() {
     } else if (days === '5') {
         planHTML += `
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Monday:</strong> Upper Push
+                <strong>Monday:</strong> Chest, Shoulders, Arms
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Tuesday:</strong> Lower Body
+                <strong>Tuesday:</strong> Legs
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Wednesday:</strong> Upper Pull
+                <strong>Wednesday:</strong> Back & Arms
             </div>
             <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
                 <strong>Thursday:</strong> Rest / Light Cardio
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Friday:</strong> Lower Body
+                <strong>Friday:</strong> Legs & Core
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Saturday:</strong> Full Body/Conditioning
+                <strong>Saturday:</strong> Chest, Back, Legs
             </div>
             <div style="background: #f0f0f0; padding: 15px; border-radius: 15px; opacity: 0.7;">
                 <strong>Sunday:</strong> Rest
@@ -1641,19 +1641,19 @@ function createWorkoutPlan() {
     } else if (days === '6') {
         planHTML += `
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Monday:</strong> Push (Chest, Shoulders, Triceps)
+                <strong>Monday:</strong> Chest, Shoulders, Arms
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Tuesday:</strong> Pull (Back, Biceps)
+                <strong>Tuesday:</strong> Back & Arms
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Wednesday:</strong> Legs & Core
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Thursday:</strong> Push (Volume)
+                <strong>Thursday:</strong> Chest & Shoulders
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
-                <strong>Friday:</strong> Pull (Volume)
+                <strong>Friday:</strong> Back & Arms
             </div>
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 15px;">
                 <strong>Saturday:</strong> Legs & Conditioning
@@ -3243,9 +3243,7 @@ function show75HardTracker() {
     document.getElementById('75hard-tracker').style.display = 'block';
 }
 
-function closeWorkoutTracker() {
-    document.getElementById('workout-tracker').style.display = 'none';
-}
+// REMOVED: Duplicate closeWorkoutTracker function - using the one at line 2213 instead
 
 function close75HardTracker() {
     document.getElementById('75hard-tracker').style.display = 'none';
