@@ -1885,11 +1885,13 @@ function loadSavedWorkouts() {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
-                    ${workout.goal ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600;">💪 ${workout.goal === 'muscle' ? 'Build Muscle' : workout.goal === 'fat-loss' ? 'Fat Loss' : workout.goal === 'endurance' ? 'Endurance' : 'Fitness'}</span>` : ''}
-                    ${daysPerWeek ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600;">📅 ${daysPerWeek} days/week</span>` : ''}
-                    ${workout.level ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600;">🎯 ${workout.level.charAt(0).toUpperCase() + workout.level.slice(1)}</span>` : ''}
+                ${(workout.goal || daysPerWeek || workout.level) ? `
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; padding-bottom: 10px;">
+                    ${workout.goal ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; display: inline-block;">💪 ${workout.goal === 'muscle' ? 'Build Muscle' : workout.goal === 'fat-loss' ? 'Fat Loss' : workout.goal === 'endurance' ? 'Endurance' : 'Fitness'}</span>` : ''}
+                    ${daysPerWeek ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; display: inline-block;">📅 ${daysPerWeek} days/week</span>` : ''}
+                    ${workout.level ? `<span style="background: ${workoutColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 600; display: inline-block;">🎯 ${workout.level.charAt(0).toUpperCase() + workout.level.slice(1)}</span>` : ''}
                 </div>
+                ` : ''}
 
                 ${dayOptions.length > 0 ? `
                     <div style="margin-bottom: 15px;">
@@ -1903,6 +1905,8 @@ function loadSavedWorkouts() {
                         </select>
                     </div>
                 ` : ''}
+
+                <div id="workout-preview-${workout.id}" style="display: none; margin-bottom: 15px; animation: slideDown 0.3s ease;"></div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <button onclick="toggleWorkoutPreview('${workout.id}')" style="background: white; color: ${workoutColor}; border: 2px solid ${workoutColor}; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 13px;">
@@ -2184,22 +2188,22 @@ function displayWorkoutTracker(workout, selectedDay = null) {
                         </span>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 40px 1fr 1fr 40px; gap: 6px; align-items: center;">
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px;">Set</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Wt</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Reps</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">✓</div>
+                    <div style="display: grid; grid-template-columns: 30px 1fr 1fr 30px; gap: 4px; align-items: center;">
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px;">Set</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px; text-align: center;">Wt</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px; text-align: center;">Reps</div>
+                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px; text-align: center;">✓</div>
             `;
 
             // Add input rows for each set
             for (let set = 1; set <= parseInt(exercise.sets); set++) {
                 trackerHTML += `
-                    <div style="text-align: center; font-weight: bold; font-size: 12px;">${set}</div>
+                    <div style="text-align: center; font-weight: bold; font-size: 11px;">${set}</div>
                     <input type="number" placeholder="${exercise.suggestedWeight || '0'}"
-                           style="padding: 6px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 12px;">
+                           style="padding: 4px 2px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 11px; width: 100%;">
                     <input type="number" placeholder="${exercise.targetReps || exercise.reps.split('-')[1]}"
-                           style="padding: 6px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 12px;">
-                    <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; justify-self: center;">
+                           style="padding: 4px 2px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 11px; width: 100%;">
+                    <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer; justify-self: center;">
                 `;
             }
 
