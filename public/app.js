@@ -2425,8 +2425,30 @@ function getTodaysWorkout(day, workout) {
 
 // Complete workout function
 function completeWorkout() {
-    alert('Great job completing your workout! 💪 Your progress has been saved.');
-    showScreen('home');
+    if (!currentWorkoutData) {
+        alert('Great job completing your workout! 💪');
+        showScreen('home');
+        return;
+    }
+
+    // Create workout history entry
+    const completedWorkout = {
+        id: Date.now().toString(),
+        workoutName: currentWorkoutData.workoutName || currentWorkoutData.name || 'Workout',
+        date: new Date().toISOString(),
+        duration: 60, // Default duration
+        day: selectedWorkoutDay,
+        completed: true
+    };
+
+    // Save to workout history
+    let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    workoutHistory.unshift(completedWorkout); // Add to beginning
+    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+    alert('🎉 Workout completed and saved to history! Great job!');
+    closeWorkoutTracker();
+    showScreen('track-workouts');
 }
 
 // Update showScreen to load saved workouts
