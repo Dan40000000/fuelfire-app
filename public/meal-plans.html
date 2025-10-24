@@ -516,7 +516,7 @@
             try {
                 console.log('🔍 Reading from localStorage key: fuelfire_meal_plans');
                 const plans = localStorage.getItem('fuelfire_meal_plans');
-                console.log('📦 Raw data from storage:', plans ? `${plans.substring(0, 100)}...` : 'null');
+                console.log('📦 Raw data from storage:', plans ? `${plans.substring(0, 200)}...` : 'null');
 
                 if (!plans) {
                     console.log('⚠️ No data found in localStorage');
@@ -525,11 +525,28 @@
 
                 const parsed = JSON.parse(plans);
                 console.log('✅ Successfully parsed', parsed.length, 'meal plans');
-                parsed.forEach((plan, index) => {
-                    console.log(`  Plan ${index + 1}: ID=${plan.id}, Goal=${plan.metadata?.goal}, Created=${plan.metadata?.createdAt}`);
+
+                // Normalize the data structure - handle both mealPlan and mealplan (case insensitive)
+                const normalized = parsed.map((plan, index) => {
+                    console.log(`  Plan ${index + 1} raw keys:`, Object.keys(plan));
+
+                    // Handle case-insensitive mealPlan key
+                    const mealPlanData = plan.mealPlan || plan.mealplan;
+
+                    return {
+                        id: plan.id || Date.now().toString(),
+                        mealPlan: mealPlanData,
+                        metadata: plan.metadata || {},
+                        createdAt: plan.createdAt || plan.metadata?.createdAt || new Date().toISOString()
+                    };
                 });
 
-                return parsed;
+                console.log('✅ Normalized', normalized.length, 'meal plans');
+                normalized.forEach((plan, index) => {
+                    console.log(`  Plan ${index + 1}: ID=${plan.id}, Goal=${plan.metadata?.goal}, Created=${plan.createdAt}`);
+                });
+
+                return normalized;
             } catch (error) {
                 console.error('❌ Error loading meal plans:', error);
                 console.error('❌ Error stack:', error.stack);
