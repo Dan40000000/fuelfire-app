@@ -213,44 +213,25 @@ class HealthSync {
         if (!this.isAvailable) return 0;
 
         try {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Get steps, weight, and height for calculation
+            const steps = await this.getTodaySteps();
+            const weight = await this.getWeight();
+            const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
+            const height = userProfile.height || 170; // Default to 170cm if not set
 
-            const { samples } = await this.Health.readSamples({
-                dataType: 'calories',
-                startDate: today.toISOString(),
-                endDate: new Date().toISOString(),
-                limit: 1000
-            });
+            // Calculate active calories from steps
+            // Formula: Stride length = Height × 0.43
+            //          Distance (km) = (Steps × Stride length) / 100000
+            //          Active Calories = Distance × Weight × 1.036
 
-            let filteredSamples = samples || [];
+            const strideLength = height * 0.43; // in cm
+            const distanceKm = (steps * strideLength) / 100000;
+            const activeCalories = distanceKm * weight * 1.036;
 
-            // PRIORITY: Filter to iPhone data only
-            if (filteredSamples.length > 0) {
-                const iphoneSamples = filteredSamples.filter(s =>
-                    s.sourceName && (
-                        s.sourceName.toLowerCase().includes('iphone') ||
-                        s.sourceName.toLowerCase().includes('phone')
-                    )
-                );
-
-                if (iphoneSamples.length > 0) {
-                    filteredSamples = iphoneSamples;
-                    console.log(`🔥 Using iPhone calories only: ${iphoneSamples.length} samples`);
-                }
-            }
-
-            let totalCalories = 0;
-            if (filteredSamples && Array.isArray(filteredSamples)) {
-                totalCalories = filteredSamples.reduce((sum, sample) => {
-                    return sum + (parseFloat(sample.value) || 0);
-                }, 0);
-            }
-
-            console.log(`🔥 Calories burned: ${totalCalories}`);
-            return Math.round(totalCalories);
+            console.log(`🔥 Active calories from steps: ${Math.round(activeCalories)} (${steps} steps, ${weight}kg, ${height}cm)`);
+            return Math.round(activeCalories);
         } catch (error) {
-            console.error('❌ Error fetching calories:', error);
+            console.error('❌ Error calculating calories:', error);
             return 0;
         }
     }

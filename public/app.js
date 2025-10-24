@@ -6103,30 +6103,41 @@ function closeQuickLog() {
 
 function saveQuickWorkout() {
     console.log('saveQuickWorkout called'); // Debug log
-    
+
     const type = document.getElementById('quick-workout-type').value;
     const duration = document.getElementById('quick-duration').value;
     const notes = document.getElementById('quick-notes').value;
-    
+
     if (!type || !duration) {
         alert('Please fill in workout type and duration');
         return;
     }
-    
+
     const workoutData = {
+        id: Date.now().toString(),
         type: type,
+        workoutName: `${type.charAt(0).toUpperCase() + type.slice(1)} Workout`,
         duration: parseInt(duration),
         exercises: [],
-        notes: notes
+        notes: notes,
+        date: new Date().toISOString(),
+        completed: true
     };
-    
-    // Log the workout
+
+    // Save to workoutHistory (for calendar, charts, and dashboard)
+    let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    workoutHistory.unshift(workoutData);
+    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+    // Also log to progress data
     logWorkout(workoutData);
+
+    // Save to recent workouts (for quick access)
     saveRecentWorkout(workoutData);
-    
-    // Update dashboard
+
+    // Update dashboard to show the new workout
     updateFitnessDashboard();
-    
+
     closeQuickLog();
     alert('✅ Workout logged successfully!');
 }
