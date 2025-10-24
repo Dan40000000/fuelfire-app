@@ -452,27 +452,38 @@
                     id: plan.id,
                     hasCreatedAt: !!plan.createdAt,
                     hasMetadataCreatedAt: !!plan.metadata?.createdAt,
-                    goal: plan.metadata?.goal
+                    goal: plan.metadata?.goal,
+                    hasMealPlan: !!plan.mealPlan,
+                    mealPlanLength: plan.mealPlan ? plan.mealPlan.length : 0
                 });
 
                 // Try to get createdAt from either location (backwards compatibility)
                 const createdAt = plan.metadata?.createdAt || plan.createdAt || new Date().toISOString();
                 const date = new Date(createdAt).toLocaleDateString();
-                const goal = plan.metadata?.goal ? plan.metadata.goal.replace('-', ' ').toLowerCase() : 'custom';
+                const goal = plan.metadata?.goal ? plan.metadata.goal.replace(/[-_]/g, ' ').toLowerCase() : 'custom';
                 const goalClass = plan.metadata?.goal ? `plan-${plan.metadata.goal.replace('_', '-')}` : 'plan-custom';
                 const goalEmoji = getGoalEmoji(goal);
-                
+
+                // Extract title from meal plan content (first line)
+                let planTitle = `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan`;
+                if (plan.mealPlan && typeof plan.mealPlan === 'string') {
+                    const firstLine = plan.mealPlan.split('\n')[0].trim();
+                    if (firstLine && firstLine.length < 100) {
+                        planTitle = firstLine.replace(/^#*\s*/, '').replace(/\*/g, '');
+                    }
+                }
+
                 plansHTML += `
                     <div class="meal-plan-card ${goalClass}" onclick="viewMealPlan(${index})" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                         <div class="plan-header">
                             <div>
-                                <h3 class="plan-title">${goalEmoji} ${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan</h3>
+                                <h3 class="plan-title">${goalEmoji} ${planTitle}</h3>
                                 <p class="plan-date">Created ${date}</p>
                             </div>
                             <button onclick="deleteMealPlan(${index}, event)" ontouchstart="" class="delete-btn" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🗑️</button>
                         </div>
                         <div class="plan-meta">
-                            <div>📅 ${plan.metadata.planDuration || '2-week'} duration</div>
+                            <div>📅 ${plan.metadata?.planDuration || '2-week'} duration</div>
                             <div>🎯 Personalized for your goals</div>
                         </div>
                     </div>
