@@ -2664,7 +2664,8 @@
                     
                     const date = new Date().toLocaleDateString();
                     const goal = tempPlan.metadata?.goal || 'Recent';
-                    selectElement.innerHTML += `<option value="0">${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}</option>`;
+                    const displayName = tempPlan.metadata?.customName || `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}`;
+                    selectElement.innerHTML += `<option value="0">${displayName}</option>`;
                     
                     document.getElementById('meal-plan-modal').style.display = 'block';
                     return;
@@ -2679,7 +2680,8 @@
             savedPlans.forEach((plan, index) => {
                 const date = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
                 const goal = plan.metadata?.goal || 'Unknown Goal';
-                selectElement.innerHTML += `<option value="${index}">${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}</option>`;
+                const displayName = plan.metadata?.customName || `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}`;
+                selectElement.innerHTML += `<option value="${index}">${displayName}</option>`;
             });
             
             document.getElementById('meal-plan-modal').style.display = 'block';
