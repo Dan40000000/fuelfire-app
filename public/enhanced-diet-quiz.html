@@ -1599,9 +1599,10 @@
                 // Add to beginning of array (newest first)
                 mealPlans.unshift(newPlan);
 
-                // Keep only the latest 10 meal plans to avoid storage issues
-                if (mealPlans.length > 10) {
-                    mealPlans.splice(10);
+                // Keep only the latest 20 meal plans to avoid storage issues
+                if (mealPlans.length > 20) {
+                    mealPlans.splice(20);
+                    console.log('⚠️ Trimmed to 20 meal plans (oldest removed)');
                 }
 
                 // Save back to localStorage
