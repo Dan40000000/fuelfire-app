@@ -66,23 +66,47 @@ export default async function handler(req, res) {
         
         console.log('🔑 API Key found, generating 4-part meal plan...');
 
-        // Generate all 5 parts in parallel
-        const [week1, week2, shopping1, shopping2, title] = await Promise.all([
-            generateWeek1(quizData),
-            generateWeek2(quizData),
-            generateWeek1ShoppingList(quizData),
-            generateWeek2ShoppingList(quizData),
-            generateTitle(quizData)
-        ]);
+        // Generate all 5 parts in parallel with individual error handling
+        let week1, week2, shopping1, shopping2, title;
+
+        try {
+            [week1, week2, shopping1, shopping2, title] = await Promise.all([
+                generateWeek1(quizData).catch(e => { console.error('❌ Week1 failed:', e); throw e; }),
+                generateWeek2(quizData).catch(e => { console.error('❌ Week2 failed:', e); throw e; }),
+                generateWeek1ShoppingList(quizData).catch(e => { console.error('❌ Shopping1 failed:', e); throw e; }),
+                generateWeek2ShoppingList(quizData).catch(e => { console.error('❌ Shopping2 failed:', e); throw e; }),
+                generateTitle(quizData).catch(e => { console.error('❌ Title failed:', e); throw e; })
+            ]);
+
+            console.log('✅ All 5 parts generated successfully');
+            console.log('📊 Part lengths - Title:', title?.length, 'Week1:', week1?.length, 'Week2:', week2?.length, 'Shopping1:', shopping1?.length, 'Shopping2:', shopping2?.length);
+        } catch (error) {
+            console.error('❌ Failed to generate one or more meal plan parts:', error);
+            throw error;
+        }
+
+        // Validate all parts exist
+        if (!week1 || !week2 || !shopping1 || !shopping2 || !title) {
+            console.error('❌ Missing meal plan parts:', {
+                hasTitle: !!title,
+                hasWeek1: !!week1,
+                hasWeek2: !!week2,
+                hasShopping1: !!shopping1,
+                hasShopping2: !!shopping2
+            });
+            throw new Error('Failed to generate complete meal plan - missing parts');
+        }
 
         // Combine all parts
         const completeMealPlan = `${title}\n\n${week1}\n\n${shopping1}\n\n${week2}\n\n${shopping2}`;
 
         console.log(`✅ Successfully generated complete meal plan for user: ${userId || 'anonymous'}`);
+        console.log(`📏 Complete meal plan length: ${completeMealPlan.length} characters`);
 
         res.status(200).json({
             success: true,
-            content: completeMealPlan,
+            mealPlan: completeMealPlan,  // Frontend expects this field
+            content: completeMealPlan,   // Keep for backward compatibility
             metadata: {
                 generatedAt: new Date().toISOString(),
                 planDuration: '2-week',
@@ -103,26 +127,42 @@ export default async function handler(req, res) {
 }
 
 async function callClaudeAPI(prompt) {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.CLAUDE_API_KEY,
-            'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-            model: 'claude-3-5-sonnet-20241022',
-            max_tokens: 4000,
-            messages: [{ role: 'user', content: prompt }]
-        })
-    });
+    console.log('🌊 Calling Claude API with prompt length:', prompt.length);
 
-    if (!response.ok) {
-        throw new Error(`Claude API error: ${response.status}`);
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.CLAUDE_API_KEY,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-3-5-sonnet-20241022',
+                max_tokens: 4000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Claude API error response:', errorText);
+            throw new Error(`Claude API error: ${response.status} - ${errorText.substring(0, 200)}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.content || !data.content[0] || !data.content[0].text) {
+            console.error('❌ Invalid Claude API response structure:', JSON.stringify(data).substring(0, 200));
+            throw new Error('Invalid response structure from Claude API');
+        }
+
+        console.log('✅ Claude API call successful, response length:', data.content[0].text.length);
+        return data.content[0].text;
+    } catch (error) {
+        console.error('❌ Error in callClaudeAPI:', error.message);
+        throw error;
     }
-
-    const data = await response.json();
-    return data.content[0].text;
 }
 
 async function extractMealPlanFromImage(imageData) {
