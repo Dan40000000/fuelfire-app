@@ -216,6 +216,9 @@
                             <button onclick="window.location.href='workout-quiz.html'" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
                                 🏋️ Quick Workout
                             </button>
+                            <button onclick="startManualWorkoutBuilder()" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
+                                💪 Build Your Own Workout
+                            </button>
                         </div>
                     </div>
                     
@@ -725,6 +728,9 @@
 
                 <!-- TRACK WORKOUTS SCREEN -->
                 <div class="screen-content" id="track-workouts">
+                    <!-- Workout Tracker Content (populated dynamically when viewing a workout) -->
+                    <div id="workout-tracker-content"></div>
+
                     <!-- Header Stats -->
                     <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px;">
                         <h3 style="font-size: 20px; margin-bottom: 15px; text-align: center;">🔥 Fitness Dashboard</h3>
@@ -1778,7 +1784,60 @@
             <button onclick="closeCustomWorkout()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 24px; cursor: pointer; color: #999;">×</button>
         </div>
     </div>
-    
+
+    <!-- Manual Workout Builder -->
+    <div class="screen-content" id="manual-workout-builder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
+        <div style="max-width: 375px; margin: 0 auto; padding: 20px;">
+            <div style="margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--dark); margin: 0;">Build Your Workout</h2>
+                    <button onclick="closeManualWorkoutBuilder()" style="background: transparent; border: none; font-size: 32px; cursor: pointer; color: #999; padding: 0; line-height: 1;">×</button>
+                </div>
+
+                <!-- Workout Name Input -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: bold;">Workout Name</label>
+                    <input type="text" id="manual-workout-name" placeholder="My Custom Workout" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
+                </div>
+
+                <!-- Selected Exercises Display -->
+                <div style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: var(--dark); margin: 0;">Selected Exercises (<span id="selected-count">0</span>)</h3>
+                        <button onclick="clearSelectedExercises()" style="background: #ff5252; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;">Clear All</button>
+                    </div>
+                    <div id="selected-exercises-list" style="background: white; border-radius: 15px; padding: 15px; min-height: 100px; max-height: 300px; overflow-y: auto;">
+                        <p style="text-align: center; color: #999; font-style: italic;">No exercises selected yet</p>
+                    </div>
+                </div>
+
+                <!-- Muscle Group Selection -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: var(--dark); margin-bottom: 15px;">Select Muscle Group</h3>
+                    <div id="muscle-groups" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <!-- Muscle groups will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Exercise List for Selected Muscle Group -->
+                <div id="exercise-list-container" style="display: none; margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="color: var(--dark); margin: 0;" id="selected-muscle-group-title">Exercises</h3>
+                        <button onclick="closeMuscleGroupExercises()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;">Back to Groups</button>
+                    </div>
+                    <div id="exercise-list" style="background: white; border-radius: 15px; padding: 15px; max-height: 400px; overflow-y: auto;">
+                        <!-- Exercises will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button onclick="saveManualWorkout()" style="width: 100%; background: var(--gradient-1); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px;">
+                    💾 Save Workout
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- AI Generating Screen -->
     <div class="screen-content" id="generating-workout" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000;">
         <div style="max-width: 375px; margin: 0 auto; padding: 60px 20px; text-align: center;">
@@ -2754,9 +2813,14 @@
         function updateHomeFoodCalories() {
             try {
                 const today = getLocalDateString();
+                console.log('🏠 updateHomeFoodCalories called for date:', today);
+
                 // Read from same source as calorie-tracker.html
                 const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
                 const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
+
+                console.log('📊 Today data:', todayData);
+                console.log('📊 Total calories from data:', todayData.totalCalories);
 
                 // Calculate macros from logged meals
                 let totalProtein = 0;
@@ -2771,21 +2835,35 @@
                     });
                 }
 
-                // Update displays
+                console.log('📈 Calculated - Protein:', totalProtein, 'Carbs:', totalCarbs, 'Fat:', totalFat);
+
+                // Update displays ONLY if elements exist
                 const homeCalories = document.getElementById('home-calories');
                 const homeProtein = document.getElementById('home-protein');
                 const homeCarbs = document.getElementById('home-carbs');
                 const homeFat = document.getElementById('home-fat');
 
-                if (homeCalories) homeCalories.textContent = Math.round(todayData.totalCalories || 0).toLocaleString();
-                if (homeProtein) homeProtein.textContent = Math.round(totalProtein) + 'g';
-                if (homeCarbs) homeCarbs.textContent = Math.round(totalCarbs) + 'g';
-                if (homeFat) homeFat.textContent = Math.round(totalFat) + 'g';
+                if (homeCalories) {
+                    homeCalories.textContent = Math.round(todayData.totalCalories || 0).toLocaleString();
+                    console.log('✅ Set home-calories to:', homeCalories.textContent);
+                }
+                if (homeProtein) {
+                    homeProtein.textContent = Math.round(totalProtein) + 'g';
+                    console.log('✅ Set home-protein to:', homeProtein.textContent);
+                }
+                if (homeCarbs) {
+                    homeCarbs.textContent = Math.round(totalCarbs) + 'g';
+                    console.log('✅ Set home-carbs to:', homeCarbs.textContent);
+                }
+                if (homeFat) {
+                    homeFat.textContent = Math.round(totalFat) + 'g';
+                    console.log('✅ Set home-fat to:', homeFat.textContent);
+                }
 
                 // Update deficit/surplus
                 updateDeficitSurplus(todayData.totalCalories || 0);
             } catch (error) {
-                console.error('Error updating home food calories:', error);
+                console.error('❌ Error updating home food calories:', error);
             }
         }
 
