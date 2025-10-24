@@ -390,9 +390,18 @@
 
             let plansHTML = '';
             savedPlans.forEach((plan, index) => {
-                const date = new Date(plan.createdAt).toLocaleDateString();
-                const goal = plan.metadata.goal.replace('-', ' ').toLowerCase();
-                const goalClass = `plan-${plan.metadata.goal.replace('_', '-')}`;
+                console.log('🔍 Processing plan', index, ':', {
+                    id: plan.id,
+                    hasCreatedAt: !!plan.createdAt,
+                    hasMetadataCreatedAt: !!plan.metadata?.createdAt,
+                    goal: plan.metadata?.goal
+                });
+
+                // Try to get createdAt from either location (backwards compatibility)
+                const createdAt = plan.metadata?.createdAt || plan.createdAt || new Date().toISOString();
+                const date = new Date(createdAt).toLocaleDateString();
+                const goal = plan.metadata?.goal ? plan.metadata.goal.replace('-', ' ').toLowerCase() : 'custom';
+                const goalClass = plan.metadata?.goal ? `plan-${plan.metadata.goal.replace('_', '-')}` : 'plan-custom';
                 const goalEmoji = getGoalEmoji(goal);
                 
                 plansHTML += `
@@ -599,10 +608,36 @@
             }, 3000);
         }
 
+        function debugLocalStorage() {
+            console.log('🔍 DEBUG: Direct localStorage check');
+            const raw = localStorage.getItem('fuelfire_meal_plans');
+            console.log('📦 Raw data:', raw);
+
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    console.log('✅ Parsed successfully:', parsed.length, 'plans');
+                    console.log('📋 Plans:', parsed);
+                    alert(`Found ${parsed.length} meal plans in storage!\n\nCheck console for details.`);
+                } catch (error) {
+                    console.error('❌ Parse error:', error);
+                    alert('Error parsing meal plans data!');
+                }
+            } else {
+                console.log('❌ No data found');
+                alert('No meal plans found in localStorage!');
+            }
+
+            // Force reload
+            loadMealPlans();
+        }
+
         // Initialize
         window.addEventListener('load', function() {
             updateTime();
             setInterval(updateTime, 1000);
+
+            console.log('🔄 Meal Plans page loaded, calling loadMealPlans()');
             loadMealPlans();
         });
     </script>
