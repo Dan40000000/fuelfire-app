@@ -466,10 +466,25 @@
 
                 // Extract title from meal plan content (first line)
                 let planTitle = `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan`;
-                if (plan.mealPlan && typeof plan.mealPlan === 'string') {
-                    const firstLine = plan.mealPlan.split('\n')[0].trim();
-                    if (firstLine && firstLine.length < 100) {
-                        planTitle = firstLine.replace(/^#*\s*/, '').replace(/\*/g, '');
+
+                console.log(`🔍 Plan ${index} mealPlan type:`, typeof plan.mealPlan);
+                console.log(`🔍 Plan ${index} mealPlan first 200 chars:`,
+                    plan.mealPlan ? String(plan.mealPlan).substring(0, 200) : 'NULL');
+
+                if (plan.mealPlan) {
+                    const mealPlanStr = String(plan.mealPlan);
+                    const lines = mealPlanStr.split(/\r?\n/);
+                    console.log(`🔍 Plan ${index} has ${lines.length} lines`);
+                    console.log(`🔍 Plan ${index} first 3 lines:`, lines.slice(0, 3));
+
+                    // Try to find a good title from first few lines
+                    for (let i = 0; i < Math.min(5, lines.length); i++) {
+                        const line = lines[i].trim();
+                        if (line && line.length > 5 && line.length < 100 && !line.startsWith('[') && !line.startsWith('{')) {
+                            planTitle = line.replace(/^#*\s*/, '').replace(/\*\*/g, '').replace(/\*/g, '');
+                            console.log(`✅ Using line ${i} as title:`, planTitle);
+                            break;
+                        }
                     }
                 }
 
