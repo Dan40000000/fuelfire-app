@@ -434,6 +434,14 @@
 
             const listContainer = document.getElementById('meal-plans-list');
 
+            console.log('🎯 listContainer found:', !!listContainer);
+            console.log('🎯 savedPlans.length:', savedPlans.length);
+
+            if (!listContainer) {
+                alert('ERROR: meal-plans-list element not found!');
+                return;
+            }
+
             if (savedPlans.length === 0) {
                 console.log('⚠️ No meal plans found');
                 listContainer.innerHTML = `
@@ -446,8 +454,26 @@
                 return;
             }
 
-            let plansHTML = '';
+            console.log('✅ About to render', savedPlans.length, 'plans...');
+
+            // TEMP: Just render simple cards to test
+            let plansHTML = `<div style="background: red; color: white; padding: 20px; margin: 10px 0;">
+                RENDERING ${savedPlans.length} PLANS
+            </div>`;
+
             savedPlans.forEach((plan, index) => {
+                plansHTML += `
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin: 10px 0;">
+                        <h3>Plan ${index + 1}</h3>
+                        <p>ID: ${plan.id || 'NO ID'}</p>
+                        <p>Created: ${plan.createdAt || plan.metadata?.createdAt || 'Unknown'}</p>
+                        <p>Goal: ${plan.metadata?.goal || 'No goal'}</p>
+                        <button onclick="viewMealPlan(${index})" style="background: white; color: #667eea; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 10px;">
+                            VIEW THIS PLAN
+                        </button>
+                    </div>
+                `;
+            });
                 console.log('🔍 Processing plan', index, ':', {
                     id: plan.id,
                     hasCreatedAt: !!plan.createdAt,
@@ -504,8 +530,10 @@
                     </div>
                 `;
             });
-            
+
+            console.log('🎯 Setting innerHTML with', plansHTML.length, 'characters');
             listContainer.innerHTML = plansHTML;
+            console.log('✅ innerHTML set! listContainer.children.length:', listContainer.children.length);
         }
         
         function getGoalEmoji(goal) {
