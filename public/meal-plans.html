@@ -371,8 +371,26 @@
 
         function loadMealPlans() {
             console.log('📋 Loading meal plans...');
+
+            // Update debug info
+            const debugDiv = document.getElementById('debug-text');
+            if (debugDiv) {
+                debugDiv.innerHTML = 'Attempting to load meal plans...';
+            }
+
             const savedPlans = getMealPlansFromStorage();
             console.log('📚 Found', savedPlans.length, 'saved plans');
+
+            // Update debug info with results
+            if (debugDiv) {
+                const rawData = localStorage.getItem('fuelfire_meal_plans');
+                debugDiv.innerHTML = `
+                    <strong>localStorage key exists:</strong> ${rawData ? 'YES ✅' : 'NO ❌'}<br>
+                    <strong>Raw data length:</strong> ${rawData ? rawData.length + ' characters' : 'N/A'}<br>
+                    <strong>Parsed plans count:</strong> ${savedPlans.length}<br>
+                    <strong>Plans loaded:</strong> ${savedPlans.length > 0 ? 'YES ✅' : 'NO ❌'}
+                `;
+            }
 
             const listContainer = document.getElementById('meal-plans-list');
 
