@@ -5675,45 +5675,9 @@ function getWorkoutIcon(programId) {
     return icons[programId] || '💪';
 }
 
-// Load today's nutrition data for home screen
-function loadTodaysNutrition() {
-    const today = new Date().toISOString().split('T')[0];
-    const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-    const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
-
-    console.log('🏠 Home page loading nutrition for', today);
-    console.log('📊 Logged meals:', todayData);
-
-    // Calculate consumed macros
-    let totalProtein = 0;
-    let totalCarbs = 0;
-    let totalFat = 0;
-
-    todayData.meals.forEach(meal => {
-        totalProtein += meal.protein || 0;
-        totalCarbs += meal.carbs || 0;
-        totalFat += meal.fat || 0;
-    });
-
-    console.log('📈 Totals - Cals:', todayData.totalCalories, 'Protein:', totalProtein, 'Carbs:', totalCarbs, 'Fat:', totalFat);
-
-    // Update home screen display
-    if (document.getElementById('home-calories')) {
-        document.getElementById('home-calories').textContent = todayData.totalCalories.toLocaleString();
-        console.log('✅ Updated home-calories element');
-    } else {
-        console.log('❌ home-calories element not found');
-    }
-    if (document.getElementById('home-protein')) {
-        document.getElementById('home-protein').textContent = Math.round(totalProtein) + 'g';
-    }
-    if (document.getElementById('home-carbs')) {
-        document.getElementById('home-carbs').textContent = Math.round(totalCarbs) + 'g';
-    }
-    if (document.getElementById('home-fat')) {
-        document.getElementById('home-fat').textContent = Math.round(totalFat) + 'g';
-    }
-}
+// REMOVED: Duplicate loadTodaysNutrition() - was using wrong date (UTC instead of local time)
+// This function used new Date().toISOString() which returns UTC date (tomorrow for most US timezones!)
+// The correct version is in index.html as updateHomeFoodCalories() which uses getLocalDateString()
 
 // Progress & Analytics Functions
 function loadProgressData() {
@@ -6278,8 +6242,8 @@ window.onload = function() {
     // Load exercise database for workout generation
     loadExerciseDatabases();
 
-    // Load today's nutrition data
-    loadTodaysNutrition();
+    // NOTE: Nutrition loading is now handled by updateHomeFoodCalories() in index.html
+    // DO NOT call the old loadTodaysNutrition() - it uses wrong date (UTC instead of local)
 
     // Load progress data
     updateProgressDisplay();
@@ -6292,17 +6256,17 @@ window.onload = function() {
         // Default to home if no hash
         showScreen('home');
     }
-    
+
     // Load recent workouts
     if (document.getElementById('recent-workouts')) {
         loadRecentWorkouts();
     }
-    
+
     // Load fitness dashboard if track-workouts screen exists
     if (document.getElementById('track-workouts')) {
         updateFitnessDashboard();
     }
-    
+
     // Check for screen parameter in URL
     const urlParams = new URLSearchParams(window.location.search);
     const screenParam = urlParams.get('screen');
@@ -6316,14 +6280,16 @@ window.onload = function() {
             }
         }, 100);
     }
-    
+
     // Show notification after 2 seconds
     setTimeout(showNotification, 2000);
 
     // Listen for nutrition updates from calorie tracker
     window.addEventListener('storage', function(e) {
         if (e.key === 'fuelfire_nutrition_updated' || e.key === 'fuelfire_logged_meals') {
-            loadTodaysNutrition();
+            if (typeof updateHomeFoodCalories === 'function') {
+                updateHomeFoodCalories();
+            }
         }
     });
 
@@ -6332,7 +6298,9 @@ window.onload = function() {
         const lastUpdate = localStorage.getItem('fuelfire_nutrition_updated');
         if (lastUpdate && window.lastNutritionUpdate !== lastUpdate) {
             window.lastNutritionUpdate = lastUpdate;
-            loadTodaysNutrition();
+            if (typeof updateHomeFoodCalories === 'function') {
+                updateHomeFoodCalories();
+            }
         }
     }, 1000);
 
@@ -6340,13 +6308,17 @@ window.onload = function() {
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden) {
             console.log('📱 Page became visible, refreshing nutrition data');
-            loadTodaysNutrition();
+            if (typeof updateHomeFoodCalories === 'function') {
+                updateHomeFoodCalories();
+            }
         }
     });
 
     // Force refresh on page focus (for iOS navigation)
     window.addEventListener('focus', function() {
         console.log('📱 Window focused, refreshing nutrition data');
-        loadTodaysNutrition();
+        if (typeof updateHomeFoodCalories === 'function') {
+            updateHomeFoodCalories();
+        }
     });
 };
