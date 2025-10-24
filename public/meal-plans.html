@@ -474,62 +474,6 @@
                     </div>
                 `;
             });
-                console.log('🔍 Processing plan', index, ':', {
-                    id: plan.id,
-                    hasCreatedAt: !!plan.createdAt,
-                    hasMetadataCreatedAt: !!plan.metadata?.createdAt,
-                    goal: plan.metadata?.goal,
-                    hasMealPlan: !!plan.mealPlan,
-                    mealPlanLength: plan.mealPlan ? plan.mealPlan.length : 0
-                });
-
-                // Try to get createdAt from either location (backwards compatibility)
-                const createdAt = plan.metadata?.createdAt || plan.createdAt || new Date().toISOString();
-                const date = new Date(createdAt).toLocaleDateString();
-                const goal = plan.metadata?.goal ? plan.metadata.goal.replace(/[-_]/g, ' ').toLowerCase() : 'custom';
-                const goalClass = plan.metadata?.goal ? `plan-${plan.metadata.goal.replace('_', '-')}` : 'plan-custom';
-                const goalEmoji = getGoalEmoji(goal);
-
-                // Extract title from meal plan content (first line)
-                let planTitle = `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan`;
-
-                console.log(`🔍 Plan ${index} mealPlan type:`, typeof plan.mealPlan);
-                console.log(`🔍 Plan ${index} mealPlan first 200 chars:`,
-                    plan.mealPlan ? String(plan.mealPlan).substring(0, 200) : 'NULL');
-
-                if (plan.mealPlan) {
-                    const mealPlanStr = String(plan.mealPlan);
-                    const lines = mealPlanStr.split(/\r?\n/);
-                    console.log(`🔍 Plan ${index} has ${lines.length} lines`);
-                    console.log(`🔍 Plan ${index} first 3 lines:`, lines.slice(0, 3));
-
-                    // Try to find a good title from first few lines
-                    for (let i = 0; i < Math.min(5, lines.length); i++) {
-                        const line = lines[i].trim();
-                        if (line && line.length > 5 && line.length < 100 && !line.startsWith('[') && !line.startsWith('{')) {
-                            planTitle = line.replace(/^#*\s*/, '').replace(/\*\*/g, '').replace(/\*/g, '');
-                            console.log(`✅ Using line ${i} as title:`, planTitle);
-                            break;
-                        }
-                    }
-                }
-
-                plansHTML += `
-                    <div class="meal-plan-card ${goalClass}" onclick="viewMealPlan(${index})" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                        <div class="plan-header">
-                            <div>
-                                <h3 class="plan-title">${goalEmoji} ${planTitle}</h3>
-                                <p class="plan-date">Created ${date}</p>
-                            </div>
-                            <button onclick="deleteMealPlan(${index}, event)" ontouchstart="" class="delete-btn" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">🗑️</button>
-                        </div>
-                        <div class="plan-meta">
-                            <div>📅 ${plan.metadata?.planDuration || '2-week'} duration</div>
-                            <div>🎯 Personalized for your goals</div>
-                        </div>
-                    </div>
-                `;
-            });
 
             console.log('🎯 Setting innerHTML with', plansHTML.length, 'characters');
             listContainer.innerHTML = plansHTML;
