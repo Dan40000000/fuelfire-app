@@ -465,14 +465,17 @@
             </div>`;
 
             savedPlans.forEach((plan, index) => {
+                const createdDate = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
                 plansHTML += `
-                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin: 10px 0;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin: 10px 0; position: relative;">
+                        <button onclick="deleteMealPlan(${index}, event)" style="position: absolute; top: 10px; right: 10px; background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;">
+                            🗑️ Delete
+                        </button>
                         <h3>Plan ${index + 1}</h3>
-                        <p>ID: ${plan.id || 'NO ID'}</p>
-                        <p>Created: ${plan.createdAt || plan.metadata?.createdAt || 'Unknown'}</p>
-                        <p>Goal: ${plan.metadata?.goal || 'No goal'}</p>
-                        <button onclick="viewMealPlan(${index})" style="background: white; color: #667eea; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 10px;">
-                            VIEW THIS PLAN
+                        <p style="margin: 5px 0;">📅 Created: ${createdDate}</p>
+                        <p style="margin: 5px 0;">🎯 Goal: ${plan.metadata?.goal || 'Custom'}</p>
+                        <button onclick="viewMealPlan(${index})" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 15px;">
+                            👁️ VIEW PLAN
                         </button>
                     </div>
                 `;
