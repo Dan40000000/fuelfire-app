@@ -22,8 +22,11 @@
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
                 <div class="header-title">Enhanced Diet Quiz</div>
+                <button onclick="autoFillQuiz()" style="background: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin-left: auto;">
+                    ⚡ TEST
+                </button>
             </div>
-            
+
             <div class="content">
 
                 <div id="quiz-content">
@@ -1327,23 +1330,72 @@
             }
         }
 
-        async function generatePlan() {
+        // TEST FUNCTION: Auto-fill quiz with sample data
+        function autoFillQuiz() {
+            if (!confirm('⚡ Auto-fill quiz with test data and generate meal plan immediately?')) {
+                return;
+            }
+
+            // Fill in all quiz data with test values
+            quizData = {
+                goal: 'muscle-gain',
+                age: 30,
+                sex: 'male',
+                weight: 180,
+                height: 72,
+                activityLevel: 'moderate',
+                dietaryRestrictions: [],
+                allergies: [],
+                meats: ['Chicken Breast', 'Ground Turkey', 'Salmon', 'Lean Beef'],
+                vegetables: ['Broccoli', 'Spinach', 'Sweet Potato', 'Carrots', 'Bell Peppers'],
+                fruits: ['Bananas', 'Apples', 'Blueberries', 'Strawberries'],
+                grains: ['Brown Rice', 'Oats', 'Quinoa', 'Whole Wheat Bread'],
+                dairyAlternatives: ['Greek Yogurt', 'Milk', 'Cheese'],
+                healthyFats: ['Avocado', 'Olive Oil', 'Almonds', 'Peanut Butter'],
+                snacks: ['Protein Shake', 'Trail Mix', 'Rice Cakes'],
+                mealsPerDay: '4',
+                cookingTime: 'moderate',
+                mealPrepPreference: 'batch-cooking',
+                budgetRange: 'moderate',
+                calorieTarget: '',
+                proteinGoal: '',
+                planDuration: '2-week'
+            };
+
+            console.log('✅ Quiz auto-filled with test data:', quizData);
+
+            // Jump to final step and trigger generation
+            currentStep = 10;
+            showStep(currentStep);
+
+            // Automatically trigger the generate plan function after a short delay
+            setTimeout(() => {
+                generatePlan();
+            }, 500);
+        }
+
+        async function generatePlan(event) {
             const goal = quizData.goal || 'maintenance';
-            
+
             // Validate we have enough data
             if (!quizData.goal || !quizData.age || !quizData.weight) {
                 alert('⚠️ Please complete all required fields in the quiz first!');
                 return;
             }
-            
+
             // Show confirmation with collected data summary
             const dataCount = `${quizData.meats?.length || 0} meats, ${quizData.vegetables?.length || 0} vegetables, ${quizData.fruits?.length || 0} fruits`;
             if (!confirm(`🎯 Generate AI meal plan for ${goal.replace('-', ' ')} goal?\n\n📊 Your preferences: ${dataCount}\n🤖 This will use Claude AI to create your personalized 2-week plan!`)) {
                 return;
             }
-            
-            // Show loading state
-            const button = event.target;
+
+            // Find the button - either from event or by finding it in the DOM
+            const button = event?.target || document.querySelector('button[onclick*="generatePlan"]');
+            if (!button) {
+                console.error('Could not find generate button');
+                return;
+            }
+
             const originalText = button.innerHTML;
             button.innerHTML = '🤖 Claude AI is creating your plan...';
             button.disabled = true;
@@ -1360,19 +1412,55 @@
                 
                 // Generate meal plan using progressive multi-phase approach
                 const result = await window.fuelFireAuth.generateMealPlan(quizData, progressCallback);
-                
+
+                console.log('🔍 API Result:', result);
+                console.log('🔍 Meal Plan Type:', typeof result.mealPlan);
+                console.log('🔍 Meal Plan Content (first 500 chars):', result.mealPlan ? String(result.mealPlan).substring(0, 500) : 'NULL');
+
                 if (result.success) {
+                    // Validate mealPlan exists and has content
+                    if (!result.mealPlan || result.mealPlan === 'undefined' || result.mealPlan === 'null') {
+                        throw new Error('API returned success but no meal plan content was generated');
+                    }
+
+                    // Ensure mealPlan is a string (API might return object or string)
+                    let mealPlanString = result.mealPlan;
+
+                    // If it's an object/array, try to stringify it
+                    if (typeof mealPlanString !== 'string') {
+                        console.log('⚠️ Meal plan is not a string, converting...');
+                        if (typeof mealPlanString === 'object' && mealPlanString !== null) {
+                            // If it's already structured data, convert to formatted string
+                            mealPlanString = JSON.stringify(mealPlanString, null, 2);
+                        } else {
+                            throw new Error('Invalid meal plan format received from API');
+                        }
+                    }
+
+                    // Validate the string has actual content (not just whitespace)
+                    if (mealPlanString.trim().length === 0) {
+                        throw new Error('Meal plan content is empty');
+                    }
+
+                    console.log('✅ Final meal plan length:', mealPlanString.length);
+
                     // Save meal plan to localStorage for the meal-plans.html page
-                    const savedPlanId = saveMealPlanToStorage(result.mealPlan, result.metadata);
-                    
+                    const savedPlanId = saveMealPlanToStorage(mealPlanString, result.metadata);
+
+                    if (!savedPlanId) {
+                        throw new Error('Failed to save meal plan to storage');
+                    }
+
+                    console.log('✅ Saved plan with ID:', savedPlanId);
+
                     // Update button to show success
                     button.innerHTML = '✅ Complete Plan Generated! Redirecting...';
-                    
+
                     // Redirect after short delay - using plan ID instead of data in URL
                     setTimeout(() => {
                         window.location.href = `meal-plan-simple.html?planId=${savedPlanId}`;
                     }, 1500);
-                    
+
                 } else {
                     throw new Error(result.message || 'Failed to generate meal plan');
                 }
@@ -1469,13 +1557,20 @@
 
         function saveMealPlanToStorage(mealPlan, metadata) {
             try {
+                console.log('💾 Saving meal plan to localStorage...');
+                console.log('📊 Meal plan type:', typeof mealPlan);
+                console.log('📏 Meal plan length:', mealPlan ? mealPlan.length : 0);
+                console.log('📋 Metadata:', metadata);
+
                 // Get existing meal plans from localStorage
                 const existingPlans = localStorage.getItem('fuelfire_meal_plans');
                 const mealPlans = existingPlans ? JSON.parse(existingPlans) : [];
-                
+
+                console.log('📚 Existing meal plans count:', mealPlans.length);
+
                 // Calculate and save macro targets based on current quiz data
                 saveMacroTargets(metadata);
-                
+
                 // Create new meal plan object
                 const newPlan = {
                     mealPlan: mealPlan,
@@ -1485,24 +1580,37 @@
                     },
                     id: Date.now().toString() // Simple unique ID
                 };
-                
+
+                console.log('🆕 New plan ID:', newPlan.id);
+
                 // Add to beginning of array (newest first)
                 mealPlans.unshift(newPlan);
-                
+
                 // Keep only the latest 10 meal plans to avoid storage issues
                 if (mealPlans.length > 10) {
                     mealPlans.splice(10);
                 }
-                
+
                 // Save back to localStorage
                 localStorage.setItem('fuelfire_meal_plans', JSON.stringify(mealPlans));
-                
-                console.log('✅ Meal plan saved to localStorage');
-                
+
+                console.log('✅ Meal plan saved to localStorage successfully!');
+                console.log('📚 Total meal plans now:', mealPlans.length);
+
+                // Verify it was saved
+                const verification = localStorage.getItem('fuelfire_meal_plans');
+                if (verification) {
+                    const verifyParsed = JSON.parse(verification);
+                    console.log('✅ VERIFICATION: Found', verifyParsed.length, 'meal plans in storage');
+                } else {
+                    console.error('❌ VERIFICATION FAILED: Could not read back from localStorage');
+                }
+
                 return newPlan.id;
-                
+
             } catch (error) {
                 console.error('❌ Error saving meal plan to localStorage:', error);
+                console.error('❌ Error stack:', error.stack);
                 return null;
             }
         }

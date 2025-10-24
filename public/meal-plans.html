@@ -370,10 +370,14 @@
         }
 
         function loadMealPlans() {
+            console.log('📋 Loading meal plans...');
             const savedPlans = getMealPlansFromStorage();
+            console.log('📚 Found', savedPlans.length, 'saved plans');
+
             const listContainer = document.getElementById('meal-plans-list');
-            
+
             if (savedPlans.length === 0) {
+                console.log('⚠️ No meal plans found');
                 listContainer.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">🍽️</div>
@@ -443,10 +447,25 @@
 
         function getMealPlansFromStorage() {
             try {
+                console.log('🔍 Reading from localStorage key: fuelfire_meal_plans');
                 const plans = localStorage.getItem('fuelfire_meal_plans');
-                return plans ? JSON.parse(plans) : [];
+                console.log('📦 Raw data from storage:', plans ? `${plans.substring(0, 100)}...` : 'null');
+
+                if (!plans) {
+                    console.log('⚠️ No data found in localStorage');
+                    return [];
+                }
+
+                const parsed = JSON.parse(plans);
+                console.log('✅ Successfully parsed', parsed.length, 'meal plans');
+                parsed.forEach((plan, index) => {
+                    console.log(`  Plan ${index + 1}: ID=${plan.id}, Goal=${plan.metadata?.goal}, Created=${plan.metadata?.createdAt}`);
+                });
+
+                return parsed;
             } catch (error) {
-                console.error('Error loading meal plans:', error);
+                console.error('❌ Error loading meal plans:', error);
+                console.error('❌ Error stack:', error.stack);
                 return [];
             }
         }

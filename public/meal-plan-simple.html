@@ -857,13 +857,30 @@
         function smartSplitShoppingList(shoppingText, days) {
             const items = parseShoppingList(shoppingText);
             const midPoint = Math.ceil(items.length / 2);
-            
+
             const week1Items = items.slice(0, midPoint);
             const week2Items = items.slice(midPoint);
-            
+
+            // Convert objects back to text strings
+            const week1Text = week1Items.map(item => {
+                if (item.isHeader) {
+                    return `**${item.text}**`;
+                } else {
+                    return item.text;
+                }
+            }).join('\n');
+
+            const week2Text = week2Items.map(item => {
+                if (item.isHeader) {
+                    return `**${item.text}**`;
+                } else {
+                    return item.text;
+                }
+            }).join('\n');
+
             return {
-                week1: week1Items.join('\n'),
-                week2: week2Items.join('\n')
+                week1: week1Text,
+                week2: week2Text
             };
         }
         
