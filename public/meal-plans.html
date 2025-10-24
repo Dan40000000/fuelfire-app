@@ -707,10 +707,15 @@
 
         // Initialize
         window.addEventListener('load', function() {
-            updateTime();
-            setInterval(updateTime, 1000);
+            console.log('🔄 Meal Plans page loaded');
 
-            console.log('🔄 Meal Plans page loaded, calling loadMealPlans()');
+            // Only update time if element exists
+            if (document.getElementById('time')) {
+                updateTime();
+                setInterval(updateTime, 1000);
+            }
+
+            console.log('🔄 Calling loadMealPlans()');
             loadMealPlans();
         });
     </script>
