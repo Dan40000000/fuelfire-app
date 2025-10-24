@@ -537,21 +537,31 @@
             
             for (let line of lines) {
                 const trimmed = line.trim();
-                
-                // Shopping list section
+
+                // Week-specific shopping lists (check BEFORE general shopping list)
+                if (trimmed.match(/Week\s*1.*Shopping/i) || (trimmed.includes('Week 1') && inShopping)) {
+                    inShopping = true;
+                    currentShoppingWeek = 'week1';
+                    currentSection = 'shopping';
+                    console.log('📋 Found Week 1 shopping list');
+                    continue;
+                }
+                if (trimmed.match(/Week\s*2.*Shopping/i) || (trimmed.includes('Week 2') && inShopping)) {
+                    inShopping = true;
+                    currentShoppingWeek = 'week2';
+                    currentSection = 'shopping';
+                    console.log('📋 Found Week 2 shopping list');
+                    continue;
+                }
+
+                // Shopping list section (general)
                 if (trimmed.includes('Shopping List') || trimmed.includes('SHOPPING LIST')) {
                     inShopping = true;
                     currentSection = 'shopping';
-                    continue;
-                }
-                
-                // Week-specific shopping lists
-                if (trimmed.includes('Week 1') && inShopping) {
-                    currentShoppingWeek = 'week1';
-                    continue;
-                }
-                if (trimmed.includes('Week 2') && inShopping) {
-                    currentShoppingWeek = 'week2';
+                    // If we haven't set a week yet, this is general shopping
+                    if (!currentShoppingWeek) {
+                        console.log('📋 Found general shopping list');
+                    }
                     continue;
                 }
                 
@@ -636,48 +646,68 @@
         
         function generateBeautifulMealPlanHTML(structured) {
             let html = '';
-            
+
+            console.log('🛒 Shopping list data:', {
+                hasWeek1: !!structured.shoppingWeek1,
+                hasWeek2: !!structured.shoppingWeek2,
+                hasGeneral: !!structured.shopping,
+                week1Length: structured.shoppingWeek1 ? structured.shoppingWeek1.length : 0,
+                week2Length: structured.shoppingWeek2 ? structured.shoppingWeek2.length : 0
+            });
+
             // Shopping list sections
             if (structured.shoppingWeek1 || structured.shoppingWeek2 || structured.shopping) {
                 if (structured.shoppingWeek1) {
                     const week1Items = parseShoppingList(structured.shoppingWeek1);
                     const week1HTML = generateInteractiveShoppingList(week1Items, 'week1');
                     const checkableCount1 = week1Items.filter(item => !item.isHeader).length;
-                    
+
                     html += `
                         <div class="shopping-section">
-                            <h2 class="shopping-title">🛒 Week 1 Shopping List</h2>
-                            <div class="shopping-progress" id="shopping-progress-week1">0 of ${checkableCount1} items checked</div>
-                            <div class="shopping-list" id="shopping-list-week1">${week1HTML}</div>
+                            <h2 class="shopping-title" onclick="toggleShoppingSection('week1')" style="cursor: pointer; user-select: none;">
+                                <span id="shopping-arrow-week1">▼</span> 🛒 Week 1 Shopping List
+                            </h2>
+                            <div id="shopping-content-week1">
+                                <div class="shopping-progress" id="shopping-progress-week1">0 of ${checkableCount1} items checked</div>
+                                <div class="shopping-list" id="shopping-list-week1">${week1HTML}</div>
+                            </div>
                         </div>
                     `;
                 }
-                
+
                 if (structured.shoppingWeek2) {
                     const week2Items = parseShoppingList(structured.shoppingWeek2);
                     const week2HTML = generateInteractiveShoppingList(week2Items, 'week2');
                     const checkableCount2 = week2Items.filter(item => !item.isHeader).length;
-                    
+
                     html += `
                         <div class="shopping-section" style="margin-top: 30px;">
-                            <h2 class="shopping-title">🛒 Week 2 Shopping List</h2>
-                            <div class="shopping-progress" id="shopping-progress-week2">0 of ${checkableCount2} items checked</div>
-                            <div class="shopping-list" id="shopping-list-week2">${week2HTML}</div>
+                            <h2 class="shopping-title" onclick="toggleShoppingSection('week2')" style="cursor: pointer; user-select: none;">
+                                <span id="shopping-arrow-week2">▼</span> 🛒 Week 2 Shopping List
+                            </h2>
+                            <div id="shopping-content-week2">
+                                <div class="shopping-progress" id="shopping-progress-week2">0 of ${checkableCount2} items checked</div>
+                                <div class="shopping-list" id="shopping-list-week2">${week2HTML}</div>
+                            </div>
                         </div>
                     `;
                 }
-                
+
                 // Fallback for single shopping list
                 if (!structured.shoppingWeek1 && !structured.shoppingWeek2 && structured.shopping) {
                     const shoppingItems = parseShoppingList(structured.shopping);
                     const shoppingHTML = generateInteractiveShoppingList(shoppingItems, 'general');
                     const checkableCount = shoppingItems.filter(item => !item.isHeader).length;
-                    
+
                     html += `
                         <div class="shopping-section">
-                            <h2 class="shopping-title">🛒 Shopping List</h2>
-                            <div class="shopping-progress" id="shopping-progress-general">0 of ${checkableCount} items checked</div>
-                            <div class="shopping-list" id="shopping-list-general">${shoppingHTML}</div>
+                            <h2 class="shopping-title" onclick="toggleShoppingSection('general')" style="cursor: pointer; user-select: none;">
+                                <span id="shopping-arrow-general">▼</span> 🛒 Shopping List
+                            </h2>
+                            <div id="shopping-content-general">
+                                <div class="shopping-progress" id="shopping-progress-general">0 of ${checkableCount} items checked</div>
+                                <div class="shopping-list" id="shopping-list-general">${shoppingHTML}</div>
+                            </div>
                         </div>
                     `;
                 }
@@ -809,6 +839,21 @@
             }).join('');
         }
         
+        function toggleShoppingSection(sectionId) {
+            const content = document.getElementById(`shopping-content-${sectionId}`);
+            const arrow = document.getElementById(`shopping-arrow-${sectionId}`);
+
+            if (content && arrow) {
+                if (content.style.display === 'none') {
+                    content.style.display = 'block';
+                    arrow.textContent = '▼';
+                } else {
+                    content.style.display = 'none';
+                    arrow.textContent = '▶';
+                }
+            }
+        }
+
         function toggleShoppingItem(weekId, index) {
             const checkbox = document.getElementById(`checkbox-${weekId}-${index}`);
             const text = document.getElementById(`text-${weekId}-${index}`);
