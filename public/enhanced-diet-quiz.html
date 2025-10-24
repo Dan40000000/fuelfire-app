@@ -1448,16 +1448,29 @@
                     const savedPlanId = saveMealPlanToStorage(mealPlanString, result.metadata);
 
                     if (!savedPlanId) {
+                        alert('❌ ERROR: Failed to save meal plan to storage! Check console.');
                         throw new Error('Failed to save meal plan to storage');
                     }
 
                     console.log('✅ Saved plan with ID:', savedPlanId);
+
+                    // DOUBLE CHECK it was actually saved
+                    const verification = localStorage.getItem('fuelfire_meal_plans');
+                    if (!verification) {
+                        alert('❌ ERROR: Meal plan not in localStorage after save! Check console.');
+                        console.error('❌ CRITICAL: localStorage.getItem returned null after save!');
+                    } else {
+                        const parsed = JSON.parse(verification);
+                        console.log('✅✅ DOUBLE CHECK: Found', parsed.length, 'plans in localStorage');
+                        console.log('✅✅ Latest plan ID:', parsed[0]?.id, 'matches saved?', parsed[0]?.id === savedPlanId);
+                    }
 
                     // Update button to show success
                     button.innerHTML = '✅ Complete Plan Generated! Redirecting...';
 
                     // Redirect after short delay - using plan ID instead of data in URL
                     setTimeout(() => {
+                        console.log('🔄 Redirecting to meal-plan-simple.html?planId=' + savedPlanId);
                         window.location.href = `meal-plan-simple.html?planId=${savedPlanId}`;
                     }, 1500);
 
