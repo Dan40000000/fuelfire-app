@@ -1444,8 +1444,18 @@
 
                     console.log('✅ Final meal plan length:', mealPlanString.length);
 
+                    // Prompt user to name their meal plan
+                    const defaultName = `${result.metadata.goal || 'Custom'} Plan - ${new Date().toLocaleDateString()}`;
+                    const planName = prompt('Name your meal plan:', defaultName);
+
+                    // Add the custom name to metadata
+                    const metadataWithName = {
+                        ...result.metadata,
+                        customName: planName || defaultName
+                    };
+
                     // Save meal plan to localStorage for the meal-plans.html page
-                    const savedPlanId = saveMealPlanToStorage(mealPlanString, result.metadata);
+                    const savedPlanId = saveMealPlanToStorage(mealPlanString, metadataWithName);
 
                     if (!savedPlanId) {
                         alert('❌ ERROR: Failed to save meal plan to storage! Check console.');

@@ -466,12 +466,18 @@
 
             savedPlans.forEach((plan, index) => {
                 const createdDate = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
+                const planName = plan.metadata?.customName || `Plan ${index + 1}`;
                 plansHTML += `
                     <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin: 10px 0; position: relative;">
                         <button onclick="deleteMealPlan(${index}, event)" style="position: absolute; top: 10px; right: 10px; background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;">
                             🗑️ Delete
                         </button>
-                        <h3>Plan ${index + 1}</h3>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <h3 style="margin: 0; flex: 1;">${planName}</h3>
+                            <button onclick="renameMealPlan(${index}, event)" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                                ✏️ Edit
+                            </button>
+                        </div>
                         <p style="margin: 5px 0;">📅 Created: ${createdDate}</p>
                         <p style="margin: 5px 0;">🎯 Goal: ${plan.metadata?.goal || 'Custom'}</p>
                         <button onclick="viewMealPlan(${index})" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 15px;">
@@ -511,6 +517,23 @@
             if (confirm('🗑️ Delete this meal plan?')) {
                 const savedPlans = getMealPlansFromStorage();
                 savedPlans.splice(index, 1);
+                saveMealPlansToStorage(savedPlans);
+                loadMealPlans(); // Reload the list
+            }
+        }
+
+        function renameMealPlan(index, event) {
+            event.stopPropagation(); // Prevent card click
+            const savedPlans = getMealPlansFromStorage();
+            const currentName = savedPlans[index].metadata?.customName || `Plan ${index + 1}`;
+            const newName = prompt('✏️ Rename your meal plan:', currentName);
+
+            if (newName && newName.trim() !== '') {
+                // Update the custom name in metadata
+                if (!savedPlans[index].metadata) {
+                    savedPlans[index].metadata = {};
+                }
+                savedPlans[index].metadata.customName = newName.trim();
                 saveMealPlansToStorage(savedPlans);
                 loadMealPlans(); // Reload the list
             }

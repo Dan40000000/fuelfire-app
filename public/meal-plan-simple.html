@@ -494,11 +494,17 @@
                 mealPlanType: typeof mealPlan,
                 metadataKeys: metadata ? Object.keys(metadata) : []
             });
-            
+
+            // Update header with custom name if available
+            const headerTitle = document.querySelector('.header-title');
+            if (headerTitle && metadata?.customName) {
+                headerTitle.textContent = metadata.customName;
+            }
+
             // Set metadata
             document.getElementById('plan-metadata').innerHTML = `
-                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
-                <strong>Goal:</strong> ${metadata.goal} | 
+                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} |
+                <strong>Goal:</strong> ${metadata.goal} |
                 <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
             `;
             
