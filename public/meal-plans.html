@@ -168,46 +168,6 @@
                         <p style="color: #666; font-size: 14px;">AI-generated or upload from your nutritionist</p>
                     </div>
 
-                    <!-- Debug Info Banner -->
-                    <div id="debug-info" style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px;">
-                        <strong style="color: #856404;">🔍 Debug Info:</strong>
-                        <div id="debug-text" style="margin-top: 8px; color: #856404;">Loading...</div>
-                    </div>
-
-                    <script>
-                        // IMMEDIATE debug check - runs as soon as this line is parsed
-                        (function() {
-                            const debugDiv = document.getElementById('debug-text');
-                            if (debugDiv) {
-                                debugDiv.innerHTML = 'JavaScript IS running! Checking localStorage...';
-
-                                setTimeout(function() {
-                                    try {
-                                        const rawData = localStorage.getItem('fuelfire_meal_plans');
-                                        debugDiv.innerHTML = `
-                                            <strong>JavaScript:</strong> ✅ RUNNING<br>
-                                            <strong>localStorage access:</strong> ${typeof localStorage !== 'undefined' ? '✅ YES' : '❌ NO'}<br>
-                                            <strong>Key "fuelfire_meal_plans" exists:</strong> ${rawData ? '✅ YES' : '❌ NO'}<br>
-                                            <strong>Data length:</strong> ${rawData ? rawData.length + ' characters' : 'N/A'}<br>
-                                            ${rawData ? `<strong>First 100 chars:</strong> ${rawData.substring(0, 100)}...` : ''}
-                                        `;
-
-                                        if (rawData) {
-                                            try {
-                                                const parsed = JSON.parse(rawData);
-                                                debugDiv.innerHTML += `<br><strong>Parsed successfully:</strong> ✅ ${parsed.length} plans found`;
-                                            } catch (e) {
-                                                debugDiv.innerHTML += `<br><strong>Parse error:</strong> ❌ ${e.message}`;
-                                            }
-                                        }
-                                    } catch (error) {
-                                        debugDiv.innerHTML = `❌ ERROR: ${error.message}`;
-                                    }
-                                }, 100);
-                            }
-                        })();
-                    </script>
-
                     <div id="meal-plans-list" class="meal-plans-grid">
                         <!-- Meal plans will be loaded here -->
                     </div>
@@ -415,25 +375,8 @@
         function loadMealPlans() {
             console.log('📋 Loading meal plans...');
 
-            // Update debug info
-            const debugDiv = document.getElementById('debug-text');
-            if (debugDiv) {
-                debugDiv.innerHTML = 'Attempting to load meal plans...';
-            }
-
             const savedPlans = getMealPlansFromStorage();
             console.log('📚 Found', savedPlans.length, 'saved plans');
-
-            // Update debug info with results
-            if (debugDiv) {
-                const rawData = localStorage.getItem('fuelfire_meal_plans');
-                debugDiv.innerHTML = `
-                    <strong>localStorage key exists:</strong> ${rawData ? 'YES ✅' : 'NO ❌'}<br>
-                    <strong>Raw data length:</strong> ${rawData ? rawData.length + ' characters' : 'N/A'}<br>
-                    <strong>Parsed plans count:</strong> ${savedPlans.length}<br>
-                    <strong>Plans loaded:</strong> ${savedPlans.length > 0 ? 'YES ✅' : 'NO ❌'}
-                `;
-            }
 
             const listContainer = document.getElementById('meal-plans-list');
 
@@ -459,25 +402,20 @@
 
             console.log('✅ About to render', savedPlans.length, 'plans...');
 
-            // TEMP: Just render simple cards to test
-            let plansHTML = `<div style="background: red; color: white; padding: 20px; margin: 10px 0;">
-                RENDERING ${savedPlans.length} PLANS
-            </div>`;
+            let plansHTML = '';
 
             savedPlans.forEach((plan, index) => {
                 const createdDate = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
                 const planName = plan.metadata?.customName || `Plan ${index + 1}`;
                 plansHTML += `
                     <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin: 10px 0; position: relative;">
+                        <button onclick="renameMealPlan(${index}, event)" style="position: absolute; top: 10px; right: 100px; background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                            ✏️ Edit
+                        </button>
                         <button onclick="deleteMealPlan(${index}, event)" style="position: absolute; top: 10px; right: 10px; background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;">
                             🗑️ Delete
                         </button>
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <h3 style="margin: 0; flex: 1;">${planName}</h3>
-                            <button onclick="renameMealPlan(${index}, event)" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                                ✏️ Edit
-                            </button>
-                        </div>
+                        <h3 style="margin: 0 0 10px 0; padding-right: 180px;">${planName}</h3>
                         <p style="margin: 5px 0;">📅 Created: ${createdDate}</p>
                         <p style="margin: 5px 0;">🎯 Goal: ${plan.metadata?.goal || 'Custom'}</p>
                         <button onclick="viewMealPlan(${index})" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 15px;">
