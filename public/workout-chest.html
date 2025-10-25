@@ -136,6 +136,7 @@
         }
     </style>
     <script src="quick-food-entry.js"></script>
+    <script src="global-nav.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -156,7 +157,7 @@
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h2 style="color: var(--primary); margin-bottom: 10px;">🏋️ Chest Exercises Library</h2>
                         <p style="color: #666; font-size: 14px;">Build a powerful chest with proper form and technique</p>
-                        <button onclick="goBack()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px;">← Back to Categories</button>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
                     </div>
                     <!-- Search Bar -->
                     <div style="margin-bottom: 20px;">
@@ -314,6 +315,10 @@
                 equipment: "Dumbbells, Bench",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 iconClass: "dumbbell-press-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/1.jpg"
+                ],
                 steps: [
                     "Sit on bench with dumbbells on thighs",
                     "Lie back while bringing dumbbells to shoulder level",
@@ -378,6 +383,10 @@
                 equipment: "None",
                 primaryMuscles: ["Chest", "Triceps", "Core"],
                 iconClass: "pushup-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/1.jpg"
+                ],
                 steps: [
                     "Start in plank position with hands under shoulders",
                     "Keep body in straight line from head to heels",
@@ -443,8 +452,8 @@
                 primaryMuscles: ["Lower Chest", "Triceps", "Shoulders"],
                 iconClass: "weight-icon",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Dips/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chest_Dip/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chest_Dip/1.jpg"
                 ],
                 steps: [
                     "Grip parallel bars with arms fully extended",
@@ -476,6 +485,10 @@
                 equipment: "Cable Machine",
                 primaryMuscles: ["Chest", "Front Delts"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
+                ],
                 steps: [
                     "Set cables to high position on both sides",
                     "Grab handles and step forward into split stance",
@@ -506,6 +519,10 @@
                 equipment: "Decline Bench, Barbell",
                 primaryMuscles: ["Lower Chest", "Triceps", "Shoulders"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Barbell_Bench_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Barbell_Bench_Press/1.jpg"
+                ],
                 steps: [
                     "Secure feet in decline bench foot pads",
                     "Lie back with head lower than hips",
@@ -536,6 +553,10 @@
                 equipment: "Incline Bench, Dumbbells",
                 primaryMuscles: ["Upper Chest", "Shoulders", "Triceps"],
                 iconClass: "dumbbell-press-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/1.jpg"
+                ],
                 steps: [
                     "Set bench to 30-45 degree incline",
                     "Sit with dumbbells on thighs",
@@ -566,6 +587,10 @@
                 equipment: "Incline Bench, Dumbbells",
                 primaryMuscles: ["Upper Chest", "Front Delts"],
                 iconClass: "flyes-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Flyes/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Flyes/1.jpg"
+                ],
                 steps: [
                     "Set bench to 30-45 degree incline",
                     "Start with dumbbells over upper chest",
@@ -596,6 +621,10 @@
                 equipment: "Cable Machine",
                 primaryMuscles: ["Upper Chest", "Front Delts"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Low_Cable_Crossover/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Low_Cable_Crossover/1.jpg"
+                ],
                 steps: [
                     "Set cables to lowest position on both sides",
                     "Grab handles and step forward",
@@ -626,6 +655,10 @@
                 equipment: "Pec Deck Machine",
                 primaryMuscles: ["Chest", "Front Delts"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Butterfly/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Butterfly/1.jpg"
+                ],
                 steps: [
                     "Adjust seat so handles align with mid-chest",
                     "Sit with back firmly against pad",
@@ -656,6 +689,10 @@
                 equipment: "Chest Press Machine",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Chest_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leverage_Chest_Press/1.jpg"
+                ],
                 steps: [
                     "Adjust seat so handles align with mid-chest",
                     "Sit with back flat against pad",
@@ -686,6 +723,10 @@
                 equipment: "Smith Machine, Bench",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 iconClass: "bench-press-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bench_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Bench_Press/1.jpg"
+                ],
                 steps: [
                     "Position bench so bar lowers to mid-chest",
                     "Lie back and grip bar slightly wider than shoulders",
@@ -716,6 +757,10 @@
                 equipment: "Landmine Attachment, Barbell",
                 primaryMuscles: ["Chest", "Shoulders", "Core"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Arm_Landmine_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Arm_Landmine_Press/1.jpg"
+                ],
                 steps: [
                     "Place one end of barbell in landmine or corner",
                     "Hold other end at shoulder height",
@@ -746,6 +791,10 @@
                 equipment: "Weight Plates",
                 primaryMuscles: ["Inner Chest", "Front Delts"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/1.jpg"
+                ],
                 steps: [
                     "Hold 2 weight plates together at chest level",
                     "Squeeze plates together hard throughout",
@@ -776,6 +825,10 @@
                 equipment: "None",
                 primaryMuscles: ["Inner Chest", "Triceps", "Core"],
                 iconClass: "pushup-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Diamond_Pushups/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Diamond_Pushups/1.jpg"
+                ],
                 steps: [
                     "Start in plank with hands close together",
                     "Form diamond shape with index fingers and thumbs",
@@ -806,6 +859,10 @@
                 equipment: "Resistance Bands",
                 primaryMuscles: ["Chest", "Triceps", "Shoulders"],
                 iconClass: "weight-icon",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/1.jpg"
+                ],
                 steps: [
                     "Anchor band at chest height behind you",
                     "Hold handles at chest level",
@@ -1077,41 +1134,6 @@
             </div>
         </div>
         <!-- Diet Plan -->
-        <div class="nav-item" onclick="window.location.href='workout-techniques.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
-                    <circle cx="12" cy="12" r="2" fill="white"/>
-                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-        </div>
-        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
-                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
-                </svg>
-            </div>
-        </div>
-        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
-                </svg>
-            </div>
-        </div>
         <div class="nav-item" onclick="window.location.href='workout-techniques.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
