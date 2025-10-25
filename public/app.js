@@ -966,109 +966,324 @@ const exerciseDatabase = {
     calves: []
 };
 
-// Load exercise databases from the workout pages (will be populated dynamically)
+// Load exercise databases from the workout-database.js comprehensive list
 async function loadExerciseDatabases() {
-    // For now, we'll create a simplified database with key exercises
-    // In production, this would fetch from the actual workout pages
-    exerciseDatabase.chest = [
-        { name: "Barbell Bench Press", difficulty: 3, equipment: "Barbell, Bench", primaryMuscles: ["Chest", "Triceps"] },
-        { name: "Dumbbell Bench Press", difficulty: 2, equipment: "Dumbbells, Bench", primaryMuscles: ["Chest", "Triceps"] },
-        { name: "Incline Bench Press", difficulty: 3, equipment: "Barbell, Incline Bench", primaryMuscles: ["Upper Chest", "Triceps"] },
-        { name: "Decline Bench Press", difficulty: 3, equipment: "Barbell, Decline Bench", primaryMuscles: ["Lower Chest", "Triceps"] },
-        { name: "Push-Ups", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Chest", "Triceps"] },
-        { name: "Dumbbell Flyes", difficulty: 2, equipment: "Dumbbells, Bench", primaryMuscles: ["Chest"] },
-        { name: "Cable Crossovers", difficulty: 2, equipment: "Cable Machine", primaryMuscles: ["Chest"] },
-        { name: "Chest Dips", difficulty: 2, equipment: "Dip Bar", primaryMuscles: ["Chest", "Triceps"] }
-    ];
+    // Use the comprehensive EXERCISE_DATABASE from workout-database.js
+    // Combine routine.gym and unique.gym exercises for maximum variety
 
-    exerciseDatabase.back = [
-        { name: "Deadlifts", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Back", "Legs", "Core"], wristStress: false },
-        { name: "Pull-Ups", difficulty: 3, equipment: "Pull-up Bar", primaryMuscles: ["Back", "Biceps"], wristFriendly: true },
-        { name: "Bicep-Focused Pull-Ups", difficulty: 3, equipment: "Pull-up Bar", primaryMuscles: ["Biceps", "Back"], wristFriendly: true },
-        { name: "Barbell Rows", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Back", "Biceps"], wristStress: false },
-        { name: "Lat Pulldowns", difficulty: 2, equipment: "Cable Machine", primaryMuscles: ["Back", "Biceps"], wristStress: false },
-        { name: "T-Bar Rows", difficulty: 3, equipment: "T-Bar", primaryMuscles: ["Back", "Biceps"], wristStress: false },
-        { name: "Cable Rows", difficulty: 2, equipment: "Cable Machine", primaryMuscles: ["Back", "Biceps"], wristFriendly: true },
-        { name: "Dumbbell Rows", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Back", "Biceps"], wristStress: false },
-        { name: "Face Pulls", difficulty: 1, equipment: "Cable Machine", primaryMuscles: ["Rear Delts", "Upper Back"], wristFriendly: true }
-    ];
+    if (typeof EXERCISE_DATABASE !== 'undefined') {
+        // Helper function to convert database format to our format
+        const convertExercises = (exercises) => {
+            return exercises.map((ex, index) => ({
+                name: ex.name,
+                difficulty: 2, // Default difficulty
+                equipment: "Gym Equipment",
+                primaryMuscles: [ex.notes || "Multiple"],
+                reps: ex.reps || "8-12",
+                notes: ex.notes || ""
+            }));
+        };
 
-    exerciseDatabase.shoulders = [
-        { name: "Overhead Press", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Shoulders", "Triceps"] },
-        { name: "Dumbbell Shoulder Press", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Shoulders", "Triceps"] },
-        { name: "Lateral Raises", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Side Delts"] },
-        { name: "Front Raises", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Front Delts"] },
-        { name: "Rear Delt Flyes", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Rear Delts"] },
-        { name: "Arnold Press", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Shoulders"] },
-        { name: "Upright Rows", difficulty: 2, equipment: "Barbell", primaryMuscles: ["Shoulders", "Traps"] },
-        { name: "Shrugs", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Traps"] }
-    ];
+        // Load chest exercises
+        if (EXERCISE_DATABASE.chest) {
+            const routine = EXERCISE_DATABASE.chest.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.chest.unique?.gym || [];
+            exerciseDatabase.chest = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
 
-    exerciseDatabase.arms = [
-        { name: "Barbell Curls", difficulty: 2, equipment: "Barbell", primaryMuscles: ["Biceps"], wristStress: true },
-        { name: "Dumbbell Curls", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Biceps"], wristStress: false },
-        { name: "Hammer Curls", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Biceps", "Forearms"], wristFriendly: true },
-        { name: "Tricep Dips", difficulty: 2, equipment: "Dip Bar", primaryMuscles: ["Triceps"], wristStress: false },
-        { name: "Tricep Pushdowns", difficulty: 1, equipment: "Cable Machine", primaryMuscles: ["Triceps"], wristFriendly: true },
-        { name: "Overhead Tricep Extension", difficulty: 2, equipment: "Dumbbell", primaryMuscles: ["Triceps"], wristStress: false },
-        { name: "Close-Grip Bench Press", difficulty: 2, equipment: "Barbell, Bench", primaryMuscles: ["Triceps", "Chest"], wristStress: true },
-        { name: "Preacher Curls", difficulty: 2, equipment: "EZ Bar, Preacher Bench", primaryMuscles: ["Biceps"], wristStress: true }
-    ];
+        // Load back exercises
+        if (EXERCISE_DATABASE.back) {
+            const routine = EXERCISE_DATABASE.back.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.back.unique?.gym || [];
+            exerciseDatabase.back = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
 
-    exerciseDatabase.legs = [
-        { name: "Barbell Squats", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Quads", "Glutes", "Core"] },
-        { name: "Leg Press", difficulty: 2, equipment: "Leg Press Machine", primaryMuscles: ["Quads", "Glutes"] },
-        { name: "Romanian Deadlifts", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Hamstrings", "Glutes"] },
-        { name: "Leg Curls", difficulty: 1, equipment: "Leg Curl Machine", primaryMuscles: ["Hamstrings"] },
-        { name: "Leg Extensions", difficulty: 1, equipment: "Leg Extension Machine", primaryMuscles: ["Quads"] },
-        { name: "Lunges", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Quads", "Glutes"] },
-        { name: "Bulgarian Split Squats", difficulty: 2, equipment: "Dumbbells", primaryMuscles: ["Quads", "Glutes"] },
-        { name: "Hack Squats", difficulty: 2, equipment: "Hack Squat Machine", primaryMuscles: ["Quads"] }
-    ];
+        // Load shoulders exercises
+        if (EXERCISE_DATABASE.shoulders) {
+            const routine = EXERCISE_DATABASE.shoulders.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.shoulders.unique?.gym || [];
+            exerciseDatabase.shoulders = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
 
-    exerciseDatabase.core = [
-        { name: "Planks", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Core"] },
-        { name: "Crunches", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Abs"] },
-        { name: "Bicycle Crunches", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Abs", "Obliques"] },
-        { name: "Leg Raises", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Lower Abs"] },
-        { name: "Russian Twists", difficulty: 2, equipment: "Medicine Ball", primaryMuscles: ["Obliques"] },
-        { name: "Mountain Climbers", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Core", "Cardio"] },
-        { name: "Ab Wheel Rollouts", difficulty: 3, equipment: "Ab Wheel", primaryMuscles: ["Core"] },
-        { name: "Hanging Knee Raises", difficulty: 2, equipment: "Pull-up Bar", primaryMuscles: ["Abs"] }
-    ];
+        // Load arms exercises
+        if (EXERCISE_DATABASE.arms) {
+            const routine = EXERCISE_DATABASE.arms.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.arms.unique?.gym || [];
+            exerciseDatabase.arms = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
 
-    exerciseDatabase.cardio = [
-        { name: "Running", difficulty: 1, equipment: "None", primaryMuscles: ["Cardiovascular"] },
-        { name: "Cycling", difficulty: 1, equipment: "Bike", primaryMuscles: ["Cardiovascular", "Legs"] },
-        { name: "Rowing", difficulty: 2, equipment: "Rowing Machine", primaryMuscles: ["Cardiovascular", "Back"] },
-        { name: "Jump Rope", difficulty: 2, equipment: "Jump Rope", primaryMuscles: ["Cardiovascular", "Calves"] },
-        { name: "Burpees", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Full Body", "Cardio"] },
-        { name: "Stair Climber", difficulty: 1, equipment: "Stair Climber", primaryMuscles: ["Cardiovascular", "Legs"] },
-        { name: "Battle Ropes", difficulty: 2, equipment: "Battle Ropes", primaryMuscles: ["Cardiovascular", "Arms"] }
-    ];
+        // Load legs exercises
+        if (EXERCISE_DATABASE.legs) {
+            const routine = EXERCISE_DATABASE.legs.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.legs.unique?.gym || [];
+            exerciseDatabase.legs = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
 
-    exerciseDatabase.calves = [
-        { name: "Standing Calf Raises", difficulty: 1, equipment: "Calf Raise Machine", primaryMuscles: ["Calves"] },
-        { name: "Seated Calf Raises", difficulty: 1, equipment: "Seated Calf Machine", primaryMuscles: ["Calves"] },
-        { name: "Single-Leg Calf Raises", difficulty: 2, equipment: "Bodyweight", primaryMuscles: ["Calves"] },
-        { name: "Jump Rope", difficulty: 2, equipment: "Jump Rope", primaryMuscles: ["Calves", "Cardio"] }
-    ];
+        // Load core exercises
+        if (EXERCISE_DATABASE.core) {
+            const routine = EXERCISE_DATABASE.core.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.core.unique?.gym || [];
+            exerciseDatabase.core = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
+
+        // Load cardio exercises
+        if (EXERCISE_DATABASE.cardio) {
+            const routine = EXERCISE_DATABASE.cardio.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.cardio.unique?.gym || [];
+            exerciseDatabase.cardio = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
+
+        // Load calves exercises
+        if (EXERCISE_DATABASE.calves) {
+            const routine = EXERCISE_DATABASE.calves.routine?.gym || [];
+            const unique = EXERCISE_DATABASE.calves.unique?.gym || [];
+            exerciseDatabase.calves = [
+                ...convertExercises(routine),
+                ...convertExercises(unique)
+            ];
+        }
+
+        console.log('✅ Loaded comprehensive exercise database:', {
+            chest: exerciseDatabase.chest.length,
+            back: exerciseDatabase.back.length,
+            shoulders: exerciseDatabase.shoulders.length,
+            arms: exerciseDatabase.arms.length,
+            legs: exerciseDatabase.legs.length,
+            core: exerciseDatabase.core.length,
+            cardio: exerciseDatabase.cardio.length,
+            calves: exerciseDatabase.calves.length
+        });
+    } else {
+        console.warn('⚠️ EXERCISE_DATABASE not found, using fallback minimal list');
+        // Fallback to basic exercises if workout-database.js isn't loaded
+        exerciseDatabase.chest = [
+            { name: "Barbell Bench Press", difficulty: 3, equipment: "Barbell, Bench", primaryMuscles: ["Chest"], reps: "8-10" },
+            { name: "Dumbbell Bench Press", difficulty: 2, equipment: "Dumbbells, Bench", primaryMuscles: ["Chest"], reps: "10-12" },
+            { name: "Push-Ups", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Chest"], reps: "15-20" }
+        ];
+        exerciseDatabase.back = [
+            { name: "Pull-Ups", difficulty: 3, equipment: "Pull-up Bar", primaryMuscles: ["Back"], reps: "8-12" },
+            { name: "Barbell Rows", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Back"], reps: "8-10" }
+        ];
+        exerciseDatabase.shoulders = [
+            { name: "Overhead Press", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Shoulders"], reps: "8-10" },
+            { name: "Lateral Raises", difficulty: 1, equipment: "Dumbbells", primaryMuscles: ["Shoulders"], reps: "12-15" }
+        ];
+        exerciseDatabase.arms = [
+            { name: "Barbell Curls", difficulty: 2, equipment: "Barbell", primaryMuscles: ["Biceps"], reps: "10-12" },
+            { name: "Tricep Dips", difficulty: 2, equipment: "Dip Bar", primaryMuscles: ["Triceps"], reps: "10-12" }
+        ];
+        exerciseDatabase.legs = [
+            { name: "Barbell Squats", difficulty: 3, equipment: "Barbell", primaryMuscles: ["Legs"], reps: "8-10" },
+            { name: "Leg Press", difficulty: 2, equipment: "Leg Press Machine", primaryMuscles: ["Legs"], reps: "10-12" }
+        ];
+        exerciseDatabase.core = [
+            { name: "Planks", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Core"], reps: "30-60 sec" },
+            { name: "Crunches", difficulty: 1, equipment: "Bodyweight", primaryMuscles: ["Abs"], reps: "15-20" }
+        ];
+        exerciseDatabase.cardio = [
+            { name: "Running", difficulty: 1, equipment: "None", primaryMuscles: ["Cardio"], reps: "20-30 min" },
+            { name: "Jump Rope", difficulty: 2, equipment: "Jump Rope", primaryMuscles: ["Cardio"], reps: "10-15 min" }
+        ];
+        exerciseDatabase.calves = [
+            { name: "Standing Calf Raises", difficulty: 1, equipment: "Calf Machine", primaryMuscles: ["Calves"], reps: "15-20" },
+            { name: "Seated Calf Raises", difficulty: 1, equipment: "Seated Calf Machine", primaryMuscles: ["Calves"], reps: "15-20" }
+        ];
+    }
 }
 
 // Start manual workout builder
+// Multi-day workout builder state
+let multiDayWorkout = {
+    name: '',
+    numDays: 3,
+    dayNamingStyle: 'days',
+    days: {},
+    currentDayIndex: 0
+};
+
 function startManualWorkoutBuilder() {
-    manualWorkoutExercises = [];
+    // Reset state
+    multiDayWorkout = {
+        name: '',
+        numDays: 3,
+        dayNamingStyle: 'days',
+        days: {},
+        currentDayIndex: 0
+    };
+
+    // Show builder
     document.getElementById('manual-workout-builder').style.display = 'block';
+
+    // Show setup screen, hide builder screen
+    document.getElementById('workout-setup-screen').style.display = 'block';
+    document.getElementById('workout-builder-screen').style.display = 'none';
+    document.getElementById('builder-bottom-nav').style.display = 'none';
+
+    // Reset inputs
     document.getElementById('manual-workout-name').value = '';
-    loadMuscleGroups();
+    document.getElementById('workout-days-count').value = '3';
+    document.getElementById('day-naming-style').value = 'days';
+
+    // Load exercise database
     loadExerciseDatabases();
-    updateSelectedExercisesList();
 }
 
 // Close manual workout builder
 function closeManualWorkoutBuilder() {
     document.getElementById('manual-workout-builder').style.display = 'none';
     document.getElementById('exercise-list-container').style.display = 'none';
+    document.getElementById('builder-bottom-nav').style.display = 'none';
+}
+
+// Start building the workout (after setup)
+function startBuildingWorkout() {
+    const workoutName = document.getElementById('manual-workout-name').value.trim();
+    const numDays = parseInt(document.getElementById('workout-days-count').value) || 3;
+    const dayNamingStyle = document.getElementById('day-naming-style').value;
+
+    if (!workoutName) {
+        alert('Please enter a workout name');
+        return;
+    }
+
+    if (numDays < 1 || numDays > 7) {
+        alert('Please enter a valid number of days (1-7)');
+        return;
+    }
+
+    // Update state
+    multiDayWorkout.name = workoutName;
+    multiDayWorkout.numDays = numDays;
+    multiDayWorkout.dayNamingStyle = dayNamingStyle;
+    multiDayWorkout.currentDayIndex = 0;
+
+    // Initialize days
+    multiDayWorkout.days = {};
+    for (let i = 0; i < numDays; i++) {
+        const dayKey = getDayKey(i, dayNamingStyle);
+        multiDayWorkout.days[dayKey] = {
+            name: dayKey,
+            exercises: []
+        };
+    }
+
+    // Hide setup, show builder
+    document.getElementById('workout-setup-screen').style.display = 'none';
+    document.getElementById('workout-builder-screen').style.display = 'block';
+    document.getElementById('builder-bottom-nav').style.display = 'block';
+
+    // Update UI
+    document.getElementById('current-workout-name').textContent = workoutName;
+
+    // Load muscle groups
+    loadMuscleGroups();
+
+    // Generate day tabs
+    generateDayTabs();
+
+    // Show first day
+    switchToDay(0);
+}
+
+// Helper function to get day key based on naming style
+function getDayKey(index, namingStyle) {
+    if (namingStyle === 'real') {
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        return days[index];
+    } else {
+        return `Day ${index + 1}`;
+    }
+}
+
+// Generate day tabs
+function generateDayTabs() {
+    const tabsContainer = document.getElementById('day-tabs-container');
+    const days = Object.keys(multiDayWorkout.days);
+
+    tabsContainer.innerHTML = days.map((dayKey, index) => `
+        <button
+            id="day-tab-${index}"
+            onclick="switchToDay(${index})"
+            style="
+                background: ${index === multiDayWorkout.currentDayIndex ? 'var(--gradient-1)' : 'white'};
+                color: ${index === multiDayWorkout.currentDayIndex ? 'white' : 'var(--dark)'};
+                border: ${index === multiDayWorkout.currentDayIndex ? 'none' : '2px solid #e0e0e0'};
+                padding: 10px 20px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-weight: bold;
+                white-space: nowrap;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            "
+        >
+            ${dayKey}
+        </button>
+    `).join('');
+}
+
+// Switch to a different day
+function switchToDay(dayIndex) {
+    multiDayWorkout.currentDayIndex = dayIndex;
+    const dayKey = Object.keys(multiDayWorkout.days)[dayIndex];
+
+    // Update tab styles
+    const days = Object.keys(multiDayWorkout.days);
+    days.forEach((_, index) => {
+        const tab = document.getElementById(`day-tab-${index}`);
+        if (tab) {
+            if (index === dayIndex) {
+                tab.style.background = 'var(--gradient-1)';
+                tab.style.color = 'white';
+                tab.style.border = 'none';
+            } else {
+                tab.style.background = 'white';
+                tab.style.color = 'var(--dark)';
+                tab.style.border = '2px solid #e0e0e0';
+            }
+        }
+    });
+
+    // Update current day label
+    document.getElementById('current-day-label').textContent = `Building ${dayKey}`;
+    document.getElementById('current-day-name-display').textContent = dayKey;
+
+    // Update exercises list for current day
+    updateCurrentDayExercisesList();
+
+    // Close exercise list if open
+    document.getElementById('exercise-list-container').style.display = 'none';
+}
+
+// Back to setup screen
+function backToSetup() {
+    if (confirm('Are you sure? Your current progress will be lost.')) {
+        document.getElementById('workout-builder-screen').style.display = 'none';
+        document.getElementById('workout-setup-screen').style.display = 'block';
+        document.getElementById('builder-bottom-nav').style.display = 'none';
+    }
 }
 
 // Load muscle groups
@@ -1123,94 +1338,131 @@ function closeMuscleGroupExercises() {
     document.getElementById('exercise-list-container').style.display = 'none';
 }
 
-// Add exercise to workout
+// Add exercise to current day's workout
 function addExerciseToWorkout(exerciseIndex, muscleGroup) {
     const exercise = exerciseDatabase[muscleGroup][exerciseIndex];
+    const dayKey = Object.keys(multiDayWorkout.days)[multiDayWorkout.currentDayIndex];
+    const currentDayExercises = multiDayWorkout.days[dayKey].exercises;
 
-    // Check if already added
-    if (manualWorkoutExercises.some(e => e.name === exercise.name)) {
-        alert('This exercise is already in your workout!');
+    // Check if already added to this day
+    if (currentDayExercises.some(e => e.name === exercise.name)) {
+        alert(`${exercise.name} is already in this day's workout!`);
         return;
     }
 
     // Add with default sets/reps
-    manualWorkoutExercises.push({
+    currentDayExercises.push({
         ...exercise,
         sets: 3,
-        reps: 10,
+        reps: exercise.reps || '10',
         muscleGroup: muscleGroup
     });
 
-    updateSelectedExercisesList();
-    alert(`${exercise.name} added to your workout!`);
+    updateCurrentDayExercisesList();
+
+    // Show brief notification instead of alert
+    showToast(`✓ ${exercise.name} added!`);
 }
 
-// Remove exercise from workout
-function removeExerciseFromWorkout(index) {
-    manualWorkoutExercises.splice(index, 1);
-    updateSelectedExercisesList();
+// Remove exercise from current day
+function removeExerciseFromCurrentDay(index) {
+    const dayKey = Object.keys(multiDayWorkout.days)[multiDayWorkout.currentDayIndex];
+    multiDayWorkout.days[dayKey].exercises.splice(index, 1);
+    updateCurrentDayExercisesList();
 }
 
-// Clear all selected exercises
-function clearSelectedExercises() {
-    if (manualWorkoutExercises.length === 0) return;
+// Clear current day's exercises
+function clearCurrentDayExercises() {
+    const dayKey = Object.keys(multiDayWorkout.days)[multiDayWorkout.currentDayIndex];
+    const exercises = multiDayWorkout.days[dayKey].exercises;
 
-    if (confirm('Are you sure you want to clear all selected exercises?')) {
-        manualWorkoutExercises = [];
-        updateSelectedExercisesList();
+    if (exercises.length === 0) return;
+
+    if (confirm(`Clear all exercises for ${dayKey}?`)) {
+        multiDayWorkout.days[dayKey].exercises = [];
+        updateCurrentDayExercisesList();
     }
 }
 
-// Update selected exercises list
-function updateSelectedExercisesList() {
-    const selectedList = document.getElementById('selected-exercises-list');
-    const selectedCount = document.getElementById('selected-count');
+// Update exercises list for current day
+function updateCurrentDayExercisesList() {
+    const dayKey = Object.keys(multiDayWorkout.days)[multiDayWorkout.currentDayIndex];
+    const exercises = multiDayWorkout.days[dayKey].exercises;
+    const selectedList = document.getElementById('selected-exercises-current-day');
+    const selectedCount = document.getElementById('selected-count-current-day');
 
-    selectedCount.textContent = manualWorkoutExercises.length;
+    selectedCount.textContent = exercises.length;
 
-    if (manualWorkoutExercises.length === 0) {
-        selectedList.innerHTML = '<p style="text-align: center; color: #999; font-style: italic;">No exercises selected yet</p>';
+    if (exercises.length === 0) {
+        selectedList.innerHTML = '<p style="text-align: center; color: #999; font-style: italic; font-size: 14px;">No exercises added yet</p>';
         return;
     }
 
-    selectedList.innerHTML = manualWorkoutExercises.map((exercise, index) => `
-        <div style="padding: 12px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+    selectedList.innerHTML = exercises.map((exercise, index) => `
+        <div style="padding: 12px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: start; gap: 10px;">
             <div style="flex: 1;">
-                <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">${exercise.name}</div>
-                <div style="display: flex; gap: 15px; align-items: center; margin-top: 8px;">
+                <div style="font-weight: bold; color: var(--dark); margin-bottom: 8px; font-size: 14px;">${index + 1}. ${exercise.name}</div>
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <div style="display: flex; gap: 5px; align-items: center;">
-                        <label style="font-size: 12px; color: #666;">Sets:</label>
-                        <input type="number" value="${exercise.sets}" min="1" max="10" onchange="updateExerciseSets(${index}, this.value)" style="width: 50px; padding: 4px; border: 1px solid #ddd; border-radius: 5px; text-align: center;">
+                        <label style="font-size: 11px; color: #666; font-weight: 600;">Sets:</label>
+                        <input type="number" value="${exercise.sets}" min="1" max="10" onchange="updateCurrentDayExerciseSets(${index}, this.value)" style="width: 45px; padding: 5px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 13px; font-weight: 600;">
                     </div>
                     <div style="display: flex; gap: 5px; align-items: center;">
-                        <label style="font-size: 12px; color: #666;">Reps:</label>
-                        <input type="number" value="${exercise.reps}" min="1" max="50" onchange="updateExerciseReps(${index}, this.value)" style="width: 50px; padding: 4px; border: 1px solid #ddd; border-radius: 5px; text-align: center;">
+                        <label style="font-size: 11px; color: #666; font-weight: 600;">Reps:</label>
+                        <input type="text" value="${exercise.reps}" onchange="updateCurrentDayExerciseReps(${index}, this.value)" style="width: 50px; padding: 5px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 13px; font-weight: 600;">
                     </div>
                 </div>
             </div>
-            <button onclick="removeExerciseFromWorkout(${index})" style="background: #ff5252; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; margin-left: 10px;">
+            <button onclick="removeExerciseFromCurrentDay(${index})" style="background: #ff5252; color: white; border: none; padding: 6px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; flex-shrink: 0;">
                 Remove
             </button>
         </div>
     `).join('');
 }
 
-// Update exercise sets
-function updateExerciseSets(index, value) {
-    manualWorkoutExercises[index].sets = parseInt(value) || 3;
+// Update exercise sets for current day
+function updateCurrentDayExerciseSets(index, value) {
+    const dayKey = Object.keys(multiDayWorkout.days)[multiDayWorkout.currentDayIndex];
+    multiDayWorkout.days[dayKey].exercises[index].sets = parseInt(value) || 3;
 }
 
-// Update exercise reps
-function updateExerciseReps(index, value) {
-    manualWorkoutExercises[index].reps = parseInt(value) || 10;
+// Update exercise reps for current day
+function updateCurrentDayExerciseReps(index, value) {
+    const dayKey = Object.keys(multiDayWorkout.days)[multiDayWorkout.currentDayIndex];
+    multiDayWorkout.days[dayKey].exercises[index].reps = value || '10';
 }
 
-// Save manual workout
+// Show toast notification
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: bold;
+        z-index: 10000;
+        animation: fadeInOut 2s ease-in-out;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+}
+
+// Save manual multi-day workout
 function saveManualWorkout() {
-    const workoutName = document.getElementById('manual-workout-name').value.trim() || 'My Custom Workout';
+    const workoutName = multiDayWorkout.name || 'My Custom Workout';
 
-    if (manualWorkoutExercises.length === 0) {
-        alert('Please add at least one exercise to your workout!');
+    // Check if at least one day has exercises
+    const hasExercises = Object.values(multiDayWorkout.days).some(day => day.exercises.length > 0);
+
+    if (!hasExercises) {
+        alert('Please add at least one exercise to at least one day!');
         return;
     }
 
@@ -1233,21 +1485,53 @@ function saveManualWorkout() {
         }
     }
 
+    // Create weekly schedule from multi-day structure
+    const weeklySchedule = {};
+    Object.keys(multiDayWorkout.days).forEach(dayKey => {
+        const dayData = multiDayWorkout.days[dayKey];
+        weeklySchedule[dayKey] = {
+            name: dayKey,
+            exercises: dayData.exercises
+        };
+    });
+
     // Create workout object
     const workout = {
         id: Date.now(),
         workoutName: workoutName,
         name: workoutName,
-        exercises: manualWorkoutExercises,
+        weeklySchedule: weeklySchedule,
         type: 'manual',
-        createdAt: new Date().toISOString()
+        daysPerWeek: multiDayWorkout.numDays,
+        createdAt: new Date().toISOString(),
+        color: '#4B9CD3'
     };
 
     savedWorkouts.push(workout);
     localStorage.setItem('savedWorkouts', JSON.stringify(savedWorkouts));
 
-    alert(`Workout "${workoutName}" saved successfully! 💪`);
+    alert(`🎉 Workout "${workoutName}" saved successfully!\n\nYou can find it in your Saved Workouts.`);
     closeManualWorkoutBuilder();
+    showScreen('saved-workouts');
+}
+
+// Show workout summary
+function showWorkoutSummary() {
+    const days = Object.keys(multiDayWorkout.days);
+    let summary = `📋 ${multiDayWorkout.name}\n\n`;
+
+    days.forEach(dayKey => {
+        const dayData = multiDayWorkout.days[dayKey];
+        summary += `${dayKey}: ${dayData.exercises.length} exercises\n`;
+    });
+
+    const totalExercises = days.reduce((total, dayKey) => {
+        return total + multiDayWorkout.days[dayKey].exercises.length;
+    }, 0);
+
+    summary += `\nTotal: ${totalExercises} exercises across ${days.length} days`;
+
+    alert(summary);
 }
 
 // Select option in quiz
@@ -1996,6 +2280,11 @@ function toggleWorkoutPreview(workoutId) {
     // If already showing, hide it
     if (previewDiv.style.display === 'block') {
         previewDiv.style.display = 'none';
+        // Remove event listener when hiding
+        const daySelector = document.getElementById(`day-${workoutId}`);
+        if (daySelector) {
+            daySelector.removeEventListener('change', daySelector._updatePreviewHandler);
+        }
         return;
     }
 
@@ -2008,6 +2297,22 @@ function toggleWorkoutPreview(workoutId) {
         return;
     }
 
+    // Show the preview with current selection
+    updateWorkoutPreview(workoutId, selectedDay, previewDiv);
+
+    // Add event listener to auto-update when day changes
+    if (daySelector && !daySelector._updatePreviewHandler) {
+        daySelector._updatePreviewHandler = function() {
+            updateWorkoutPreview(workoutId, daySelector.value, previewDiv);
+        };
+        daySelector.addEventListener('change', daySelector._updatePreviewHandler);
+    }
+
+    previewDiv.style.display = 'block';
+}
+
+// Helper function to update workout preview
+function updateWorkoutPreview(workoutId, selectedDay, previewDiv) {
     // Get workout data
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
     const workout = savedWorkouts.find(w => String(w.id) === String(workoutId));
@@ -2017,7 +2322,11 @@ function toggleWorkoutPreview(workoutId) {
     const schedule = workout.weeklySchedule || (program && program.schedule);
 
     if (!schedule || !schedule[selectedDay]) {
-        alert('No workout found for this day');
+        previewDiv.innerHTML = `
+            <div style="background: #ff5252; padding: 15px; border-radius: 12px; color: white; text-align: center;">
+                <p style="margin: 0;">No workout found for ${selectedDay}</p>
+            </div>
+        `;
         return;
     }
 
@@ -2049,7 +2358,6 @@ function toggleWorkoutPreview(workoutId) {
     `;
 
     previewDiv.innerHTML = previewHTML;
-    previewDiv.style.display = 'block';
 }
 
 // Start workout (full tracker)

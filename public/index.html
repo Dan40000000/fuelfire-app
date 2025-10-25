@@ -12,6 +12,7 @@
     <script src="health-sync.js"></script>
     <script src="global-nav.js"></script>
     <script src="quick-food-entry.js"></script>
+    <script src="workout-database.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -1787,52 +1788,114 @@
 
     <!-- Manual Workout Builder -->
     <div class="screen-content" id="manual-workout-builder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
-        <div style="max-width: 375px; margin: 0 auto; padding: 20px;">
-            <div style="margin-bottom: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: var(--dark); margin: 0;">Build Your Workout</h2>
-                    <button onclick="closeManualWorkoutBuilder()" style="background: transparent; border: none; font-size: 32px; cursor: pointer; color: #999; padding: 0; line-height: 1;">×</button>
+        <div style="max-width: 375px; margin: 0 auto; padding: 60px 20px 100px 20px;">
+
+            <!-- Step 1: Setup Screen -->
+            <div id="workout-setup-screen" style="display: block;">
+                <div style="background: var(--gradient-1); color: white; padding: 25px; border-radius: 20px; margin-bottom: 25px; text-align: center;">
+                    <h2 style="font-size: 24px; margin-bottom: 10px;">💪 Build Your Workout</h2>
+                    <p style="opacity: 0.9; font-size: 14px;">Create a custom multi-day workout program</p>
                 </div>
 
-                <!-- Workout Name Input -->
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: bold;">Workout Name</label>
-                    <input type="text" id="manual-workout-name" placeholder="My Custom Workout" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
+                <!-- Workout Name -->
+                <div style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; color: var(--dark); font-weight: bold;">Workout Name</label>
+                    <input type="text" id="manual-workout-name" placeholder="e.g., Summer Shred 2025" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
                 </div>
 
-                <!-- Selected Exercises Display -->
-                <div style="margin-bottom: 25px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h3 style="color: var(--dark); margin: 0;">Selected Exercises (<span id="selected-count">0</span>)</h3>
-                        <button onclick="clearSelectedExercises()" style="background: #ff5252; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;">Clear All</button>
+                <!-- Number of Days -->
+                <div style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; color: var(--dark); font-weight: bold;">How many days per week?</label>
+                    <input type="number" id="workout-days-count" min="1" max="7" value="3" placeholder="3" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
+                </div>
+
+                <!-- Day Naming Style -->
+                <div style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; color: var(--dark); font-weight: bold;">How do you want to name your days?</label>
+                    <select id="day-naming-style" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: white;">
+                        <option value="days">Day 1, Day 2, Day 3...</option>
+                        <option value="real">Monday, Tuesday, Wednesday...</option>
+                    </select>
+                </div>
+
+                <button onclick="startBuildingWorkout()" style="width: 100%; background: var(--gradient-1); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                    🚀 Start Building
+                </button>
+
+                <button onclick="closeManualWorkoutBuilder()" style="width: 100%; background: transparent; border: 2px solid var(--lighter-bg); color: var(--primary-dark); padding: 12px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px;">
+                    ← Cancel
+                </button>
+            </div>
+
+            <!-- Step 2: Exercise Builder Screen -->
+            <div id="workout-builder-screen" style="display: none;">
+                <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; position: relative;">
+                    <button onclick="backToSetup()" style="position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                        ← Back
+                    </button>
+                    <h3 id="current-workout-name" style="margin: 0 0 5px 0; font-size: 20px; text-align: center;">My Workout</h3>
+                    <p id="current-day-label" style="opacity: 0.9; font-size: 14px; margin: 0; text-align: center;">Building Day 1</p>
+                </div>
+
+                <!-- Day Tabs -->
+                <div id="day-tabs-container" style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 10px;">
+                    <!-- Tabs will be generated dynamically -->
+                </div>
+
+                <!-- Selected Exercises for Current Day -->
+                <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="color: var(--dark); margin: 0; font-size: 16px;">Exercises for <span id="current-day-name-display">Day 1</span> (<span id="selected-count-current-day">0</span>)</h3>
+                        <button onclick="clearCurrentDayExercises()" style="background: #ff5252; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; font-weight: bold;">
+                            Clear
+                        </button>
                     </div>
-                    <div id="selected-exercises-list" style="background: white; border-radius: 15px; padding: 15px; min-height: 100px; max-height: 300px; overflow-y: auto;">
-                        <p style="text-align: center; color: #999; font-style: italic;">No exercises selected yet</p>
+                    <div id="selected-exercises-current-day" style="min-height: 80px; max-height: 250px; overflow-y: auto;">
+                        <p style="text-align: center; color: #999; font-style: italic; font-size: 14px;">No exercises added yet</p>
                     </div>
                 </div>
 
                 <!-- Muscle Group Selection -->
-                <div style="margin-bottom: 20px;">
-                    <h3 style="color: var(--dark); margin-bottom: 15px;">Select Muscle Group</h3>
+                <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                    <h3 style="color: var(--dark); margin: 0 0 15px 0; font-size: 16px;">Add Exercises</h3>
                     <div id="muscle-groups" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                         <!-- Muscle groups will be populated by JS -->
                     </div>
                 </div>
 
                 <!-- Exercise List for Selected Muscle Group -->
-                <div id="exercise-list-container" style="display: none; margin-bottom: 25px;">
+                <div id="exercise-list-container" style="display: none; background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3 style="color: var(--dark); margin: 0;" id="selected-muscle-group-title">Exercises</h3>
-                        <button onclick="closeMuscleGroupExercises()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;">Back to Groups</button>
+                        <h3 style="color: var(--dark); margin: 0; font-size: 16px;" id="selected-muscle-group-title">Exercises</h3>
+                        <button onclick="closeMuscleGroupExercises()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: bold;">
+                            ← Back
+                        </button>
                     </div>
-                    <div id="exercise-list" style="background: white; border-radius: 15px; padding: 15px; max-height: 400px; overflow-y: auto;">
+                    <div id="exercise-list" style="max-height: 400px; overflow-y: auto; border-top: 1px solid #e0e0e0; padding-top: 10px;">
                         <!-- Exercises will be populated by JS -->
                     </div>
                 </div>
 
                 <!-- Save Button -->
-                <button onclick="saveManualWorkout()" style="width: 100%; background: var(--gradient-1); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px;">
-                    💾 Save Workout
+                <button onclick="saveManualWorkout()" style="width: 100%; background: var(--gradient-2); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
+                    💾 Save Workout Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation (only shown when building) -->
+        <div id="builder-bottom-nav" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; padding: 12px 20px; z-index: 1001;">
+            <div style="max-width: 375px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center;">
+                <button onclick="showScreen('home')" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 20px;">🏠</span>
+                    <span>Home</span>
+                </button>
+                <button onclick="showWorkoutSummary()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 20px;">📋</span>
+                    <span>Summary</span>
+                </button>
+                <button onclick="saveManualWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold;">
+                    💾 Save
                 </button>
             </div>
         </div>
