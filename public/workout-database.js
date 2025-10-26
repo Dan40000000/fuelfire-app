@@ -1447,7 +1447,8 @@ function getWorkoutFromDatabase(muscles, time, location, style) {
                 sets: `${setsPerExercise} sets`,
                 reps: exercise.reps,
                 rest: restPeriod,
-                notes: exercise.notes
+                notes: exercise.notes,
+                muscle: muscle  // Add muscle group for linking to technique pages
             });
         });
     });
