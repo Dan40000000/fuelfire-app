@@ -770,7 +770,25 @@
 
             let html = '';
             workout.forEach(exercise => {
-                const techniquePageUrl = exercise.muscle ? `workout-${exercise.muscle}.html` : 'workout-techniques.html';
+                // Map muscle groups to actual HTML files
+                const muscleToPage = {
+                    'chest': 'chest',
+                    'lats': 'back',
+                    'traps': 'back',
+                    'shoulders': 'shoulders',
+                    'biceps': 'arms',
+                    'triceps': 'arms',
+                    'quads': 'legs',
+                    'hamstrings': 'legs',
+                    'glutes': 'legs',
+                    'calves': 'calves',
+                    'core': 'core',
+                    'cardio': 'cardio',
+                    'full-body': 'techniques'
+                };
+                const pageName = exercise.muscle && muscleToPage[exercise.muscle] ? muscleToPage[exercise.muscle] : 'techniques';
+                const techniquePageUrl = `workout-${pageName}.html`;
+
                 html += `
                     <div class="exercise-item">
                         <div class="exercise-name">${exercise.name}</div>
@@ -780,7 +798,7 @@
                             ${exercise.rest ? ` • ${exercise.rest}` : ''}
                         </div>
                         ${exercise.notes ? `<div style="margin-top: 8px; font-size: 13px; font-style: italic; color: #666;">${exercise.notes}</div>` : ''}
-                        <a href="${techniquePageUrl}" class="view-form-btn">👁️ View Form & Technique</a>
+                        <a href="${techniquePageUrl}" target="_blank" class="view-form-btn">👁️ View Form & Technique</a>
                     </div>
                 `;
             });

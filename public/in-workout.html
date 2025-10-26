@@ -536,7 +536,25 @@
 
             workoutData.exercises.forEach((exercise, index) => {
                 const numSets = parseInt(exercise.sets) || 3;
-                const techniquePageUrl = exercise.muscle ? `workout-${exercise.muscle}.html` : 'workout-techniques.html';
+
+                // Map muscle groups to actual HTML files
+                const muscleToPage = {
+                    'chest': 'chest',
+                    'lats': 'back',
+                    'traps': 'back',
+                    'shoulders': 'shoulders',
+                    'biceps': 'arms',
+                    'triceps': 'arms',
+                    'quads': 'legs',
+                    'hamstrings': 'legs',
+                    'glutes': 'legs',
+                    'calves': 'calves',
+                    'core': 'core',
+                    'cardio': 'cardio',
+                    'full-body': 'techniques'
+                };
+                const pageName = exercise.muscle && muscleToPage[exercise.muscle] ? muscleToPage[exercise.muscle] : 'techniques';
+                const techniquePageUrl = `workout-${pageName}.html`;
 
                 html += `
                     <div class="exercise-tracker" id="exercise-${index}">
@@ -549,7 +567,7 @@
                             ${exercise.notes ? `<br><em style="font-size: 12px;">${exercise.notes}</em>` : ''}
                         </div>
                         <div style="margin: 10px 0;">
-                            <a href="${techniquePageUrl}" style="display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #4B9CD3 0%, #13294B 100%); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: bold; text-decoration: none; transition: all 0.3s ease;">👁️ View Form & Technique</a>
+                            <a href="${techniquePageUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #4B9CD3 0%, #13294B 100%); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: bold; text-decoration: none; transition: all 0.3s ease;">👁️ View Form & Technique</a>
                         </div>
                         <div class="set-inputs">
                 `;
