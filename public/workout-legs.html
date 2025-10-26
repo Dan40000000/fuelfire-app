@@ -157,7 +157,7 @@
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h2 style="color: var(--primary); margin-bottom: 10px;">🦵 Leg Exercise Library</h2>
                         <p style="color: #666; font-size: 14px;">Build powerful legs with proper form and technique</p>
-                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back to Categories</button>
+                        <button onclick="goBack()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 15px; font-size: 12px; margin-top: 10px; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">← Back</button>
                     </div>
                     <!-- Search Bar -->
                     <div style="margin-bottom: 20px;">
@@ -1273,7 +1273,7 @@
         }
         
         function goBack() {
-            window.location.href = 'workout-techniques.html';
+            window.history.back();
         }
 
         function generateDifficultyStars(difficulty) {
