@@ -60,7 +60,7 @@ class FuelFireAuth {
             console.log('🔍 API URL:', `${this.apiBaseUrl}/api/claude-meal-plan`);
             console.log('🔍 Quiz data keys:', Object.keys(quizData));
             
-            const response = await fetch('/api/claude-meal-plan', {
+            const response = await fetch('https://fuelfire-app.vercel.app/api/claude-meal-plan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ class FuelFireAuth {
         try {
             console.log('🤖 Sending single-phase request to Claude AI...');
             
-            const response = await fetch('/api/claude-meal-plan', {
+            const response = await fetch('https://fuelfire-app.vercel.app/api/claude-meal-plan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
