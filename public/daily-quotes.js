@@ -313,16 +313,89 @@ const dailyQuotes = [
     { quote: "Hardships often prepare ordinary people for an extraordinary destiny.", author: "C.S. Lewis" }
 ];
 
-// Get quote for today based on day of year
-function getDailyQuote() {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now - start;
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
+const QUOTE_OF_DAY_KEY = 'dailyQuoteOfDay';
+const QUOTE_HISTORY_KEY = 'dailyQuoteHistory';
+const MAX_QUOTE_HISTORY = 90;
 
-    // Use day of year to select quote (wraps around if > 365)
-    const quoteIndex = dayOfYear % dailyQuotes.length;
+function safeGet(key) {
+    try {
+        return localStorage.getItem(key);
+    } catch (error) {
+        console.warn('localStorage get failed:', error);
+        return null;
+    }
+}
+
+function safeSet(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch (error) {
+        console.warn('localStorage set failed:', error);
+    }
+}
+
+function parseStoredJson(raw, fallback) {
+    if (!raw) return fallback;
+    try {
+        return JSON.parse(raw);
+    } catch (error) {
+        console.warn('Failed to parse stored JSON:', error);
+        return fallback;
+    }
+}
+
+function secureRandomInt(maxExclusive) {
+    if (maxExclusive <= 0) return 0;
+    if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+        const array = new Uint32Array(1);
+        window.crypto.getRandomValues(array);
+        return array[0] % maxExclusive;
+    }
+    return Math.floor(Math.random() * maxExclusive);
+}
+
+function selectQuoteIndex(exclusions = new Set()) {
+    const totalQuotes = dailyQuotes.length;
+    if (totalQuotes === 0) return 0;
+
+    if (exclusions.size >= totalQuotes) {
+        exclusions = new Set();
+    }
+
+    const candidates = [];
+    for (let i = 0; i < totalQuotes; i++) {
+        if (!exclusions.has(i)) {
+            candidates.push(i);
+        }
+    }
+
+    const randomIdx = secureRandomInt(candidates.length);
+    return candidates[randomIdx];
+}
+
+// Get quote for today with randomness and history
+function getDailyQuote() {
+    const todayKey = new Date().toISOString().split('T')[0];
+    const storedQuote = parseStoredJson(safeGet(QUOTE_OF_DAY_KEY), null);
+
+    if (storedQuote && storedQuote.date === todayKey && dailyQuotes[storedQuote.index]) {
+        return dailyQuotes[storedQuote.index];
+    }
+
+    const historyArray = parseStoredJson(safeGet(QUOTE_HISTORY_KEY), []);
+    const recentSet = new Set(historyArray);
+
+    const quoteIndex = selectQuoteIndex(recentSet);
+
+    const quotePayload = { date: todayKey, index: quoteIndex };
+    safeSet(QUOTE_OF_DAY_KEY, JSON.stringify(quotePayload));
+
+    historyArray.push(quoteIndex);
+    if (historyArray.length > MAX_QUOTE_HISTORY) {
+        historyArray.splice(0, historyArray.length - MAX_QUOTE_HISTORY);
+    }
+    safeSet(QUOTE_HISTORY_KEY, JSON.stringify(historyArray));
+
     return dailyQuotes[quoteIndex];
 }
 
