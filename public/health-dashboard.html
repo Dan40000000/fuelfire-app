@@ -815,18 +815,29 @@
                 return;
             }
 
-            const max = Math.max(...entries.map(e => e.value));
-            const min = Math.min(...entries.map(e => e.value));
+            const numericValues = entries
+                .map(entry => getEntryValue(entry))
+                .filter(value => value !== null);
+
+            if (numericValues.length === 0) {
+                chart.innerHTML = '<div style="text-align: center; color: #999;">No data yet</div>';
+                return;
+            }
+
+            const max = Math.max(...numericValues);
+            const min = Math.min(...numericValues);
             const range = max - min || 10;
 
             let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 90px; gap: 2px;">';
 
             entries.slice(-7).forEach((entry, i) => {
-                const height = entries.length === 1 ? 50 : ((entry.value - min) / range) * 70 + 20;
+                const weightValue = getEntryValue(entry);
+                if (weightValue === null) return;
+                const height = entries.length === 1 ? 50 : ((weightValue - min) / range) * 70 + 20;
                 const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
                 chartHTML += `
                     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.value.toFixed(1)}</div>
+                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${weightValue.toFixed(1)}</div>
                         <div style="width: 100%; background: var(--gradient-1); border-radius: 5px 5px 0 0; height: ${height}px;"></div>
                         <div style="font-size: 9px; color: #666;">${date}</div>
                     </div>
@@ -843,10 +854,12 @@
 
             let html = '<div style="font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 600;">Recent Entries:</div>';
             entries.slice(-5).reverse().forEach(entry => {
+                const value = getEntryValue(entry);
+                if (value === null) return;
                 const date = new Date(entry.date).toLocaleString();
                 html += `
                     <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
-                        <span style="font-weight: bold;">${entry.value.toFixed(1)} lbs</span>
+                        <span style="font-weight: bold;">${value.toFixed(1)} lbs</span>
                         <span style="font-size: 12px; color: #666;">${date}</span>
                     </div>
                 `;
@@ -1084,10 +1097,16 @@
                 if (entries.length > 0) {
                     // Get most recent entry
                     const latest = entries[entries.length - 1];
+                    const latestValue = getEntryValue(latest);
+                    if (latestValue === null) {
+                        element.textContent = defaults[metric];
+                        return;
+                    }
+
                     if (metric === 'visceral') {
-                        element.textContent = Math.round(latest.value) + units[metric];
+                        element.textContent = Math.round(latestValue) + units[metric];
                     } else {
-                        element.textContent = latest.value.toFixed(1) + units[metric];
+                        element.textContent = latestValue.toFixed(1) + units[metric];
                     }
                 } else {
                     if (metric === 'weight') {
@@ -1510,6 +1529,21 @@
             }
         }
 
+        function getEntryValue(entry) {
+            if (!entry) return null;
+            if (typeof entry.value === 'number' && !Number.isNaN(entry.value)) {
+                return entry.value;
+            }
+            if (typeof entry.weight === 'number' && !Number.isNaN(entry.weight)) {
+                return entry.weight;
+            }
+            if (entry.weight !== undefined) {
+                const parsed = parseFloat(entry.weight);
+                return Number.isNaN(parsed) ? null : parsed;
+            }
+            return null;
+        }
+
         function getStoredProfile() {
             try {
                 const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
@@ -1652,6 +1686,8 @@
             if (profile.sex) {
                 document.getElementById('user-sex').value = profile.sex;
             }
+
+            refreshBaseCaloriesDisplay();
         }
 
         // Load progress on page load
@@ -1660,12 +1696,15 @@
             const weightEntries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
             if (weightEntries.length > 0) {
                 const latest = weightEntries[weightEntries.length - 1];
-                document.getElementById('weight').textContent = latest.value.toFixed(1) + ' lbs';
+                const latestWeight = getEntryValue(latest);
+                if (latestWeight !== null) {
+                    document.getElementById('weight').textContent = latestWeight.toFixed(1) + ' lbs';
+                }
                 loadWeightProgress();
                 try {
                     const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
-                    if (!profile.weight || Math.abs(profile.weight - latest.value) > 0.01) {
-                        profile.weight = latest.value;
+                    if (latestWeight !== null && (!profile.weight || Math.abs(profile.weight - latestWeight) > 0.01)) {
+                        profile.weight = latestWeight;
                         profile.updatedAt = new Date().toISOString();
                         localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
                         localStorage.setItem('fuelfire_profile_updated', Date.now().toString());
