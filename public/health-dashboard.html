@@ -499,9 +499,29 @@
                 Goals & Progress
             </div>
         </div>
-    </div>
+</div>
 
-    <script>
+<!-- Body Composition Modal -->
+<div id="body-comp-modal" style="display:none; position: fixed; inset: 0; background: rgba(10,16,28,0.78); z-index: 12000; align-items: center; justify-content: center; padding: 20px;" onclick="dismissBodyCompOverlay(event)">
+    <div style="background: #0f1b33; color: white; border-radius: 24px; padding: 28px; width: min(420px, 92vw); box-shadow: 0 25px 70px rgba(0,0,0,0.55);" onclick="event.stopPropagation()">
+        <h3 id="body-comp-modal-title" style="margin: 0 0 16px 0; font-size: 20px;">Log Measurement</h3>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.7);">Value</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="number" id="body-comp-value" inputmode="decimal" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(8,14,24,0.85); color: white; font-size: 16px;">
+                <span id="body-comp-unit" style="min-width: 40px; text-align: center; font-weight: 600;"></span>
+            </div>
+            <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.7);">Date</label>
+            <input type="date" id="body-comp-date" style="padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(8,14,24,0.85); color: white; font-size: 16px;">
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="button" id="body-comp-submit" onclick="submitBodyCompositionEntry()" style="flex: 1; background: linear-gradient(135deg, #4B9CD3, #13294B); border: none; color: white; padding: 12px 18px; border-radius: 16px; font-weight: 700; cursor: pointer;">Save Entry</button>
+            <button type="button" onclick="closeBodyCompositionModal()" style="background: rgba(255,255,255,0.12); border: none; color: white; padding: 12px 18px; border-radius: 16px; font-weight: 600; cursor: pointer;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.querySelector('.overlay').classList.toggle('show');
@@ -753,38 +773,6 @@
             }
         }
 
-        // Weight Tracking Functions
-        function showWeightEntry() {
-            const weight = prompt('Enter your current weight (lbs):', '');
-            if (weight && !isNaN(weight)) {
-                logWeight(parseFloat(weight));
-            }
-        }
-
-        function logWeight(weight) {
-            const entries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
-            entries.push({
-                weight: weight,
-                date: new Date().toISOString(),
-                timestamp: Date.now()
-            });
-            localStorage.setItem('fuelfire_weight_entries', JSON.stringify(entries));
-
-            try {
-                const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
-                profile.weight = parseFloat(weight);
-                profile.updatedAt = new Date().toISOString();
-                localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
-            } catch (error) {
-                console.warn('Failed to update user profile weight:', error);
-            }
-
-            // Update display
-            document.getElementById('weight').textContent = weight.toFixed(1) + ' lbs';
-            loadWeightProgress();
-            alert(`✅ Weight logged: ${weight.toFixed(1)} lbs`);
-        }
-
         function loadWeightProgress() {
             const entries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
             if (entries.length === 0) return;
@@ -853,69 +841,138 @@
         // Supports: Weight, Body Fat %, Muscle Mass, Visceral Fat with back-dating
 
         let currentCompositionMetric = 'bodyfat';
+        const BODY_COMPOSITION_CONFIG = {
+            bodyfat: { label: 'Body Fat %', placeholder: '15', unit: '%', step: 0.1, min: 1, max: 75 },
+            muscle: { label: 'Muscle Mass', placeholder: '150', unit: 'lbs', step: 0.5, min: 1, max: 400 },
+            weight: { label: 'Body Weight', placeholder: '180', unit: 'lbs', step: 0.2, min: 1, max: 600 },
+            visceral: { label: 'Visceral Fat Level', placeholder: '10', unit: '', step: 1, min: 1, max: 30 }
+        };
+        let pendingCompositionMetric = null;
 
-        // Body Fat Entry
-        function showBodyFatEntry() {
-            const bodyfat = prompt('Enter your body fat percentage (%):', '');
-            if (!bodyfat || isNaN(bodyfat)) return;
+        function formatDateForInput(date) {
+            const yr = date.getFullYear();
+            const mo = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${yr}-${mo}-${day}`;
+        }
 
-            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
-            const date = dateStr ? new Date(dateStr) : new Date();
+        function openBodyCompositionModal(metric) {
+            const config = BODY_COMPOSITION_CONFIG[metric];
+            const modal = document.getElementById('body-comp-modal');
+            const title = document.getElementById('body-comp-modal-title');
+            const valueInput = document.getElementById('body-comp-value');
+            const unitEl = document.getElementById('body-comp-unit');
+            const dateInput = document.getElementById('body-comp-date');
 
-            if (isNaN(date.getTime())) {
-                alert('Invalid date format. Please use YYYY-MM-DD');
+            if (!config || !modal || !title || !valueInput || !unitEl || !dateInput) return;
+
+            pendingCompositionMetric = metric;
+            title.textContent = `Log ${config.label}`;
+            unitEl.textContent = config.unit || '';
+
+            valueInput.value = '';
+            valueInput.placeholder = config.placeholder || '';
+            valueInput.step = config.step || 'any';
+            valueInput.min = config.min !== undefined ? config.min : '';
+            valueInput.max = config.max !== undefined ? config.max : '';
+
+            const today = formatDateForInput(new Date());
+            dateInput.value = today;
+            dateInput.max = today;
+
+            modal.style.display = 'flex';
+            valueInput.onkeydown = (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitBodyCompositionEntry();
+                }
+            };
+            dateInput.onkeydown = (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    submitBodyCompositionEntry();
+                }
+            };
+            setTimeout(() => valueInput.focus(), 80);
+        }
+
+        function closeBodyCompositionModal() {
+            const modal = document.getElementById('body-comp-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            pendingCompositionMetric = null;
+        }
+
+        function dismissBodyCompOverlay(event) {
+            if (event.target && event.target.id === 'body-comp-modal') {
+                closeBodyCompositionModal();
+            }
+        }
+
+        function submitBodyCompositionEntry() {
+            if (!pendingCompositionMetric) {
+                closeBodyCompositionModal();
                 return;
             }
 
-            logBodyComposition('bodyfat', parseFloat(bodyfat), date);
+            const config = BODY_COMPOSITION_CONFIG[pendingCompositionMetric];
+            const valueInput = document.getElementById('body-comp-value');
+            const dateInput = document.getElementById('body-comp-date');
+
+            if (!valueInput || !dateInput || !config) return;
+
+            const rawValue = valueInput.value.trim();
+            const value = parseFloat(rawValue);
+
+            if (!rawValue || Number.isNaN(value)) {
+                alert('Please enter a valid number.');
+                valueInput.focus();
+                return;
+            }
+
+            if (config.min !== undefined && value < config.min) {
+                alert(`Value must be at least ${config.min}.`);
+                valueInput.focus();
+                return;
+            }
+
+            if (config.max !== undefined && value > config.max) {
+                alert(`Value must be no more than ${config.max}.`);
+                valueInput.focus();
+                return;
+            }
+
+            const dateValue = dateInput.value;
+            const parsedDate = dateValue ? new Date(`${dateValue}T00:00:00`) : new Date();
+            if (Number.isNaN(parsedDate.getTime())) {
+                alert('Please choose a valid date.');
+                dateInput.focus();
+                return;
+            }
+
+            logBodyComposition(pendingCompositionMetric, value, parsedDate);
+            closeBodyCompositionModal();
+        }
+
+        // Body Fat Entry
+        function showBodyFatEntry() {
+            openBodyCompositionModal('bodyfat');
         }
 
         // Muscle Mass Entry
         function showMuscleMassEntry() {
-            const muscle = prompt('Enter your muscle mass (lbs):', '');
-            if (!muscle || isNaN(muscle)) return;
-
-            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
-            const date = dateStr ? new Date(dateStr) : new Date();
-
-            if (isNaN(date.getTime())) {
-                alert('Invalid date format. Please use YYYY-MM-DD');
-                return;
-            }
-
-            logBodyComposition('muscle', parseFloat(muscle), date);
+            openBodyCompositionModal('muscle');
         }
 
         // Weight Entry (Updated)
         function showWeightEntry() {
-            const weight = prompt('Enter your weight (lbs):', '');
-            if (!weight || isNaN(weight)) return;
-
-            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
-            const date = dateStr ? new Date(dateStr) : new Date();
-
-            if (isNaN(date.getTime())) {
-                alert('Invalid date format. Please use YYYY-MM-DD');
-                return;
-            }
-
-            logBodyComposition('weight', parseFloat(weight), date);
+            openBodyCompositionModal('weight');
         }
 
         // Visceral Fat Entry
         function showVisceralFatEntry() {
-            const visceral = prompt('Enter your visceral fat level (1-30):', '');
-            if (!visceral || isNaN(visceral)) return;
-
-            const dateStr = prompt('Enter date (YYYY-MM-DD) or leave empty for today:', '');
-            const date = dateStr ? new Date(dateStr) : new Date();
-
-            if (isNaN(date.getTime())) {
-                alert('Invalid date format. Please use YYYY-MM-DD');
-                return;
-            }
-
-            logBodyComposition('visceral', parseFloat(visceral), date);
+            openBodyCompositionModal('visceral');
         }
 
         // Universal Body Composition Logger
@@ -933,6 +990,18 @@
             entries.sort((a, b) => a.timestamp - b.timestamp);
 
             localStorage.setItem(storageKey, JSON.stringify(entries));
+
+            if (type === 'weight') {
+                try {
+                    const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
+                    profile.weight = value;
+                    profile.updatedAt = new Date().toISOString();
+                    localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+                    localStorage.setItem('fuelfire_profile_updated', Date.now().toString());
+                } catch (error) {
+                    console.warn('Failed to sync profile weight entry:', error);
+                }
+            }
 
             // Update current value display
             updateCurrentValues();
@@ -956,7 +1025,8 @@
                 'visceral': ''
             };
 
-            alert(`✅ ${labels[type]} logged: ${value.toFixed(1)}${units[type]}\nDate: ${date.toLocaleDateString()}`);
+            const formattedValue = type === 'visceral' ? Math.round(value) : value.toFixed(1);
+            alert(`✅ ${labels[type]} logged: ${formattedValue}${units[type]}\nDate: ${date.toLocaleDateString()}`);
         }
 
         // Update Current Value Displays
@@ -988,7 +1058,11 @@
                 if (entries.length > 0) {
                     // Get most recent entry
                     const latest = entries[entries.length - 1];
-                    element.textContent = latest.value.toFixed(1) + units[metric];
+                    if (metric === 'visceral') {
+                        element.textContent = Math.round(latest.value) + units[metric];
+                    } else {
+                        element.textContent = latest.value.toFixed(1) + units[metric];
+                    }
                 } else {
                     element.textContent = defaults[metric];
                 }
@@ -1479,7 +1553,6 @@
             // Load active calories data
             loadActiveCaloriesData();
         }
-
         // Quick Workout Logging Functions
         function showQuickLogWorkout() {
             document.getElementById('quick-workout-modal').style.display = 'flex';

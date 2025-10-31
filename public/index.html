@@ -877,8 +877,8 @@
                                 <h3 style="color: white; margin: 6px 0;">AI Treadmill Logger</h3>
                                 <p style="color: rgba(255,255,255,0.72); margin: 0;">Snap the console right after your run—we'll capture pace, distance, calories, and time automatically.</p>
                             </div>
-                            <div id="treadmill-dropzone" style="background: rgba(14,29,56,0.9); border: 2px dashed rgba(75,156,211,0.45); border-radius: 18px; padding: 26px; text-align: center; cursor: pointer; margin-bottom: 24px; transition: border-color 0.2s ease, background 0.2s ease;" onclick="triggerTreadmillFileInput(event)">
-                                <input type="file" id="treadmill-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleTreadmillPhotoChange(event)">
+                            <div id="treadmill-dropzone" style="position: relative; background: rgba(14,29,56,0.9); border: 2px dashed rgba(75,156,211,0.45); border-radius: 18px; padding: 26px; text-align: center; cursor: pointer; margin-bottom: 24px; transition: border-color 0.2s ease, background 0.2s ease;" onclick="triggerTreadmillFileInput(event)">
+                                <input type="file" id="treadmill-photo-input" accept="image/*" capture="environment" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" onchange="handleTreadmillPhotoChange(event)">
                                 <div id="treadmill-photo-placeholder" style="color: rgba(255,255,255,0.7);">
                                     <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
                                     <div style="font-weight: 600; font-size: 16px;">Tap to open camera</div>
@@ -2331,6 +2331,8 @@
         window.addEventListener('storage', function(e) {
             if (e.key === 'fuelfire_nutrition_updated') {
                 updateHomeFoodCalories();
+            } else if (e.key === 'fuelfire_profile_updated') {
+                updateHomeBaseCaloriesFromStorage();
             }
         });
     </script>
@@ -3629,11 +3631,12 @@
         }
 
         function triggerTreadmillFileInput(event) {
-            event.preventDefault();
             const input = document.getElementById('treadmill-photo-input');
-            if (input) {
-                input.click();
+            if (!input) return;
+            if (event && event.target === input) {
+                return;
             }
+            input.click();
         }
 
         function handleTreadmillPhotoChange(event) {
