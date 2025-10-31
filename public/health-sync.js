@@ -210,32 +210,41 @@ class HealthSync {
                 dataType: 'heartRate',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
-                limit: 1000
+                limit: 2000
             });
 
-            if (samples && samples.length > 0) {
-                // PRIORITY: Filter to iPhone data only
-                let filteredSamples = samples;
-                const iphoneSamples = samples.filter(s =>
-                    s.sourceName && (
-                        s.sourceName.toLowerCase().includes('iphone') ||
-                        s.sourceName.toLowerCase().includes('phone')
-                    )
-                );
-
-                if (iphoneSamples.length > 0) {
-                    filteredSamples = iphoneSamples;
-                    console.log(`❤️ Using iPhone heart rate data only: ${iphoneSamples.length} samples`);
-                }
-
-                // Calculate average heart rate for the day
-                const total = filteredSamples.reduce((sum, sample) => sum + parseFloat(sample.value), 0);
-                const average = Math.round(total / filteredSamples.length);
-                console.log(`❤️ Average heart rate today: ${average} bpm (${filteredSamples.length} readings)`);
-                return average;
+            if (!samples || samples.length === 0) {
+                return null;
             }
 
-            return null;
+            let sum = 0;
+            let count = 0;
+            let min = Number.POSITIVE_INFINITY;
+            let max = Number.NEGATIVE_INFINITY;
+
+            samples.forEach(sample => {
+                const value = parseFloat(sample.value);
+                if (!Number.isNaN(value) && Number.isFinite(value)) {
+                    sum += value;
+                    count++;
+                    if (value < min) min = value;
+                    if (value > max) max = value;
+                }
+            });
+
+            if (count === 0) {
+                return null;
+            }
+
+            const average = Math.round(sum / count);
+            const summary = {
+                average,
+                min: Math.round(min),
+                max: Math.round(max)
+            };
+
+            console.log(`❤️ Heart rate summary: avg ${average} bpm (${count} samples), range ${summary.min}-${summary.max}`);
+            return summary;
         } catch (error) {
             console.error('❌ Error fetching heart rate:', error);
             return null;
@@ -280,25 +289,10 @@ class HealthSync {
                 dataType: 'workout',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
-                limit: 50
+                limit: 200
             });
 
-            let filteredSamples = samples || [];
-
-            // PRIORITY: Filter to iPhone data only
-            if (filteredSamples.length > 0) {
-                const iphoneSamples = filteredSamples.filter(s =>
-                    s.sourceName && (
-                        s.sourceName.toLowerCase().includes('iphone') ||
-                        s.sourceName.toLowerCase().includes('phone')
-                    )
-                );
-
-                if (iphoneSamples.length > 0) {
-                    filteredSamples = iphoneSamples;
-                    console.log(`💪 Using iPhone workouts only: ${iphoneSamples.length} samples`);
-                }
-            }
+            const filteredSamples = Array.isArray(samples) ? samples : [];
 
             const workouts = [];
             if (filteredSamples && Array.isArray(filteredSamples)) {
@@ -333,35 +327,16 @@ class HealthSync {
                 dataType: 'distance',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
-                limit: 1000
+                limit: 5000
             });
 
-            let filteredSamples = samples || [];
-
-            // PRIORITY: Filter to iPhone data only
-            if (filteredSamples.length > 0) {
-                const iphoneSamples = filteredSamples.filter(s =>
-                    s.sourceName && (
-                        s.sourceName.toLowerCase().includes('iphone') ||
-                        s.sourceName.toLowerCase().includes('phone')
-                    )
-                );
-
-                if (iphoneSamples.length > 0) {
-                    filteredSamples = iphoneSamples;
-                    console.log(`🏃 Using iPhone distance only: ${iphoneSamples.length} samples`);
-                }
-            }
-
-            let totalDistance = 0;
-            if (filteredSamples && Array.isArray(filteredSamples)) {
-                totalDistance = filteredSamples.reduce((sum, sample) => {
-                    return sum + (parseFloat(sample.value) || 0);
+            const totalDistanceMeters = (Array.isArray(samples) ? samples : [])
+                .reduce((sum, sample) => {
+                    const value = parseFloat(sample?.value);
+                    return !Number.isNaN(value) && Number.isFinite(value) ? sum + value : sum;
                 }, 0);
-            }
 
-            // Convert meters to miles
-            const miles = totalDistance * 0.000621371;
+            const miles = totalDistanceMeters * 0.000621371;
             console.log(`🏃 Distance: ${miles.toFixed(2)} miles`);
             return miles;
         } catch (error) {
@@ -408,35 +383,18 @@ class HealthSync {
                 dataType: 'sleep',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
-                limit: 100
+                limit: 500
             });
 
-            let filteredSamples = samples || [];
-
-            // PRIORITY: Filter to iPhone data only
-            if (filteredSamples.length > 0) {
-                const iphoneSamples = filteredSamples.filter(s =>
-                    s.sourceName && (
-                        s.sourceName.toLowerCase().includes('iphone') ||
-                        s.sourceName.toLowerCase().includes('phone')
-                    )
-                );
-
-                if (iphoneSamples.length > 0) {
-                    filteredSamples = iphoneSamples;
-                    console.log(`😴 Using iPhone sleep data only: ${iphoneSamples.length} samples`);
-                }
-            }
-
             let totalSleepMinutes = 0;
-            if (filteredSamples && Array.isArray(filteredSamples)) {
-                filteredSamples.forEach(sample => {
-                    const start = new Date(sample.startDate);
-                    const end = new Date(sample.endDate);
-                    const minutes = (end - start) / (1000 * 60);
+            (Array.isArray(samples) ? samples : []).forEach(sample => {
+                const start = new Date(sample.startDate);
+                const end = new Date(sample.endDate);
+                const minutes = (end - start) / (1000 * 60);
+                if (!Number.isNaN(minutes) && Number.isFinite(minutes)) {
                     totalSleepMinutes += minutes;
-                });
-            }
+                }
+            });
 
             const hours = totalSleepMinutes / 60;
             console.log(`😴 Sleep today: ${hours.toFixed(1)} hours`);
@@ -483,8 +441,11 @@ class HealthSync {
         console.log('🔄 Syncing all health data...');
 
         try {
-            // Get active energy from Apple Health
-            const activeEnergy = await this.getTodayCaloriesBurned();
+            // Get active energy and supporting metrics from Apple Health
+            const [activeEnergy, heartRateSummary] = await Promise.all([
+                this.getTodayCaloriesBurned(),
+                this.getTodayAverageHeartRate()
+            ]);
             let weight = await this.getWeight();
 
             // Try to get user profile for BMR calculation
@@ -512,7 +473,7 @@ class HealthSync {
 
             const data = {
                 steps: await this.getTodaySteps(),
-                heartRate: await this.getTodayAverageHeartRate(),
+                heartRate: heartRateSummary,
                 activeEnergy: activeEnergy,
                 bmr: bmr,
                 caloriesBurned: totalCaloriesBurned,

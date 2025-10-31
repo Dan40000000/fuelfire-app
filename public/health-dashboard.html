@@ -104,8 +104,9 @@
                         <!-- Heart Rate -->
                         <div style="background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
                             <div style="font-size: 36px; margin-bottom: 5px;">❤️</div>
-                            <div style="font-size: 28px; font-weight: bold;" id="heart-rate">--</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Heart Rate (bpm)</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="heart-rate-average">--</div>
+                            <div style="font-size: 13px; opacity: 0.9;">Heart Rate (avg bpm)</div>
+                            <div style="font-size: 12px; opacity: 0.75; margin-top: 4px;" id="heart-rate-range">Range: --</div>
                         </div>
 
                         <!-- Base Calories (BMR) -->
@@ -642,7 +643,11 @@
                 debugLog += `  Distance: ${data.distance.toFixed(2)} miles\n`;
                 debugLog += `  Active Calories: ${data.activeEnergy}\n`;
                 debugLog += `  BMR: ${data.bmr}\n`;
-                debugLog += `  Heart Rate: ${data.heartRate || 'N/A'}\n`;
+                if (data.heartRate && typeof data.heartRate === 'object') {
+                    debugLog += `  Heart Rate: avg ${data.heartRate.average || '--'} bpm (range ${data.heartRate.min || '--'}-${data.heartRate.max || '--'})\n`;
+                } else {
+                    debugLog += '  Heart Rate: N/A\n';
+                }
                 debugLog += `  Workouts: ${data.workouts?.length || 0}\n`;
                 debugLog += `  Sync Time: ${new Date(data.syncTime).toLocaleTimeString()}\n`;
                 document.getElementById('debug-info').innerHTML = debugLog;
@@ -695,7 +700,21 @@
             updateStepProgress(data.steps);
 
             // Heart Rate
-            document.getElementById('heart-rate').textContent = data.heartRate || '--';
+            const heartRateAvgEl = document.getElementById('heart-rate-average');
+            const heartRateRangeEl = document.getElementById('heart-rate-range');
+            if (data.heartRate && typeof data.heartRate === 'object' && data.heartRate.average) {
+                heartRateAvgEl.textContent = data.heartRate.average.toString();
+                const min = data.heartRate.min ? data.heartRate.min : null;
+                const max = data.heartRate.max ? data.heartRate.max : null;
+                if (min !== null && max !== null) {
+                    heartRateRangeEl.textContent = `Range: ${min}-${max} bpm`;
+                } else {
+                    heartRateRangeEl.textContent = 'Range: --';
+                }
+            } else {
+                heartRateAvgEl.textContent = '--';
+                heartRateRangeEl.textContent = 'Range: --';
+            }
 
             // Base Calories (BMR)
             const profileBmr = calculateBmrFromProfile(getStoredProfile());
@@ -791,7 +810,7 @@
         }
 
         function loadWeightProgress() {
-            const entries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
+            const entries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]').filter(entry => getEntryValue(entry) !== null);
             if (entries.length === 0) return;
 
             // Show progress container
