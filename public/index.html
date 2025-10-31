@@ -142,8 +142,8 @@
                     </div>
 
                     <!-- Quick Actions -->
-                    <div class="quick-actions">
-                        <div class="action-card" onclick="window.location.href='workout-quiz.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                    <div class="quick-actions" id="quick-actions-bar">
+                        <div class="action-card" id="quick-action-quick-workout" onclick="window.location.href='workout-quiz.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="action-icon">
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
@@ -751,8 +751,8 @@
                             </div>
                         </div>
                         
-                        <button onclick="showQuickLog()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 25px; border-radius: 20px; margin-top: 15px; font-weight: bold; cursor: pointer; width: 100%;">
-                            🏋️ Quick Log Workout
+                        <button onclick="openWorkoutLogMenu()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 25px; border-radius: 20px; margin-top: 15px; font-weight: bold; cursor: pointer; width: 100%;">
+                            🏋️ Log a Workout
                         </button>
                     </div>
                     
@@ -832,6 +832,96 @@
                                 <button onclick="closeQuickLog()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer;">
                                     Cancel
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workout Log Menu -->
+                    <div id="workout-log-menu" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10050; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: #0B1626; border-radius: 24px; padding: 30px; width: min(460px, 95vw); box-shadow: 0 20px 60px rgba(0,0,0,0.45); position: relative;">
+                            <button onclick="closeWorkoutLogMenu()" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.08); border: none; color: white; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer;">✕</button>
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <div style="font-size: 42px;">🚀</div>
+                                <h3 style="color: white; margin: 8px 0;">Log a Workout</h3>
+                                <p style="color: rgba(255,255,255,0.75); margin: 0;">Pick how you want to log today's grind.</p>
+                            </div>
+                            <div style="display: grid; gap: 16px;">
+                                <div onclick="openManualWorkoutLog()" style="background: linear-gradient(135deg, rgba(75,156,211,0.22), rgba(19,41,75,0.6)); border: 1px solid rgba(75,156,211,0.35); border-radius: 18px; padding: 20px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                                    <div style="display:flex; align-items:center; gap:16px;">
+                                        <div style="font-size: 36px; background: rgba(255,255,255,0.08); border-radius: 14px; width:64px; height:64px; display:flex; align-items:center; justify-content:center;">✍️</div>
+                                        <div>
+                                            <h4 style="margin:0; color:white;">Manual Quick Log</h4>
+                                            <p style="margin:4px 0 0; color: rgba(255,255,255,0.7); font-size: 14px;">Type in duration, notes, and calories in under 10 seconds.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div onclick="openTreadmillScanModal()" style="background: linear-gradient(135deg, rgba(255,128,77,0.24), rgba(255,88,70,0.55)); border: 1px solid rgba(255,128,77,0.4); border-radius: 18px; padding: 20px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                                    <div style="display:flex; align-items:center; gap:16px;">
+                                        <div style="font-size: 36px; background: rgba(255,255,255,0.12); border-radius: 14px; width:64px; height:64px; display:flex; align-items:center; justify-content:center;">📸</div>
+                                        <div>
+                                            <h4 style="margin:0; color:white;">Snap The Treadmill</h4>
+                                            <p style="margin:4px 0 0; color: rgba(255,255,255,0.7); font-size: 14px;">Take a photo of the console—AI fills in pace, distance, time, and calories.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Treadmill Scan Modal -->
+                    <div id="treadmill-scan-modal" style="display: none; position: fixed; inset: 0; background: rgba(5,12,24,0.88); z-index: 10060; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: #0f1b33; border-radius: 26px; padding: 28px; width: min(520px, 96vw); max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 70px rgba(0,0,0,0.55); position: relative;">
+                            <button onclick="closeTreadmillScanModal()" style="position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.08); border: none; color: white; border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer;">✕</button>
+                            <div style="text-align: center; margin-bottom: 22px;">
+                                <div style="font-size: 46px;">🤖</div>
+                                <h3 style="color: white; margin: 6px 0;">AI Treadmill Logger</h3>
+                                <p style="color: rgba(255,255,255,0.72); margin: 0;">Snap the console right after your run—we'll capture pace, distance, calories, and time automatically.</p>
+                            </div>
+                            <div id="treadmill-dropzone" style="background: rgba(14,29,56,0.9); border: 2px dashed rgba(75,156,211,0.45); border-radius: 18px; padding: 26px; text-align: center; cursor: pointer; margin-bottom: 24px; transition: border-color 0.2s ease, background 0.2s ease;" onclick="triggerTreadmillFileInput(event)">
+                                <input type="file" id="treadmill-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handleTreadmillPhotoChange(event)">
+                                <div id="treadmill-photo-placeholder" style="color: rgba(255,255,255,0.7);">
+                                    <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
+                                    <div style="font-weight: 600; font-size: 16px;">Tap to open camera</div>
+                                    <div style="font-size: 13px; margin-top: 6px;">Get the full console in frame for best results.</div>
+                                </div>
+                                <div id="treadmill-photo-preview" style="display:none;">
+                                    <img id="treadmill-preview-image" src="" alt="Treadmill preview" style="max-width: 100%; border-radius: 14px;">
+                                </div>
+                            </div>
+                            <div id="treadmill-analysis-status" style="display:none; background: rgba(19,41,75,0.65); border-radius: 14px; padding: 14px 16px; color: rgba(255,255,255,0.85); font-size: 14px; margin-bottom: 20px;"></div>
+                            <div style="display: grid; gap: 14px; margin-bottom: 20px;">
+                                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+                                    <div>
+                                        <label for="treadmill-duration" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Duration (minutes)</label>
+                                        <input id="treadmill-duration" type="number" min="0" placeholder="0" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                    </div>
+                                    <div>
+                                        <label for="treadmill-distance" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Distance (miles)</label>
+                                        <input id="treadmill-distance" type="number" min="0" step="0.01" placeholder="0.00" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+                                    <div>
+                                        <label for="treadmill-calories" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Calories Burned</label>
+                                        <input id="treadmill-calories" type="number" min="0" placeholder="0" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                    </div>
+                                    <div>
+                                        <label for="treadmill-pace" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Average Pace (min/mi)</label>
+                                        <input id="treadmill-pace" type="text" placeholder="00:00" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="treadmill-incline" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Incline (%)</label>
+                                    <input id="treadmill-incline" type="number" step="0.5" placeholder="Optional" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                </div>
+                                <div>
+                                    <label for="treadmill-notes" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Notes</label>
+                                    <textarea id="treadmill-notes" placeholder="How did the run feel?" style="width: 100%; min-height: 80px; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white; resize: vertical;"></textarea>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap: 12px;">
+                                <button id="treadmill-analyze-btn" onclick="analyzeTreadmillPhoto()" style="flex:1; background: linear-gradient(135deg, #4B9CD3, #13294B); color: white; border: none; padding: 14px 18px; border-radius: 16px; font-weight: 700; cursor: pointer;">⚡ Analyze Photo</button>
+                                <button onclick="saveTreadmillWorkout()" style="flex:1; background: linear-gradient(135deg, #00C853, #009688); color: white; border: none; padding: 14px 18px; border-radius: 16px; font-weight: 700; cursor: pointer;">✅ Save Workout</button>
                             </div>
                         </div>
                     </div>
@@ -2137,7 +2227,7 @@
                 </svg>
                 Home
             </div>
-            <div class="menu-item" onclick="showScreen('create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+            <div class="menu-item" id="menu-create-workout" onclick="showScreen('create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                     <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
                     <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
@@ -2172,7 +2262,7 @@
                 </svg>
                 Health Dashboard
             </div>
-            <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
+            <div class="menu-item" id="menu-diet-creation" onclick="window.location.href='enhanced-diet-quiz.html'">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
                     <circle cx="12" cy="12" r="2" fill="currentColor"/>
@@ -2201,7 +2291,7 @@
                 </svg>
                 Supplements
             </div>
-            <div class="menu-item" onclick="window.location.href='workout-techniques.html'">
+            <div class="menu-item" id="menu-workout-techniques" onclick="window.location.href='workout-techniques.html'">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                     <circle cx="8" cy="8" r="2" fill="currentColor"/>
                     <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2650,6 +2740,8 @@
         // Load Apple Health data for home page
         async function loadHomeHealthData() {
             try {
+                updateHomeBaseCaloriesFromStorage();
+
                 // First, load cached data for instant display
                 const cached = localStorage.getItem('healthData');
                 if (cached) {
@@ -2675,6 +2767,169 @@
             }
         }
 
+        function updateHomeBaseCaloriesFromStorage() {
+            const baseCaloriesEl = document.getElementById('home-base-calories');
+            if (!baseCaloriesEl) return;
+
+            const baseCalories = getBaseCaloriesEstimate({});
+            baseCaloriesEl.textContent = Math.round(baseCalories || 0).toLocaleString();
+        }
+
+        function getStoredUserProfile() {
+            let profile = {};
+            let legacyProfile = {};
+            try {
+                profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
+            } catch (error) {
+                profile = {};
+            }
+            try {
+                legacyProfile = JSON.parse(localStorage.getItem('userProfile') || '{}') || {};
+            } catch (error) {
+                legacyProfile = {};
+            }
+            return { ...legacyProfile, ...profile };
+        }
+
+        function getLatestKnownWeight(healthData = {}) {
+            if (healthData && healthData.weight !== undefined && healthData.weight !== null) {
+                const weight = Number(healthData.weight);
+                if (!Number.isNaN(weight) && weight > 0) {
+                    return weight;
+                }
+            }
+
+            const profile = getStoredUserProfile();
+            if (profile && profile.weight !== undefined && profile.weight !== null) {
+                const weight = Number(profile.weight);
+                if (!Number.isNaN(weight) && weight > 0) {
+                    return weight;
+                }
+            }
+
+            try {
+                const weightEntries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
+                if (Array.isArray(weightEntries) && weightEntries.length > 0) {
+                    const latest = weightEntries[weightEntries.length - 1];
+                    if (latest && latest.weight !== undefined && latest.weight !== null) {
+                        const weight = Number(latest.weight);
+                        if (!Number.isNaN(weight) && weight > 0) {
+                            return weight;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('Unable to read weight entries:', error);
+            }
+
+            return 0;
+        }
+
+        function getUserMetrics(healthData = {}) {
+            const profile = getStoredUserProfile();
+            const weightLbs = getLatestKnownWeight(healthData);
+
+            let heightInches = 0;
+            if (profile) {
+                if (profile.height !== undefined && profile.height !== null) {
+                    const value = Number(profile.height);
+                    if (!Number.isNaN(value) && value > 0) {
+                        heightInches = value;
+                    }
+                } else if (profile.heightInches !== undefined && profile.heightInches !== null) {
+                    const value = Number(profile.heightInches);
+                    if (!Number.isNaN(value) && value > 0) {
+                        heightInches = value;
+                    }
+                } else if (profile.heightCm !== undefined && profile.heightCm !== null) {
+                    const value = Number(profile.heightCm);
+                    if (!Number.isNaN(value) && value > 0) {
+                        heightInches = value / 2.54;
+                    }
+                } else if (profile.height_feet !== undefined && profile.height_inches !== undefined) {
+                    const feet = Number(profile.height_feet);
+                    const inches = Number(profile.height_inches);
+                    if (!Number.isNaN(feet) && !Number.isNaN(inches) && feet > 0) {
+                        heightInches = (feet * 12) + inches;
+                    }
+                }
+            }
+
+            let age = 0;
+            if (profile) {
+                if (profile.age !== undefined && profile.age !== null) {
+                    const value = Number(profile.age);
+                    if (!Number.isNaN(value) && value > 0) {
+                        age = value;
+                    }
+                } else if (profile.ageYears !== undefined && profile.ageYears !== null) {
+                    const value = Number(profile.ageYears);
+                    if (!Number.isNaN(value) && value > 0) {
+                        age = value;
+                    }
+                }
+            }
+
+            const sex = (profile && (profile.sex || profile.gender)) ? (profile.sex || profile.gender).toString().toLowerCase() : 'male';
+
+            return {
+                weightLbs,
+                heightInches,
+                age,
+                sex,
+                activity: profile?.activity || null
+            };
+        }
+
+        function computeBmrFromMetrics({ weightLbs, heightInches, age, sex }) {
+            if (!weightLbs || !heightInches || !age) {
+                return 0;
+            }
+
+            const weightKg = weightLbs * 0.453592;
+            const heightCm = heightInches * 2.54;
+            const isFemale = sex === 'female';
+
+            const bmr = isFemale
+                ? (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161
+                : (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+
+            return Math.round(bmr);
+        }
+
+        function getBaseCaloriesEstimate(healthData = {}) {
+            if (healthData && typeof healthData.bmr === 'number' && healthData.bmr > 0) {
+                localStorage.setItem('fuelfire_last_bmr', String(Math.round(healthData.bmr)));
+                return healthData.bmr;
+            }
+
+            const metrics = getUserMetrics(healthData);
+            let bmr = computeBmrFromMetrics(metrics);
+
+            if (!bmr && metrics.weightLbs > 0) {
+                // If height or age missing, use smart defaults
+                const assumedHeight = metrics.heightInches > 0 ? metrics.heightInches : 70;
+                const assumedAge = metrics.age > 0 ? metrics.age : 30;
+                bmr = computeBmrFromMetrics({
+                    weightLbs: metrics.weightLbs,
+                    heightInches: assumedHeight,
+                    age: assumedAge,
+                    sex: metrics.sex || 'male'
+                });
+            }
+
+            if (!bmr) {
+                const cached = parseInt(localStorage.getItem('fuelfire_last_bmr') || '0', 10);
+                if (cached > 0) {
+                    return cached;
+                }
+                return 2000;
+            }
+
+            localStorage.setItem('fuelfire_last_bmr', String(bmr));
+            return bmr;
+        }
+
         function updateHomeHealthUI(data) {
             // Update steps display
             const stepsEl = document.getElementById('home-steps');
@@ -2684,8 +2939,9 @@
 
             // Update base calories (BMR)
             const baseCaloriesEl = document.getElementById('home-base-calories');
-            if (baseCaloriesEl && data.bmr !== undefined) {
-                baseCaloriesEl.textContent = (data.bmr || 0).toLocaleString();
+            if (baseCaloriesEl) {
+                const baseCalories = getBaseCaloriesEstimate(data);
+                baseCaloriesEl.textContent = Math.round(baseCalories || 0).toLocaleString();
             }
 
             // Update active calories (Apple Health + Manual + Workouts)
@@ -2796,21 +3052,21 @@
         async function calculateTotalCaloriesBurned(healthData) {
             try {
                 // Try to get user profile for BMR calculation
-                const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-                const age = userProfile.age || 30;
-                const weight = healthData.weight || userProfile.weight || 70; // kg
-                const heightCm = userProfile.height || 175;
-                const sex = userProfile.sex || 'male';
+                const metrics = getUserMetrics(healthData);
+                const age = metrics.age || 30;
+                const sex = metrics.sex || 'male';
 
                 // If we have heart rate data, use HR-based calculation (more accurate)
-                if (healthData.heartRate && healthData.heartRate > 0) {
-                    const hrCalories = calculateHRBasedCalories(healthData.heartRate, age, weight, sex);
+                const weightKgForHR = metrics.weightLbs ? metrics.weightLbs * 0.453592 : 75;
+
+                if (healthData.heartRate && healthData.heartRate > 0 && weightKgForHR > 0) {
+                    const hrCalories = calculateHRBasedCalories(healthData.heartRate, age, weightKgForHR, sex);
                     console.log(`💓 Using HR-based calorie calculation: ${hrCalories} cal`);
                     return hrCalories;
                 }
 
                 // Fallback: BMR + activity multiplier
-                const bmr = calculateBMR(weight, heightCm, age, sex);
+                const bmr = getBaseCaloriesEstimate(healthData);
                 const activityMultiplier = getActivityMultiplier(healthData.steps || 0);
                 const totalCalories = Math.round(bmr * activityMultiplier);
 
@@ -2932,34 +3188,16 @@
 
         // Calculate BMR (Basal Metabolic Rate) using Mifflin-St Jeor equation
         function calculateBMR() {
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const metrics = getUserMetrics();
+            const base = computeBmrFromMetrics({
+                weightLbs: metrics.weightLbs || 180,
+                heightInches: metrics.heightInches || 70,
+                age: metrics.age || 30,
+                sex: metrics.sex || 'male'
+            }) || 2000;
 
-            if (!userProfile.weight || !userProfile.age || !userProfile.gender) {
-                // Default BMR if no profile data
-                return 2000;
-            }
-
-            const weight = userProfile.weight; // in lbs
-            const age = userProfile.age;
-            const gender = userProfile.gender;
-            const height = userProfile.height || 70; // default to 5'10" (70 inches) if not set
-
-            // Convert weight from lbs to kg
-            const weightKg = weight * 0.453592;
-            // Convert height from inches to cm
-            const heightCm = height * 2.54;
-
-            let bmr;
-            if (gender === 'male') {
-                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
-            } else {
-                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
-            }
-
-            // Apply activity multiplier (moderate activity = 1.55)
-            const tdee = bmr * 1.55;
-
-            return Math.round(tdee);
+            // Apply moderate activity multiplier by default for TDEE-style estimate
+            return Math.round(base * 1.55);
         }
 
         async function updateDeficitSurplus(caloriesConsumed) {
@@ -3248,7 +3486,7 @@
                     <div class="log-option-title">Scan Barcode</div>
                     <div class="log-option-desc">Quick scan of packaged foods</div>
                 </div>
-                <div class="log-option" onclick="navigateToLogFood('voice')">
+                <div class="log-option" id="voice-log-option" onclick="navigateToLogFood('voice')">
                     <div class="log-option-icon">🎤</div>
                     <div class="log-option-title">Voice Log</div>
                     <div class="log-option-desc">Speak your meal naturally</div>
@@ -3312,6 +3550,310 @@
     </div>
 
     <script>
+        const TREADMILL_API_ENDPOINT = 'https://fuelfire-app.vercel.app/api/treadmill-vision';
+        let treadmillPhotoData = null;
+        let treadmillPhotoMime = null;
+        let treadmillLastAnalysis = null;
+
+        function openWorkoutLogMenu() {
+            const menu = document.getElementById('workout-log-menu');
+            if (menu) {
+                menu.style.display = 'flex';
+            }
+        }
+
+        function closeWorkoutLogMenu() {
+            const menu = document.getElementById('workout-log-menu');
+            if (menu) {
+                menu.style.display = 'none';
+            }
+        }
+
+        function openManualWorkoutLog() {
+            closeWorkoutLogMenu();
+            if (typeof showQuickLog === 'function') {
+                showQuickLog();
+            }
+        }
+
+        function openTreadmillScanModal() {
+            closeWorkoutLogMenu();
+            resetTreadmillModal();
+            const modal = document.getElementById('treadmill-scan-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeTreadmillScanModal() {
+            const modal = document.getElementById('treadmill-scan-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            resetTreadmillModal();
+        }
+
+        function resetTreadmillModal() {
+            treadmillPhotoData = null;
+            treadmillPhotoMime = null;
+            treadmillLastAnalysis = null;
+
+            const preview = document.getElementById('treadmill-photo-preview');
+            const placeholder = document.getElementById('treadmill-photo-placeholder');
+            const previewImg = document.getElementById('treadmill-preview-image');
+            if (preview) preview.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'block';
+            if (previewImg) previewImg.src = '';
+
+            ['treadmill-duration', 'treadmill-distance', 'treadmill-calories', 'treadmill-pace', 'treadmill-incline', 'treadmill-notes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            const status = document.getElementById('treadmill-analysis-status');
+            if (status) {
+                status.style.display = 'none';
+                status.textContent = '';
+            }
+
+            const analyzeBtn = document.getElementById('treadmill-analyze-btn');
+            if (analyzeBtn) {
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '⚡ Analyze Photo';
+            }
+
+            const input = document.getElementById('treadmill-photo-input');
+            if (input) {
+                input.value = '';
+            }
+        }
+
+        function triggerTreadmillFileInput(event) {
+            event.preventDefault();
+            const input = document.getElementById('treadmill-photo-input');
+            if (input) {
+                input.click();
+            }
+        }
+
+        function handleTreadmillPhotoChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            treadmillPhotoMime = file.type || 'image/jpeg';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                if (!dataUrl) {
+                    showTreadmillStatus('Unable to read photo. Try again.', 'error');
+                    return;
+                }
+                const base64Match = dataUrl.split(',');
+                treadmillPhotoData = base64Match.length > 1 ? base64Match[1] : dataUrl;
+
+                const preview = document.getElementById('treadmill-photo-preview');
+                const placeholder = document.getElementById('treadmill-photo-placeholder');
+                const previewImg = document.getElementById('treadmill-preview-image');
+                if (placeholder) placeholder.style.display = 'none';
+                if (preview) preview.style.display = 'block';
+                if (previewImg) previewImg.src = dataUrl;
+
+                showTreadmillStatus('Photo loaded. Tap “Analyze Photo” to pull your stats.', 'info');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function analyzeTreadmillPhoto() {
+            if (!treadmillPhotoData) {
+                showTreadmillStatus('Snap the treadmill console first so we can read it.', 'warning');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('treadmill-analyze-btn');
+            if (analyzeBtn) {
+                analyzeBtn.disabled = true;
+                analyzeBtn.textContent = '⏳ Analyzing...';
+            }
+
+            showTreadmillStatus('Analyzing the console details...', 'info');
+
+            try {
+                const response = await fetch(TREADMILL_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64: treadmillPhotoData,
+                        mimeType: treadmillPhotoMime || 'image/jpeg'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Unable to analyze treadmill photo');
+                }
+
+                const result = await response.json();
+                if (!result?.success) {
+                    throw new Error(result?.error || 'AI could not read the display. Try a clearer photo.');
+                }
+
+                treadmillLastAnalysis = result.data || {};
+                applyTreadmillAnalysis(treadmillLastAnalysis);
+
+                const summary = result.data?.summary || 'Stats captured. Review and hit save when it looks right.';
+                showTreadmillStatus(summary, 'success');
+            } catch (error) {
+                console.error('Treadmill analysis error:', error);
+                showTreadmillStatus(error.message || 'Something went wrong. Retake the photo and try again.', 'error');
+            } finally {
+                if (analyzeBtn) {
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.textContent = '⚡ Analyze Photo';
+                }
+            }
+        }
+
+        function applyTreadmillAnalysis(data) {
+            const setIfPresent = (id, value, transform) => {
+                if (value === undefined || value === null || value === '') return;
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.value = transform ? transform(value) : value;
+            };
+
+            setIfPresent('treadmill-duration', data.durationMinutes, (val) => Math.round(val));
+            setIfPresent('treadmill-distance', data.distanceMiles, (val) => Number(val).toFixed(2));
+            setIfPresent('treadmill-calories', data.calories, (val) => Math.round(val));
+
+            if (data.averagePace) {
+                setIfPresent('treadmill-pace', data.averagePace);
+            } else if (data.speedMph) {
+                const paceMinutes = data.speedMph > 0 ? 60 / data.speedMph : 0;
+                if (paceMinutes) {
+                    const wholeMinutes = Math.floor(paceMinutes);
+                    const seconds = Math.round((paceMinutes - wholeMinutes) * 60);
+                    const formattedSeconds = seconds.toString().padStart(2, '0');
+                    setIfPresent('treadmill-pace', `${wholeMinutes}:${formattedSeconds}`);
+                }
+            }
+
+            setIfPresent('treadmill-incline', data.inclinePercent);
+
+            if (data.notes || data.summary) {
+                const el = document.getElementById('treadmill-notes');
+                if (el && !el.value) {
+                    el.value = data.notes || data.summary;
+                }
+            }
+        }
+
+        function showTreadmillStatus(message, variant = 'info') {
+            const status = document.getElementById('treadmill-analysis-status');
+            if (!status) return;
+
+            const palette = {
+                info: 'rgba(75,156,211,0.18)',
+                success: 'rgba(0,200,83,0.2)',
+                warning: 'rgba(255,193,7,0.22)',
+                error: 'rgba(255,82,82,0.22)'
+            };
+
+            status.style.display = 'block';
+            status.style.background = palette[variant] || palette.info;
+            status.textContent = message;
+        }
+
+        function estimateTreadmillCalories(durationMinutes, distanceMiles) {
+            const duration = Number(durationMinutes) || 0;
+            const distance = Number(distanceMiles) || 0;
+            if (duration <= 0 && distance <= 0) {
+                return 0;
+            }
+
+            if (duration > 0 && distance > 0) {
+                const caloriesPerMile = 100;
+                const caloriesPerMinute = 9;
+                const blend = (caloriesPerMile * distance + caloriesPerMinute * duration) / 2;
+                return Math.round(blend);
+            }
+
+            if (distance > 0) {
+                return Math.round(distance * 100);
+            }
+
+            return Math.round(duration * 9);
+        }
+
+        function saveTreadmillWorkout() {
+            const duration = parseInt(document.getElementById('treadmill-duration')?.value || '0', 10);
+            const distance = parseFloat(document.getElementById('treadmill-distance')?.value || '0');
+            const caloriesInput = parseInt(document.getElementById('treadmill-calories')?.value || '0', 10);
+            const pace = document.getElementById('treadmill-pace')?.value || '';
+            const incline = parseFloat(document.getElementById('treadmill-incline')?.value || '0');
+            const notes = document.getElementById('treadmill-notes')?.value || '';
+
+            if (!duration && !distance && !caloriesInput) {
+                showTreadmillStatus('Add at least duration, distance, or calories before saving.', 'warning');
+                return;
+            }
+
+            const calories = caloriesInput || estimateTreadmillCalories(duration, distance);
+
+            const workout = {
+                id: Date.now().toString(),
+                workoutName: 'Treadmill Session',
+                type: 'cardio',
+                date: new Date().toISOString(),
+                duration: duration || Math.round(distance * 10),
+                calories,
+                exercises: [],
+                notes: notes || 'Logged from treadmill photo',
+                completed: true,
+                source: 'treadmill-photo',
+                metrics: {
+                    distanceMiles: distance || null,
+                    averagePace: pace || null,
+                    inclinePercent: incline || null,
+                    aiSummary: treadmillLastAnalysis?.summary || null,
+                    aiConfidence: treadmillLastAnalysis?.confidence || null
+                }
+            };
+
+            let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            workoutHistory.unshift(workout);
+            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+            let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts') || '[]');
+            recentWorkouts.unshift(workout);
+            recentWorkouts = recentWorkouts.slice(0, 10);
+            localStorage.setItem('recentWorkouts', JSON.stringify(recentWorkouts));
+
+            if (typeof logWorkout === 'function') {
+                try {
+                    logWorkout({
+                        type: 'cardio',
+                        duration: workout.duration,
+                        exercises: [],
+                        notes: workout.notes
+                    });
+                } catch (err) {
+                    console.warn('logWorkout failed, continuing', err);
+                }
+            }
+
+            if (typeof updateFitnessDashboard === 'function') {
+                updateFitnessDashboard();
+            }
+            if (typeof loadWorkoutHistory === 'function') {
+                loadWorkoutHistory();
+            }
+
+            alert(`✅ Treadmill workout saved!\n\nTime: ${workout.duration} min\nDistance: ${distance ? distance.toFixed(2) + ' mi' : '—'}\nCalories: ${calories} cal`);
+            closeTreadmillScanModal();
+        }
+
         // Quick Workout Logging Functions
         function showQuickLog() {
             document.getElementById('quick-workout-modal').style.display = 'flex';
@@ -3401,6 +3943,7 @@
             }
         }
     </script>
+    <script src="onboarding.js"></script>
 
 </body>
 </html>

@@ -8,6 +8,43 @@ class HealthSync {
         this.lastSync = null;
     }
 
+    resolveHealthPlugin() {
+        if (this.Health) {
+            return this.Health;
+        }
+
+        if (typeof Capacitor === 'undefined') {
+            return null;
+        }
+
+        // Prefer the plugin instance registered on Capacitor.Plugins (Capacitor <=6 compatibility)
+        const pluginContainer = Capacitor.Plugins;
+        if (pluginContainer && pluginContainer.Health) {
+            this.Health = pluginContainer.Health;
+            return this.Health;
+        }
+
+        // Capacitor 7+ exposes registerPlugin on the global Capacitor object
+        if (typeof Capacitor.registerPlugin === 'function') {
+            try {
+                this.Health = Capacitor.registerPlugin('Health');
+                if (this.Health) {
+                    return this.Health;
+                }
+            } catch (error) {
+                console.warn('⚠️ Failed to register Health plugin dynamically:', error);
+            }
+        }
+
+        // Fallback: some builds expose the plugin on a global namespace
+        if (typeof window !== 'undefined' && window.CapgoCapacitorHealth && window.CapgoCapacitorHealth.Health) {
+            this.Health = window.CapgoCapacitorHealth.Health;
+            return this.Health;
+        }
+
+        return null;
+    }
+
     async initialize() {
         try {
             console.log('🔍 Checking Capacitor availability...');
@@ -18,18 +55,30 @@ class HealthSync {
 
             console.log('✅ Capacitor available, platform:', Capacitor.getPlatform());
 
-            if (Capacitor.getPlatform() === 'web') {
+            const platform = typeof Capacitor.getPlatform === 'function' ? Capacitor.getPlatform() : 'unknown';
+            const isNative = platform === 'ios' || platform === 'android' || platform === 'mac';
+            const isNativeOverride = typeof Capacitor.isNativePlatform === 'function' ? Capacitor.isNativePlatform() : isNative;
+
+            if (!isNativeOverride) {
                 console.log('❌ Running on web - Health sync disabled');
                 return false;
             }
 
             // Get the Health plugin from Capacitor.Plugins
             console.log('🔍 Looking for Health plugin...');
-            console.log('Available plugins:', Object.keys(Capacitor.Plugins));
+            if (Capacitor.Plugins) {
+                try {
+                    console.log('Available plugins:', Object.keys(Capacitor.Plugins));
+                } catch (pluginLogError) {
+                    console.log('ℹ️ Unable to enumerate Capacitor.Plugins:', pluginLogError);
+                }
+            } else {
+                console.log('ℹ️ Capacitor.Plugins container is not defined (Capacitor 7+ uses registerPlugin).');
+            }
 
-            const { Health } = Capacitor.Plugins;
+            const Health = this.resolveHealthPlugin();
 
-            if (!Health) {
+            if (!Health || typeof Health.isAvailable !== 'function') {
                 console.error('❌ Health plugin not found in Capacitor.Plugins');
                 return false;
             }
@@ -59,15 +108,21 @@ class HealthSync {
     }
 
     async requestPermissions() {
-        if (!this.isAvailable) {
+        if (!this.isAvailable && !this.resolveHealthPlugin()) {
             console.log('❌ Health not available - cannot request permissions');
             return false;
         }
 
         try {
+            const Health = this.resolveHealthPlugin();
+            if (!Health || typeof Health.requestAuthorization !== 'function') {
+                console.warn('❌ Health plugin is not ready to request permissions');
+                return false;
+            }
+
             console.log('🔐 Requesting health permissions...');
-            console.log('Health object:', this.Health);
-            console.log('Health.requestAuthorization exists?', typeof this.Health.requestAuthorization);
+            console.log('Health object:', Health);
+            console.log('Health.requestAuthorization exists?', typeof Health.requestAuthorization);
 
             // Request all health permissions
             // Note: Only use data types supported by @capgo/capacitor-health
@@ -78,7 +133,7 @@ class HealthSync {
 
             console.log('Permission request:', JSON.stringify(permissionRequest));
 
-            const permissions = await this.Health.requestAuthorization(permissionRequest);
+            const permissions = await Health.requestAuthorization(permissionRequest);
 
             console.log('✅ requestAuthorization returned:', JSON.stringify(permissions));
 
@@ -127,36 +182,14 @@ class HealthSync {
                 console.log('📱 Data sources found:', sources);
             }
 
-            // PRIORITY: ALWAYS use iPhone data first
-            // Filter to ONLY iPhone data, ignore Apple Watch
-            let filteredSamples = samples || [];
-
-            if (filteredSamples.length > 0) {
-                // Check if we have iPhone data
-                const iphoneSamples = filteredSamples.filter(s =>
-                    s.sourceName && (
-                        s.sourceName.toLowerCase().includes('iphone') ||
-                        s.sourceName.toLowerCase().includes('phone')
-                    )
-                );
-
-                if (iphoneSamples.length > 0) {
-                    // Use ONLY iPhone data
-                    filteredSamples = iphoneSamples;
-                    console.log(`📱 Using iPhone only: ${iphoneSamples.length} samples (filtered out Watch duplicates)`);
-                } else {
-                    // No explicit iPhone data, use all data
-                    console.log(`📱 No explicit iPhone source, using all data: ${filteredSamples.length} samples`);
-                }
-            }
-
-            // Sum up the filtered samples
+            const allSamples = Array.isArray(samples) ? samples : [];
             let totalSteps = 0;
-            if (filteredSamples && Array.isArray(filteredSamples)) {
-                totalSteps = filteredSamples.reduce((sum, sample) => {
-                    return sum + (parseFloat(sample.value) || 0);
-                }, 0);
-            }
+            allSamples.forEach(sample => {
+                const value = parseFloat(sample?.value);
+                if (!Number.isNaN(value) && Number.isFinite(value)) {
+                    totalSteps += value;
+                }
+            });
 
             console.log(`🚶 Today's steps: ${totalSteps}`);
             return Math.round(totalSteps);
@@ -452,12 +485,20 @@ class HealthSync {
         try {
             // Get active energy from Apple Health
             const activeEnergy = await this.getTodayCaloriesBurned();
-            const weight = await this.getWeight();
+            let weight = await this.getWeight();
 
             // Try to get user profile for BMR calculation
             const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
             let bmr = 0;
             let totalCaloriesBurned = activeEnergy;
+
+            if ((!weight || Number.isNaN(weight)) && userProfile && userProfile.weight) {
+                const profileWeight = parseFloat(userProfile.weight);
+                if (!Number.isNaN(profileWeight) && profileWeight > 0) {
+                    weight = profileWeight;
+                    console.log('⚖️ Using profile weight for BMR calculation:', profileWeight);
+                }
+            }
 
             if (weight && userProfile.age && userProfile.height) {
                 // Calculate BMR from user profile
@@ -465,7 +506,7 @@ class HealthSync {
                 totalCaloriesBurned = activeEnergy + bmr;
                 console.log(`🔥 Total calories: ${activeEnergy} (active) + ${bmr} (BMR) = ${totalCaloriesBurned}`);
             } else {
-                console.log('⚠️ No user profile found, using active energy only');
+                console.log('⚠️ Missing profile data for BMR (need weight, height, age). Using active energy only.');
                 totalCaloriesBurned = activeEnergy;
             }
 

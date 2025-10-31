@@ -770,6 +770,15 @@
             });
             localStorage.setItem('fuelfire_weight_entries', JSON.stringify(entries));
 
+            try {
+                const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
+                profile.weight = parseFloat(weight);
+                profile.updatedAt = new Date().toISOString();
+                localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+            } catch (error) {
+                console.warn('Failed to update user profile weight:', error);
+            }
+
             // Update display
             document.getElementById('weight').textContent = weight.toFixed(1) + ' lbs';
             loadWeightProgress();
@@ -1447,6 +1456,16 @@
                 const latest = weightEntries[weightEntries.length - 1];
                 document.getElementById('weight').textContent = latest.weight.toFixed(1) + ' lbs';
                 loadWeightProgress();
+                try {
+                    const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
+                    if (!profile.weight || Math.abs(profile.weight - latest.weight) > 0.01) {
+                        profile.weight = latest.weight;
+                        profile.updatedAt = new Date().toISOString();
+                        localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+                    }
+                } catch (error) {
+                    console.warn('Failed to sync profile weight from history:', error);
+                }
             }
 
             // Load body fat progress
