@@ -167,16 +167,26 @@
                                 </div>
                             </div>
 
-                            <div id="height-metric-container" style="display: none;">
-                                <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Height (cm)</label>
-                                <input type="number" id="user-height-cm" placeholder="178" min="0" max="300" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                            </div>
+                        <div id="height-metric-container" style="display: none;">
+                            <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Height (cm)</label>
+                            <input type="number" id="user-height-cm" placeholder="178" min="0" max="300" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                        </div>
 
-                            <div>
-                                <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Age</label>
-                                <input type="number" id="user-age" placeholder="30" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                            </div>
-                            <div>
+                        <div id="weight-imperial-container">
+                            <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Weight (lbs)</label>
+                            <input type="number" id="user-weight-lbs" placeholder="180" min="1" max="600" step="0.1" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                        </div>
+
+                        <div id="weight-metric-container" style="display: none;">
+                            <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Weight (kg)</label>
+                            <input type="number" id="user-weight-kg" placeholder="82" min="1" max="300" step="0.1" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Age</label>
+                            <input type="number" id="user-age" placeholder="30" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                        </div>
+                        <div>
                                 <label style="display: block; font-size: 14px; color: #666; margin-bottom: 5px;">Sex</label>
                                 <select id="user-sex" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
                                     <option value="male">Male</option>
@@ -688,7 +698,14 @@
             document.getElementById('heart-rate').textContent = data.heartRate || '--';
 
             // Base Calories (BMR)
-            document.getElementById('base-calories').textContent = (data.bmr || 0).toLocaleString();
+            const profileBmr = calculateBmrFromProfile(getStoredProfile());
+            const effectiveBmr = data.bmr && data.bmr > 0 ? Math.round(data.bmr) : profileBmr;
+            if (effectiveBmr && effectiveBmr > 0) {
+                document.getElementById('base-calories').textContent = effectiveBmr.toLocaleString();
+                localStorage.setItem('fuelfire_last_bmr', String(effectiveBmr));
+            } else {
+                document.getElementById('base-calories').textContent = '--';
+            }
 
             // Active Calories (Apple Health + Manual + Workouts)
             const appleHealthActive = data.activeEnergy || 0;
@@ -998,6 +1015,11 @@
                     profile.updatedAt = new Date().toISOString();
                     localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
                     localStorage.setItem('fuelfire_profile_updated', Date.now().toString());
+                    const weightEl = document.getElementById('weight');
+                    if (weightEl) {
+                        weightEl.textContent = value.toFixed(1) + ' lbs';
+                    }
+                    refreshBaseCaloriesDisplay();
                 } catch (error) {
                     console.warn('Failed to sync profile weight entry:', error);
                 }
@@ -1403,13 +1425,19 @@
         function toggleUnits() {
             isMetric = document.getElementById('unit-toggle').checked;
             const label = document.getElementById('unit-label');
-            const imperialContainer = document.getElementById('height-imperial-container');
-            const metricContainer = document.getElementById('height-metric-container');
+            const imperialHeight = document.getElementById('height-imperial-container');
+            const metricHeight = document.getElementById('height-metric-container');
+            const imperialWeight = document.getElementById('weight-imperial-container');
+            const metricWeight = document.getElementById('weight-metric-container');
+            const weightLbsInput = document.getElementById('user-weight-lbs');
+            const weightKgInput = document.getElementById('user-weight-kg');
 
             if (isMetric) {
                 label.textContent = 'Metric';
-                imperialContainer.style.display = 'none';
-                metricContainer.style.display = 'block';
+                imperialHeight.style.display = 'none';
+                metricHeight.style.display = 'block';
+                imperialWeight.style.display = 'none';
+                metricWeight.style.display = 'block';
 
                 // Convert existing imperial values to metric if present
                 const feet = document.getElementById('user-feet').value;
@@ -1419,10 +1447,20 @@
                     const cm = Math.round(totalInches * 2.54);
                     document.getElementById('user-height-cm').value = cm;
                 }
+
+                if (weightLbsInput && weightLbsInput.value) {
+                    const lbsValue = parseFloat(weightLbsInput.value);
+                    if (!Number.isNaN(lbsValue)) {
+                        const kgValue = Math.round(lbsValue * 0.453592 * 10) / 10;
+                        weightKgInput.value = kgValue;
+                    }
+                }
             } else {
                 label.textContent = 'Imperial';
-                imperialContainer.style.display = 'block';
-                metricContainer.style.display = 'none';
+                imperialHeight.style.display = 'block';
+                metricHeight.style.display = 'none';
+                imperialWeight.style.display = 'block';
+                metricWeight.style.display = 'none';
 
                 // Convert existing metric values to imperial if present
                 const cm = document.getElementById('user-height-cm').value;
@@ -1432,6 +1470,14 @@
                     const inches = totalInches % 12;
                     document.getElementById('user-feet').value = feet;
                     document.getElementById('user-inches').value = inches;
+                }
+
+                if (weightKgInput && weightKgInput.value) {
+                    const kgValue = parseFloat(weightKgInput.value);
+                    if (!Number.isNaN(kgValue)) {
+                        const lbsValue = Math.round(kgValue / 0.453592 * 10) / 10;
+                        weightLbsInput.value = lbsValue;
+                    }
                 }
             }
 
@@ -1450,6 +1496,51 @@
             } else {
                 slider.style.backgroundColor = '#ccc';
                 knob.style.transform = 'translateX(0)';
+            }
+        }
+
+        function getStoredProfile() {
+            try {
+                const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
+                return profile;
+            } catch (error) {
+                console.warn('Failed to read stored profile:', error);
+                return {};
+            }
+        }
+
+        function calculateBmrFromProfile(profile) {
+            if (!profile || !profile.weight || !profile.height || !profile.age || !profile.sex) {
+                return null;
+            }
+
+            const weightKg = profile.weight * 0.453592;
+            const heightCm = profile.height * 2.54;
+            const age = parseInt(profile.age, 10);
+            if (Number.isNaN(weightKg) || Number.isNaN(heightCm) || Number.isNaN(age)) {
+                return null;
+            }
+
+            const isFemale = (profile.sex || '').toLowerCase() === 'female';
+            const bmr = isFemale
+                ? (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161
+                : (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+
+            return Math.round(bmr);
+        }
+
+        function refreshBaseCaloriesDisplay() {
+            const baseCalEl = document.getElementById('base-calories');
+            if (!baseCalEl) return;
+
+            const profile = getStoredProfile();
+            const bmr = calculateBmrFromProfile(profile);
+            if (bmr && bmr > 0) {
+                baseCalEl.textContent = bmr.toLocaleString();
+                localStorage.setItem('fuelfire_last_bmr', String(bmr));
+            } else {
+                const cached = parseInt(localStorage.getItem('fuelfire_last_bmr') || '0', 10);
+                baseCalEl.textContent = cached > 0 ? cached.toLocaleString() : '--';
             }
         }
 
@@ -1474,10 +1565,27 @@
                 heightInInches = (parseInt(feet) * 12) + parseInt(inches);
             }
 
+            let weightLbs;
+            if (isMetric) {
+                const kg = document.getElementById('user-weight-kg').value;
+                if (!kg) {
+                    alert('Please enter your weight');
+                    return;
+                }
+                weightLbs = parseFloat(kg) / 0.453592;
+            } else {
+                const lbs = document.getElementById('user-weight-lbs').value;
+                if (!lbs) {
+                    alert('Please enter your weight');
+                    return;
+                }
+                weightLbs = parseFloat(lbs);
+            }
+
             const age = document.getElementById('user-age').value;
             const sex = document.getElementById('user-sex').value;
 
-            if (!age) {
+            if (!age || !sex || Number.isNaN(weightLbs)) {
                 alert('Please fill in all fields');
                 return;
             }
@@ -1486,14 +1594,20 @@
                 height: heightInInches, // Always store in inches
                 age: parseInt(age),
                 sex: sex,
-                timestamp: Date.now()
+                weight: Math.round(weightLbs * 10) / 10,
+                updatedAt: new Date().toISOString()
             };
 
             localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
-            alert('✅ Profile saved! Sync health data to recalculate BMR with your height.');
-
-            // Trigger a health data sync to recalculate BMR
-            syncHealthData();
+            localStorage.setItem('fuelfire_profile_updated', Date.now().toString());
+            refreshBaseCaloriesDisplay();
+            const weightEl = document.getElementById('weight');
+            if (weightEl) {
+                weightEl.textContent = (Math.round(weightLbs * 10) / 10).toFixed(1) + ' lbs';
+            }
+            document.getElementById('user-weight-lbs').value = Math.round(weightLbs * 10) / 10;
+            document.getElementById('user-weight-kg').value = Math.round((weightLbs * 0.453592) * 10) / 10;
+            alert('✅ Profile saved! BMR updated using your new stats.');
         }
 
         function loadUserProfile() {
@@ -1512,6 +1626,13 @@
                     document.getElementById('user-feet').value = feet;
                     document.getElementById('user-inches').value = inches;
                 }
+            }
+
+            if (profile.weight) {
+                const weightLbs = Math.round(profile.weight * 10) / 10;
+                const weightKg = Math.round(profile.weight * 0.453592 * 10) / 10;
+                document.getElementById('user-weight-lbs').value = weightLbs;
+                document.getElementById('user-weight-kg').value = weightKg;
             }
 
             if (profile.age) {
@@ -1552,6 +1673,8 @@
 
             // Load active calories data
             loadActiveCaloriesData();
+
+            refreshBaseCaloriesDisplay();
         }
         // Quick Workout Logging Functions
         function showQuickLogWorkout() {
@@ -1669,6 +1792,7 @@
             updateToggleSlider(); // Initialize toggle appearance
             updateCurrentValues(); // Load current body composition values
             showCompositionMetric('bodyfat'); // Show default chart
+            refreshBaseCaloriesDisplay();
         });
     </script>
 </body>
