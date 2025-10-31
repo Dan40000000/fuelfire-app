@@ -41,23 +41,23 @@
                     <!-- Quick Log Workout Modal -->
                     <div id="quick-workout-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center;">
                         <div style="background: white; border-radius: 20px; padding: 30px; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto;">
-                            <h2 style="color: var(--primary); margin: 0 0 20px 0; text-align: center;">💪 Quick Log Workout</h2>
+                        <h2 style="color: var(--primary); margin: 0 0 20px 0; text-align: center;">Quick Log Workout</h2>
 
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Workout Type</label>
                                 <select id="quick-workout-type" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px;">
-                                    <option value="Chest">🏋️ Chest</option>
-                                    <option value="Back">🏋️ Back</option>
-                                    <option value="Legs">🦵 Legs</option>
-                                    <option value="Shoulders">💪 Shoulders</option>
-                                    <option value="Arms">💪 Arms</option>
-                                    <option value="Core">🧘 Core</option>
-                                    <option value="Cardio">🏃 Cardio</option>
-                                    <option value="HIIT">⚡ HIIT</option>
-                                    <option value="Yoga">🧘 Yoga</option>
-                                    <option value="Stretching">🤸 Stretching</option>
-                                    <option value="Sports">⚽ Sports</option>
-                                    <option value="Other">🏃 Other</option>
+                                    <option value="Chest">Chest</option>
+                                    <option value="Back">Back</option>
+                                    <option value="Legs">Legs</option>
+                                    <option value="Shoulders">Shoulders</option>
+                                    <option value="Arms">Arms</option>
+                                    <option value="Core">Core</option>
+                                    <option value="Cardio">Cardio</option>
+                                    <option value="HIIT">HIIT</option>
+                                    <option value="Yoga">Yoga</option>
+                                    <option value="Stretching">Stretching</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
 
@@ -67,7 +67,7 @@
                             </div>
 
                             <div id="distance-field" style="margin-bottom: 20px; display: none;">
-                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">🏃 Distance (miles) - For Cardio/Running</label>
+                                <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Distance (miles) - For Cardio/Running</label>
                                 <input type="number" id="quick-workout-distance" placeholder="3.1" min="0" max="100" step="0.1" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; box-sizing: border-box;">
                             </div>
 
@@ -96,43 +96,38 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
                         <!-- Steps -->
                         <div style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 36px; margin-bottom: 5px;">🚶</div>
+                            <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;">Steps Today</div>
                             <div style="font-size: 28px; font-weight: bold;" id="steps-count">---</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Steps Today</div>
                         </div>
 
                         <!-- Heart Rate -->
                         <div style="background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 36px; margin-bottom: 5px;">❤️</div>
+                            <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;">Heart Rate</div>
                             <div style="font-size: 28px; font-weight: bold;" id="heart-rate-average">--</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Heart Rate (avg bpm)</div>
-                            <div style="font-size: 12px; opacity: 0.75; margin-top: 4px;" id="heart-rate-range">Range: --</div>
+                            <div style="font-size: 12px; opacity: 0.75; margin-top: 6px;" id="heart-rate-range">Range: --</div>
                         </div>
 
                         <!-- Base Calories (BMR) -->
                         <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 36px; margin-bottom: 5px;">⚡</div>
+                            <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;">Base Calories (BMR)</div>
                             <div style="font-size: 28px; font-weight: bold;" id="base-calories">---</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Base Calories (BMR)</div>
                         </div>
 
                         <!-- Active Calories -->
                         <div style="background: linear-gradient(135deg, #FF5722 0%, #E64A19 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 36px; margin-bottom: 5px;">🔥</div>
+                            <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;">Active Calories</div>
                             <div style="font-size: 28px; font-weight: bold;" id="active-calories">---</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Active Calories</div>
                         </div>
 
                         <!-- Total Burned -->
                         <div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 36px; margin-bottom: 5px;">💪</div>
+                            <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;">Total Burned</div>
                             <div style="font-size: 28px; font-weight: bold;" id="calories-burned">---</div>
-                            <div style="font-size: 13px; opacity: 0.9;">Total Burned</div>
                         </div>
 
                         <!-- Distance -->
                         <div style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); color: white; padding: 20px; border-radius: 20px; text-align: center;">
-                            <div style="font-size: 36px; margin-bottom: 5px;">🏃</div>
+                            <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform:uppercase; margin-bottom: 6px;">Distance</div>
                             <div style="font-size: 28px; font-weight: bold;" id="distance">--</div>
                             <div style="font-size: 13px; opacity: 0.9;">Miles</div>
                         </div>
@@ -141,7 +136,7 @@
                     <!-- User Profile / BMR Settings -->
                     <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="color: var(--primary); margin: 0;">👤 Profile for BMR Calculation</h3>
+                            <h3 style="color: var(--primary); margin: 0;">Profile for BMR Calculation</h3>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 14px; color: #666;" id="unit-label">Imperial</span>
                                 <label style="position: relative; display: inline-block; width: 50px; height: 24px;">
@@ -208,7 +203,6 @@
                     <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="font-size: 40px;">⚖️</div>
                                 <div>
                                     <div style="font-size: 14px; color: #666;">Current Weight</div>
                                     <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="weight">-- lbs</div>
@@ -234,7 +228,6 @@
                         <!-- Body Fat -->
                         <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <div style="text-align: center;">
-                                <div style="font-size: 32px; margin-bottom: 8px;">💪</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Body Fat</div>
                                 <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="bodyfat-current">--%</div>
                                 <button onclick="showBodyFatEntry()" style="background: var(--gradient-1); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
@@ -244,7 +237,6 @@
                         <!-- Muscle Mass -->
                         <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <div style="text-align: center;">
-                                <div style="font-size: 32px; margin-bottom: 8px;">🏋️</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Muscle Mass</div>
                                 <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="muscle-current">-- lbs</div>
                                 <button onclick="showMuscleMassEntry()" style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
@@ -254,7 +246,6 @@
                         <!-- Weight -->
                         <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <div style="text-align: center;">
-                                <div style="font-size: 32px; margin-bottom: 8px;">⚖️</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Weight</div>
                                 <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="weight-current">-- lbs</div>
                                 <button onclick="showWeightEntry()" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
@@ -264,7 +255,6 @@
                         <!-- Visceral Fat -->
                         <div style="background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <div style="text-align: center;">
-                                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Visceral Fat</div>
                                 <div style="font-size: 28px; font-weight: bold; color: var(--primary);" id="visceral-current">--</div>
                                 <button onclick="showVisceralFatEntry()" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%;">+ Log</button>
@@ -274,7 +264,7 @@
 
                     <!-- Body Composition History & Trends -->
                     <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">📊 Body Composition History</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">Body Composition History</h3>
 
                         <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;">
                             <button onclick="showCompositionMetric('bodyfat')" id="btn-bodyfat" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap;">Body Fat %</button>
@@ -296,7 +286,7 @@
 
                     <!-- Today's Workouts -->
                     <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">💪 Today's Workouts</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 20px; text-align: center;">Today's Workouts</h3>
                         <div id="workouts-list" style="color: var(--dark);">
                             <div style="text-align: center; color: #999; padding: 20px;">
                                 Sync to see your workouts
@@ -307,13 +297,10 @@
                     <!-- Active Calories Tracking Card -->
                     <div style="background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="font-size: 40px;">🔥</div>
-                                <div>
-                                    <div style="font-size: 14px; color: #666;">Manual Active Calories</div>
-                                    <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="manual-active-calories">0</div>
-                                    <div style="font-size: 12px; color: #999; margin-top: 5px;">From Workouts: <span id="workout-calories">0</span> cal</div>
-                                </div>
+                            <div>
+                                <div style="font-size: 14px; color: #666;">Manual Active Calories</div>
+                                <div style="font-size: 32px; font-weight: bold; color: var(--dark);" id="manual-active-calories">0</div>
+                                <div style="font-size: 12px; color: #999; margin-top: 5px;">From Workouts: <span id="workout-calories">0</span> cal</div>
                             </div>
                             <button onclick="showActiveCaloriesEntry()" style="background: linear-gradient(135deg, #FF5722 0%, #E64A19 100%); color: white; border: none; padding: 10px 20px; border-radius: 15px; font-size: 14px; font-weight: bold; cursor: pointer;">+ Log Activity</button>
                         </div>
@@ -327,20 +314,20 @@
                         </div>
 
                         <div style="margin-top: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 10px;">
-                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">💡 Tip</div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Tip</div>
                             <div style="font-size: 13px; color: #555;">Log manual activities like workouts, sports, or other exercises. Completed workouts from the Track Workouts page are automatically included!</div>
                         </div>
                     </div>
 
                     <!-- Health Summary -->
                     <div style="background: var(--gradient-light); border-radius: 20px; padding: 25px; margin-bottom: 25px;">
-                        <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center;">📊 Health Summary</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center;">Health Summary</h3>
                         <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="color: #666;">Daily Goal</span>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <span style="font-weight: bold; color: var(--dark);" id="step-goal-display">10,000 steps</span>
-                                    <button onclick="editStepGoal()" style="background: var(--gradient-1); color: white; border: none; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer;">✏️ Edit</button>
+                                    <button onclick="editStepGoal()" style="background: var(--gradient-1); color: white; border: none; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer;">Edit</button>
                                 </div>
                             </div>
                             <div style="background: #e0e0e0; height: 10px; border-radius: 5px; overflow: hidden;">
@@ -422,7 +409,7 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-brand">🔥 FuelFire</div>
+            <div class="sidebar-brand">FuelFire</div>
         </div>
         <div class="sidebar-menu">
             <div class="menu-item" onclick="window.location.href='index.html'">
@@ -539,12 +526,12 @@
         }
 
         async function initHealthDashboard() {
-            console.log('🏥 Initializing Health Dashboard...');
+            console.log('Initializing Health Dashboard...');
 
             // Initialize health sync
             const initialized = await window.healthSync.initialize();
             if (!initialized) {
-                document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available on this device';
+                document.getElementById('sync-status').innerHTML = 'Health sync not available on this device';
                 return;
             }
 
@@ -564,14 +551,14 @@
 
         async function requestHealthPermissions() {
             try {
-                console.log('🔐 Requesting health permissions...');
-                document.getElementById('sync-status').innerHTML = '🔐 Requesting permissions...';
+                console.log('Requesting health permissions...');
+                document.getElementById('sync-status').innerHTML = 'Requesting permissions...';
 
                 // Make sure healthSync is initialized
                 if (!window.healthSync.isAvailable) {
                     const initialized = await window.healthSync.initialize();
                     if (!initialized) {
-                        document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available on this device';
+                        document.getElementById('sync-status').innerHTML = 'Health sync not available on this device';
                         return;
                     }
                 }
@@ -580,65 +567,65 @@
                 const permitted = await window.healthSync.requestPermissions();
 
                 if (permitted) {
-                    console.log('✅ Permissions granted!');
-                    document.getElementById('sync-status').innerHTML = '✅ Permissions granted! Now tap "Sync Data"';
+                    console.log('Permissions granted.');
+                    document.getElementById('sync-status').innerHTML = 'Permissions granted! Now tap "Sync Data"';
                 } else {
-                    console.log('❌ Permissions denied or dialog dismissed');
-                    document.getElementById('sync-status').innerHTML = '❌ Please grant permissions in Settings → Health → Data Access & Devices → Well Fit';
+                    console.log('Permissions denied or dialog dismissed.');
+                    document.getElementById('sync-status').innerHTML = 'Please grant permissions in Settings → Health → Data Access & Devices → FuelFire';
                 }
             } catch (error) {
-                console.error('❌ Permission request error:', error);
-                document.getElementById('sync-status').innerHTML = `❌ Error: ${error.message}`;
+                console.error('Permission request error:', error);
+                document.getElementById('sync-status').innerHTML = `Error: ${error.message}`;
             }
         }
 
         async function clearCacheAndRefresh() {
             if (confirm('This will clear all cached health data and force a fresh sync from Apple Health. Continue?')) {
                 localStorage.removeItem('healthData');
-                document.getElementById('sync-status').innerHTML = '🗑️ Cache cleared! Tap "Sync Data" to refresh';
+                document.getElementById('sync-status').innerHTML = 'Cache cleared! Tap "Sync Data" to refresh';
                 document.getElementById('debug-info').style.display = 'block';
-                document.getElementById('debug-info').innerHTML = '✅ Cache cleared at ' + new Date().toLocaleTimeString();
+                document.getElementById('debug-info').innerHTML = 'Cache cleared at ' + new Date().toLocaleTimeString();
             }
         }
 
         async function syncHealthData() {
             try {
-                console.log('🔄 Starting sync...');
-                document.getElementById('sync-status').innerHTML = '🔄 Syncing...';
+                console.log('Starting sync...');
+                document.getElementById('sync-status').innerHTML = 'Syncing...';
                 document.getElementById('debug-info').style.display = 'block';
                 let debugLog = '';
 
                 // Make sure healthSync is initialized
                 if (!window.healthSync.isAvailable) {
-                    console.log('⚠️ Health not initialized, initializing now...');
-                    debugLog += '⚠️ Initializing Health plugin...\n';
+                    console.log('Health not initialized, initializing now...');
+                    debugLog += 'Initializing Health plugin...\n';
                     const initialized = await window.healthSync.initialize();
                     if (!initialized) {
-                        console.log('❌ Health initialization failed');
-                        document.getElementById('sync-status').innerHTML = '⚠️ Health sync not available';
-                        debugLog += '❌ Health initialization failed\n';
+                        console.log('Health initialization failed');
+                        document.getElementById('sync-status').innerHTML = 'Health sync not available';
+                        debugLog += 'Health initialization failed\n';
                         document.getElementById('debug-info').innerHTML = debugLog;
                         return;
                     }
-                    debugLog += '✅ Health plugin initialized\n';
+                    debugLog += 'Health plugin initialized\n';
                 }
 
-                console.log('📊 Syncing all data...');
-                debugLog += '📊 Fetching data from Apple Health...\n';
+                console.log('Syncing all data...');
+                debugLog += 'Fetching data from Apple Health...\n';
                 document.getElementById('debug-info').innerHTML = debugLog;
 
                 const data = await window.healthSync.syncAllData();
 
                 if (!data) {
-                    console.log('❌ No data returned from sync');
-                    document.getElementById('sync-status').innerHTML = '❌ No health data found. Tap "Grant Permissions" first, then grant access in Settings → Health';
+                    console.log('No data returned from sync.');
+                    document.getElementById('sync-status').innerHTML = 'No health data found. Tap "Grant Permissions" first, then grant access in Settings → Health';
                     debugLog += '❌ No data returned - check permissions\n';
                     document.getElementById('debug-info').innerHTML = debugLog;
                     return;
                 }
 
-                console.log('✅ Sync complete:', data);
-                debugLog += '✅ Data received:\n';
+                console.log('Sync complete:', data);
+                debugLog += 'Data received:\n';
                 debugLog += `  Steps: ${data.steps}\n`;
                 debugLog += `  Distance: ${data.distance.toFixed(2)} miles\n`;
                 debugLog += `  Active Calories: ${data.activeEnergy}\n`;
@@ -654,12 +641,12 @@
 
                 updateUI(data);
                 localStorage.setItem('healthData', JSON.stringify(data));
-                document.getElementById('sync-status').innerHTML = `✅ Synced at ${new Date().toLocaleTimeString()}`;
+                document.getElementById('sync-status').innerHTML = `Synced at ${new Date().toLocaleTimeString()}`;
             } catch (error) {
-                console.error('❌ Sync error:', error);
-                document.getElementById('sync-status').innerHTML = `❌ Sync failed: ${error.message}`;
+                console.error('Sync error:', error);
+                document.getElementById('sync-status').innerHTML = `Sync failed: ${error.message}`;
                 document.getElementById('debug-info').style.display = 'block';
-                document.getElementById('debug-info').innerHTML = `❌ Error: ${error.message}\n${error.stack}`;
+                document.getElementById('debug-info').innerHTML = `Error: ${error.message}\n${error.stack}`;
             }
         }
 
@@ -774,7 +761,6 @@
                                 <div style="font-weight: bold; color: var(--dark); margin-bottom: 5px;">${workout.type}</div>
                                 <div style="font-size: 13px; color: #666;">${durationMin} minutes • ${Math.round(workout.calories)} calories</div>
                             </div>
-                            <div style="font-size: 32px;">💪</div>
                         </div>
                     </div>
                 `;
@@ -792,7 +778,7 @@
 
             const calories = prompt('Estimated calories burned (optional):', '300');
 
-            document.getElementById('sync-status').innerHTML = '💪 Logging workout to Apple Health...';
+            document.getElementById('sync-status').innerHTML = 'Logging workout to Apple Health...';
 
             const success = await window.logWorkoutToAppleHealth(
                 workoutType,
@@ -801,11 +787,11 @@
             );
 
             if (success) {
-                document.getElementById('sync-status').innerHTML = `✅ ${workoutType} workout logged to Apple Health!`;
+                document.getElementById('sync-status').innerHTML = `${workoutType} workout logged to Apple Health!`;
                 // Sync to see the new workout
                 setTimeout(syncHealthData, 1000);
             } else {
-                document.getElementById('sync-status').innerHTML = '❌ Failed to log workout';
+                document.getElementById('sync-status').innerHTML = 'Failed to log workout';
             }
         }
 
