@@ -165,7 +165,7 @@ class HealthSync {
                 dataType: 'steps',
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString(),
-                limit: 5000
+                limit: 60000
             });
 
             console.log('📊 Step samples received:', samples?.length || 0);

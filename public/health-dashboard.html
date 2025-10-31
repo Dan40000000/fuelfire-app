@@ -815,18 +815,18 @@
                 return;
             }
 
-            const max = Math.max(...entries.map(e => e.weight));
-            const min = Math.min(...entries.map(e => e.weight));
+            const max = Math.max(...entries.map(e => e.value));
+            const min = Math.min(...entries.map(e => e.value));
             const range = max - min || 10;
 
             let chartHTML = '<div style="display: flex; align-items: flex-end; justify-content: space-around; height: 90px; gap: 2px;">';
 
             entries.slice(-7).forEach((entry, i) => {
-                const height = entries.length === 1 ? 50 : ((entry.weight - min) / range) * 70 + 20;
+                const height = entries.length === 1 ? 50 : ((entry.value - min) / range) * 70 + 20;
                 const date = new Date(entry.date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
                 chartHTML += `
                     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;">
-                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.weight.toFixed(1)}</div>
+                        <div style="font-size: 11px; font-weight: bold; color: var(--primary);">${entry.value.toFixed(1)}</div>
                         <div style="width: 100%; background: var(--gradient-1); border-radius: 5px 5px 0 0; height: ${height}px;"></div>
                         <div style="font-size: 9px; color: #666;">${date}</div>
                     </div>
@@ -846,7 +846,7 @@
                 const date = new Date(entry.date).toLocaleString();
                 html += `
                     <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
-                        <span style="font-weight: bold;">${entry.weight.toFixed(1)} lbs</span>
+                        <span style="font-weight: bold;">${entry.value.toFixed(1)} lbs</span>
                         <span style="font-size: 12px; color: #666;">${date}</span>
                     </div>
                 `;
@@ -1033,6 +1033,10 @@
                 showCompositionMetric(type);
             }
 
+            if (type === 'weight') {
+                loadWeightProgress();
+            }
+
             const labels = {
                 'bodyfat': 'Body Fat',
                 'muscle': 'Muscle Mass',
@@ -1086,6 +1090,13 @@
                         element.textContent = latest.value.toFixed(1) + units[metric];
                     }
                 } else {
+                    if (metric === 'weight') {
+                        const profile = getStoredProfile();
+                        if (profile.weight) {
+                            element.textContent = (Math.round(profile.weight * 10) / 10).toFixed(1) + units[metric];
+                            return;
+                        }
+                    }
                     element.textContent = defaults[metric];
                 }
             });
@@ -1649,17 +1660,23 @@
             const weightEntries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
             if (weightEntries.length > 0) {
                 const latest = weightEntries[weightEntries.length - 1];
-                document.getElementById('weight').textContent = latest.weight.toFixed(1) + ' lbs';
+                document.getElementById('weight').textContent = latest.value.toFixed(1) + ' lbs';
                 loadWeightProgress();
                 try {
                     const profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
-                    if (!profile.weight || Math.abs(profile.weight - latest.weight) > 0.01) {
-                        profile.weight = latest.weight;
+                    if (!profile.weight || Math.abs(profile.weight - latest.value) > 0.01) {
+                        profile.weight = latest.value;
                         profile.updatedAt = new Date().toISOString();
                         localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+                        localStorage.setItem('fuelfire_profile_updated', Date.now().toString());
                     }
                 } catch (error) {
                     console.warn('Failed to sync profile weight from history:', error);
+                }
+            } else {
+                const profile = getStoredProfile();
+                if (profile.weight) {
+                    document.getElementById('weight').textContent = (Math.round(profile.weight * 10) / 10).toFixed(1) + ' lbs';
                 }
             }
 
