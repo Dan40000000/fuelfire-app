@@ -2121,6 +2121,42 @@ function saveWorkoutPlan() {
     showScreen('saved-workouts');
 }
 
+function escapeAttribute(value) {
+    return (value || '').toString()
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function formatLocationLabel(loc) {
+    const labels = {
+        home: 'Home Setup',
+        hotel: 'Hotel Gym',
+        gym: 'Full Gym',
+        park: 'Outdoor/Park'
+    };
+    if (!loc) return '';
+    return labels[loc] || loc.charAt(0).toUpperCase() + loc.slice(1);
+}
+
+function getFormMuscleFromExercise(exercise) {
+    if (!exercise) return '';
+    if (typeof inferFormMuscleFromExercise === 'function') {
+        const inferred = inferFormMuscleFromExercise(exercise);
+        if (inferred) return inferred;
+    }
+    const direct =
+        exercise.muscle ||
+        (Array.isArray(exercise.primaryMuscles) && exercise.primaryMuscles[0]) ||
+        exercise.muscleGroup ||
+        exercise.category ||
+        exercise.focus;
+    if (direct) return direct;
+    return '';
+}
+
 // Load saved workouts - UNIFIED VERSION for both AI and preset workouts
 function loadSavedWorkouts() {
     const savedWorkouts = JSON.parse(localStorage.getItem('savedWorkouts') || '[]');
@@ -2331,23 +2367,50 @@ function updateWorkoutPreview(workoutId, selectedDay, previewDiv) {
     }
 
     const dayWorkout = schedule[selectedDay];
+    const safeDay = escapeAttribute(selectedDay);
+    const safeWorkoutName = escapeAttribute((dayWorkout && dayWorkout.name) || selectedDay);
 
     // Build preview
     let previewHTML = `
         <div style="background: var(--gradient-1); padding: 15px; border-radius: 12px;">
-            <h4 style="color: white; margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">📋 ${selectedDay}: ${dayWorkout.name}</h4>
+            <h4 style="color: white; margin: 0 0 12px 0; font-size: 14px; font-weight: 700;">📋 ${safeDay}: ${safeWorkoutName}</h4>
             <div style="display: grid; gap: 8px;">
     `;
 
+    const originalLocation = workout.location || null;
+
     dayWorkout.exercises.forEach((exercise, index) => {
+        const safeName = escapeAttribute(exercise.name || `Exercise ${index + 1}`);
+        const setsText = exercise.sets ? escapeAttribute(exercise.sets) : '';
+        const repsText = exercise.reps ? escapeAttribute(exercise.reps) : '';
+        const setsReps = setsText && repsText ? `${setsText} × ${repsText}` : (setsText || repsText || '');
+        const rawMuscle = getFormMuscleFromExercise(exercise) || '';
+        const safeMuscle = escapeAttribute(rawMuscle.toString().toLowerCase());
+        const focusLabel = exercise.focus ? escapeAttribute(exercise.focus) : '';
+        const needsLocationHint = Boolean(originalLocation && exercise.baseLocation && exercise.baseLocation !== originalLocation);
+        const locationHint = needsLocationHint ? escapeAttribute(formatLocationLabel(exercise.baseLocation)) : '';
+        const notesText = exercise.notes ? escapeAttribute(exercise.notes) : '';
+
         previewHTML += `
-            <div style="background: white; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 13px; font-weight: 700; color: var(--dark); flex: 1;">
-                    ${index + 1}. ${exercise.name}
+            <div style="background: white; padding: 12px; border-radius: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                    <div style="font-size: 13px; font-weight: 700; color: var(--dark); flex: 1;">
+                        ${index + 1}. ${safeName}
+                    </div>
+                    <div style="background: var(--carolina-blue); color: white; padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; white-space: nowrap;">
+                        ${setsReps || 'N/A'}
+                    </div>
                 </div>
-                <div style="background: var(--carolina-blue); color: white; padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; white-space: nowrap;">
-                    ${exercise.sets} × ${exercise.reps}
-                </div>
+                ${focusLabel ? `<div style="margin-top: 6px; font-size: 11px; font-weight: 600; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 0.5px;">Focus: ${focusLabel}</div>` : ''}
+                ${needsLocationHint ? `<div style="margin-top: 4px; font-size: 10px; color: #999;">Using ${locationHint} variation</div>` : ''}
+                ${notesText ? `<div style="margin-top: 6px; font-size: 11px; color: #666; font-style: italic;">${notesText}</div>` : ''}
+                <button type="button"
+                        data-form-help="true"
+                        data-form-muscle="${safeMuscle}"
+                        data-form-name="${safeName}"
+                        style="margin-top: 8px; background: var(--gradient-1); color: white; border: none; border-radius: 14px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer;">
+                    Form Help
+                </button>
             </div>
         `;
     });
@@ -2805,6 +2868,9 @@ function showScreen(screenId) {
         setTimeout(() => {
             if (typeof updateHomeFoodCalories === 'function') {
                 updateHomeFoodCalories();
+            }
+            if (typeof loadHomeHealthData === 'function') {
+                loadHomeHealthData();
             }
         }, 100);
     }
@@ -6567,37 +6633,47 @@ window.onload = function() {
     // Load progress data
     updateProgressDisplay();
 
-    // Check URL hash and show the correct screen on page load
-    const hash = window.location.hash.substring(1); // Remove the # symbol
+    // Determine initial screen
+    const urlParams = new URLSearchParams(window.location.search);
+    const screenParam = urlParams.get('screen');
+    const hash = window.location.hash.substring(1);
+    let pendingScreen = null;
+
+    try {
+        pendingScreen = localStorage.getItem('fuelfire_pending_screen');
+        if (pendingScreen) {
+            localStorage.removeItem('fuelfire_pending_screen');
+        }
+    } catch (error) {
+        console.warn('Unable to read pending screen:', error);
+    }
+
+    let initialScreen = null;
+
     if (hash && document.getElementById(hash)) {
-        showScreen(hash);
-    } else {
-        // Default to home if no hash
-        showScreen('home');
+        initialScreen = hash;
+    } else if (screenParam && document.getElementById(screenParam)) {
+        initialScreen = screenParam;
+    } else if (pendingScreen && document.getElementById(pendingScreen)) {
+        initialScreen = pendingScreen;
+    }
+
+    const resolvedScreen = initialScreen || 'home';
+    showScreen(resolvedScreen);
+
+    if (typeof loadHomeHealthData === 'function') {
+        setTimeout(loadHomeHealthData, 150);
+    }
+
+    if (resolvedScreen === 'track-workouts') {
+        setTimeout(updateFitnessDashboard, 200);
+    } else if (document.getElementById('track-workouts')) {
+        updateFitnessDashboard();
     }
 
     // Load recent workouts
     if (document.getElementById('recent-workouts')) {
         loadRecentWorkouts();
-    }
-
-    // Load fitness dashboard if track-workouts screen exists
-    if (document.getElementById('track-workouts')) {
-        updateFitnessDashboard();
-    }
-
-    // Check for screen parameter in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const screenParam = urlParams.get('screen');
-    if (screenParam) {
-        // Show the requested screen
-        setTimeout(() => {
-            showScreen(screenParam);
-            // Update dashboard if showing track-workouts
-            if (screenParam === 'track-workouts') {
-                setTimeout(updateFitnessDashboard, 200);
-            }
-        }, 100);
     }
 
     // Show notification after 2 seconds

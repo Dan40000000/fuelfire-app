@@ -193,8 +193,6 @@
                             <div class="action-desc">Track your progress</div>
                         </div>
                     </div>
-                    <div class="overlay" onclick="toggleSidebar()" ontouchstart=""></div>
-
                     <div class="bottom-nav">
                         <!-- Quick Workout -->
                         <div class="nav-item" onclick="window.location.href='workout-quiz.html'" ontouchstart="">
@@ -251,98 +249,6 @@
                                     <circle cx="12" cy="12" r="2" fill="white"/>
                                     <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
                                 </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="sidebar" id="sidebar">
-                        <div class="sidebar-header">
-                            <div class="sidebar-brand">🔥 Well Fit</div>
-                        </div>
-                        <div class="sidebar-menu">
-                            <div class="menu-item active" id="menu-home" onclick="showScreen('home')">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Home
-                            </div>
-                            <div class="menu-item" id="menu-create-workout" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
-                                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
-                                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
-                                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
-                                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
-                                </svg>
-                                Create Workout
-                            </div>
-                            <div class="menu-item" id="menu-saved-workouts" onclick="goToScreen('index.html', 'saved-workouts')" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Saved Workouts
-                            </div>
-                            <div class="menu-item" id="menu-track-workouts" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Track Workouts
-                            </div>
-                            <div class="menu-item" id="menu-calorie-tracker" onclick="window.location.href='calorie-tracker.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
-                                </svg>
-                                Calorie Tracker
-                            </div>
-                            <div class="menu-item" id="menu-health-dashboard" onclick="window.location.href='health-dashboard.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
-                                </svg>
-                                Health Dashboard
-                            </div>
-                            <div class="menu-item" id="menu-diet-creation" onclick="window.location.href='enhanced-diet-quiz.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
-                                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                Diet Creation
-                            </div>
-                            <div class="menu-item" id="menu-meal-plans" onclick="window.location.href='meal-plans.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
-                                </svg>
-                                Meal Plans
-                            </div>
-                            <div class="menu-item" id="menu-meal-ideas" onclick="window.location.href='meal-ideas.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                Meal Ideas
-                            </div>
-                            <div class="menu-item" id="menu-supplements" onclick="window.location.href='supplements.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                </svg>
-                                Supplements
-                            </div>
-                            <div class="menu-item" id="menu-workout-techniques" onclick="window.location.href='workout-techniques.html'" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
-                                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Workout Techniques
-                            </div>
-                            <div class="menu-item" id="menu-progress" onclick="goToScreen('index.html', 'progress')" ontouchstart="">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                Goals &amp; Progress
                             </div>
                         </div>
                     </div>
@@ -1321,7 +1227,369 @@
                 loadWorkoutHistory();
             }
         }
+
+        // ==================== HOME DASHBOARD HEALTH SYNC ====================
+
+        function getCachedHealthData() {
+            try {
+                return JSON.parse(localStorage.getItem('healthData') || '{}') || {};
+            } catch (error) {
+                console.warn('Unable to parse cached health data:', error);
+                return {};
+            }
+        }
+
+        async function loadHomeHealthData(force = false) {
+            const cached = getCachedHealthData();
+            if (Object.keys(cached).length) {
+                updateHomeHealthUI(cached);
+            }
+
+            try {
+                let mergedData = { ...cached };
+
+                if (window.healthSync && typeof window.healthSync.initialize === 'function') {
+                    const initialized = await window.healthSync.initialize();
+                    if (initialized) {
+                        let freshData = {};
+                        if (typeof window.healthSync.syncAllData === 'function') {
+                            const syncData = await window.healthSync.syncAllData();
+                            if (syncData) {
+                                freshData = { ...freshData, ...syncData };
+                            }
+                        }
+
+                        if (typeof window.healthSync.getAggregatedTotals === 'function') {
+                            const totals = await window.healthSync.getAggregatedTotals(force);
+                            if (totals) {
+                                freshData = {
+                                    ...freshData,
+                                    steps: totals.steps ?? freshData.steps,
+                                    activeEnergy: totals.activeEnergy ?? freshData.activeEnergy,
+                                    distance: (totals.distanceMeters || 0) / 1000,
+                                    heartRate: totals.heartRate ?? freshData.heartRate
+                                };
+                            }
+                        }
+
+                        if (Object.keys(freshData).length > 0) {
+                            mergedData = { ...cached, ...freshData };
+                            updateHomeHealthUI(mergedData);
+                            console.info('[Health] Home dashboard auto-synced');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('[Health] Home sync skipped:', error);
+            }
+        }
+
+        function updateHomeHealthUI(data = {}) {
+            const todayKey = getLocalDateString();
+            let nutrition = {};
+            try {
+                nutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}') || {};
+            } catch (error) {
+                nutrition = {};
+            }
+
+            if (!nutrition[todayKey]) {
+                nutrition[todayKey] = {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0,
+                    meals: [],
+                    workoutCaloriesBurned: 0,
+                    steps: 0,
+                    baseCalories: 0,
+                    activeCalories: 0
+                };
+            }
+
+            const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const lastBmr = Number(localStorage.getItem('fuelfire_last_bmr')) || 0;
+            const cached = getCachedHealthData();
+
+            const stepsEl = document.getElementById('home-steps');
+            const resolvedStepsSource = data.steps ?? cached.steps ?? nutrition[todayKey].steps ?? 0;
+            const resolvedSteps = Number.isFinite(resolvedStepsSource) ? Math.max(0, Math.round(resolvedStepsSource)) : 0;
+            if (stepsEl) {
+                stepsEl.textContent = resolvedSteps.toLocaleString();
+            }
+            nutrition[todayKey].steps = resolvedSteps;
+
+            const baseCaloriesEl = document.getElementById('home-base-calories');
+            let effectiveBmr = 0;
+            if (typeof data.bmr === 'number' && data.bmr > 0) {
+                effectiveBmr = Math.round(data.bmr);
+            } else if (typeof cached.bmr === 'number' && cached.bmr > 0) {
+                effectiveBmr = Math.round(cached.bmr);
+            } else if (lastBmr > 0) {
+                effectiveBmr = Math.round(lastBmr);
+            } else {
+                effectiveBmr = calculateBMR(resolvedSteps, profile);
+            }
+
+            if (baseCaloriesEl) {
+                baseCaloriesEl.textContent = effectiveBmr.toLocaleString();
+            }
+
+            nutrition[todayKey].baseCalories = effectiveBmr;
+            localStorage.setItem('fuelfire_last_bmr', String(effectiveBmr));
+
+            const activeCaloriesEl = document.getElementById('home-active-calories');
+            const activeSource = data.activeEnergy ?? cached.activeEnergy ?? nutrition[todayKey].activeCalories ?? 0;
+            const activeRounded = Number.isFinite(activeSource) ? Math.max(0, Math.round(activeSource)) : 0;
+            if (activeCaloriesEl) {
+                activeCaloriesEl.textContent = activeRounded.toLocaleString();
+            }
+            nutrition[todayKey].activeCalories = activeRounded;
+
+            if (typeof data.caloriesBurned === 'number' && data.caloriesBurned > 0) {
+                syncWorkoutCaloriesToDailyBudget(data.caloriesBurned);
+            }
+
+            updateHomeFoodCalories();
+
+            try {
+                localStorage.setItem('dailyNutrition', JSON.stringify(nutrition));
+            } catch (error) {
+                console.warn('Unable to persist daily nutrition metadata:', error);
+            }
+        }
+
+        function syncWorkoutCaloriesToDailyBudget(caloriesBurned = 0) {
+            try {
+                const today = getLocalDateString();
+                const storeKey = 'dailyNutrition';
+                const existing = JSON.parse(localStorage.getItem(storeKey) || '{}');
+
+                if (!existing[today]) {
+                    existing[today] = {
+                        calories: 0,
+                        protein: 0,
+                        carbs: 0,
+                        fat: 0,
+                        meals: [],
+                        workoutCaloriesBurned: 0
+                    };
+                }
+
+                existing[today].workoutCaloriesBurned = Math.round(caloriesBurned);
+                localStorage.setItem(storeKey, JSON.stringify(existing));
+            } catch (error) {
+                console.warn('Unable to persist workout calories:', error);
+            }
+        }
+
+        function calculateBMR(stepsValue, profileOverride) {
+            const userProfile = profileOverride || JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const weightLbs = Number(userProfile.weight || userProfile.weightLbs || userProfile.currentWeight) || 180;
+            const heightInches = Number(userProfile.height || userProfile.heightInches) || 70;
+            const age = Number(userProfile.age) || 30;
+            const gender = userProfile.gender || 'male';
+
+            const weightKg = weightLbs * 0.453592;
+            const heightCm = heightInches * 2.54;
+
+            let bmr;
+            if (gender === 'male') {
+                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+            }
+
+            const parsedSteps = Number(stepsValue ?? document.getElementById('home-steps')?.textContent.replace(/,/g, '') || 0);
+            const activityMultiplier = getActivityMultiplier(parsedSteps);
+            return Math.round(bmr * activityMultiplier);
+        }
+
+        function getActivityMultiplier(steps) {
+            const safeSteps = Number.isFinite(steps) ? steps : 0;
+            if (safeSteps >= 10000) return 1.9;
+            if (safeSteps >= 7500) return 1.725;
+            if (safeSteps >= 5000) return 1.55;
+            if (safeSteps >= 3000) return 1.375;
+            return 1.2;
+        }
+
+        function getLocalDateString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function updateHomeFoodCalories() {
+            try {
+                const today = getLocalDateString();
+                const logKey = 'fuelfire_logged_meals';
+                const loggedMeals = JSON.parse(localStorage.getItem(logKey) || '{}');
+                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0, protein: 0, carbs: 0, fat: 0 };
+
+                let totalProtein = 0;
+                let totalCarbs = 0;
+                let totalFat = 0;
+
+                if (Array.isArray(todayData.meals)) {
+                    todayData.meals.forEach(meal => {
+                        totalProtein += Number(meal.protein) || 0;
+                        totalCarbs += Number(meal.carbs) || 0;
+                        totalFat += Number(meal.fat) || 0;
+                    });
+                }
+
+                document.getElementById('home-calories')?.textContent = Math.round(todayData.totalCalories || 0).toLocaleString();
+                document.getElementById('home-protein')?.textContent = `${Math.round(totalProtein)}g`;
+                document.getElementById('home-carbs')?.textContent = `${Math.round(totalCarbs)}g`;
+                document.getElementById('home-fat')?.textContent = `${Math.round(totalFat)}g`;
+
+                updateDeficitSurplus(todayData.totalCalories || 0);
+            } catch (error) {
+                console.error('Unable to update home food calories:', error);
+            }
+        }
+
+        async function updateDeficitSurplus(caloriesConsumed = 0) {
+            const amountEl = document.getElementById('deficit-surplus-amount');
+            const labelEl = document.getElementById('deficit-surplus-label');
+            if (!amountEl || !labelEl) return;
+
+            let workoutCalories = 0;
+            let baseCalories = calculateBMR();
+
+            try {
+                const healthData = JSON.parse(localStorage.getItem('healthData') || '{}');
+                if (healthData && typeof healthData.bmr === 'number') {
+                    baseCalories = Math.round(healthData.bmr);
+                }
+                if (healthData && typeof healthData.activeEnergy === 'number') {
+                    workoutCalories = Math.round(healthData.activeEnergy);
+                }
+            } catch (error) {
+                console.warn('Unable to read cached health data:', error);
+            }
+
+            try {
+                const today = getLocalDateString();
+                const dailyNutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}') || {};
+                const todayEntry = dailyNutrition[today];
+                if (todayEntry) {
+                    if (typeof todayEntry.workoutCaloriesBurned === 'number') {
+                        workoutCalories = Math.max(workoutCalories, Math.round(todayEntry.workoutCaloriesBurned));
+                    }
+                    if (typeof todayEntry.baseCalories === 'number' && todayEntry.baseCalories > 0) {
+                        baseCalories = Math.round(todayEntry.baseCalories);
+                    }
+                }
+            } catch (error) {
+                console.warn('Unable to merge deficit data:', error);
+            }
+
+            const totalBurned = baseCalories + workoutCalories;
+            const balance = Math.round(caloriesConsumed - totalBurned);
+
+            amountEl.textContent = `${balance > 0 ? '+' : ''}${balance.toLocaleString()} cal`;
+            labelEl.textContent = balance > 0 ? 'Calorie Surplus' : 'Calorie Deficit';
+        }
+
     </script>
+    <div class="overlay" id="global-overlay" onclick="toggleSidebar()" ontouchstart=""></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🔥 Well Fit</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" id="menu-home" onclick="goToScreen('index.html', 'home')" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" id="menu-create-workout" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" id="menu-saved-workouts" onclick="goToScreen('index.html', 'saved-workouts')" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" id="menu-track-workouts" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" id="menu-calorie-tracker" onclick="window.location.href='calorie-tracker.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" id="menu-health-dashboard" onclick="window.location.href='health-dashboard.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" id="menu-diet-creation" onclick="window.location.href='enhanced-diet-quiz.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" id="menu-meal-plans" onclick="window.location.href='meal-plans.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" id="menu-meal-ideas" onclick="window.location.href='meal-ideas.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" id="menu-supplements" onclick="window.location.href='supplements.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" id="menu-workout-techniques" onclick="window.location.href='workout-techniques.html'" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+                    <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Workout Techniques
+            </div>
+            <div class="menu-item" id="menu-progress" onclick="goToScreen('index.html', 'progress')" ontouchstart="">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Goals &amp; Progress
+            </div>
+        </div>
+    </div>
+    <script src="app.js?v=20251104.1"></script>
     <script src="onboarding.js"></script>
 
 </body>
