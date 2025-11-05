@@ -4,51 +4,54 @@
     const steps = [
         {
             selector: '#quick-actions-bar',
-            title: 'Quick Access Hub',
-            description: 'Use these four shortcuts: launch a quick workout, jump to tracking, log your meals, or review your goals in one tap.',
+            title: 'Welcome to FuelFire',
+            description: 'Everything you need—workouts, nutrition, health stats—is one tap away on this quick-launch strip.',
+        },
+        {
+            selector: '#calorie-overview-card',
+            title: 'AI Calorie Command Center',
+            description: 'Tap here to log meals by voice, text, photo, or barcode. Anthropics AI breaks each entry into calories, macros, and updates this dashboard instantly.',
+        },
+        {
+            selector: '#quick-action-log-food',
+            title: 'Log Food with AI',
+            description: 'Need to capture a meal fast? Open the AI logger to speak it, type it, or scan it—FuelFire handles the math for you.',
         },
         {
             selector: '#quick-action-quick-workout',
             title: 'Instant Quick Workout',
-            description: 'Need a fresh session fast? Tap here to open the AI quick workout quiz and get a brand-new routine.',
+            description: 'Generate a brand-new routine in seconds. Perfect for hotel gyms, home setups, or when you just need to move now.',
         },
         {
             selector: '#menu-create-workout',
-            title: 'Personalized Programs',
-            description: 'Inside the menu, “Create Workout” launches the custom builder and AI planner for long-term programming.',
+            title: 'Build Custom Programs',
+            description: 'Inside “Create Workout” you can craft multi-week plans, add form notes, and save them for future sessions.',
             onBefore: () => setSidebarOpen(true),
             onAfter: () => setSidebarOpen(false)
         },
         {
-            selector: '#voice-log-option',
-            title: 'AI Voice Food Logging',
-            description: 'Choose “Voice Log” to speak your meals—Claude breaks everything into accurate macros automatically.',
-            onBefore: () => {
-                if (typeof window.showLogFoodMenu === 'function') {
-                    window.showLogFoodMenu();
-                }
-            },
-            onAfter: () => {
-                if (typeof window.closeLogFoodMenu === 'function') {
-                    window.closeLogFoodMenu();
-                }
-            }
+            selector: '#menu-diet-creation',
+            title: 'Personalized Meal Plans',
+            description: 'Take the Enhanced Diet Quiz and get a 14-day plan with macros, recipes, and shopping lists tuned to your goals.',
+            onBefore: () => setSidebarOpen(true),
+            onAfter: () => setSidebarOpen(false)
         },
         {
-            selector: '#menu-diet-creation',
-            title: 'Customized Meal Plans',
-            description: 'Take the Enhanced Diet Quiz to generate 14-day plans with macros, recipes, and shopping lists.',
-            onBefore: () => setSidebarOpen(true)
+            selector: '#health-dashboard-card',
+            title: 'Apple Health Dashboard',
+            description: 'Sync with Apple Health to see live steps, distance, heart rate trends, and active calories all in one place.',
         },
         {
             selector: '#menu-workout-techniques',
             title: 'Form & Technique Library',
-            description: 'Every exercise has step-by-step cues, gifs, and coaching notes. Check here anytime you need guidance.',
+            description: 'Need coaching cues or demos? Every exercise has form notes, muscle focus, and safety tips right here.',
+            onBefore: () => setSidebarOpen(true),
+            onAfter: () => setSidebarOpen(false)
         },
         {
             selector: '.hamburger',
-            title: 'Quick Menu',
-            description: 'Open the FuelFire menu from anywhere to jump between workouts, nutrition, and tracking tools.',
+            title: 'Navigate Anytime',
+            description: 'Use the FuelFire menu to jump between workouts, meal plans, supplements, and health tools from any page.',
             onBefore: () => setSidebarOpen(false)
         }
     ];
