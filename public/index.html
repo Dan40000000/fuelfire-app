@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>FuelFire - Fitness & Nutrition Tracker v2.0</title>
     <link rel="stylesheet" href="styles.css?v=24.0">
-    <script src="daily-quotes.js"></script>
+    <script src="daily-quotes.js?v=20251104.5"></script>
     <script src="health-sync.js"></script>
     <script src="global-nav.js"></script>
     <script src="quick-food-entry.js"></script>
@@ -53,6 +53,11 @@
                         <button onclick="closeQuoteBanner(event)" style="position: absolute; top: 15px; right: 15px; background: var(--light-bg); border: 2px solid var(--carolina-blue); color: var(--carolina-blue); width: 35px; height: 35px; border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">✕</button>
                         <div style="font-size: 20px; font-weight: 600; font-style: italic; line-height: 1.7; text-align: center; padding: 0 30px 0 10px; color: var(--dark);" id="daily-quote">Loading quote...</div>
                         <div style="font-size: 15px; text-align: center; margin-top: 15px; color: var(--primary-dark); font-weight: bold;" id="quote-author">- Author</div>
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button id="quote-shuffle" style="background: linear-gradient(135deg, #4B9CD3, #13294B); color: white; border: none; padding: 10px 22px; border-radius: 999px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; transition: transform 0.2s;">
+                                ↻ New Quote
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Today's Overview -->
@@ -156,7 +161,7 @@
                             <div class="action-title">Quick Workout</div>
                             <div class="action-desc">Start your workout now</div>
                         </div>
-                        <div class="action-card" onclick="showScreen('track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="action-card" id="quick-action-track-progress" onclick="showScreen('track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="action-icon">
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3 20L9 14L13 18L21 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -166,7 +171,7 @@
                             <div class="action-title">Track Progress</div>
                             <div class="action-desc">Log today's session</div>
                         </div>
-                        <div class="action-card" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="action-card" id="quick-action-log-food" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="action-icon">
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -176,7 +181,7 @@
                             <div class="action-title">Log Nutrition</div>
                             <div class="action-desc">Track your meals</div>
                         </div>
-                        <div class="action-card" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                        <div class="action-card" id="quick-action-progress" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                             <div class="action-icon">
                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -732,104 +737,185 @@
                     <!-- Workout Tracker Content (populated dynamically when viewing a workout) -->
                     <div id="workout-tracker-content"></div>
 
-                    <!-- Header Stats -->
-                    <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 25px;">
-                        <h3 style="font-size: 20px; margin-bottom: 15px; text-align: center;">🔥 Fitness Dashboard</h3>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
-                            <div>
-                                <div style="font-size: 24px; font-weight: bold;" id="workout-streak">0</div>
-                                <div style="font-size: 12px; opacity: 0.9;">Day Streak</div>
+                    <div id="track-dashboard" class="track-dashboard">
+                        <section class="track-hero-card">
+                            <div class="track-hero-header">
+                                <span class="track-hero-pill">Well Fit Workout Hub</span>
+                                <h3>Own today's session</h3>
+                                <p>Stay on streak, log machine workouts instantly, and keep every calorie accounted for.</p>
                             </div>
-                            <div>
-                                <div style="font-size: 24px; font-weight: bold;" id="week-workouts">0/5</div>
-                                <div style="font-size: 12px; opacity: 0.9;">Week Goal</div>
+                            <div class="track-hero-highlight">
+                                <div class="track-hero-tile">
+                                    <span class="track-hero-caption">Last workout</span>
+                                    <span class="track-hero-value" id="track-last-workout-label">No workouts logged yet</span>
+                                    <span class="track-hero-subvalue" id="track-last-workout-time">Start logging to begin your streak.</span>
+                                </div>
+                                <div class="track-hero-tile">
+                                    <span class="track-hero-caption">Lifetime burn</span>
+                                    <span class="track-hero-value" id="track-hero-total-calories">0 cal</span>
+                                    <span class="track-hero-subvalue">All workouts you’ve recorded</span>
+                                </div>
+                                <div class="track-hero-tile">
+                                    <span class="track-hero-caption">Best day</span>
+                                    <span class="track-hero-value" id="track-best-day-value">0 cal</span>
+                                    <span class="track-hero-subvalue" id="track-best-day-label">Keep the streak alive</span>
+                                </div>
                             </div>
-                            <div>
-                                <div style="font-size: 24px; font-weight: bold;" id="total-workouts">0</div>
-                                <div style="font-size: 12px; opacity: 0.9;">All Time</div>
+                        </section>
+
+                        <section class="track-actions">
+                            <button class="track-action-btn track-action-primary" onclick="openWorkoutLogMenu()">
+                                <span class="track-action-icon">⚡</span>
+                                <span class="track-action-title">Quick Log</span>
+                                <span class="track-action-sub">Manual entry with machine metrics</span>
+                            </button>
+                            <button class="track-action-btn track-action-secondary" onclick="openTreadmillScanModal()">
+                                <span class="track-action-icon">📸</span>
+                                <span class="track-action-title">Scan Machine</span>
+                                <span class="track-action-sub">AI reads treadmills, bikes & stairs</span>
+                            </button>
+                            <button class="track-action-btn track-action-outline" onclick="importWatchWorkouts()">
+                                <span class="track-action-icon">⌚</span>
+                                <span class="track-action-title">Import Watch</span>
+                                <span class="track-action-sub">Pull today’s Apple Health sessions</span>
+                            </button>
+                        </section>
+
+                        <div id="track-sync-status" class="track-sync-status" style="display: none;"></div>
+
+                        <section class="track-celebration" id="track-streak-celebration" style="display: none;"></section>
+
+                        <section class="track-stat-grid">
+                            <div class="track-stat-card">
+                                <span class="track-stat-label">Current streak</span>
+                                <span class="track-stat-value" id="track-stat-streak">0</span>
+                                <span class="track-stat-meta" id="track-stat-streak-sub">days in a row</span>
                             </div>
-                        </div>
-                        
-                        <button onclick="openWorkoutLogMenu()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 12px 25px; border-radius: 20px; margin-top: 15px; font-weight: bold; cursor: pointer; width: 100%;">
-                            🏋️ Log a Workout
-                        </button>
-                    </div>
-                    
-                    <!-- Calendar View -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h4 style="color: var(--dark); margin: 0;">📅 Workout Calendar</h4>
-                            <div style="display: flex; gap: 10px;">
-                                <button onclick="changeCalendarMonth(-1)" style="background: var(--lighter-bg); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">◀</button>
-                                <span id="calendar-month" style="font-weight: bold; color: var(--dark); min-width: 120px; text-align: center; line-height: 32px;"></span>
-                                <button onclick="changeCalendarMonth(1)" style="background: var(--lighter-bg); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">▶</button>
+                            <div class="track-stat-card">
+                                <span class="track-stat-label">Longest streak</span>
+                                <span class="track-stat-value" id="track-stat-longest">0</span>
+                                <span class="track-stat-meta" id="track-stat-longest-sub">personal best</span>
                             </div>
-                        </div>
-                        <div id="workout-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-size: 12px;">
-                            <!-- Calendar will be generated here -->
-                        </div>
-                        <div style="display: flex; gap: 15px; margin-top: 15px; font-size: 12px; justify-content: center;">
-                            <div><span style="display: inline-block; width: 12px; height: 12px; background: #4CAF50; border-radius: 3px; margin-right: 5px;"></span>Workout Day</div>
-                            <div><span style="display: inline-block; width: 12px; height: 12px; background: #FF5722; border-radius: 3px; margin-right: 5px;"></span>Missed Goal</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Charts -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">📈 Weekly Progress</h4>
-                        <div id="weekly-chart" style="height: 120px; display: flex; align-items: end; gap: 8px; padding: 10px 0;">
-                            <!-- Chart bars will be generated here -->
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-top: 5px;">
-                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Personal Records -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">🏆 Recent Achievements</h4>
-                        <div id="recent-prs">
-                            <!-- Personal records will be shown here -->
-                        </div>
-                        <button onclick="addPersonalRecord()" style="background: var(--lighter-bg); color: var(--dark); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%;">
-                            ➕ Log New Personal Record
-                        </button>
-                    </div>
-                    
-                    <!-- Recent Activity -->
-                    <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
-                        <h4 style="color: var(--dark); margin-bottom: 15px;">🕒 Recent Activity</h4>
-                        <div id="recent-workouts-dashboard">
-                            <!-- Recent workouts will be shown here -->
-                        </div>
+                            <div class="track-stat-card">
+                                <span class="track-stat-label">This week</span>
+                                <span class="track-stat-value" id="track-stat-week">0</span>
+                                <span class="track-stat-meta" id="track-stat-week-sub">sessions logged</span>
+                            </div>
+                            <div class="track-stat-card">
+                                <span class="track-stat-label">This week burn</span>
+                                <span class="track-stat-value" id="track-stat-week-calories">0</span>
+                                <span class="track-stat-meta" id="track-stat-week-calories-sub">active calories</span>
+                            </div>
+                            <div class="track-stat-card">
+                                <span class="track-stat-label">Lifetime workouts</span>
+                                <span class="track-stat-value" id="track-stat-total-workouts">0</span>
+                                <span class="track-stat-meta" id="track-stat-total-workouts-sub">logged sessions</span>
+                            </div>
+                            <div class="track-stat-card">
+                                <span class="track-stat-label">Lifetime time</span>
+                                <span class="track-stat-value" id="track-stat-total-minutes">0</span>
+                                <span class="track-stat-meta" id="track-stat-total-minutes-sub">minutes of work</span>
+                            </div>
+                        </section>
+
+                        <section class="track-chart-card">
+                            <div class="track-chart-header">
+                                <div>
+                                    <h4>Calories burned</h4>
+                                    <p id="track-calorie-summary">Log a workout to unlock analytics.</p>
+                                </div>
+                                <div class="track-chart-controls">
+                                    <button id="track-month-newer" class="track-chart-nav" onclick="changeTrackAnalyticsMonth(-1)" disabled>‹ Newer</button>
+                                    <span id="track-month-label" class="track-chart-label">Current month</span>
+                                    <button id="track-month-older" class="track-chart-nav" onclick="changeTrackAnalyticsMonth(1)" disabled>Older ›</button>
+                                </div>
+                            </div>
+                            <div id="track-calorie-bars" class="track-calorie-bars"></div>
+                            <div id="track-calorie-empty" class="track-empty-state">
+                                <div>🔥 Every logged workout powers this graph. Start logging to chart your burn.</div>
+                            </div>
+                        </section>
+
+                        <section class="track-card track-timeline-card">
+                            <div class="track-card-header">
+                                <h4>Recent sessions</h4>
+                                <button class="track-card-link" onclick="showScreen('saved-workouts')">Saved plans →</button>
+                            </div>
+                            <div id="track-workout-timeline" class="track-timeline-list"></div>
+                        </section>
+
+                        <section class="track-card track-machine-card">
+                            <div class="track-card-header">
+                                <h4>Cardio machine snapshot</h4>
+                                <span class="track-card-sub">Distance, calories, and streaks by machine</span>
+                            </div>
+                            <div id="track-machine-breakdown" class="track-machine-grid"></div>
+                        </section>
+
+                        <section class="track-card track-pr-card">
+                            <div class="track-card-header">
+                                <h4>Recent PRs</h4>
+                                <button class="track-card-link" onclick="addPersonalRecord()">Add PR</button>
+                            </div>
+                            <div id="recent-prs"></div>
+                        </section>
                     </div>
                     
                     <!-- Quick Log Modal -->
-                    <div id="quick-log-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
-                        <div style="background: white; border-radius: 20px; padding: 25px; max-width: 400px; width: 90%;">
-                            <h3 style="color: var(--dark); margin: 0 0 20px 0;">🏋️ Quick Log Workout</h3>
+                    <div id="quick-log-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+                        <div style="background: white; border-radius: 20px; padding: 28px; max-width: 420px; width: 92vw; box-shadow: 0 10px 40px rgba(75,156,211,0.15); border: 1px solid rgba(75,156,211,0.1);">
+                            <h3 style="color: var(--dark); margin: 0 0 22px 0; font-size: 20px; font-weight: 700;">🏋️ Quick Log Workout</h3>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                                <select id="quick-workout-type" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                                <select id="quick-workout-type" style="padding: 12px; border: 1px solid rgba(75,156,211,0.2); border-radius: 12px; font-size: 14px; background: white; color: var(--dark);">
                                     <option value="">Workout Type</option>
                                     <option value="chest">🏋️ Chest</option>
                                     <option value="back">🔙 Back</option>
                                     <option value="legs">🦵 Legs</option>
                                     <option value="shoulders">💪 Shoulders</option>
                                     <option value="arms">💪 Arms</option>
+                                    <option value="core">🧘 Core</option>
                                     <option value="cardio">🏃 Cardio</option>
+                                    <option value="treadmill">🏃‍♂️ Treadmill</option>
+                                    <option value="stationary bike">🚴 Stationary Bike</option>
+                                    <option value="elliptical">🚶 Elliptical</option>
+                                    <option value="stairmaster">🪜 StairMaster</option>
+                                    <option value="hiit">⚡ HIIT</option>
+                                    <option value="yoga">🧘 Yoga</option>
+                                    <option value="stretching">🤸 Stretching</option>
+                                    <option value="sports">🏈 Sports</option>
+                                    <option value="other">✨ Other</option>
                                 </select>
-                                <input type="number" id="quick-duration" placeholder="Duration (min)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
+                                <input type="number" id="quick-duration" placeholder="Duration (min)" min="1" max="300" style="padding: 12px; border: 1px solid rgba(75,156,211,0.2); border-radius: 12px; font-size: 14px;">
                             </div>
-                            
-                            <textarea id="quick-notes" placeholder="Quick notes or key exercises..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; height: 80px; margin-bottom: 20px; resize: vertical;"></textarea>
-                            
-                            <div style="display: flex; gap: 10px;">
-                                <button onclick="saveQuickWorkout()" ontouchstart="" style="background: var(--gradient-1); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; flex: 1; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+
+                            <div id="home-machine-field-group" style="margin-bottom: 18px; display: none; background: rgba(75,156,211,0.04); border: 1px dashed rgba(75,156,211,0.2); border-radius: 14px; padding: 16px;">
+                                <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--primary-dark); margin-bottom: 12px;">
+                                    Optional Machine Metrics
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 12px;">
+                                    <div id="home-distance-wrapper" style="display: none;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: var(--dark); font-size: 13px;">Distance (miles)</label>
+                                        <input type="number" id="quick-distance" placeholder="e.g. 2.5" min="0" max="200" step="0.1" style="width: 100%; padding: 11px; border: 1px solid rgba(75,156,211,0.2); border-radius: 10px; font-size: 14px;">
+                                    </div>
+                                    <div id="home-floors-wrapper" style="display: none;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: var(--dark); font-size: 13px;">Floors / Steps</label>
+                                        <input type="number" id="quick-floors" placeholder="e.g. 120" min="0" max="5000" step="1" style="width: 100%; padding: 11px; border: 1px solid rgba(75,156,211,0.2); border-radius: 10px; font-size: 14px;">
+                                    </div>
+                                    <div id="home-resistance-wrapper" style="display: none;">
+                                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: var(--dark); font-size: 13px;">Resistance / Level</label>
+                                        <input type="text" id="quick-resistance" placeholder="e.g. Level 8" style="width: 100%; padding: 11px; border: 1px solid rgba(75,156,211,0.2); border-radius: 10px; font-size: 14px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <textarea id="quick-notes" placeholder="Quick notes or key exercises..." style="width: 100%; padding: 12px; border: 1px solid rgba(75,156,211,0.2); border-radius: 12px; height: 80px; margin-bottom: 20px; resize: vertical; font-size: 14px; font-family: inherit;"></textarea>
+
+                            <div style="display: flex; gap: 12px;">
+                                <button onclick="saveQuickWorkout()" ontouchstart="" style="background: var(--gradient-1); color: white; border: none; padding: 14px 26px; border-radius: 14px; font-weight: 700; cursor: pointer; flex: 1; font-size: 15px; box-shadow: 0 2px 8px rgba(75,156,211,0.2); -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                                     💾 Save Workout
                                 </button>
-                                <button onclick="closeQuickLog()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: bold; cursor: pointer;">
+                                <button onclick="closeQuickLog()" style="background: rgba(107,114,128,0.12); color: var(--dark); border: 1px solid rgba(107,114,128,0.2); padding: 14px 22px; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 15px;">
                                     Cancel
                                 </button>
                             </div>
@@ -837,30 +923,30 @@
                     </div>
 
                     <!-- Workout Log Menu -->
-                    <div id="workout-log-menu" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10050; align-items: center; justify-content: center; padding: 20px;">
-                        <div style="background: #0B1626; border-radius: 24px; padding: 30px; width: min(460px, 95vw); box-shadow: 0 20px 60px rgba(0,0,0,0.45); position: relative;">
-                            <button onclick="closeWorkoutLogMenu()" style="position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.08); border: none; color: white; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer;">✕</button>
-                            <div style="text-align: center; margin-bottom: 24px;">
-                                <div style="font-size: 42px;">🚀</div>
-                                <h3 style="color: white; margin: 8px 0;">Log a Workout</h3>
-                                <p style="color: rgba(255,255,255,0.75); margin: 0;">Pick how you want to log today's grind.</p>
+                    <div id="workout-log-menu" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 10050; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 22px; padding: 30px; width: min(460px, 95vw); box-shadow: 0 10px 40px rgba(75,156,211,0.15); border: 1px solid rgba(75,156,211,0.1); position: relative;">
+                            <button onclick="closeWorkoutLogMenu()" style="position: absolute; top: 18px; right: 18px; background: rgba(75,156,211,0.08); border: 1px solid rgba(75,156,211,0.12); color: var(--primary-dark); border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; font-weight: 600;">✕</button>
+                            <div style="text-align: center; margin-bottom: 26px;">
+                                <div style="font-size: 44px;">🚀</div>
+                                <h3 style="color: var(--dark); margin: 10px 0 8px; font-size: 22px; font-weight: 700;">Log a Workout</h3>
+                                <p style="color: var(--primary-dark); margin: 0; font-size: 14px;">Pick how you want to log today's grind.</p>
                             </div>
-                            <div style="display: grid; gap: 16px;">
-                                <div onclick="openManualWorkoutLog()" style="background: linear-gradient(135deg, rgba(75,156,211,0.22), rgba(19,41,75,0.6)); border: 1px solid rgba(75,156,211,0.35); border-radius: 18px; padding: 20px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                            <div style="display: grid; gap: 14px;">
+                                <div onclick="openManualWorkoutLog()" style="background: linear-gradient(135deg, rgba(75,156,211,0.08), rgba(93,173,226,0.12)); border: 1px solid rgba(75,156,211,0.2); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s ease;">
                                     <div style="display:flex; align-items:center; gap:16px;">
-                                        <div style="font-size: 36px; background: rgba(255,255,255,0.08); border-radius: 14px; width:64px; height:64px; display:flex; align-items:center; justify-content:center;">✍️</div>
+                                        <div style="font-size: 36px; background: rgba(75,156,211,0.12); border-radius: 14px; width:60px; height:60px; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">✍️</div>
                                         <div>
-                                            <h4 style="margin:0; color:white;">Manual Quick Log</h4>
-                                            <p style="margin:4px 0 0; color: rgba(255,255,255,0.7); font-size: 14px;">Type in duration, notes, and calories in under 10 seconds.</p>
+                                            <h4 style="margin:0; color: var(--dark); font-size: 16px; font-weight: 700;">Manual Quick Log</h4>
+                                            <p style="margin:5px 0 0; color: var(--primary-dark); font-size: 13px;">Type in duration, notes, and calories in under 10 seconds.</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div onclick="openTreadmillScanModal()" style="background: linear-gradient(135deg, rgba(255,128,77,0.24), rgba(255,88,70,0.55)); border: 1px solid rgba(255,128,77,0.4); border-radius: 18px; padding: 20px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                                <div onclick="openTreadmillScanModal()" style="background: linear-gradient(135deg, rgba(255,140,90,0.08), rgba(255,179,71,0.12)); border: 1px solid rgba(255,140,90,0.2); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s ease;">
                                     <div style="display:flex; align-items:center; gap:16px;">
-                                        <div style="font-size: 36px; background: rgba(255,255,255,0.12); border-radius: 14px; width:64px; height:64px; display:flex; align-items:center; justify-content:center;">📸</div>
+                                        <div style="font-size: 36px; background: rgba(255,140,90,0.12); border-radius: 14px; width:60px; height:60px; display:flex; align-items:center; justify-content:center; flex-shrink: 0;">📸</div>
                                         <div>
-                                            <h4 style="margin:0; color:white;">Snap The Treadmill</h4>
-                                            <p style="margin:4px 0 0; color: rgba(255,255,255,0.7); font-size: 14px;">Take a photo of the console—AI fills in pace, distance, time, and calories.</p>
+                                            <h4 style="margin:0; color: var(--dark); font-size: 16px; font-weight: 700;">Snap The Treadmill</h4>
+                                            <p style="margin:5px 0 0; color: var(--primary-dark); font-size: 13px;">Take a photo of the console—AI fills in pace, distance, time, and calories.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -869,59 +955,59 @@
                     </div>
 
                     <!-- Treadmill Scan Modal -->
-                    <div id="treadmill-scan-modal" style="display: none; position: fixed; inset: 0; background: rgba(5,12,24,0.88); z-index: 10060; align-items: center; justify-content: center; padding: 20px;">
-                        <div style="background: #0f1b33; border-radius: 26px; padding: 28px; width: min(520px, 96vw); max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 70px rgba(0,0,0,0.55); position: relative;">
-                            <button onclick="closeTreadmillScanModal()" style="position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.08); border: none; color: white; border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer;">✕</button>
-                            <div style="text-align: center; margin-bottom: 22px;">
-                                <div style="font-size: 46px;">🤖</div>
-                                <h3 style="color: white; margin: 6px 0;">AI Treadmill Logger</h3>
-                                <p style="color: rgba(255,255,255,0.72); margin: 0;">Snap the console right after your run—we'll capture pace, distance, calories, and time automatically.</p>
+                    <div id="treadmill-scan-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 10060; align-items: center; justify-content: center; padding: 20px;">
+                        <div style="background: white; border-radius: 22px; padding: 28px; width: min(520px, 96vw); max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(75,156,211,0.15); border: 1px solid rgba(75,156,211,0.1); position: relative;">
+                            <button onclick="closeTreadmillScanModal()" style="position: absolute; top: 18px; right: 18px; background: rgba(75,156,211,0.08); border: 1px solid rgba(75,156,211,0.12); color: var(--primary-dark); border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer; font-weight: 600;">✕</button>
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <div style="font-size: 48px;">🤖</div>
+                                <h3 style="color: var(--dark); margin: 8px 0; font-size: 22px; font-weight: 700;">AI Treadmill Logger</h3>
+                                <p style="color: var(--primary-dark); margin: 0; font-size: 14px; line-height: 1.5;">Snap the console right after your run—we'll capture pace, distance, calories, and time automatically.</p>
                             </div>
-                            <div id="treadmill-dropzone" style="position: relative; background: rgba(14,29,56,0.9); border: 2px dashed rgba(75,156,211,0.45); border-radius: 18px; padding: 26px; text-align: center; cursor: pointer; margin-bottom: 24px; transition: border-color 0.2s ease, background 0.2s ease;" onclick="triggerTreadmillFileInput(event)">
+                            <div id="treadmill-dropzone" style="position: relative; background: rgba(75,156,211,0.04); border: 2px dashed rgba(75,156,211,0.25); border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; margin-bottom: 24px; transition: border-color 0.2s ease, background 0.2s ease;" onclick="triggerTreadmillFileInput(event)">
                                 <input type="file" id="treadmill-photo-input" accept="image/*" capture="environment" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" onchange="handleTreadmillPhotoChange(event)">
-                                <div id="treadmill-photo-placeholder" style="color: rgba(255,255,255,0.7);">
-                                    <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
-                                    <div style="font-weight: 600; font-size: 16px;">Tap to open camera</div>
-                                    <div style="font-size: 13px; margin-top: 6px;">Get the full console in frame for best results.</div>
+                                <div id="treadmill-photo-placeholder" style="color: var(--primary-dark);">
+                                    <div style="font-size: 44px; margin-bottom: 12px;">📷</div>
+                                    <div style="font-weight: 700; font-size: 16px; color: var(--dark); margin-bottom: 6px;">Tap to open camera</div>
+                                    <div style="font-size: 13px;">Get the full console in frame for best results.</div>
                                 </div>
                                 <div id="treadmill-photo-preview" style="display:none;">
                                     <img id="treadmill-preview-image" src="" alt="Treadmill preview" style="max-width: 100%; border-radius: 14px;">
                                 </div>
                             </div>
-                            <div id="treadmill-analysis-status" style="display:none; background: rgba(19,41,75,0.65); border-radius: 14px; padding: 14px 16px; color: rgba(255,255,255,0.85); font-size: 14px; margin-bottom: 20px;"></div>
-                            <div style="display: grid; gap: 14px; margin-bottom: 20px;">
+                            <div id="treadmill-analysis-status" style="display:none; background: rgba(75,156,211,0.08); border: 1px solid rgba(75,156,211,0.15); border-radius: 12px; padding: 14px 16px; color: var(--primary-dark); font-size: 14px; margin-bottom: 20px;"></div>
+                            <div style="display: grid; gap: 14px; margin-bottom: 22px;">
                                 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
                                     <div>
-                                        <label for="treadmill-duration" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Duration (minutes)</label>
-                                        <input id="treadmill-duration" type="number" min="0" placeholder="0" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                        <label for="treadmill-duration" style="display:block; color: var(--dark); margin-bottom: 7px; font-size: 13px; font-weight: 600;">Duration (minutes)</label>
+                                        <input id="treadmill-duration" type="number" min="0" placeholder="0" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(75,156,211,0.2); background: white; color: var(--dark); font-size: 14px;">
                                     </div>
                                     <div>
-                                        <label for="treadmill-distance" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Distance (miles)</label>
-                                        <input id="treadmill-distance" type="number" min="0" step="0.01" placeholder="0.00" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                        <label for="treadmill-distance" style="display:block; color: var(--dark); margin-bottom: 7px; font-size: 13px; font-weight: 600;">Distance (miles)</label>
+                                        <input id="treadmill-distance" type="number" min="0" step="0.01" placeholder="0.00" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(75,156,211,0.2); background: white; color: var(--dark); font-size: 14px;">
                                     </div>
                                 </div>
                                 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
                                     <div>
-                                        <label for="treadmill-calories" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Calories Burned</label>
-                                        <input id="treadmill-calories" type="number" min="0" placeholder="0" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                        <label for="treadmill-calories" style="display:block; color: var(--dark); margin-bottom: 7px; font-size: 13px; font-weight: 600;">Calories Burned</label>
+                                        <input id="treadmill-calories" type="number" min="0" placeholder="0" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(75,156,211,0.2); background: white; color: var(--dark); font-size: 14px;">
                                     </div>
                                     <div>
-                                        <label for="treadmill-pace" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Average Pace (min/mi)</label>
-                                        <input id="treadmill-pace" type="text" placeholder="00:00" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                        <label for="treadmill-pace" style="display:block; color: var(--dark); margin-bottom: 7px; font-size: 13px; font-weight: 600;">Average Pace (min/mi)</label>
+                                        <input id="treadmill-pace" type="text" placeholder="00:00" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(75,156,211,0.2); background: white; color: var(--dark); font-size: 14px;">
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="treadmill-incline" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Incline (%)</label>
-                                    <input id="treadmill-incline" type="number" step="0.5" placeholder="Optional" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white;">
+                                    <label for="treadmill-incline" style="display:block; color: var(--dark); margin-bottom: 7px; font-size: 13px; font-weight: 600;">Incline (%)</label>
+                                    <input id="treadmill-incline" type="number" step="0.5" placeholder="Optional" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(75,156,211,0.2); background: white; color: var(--dark); font-size: 14px;">
                                 </div>
                                 <div>
-                                    <label for="treadmill-notes" style="display:block; color: rgba(255,255,255,0.75); margin-bottom: 6px; font-size: 13px;">Notes</label>
-                                    <textarea id="treadmill-notes" placeholder="How did the run feel?" style="width: 100%; min-height: 80px; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(9,17,31,0.95); color: white; resize: vertical;"></textarea>
+                                    <label for="treadmill-notes" style="display:block; color: var(--dark); margin-bottom: 7px; font-size: 13px; font-weight: 600;">Notes</label>
+                                    <textarea id="treadmill-notes" placeholder="How did the run feel?" style="width: 100%; min-height: 80px; padding: 12px; border-radius: 12px; border: 1px solid rgba(75,156,211,0.2); background: white; color: var(--dark); resize: vertical; font-size: 14px; font-family: inherit;"></textarea>
                                 </div>
                             </div>
                             <div style="display:flex; gap: 12px;">
-                                <button id="treadmill-analyze-btn" onclick="analyzeTreadmillPhoto()" style="flex:1; background: linear-gradient(135deg, #4B9CD3, #13294B); color: white; border: none; padding: 14px 18px; border-radius: 16px; font-weight: 700; cursor: pointer;">⚡ Analyze Photo</button>
-                                <button onclick="saveTreadmillWorkout()" style="flex:1; background: linear-gradient(135deg, #00C853, #009688); color: white; border: none; padding: 14px 18px; border-radius: 16px; font-weight: 700; cursor: pointer;">✅ Save Workout</button>
+                                <button id="treadmill-analyze-btn" onclick="analyzeTreadmillPhoto()" style="flex:1; background: var(--gradient-1); color: white; border: none; padding: 15px 20px; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 2px 8px rgba(75,156,211,0.2);">⚡ Analyze Photo</button>
+                                <button onclick="saveTreadmillWorkout()" style="flex:1; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 15px 20px; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 2px 8px rgba(16,185,129,0.2);">✅ Save Workout</button>
                             </div>
                         </div>
                     </div>
@@ -1878,7 +1964,7 @@
 
     <!-- Manual Workout Builder -->
     <div class="screen-content" id="manual-workout-builder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 1000; overflow-y: auto;">
-        <div style="max-width: 375px; margin: 0 auto; padding: 60px 20px 100px 20px;">
+        <div style="max-width: 375px; margin: 0 auto; padding: 60px 20px 140px 20px;">
 
             <!-- Step 1: Setup Screen -->
             <div id="workout-setup-screen" style="display: block;">
@@ -1974,18 +2060,38 @@
         </div>
 
         <!-- Bottom Navigation (only shown when building) -->
-        <div id="builder-bottom-nav" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; padding: 12px 20px; z-index: 1001;">
-            <div style="max-width: 375px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center;">
-                <button onclick="showScreen('home')" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <div id="builder-bottom-nav" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; padding: 12px 16px 18px; z-index: 1001;">
+            <div style="max-width: 420px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 8px; border-bottom: 1px dashed rgba(19,41,75,0.15);">
+                <button onclick="window.location.href='workout-quiz.html'" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 20px;">⚡</span>
+                    <span style="font-weight: 600;">Quick</span>
+                </button>
+                <button onclick="window.location.href='calorie-tracker.html'" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 20px;">🍽️</span>
+                    <span style="font-weight: 600;">Log Food</span>
+                </button>
+                <button onclick="window.location.href='health-dashboard.html'" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 20px;">📊</span>
+                    <span style="font-weight: 600;">Health</span>
+                </button>
+                <button onclick="window.location.href='workout-techniques.html'" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 20px;">🎥</span>
+                    <span style="font-weight: 600;">Form</span>
+                </button>
+                <button onclick="showScreen('home')" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
                     <span style="font-size: 20px;">🏠</span>
-                    <span>Home</span>
+                    <span style="font-weight: 600;">Home</span>
                 </button>
-                <button onclick="showWorkoutSummary()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                    <span style="font-size: 20px;">📋</span>
-                    <span>Summary</span>
+            </div>
+            <div style="max-width: 420px; margin: 8px auto 0; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                <button onclick="showWorkoutSummary()" style="flex: 1; background: rgba(75,156,211,0.12); border: 1px solid rgba(75,156,211,0.35); color: var(--primary-dark); padding: 10px 16px; border-radius: 15px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                    📋 View Summary
                 </button>
-                <button onclick="saveManualWorkout()" style="background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold;">
-                    💾 Save
+                <button onclick="saveManualWorkout()" style="flex: 1; background: var(--gradient-1); color: white; border: none; padding: 10px 20px; border-radius: 15px; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 6px 20px rgba(75,156,211,0.25);">
+                    💾 Save Plan
+                </button>
+                <button onclick="closeManualWorkoutBuilder()" style="flex: 1; background: rgba(231,76,60,0.12); border: 1px solid rgba(231,76,60,0.35); color: #c0392b; padding: 10px 16px; border-radius: 15px; font-weight: 600; font-size: 13px; cursor: pointer;">
+                    ✖ Exit
                 </button>
             </div>
         </div>
@@ -2774,7 +2880,9 @@
             if (!baseCaloriesEl) return;
 
             const baseCalories = getBaseCaloriesEstimate({});
-            baseCaloriesEl.textContent = Math.round(baseCalories || 0).toLocaleString();
+            const fallback = Math.round(baseCalories || 0);
+            const finalValue = Number.isFinite(fallback) && fallback > 0 ? fallback : 2000;
+            baseCaloriesEl.textContent = finalValue.toLocaleString();
         }
 
         function getStoredUserProfile() {
@@ -3516,18 +3624,42 @@
                     <option value="Shoulders">💪 Shoulders</option>
                     <option value="Arms">💪 Arms</option>
                     <option value="Core">🧘 Core</option>
-                    <option value="Cardio">🏃 Cardio</option>
+                    <option value="Cardio">🏃 Cardio (General)</option>
+                    <option value="Treadmill">🏃‍♂️ Treadmill</option>
+                    <option value="Stationary Bike">🚴 Stationary Bike</option>
+                    <option value="Elliptical">🚶 Elliptical</option>
+                    <option value="StairMaster">🪜 StairMaster</option>
                     <option value="HIIT">⚡ HIIT</option>
                     <option value="Yoga">🧘 Yoga</option>
                     <option value="Stretching">🤸 Stretching</option>
                     <option value="Sports">⚽ Sports</option>
-                    <option value="Other">🏃 Other</option>
+                    <option value="Other">✨ Other</option>
                 </select>
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #333;">Duration (minutes)</label>
                 <input type="number" id="quick-workout-duration-main" placeholder="45" min="1" max="300" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; box-sizing: border-box;">
+            </div>
+
+            <div id="quick-machine-field-group" style="margin-bottom: 20px; display: none; background: #f8fafc; border: 1px dashed #d0d7de; border-radius: 12px; padding: 16px;">
+                <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #4b5563; margin-bottom: 12px;">
+                    Optional Machine Metrics
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                    <div id="quick-distance-wrapper" style="display: none;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #374151;">Distance (miles)</label>
+                        <input type="number" id="quick-workout-distance-main" placeholder="e.g. 2.5" min="0" max="200" step="0.1" style="width: 100%; padding: 10px; border: 1px solid #dbe1ea; border-radius: 10px; font-size: 15px; box-sizing: border-box;">
+                    </div>
+                    <div id="quick-floors-wrapper" style="display: none;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #374151;">Floors / Steps</label>
+                        <input type="number" id="quick-workout-floors-main" placeholder="e.g. 120" min="0" max="5000" step="1" style="width: 100%; padding: 10px; border: 1px solid #dbe1ea; border-radius: 10px; font-size: 15px; box-sizing: border-box;">
+                    </div>
+                    <div id="quick-resistance-wrapper" style="display: none;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #374151;">Resistance / Level</label>
+                        <input type="text" id="quick-workout-resistance-main" placeholder="e.g. Level 8" style="width: 100%; padding: 10px; border: 1px solid #dbe1ea; border-radius: 10px; font-size: 15px; box-sizing: border-box;">
+                    </div>
+                </div>
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -3636,7 +3768,17 @@
             if (event && event.target === input) {
                 return;
             }
-            input.click();
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+            const openPicker = () => {
+                if (typeof input.showPicker === 'function') {
+                    input.showPicker().catch(() => input.click());
+                } else {
+                    input.click();
+                }
+            };
+            requestAnimationFrame(openPicker);
         }
 
         function handleTreadmillPhotoChange(event) {
@@ -3858,36 +4000,130 @@
         }
 
         // Quick Workout Logging Functions
+        const quickLogMachineConfig = {
+            'cardio': { distance: true },
+            'treadmill': { distance: true },
+            'stationary bike': { distance: true, resistance: true },
+            'elliptical': { distance: true, resistance: true },
+            'stairmaster': { floors: true, resistance: true },
+            'hiit': { distance: true },
+            'sports': { distance: true }
+        };
+
+        function setQuickLogMachineFields(typeValue) {
+            const group = document.getElementById('quick-machine-field-group');
+            const distanceWrapper = document.getElementById('quick-distance-wrapper');
+            const floorsWrapper = document.getElementById('quick-floors-wrapper');
+            const resistanceWrapper = document.getElementById('quick-resistance-wrapper');
+
+            if (!group) return;
+
+            const config = quickLogMachineConfig[(typeValue || '').toLowerCase()] || {};
+            const showAny = config.distance || config.floors || config.resistance;
+            group.style.display = showAny ? 'block' : 'none';
+
+            if (distanceWrapper) {
+                distanceWrapper.style.display = config.distance ? 'block' : 'none';
+                if (!config.distance) {
+                    const distanceInput = document.getElementById('quick-workout-distance-main');
+                    if (distanceInput) distanceInput.value = '';
+                }
+            }
+
+            if (floorsWrapper) {
+                floorsWrapper.style.display = config.floors ? 'block' : 'none';
+                if (!config.floors) {
+                    const floorsInput = document.getElementById('quick-workout-floors-main');
+                    if (floorsInput) floorsInput.value = '';
+                }
+            }
+
+            if (resistanceWrapper) {
+                resistanceWrapper.style.display = config.resistance ? 'block' : 'none';
+                if (!config.resistance) {
+                    const resistanceInput = document.getElementById('quick-workout-resistance-main');
+                    if (resistanceInput) resistanceInput.value = '';
+                }
+            }
+        }
+
         function showQuickLog() {
             document.getElementById('quick-workout-modal').style.display = 'flex';
-            // Set default duration
-            document.getElementById('quick-workout-duration-main').value = 45;
-            document.getElementById('quick-workout-calories-main').value = '';
-            document.getElementById('quick-workout-notes-main').value = '';
+            const typeSelect = document.getElementById('quick-workout-type-main');
+            const durationInput = document.getElementById('quick-workout-duration-main');
+            const caloriesInput = document.getElementById('quick-workout-calories-main');
+            const distanceInput = document.getElementById('quick-workout-distance-main');
+            const floorsInput = document.getElementById('quick-workout-floors-main');
+            const resistanceInput = document.getElementById('quick-workout-resistance-main');
+            const notesInput = document.getElementById('quick-workout-notes-main');
+
+            if (typeSelect) {
+                if (!typeSelect.dataset.machineListenerAttached) {
+                    typeSelect.addEventListener('change', (event) => {
+                        setQuickLogMachineFields(event.target.value || '');
+                    });
+                    typeSelect.dataset.machineListenerAttached = 'true';
+                }
+                typeSelect.value = 'Chest';
+                setQuickLogMachineFields(typeSelect.value);
+            } else {
+                setQuickLogMachineFields('');
+            }
+
+            if (durationInput) durationInput.value = 45;
+            if (caloriesInput) caloriesInput.value = '';
+            if (distanceInput) distanceInput.value = '';
+            if (floorsInput) floorsInput.value = '';
+            if (resistanceInput) resistanceInput.value = '';
+            if (notesInput) notesInput.value = '';
         }
 
         function closeQuickLog() {
             document.getElementById('quick-workout-modal').style.display = 'none';
+            const fields = [
+                'quick-workout-type-main',
+                'quick-workout-duration-main',
+                'quick-workout-calories-main',
+                'quick-workout-distance-main',
+                'quick-workout-floors-main',
+                'quick-workout-resistance-main',
+                'quick-workout-notes-main'
+            ];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (id === 'quick-workout-type-main') {
+                    el.value = 'Chest';
+                } else {
+                    el.value = '';
+                }
+            });
+            setQuickLogMachineFields('');
         }
 
         function calculateWorkoutCalories(type, duration) {
             // Calories per minute based on workout type
+            const normalized = (type || '').toLowerCase();
             const caloriesPerMinute = {
-                'Chest': 7,
-                'Back': 7,
-                'Legs': 8,
-                'Shoulders': 6,
-                'Arms': 5,
-                'Core': 5,
-                'Cardio': 10,
-                'HIIT': 12,
-                'Yoga': 3,
-                'Stretching': 2,
-                'Sports': 8,
-                'Other': 6
+                'chest': 7,
+                'back': 7,
+                'legs': 8,
+                'shoulders': 6,
+                'arms': 5,
+                'core': 5,
+                'cardio': 10,
+                'treadmill': 10,
+                'stationary bike': 9,
+                'elliptical': 9,
+                'stairmaster': 11,
+                'hiit': 12,
+                'yoga': 3,
+                'stretching': 2,
+                'sports': 8,
+                'other': 6
             };
 
-            const rate = caloriesPerMinute[type] || 6;
+            const rate = caloriesPerMinute[normalized] || 6;
             return Math.round(duration * rate);
         }
 
@@ -3895,6 +4131,9 @@
             const type = document.getElementById('quick-workout-type-main').value;
             const duration = parseInt(document.getElementById('quick-workout-duration-main').value);
             const caloriesInput = document.getElementById('quick-workout-calories-main').value;
+            const distanceInput = document.getElementById('quick-workout-distance-main')?.value || '';
+            const floorsInput = document.getElementById('quick-workout-floors-main')?.value || '';
+            const resistanceInput = document.getElementById('quick-workout-resistance-main')?.value || '';
             const notes = document.getElementById('quick-workout-notes-main').value;
 
             if (!duration || duration < 1) {
@@ -3904,12 +4143,16 @@
 
             // Use entered calories or auto-calculate
             const calories = caloriesInput ? parseInt(caloriesInput) : calculateWorkoutCalories(type, duration);
+            const normalizedType = (type || '').toLowerCase();
+            const distance = distanceInput ? parseFloat(distanceInput) : null;
+            const floors = floorsInput ? parseInt(floorsInput, 10) : null;
+            const resistance = resistanceInput ? resistanceInput.trim() : '';
 
             // Create workout entry
             const workout = {
                 id: Date.now().toString(),
                 workoutName: type,
-                type: type.toLowerCase(),
+                type: normalizedType,
                 date: new Date().toISOString(),
                 duration: duration,
                 calories: calories,
@@ -3918,6 +4161,20 @@
                 completed: true,
                 quickLogged: true
             };
+
+            const metrics = {};
+            if (distance !== null && Number.isFinite(distance)) {
+                metrics.distanceMiles = Math.round(distance * 100) / 100;
+            }
+            if (floors !== null && Number.isFinite(floors)) {
+                metrics.floors = floors;
+            }
+            if (resistance) {
+                metrics.resistance = resistance;
+            }
+            if (Object.keys(metrics).length > 0) {
+                workout.metrics = metrics;
+            }
 
             // Save to workout history (for Health Dashboard calories)
             let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
@@ -3933,7 +4190,13 @@
             closeQuickLog();
 
             // Show success message
-            alert(`✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal\n\n✨ Added to Track Workouts & Health Dashboard!`);
+            let message = `✅ ${type} workout logged!\n\nDuration: ${duration} min\nCalories: ${calories} cal`;
+            if (metrics.distanceMiles !== undefined) message += `\nDistance: ${metrics.distanceMiles} miles`;
+            if (metrics.floors !== undefined) message += `\nFloors/Steps: ${metrics.floors}`;
+            if (metrics.resistance) message += `\nResistance/Level: ${metrics.resistance}`;
+            if (notes) message += `\nNotes: ${notes}`;
+            message += `\n\n✨ Added to Track Workouts & Health Dashboard!`;
+            alert(message);
 
             // Refresh Track Workouts dashboard if function exists
             if (typeof updateFitnessDashboard === 'function') {
