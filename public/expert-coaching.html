@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Expert Coaching | FuelFire</title>
+    <link rel="stylesheet" href="styles.css?v=24.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0c1424 0%, #081022 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 28px 22px;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, rgba(75, 156, 211, 0.2) 0%, rgba(142, 84, 233, 0.2) 100%);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 24px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-card h1 {
+            margin: 0 0 12px;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-banner {
+            background: rgba(75, 156, 211, 0.15);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-top: 16px;
+            border: 1px solid rgba(75, 156, 211, 0.3);
+        }
+
+        .pricing-banner h2 {
+            margin: 0 0 4px;
+            font-size: 1.4rem;
+            color: #4B9CD3;
+        }
+
+        .section-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 25px 55px rgba(4,12,30,0.45);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0 0 18px;
+            color: #4B9CD3;
+        }
+
+        .expert-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .expert-card {
+            background: rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .expert-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(75, 156, 211, 0.5);
+            box-shadow: 0 15px 35px rgba(75,156,211,0.25);
+        }
+
+        .expert-card.selected {
+            border-color: #4B9CD3;
+            background: rgba(75, 156, 211, 0.1);
+            box-shadow: 0 15px 35px rgba(75,156,211,0.35);
+        }
+
+        .expert-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .expert-avatar {
+            font-size: 3rem;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .expert-info h3 {
+            margin: 0 0 4px;
+            font-size: 1.1rem;
+        }
+
+        .expert-credentials {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin: 0;
+        }
+
+        .expert-stats {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .stat-badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .expert-specialty {
+            font-weight: 600;
+            color: #4B9CD3;
+            margin-top: 12px;
+            font-size: 0.95rem;
+        }
+
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .package-card {
+            background: rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 16px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .package-card.popular::before {
+            content: 'POPULAR';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .package-card.selected {
+            border-color: #4B9CD3;
+            background: rgba(75, 156, 211, 0.1);
+        }
+
+        .package-sessions {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 4px;
+        }
+
+        .package-price {
+            font-size: 1.3rem;
+            color: #4B9CD3;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .package-savings {
+            font-size: 0.8rem;
+            color: #8e54e9;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(7,15,30,0.85);
+            color: #fff;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .booking-summary {
+            background: rgba(75, 156, 211, 0.1);
+            border: 1px solid rgba(75, 156, 211, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .summary-row.total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #4B9CD3;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+
+        .cta-button {
+            width: 100%;
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            border: none;
+            color: #fff;
+            padding: 18px;
+            font-size: 1.1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(75,156,211,0.45);
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 45px rgba(75,156,211,0.55);
+        }
+
+        .cta-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .money-back {
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 12px;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #4B9CD3, #7BAFD4);
+            border-color: transparent;
+            color: #0b1628;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-card">
+            <h1>🏆 Expert Coaching</h1>
+            <p style="opacity: 0.9; margin: 0;">Work 1-on-1 with certified fitness trainers and registered dietitians</p>
+            <div class="pricing-banner">
+                <h2>$100/hour</h2>
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Professional coaching • Multi-session packages available</p>
+            </div>
+        </div>
+
+        <!-- Expert Type Selection -->
+        <div class="section-card">
+            <div class="toggle-buttons" id="expertTypeToggle">
+                <button class="toggle-btn active" data-type="trainer">💪 Trainers</button>
+                <button class="toggle-btn" data-type="nutritionist">🥗 Nutritionists</button>
+            </div>
+
+            <div id="expertList" class="expert-grid"></div>
+        </div>
+
+        <!-- Package Selection -->
+        <div class="section-card" id="packageSection" style="display: none;">
+            <h2 class="section-title">Choose Your Package</h2>
+            <div class="package-grid" id="packageGrid"></div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="section-card" id="bookingForm" style="display: none;">
+            <h2 class="section-title">Schedule Your Session</h2>
+
+            <div class="form-group">
+                <label for="sessionDate">Preferred Date</label>
+                <input type="date" id="sessionDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="sessionTime">Preferred Time</label>
+                <input type="time" id="sessionTime" required>
+            </div>
+
+            <div class="form-group">
+                <label for="focusArea">Primary Focus</label>
+                <select id="focusArea" required>
+                    <option value="">Select focus area...</option>
+                    <option value="strength">Strength Training</option>
+                    <option value="fat-loss">Fat Loss</option>
+                    <option value="endurance">Endurance & Cardio</option>
+                    <option value="muscle-building">Muscle Building</option>
+                    <option value="nutrition">Nutrition & Meal Planning</option>
+                    <option value="recovery">Recovery & Mobility</option>
+                    <option value="sports-performance">Sports Performance</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sessionNotes">Goals & Questions</label>
+                <textarea id="sessionNotes" placeholder="Tell your coach about your goals, challenges, or specific questions..."></textarea>
+            </div>
+
+            <!-- Booking Summary -->
+            <div class="booking-summary" id="bookingSummary"></div>
+
+            <button class="cta-button" id="proceedToPayment">Proceed to Payment</button>
+            <p class="money-back">💯 100% Money-Back Guarantee • Cancel anytime</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Expert profiles database (inline for now)
+        const experts = {
+            trainers: [
+                {
+                    id: 't1',
+                    name: 'Dr. Sarah Mitchell',
+                    credentials: 'PhD Exercise Science, CSCS',
+                    specialty: 'Strength & Hypertrophy',
+                    experience: '15+ years',
+                    clients: '500+',
+                    rating: 4.9,
+                    avatar: '💪'
+                },
+                {
+                    id: 't2',
+                    name: 'Marcus Chen',
+                    credentials: 'MS Kinesiology, ACSM-EP',
+                    specialty: 'Endurance & Conditioning',
+                    experience: '12+ years',
+                    clients: '400+',
+                    rating: 4.8,
+                    avatar: '🏃'
+                },
+                {
+                    id: 't3',
+                    name: 'Jessica Rodriguez',
+                    credentials: 'BS Exercise Physiology, NASM-PES',
+                    specialty: 'Fat Loss & Mobility',
+                    experience: '10+ years',
+                    clients: '350+',
+                    rating: 4.9,
+                    avatar: '🔥'
+                }
+            ],
+            nutritionists: [
+                {
+                    id: 'n1',
+                    name: 'Dr. Amanda Foster, RD',
+                    credentials: 'PhD Nutritional Sciences, RD, CSSD',
+                    specialty: 'Sports Nutrition & Performance',
+                    experience: '18+ years',
+                    clients: '600+',
+                    rating: 5.0,
+                    avatar: '🥗'
+                },
+                {
+                    id: 'n2',
+                    name: 'Kevin Park, MS, RDN',
+                    credentials: 'MS Nutrition, RDN, CNSC',
+                    specialty: 'Weight Management & Metabolic Health',
+                    experience: '14+ years',
+                    clients: '450+',
+                    rating: 4.9,
+                    avatar: '📊'
+                },
+                {
+                    id: 'n3',
+                    name: 'Dr. Lisa Thompson, RD',
+                    credentials: 'PhD Nutrition, RD, FAND',
+                    specialty: 'Meal Planning & Lifestyle',
+                    experience: '20+ years',
+                    clients: '700+',
+                    rating: 4.9,
+                    avatar: '🍽️'
+                }
+            ]
+        };
+
+        const packages = [
+            { id: 'single', sessions: 1, price: 100, perSession: 100, savings: 0, popular: false },
+            { id: 'starter', sessions: 4, price: 360, perSession: 90, savings: 40, popular: true },
+            { id: 'transformation', sessions: 8, price: 640, perSession: 80, savings: 160, popular: false },
+            { id: 'elite', sessions: 12, price: 840, perSession: 70, savings: 360, popular: false }
+        ];
+
+        let selectedExpertType = 'trainer';
+        let selectedExpert = null;
+        let selectedPackage = null;
+
+        // Render experts
+        function renderExperts(type) {
+            const list = document.getElementById('expertList');
+            const expertList = type === 'trainer' ? experts.trainers : experts.nutritionists;
+
+            list.innerHTML = expertList.map(expert => `
+                <div class="expert-card" data-id="${expert.id}">
+                    <div class="expert-header">
+                        <div class="expert-avatar">${expert.avatar}</div>
+                        <div class="expert-info">
+                            <h3>${expert.name}</h3>
+                            <p class="expert-credentials">${expert.credentials}</p>
+                        </div>
+                    </div>
+                    <div class="expert-specialty">⭐ ${expert.specialty}</div>
+                    <div class="expert-stats">
+                        <span class="stat-badge">⏱️ ${expert.experience}</span>
+                        <span class="stat-badge">👥 ${expert.clients}</span>
+                        <span class="stat-badge">⭐ ${expert.rating}/5.0</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.expert-card').forEach(card => {
+                card.addEventListener('click', () => selectExpert(card.dataset.id));
+            });
+        }
+
+        // Render packages
+        function renderPackages() {
+            const grid = document.getElementById('packageGrid');
+            grid.innerHTML = packages.map(pkg => `
+                <div class="package-card ${pkg.popular ? 'popular' : ''}" data-id="${pkg.id}">
+                    <div class="package-sessions">${pkg.sessions} Session${pkg.sessions > 1 ? 's' : ''}</div>
+                    <div class="package-price">$${pkg.price}</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">$${pkg.perSession}/session</div>
+                    ${pkg.savings > 0 ? `<div class="package-savings">Save $${pkg.savings}</div>` : ''}
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.package-card').forEach(card => {
+                card.addEventListener('click', () => selectPackage(card.dataset.id));
+            });
+        }
+
+        // Expert type toggle
+        document.querySelectorAll('#expertTypeToggle .toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#expertTypeToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedExpertType = btn.dataset.type;
+                selectedExpert = null;
+                document.getElementById('packageSection').style.display = 'none';
+                document.getElementById('bookingForm').style.display = 'none';
+                renderExperts(selectedExpertType);
+            });
+        });
+
+        function selectExpert(id) {
+            document.querySelectorAll('.expert-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`[data-id="${id}"]`).classList.add('selected');
+            selectedExpert = id;
+            document.getElementById('packageSection').style.display = 'block';
+            renderPackages();
+        }
+
+        function selectPackage(id) {
+            document.querySelectorAll('.package-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`.package-card[data-id="${id}"]`).classList.add('selected');
+            selectedPackage = packages.find(p => p.id === id);
+            document.getElementById('bookingForm').style.display = 'block';
+            updateBookingSummary();
+            document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateBookingSummary() {
+            if (!selectedExpert || !selectedPackage) return;
+
+            const expertList = selectedExpertType === 'trainer' ? experts.trainers : experts.nutritionists;
+            const expert = expertList.find(e => e.id === selectedExpert);
+
+            const summary = document.getElementById('bookingSummary');
+            summary.innerHTML = `
+                <h3 style="margin: 0 0 16px; font-size: 1.1rem;">Booking Summary</h3>
+                <div class="summary-row">
+                    <span>Expert:</span>
+                    <strong>${expert.name}</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Package:</span>
+                    <strong>${selectedPackage.sessions} Session${selectedPackage.sessions > 1 ? 's' : ''}</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Per Session:</span>
+                    <strong>$${selectedPackage.perSession}</strong>
+                </div>
+                ${selectedPackage.savings > 0 ? `
+                <div class="summary-row" style="color: #8e54e9;">
+                    <span>Savings:</span>
+                    <strong>-$${selectedPackage.savings}</strong>
+                </div>` : ''}
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span>$${selectedPackage.price}</span>
+                </div>
+            `;
+        }
+
+        // Payment button
+        document.getElementById('proceedToPayment').addEventListener('click', () => {
+            const date = document.getElementById('sessionDate').value;
+            const time = document.getElementById('sessionTime').value;
+            const focus = document.getElementById('focusArea').value;
+
+            if (!date || !time || !focus) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // In production, this would integrate with Stripe
+            alert(`🎉 Payment integration coming soon!\n\nBooking Details:\n• ${selectedPackage.sessions} session(s)\n• Total: $${selectedPackage.price}\n• Date: ${date}\n• Time: ${time}\n\nYou'll receive a confirmation email with payment link.`);
+        });
+
+        // Initialize
+        renderExperts('trainer');
+    </script>
+</body>
+</html>

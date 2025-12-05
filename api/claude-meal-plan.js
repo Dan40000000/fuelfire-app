@@ -2,36 +2,42 @@
 // This routes all user requests through your Claude Pro account
 // Last updated: July 25, 2025 - Added better error handling
 
+import { callClaude, getClaudeModel } from './_lib/anthropic.js';
+import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+
+const corsOptions = {
+    methods: ['POST', 'OPTIONS'],
+    headers: ['Content-Type', 'Authorization'],
+};
+
 export default async function handler(req, res) {
-    // Set CORS headers for frontend access
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    if (handleCorsPreflight(req, res, corsOptions)) {
+        return;
     }
+    applyCors(res, corsOptions);
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+    if (!ensureMethod(req, res, ['POST'])) {
+        return;
     }
 
     try {
-        const { quizData, userId, imageUpload, image, images, imageCount } = req.body;
+        const body = req.body || {};
+        const { quizData, userId, imageUpload, image, images, imageCount, phase } = body;
+
+        if (!process.env.CLAUDE_API_KEY) {
+            console.error('❌ CLAUDE_API_KEY not found in environment variables');
+            throw new Error('API configuration error - Claude API key not configured');
+        }
+
+        console.log(`🔑 Claude API key present. Using model: ${getClaudeModel()}`);
 
         // Handle image upload (single or multiple)
         if (imageUpload && (image || images)) {
             const imageArray = images || [image];
             console.log(`📷 Processing ${imageArray.length} uploaded meal plan image(s) for user: ${userId || 'anonymous'}`);
 
-            // Check if API key exists
-            if (!process.env.CLAUDE_API_KEY) {
-                console.error('❌ CLAUDE_API_KEY not found in environment variables');
-                throw new Error('API configuration error - Claude API key not configured');
-            }
-
             // Extract meal plan from image(s)
-            const extractedMealPlan = await extractMealPlanFromImages(imageArray);
+            const extractedMealPlan = await extractMealPlanFromImages(imageArray, { userId });
 
             console.log(`✅ Successfully extracted meal plan from ${imageArray.length} image(s) for user: ${userId || 'anonymous'}`);
 
@@ -57,14 +63,30 @@ export default async function handler(req, res) {
 
         console.log(`🎯 Generating complete meal plan for user: ${userId || 'anonymous'}`);
         console.log(`📊 Quiz data includes: ${Object.keys(quizData).join(', ')}`);
-        
-        // Check if API key exists
-        if (!process.env.CLAUDE_API_KEY) {
-            console.error('❌ CLAUDE_API_KEY not found in environment variables');
-            throw new Error('API configuration error - Claude API key not configured');
+        console.log('🚀 Dispatching segmented meal plan prompts...');
+
+        if (phase === 'legacy') {
+            console.log('🕰️ Legacy phase requested, using consolidated prompt flow.');
+            const legacyPrompt = buildLegacyPrompt(quizData);
+            const legacyPlan = await callClaudeText({
+                prompt: legacyPrompt,
+                maxTokens: 4000,
+                tags: ['meal-plan', 'legacy'],
+            });
+
+            return res.status(200).json({
+                success: true,
+                mealPlan: formatMealPlanForApp(legacyPlan),
+                content: legacyPlan,
+                metadata: {
+                    generatedAt: new Date().toISOString(),
+                    planDuration: '14-day',
+                    goal: quizData.goal,
+                    userId: userId || 'anonymous',
+                    mode: 'legacy',
+                },
+            });
         }
-        
-        console.log('🔑 API Key found, generating 4-part meal plan...');
 
         // Generate all 5 parts in parallel with individual error handling
         let week1, week2, shopping1, shopping2, title;
@@ -126,51 +148,20 @@ export default async function handler(req, res) {
     }
 }
 
-async function callClaudeAPI(prompt) {
-    console.log('🌊 Calling Claude API with prompt length:', prompt.length);
-
-    try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.CLAUDE_API_KEY,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-haiku-20240307',
-                max_tokens: 4000,
-                messages: [{ role: 'user', content: prompt }]
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Claude API error response:', errorText);
-            throw new Error(`Claude API error: ${response.status} - ${errorText.substring(0, 200)}`);
-        }
-
-        const data = await response.json();
-
-        if (!data.content || !data.content[0] || !data.content[0].text) {
-            console.error('❌ Invalid Claude API response structure:', JSON.stringify(data).substring(0, 200));
-            throw new Error('Invalid response structure from Claude API');
-        }
-
-        console.log('✅ Claude API call successful, response length:', data.content[0].text.length);
-        return data.content[0].text;
-    } catch (error) {
-        console.error('❌ Error in callClaudeAPI:', error.message);
-        throw error;
-    }
+async function callClaudeText(options) {
+    const { text } = await callClaude(options);
+    return text;
 }
 
-async function extractMealPlanFromImage(imageData) {
-    // Extract the base64 data and media type
+async function extractMealPlanFromImage(imageData, { userId } = {}) {
     const [header, base64] = imageData.split(',');
-    const mediaType = header.match(/data:image\/(.*?);/)[1];
-    
-    const prompt = `Analyze this image of a meal plan and extract all the information into a structured format.
+    const mediaTypeMatch = header.match(/data:image\/(.*?);/);
+    const mediaType = mediaTypeMatch ? mediaTypeMatch[1] : 'jpeg';
+
+    const content = [
+        {
+            type: 'text',
+            text: `Analyze this image of a meal plan and extract all the information into a structured format.
 
 Please format the extracted meal plan EXACTLY like this:
 
@@ -205,49 +196,26 @@ Important:
 - Keep the exact formatting with emojis
 - If some information is not visible, make reasonable estimates based on the meals
 - Organize by days if the plan shows multiple days
-- If it's a weekly plan, expand it to cover 7-14 days as appropriate`;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.CLAUDE_API_KEY,
-            'anthropic-version': '2023-06-01'
+- If it's a weekly plan, expand it to cover 7-14 days as appropriate`,
         },
-        body: JSON.stringify({
-            model: 'claude-3-haiku-20240307',
-            max_tokens: 4000,
-            messages: [{
-                role: 'user',
-                content: [
-                    {
-                        type: 'text',
-                        text: prompt
-                    },
-                    {
-                        type: 'image',
-                        source: {
-                            type: 'base64',
-                            media_type: `image/${mediaType}`,
-                            data: base64
-                        }
-                    }
-                ]
-            }]
-        })
+        {
+            type: 'image',
+            source: {
+                type: 'base64',
+                media_type: `image/${mediaType}`,
+                data: base64,
+            },
+        },
+    ];
+
+    return await callClaudeText({
+        messages: [{ role: 'user', content }],
+        maxTokens: 4000,
+        tags: ['meal-plan', 'image-extract', userId ? `user:${userId}` : undefined].filter(Boolean),
     });
-
-    if (!response.ok) {
-        const error = await response.text();
-        console.error('Claude API error:', error);
-        throw new Error(`Failed to extract meal plan from image: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.content[0].text;
 }
 
-async function extractMealPlanFromImages(imageDataArray) {
+async function extractMealPlanFromImages(imageDataArray, { userId } = {}) {
     // Build content array with prompt text first, then all images
     const content = [
         {
@@ -312,31 +280,11 @@ Important:
         });
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.CLAUDE_API_KEY,
-            'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-            model: 'claude-3-haiku-20240307',
-            max_tokens: 4000,
-            messages: [{
-                role: 'user',
-                content: content
-            }]
-        })
+    return await callClaudeText({
+        messages: [{ role: 'user', content }],
+        maxTokens: 4000,
+        tags: ['meal-plan', 'image-batch', `count:${imageDataArray.length}`, userId ? `user:${userId}` : undefined].filter(Boolean),
     });
-
-    if (!response.ok) {
-        const error = await response.text();
-        console.error('Claude API error:', error);
-        throw new Error(`Failed to extract meal plan from images: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.content[0].text;
 }
 
 async function generateTitle(quizData) {
@@ -368,7 +316,11 @@ Format each day exactly like this:
 
 Include ALL 7 days. ALWAYS specify exact quantities for every ingredient. Keep meal descriptions with quantities but concise. ALWAYS include complete macro totals for each day. Start with Day 1.`;
 
-    return await callClaudeAPI(prompt);
+    return await callClaudeText({
+        prompt,
+        maxTokens: 4000,
+        tags: ['meal-plan', 'week1'],
+    });
 }
 
 async function generateWeek2(quizData) {
@@ -395,7 +347,11 @@ Format each day exactly like this:
 
 Include ALL 7 days (Days 8-14). ALWAYS specify exact quantities for every ingredient. Keep meal descriptions with quantities but concise. ALWAYS include complete macro totals for each day. Start with Day 8.`;
 
-    return await callClaudeAPI(prompt);
+    return await callClaudeText({
+        prompt,
+        maxTokens: 4000,
+        tags: ['meal-plan', 'week2'],
+    });
 }
 
 async function generateWeek1ShoppingList(quizData) {
@@ -415,7 +371,11 @@ Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}
 
 Format each category with specific items and quantities. Keep it practical.`;
 
-    return await callClaudeAPI(prompt);
+    return await callClaudeText({
+        prompt,
+        maxTokens: 2000,
+        tags: ['meal-plan', 'shopping', 'week1'],
+    });
 }
 
 async function generateWeek2ShoppingList(quizData) {
@@ -435,7 +395,11 @@ Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}
 
 Format each category with specific items and quantities. Keep it practical.`;
 
-    return await callClaudeAPI(prompt);
+    return await callClaudeText({
+        prompt,
+        maxTokens: 2000,
+        tags: ['meal-plan', 'shopping', 'week2'],
+    });
 }
 
 function getVarietyInstructions(mealVariety) {
@@ -519,4 +483,3 @@ function formatMealPlanForApp(rawMealPlan) {
     // The frontend will handle the formatting
     return rawMealPlan;
 }
-

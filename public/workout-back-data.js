@@ -1,0 +1,912 @@
+window.BACK_EXERCISES = [
+            {
+                name: "Deadlift",
+                description: "The king of all exercises - builds total body strength and power",
+                difficulty: 5,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Erector Spinae", "Lats", "Traps", "Glutes"],
+                icon: "🏋️",
+                formIllustration: "🧍→🤸‍♂️ ↓🏋️ ⬆️🧍 💪\nHip hinge • Grip bar • Drive up",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/1.jpg"
+                ],
+                steps: [
+                    "Stand with feet hip-width apart, bar over mid-foot",
+                    "Hinge at hips and bend knees to grip bar just outside legs",
+                    "Chest up, shoulders back, neutral spine throughout",
+                    "Drive through heels and hips to stand up tall",
+                    "Keep bar close to body throughout entire movement",
+                    "Reverse movement by hinging at hips first, then knees"
+                ],
+                commonMistakes: [
+                    "Rounding the back - extremely dangerous",
+                    "Bar drifting away from body during lift",
+                    "Hyperextending at the top of movement",
+                    "Looking up during lift (cervical extension)"
+                ],
+                safetyTips: [
+                    "Master hip hinge movement pattern first",
+                    "Start with lighter weight to perfect form",
+                    "Use proper footwear (flat soles, not running shoes)",
+                    "Consider lifting straps for grip if needed"
+                ],
+                risks: "Lower back injury, bicep tears, herniated discs if performed incorrectly",
+                energySaving: "Focus on hip hinge pattern - let your glutes and hamstrings do the work, not your back"
+            },
+            {
+                name: "Pull-ups",
+                description: "Ultimate bodyweight back exercise for width and strength",
+                difficulty: 4,
+                equipment: "Pull-up Bar",
+                primaryMuscles: ["Lats", "Rhomboids", "Biceps", "Mid Traps"],
+                icon: "🏃",
+                formIllustration: "🤲🔗 ↓🔻 ⬆️💪 ↓🔻\nHang • Pull up • Control down",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Pull-Up/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Pull-Up/1.jpg"
+                ],
+                steps: [
+                    "Hang from bar with palms facing away, hands shoulder-width apart",
+                    "Start from dead hang with arms fully extended",
+                    "Engage lats and pull chest toward bar",
+                    "Focus on bringing elbows down and back",
+                    "Pull until chin clears bar or chest touches",
+                    "Lower with control to full extension"
+                ],
+                commonMistakes: [
+                    "Using momentum or kipping motion",
+                    "Partial range of motion (not reaching full extension)",
+                    "Pulling with arms instead of back muscles",
+                    "Craning neck to get chin over bar"
+                ],
+                safetyTips: [
+                    "Start with assisted pull-ups or negatives if needed",
+                    "Warm up shoulders thoroughly before starting",
+                    "Progress gradually - quality over quantity",
+                    "Stop if you feel shoulder or elbow pain"
+                ],
+                risks: "Shoulder impingement, elbow strain, falling from bar",
+                energySaving: "Use resistance bands for assistance rather than avoiding the exercise entirely"
+            },
+            {
+                name: "Barbell Rows",
+                description: "Fundamental rowing movement for back thickness and strength",
+                difficulty: 3,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
+                icon: "🚣",
+                formIllustration: "🧍↘️ 🏋️💪 ↖️⬆️ ↙️⬇️\nHinge forward • Row to chest • Control down",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+                ],
+                steps: [
+                    "Stand with feet hip-width apart, hold bar with overhand grip",
+                    "Hinge at hips keeping chest up and back straight",
+                    "Let bar hang at arm's length with slight knee bend",
+                    "Pull bar to lower chest/upper abdomen",
+                    "Squeeze shoulder blades together at top",
+                    "Lower bar with control to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much body momentum",
+                    "Rowing to wrong part of body (too high or low)",
+                    "Not maintaining hip hinge position",
+                    "Rounding the back during movement"
+                ],
+                safetyTips: [
+                    "Keep core engaged throughout movement",
+                    "Start with lighter weight to master form",
+                    "Don't let lower back round",
+                    "Focus on pulling with back muscles, not arms"
+                ],
+                risks: "Lower back strain, bicep tears, poor posture reinforcement",
+                energySaving: "Use a bench for chest support if lower back fatigue is limiting factor"
+            },
+            {
+                name: "Lat Pulldowns",
+                description: "Cable exercise for building lat width and upper body strength",
+                difficulty: 2,
+                equipment: "Cable Machine, Lat Bar",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Biceps"],
+                icon: "⬇️",
+                formIllustration: "🪑🤲 ⬆️🔗 ⬇️💪 ⬆️🔗\nSit • Grip wide • Pull to chest",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/1.jpg"
+                ],
+                steps: [
+                    "Sit at lat pulldown machine with thighs secured under pads",
+                    "Grip bar wider than shoulder-width with palms away",
+                    "Lean back slightly and puff chest out",
+                    "Pull bar down to upper chest in smooth motion",
+                    "Focus on pulling elbows down and back",
+                    "Control weight back to starting position"
+                ],
+                commonMistakes: [
+                    "Pulling bar behind neck (dangerous for shoulders)",
+                    "Using too much body momentum",
+                    "Not getting full stretch at top of movement",
+                    "Pulling with arms instead of back muscles"
+                ],
+                safetyTips: [
+                    "Never pull bar behind your neck",
+                    "Keep chest up throughout movement",
+                    "Don't let weight stack slam down",
+                    "Adjust weight to maintain proper form"
+                ],
+                risks: "Shoulder impingement, neck strain if pulled behind head",
+                energySaving: "Focus on mind-muscle connection - slower reps build more muscle with less weight"
+            },
+            {
+                name: "T-Bar Rows",
+                description: "Thick back builder using specialized equipment for heavy rowing",
+                difficulty: 3,
+                equipment: "T-Bar Machine or Landmine",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
+                icon: "📐",
+                formIllustration: "🧍📐 ↘️🤲 ↗️💪 ↙️⬇️\nStraddle T-bar • Hinge • Row up",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/1.jpg"
+                ],
+                steps: [
+                    "Straddle T-bar with feet planted firmly",
+                    "Hinge at hips and grip handles with both hands",
+                    "Keep chest up and back straight throughout",
+                    "Pull bar to lower chest/upper abdomen",
+                    "Squeeze shoulder blades at top of movement",
+                    "Lower weight with control to full extension"
+                ],
+                commonMistakes: [
+                    "Standing too upright during movement",
+                    "Using legs to help lift weight",
+                    "Not maintaining neutral spine",
+                    "Partial range of motion"
+                ],
+                safetyTips: [
+                    "Keep core braced throughout movement",
+                    "Don't let lower back round",
+                    "Use proper foot placement for stability",
+                    "Start lighter than you think you need"
+                ],
+                risks: "Lower back strain, loss of balance, weight dropping on feet",
+                energySaving: "Use chest-supported version if available to reduce lower back fatigue"
+            },
+            {
+                name: "Cable Rows",
+                description: "Seated cable exercise for controlled back development",
+                difficulty: 2,
+                equipment: "Cable Machine, Seated Row Attachment",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps", "Rear Delts"],
+                icon: "🔗",
+                formIllustration: "🪑→ 🤲⬅️ 💪↖️ ➡️🤲\nSit tall • Pull to chest • Squeeze back",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Row/1.jpg"
+                ],
+                steps: [
+                    "Sit at cable row machine with feet on platform",
+                    "Grip handle with both hands, arms extended",
+                    "Sit up tall with slight lean back",
+                    "Pull handle to lower chest/upper abdomen",
+                    "Squeeze shoulder blades together",
+                    "Slowly return to starting position with control"
+                ],
+                commonMistakes: [
+                    "Using too much momentum or body swing",
+                    "Rounding shoulders forward at start position",
+                    "Pulling handle too high (to neck area)",
+                    "Not maintaining upright posture"
+                ],
+                safetyTips: [
+                    "Keep chest up and shoulders back",
+                    "Don't let weight stack slam down",
+                    "Maintain slight bend in knees",
+                    "Focus on controlled movement"
+                ],
+                risks: "Lower back strain from poor posture, shoulder strain",
+                energySaving: "Use pause at peak contraction to maximize muscle activation"
+            },
+            {
+                name: "Face Pulls",
+                description: "Rear delt and upper back exercise for posture improvement",
+                difficulty: 1,
+                equipment: "Cable Machine, Rope Attachment",
+                primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
+                icon: "👤",
+                formIllustration: "🤲🔗 ↖️↗️ 👤💪 ↙️↘️\nGrip rope • Pull to face • Separate hands",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/1.jpg"
+                ],
+                steps: [
+                    "Set cable to face height with rope attachment",
+                    "Grip rope with palms down, arms extended",
+                    "Pull rope toward face while separating hands",
+                    "Focus on squeezing shoulder blades together",
+                    "Pull until hands reach ear level",
+                    "Slowly return to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight and compromising form",
+                    "Not separating hands at end of movement",
+                    "Pulling too low (to chest instead of face)",
+                    "Using momentum instead of controlled movement"
+                ],
+                safetyTips: [
+                    "Start with very light weight",
+                    "Focus on perfect form over heavy weight",
+                    "Keep elbows high throughout movement",
+                    "Don't let shoulders roll forward"
+                ],
+                risks: "Minimal risk - mainly shoulder strain if too heavy",
+                energySaving: "Perfect exercise for high reps - builds endurance and improves posture"
+            },
+            {
+                name: "Shrugs",
+                description: "Targeted trapezius exercise for upper back development",
+                difficulty: 1,
+                equipment: "Dumbbells or Barbell",
+                primaryMuscles: ["Upper Traps", "Levator Scapulae"],
+                icon: "🤷",
+                formIllustration: "🧍💪 ⬆️🤷 ⬇️💪 ⬆️🤷\nStand tall • Lift shoulders • Control down",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/1.jpg"
+                ],
+                steps: [
+                    "Hold dumbbells at sides or barbell in front",
+                    "Stand tall with feet hip-width apart",
+                    "Keep arms straight throughout movement",
+                    "Lift shoulders straight up toward ears",
+                    "Hold peak contraction for 1-2 seconds",
+                    "Lower shoulders slowly to starting position"
+                ],
+                commonMistakes: [
+                    "Rolling shoulders in circular motion",
+                    "Using too much weight and partial range",
+                    "Bending arms during movement",
+                    "Rushing through the exercise"
+                ],
+                safetyTips: [
+                    "Move shoulders straight up and down only",
+                    "Don't roll shoulders - increases injury risk",
+                    "Use straps if grip is limiting factor",
+                    "Focus on slow, controlled movements"
+                ],
+                risks: "Neck strain, shoulder impingement if performed incorrectly",
+                energySaving: "Hold peak contraction longer rather than using heavier weight"
+            },
+            {
+                name: "Single-Arm Dumbbell Rows",
+                description: "Unilateral rowing movement for balanced back development and core stability",
+                difficulty: 2,
+                equipment: "Dumbbell, Bench",
+                primaryMuscles: ["Lats", "Rhomboids", "Rear Delts", "Core"],
+                icon: "💪",
+                formIllustration: "🪑🤲 ↙️ ↗️💪 ↘️\nKnee on bench • Row up • Control down",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/1.jpg"
+                ],
+                steps: [
+                    "Place one knee and hand on bench for support",
+                    "Hold dumbbell in opposite hand with arm extended",
+                    "Keep back flat and parallel to ground",
+                    "Pull dumbbell to hip, keeping elbow close to body",
+                    "Squeeze shoulder blade at top of movement",
+                    "Lower weight with control to full extension"
+                ],
+                commonMistakes: [
+                    "Rotating torso during row",
+                    "Using too much momentum",
+                    "Not pulling dumbbell to hip level",
+                    "Allowing shoulder to drop at bottom"
+                ],
+                safetyTips: [
+                    "Keep core braced throughout",
+                    "Don't let torso rotate or twist",
+                    "Focus on pulling with back, not bicep",
+                    "Maintain neutral spine position"
+                ],
+                risks: "Lower back strain from rotation, shoulder strain",
+                energySaving: "Great for addressing muscle imbalances - work weaker side first"
+            },
+            {
+                name: "Chin-ups",
+                description: "Underhand grip pull-up variation emphasizing biceps and lower lats",
+                difficulty: 4,
+                equipment: "Pull-up Bar",
+                primaryMuscles: ["Lats", "Biceps", "Rhomboids"],
+                icon: "🤸",
+                formIllustration: "🤲⬆️ ↑🔼 💪⬆️ ↓🔻\nUnderhand grip • Pull up • Lower slow",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/1.jpg"
+                ],
+                steps: [
+                    "Hang from bar with palms facing you, hands shoulder-width",
+                    "Start from dead hang with arms fully extended",
+                    "Pull body up focusing on bringing elbows down",
+                    "Pull until chin clears bar",
+                    "Squeeze at top for peak contraction",
+                    "Lower slowly to full extension"
+                ],
+                commonMistakes: [
+                    "Using momentum or swinging",
+                    "Not achieving full range of motion",
+                    "Flaring elbows out too much",
+                    "Rushing the negative portion"
+                ],
+                safetyTips: [
+                    "Easier than pull-ups for most people",
+                    "Control descent - don't drop",
+                    "Keep shoulders engaged at bottom",
+                    "Add weight when you can do 12+ reps"
+                ],
+                risks: "Bicep tendon strain, shoulder impingement, grip failure",
+                energySaving: "Perfect exercise for building up to pull-ups - emphasizes arm strength"
+            },
+            {
+                name: "Inverted Rows",
+                description: "Bodyweight rowing exercise using bar or TRX straps",
+                difficulty: 2,
+                equipment: "Barbell in rack or TRX",
+                primaryMuscles: ["Rhomboids", "Mid Traps", "Rear Delts", "Biceps"],
+                icon: "🔄",
+                formIllustration: "↘️🤲 ⬆️💪 ↙️⬇️\nLean back • Pull to chest • Lower slow",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Inverted_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Inverted_Row/1.jpg"
+                ],
+                steps: [
+                    "Set bar to waist height in squat rack",
+                    "Lie under bar and grip with overhand grip",
+                    "Keep body straight from heels to head",
+                    "Pull chest to bar keeping body rigid",
+                    "Squeeze shoulder blades together",
+                    "Lower with control to full arm extension"
+                ],
+                commonMistakes: [
+                    "Sagging hips during movement",
+                    "Not pulling chest all the way to bar",
+                    "Using momentum instead of control",
+                    "Partial range of motion"
+                ],
+                safetyTips: [
+                    "Keep core tight throughout",
+                    "Elevate feet to increase difficulty",
+                    "Great beginner alternative to barbell rows",
+                    "Focus on quality over quantity"
+                ],
+                risks: "Minimal - possible shoulder strain if form breaks down",
+                energySaving: "Excellent for beginners - scalable difficulty by changing bar height"
+            },
+            {
+                name: "Pendlay Rows",
+                description: "Explosive barbell row from floor with strict form",
+                difficulty: 4,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Lats", "Rhomboids", "Traps", "Erector Spinae"],
+                icon: "⚡",
+                formIllustration: "🏋️↘️ ⚡💪 ⬇️🏋️\nRest on floor • Explosive row • Reset",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+                ],
+                steps: [
+                    "Bar rests on floor between each rep",
+                    "Hinge at hips with back parallel to ground",
+                    "Grip bar with hands just outside legs",
+                    "Explosively pull bar to lower chest",
+                    "Squeeze back at top position",
+                    "Lower bar back to floor with control and reset"
+                ],
+                commonMistakes: [
+                    "Not resetting bar on floor between reps",
+                    "Losing torso position during row",
+                    "Using leg drive to help lift",
+                    "Rounding back during movement"
+                ],
+                safetyTips: [
+                    "Requires excellent lower back strength",
+                    "Master regular barbell rows first",
+                    "Keep strict form - no momentum",
+                    "Use bumper plates for proper height"
+                ],
+                risks: "Lower back injury, bicep tears, loss of balance",
+                energySaving: "Reset between reps allows for heavier weight and explosive power"
+            },
+            {
+                name: "Seal Rows",
+                description: "Chest-supported row eliminating lower back involvement",
+                difficulty: 2,
+                equipment: "Elevated Bench, Dumbbells or Barbell",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps"],
+                icon: "🦭",
+                formIllustration: "🛏️↘️ 🤲💪 ⬆️⬇️\nLie face down • Row up • Squeeze back",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Row/1.jpg"
+                ],
+                steps: [
+                    "Lie face down on elevated bench (chest supported)",
+                    "Grip dumbbells or barbell hanging beneath",
+                    "Pull weight to sides of bench",
+                    "Squeeze shoulder blades at top",
+                    "Focus on back contraction, not momentum",
+                    "Lower with control to full extension"
+                ],
+                commonMistakes: [
+                    "Lifting chest off bench during row",
+                    "Using momentum to swing weights",
+                    "Not achieving full range of motion",
+                    "Rowing too fast without control"
+                ],
+                safetyTips: [
+                    "Perfect for those with lower back issues",
+                    "Can go heavy without back strain",
+                    "Focus purely on back muscles",
+                    "Excellent for muscle isolation"
+                ],
+                risks: "Minimal - very safe exercise for back training",
+                energySaving: "No lower back fatigue means you can train back harder and longer"
+            },
+            {
+                name: "Rack Pulls",
+                description: "Partial deadlift from elevated position focusing on upper back and traps",
+                difficulty: 4,
+                equipment: "Barbell, Rack, Plates",
+                primaryMuscles: ["Traps", "Erector Spinae", "Lats", "Rhomboids"],
+                icon: "📦",
+                formIllustration: "📦🏋️ ⬆️💪 ⬇️📦\nBar on pins • Pull to lockout • Control down",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rack_Pull/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rack_Pull/1.jpg"
+                ],
+                steps: [
+                    "Set bar on rack pins at knee height",
+                    "Grip bar just outside legs with overhand or mixed grip",
+                    "Brace core and maintain neutral spine",
+                    "Drive through heels to pull bar to lockout",
+                    "Squeeze glutes and lock out at top",
+                    "Lower bar back to pins with control"
+                ],
+                commonMistakes: [
+                    "Setting pins too high, reducing effectiveness",
+                    "Hyperextending back at lockout",
+                    "Jerking the bar off pins",
+                    "Not maintaining neutral spine"
+                ],
+                safetyTips: [
+                    "Can handle heavier weight than full deadlifts",
+                    "Excellent for overload training",
+                    "Use lifting straps if needed",
+                    "Don't bounce bar off pins"
+                ],
+                risks: "Lower back injury if form breaks, bicep tears with mixed grip",
+                energySaving: "Great for building deadlift lockout strength without full movement fatigue"
+            },
+            {
+                name: "Meadows Rows",
+                description: "Landmine row variation for intense lat stretch and contraction",
+                difficulty: 3,
+                equipment: "Landmine or Barbell Corner",
+                primaryMuscles: ["Lats", "Rhomboids", "Rear Delts", "Biceps"],
+                icon: "🌾",
+                formIllustration: "⚓🤲 ↗️💪 ↘️⬇️\nStagger stance • Row across body • Squeeze",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Landmine_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Landmine_Row/1.jpg"
+                ],
+                steps: [
+                    "Stand perpendicular to landmine with staggered stance",
+                    "Hinge at hips and grip bar with one hand",
+                    "Pull bar across body toward hip",
+                    "Get full stretch at bottom position",
+                    "Drive elbow back and squeeze lat at top",
+                    "Control negative back to starting position"
+                ],
+                commonMistakes: [
+                    "Not getting full stretch at bottom",
+                    "Rotating torso excessively",
+                    "Rowing straight up instead of across",
+                    "Using too much weight"
+                ],
+                safetyTips: [
+                    "Focus on lat stretch and contraction",
+                    "Keep free hand on knee for support",
+                    "Start lighter to learn movement pattern",
+                    "Excellent for hypertrophy training"
+                ],
+                risks: "Lower back strain, shoulder strain if rotation is excessive",
+                energySaving: "Unique angle provides maximum lat activation with moderate weight"
+            },
+            {
+                name: "Wide Grip Pull-ups",
+                description: "Pull-up variation with wide grip emphasizing lat width",
+                difficulty: 5,
+                equipment: "Pull-up Bar",
+                primaryMuscles: ["Lats", "Teres Major", "Mid Traps"],
+                icon: "↔️",
+                formIllustration: "🤲↔️ ⬆️💪 ⬇️🔻\nWide grip • Pull up • Control down",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide_Grip_Pull-Up/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide_Grip_Pull-Up/1.jpg"
+                ],
+                steps: [
+                    "Hang from bar with grip 1.5x shoulder width",
+                    "Start from dead hang position",
+                    "Pull focusing on driving elbows down and back",
+                    "Bring upper chest toward bar",
+                    "Achieve peak contraction at top",
+                    "Lower slowly to full extension"
+                ],
+                commonMistakes: [
+                    "Grip too wide causing shoulder issues",
+                    "Not achieving full range of motion",
+                    "Using kipping or momentum",
+                    "Partial reps at bottom"
+                ],
+                safetyTips: [
+                    "Harder than regular pull-ups",
+                    "Don't go excessively wide (shoulder width + 6 inches)",
+                    "Focus on lat engagement",
+                    "Build up strength with regular pull-ups first"
+                ],
+                risks: "Shoulder impingement, rotator cuff strain, grip failure",
+                energySaving: "Best exercise for building wide lats - quality over quantity"
+            },
+            {
+                name: "Straight Arm Pulldowns",
+                description: "Isolation exercise for lats using cable with straight arms",
+                difficulty: 2,
+                equipment: "Cable Machine, Straight Bar",
+                primaryMuscles: ["Lats", "Long Head Triceps"],
+                icon: "📐",
+                formIllustration: "⬆️🤲 ↓💪 ⬆️🤲\nArms straight • Pull down • Squeeze lats",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight_Arm_Pulldown/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight_Arm_Pulldown/1.jpg"
+                ],
+                steps: [
+                    "Stand facing cable machine with bar at head height",
+                    "Grip bar with arms extended and slight elbow bend",
+                    "Hinge slightly at hips, chest up",
+                    "Pull bar down in arc to thighs",
+                    "Keep arms straight throughout movement",
+                    "Slowly return to starting position with control"
+                ],
+                commonMistakes: [
+                    "Bending elbows during movement",
+                    "Using too much weight",
+                    "Not feeling lats working",
+                    "Leaning too far forward"
+                ],
+                safetyTips: [
+                    "Perfect lat isolation exercise",
+                    "Use lighter weight for proper form",
+                    "Focus on lat engagement",
+                    "Great for pre-exhaust or finishing movement"
+                ],
+                risks: "Minimal - possible shoulder strain if too heavy",
+                energySaving: "Excellent mind-muscle connection builder for lats"
+            },
+            {
+                name: "Kroc Rows",
+                description: "High-rep heavy dumbbell rows with controlled momentum",
+                difficulty: 4,
+                equipment: "Heavy Dumbbell, Bench",
+                primaryMuscles: ["Lats", "Traps", "Rhomboids", "Grip"],
+                icon: "🔥",
+                formIllustration: "🪑💪 ⬆️⬇️⬆️ 🔥\nHeavy DB • High reps • Controlled",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/1.jpg"
+                ],
+                steps: [
+                    "Set up like single-arm dumbbell rows",
+                    "Use very heavy dumbbell (can use straps)",
+                    "Allow slight body english to start movement",
+                    "Pull dumbbell explosively to hip",
+                    "Control descent and repeat for high reps (15-20+)",
+                    "Focus on building work capacity and mental toughness"
+                ],
+                commonMistakes: [
+                    "Going too light (defeats purpose)",
+                    "Excessive body movement",
+                    "Not controlling the negative",
+                    "Stopping too soon"
+                ],
+                safetyTips: [
+                    "Advanced exercise for experienced lifters",
+                    "Use lifting straps to protect grip",
+                    "Some momentum is acceptable",
+                    "Build mental and physical toughness"
+                ],
+                risks: "Lower back strain, bicep tears, dropping weight",
+                energySaving: "Push through the burn - builds incredible back size and grip strength"
+            },
+            {
+                name: "Reverse Grip Barbell Rows",
+                description: "Underhand barbell row emphasizing lower lats and biceps",
+                difficulty: 3,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Lower Lats", "Rhomboids", "Biceps"],
+                icon: "🔄",
+                formIllustration: "🧍↘️ 🔄💪 ⬆️⬇️\nUnderhand grip • Row to belly • Squeeze",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Bent-Over_Rows/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Bent-Over_Rows/1.jpg"
+                ],
+                steps: [
+                    "Grip barbell with palms facing up (supinated)",
+                    "Hinge at hips with back flat",
+                    "Row bar to lower abdomen/belly button",
+                    "Keep elbows closer to body than overhand rows",
+                    "Squeeze lower lats at top",
+                    "Lower with control to full extension"
+                ],
+                commonMistakes: [
+                    "Rowing to chest instead of belly",
+                    "Standing too upright",
+                    "Using too much momentum",
+                    "Not keeping elbows tucked"
+                ],
+                safetyTips: [
+                    "Easier to maintain form than overhand",
+                    "Great for lower lat development",
+                    "Keep wrists straight",
+                    "May allow slightly heavier weight"
+                ],
+                risks: "Bicep strain, lower back injury from poor form",
+                energySaving: "More natural pulling position for many people"
+            },
+            {
+                name: "Dumbbell Pullovers",
+                description: "Stretching exercise for lats and chest performed lying on bench",
+                difficulty: 2,
+                equipment: "Dumbbell, Bench",
+                primaryMuscles: ["Lats", "Chest", "Serratus"],
+                icon: "🎭",
+                formIllustration: "🛏️⬆️ ↘️💪 ⬆️🔼\nArms overhead • Pull down • Stretch",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Pullover/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Pullover/1.jpg"
+                ],
+                steps: [
+                    "Lie perpendicular on bench with shoulders supported",
+                    "Hold dumbbell above chest with both hands",
+                    "Lower dumbbell back in arc over head",
+                    "Get deep stretch in lats and chest",
+                    "Pull dumbbell back over chest",
+                    "Keep slight bend in elbows throughout"
+                ],
+                commonMistakes: [
+                    "Using too heavy weight",
+                    "Not getting full stretch",
+                    "Bending elbows too much",
+                    "Arching back excessively"
+                ],
+                safetyTips: [
+                    "Focus on stretch and contraction",
+                    "Keep core engaged",
+                    "Don't go too deep if shoulder hurts",
+                    "Moderate weight works best"
+                ],
+                risks: "Shoulder strain, rib/intercostal issues if too heavy",
+                energySaving: "Excellent for expanding rib cage and improving flexibility"
+            },
+            {
+                name: "Chest-Supported T-Bar Rows",
+                description: "Machine row variation eliminating lower back stress",
+                difficulty: 2,
+                equipment: "Chest-Supported Row Machine",
+                primaryMuscles: ["Lats", "Rhomboids", "Mid Traps"],
+                icon: "🎰",
+                formIllustration: "🛏️🤲 ⬆️💪 ⬇️🤲\nChest on pad • Row handles • Squeeze back",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+                ],
+                steps: [
+                    "Adjust pad height so chest is supported",
+                    "Grip handles with desired grip width",
+                    "Pull handles toward torso",
+                    "Squeeze shoulder blades together at peak",
+                    "Focus on back muscles, not arms",
+                    "Lower with control to full extension"
+                ],
+                commonMistakes: [
+                    "Lifting chest off pad during row",
+                    "Not achieving full range of motion",
+                    "Rowing too fast",
+                    "Using momentum instead of muscle"
+                ],
+                safetyTips: [
+                    "Perfect for high volume training",
+                    "No lower back fatigue",
+                    "Can train to failure safely",
+                    "Great for hypertrophy"
+                ],
+                risks: "Minimal - very safe machine exercise",
+                energySaving: "Allows maximum back focus without lower back limiting factor"
+            },
+            {
+                name: "Trap Bar Deadlift",
+                description: "Deadlift variation using hex bar with more upright position",
+                difficulty: 3,
+                equipment: "Trap/Hex Bar, Plates",
+                primaryMuscles: ["Traps", "Quads", "Glutes", "Lats"],
+                icon: "⬡",
+                formIllustration: "⬡🧍 ⬇️🤲 ⬆️💪\nStand in bar • Grip handles • Stand up",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Trap_Bar_Deadlift/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Trap_Bar_Deadlift/1.jpg"
+                ],
+                steps: [
+                    "Stand inside trap bar with feet hip-width",
+                    "Bend down and grip high or low handles",
+                    "Chest up, shoulders back, neutral spine",
+                    "Drive through heels to stand up",
+                    "Lock out at top with hips and shoulders",
+                    "Lower back to floor with control"
+                ],
+                commonMistakes: [
+                    "Rounding back during lift",
+                    "Hyperextending at lockout",
+                    "Starting with hips too high or low",
+                    "Letting bar drift forward"
+                ],
+                safetyTips: [
+                    "Easier to learn than barbell deadlift",
+                    "More natural pulling position",
+                    "Allows heavier loads safely",
+                    "Great for athletes and beginners"
+                ],
+                risks: "Lower back injury if form fails, dropping bar on feet",
+                energySaving: "Biomechanically advantageous - can pull more weight with less stress"
+            },
+            {
+                name: "Rope Face Pulls (High)",
+                description: "Upper back and rear delt exercise with rope attachment high position",
+                difficulty: 1,
+                equipment: "Cable Machine, Rope",
+                primaryMuscles: ["Upper Traps", "Rear Delts", "Rhomboids"],
+                icon: "⬆️",
+                formIllustration: "🤲⬆️ ↗️💪 ↘️\nHigh position • Pull to forehead • Squeeze",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/1.jpg"
+                ],
+                steps: [
+                    "Set cable to highest position with rope",
+                    "Grip rope and step back for tension",
+                    "Pull rope toward forehead/hairline",
+                    "Separate hands at end of movement",
+                    "Squeeze upper traps and rear delts",
+                    "Control return to starting position"
+                ],
+                commonMistakes: [
+                    "Pulling to wrong height",
+                    "Not separating hands enough",
+                    "Using too much weight",
+                    "Not maintaining upright posture"
+                ],
+                safetyTips: [
+                    "Perfect for upper trap activation",
+                    "Great for overhead pressing strength",
+                    "High rep exercise",
+                    "Focus on squeeze and control"
+                ],
+                risks: "Minimal - very safe exercise",
+                energySaving: "Essential for shoulder health and posture improvement"
+            },
+            {
+                name: "Yates Rows",
+                description: "Underhand barbell row with more upright torso invented by Dorian Yates",
+                difficulty: 3,
+                equipment: "Barbell, Plates",
+                primaryMuscles: ["Lower Lats", "Biceps", "Lower Back"],
+                icon: "🏆",
+                formIllustration: "🧍🔄 ↗️💪 ↘️\nMore upright • Underhand row • To hips",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Bent-Over_Rows/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Bent-Over_Rows/1.jpg"
+                ],
+                steps: [
+                    "Stand more upright than traditional rows (30-45 degrees)",
+                    "Grip bar with underhand grip, shoulder width",
+                    "Pull bar explosively to lower abdomen/hips",
+                    "Use controlled momentum (not strict form)",
+                    "Squeeze lats hard at top",
+                    "Lower with control but not slow"
+                ],
+                commonMistakes: [
+                    "Standing too upright (not enough bend)",
+                    "Using too light weight (meant to be heavy)",
+                    "Being too strict with form",
+                    "Not rowing to hips"
+                ],
+                safetyTips: [
+                    "Some body english is acceptable",
+                    "Build up to heavy weights gradually",
+                    "Focus on back engagement",
+                    "Dorian Yates' favorite back builder"
+                ],
+                risks: "Lower back strain, bicep tears with heavy weight",
+                energySaving: "Allows heavy weight for massive back growth"
+            },
+            {
+                name: "Machine High Rows",
+                description: "Machine rowing variation targeting upper back and traps",
+                difficulty: 1,
+                equipment: "High Row Machine",
+                primaryMuscles: ["Upper Traps", "Rhomboids", "Rear Delts"],
+                icon: "🎰",
+                formIllustration: "🪑⬆️ 🤲💪 ⬅️\nSit tall • Pull to chest • Squeeze shoulder blades",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lever_High_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lever_High_Row/1.jpg"
+                ],
+                steps: [
+                    "Adjust seat so handles are at upper chest height",
+                    "Grip handles with desired grip",
+                    "Pull handles toward upper chest/collarbone",
+                    "Drive elbows back and squeeze shoulder blades",
+                    "Hold peak contraction",
+                    "Extend arms slowly back to start"
+                ],
+                commonMistakes: [
+                    "Seat height too low or high",
+                    "Using momentum to pull",
+                    "Not squeezing shoulder blades",
+                    "Incomplete range of motion"
+                ],
+                safetyTips: [
+                    "Perfect for beginners",
+                    "Safe for heavy weights",
+                    "Great for muscle building",
+                    "Focus on contraction"
+                ],
+                risks: "Minimal - very safe machine exercise",
+                energySaving: "Allows focus on upper back without fatigue from stabilization"
+            },
+            {
+                name: "Bent Over Reverse Flyes",
+                description: "Rear delt and upper back isolation with dumbbells",
+                difficulty: 2,
+                equipment: "Dumbbells",
+                primaryMuscles: ["Rear Delts", "Rhomboids", "Mid Traps"],
+                icon: "🦋",
+                formIllustration: "↘️🤲 ↔️💪 🤲↘️\nBend over • Raise to sides • Squeeze back",
+                images: [
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Rear_Delt_Raise/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Rear_Delt_Raise/1.jpg"
+                ],
+                steps: [
+                    "Hinge at hips with flat back, dumbbells hanging",
+                    "Keep slight bend in elbows throughout",
+                    "Raise dumbbells out to sides in arc motion",
+                    "Squeeze rear delts and upper back at top",
+                    "Focus on pulling with back, not arms",
+                    "Lower slowly to starting position"
+                ],
+                commonMistakes: [
+                    "Using too much weight",
+                    "Bending elbows during movement",
+                    "Not hinging forward enough",
+                    "Rounding back during exercise"
+                ],
+                safetyTips: [
+                    "Use light to moderate weight",
+                    "Focus on muscle contraction",
+                    "Perfect for high reps",
+                    "Great for shoulder health"
+                ],
+                risks: "Lower back strain from bent position, shoulder strain if too heavy",
+                energySaving: "Essential for balanced shoulder development and injury prevention"
+            }
+        ];

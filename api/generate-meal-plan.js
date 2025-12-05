@@ -1,61 +1,57 @@
 // Backend API endpoint for meal plan generation using Claude AI
 // This file should be deployed to your server (e.g., Vercel, Netlify Functions, or Express.js)
 
+import { callClaude, getClaudeModel } from './_lib/anthropic.js';
+import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+
+const corsOptions = {
+    methods: ['POST', 'OPTIONS'],
+    headers: ['Content-Type'],
+};
+
 export default async function handler(req, res) {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    if (handleCorsPreflight(req, res, corsOptions)) {
+        return;
     }
+    applyCors(res, corsOptions);
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+    if (!ensureMethod(req, res, ['POST'])) {
+        return;
     }
 
     try {
-        const { prompt, userToken } = req.body;
+        const body = req.body || {};
+        const { prompt, userToken } = body;
 
         // Validate user token (implement your auth logic here)
         if (!userToken) {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        // Call Claude AI API
-        const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.CLAUDE_API_KEY, // Store your Claude API key in environment variables
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-sonnet-20240229',
-                max_tokens: 4000,
-                messages: [
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ]
-            })
-        });
-
-        if (!claudeResponse.ok) {
-            throw new Error(`Claude API error: ${claudeResponse.status}`);
+        if (!process.env.CLAUDE_API_KEY) {
+            return res.status(500).json({
+                error: 'Claude API key missing',
+                message: 'Configure CLAUDE_API_KEY in environment variables',
+            });
         }
 
-        const claudeData = await claudeResponse.json();
-        const mealPlan = claudeData.content[0].text;
+        // Call Claude AI API
+        const result = await callClaude({
+            prompt,
+            maxTokens: 4000,
+            temperature: 0.3,
+            tags: ['meal-plan', 'single-endpoint'],
+        });
+        const mealPlan = result.text;
 
         // Format the meal plan for better display
         const formattedMealPlan = formatMealPlan(mealPlan);
 
         res.status(200).json({
             success: true,
-            mealPlan: formattedMealPlan
+            mealPlan: formattedMealPlan,
+            model: getClaudeModel(),
+            apiKeyRedacted: result.metadata.apiKey,
         });
 
     } catch (error) {

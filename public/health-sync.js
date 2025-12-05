@@ -5,7 +5,10 @@ class HealthSync {
     constructor() {
         this.isAvailable = false;
         this.Health = null;
+        this.HealthTotals = null;
         this.lastSync = null;
+        this.dailyTotalsCache = null;
+        this.dailyTotalsCacheDate = null;
     }
 
     resolveHealthPlugin() {
@@ -45,7 +48,182 @@ class HealthSync {
         return null;
     }
 
+    resolveTotalsPlugin() {
+        if (this.HealthTotals) {
+            return this.HealthTotals;
+        }
+
+        if (typeof Capacitor === 'undefined') {
+            return null;
+        }
+
+        const pluginsContainer = Capacitor.Plugins;
+        if (pluginsContainer && pluginsContainer.HealthTotals) {
+            this.HealthTotals = pluginsContainer.HealthTotals;
+            return this.HealthTotals;
+        }
+
+        if (typeof Capacitor.registerPlugin === 'function') {
+            try {
+                this.HealthTotals = Capacitor.registerPlugin('HealthTotals');
+                if (this.HealthTotals) {
+                    return this.HealthTotals;
+                }
+            } catch (error) {
+                console.warn('⚠️ Failed to register HealthTotals plugin dynamically:', error);
+            }
+        }
+
+        if (typeof window !== 'undefined' && window.HealthTotals) {
+            this.HealthTotals = window.HealthTotals;
+            return this.HealthTotals;
+        }
+
+        return null;
+    }
+
+    async getAggregatedTotals(force = false) {
+        if (!this.isAvailable) {
+            return null;
+        }
+
+        const totalsPlugin = this.resolveTotalsPlugin();
+        if (!totalsPlugin || typeof totalsPlugin.getDailyTotals !== 'function') {
+            return null;
+        }
+
+        const todayKey = new Date().toISOString().split('T')[0];
+        if (!force && this.dailyTotalsCache && this.dailyTotalsCacheDate === todayKey) {
+            return this.dailyTotalsCache;
+        }
+
+        try {
+            const response = await totalsPlugin.getDailyTotals({ date: todayKey });
+            if (response && typeof response === 'object') {
+                this.dailyTotalsCache = response;
+                this.dailyTotalsCacheDate = todayKey;
+                console.log('📈 Aggregated health totals:', response);
+                return response;
+            }
+        } catch (error) {
+            console.error('❌ Failed to fetch aggregated health totals:', error);
+        }
+
+        return null;
+    }
+
+    getStoredUserProfile() {
+        let profile = {};
+        let legacyProfile = {};
+        try {
+            profile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}') || {};
+        } catch (error) {
+            profile = {};
+        }
+        try {
+            legacyProfile = JSON.parse(localStorage.getItem('userProfile') || '{}') || {};
+        } catch (error) {
+            legacyProfile = {};
+        }
+        return { ...legacyProfile, ...profile };
+    }
+
+    getLatestLoggedWeightFromStorage() {
+        const profile = this.getStoredUserProfile();
+        const parseNumber = (value) => {
+            const num = Number(value);
+            return Number.isFinite(num) && num > 0 ? num : null;
+        };
+
+        const directWeight = parseNumber(profile.weightLbs || profile.weight || profile.currentWeight);
+        if (directWeight) {
+            return directWeight;
+        }
+
+        const weightKg = parseNumber(profile.weightKg || profile.weightKG || profile.weight_kg);
+        if (weightKg) {
+            return weightKg * 2.20462;
+        }
+
+        try {
+            const weightEntries = JSON.parse(localStorage.getItem('fuelfire_weight_entries') || '[]');
+            if (Array.isArray(weightEntries) && weightEntries.length > 0) {
+                for (let i = weightEntries.length - 1; i >= 0; i -= 1) {
+                    const entry = weightEntries[i];
+                    const entryWeight = parseNumber(entry?.weight);
+                    if (entryWeight) {
+                        return entryWeight;
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Unable to read stored weight entries:', error);
+        }
+
+        return null;
+    }
+
+    getProfileMetricsFromStorage() {
+        const profile = this.getStoredUserProfile();
+        const parseNumber = (value) => {
+            const num = Number(value);
+            return Number.isFinite(num) && num > 0 ? num : null;
+        };
+
+        let heightInches = parseNumber(profile.heightInches || profile.height);
+        if (!heightInches) {
+            const heightFeet = parseNumber(profile.heightFeet || profile.height_feet);
+            const heightInchesPart = parseNumber(profile.heightInches || profile.height_inches);
+            if (heightFeet || heightInchesPart) {
+                heightInches = (heightFeet || 0) * 12 + (heightInchesPart || 0);
+            }
+        }
+        if (!heightInches) {
+            const heightCm = parseNumber(profile.heightCm || profile.height_cm || profile.heightCentimeters);
+            if (heightCm) {
+                heightInches = heightCm / 2.54;
+            }
+        }
+
+        let age = parseNumber(profile.ageYears || profile.age || profile.age_years);
+        if (!age) {
+            const birthYear = parseNumber(profile.birthYear || profile.birth_year);
+            if (birthYear) {
+                const currentYear = new Date().getFullYear();
+                const computedAge = currentYear - birthYear;
+                if (computedAge > 0 && computedAge < 120) {
+                    age = computedAge;
+                }
+            }
+        }
+
+        let weightLbs = parseNumber(profile.weightLbs || profile.weight || profile.currentWeight);
+        if (!weightLbs) {
+            const weightKg = parseNumber(profile.weightKg || profile.weightKG || profile.weight_kg);
+            if (weightKg) {
+                weightLbs = weightKg * 2.20462;
+            }
+        }
+        if (!weightLbs) {
+            weightLbs = this.getLatestLoggedWeightFromStorage();
+        }
+
+        const sex = (profile.sex || profile.gender || 'male').toString().toLowerCase();
+
+        return {
+            profile,
+            heightInches: heightInches || null,
+            age: age || null,
+            weightLbs: weightLbs || null,
+            sex
+        };
+    }
+
     async initialize() {
+        if (this.shouldSkipInitialization()) {
+            console.log('ℹ️ Health sync disabled for this context (tour/web preview).');
+            return false;
+        }
         try {
             console.log('🔍 Checking Capacitor availability...');
             if (typeof Capacitor === 'undefined') {
@@ -86,6 +264,13 @@ class HealthSync {
             console.log('✅ Health plugin found:', Health);
             this.Health = Health;
 
+            const totalsPlugin = this.resolveTotalsPlugin();
+            if (totalsPlugin) {
+                console.log('📊 HealthTotals plugin available:', totalsPlugin);
+            } else {
+                console.warn('⚠️ HealthTotals plugin not detected (aggregated metrics will fall back to sample sums).');
+            }
+
             // Check if Health is available on this device
             console.log('🔍 Checking if Health is available on device...');
             const availability = await Health.isAvailable();
@@ -105,6 +290,15 @@ class HealthSync {
             console.error('Error stack:', error.stack);
             return false;
         }
+    }
+
+    shouldSkipInitialization() {
+        if (typeof window === 'undefined') return false;
+        const params = new URLSearchParams(window.location.search || '');
+        if (params.get('tourPreview') === '1') {
+            return true;
+        }
+        return Boolean(window.__DISABLE_HEALTH_SYNC__);
     }
 
     async requestPermissions() {
@@ -158,6 +352,17 @@ class HealthSync {
         if (!this.isAvailable) return 0;
 
         try {
+            const totals = await this.getAggregatedTotals();
+            if (totals && typeof totals.steps === 'number' && Number.isFinite(totals.steps)) {
+                const rounded = Math.round(totals.steps);
+                console.log(`🚶 Aggregated steps total: ${rounded}`);
+                return rounded;
+            }
+        } catch (error) {
+            console.warn('⚠️ Aggregated steps unavailable, falling back to sample summation:', error);
+        }
+
+        try {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -191,7 +396,7 @@ class HealthSync {
                 }
             });
 
-            console.log(`🚶 Today's steps: ${totalSteps}`);
+            console.log(`🚶 Today's steps (summed): ${totalSteps}`);
             return Math.round(totalSteps);
         } catch (error) {
             console.error('❌ Error fetching steps:', error);
@@ -201,6 +406,26 @@ class HealthSync {
 
     async getTodayAverageHeartRate() {
         if (!this.isAvailable) return null;
+
+        try {
+            const totals = await this.getAggregatedTotals();
+            const aggregatedHeart = totals?.heartRate;
+            const average = aggregatedHeart && typeof aggregatedHeart.average === 'number' ? aggregatedHeart.average : null;
+            const min = aggregatedHeart && typeof aggregatedHeart.min === 'number' ? aggregatedHeart.min : null;
+            const max = aggregatedHeart && typeof aggregatedHeart.max === 'number' ? aggregatedHeart.max : null;
+
+            if (average !== null || min !== null || max !== null) {
+                const summary = {
+                    average: average !== null ? Math.round(average) : null,
+                    min: min !== null ? Math.round(min) : null,
+                    max: max !== null ? Math.round(max) : null
+                };
+                console.log('❤️ Aggregated heart rate summary:', summary);
+                return summary;
+            }
+        } catch (error) {
+            console.warn('⚠️ Aggregated heart rate unavailable, falling back to sample averaging:', error);
+        }
 
         try {
             const today = new Date();
@@ -255,22 +480,47 @@ class HealthSync {
         if (!this.isAvailable) return 0;
 
         try {
+            const totals = await this.getAggregatedTotals();
+            if (totals && typeof totals.activeEnergy === 'number' && Number.isFinite(totals.activeEnergy)) {
+                const rounded = Math.round(totals.activeEnergy);
+                console.log(`🔥 Aggregated active energy: ${rounded} kcal`);
+                return rounded;
+            }
+        } catch (error) {
+            console.warn('⚠️ Aggregated active energy unavailable, falling back to derived estimate:', error);
+        }
+
+        try {
             // Get steps, weight, and height for calculation
             const steps = await this.getTodaySteps();
-            const weight = await this.getWeight();
-            const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
-            const height = userProfile.height || 170; // Default to 170cm if not set
+            const weightFromHealth = await this.getWeight();
+            const profileMetrics = this.getProfileMetricsFromStorage();
+
+            const heightCm = (() => {
+                if (profileMetrics.heightInches) {
+                    return profileMetrics.heightInches * 2.54;
+                }
+                const storedProfile = profileMetrics.profile || {};
+                const candidate = Number(storedProfile.heightCm || storedProfile.height_cm || storedProfile.height);
+                if (Number.isFinite(candidate) && candidate > 0) {
+                    return candidate;
+                }
+                return 170;
+            })();
+
+            const weightLbs = weightFromHealth || profileMetrics.weightLbs;
+            const weightKg = weightLbs ? (weightLbs / 2.20462) : 80;
 
             // Calculate active calories from steps
             // Formula: Stride length = Height × 0.43
             //          Distance (km) = (Steps × Stride length) / 100000
             //          Active Calories = Distance × Weight × 1.036
 
-            const strideLength = height * 0.43; // in cm
+            const strideLength = heightCm * 0.43; // in cm
             const distanceKm = (steps * strideLength) / 100000;
-            const activeCalories = distanceKm * weight * 1.036;
+            const activeCalories = distanceKm * weightKg * 1.036;
 
-            console.log(`🔥 Active calories from steps: ${Math.round(activeCalories)} (${steps} steps, ${weight}kg, ${height}cm)`);
+            console.log(`🔥 Active calories (fallback) from steps: ${Math.round(activeCalories)} (${steps} steps, ${weightKg.toFixed(1)}kg, ${heightCm}cm)`);
             return Math.round(activeCalories);
         } catch (error) {
             console.error('❌ Error calculating calories:', error);
@@ -320,6 +570,17 @@ class HealthSync {
         if (!this.isAvailable) return 0;
 
         try {
+            const totals = await this.getAggregatedTotals();
+            if (totals && typeof totals.distanceMeters === 'number' && Number.isFinite(totals.distanceMeters)) {
+                const miles = totals.distanceMeters * 0.000621371;
+                console.log(`🏃 Aggregated distance: ${miles.toFixed(2)} miles`);
+                return miles;
+            }
+        } catch (error) {
+            console.warn('⚠️ Aggregated distance unavailable, falling back to sample summation:', error);
+        }
+
+        try {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -337,7 +598,7 @@ class HealthSync {
                 }, 0);
 
             const miles = totalDistanceMeters * 0.000621371;
-            console.log(`🏃 Distance: ${miles.toFixed(2)} miles`);
+            console.log(`🏃 Distance (summed): ${miles.toFixed(2)} miles`);
             return miles;
         } catch (error) {
             console.error('❌ Error fetching distance:', error);
@@ -346,7 +607,14 @@ class HealthSync {
     }
 
     async getWeight() {
-        if (!this.isAvailable) return null;
+        const fallbackWeight = this.getLatestLoggedWeightFromStorage();
+
+        if (!this.isAvailable) {
+            if (fallbackWeight) {
+                console.log(`⚖️ Using stored weight (no native health available): ${fallbackWeight.toFixed(1)} lbs`);
+            }
+            return fallbackWeight;
+        }
 
         try {
             const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
@@ -365,10 +633,13 @@ class HealthSync {
                 return weightLbs;
             }
 
-            return null;
+            if (fallbackWeight) {
+                console.log(`⚖️ Falling back to stored weight: ${fallbackWeight.toFixed(1)} lbs`);
+            }
+            return fallbackWeight;
         } catch (error) {
             console.error('❌ Error fetching weight:', error);
-            return null;
+            return fallbackWeight;
         }
     }
 
@@ -441,58 +712,108 @@ class HealthSync {
         console.log('🔄 Syncing all health data...');
 
         try {
-            // Get active energy and supporting metrics from Apple Health
-            const [activeEnergy, heartRateSummary] = await Promise.all([
+            const aggregatedTotals = await this.getAggregatedTotals(true);
+
+            const [steps, heartRateSummary, activeEnergy, distanceMiles, workouts, sleepHours] = await Promise.all([
+                this.getTodaySteps(),
+                this.getTodayAverageHeartRate(),
                 this.getTodayCaloriesBurned(),
-                this.getTodayAverageHeartRate()
+                this.getDistance(),
+                this.getTodayWorkouts(),
+                this.getTodaySleep()
             ]);
+
             let weight = await this.getWeight();
+            const profileMetrics = this.getProfileMetricsFromStorage();
 
-            // Try to get user profile for BMR calculation
-            const userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || '{}');
-            let bmr = 0;
-            let totalCaloriesBurned = activeEnergy;
+            if ((!weight || Number.isNaN(weight)) && profileMetrics.weightLbs) {
+                weight = profileMetrics.weightLbs;
+                console.log(`⚖️ Using stored profile weight for BMR calculation: ${weight.toFixed(1)} lbs`);
+            }
 
-            if ((!weight || Number.isNaN(weight)) && userProfile && userProfile.weight) {
-                const profileWeight = parseFloat(userProfile.weight);
-                if (!Number.isNaN(profileWeight) && profileWeight > 0) {
-                    weight = profileWeight;
-                    console.log('⚖️ Using profile weight for BMR calculation:', profileWeight);
+            weight = Number(weight);
+            if (Number.isFinite(weight)) {
+                weight = Math.round(weight * 10) / 10;
+            } else {
+                weight = null;
+            }
+
+            const hasMetricsForBmr = weight && profileMetrics.heightInches && profileMetrics.age;
+            let bmr = hasMetricsForBmr
+                ? this.calculateBMR(weight, profileMetrics.heightInches, profileMetrics.age, profileMetrics.sex)
+                : 0;
+
+            if (!hasMetricsForBmr) {
+                console.log('⚠️ Missing metrics for BMR calculation.', {
+                    hasWeight: Boolean(weight),
+                    heightInches: profileMetrics.heightInches || null,
+                    age: profileMetrics.age || null
+                });
+            }
+
+            if (!bmr || !Number.isFinite(bmr) || bmr <= 0) {
+                const cachedBmr = parseInt(localStorage.getItem('fuelfire_last_bmr') || '0', 10);
+                if (cachedBmr > 0) {
+                    bmr = cachedBmr;
+                    console.log(`📦 Using cached BMR from storage: ${cachedBmr}`);
+                } else if (weight) {
+                    const assumedHeight = profileMetrics.heightInches || 70;
+                    const assumedAge = profileMetrics.age || 30;
+                    bmr = this.calculateBMR(weight, assumedHeight, assumedAge, profileMetrics.sex);
+                    console.log(`🧮 Estimated fallback BMR using assumptions: ${bmr}`);
                 }
             }
 
-            if (weight && userProfile.age && userProfile.height) {
-                // Calculate BMR from user profile
-                bmr = this.calculateBMR(weight, userProfile.height, userProfile.age, userProfile.sex);
-                totalCaloriesBurned = activeEnergy + bmr;
-                console.log(`🔥 Total calories: ${activeEnergy} (active) + ${bmr} (BMR) = ${totalCaloriesBurned}`);
-            } else {
-                console.log('⚠️ Missing profile data for BMR (need weight, height, age). Using active energy only.');
-                totalCaloriesBurned = activeEnergy;
+            if (bmr && Number.isFinite(bmr) && bmr > 0) {
+                localStorage.setItem('fuelfire_last_bmr', String(Math.round(bmr)));
+            }
+
+            const totalCaloriesBurned = activeEnergy + (bmr || 0);
+
+            if (weight && Number.isFinite(weight) && weight > 0) {
+                try {
+                    const profile = { ...(profileMetrics.profile || {}) };
+                    const storedWeight = Number(profile.weight);
+                    if (!Number.isFinite(storedWeight) || Math.abs(storedWeight - weight) > 0.01) {
+                        profile.weight = Math.round(weight * 10) / 10;
+                        profile.updatedAt = new Date().toISOString();
+                        profile.weightSource = 'apple-health';
+                        localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+                        localStorage.setItem('fuelfire_profile_updated', Date.now().toString());
+                        console.log(`🗂️ Stored weight updated from Health: ${profile.weight} lbs`);
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Unable to persist weight to profile:', error);
+                }
             }
 
             const data = {
-                steps: await this.getTodaySteps(),
+                steps,
                 heartRate: heartRateSummary,
-                activeEnergy: activeEnergy,
-                bmr: bmr,
+                activeEnergy,
+                bmr,
                 caloriesBurned: totalCaloriesBurned,
-                workouts: await this.getTodayWorkouts(),
-                distance: await this.getDistance(),
-                weight: weight,
-                sleep: await this.getTodaySleep(),
-                syncTime: new Date().toISOString()
+                workouts,
+                distance: distanceMiles,
+                distanceMeters: aggregatedTotals?.distanceMeters ?? null,
+                weight: weight ?? null,
+                sleep: sleepHours,
+                syncTime: new Date().toISOString(),
+                aggregatedTotals: aggregatedTotals || null
             };
 
             // Check if we got any real data (not just zeros/nulls)
             // This helps detect permission issues
-            const hasRealData = data.steps > 0 ||
-                               data.heartRate !== null ||
-                               data.caloriesBurned > 0 ||
-                               data.workouts.length > 0 ||
-                               data.distance > 0 ||
-                               data.weight !== null ||
-                               data.sleep > 0;
+            const hasRealData = Boolean(aggregatedTotals) ||
+                               (Number.isFinite(steps) && steps > 0) ||
+                               (heartRateSummary && (Number.isFinite(heartRateSummary.average) ||
+                                                     Number.isFinite(heartRateSummary.min) ||
+                                                     Number.isFinite(heartRateSummary.max))) ||
+                               (Number.isFinite(activeEnergy) && activeEnergy > 0) ||
+                               (Array.isArray(workouts) && workouts.length > 0) ||
+                               (Number.isFinite(distanceMiles) && distanceMiles > 0) ||
+                               (Number.isFinite(weight) && weight > 0) ||
+                               (Number.isFinite(sleepHours) && sleepHours > 0);
 
             if (!hasRealData) {
                 console.log('⚠️ No health data returned - permissions may not be granted');

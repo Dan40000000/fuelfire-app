@@ -530,9 +530,30 @@
             updateProgress();
         }
 
+        function escapeAttribute(value) {
+            return (value || '').toString()
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function formatLocationLabel(loc) {
+            const labels = {
+                home: 'Home Setup',
+                hotel: 'Hotel Gym',
+                gym: 'Full Gym',
+                park: 'Outdoor/Park'
+            };
+            if (!loc) return '';
+            return labels[loc] || loc.charAt(0).toUpperCase() + loc.slice(1);
+        }
+
         function renderExercises() {
             const container = document.getElementById('exercise-list');
             let html = '';
+            const originalLocation = workoutData.location || null;
 
             workoutData.exercises.forEach((exercise, index) => {
                 const numSets = parseInt(exercise.sets) || 3;
@@ -554,20 +575,36 @@
                     'full-body': 'techniques'
                 };
                 const pageName = exercise.muscle && muscleToPage[exercise.muscle] ? muscleToPage[exercise.muscle] : 'techniques';
-                const techniquePageUrl = `workout-${pageName}.html`;
+                const formMuscle = pageName;
+                const safeName = escapeAttribute(exercise.name || `Exercise ${index + 1}`);
+                const safeNotes = exercise.notes ? escapeAttribute(exercise.notes) : '';
+                const safeMuscle = escapeAttribute(formMuscle);
+                const safeSets = escapeAttribute(exercise.sets || '');
+                const safeReps = escapeAttribute(exercise.reps || '');
+                const safeRest = escapeAttribute(exercise.rest || '');
+                const needsLocationHint = Boolean(originalLocation && exercise.baseLocation && exercise.baseLocation !== originalLocation);
+                const locationLabel = needsLocationHint ? escapeAttribute(formatLocationLabel(exercise.baseLocation)) : '';
 
                 html += `
                     <div class="exercise-tracker" id="exercise-${index}">
                         <div class="exercise-header">
-                            <div class="exercise-name">${exercise.name}</div>
+                            <div class="exercise-name">${safeName}</div>
                             <div class="exercise-number">${index + 1}</div>
                         </div>
                         <div class="exercise-target">
-                            Target: ${exercise.sets} • ${exercise.reps} • ${exercise.rest} rest
-                            ${exercise.notes ? `<br><em style="font-size: 12px;">${exercise.notes}</em>` : ''}
+                            Target: ${safeSets} • ${safeReps} • ${safeRest} rest
+                            ${exercise.focus ? `<br><strong style="font-size: 12px; color: var(--primary-dark);">Focus:</strong> <span style="font-size: 12px; color: var(--primary-dark);">${escapeAttribute(exercise.focus)}</span>` : ''}
+                            ${needsLocationHint ? `<br><strong style="font-size: 12px; color: #888;">Setup:</strong> <span style="font-size: 12px; color: #888;">${locationLabel}</span>` : ''}
+                            ${exercise.notes ? `<br><em style="font-size: 12px;">${safeNotes}</em>` : ''}
                         </div>
                         <div style="margin: 10px 0;">
-                            <a href="${techniquePageUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #4B9CD3 0%, #13294B 100%); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: bold; text-decoration: none; transition: all 0.3s ease;">View Form & Technique</a>
+                            <button type="button"
+                                    data-form-help="true"
+                                    data-form-muscle="${safeMuscle}"
+                                    data-form-name="${safeName}"
+                                    style="display: inline-block; padding: 8px 16px; background: linear-gradient(135deg, #4B9CD3 0%, #13294B 100%); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.3s ease;">
+                                Form Help
+                            </button>
                         </div>
                         <div class="set-inputs">
                 `;

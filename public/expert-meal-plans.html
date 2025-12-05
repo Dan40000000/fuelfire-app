@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Expert Meal Plans | FuelFire</title>
+    <link rel="stylesheet" href="styles.css?v=24.0">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0c1424 0%, #081022 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 28px 22px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 8px;
+        }
+
+        .plan-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .expert-badge {
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .plan-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 12px 0 8px;
+        }
+
+        .expert-name {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 12px;
+        }
+
+        .plan-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .stat-pill {
+            background: rgba(255,255,255,0.1);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+        }
+
+        .plan-description {
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .price-tag {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4B9CD3;
+            margin-bottom: 16px;
+        }
+
+        .cta-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            border: none;
+            color: #fff;
+            padding: 16px;
+            font-size: 1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 45px rgba(75,156,211,0.45);
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-pill {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-pill.active {
+            background: linear-gradient(135deg, #4B9CD3, #7BAFD4);
+            border-color: transparent;
+            color: #0b1628;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥗 Expert Meal Plans</h1>
+            <p style="opacity: 0.8;">Created by registered dietitians</p>
+        </div>
+
+        <div class="filter-pills" id="filterPills">
+            <button class="filter-pill active" data-filter="all">All Plans</button>
+            <button class="filter-pill" data-filter="fat-loss">Fat Loss</button>
+            <button class="filter-pill" data-filter="muscle-building">Muscle Building</button>
+            <button class="filter-pill" data-filter="performance">Performance</button>
+            <button class="filter-pill" data-filter="health">Health</button>
+        </div>
+
+        <div id="plansList"></div>
+    </div>
+
+    <script>
+        const expertMealPlans = [
+            {
+                id: 'fat-loss-pro',
+                title: 'Professional Fat Loss Protocol',
+                expert: 'Dr. Amanda Foster, RD',
+                category: 'fat-loss',
+                calories: '1800-2200',
+                macros: 'High Protein, Moderate Carb',
+                duration: '8 weeks',
+                price: 149,
+                description: 'Scientifically-designed meal plan for sustainable fat loss. Includes 56 days of meals, macro tracking, and weekly adjustments.',
+                features: ['8 weeks of daily meals', 'Macro calculator included', 'Weekly progress check-ins', '100+ recipes']
+            },
+            {
+                id: 'muscle-building-elite',
+                title: 'Elite Muscle Building Plan',
+                expert: 'Dr. Amanda Foster, RD',
+                category: 'muscle-building',
+                calories: '2800-3200',
+                macros: 'High Protein, High Carb',
+                duration: '12 weeks',
+                price: 199,
+                description: 'Designed for serious lifters. Optimized nutrient timing, pre/post-workout meals, and muscle-building macros.',
+                features: ['12 weeks of meals', 'Nutrient timing protocols', 'Bulk & cut phases', 'Supplement guide']
+            },
+            {
+                id: 'performance-athlete',
+                title: 'Athletic Performance Nutrition',
+                expert: 'Kevin Park, MS, RDN',
+                category: 'performance',
+                calories: '2400-2800',
+                macros: 'Balanced Performance',
+                duration: '8 weeks',
+                price: 169,
+                description: 'Fuel your training like a pro athlete. Sport-specific nutrition strategies for endurance and strength sports.',
+                features: ['Sport-specific plans', 'Recovery nutrition', 'Competition day protocols', 'Hydration strategies']
+            },
+            {
+                id: 'metabolic-health',
+                title: 'Metabolic Health Reset',
+                expert: 'Kevin Park, MS, RDN',
+                category: 'health',
+                calories: '2000-2400',
+                macros: 'Blood Sugar Optimized',
+                duration: '6 weeks',
+                price: 129,
+                description: 'Reverse metabolic syndrome and optimize blood sugar. Anti-inflammatory foods and gut health focus.',
+                features: ['Blood sugar optimization', 'Anti-inflammatory foods', 'Gut health protocols', 'Lab interpretation guide']
+            },
+            {
+                id: 'lifestyle-sustainable',
+                title: 'Sustainable Lifestyle Plan',
+                expert: 'Dr. Lisa Thompson, RD',
+                category: 'health',
+                calories: '2000-2500',
+                macros: 'Flexible & Sustainable',
+                duration: '4 weeks',
+                price: 99,
+                description: 'Learn to eat healthy for life. Focus on habits, flexibility, and enjoyment without restriction.',
+                features: ['Flexible meal framework', 'Restaurant guide', 'Meal prep strategies', 'Habit building system']
+            },
+            {
+                id: 'keto-performance',
+                title: 'Ketogenic Performance Plan',
+                expert: 'Dr. Amanda Foster, RD',
+                category: 'fat-loss',
+                calories: '1800-2200',
+                macros: 'Very Low Carb, High Fat',
+                duration: '6 weeks',
+                price: 149,
+                description: 'Properly implemented ketogenic diet for fat loss and mental clarity. Includes keto-adaptation phase.',
+                features: ['Keto adaptation protocol', 'Electrolyte management', 'Macro tracking tools', '80+ keto recipes']
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        function renderPlans(filter = 'all') {
+            const container = document.getElementById('plansList');
+            const filtered = filter === 'all'
+                ? expertMealPlans
+                : expertMealPlans.filter(p => p.category === filter);
+
+            container.innerHTML = filtered.map(plan => `
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <span class="expert-badge">✓ EXPERT CREATED</span>
+                    </div>
+                    <div class="plan-title">${plan.title}</div>
+                    <div class="expert-name">By ${plan.expert}</div>
+                    <div class="plan-stats">
+                        <span class="stat-pill">⏱️ ${plan.duration}</span>
+                        <span class="stat-pill">🔥 ${plan.calories} cal</span>
+                        <span class="stat-pill">📊 ${plan.macros}</span>
+                    </div>
+                    <div class="plan-description">${plan.description}</div>
+                    <ul style="opacity: 0.9; margin: 16px 0; padding-left: 20px;">
+                        ${plan.features.map(f => `<li style="margin-bottom: 8px;">${f}</li>`).join('')}
+                    </ul>
+                    <div class="price-tag">$${plan.price}</div>
+                    <button class="cta-btn" onclick="purchasePlan('${plan.id}')">Purchase Plan</button>
+                </div>
+            `).join('');
+        }
+
+        function purchasePlan(planId) {
+            const plan = expertMealPlans.find(p => p.id === planId);
+            alert(`🎉 Purchase feature coming soon!\n\nYou selected:\n${plan.title}\nPrice: $${plan.price}\n\nYou'll receive:\n${plan.features.join('\n')}`);
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                const filter = pill.dataset.filter;
+                renderPlans(filter);
+            });
+        });
+
+        // Initial render
+        renderPlans();
+    </script>
+</body>
+</html>

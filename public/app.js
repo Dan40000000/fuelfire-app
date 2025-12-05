@@ -1640,6 +1640,12 @@ function updateInjuries(checkbox, injury) {
 
 // Generate workout with AI
 async function generateWorkout() {
+    if (typeof requireAIAccess === 'function' && !requireAIAccess('Custom AI workout')) {
+        document.getElementById('custom-workout-quiz').style.display = 'block';
+        document.getElementById('generating-workout').style.display = 'none';
+        return;
+    }
+
     document.getElementById('custom-workout-quiz').style.display = 'none';
     document.getElementById('generating-workout').style.display = 'block';
     
@@ -3705,7 +3711,11 @@ function finishWorkout() {
 let currentWorkoutProgramId = null;
 
 function loadWorkoutHistory() {
-    const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    const rawHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    const workoutHistory = rawHistory.map(entry => ({
+        ...entry,
+        exercises: Array.isArray(entry.exercises) ? entry.exercises : []
+    }));
     const content = document.getElementById('workout-tracker-content');
 
     // Safety check - element might not exist on this page
@@ -3820,23 +3830,24 @@ function loadWorkoutHistory() {
                 <h4 style="color: var(--dark); margin-bottom: 15px;">🔥 Recent Completed Workouts</h4>
         `;
         
-        workoutHistory.slice(0, 5).forEach((workout, index) => {
-            const date = new Date(workout.date);
-            const timeAgo = getTimeAgo(date);
-            const programInfo = workoutPrograms[workout.programId] || { name: 'Custom Workout' };
-            
-            html += `
-                <div class="workout-history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px; animation-delay: ${index * 0.1}s;">
-                    <div>
-                        <div style="font-weight: bold; color: var(--dark);">${getWorkoutIcon(workout.programId)} ${workout.workoutName}</div>
-                        <div style="color: #666; font-size: 12px;">${timeAgo} • ${workout.duration} min • ${programInfo.name}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="color: var(--primary); font-weight: bold;">${workout.exercises.length} exercises</div>
-                        <div style="color: #666; font-size: 12px;">${getPRs(workout)}</div>
-                    </div>
+    workoutHistory.slice(0, 5).forEach((workout, index) => {
+        const date = new Date(workout.date);
+        const timeAgo = getTimeAgo(date);
+        const programInfo = workoutPrograms[workout.programId] || { name: 'Custom Workout' };
+        const exerciseCount = Array.isArray(workout.exercises) ? workout.exercises.length : 0;
+        
+        html += `
+            <div class="workout-history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px; animation-delay: ${index * 0.1}s;">
+                <div>
+                    <div style="font-weight: bold; color: var(--dark);">${getWorkoutIcon(workout.programId)} ${workout.workoutName}</div>
+                    <div style="color: #666; font-size: 12px;">${timeAgo} • ${workout.duration} min • ${programInfo.name}</div>
                 </div>
-            `;
+                <div style="text-align: right;">
+                    <div style="color: var(--primary); font-weight: bold;">${exerciseCount} exercises</div>
+                    <div style="color: #666; font-size: 12px;">${getPRs(workout)}</div>
+                </div>
+            </div>
+        `;
         });
         
         html += `
@@ -3958,15 +3969,29 @@ function getExerciseProgressData(history, exerciseName) {
     const data = [];
     
     history.forEach(workout => {
-        workout.exercises.forEach(exercise => {
-            if (exercise.name.toLowerCase().includes(exerciseName.toLowerCase())) {
-                const maxWeight = Math.max(...exercise.sets.map(set => set.weight));
-                if (maxWeight > 0) {
-                    data.push({
-                        date: workout.date,
-                        weight: maxWeight
-                    });
-                }
+        const exercises = Array.isArray(workout.exercises) ? workout.exercises : [];
+        exercises.forEach(exercise => {
+            const exerciseNameValue = (exercise.name || '').toLowerCase();
+            if (!exerciseNameValue.includes(exerciseName.toLowerCase())) {
+                return;
+            }
+            const sets = Array.isArray(exercise.sets) ? exercise.sets : [];
+            const weights = sets
+                .map(set => {
+                    const raw = typeof set === 'object' ? set.weight : set;
+                    const num = parseFloat(raw);
+                    return Number.isFinite(num) ? num : 0;
+                })
+                .filter(value => value > 0);
+            if (weights.length === 0) {
+                return;
+            }
+            const maxWeight = Math.max(...weights);
+            if (maxWeight > 0) {
+                data.push({
+                    date: workout.date,
+                    weight: maxWeight
+                });
             }
         });
     });
@@ -4004,8 +4029,20 @@ function getTimeAgo(date) {
 
 function getPRs(workout) {
     const prs = [];
-    workout.exercises.forEach(exercise => {
-        const maxWeight = Math.max(...exercise.sets.map(set => set.weight));
+    const exercises = Array.isArray(workout.exercises) ? workout.exercises : [];
+    exercises.forEach(exercise => {
+        const sets = Array.isArray(exercise.sets) ? exercise.sets : [];
+        const weights = sets
+            .map(set => {
+                const raw = typeof set === 'object' ? set.weight : set;
+                const num = parseFloat(raw);
+                return Number.isFinite(num) ? num : 0;
+            })
+            .filter(value => value > 0);
+        if (weights.length === 0) {
+            return;
+        }
+        const maxWeight = Math.max(...weights);
         if (maxWeight > 200) { // Arbitrary PR threshold
             prs.push(`${maxWeight} lbs PR`);
         }
@@ -4823,6 +4860,10 @@ function resetDietQuiz() {
 
 // AI Diet Plan Generation Function
 async function generateAIDietPlan() {
+    if (typeof requireAIAccess === 'function' && !requireAIAccess('AI diet creation')) {
+        return;
+    }
+
     // Save step 7 data
     dietData.budget = document.getElementById('quiz-budget').value;
     dietData.healthConditions = Array.from(document.querySelectorAll('.condition-check:checked')).map(cb => cb.value);
@@ -6572,6 +6613,7 @@ function updateFitnessDashboard() {
     generateWeeklyChart();
     updateRecentPRs();
     loadRecentWorkoutsDashboard();
+    updateRunningFocusCard();
 }
 
 function loadRecentWorkoutsDashboard() {
@@ -6603,6 +6645,141 @@ function loadRecentWorkoutsDashboard() {
     });
     
     container.innerHTML = html;
+}
+
+function updateRunningFocusCard() {
+    const weeklyEl = document.getElementById('running-weekly-miles');
+    const longestEl = document.getElementById('running-longest-run');
+    const streakEl = document.getElementById('running-streak-days');
+    const lastRunEl = document.getElementById('running-last-run');
+    const recentListEl = document.getElementById('running-recent-runs');
+
+    if (!weeklyEl || !longestEl || !streakEl || !lastRunEl || !recentListEl) {
+        return;
+    }
+
+    const history = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    const runningWorkouts = history.filter(isRunningWorkout);
+
+    if (runningWorkouts.length === 0) {
+        weeklyEl.textContent = '0.0';
+        longestEl.textContent = '—';
+        streakEl.textContent = '0';
+        lastRunEl.textContent = 'Log a run to see your latest pacing and mileage.';
+        recentListEl.innerHTML = '<div style="text-align:center; color:#666; font-size:12px;">No runs logged yet. Use the Manual Log to record your miles.</div>';
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekStart = new Date(today);
+    weekStart.setDate(weekStart.getDate() - 6);
+
+    let weeklyMiles = 0;
+    let longestRun = 0;
+
+    runningWorkouts.forEach(workout => {
+        const distance = getWorkoutDistanceMiles(workout);
+        const workoutDate = getWorkoutDate(workout);
+        if (distance && workoutDate >= weekStart) {
+            weeklyMiles += distance;
+        }
+        if (distance && distance > longestRun) {
+            longestRun = distance;
+        }
+    });
+
+    weeklyEl.textContent = weeklyMiles.toFixed(1);
+    longestEl.textContent = longestRun > 0 ? `${longestRun.toFixed(1)} mi` : '—';
+    streakEl.textContent = calculateRunStreak(runningWorkouts).toString();
+
+    const latestRun = runningWorkouts[0];
+    const latestDistance = getWorkoutDistanceMiles(latestRun);
+    const latestDate = getWorkoutDate(latestRun);
+    const latestLabel = latestRun?.workoutName || latestRun?.type || 'Run';
+    if (latestDistance) {
+        lastRunEl.textContent = `${latestLabel} • ${latestDistance.toFixed(1)} mi • ${latestDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}`;
+    } else {
+        lastRunEl.textContent = `${latestLabel} • ${latestDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}`;
+    }
+
+    const recentRuns = runningWorkouts.slice(0, 3);
+    let recentHtml = '';
+    recentRuns.forEach(run => {
+        const distance = getWorkoutDistanceMiles(run);
+        const pace = run.metrics?.averagePace || run.metrics?.split500 || '';
+        const date = getWorkoutDate(run);
+        const name = run.workoutName || run.type || 'Run';
+        recentHtml += `
+            <div style="display:flex; justify-content:space-between; align-items:center; background: var(--lighter-bg); padding: 10px; border-radius: 10px;">
+                <div>
+                    <div style="font-weight:600; color: var(--dark);">${name}</div>
+                    <div style="font-size:11px; color:#666;">${date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-weight:600; color: var(--primary);">${distance ? `${distance.toFixed(1)} mi` : `${run.duration || 0} min`}</div>
+                    ${pace ? `<div style="font-size:11px; color:#888;">Pace: ${pace}</div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    recentListEl.innerHTML = recentHtml;
+}
+
+function isRunningWorkout(workout) {
+    if (!workout) return false;
+    const type = (workout.type || '').toLowerCase();
+    const name = (workout.workoutName || '').toLowerCase();
+    const notes = (workout.notes || '').toLowerCase();
+    if (type.includes('run')) return true;
+    if (name.includes('run')) return true;
+    if (notes.includes('run')) return true;
+    if (workout.metrics && (workout.metrics.averagePace || workout.metrics.distanceMiles || workout.metrics.split500)) {
+        return true;
+    }
+    return false;
+}
+
+function getWorkoutDate(workout) {
+    const raw = workout?.date || workout?.timestamp || Date.now();
+    const date = new Date(raw);
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+
+function getWorkoutDistanceMiles(workout) {
+    if (!workout) return null;
+    if (typeof workout.distance === 'number' && Number.isFinite(workout.distance)) {
+        return workout.distance;
+    }
+    if (typeof workout.distance === 'string' && workout.distance.trim() !== '') {
+        const value = parseFloat(workout.distance);
+        if (Number.isFinite(value)) return value;
+    }
+    const metrics = workout.metrics || {};
+    if (typeof metrics.distanceMiles === 'number' && Number.isFinite(metrics.distanceMiles)) {
+        return metrics.distanceMiles;
+    }
+    if (typeof metrics.distanceMeters === 'number' && Number.isFinite(metrics.distanceMeters)) {
+        return metrics.distanceMeters / 1609.34;
+    }
+    return null;
+}
+
+function calculateRunStreak(runningWorkouts) {
+    const dayMs = 86400000;
+    const runDays = new Set();
+    runningWorkouts.forEach(workout => {
+        runDays.add(getWorkoutDate(workout).getTime());
+    });
+    const cursor = new Date();
+    cursor.setHours(0, 0, 0, 0);
+    let streak = 0;
+    while (runDays.has(cursor.getTime())) {
+        streak += 1;
+        cursor.setTime(cursor.getTime() - dayMs);
+    }
+    return streak;
 }
 
 function getTimeAgo(date) {

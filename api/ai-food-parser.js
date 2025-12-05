@@ -1,22 +1,27 @@
 // AI-Powered Food Parsing API
 // Uses Claude to parse natural food descriptions and return accurate nutrition data
 
+import { callClaude, getClaudeModel } from './_lib/anthropic.js';
+import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+
+const corsOptions = {
+    methods: ['POST', 'OPTIONS'],
+    headers: ['Content-Type'],
+};
+
 export default async function handler(req, res) {
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+    if (handleCorsPreflight(req, res, corsOptions)) {
+        return;
     }
+    applyCors(res, corsOptions);
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+    if (!ensureMethod(req, res, ['POST'])) {
+        return;
     }
 
     try {
-        const { query } = req.body;
+        const body = req.body || {};
+        const { query } = body;
         
         if (!query || query.trim().length < 2) {
             return res.status(400).json({ error: 'Food description required' });
@@ -37,6 +42,8 @@ export default async function handler(req, res) {
                 message: 'Using basic food parsing - add Claude API key for smarter recognition'
             });
         }
+
+        console.log(`🧠 Claude model in use: ${getClaudeModel()}`);
 
         // Use Claude AI to parse the food description
         const prompt = `Parse this food description and return ONLY a JSON array of foods with accurate nutrition data. No other text.
@@ -78,37 +85,22 @@ Return format (JSON array only):
 
 Use accurate nutrition data from major brands/USDA. Include realistic serving sizes. ALWAYS include sugar content in grams. ALWAYS include quantity field (default 1 if not specified).`;
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.CLAUDE_API_KEY,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-haiku-20240307',
-                max_tokens: 1000,
-                messages: [{ role: 'user', content: prompt }]
-            })
+        const { text: aiResponse } = await callClaude({
+            prompt,
+            maxTokens: 1200,
+            temperature: 0,
+            tags: ['food-parser'],
         });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`Claude API error ${response.status}:`, errorText);
-            throw new Error(`Claude API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const aiResponse = data.content[0].text.trim();
+        const trimmedResponse = aiResponse.trim();
         
-        console.log('🤖 Claude response:', aiResponse);
+        console.log('🤖 Claude response:', trimmedResponse);
 
         // Parse the AI response
         let foods;
         let isAIResponse = true;
         try {
             // Clean up the response to extract just the JSON
-            const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+            const jsonMatch = trimmedResponse.match(/\[[\s\S]*\]/);
             if (jsonMatch) {
                 foods = JSON.parse(jsonMatch[0]);
             } else {

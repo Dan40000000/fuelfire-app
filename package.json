@@ -8,6 +8,8 @@
     "build": "echo 'Static app with serverless API - ready for deployment'",
     "start": "npx serve . -p 3000",
     "deploy": "vercel --prod",
+    "verify:anthropic": "node scripts/verify-anthropic-model.js",
+    "verify": "npm run verify:anthropic",
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",
     "cap:update": "npx cap update",
@@ -51,6 +53,8 @@
     "@capacitor/cli": "^7.4.3",
     "@capacitor/core": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
-    "@capgo/capacitor-health": "^7.0.10"
+    "@capgo/capacitor-health": "^7.0.10",
+    "firebase-admin": "^13.6.0",
+    "stripe": "^20.0.0"
   }
 }

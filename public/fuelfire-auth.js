@@ -1,9 +1,19 @@
 // FuelFire Authentication System
 // Simple authentication for Claude meal plan generation
 
+const DEFAULT_API_BASE_URL = 'https://fuelfire-app.vercel.app';
+
+function normalizeBaseUrl(value) {
+    if (!value) return DEFAULT_API_BASE_URL;
+    return value.replace(/\/+$/, '');
+}
+
+const API_BASE_URL = normalizeBaseUrl(window.FUELFIRE_API_BASE_URL || DEFAULT_API_BASE_URL);
+const CLAUDE_MEAL_PLAN_URL = `${API_BASE_URL}/api/claude-meal-plan`;
+
 class FuelFireAuth {
     constructor() {
-        this.apiBaseUrl = window.location.origin;
+        this.apiBaseUrl = API_BASE_URL;
         this.init();
     }
 
@@ -57,36 +67,14 @@ class FuelFireAuth {
 
         try {
             console.log('🤖 Sending request to Claude AI...');
-            console.log('🔍 API URL:', `${this.apiBaseUrl}/api/claude-meal-plan`);
+            console.log('🔍 API URL:', CLAUDE_MEAL_PLAN_URL);
             console.log('🔍 Quiz data keys:', Object.keys(quizData));
             
-            const response = await fetch('https://fuelfire-app.vercel.app/api/claude-meal-plan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    quizData: quizData,
-                    userId: sessionId,
-                    timestamp: new Date().toISOString()
-                })
-            });
-
-            if (!response.ok) {
-                console.error('❌ API Response not OK:', response.status, response.statusText);
-                let errorData;
-                try {
-                    errorData = await response.json();
-                } catch (e) {
-                    const textData = await response.text();
-                    console.error('❌ Raw error response:', textData);
-                    throw new Error(`API Error ${response.status}: ${textData.substring(0, 200)}`);
-                }
-                console.error('❌ Error data:', errorData);
-                throw new Error(errorData.message || `API Error ${response.status}`);
-            }
-
-            const result = await response.json();
+            const result = await this.requestMealPlan({
+                quizData,
+                userId: sessionId,
+                timestamp: new Date().toISOString()
+            }, { context: 'multi-phase' });
             
             // Track successful generation
             this.incrementPlanCount();
@@ -107,35 +95,12 @@ class FuelFireAuth {
 
         try {
             console.log('🤖 Sending single-phase request to Claude AI...');
-            
-            const response = await fetch('https://fuelfire-app.vercel.app/api/claude-meal-plan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    quizData: quizData,
-                    userId: sessionId,
-                    phase: 'legacy', // Uses fallback prompt
-                    timestamp: new Date().toISOString()
-                })
-            });
-
-            if (!response.ok) {
-                console.error('❌ API Response not OK:', response.status, response.statusText);
-                let errorData;
-                try {
-                    errorData = await response.json();
-                } catch (e) {
-                    const textData = await response.text();
-                    console.error('❌ Raw error response:', textData);
-                    throw new Error(`API Error ${response.status}: ${textData.substring(0, 200)}`);
-                }
-                console.error('❌ Error data:', errorData);
-                throw new Error(errorData.message || `API Error ${response.status}`);
-            }
-
-            const result = await response.json();
+            const result = await this.requestMealPlan({
+                quizData,
+                userId: sessionId,
+                phase: 'legacy',
+                timestamp: new Date().toISOString()
+            }, { context: 'legacy' });
             
             // Convert to new format for compatibility
             return {
@@ -148,6 +113,35 @@ class FuelFireAuth {
             console.error('❌ Error generating meal plan:', error);
             throw error;
         }
+    }
+    
+    async requestMealPlan(body, { context = 'standard' } = {}) {
+        const payloadKeys = Object.keys(body || {});
+        console.log(`📦 Request payload keys [${context}]:`, payloadKeys);
+
+        const response = await fetch(CLAUDE_MEAL_PLAN_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            console.error(`❌ API Response not OK [${context}]:`, response.status, response.statusText);
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch (parseError) {
+                const textData = await response.text();
+                console.error(`❌ Raw error response [${context}]:`, textData);
+                throw new Error(`API Error ${response.status}: ${textData.substring(0, 200)}`);
+            }
+            console.error(`❌ Error data [${context}]:`, errorData);
+            throw new Error(errorData.message || `API Error ${response.status}`);
+        }
+
+        return await response.json();
     }
 
     // Get user stats (for your monitoring)

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FuelFire Coaching Sessions</title>
+    <link rel="stylesheet" href="styles.css?v=24.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="quick-food-entry.js"></script>
+    <script src="global-nav.js"></script>
+    <style>
+        body {
+            background: linear-gradient(145deg, #0e172b 0%, #0a1020 55%, #0b1328 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding-bottom: 96px;
+        }
+        .phone-container {
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .scheduler-shell {
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 26px 20px 60px;
+            padding-top: calc(22px + env(safe-area-inset-top));
+        }
+        .scheduler-card {
+            background: rgba(255,255,255,0.06);
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: 0 20px 55px rgba(4,12,30,0.45);
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .gradient-border {
+            border: 1px solid transparent;
+            border-radius: 24px;
+            background: linear-gradient(#10192d,#10192d) padding-box,
+                        linear-gradient(135deg,#4B9CD3,#8e54e9) border-box;
+        }
+        .coach-roster {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+        }
+        .coach-card {
+            border-radius: 16px;
+            padding: 14px;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            display: grid;
+            gap: 6px;
+        }
+        .coach-card:hover { transform: translateY(-3px); }
+        .coach-card.active {
+            border-color: #4B9CD3;
+            box-shadow: 0 16px 30px rgba(75,156,211,0.32);
+            transform: translateY(-4px);
+        }
+        .coach-header { display: flex; align-items: center; gap: 10px; }
+        .coach-avatar { width: 52px; height: 52px; border-radius: 14px; overflow: hidden; border: 2px solid rgba(255,255,255,0.18); }
+        .coach-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .coach-meta { display: grid; gap: 2px; }
+        .coach-name { font-weight: 800; font-size: 1rem; }
+        .coach-role { font-size: 0.85rem; color: rgba(255,255,255,0.78); }
+        .coach-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .coach-tag { padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 0.8rem; color: #dce9f7; }
+        .session-type { display: flex; gap: 12px; }
+        .session-type button {
+            flex: 1;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 16px;
+            background: transparent;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .session-type button.active { background: linear-gradient(135deg, #4B9CD3, #7BAFD4); border-color: transparent; color: #0b1628; }
+        .form-grid { display: grid; gap: 16px; }
+        label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; display: block; color: rgba(255,255,255,0.85); }
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(7,15,30,0.85);
+            color: #fff;
+            font-size: 0.95rem;
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        .summary-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 22px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.12);
+            margin-top: 16px;
+        }
+        .price-options { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 14px; }
+        .price-card {
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.07);
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: grid;
+            gap: 4px;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .price-card:hover { transform: translateY(-3px); }
+        .price-card.active { border-color: #4B9CD3; box-shadow: 0 14px 28px rgba(75,156,211,0.28); }
+        .price-label { font-weight: 800; }
+        .price-value { font-weight: 800; color: #79c1ff; }
+        .price-meta { color: rgba(255,255,255,0.78); font-size: 0.88rem; }
+        .cta-button {
+            width: 100%;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            border: none;
+            color: #fff;
+            padding: 16px;
+            font-size: 1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(75,156,211,0.45);
+        }
+        .micro-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .upcoming-list { display: grid; gap: 10px; margin-top: 12px; }
+        .upcoming-item {
+            background: rgba(255,255,255,0.08);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="status-bar"></div>
+            <div class="header">
+                <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
+                <div class="header-title" style="font-weight:800;">Book a Coach</div>
+            </div>
+
+            <div class="content">
+                <div class="scheduler-shell">
+                    <div class="scheduler-card gradient-border" style="text-align:center;">
+                        <p class="micro-badge">Concierge Booking</p>
+                        <h1 style="margin:10px 0 6px; font-size:1.65rem;">Book a Coach</h1>
+                        <p style="opacity:0.8; font-size:0.95rem;">Choose a specialist, pick your session format, and lock in white-glove coaching. AI summaries and follow-ups included.</p>
+                    </div>
+
+                    <div class="scheduler-card">
+                        <label style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Choose your pro</span>
+                            <span style="font-size:0.85rem; opacity:0.75;">Tap to select</span>
+                        </label>
+                        <div class="coach-roster" id="coachRoster"></div>
+                    </div>
+
+                    <div class="scheduler-card">
+                        <label>Session format</label>
+                        <div class="session-type" id="sessionType">
+                            <button class="active" data-mode="video">🎥 Video Chat</button>
+                            <button data-mode="phone">📞 Phone Call</button>
+                        </div>
+
+                        <div class="form-grid" style="margin-top:18px;">
+                            <div>
+                                <label for="sessionDate">Preferred date</label>
+                                <input type="date" id="sessionDate">
+                            </div>
+                            <div>
+                                <label for="sessionTime">Preferred time</label>
+                                <input type="time" id="sessionTime">
+                            </div>
+                            <div>
+                                <label for="focusArea">Focus area</label>
+                                <select id="focusArea">
+                                    <option value="fat-loss">Fat Loss & Metabolism</option>
+                                    <option value="hypertrophy">Muscle Building / Hypertrophy</option>
+                                    <option value="endurance">Endurance & Conditioning</option>
+                                    <option value="recovery">Recovery / Mobility</option>
+                                    <option value="nutrition">Nutrition & Meal Planning</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sessionNotes">Notes for your coach</label>
+                                <textarea id="sessionNotes" placeholder="Example: Working toward a sub-20 5K + keeping protein high on travel weeks."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="summary-card" id="sessionSummary">
+                            <strong>Session Summary</strong>
+                            <p style="margin:8px 0 0; opacity:0.85; font-size:0.9rem;">Video consultation with Performance Trainer · focus on Fat Loss & Metabolism.</p>
+                        </div>
+
+                        <div class="price-options" id="priceOptions">
+                            <div class="price-card active" data-plan="single">
+                                <div class="price-label">Single Session</div>
+                                <div class="price-value">$100</div>
+                                <div class="price-meta">60-minute 1:1, video or phone</div>
+                            </div>
+                            <div class="price-card" data-plan="double">
+                                <div class="price-label">2-Session Pack</div>
+                                <div class="price-value">$150</div>
+                                <div class="price-meta">$75 per session • book anytime</div>
+                            </div>
+                            <div class="price-card" data-plan="monthly">
+                                <div class="price-label">Concierge Monthly</div>
+                                <div class="price-value">$70 / mo</div>
+                                <div class="price-meta">Includes 1 free session every month</div>
+                            </div>
+                        </div>
+
+                        <button class="cta-button" id="submitBooking">Send Request + AI Prep</button>
+                    </div>
+
+                    <div class="scheduler-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2 style="margin:0; font-size:1.1rem;">Upcoming concierge slots</h2>
+                            <button style="background:rgba(255,255,255,0.15); border:none; color:#fff; padding:8px 14px; border-radius:12px; cursor:pointer;">Sync Calendar</button>
+                        </div>
+                        <div class="upcoming-list" id="upcomingList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-nav">
+                <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+                    <div class="nav-glow"></div>
+                    <div class="nav-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                            <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                            <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                            <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                            <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="nav-item" onclick="showQuickFoodEntry()">
+                    <div class="nav-glow"></div>
+                    <div class="nav-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                            <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.1);">
+                    <div class="nav-glow"></div>
+                    <div class="nav-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+                    <div class="nav-glow"></div>
+                    <div class="nav-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="nav-item" onclick="window.location.href='account.html'">
+                    <div class="nav-glow"></div>
+                    <div class="nav-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="8" r="5" stroke="white" stroke-width="2" fill="none"/>
+                            <path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">FuelFire</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item" onclick="window.location.href='index.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Home
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'create-workout')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="currentColor"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#fff"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#fff"/>
+                </svg>
+                Create Workout
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'saved-workouts')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9L11 5H19C19.5304 5 20.0391 5.21071 20.4142 5.58579C20.7893 5.96086 21 6.46957 21 7V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Saved Workouts
+            </div>
+            <div class="menu-item" onclick="goToScreen('index.html', 'track-workouts')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M3 3V18C3 18.5304 3.21071 19.0391 3.58579 19.4142C3.96086 19.7893 4.46957 20 5 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 14L12 9L16 13L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Track Workouts
+            </div>
+            <div class="menu-item" onclick="window.location.href='calorie-tracker.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M13.5 0.67C13.5 0.67 14.24 3.32 14.24 5.47C14.24 7.53 12.89 9.2 10.83 9.2C8.76 9.2 7.2 7.53 7.2 5.47L7.23 5.1C5.21 7.5 4 10.61 4 14C4 19.5 8.5 24 14 24C19.5 24 24 19.5 24 14C24 8.36 18.37 3.29 13.5 0.67Z" fill="currentColor"/>
+                </svg>
+                Calorie Tracker
+            </div>
+            <div class="menu-item" onclick="window.location.href='health-dashboard.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Health Dashboard
+            </div>
+            <div class="menu-item" data-nav="book-coach" onclick="window.location.href='coaching-scheduler.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; margin-right:8px;">
+                    <path d="M8 16L11 19L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Book a Coach
+            </div>
+            <div class="menu-item" id="menu-diet-creation" onclick="window.location.href='enhanced-diet-quiz.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <path d="M12 2V12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Diet Creation
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-plans.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Meal Plans
+            </div>
+            <div class="menu-item" onclick="window.location.href='meal-ideas.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 1V3M12 21V23M23 12H21M3 12H1M20.49 3.51L18.36 5.64M5.64 18.36L3.51 20.49M20.49 20.49L18.36 18.36M5.64 5.64L3.51 3.51" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Meal Ideas
+            </div>
+            <div class="menu-item" onclick="window.location.href='supplements.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <rect x="9" y="2" width="6" height="20" rx="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M9 8H15M9 12H15M9 16H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Supplements
+            </div>
+            <div class="menu-item" onclick="window.location.href='account.html'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="8" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Account
+            </div>
+            <div class="menu-item" onclick="showLogFoodMenu()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                Quick Log Meal
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const coachRosterEl = document.getElementById('coachRoster');
+        const sessionButtons = document.querySelectorAll('#sessionType button');
+        const priceCards = document.querySelectorAll('#priceOptions .price-card');
+        const summaryEl = document.getElementById('sessionSummary');
+        const focusEl = document.getElementById('focusArea');
+        const dateEl = document.getElementById('sessionDate');
+        const timeEl = document.getElementById('sessionTime');
+
+        const coaches = [
+            { id: 'sarah-pro', name: 'Dr. Sarah Mitchell', role: 'Performance Coach', tags: ['Biomechanics', 'Strength', 'ACL rehab'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80', type: 'trainer' },
+            { id: 'marcus-strength', name: 'Marcus Chen', role: 'Strength Specialist', tags: ['Powerlifting', 'Hypertrophy', 'Form tune-ups'], photo: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&w=300&q=80', type: 'trainer' },
+            { id: 'jessica-tonal', name: 'Jessica Rodriguez', role: 'Tonal Coach', tags: ['Glutes/legs', 'Lean mass', 'Fat loss'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80', type: 'trainer' },
+            { id: 'amanda-rdn', name: 'Dr. Amanda Foster', role: 'Sports Dietitian', tags: ['Performance fueling', 'Hormone health', 'Women’s health'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80', type: 'nutritionist' },
+            { id: 'kevin-rd', name: 'Kevin Park, RD', role: 'Clinical Nutrition', tags: ['Blood sugar', 'Macros', 'Travel tactics'], photo: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=300&q=80', type: 'nutritionist' },
+            { id: 'claire-rdn', name: 'Claire Benton, RDN', role: 'Nutritionist', tags: ['Metabolic health', 'Lab-guided', 'Macros'], photo: 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=300&q=80', type: 'nutritionist' }
+        ];
+
+        let selectedCoachId = coaches[0].id;
+        let sessionMode = 'video';
+        let selectedPlan = 'single';
+
+        function renderCoaches() {
+            coachRosterEl.innerHTML = '';
+            coaches.forEach(coach => {
+                const card = document.createElement('div');
+                card.className = 'coach-card';
+                if (coach.id === selectedCoachId) card.classList.add('active');
+                card.dataset.id = coach.id;
+                card.dataset.type = coach.type;
+                card.innerHTML = `
+                    <div class="coach-header">
+                        <div class="coach-avatar">
+                            <img src="${coach.photo}" alt="${coach.name}">
+                        </div>
+                        <div class="coach-meta">
+                            <div class="coach-name">${coach.name}</div>
+                            <div class="coach-role">${coach.role}</div>
+                        </div>
+                    </div>
+                    <div class="coach-tags">
+                        ${coach.tags.map(tag => `<span class="coach-tag">${tag}</span>`).join('')}
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    selectedCoachId = coach.id;
+                    renderCoaches();
+                    renderSummary();
+                });
+                coachRosterEl.appendChild(card);
+            });
+        }
+
+        sessionButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sessionButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                sessionMode = btn.dataset.mode;
+                renderSummary();
+            });
+        });
+
+        priceCards.forEach(card => {
+            card.addEventListener('click', () => {
+                priceCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                selectedPlan = card.dataset.plan;
+                renderSummary();
+            });
+        });
+
+        [focusEl, dateEl, timeEl, document.getElementById('sessionNotes')].forEach(el => {
+            el.addEventListener('input', renderSummary);
+        });
+
+        function getSelectedCoach() {
+            return coaches.find(c => c.id === selectedCoachId) || coaches[0];
+        }
+
+        function planLabel() {
+            if (selectedPlan === 'double') return '2-session pack ($150)';
+            if (selectedPlan === 'monthly') return 'Concierge Monthly ($70/mo, 1 free session)';
+            return 'Single session ($100)';
+        }
+
+        function renderSummary() {
+            const focusLabel = focusEl.options[focusEl.selectedIndex].text;
+            const dateLabel = dateEl.value ? new Date(dateEl.value).toLocaleDateString() : 'Next available day';
+            const timeLabel = timeEl.value ? timeEl.value : 'Flexible time';
+            const coach = getSelectedCoach();
+            const modeLabel = sessionMode === 'video' ? 'Video chat' : 'Phone call';
+            const plan = planLabel();
+            summaryEl.innerHTML = `<strong>Session Summary</strong>
+                <p style="margin:8px 0 6px; opacity:0.85; font-size:0.9rem;">${modeLabel} with ${coach.name} (${coach.role}) · focus on ${focusLabel}.<br>
+                Preferred: ${dateLabel} at ${timeLabel}.<br>
+                Plan: ${plan}.</p>`;
+        }
+        renderCoaches();
+        renderSummary();
+
+        const submitBtn = document.getElementById('submitBooking');
+        submitBtn.addEventListener('click', () => {
+            submitBtn.innerText = 'Request Sent ✓';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            createUpcomingEntry();
+        });
+
+        function createUpcomingEntry() {
+            const container = document.getElementById('upcomingList');
+            const block = document.createElement('div');
+            block.className = 'upcoming-item';
+            const coach = getSelectedCoach();
+            const focusLabel = focusEl.options[focusEl.selectedIndex].text;
+            const dateLabel = dateEl.value ? new Date(dateEl.value).toLocaleDateString() : 'TBD';
+            const timeLabel = timeEl.value || 'Scheduling';
+            block.innerHTML = `<div>
+                <strong>${coach.name} · ${focusLabel}</strong>
+                <div style="font-size:0.85rem; opacity:0.8;">${dateLabel} · ${timeLabel} · ${planLabel()}</div>
+            </div>
+            <span class="micro-badge">Pending</span>`;
+            container.prepend(block);
+        }
+    </script>
+</body>
+</html>

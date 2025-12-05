@@ -9,6 +9,195 @@ const WORKOUT_VOLUME_CHART = {
     120: { totalExercises: 14, setsPerExercise: 4, totalSets: 56, restBetweenSets: '120 sec' }
 };
 
+// Location fallback logic allows hotel/home users to still get workouts if a pool is light
+const LOCATION_FALLBACKS = {
+    home: ['home', 'hotel', 'park', 'gym'],
+    hotel: ['hotel', 'gym', 'home', 'park'],
+    gym: ['gym', 'hotel', 'home', 'park'],
+    park: ['park', 'home', 'hotel', 'gym'],
+    default: ['gym', 'home', 'hotel', 'park']
+};
+
+const WORKOUT_BALANCE_RULES = {
+    chest: {
+        required: ['upper-chest', 'mid-chest', 'lower-chest'],
+        optional: ['fly'],
+        keywords: {
+            'upper-chest': ['incline', 'upper', 'reverse grip', 'feet elevated', 'low-to-high'],
+            'mid-chest': ['flat', 'bench', 'push-up', 'push up', 'press', 'floor'],
+            'lower-chest': ['decline', 'dip', 'high-to-low', 'lower', 'deficit'],
+            fly: ['fly', 'cable', 'svend', 'pec deck', 'crossover', 'squeeze']
+        }
+    },
+    back: {
+        required: ['vertical-pull', 'horizontal-row'],
+        optional: ['posterior-chain', 'upper-back'],
+        keywords: {
+            'vertical-pull': ['pull-up', 'chin', 'lat pulldown', 'pulldown', 'pull down'],
+            'horizontal-row': ['row', 'meadows', 'seal', 'pendlay', 'cable row', 'machine row', 'inverted', 'australian'],
+            'posterior-chain': ['deadlift', 'dead lift', 'rdl', 'romanian', 'good morning', 'hyperextension', 'reverse hyper', 'hinge'],
+            'upper-back': ['face pull', 'kelso', 'shrug', 'rear delt', 'trap']
+        }
+    },
+    shoulders: {
+        required: ['overhead-press', 'lateral-raise', 'rear-delt'],
+        optional: ['front-raise'],
+        keywords: {
+            'overhead-press': ['press', 'push press', 'arnold', 'military', 'overhead'],
+            'lateral-raise': ['lateral', 'side raise', 'cable raise'],
+            'rear-delt': ['rear', 'reverse fly', 'face pull', 'bent-over raise', 'y-raise', 'posterior'],
+            'front-raise': ['front raise', 'plate raise']
+        }
+    },
+    quads: {
+        required: ['squat-pattern', 'lunge-split'],
+        optional: ['machine-quads'],
+        keywords: {
+            'squat-pattern': ['squat', 'front squat', 'hack squat', 'zercher', 'box squat'],
+            'lunge-split': ['lunge', 'split squat', 'step-up', 'step up', 'bulgarian'],
+            'machine-quads': ['leg press', 'leg extension', 'sled', 'belt squat']
+        }
+    },
+    hamstrings: {
+        required: ['hinge', 'leg-curl'],
+        optional: ['glute-ham'],
+        keywords: {
+            hinge: ['deadlift', 'dead lift', 'romanian', 'good morning', 'rdl', 'hip hinge', 'pull through'],
+            'leg-curl': ['curl', 'hamstring curl', 'leg curl'],
+            'glute-ham': ['glute-ham', 'nordic', 'slider', 'ham raise']
+        }
+    },
+    glutes: {
+        required: ['hip-hinge', 'abduction'],
+        optional: ['unilateral'],
+        keywords: {
+            'hip-hinge': ['hip thrust', 'glute bridge', 'deadlift', 'romanian', 'swing'],
+            abduction: ['kickback', 'clam', 'abduction', 'monster walk', 'band walk'],
+            unilateral: ['lunge', 'step-up', 'split squat', 'single-leg', 'pistol']
+        }
+    },
+    calves: {
+        required: ['standing-calf'],
+        optional: ['seated-calf', 'plyometric'],
+        keywords: {
+            'standing-calf': ['standing calf', 'calf raise', 'donkey'],
+            'seated-calf': ['seated calf', 'tib raise', 'soleus'],
+            plyometric: ['jump', 'hop', 'plyo']
+        }
+    },
+    core: {
+        required: ['anti-extension', 'rotation'],
+        optional: ['flexion', 'carry'],
+        keywords: {
+            'anti-extension': ['plank', 'ab wheel', 'dead bug', 'hollow', 'body saw'],
+            rotation: ['woodchop', 'russian twist', 'pallof', 'chop', 'twist'],
+            flexion: ['crunch', 'sit-up', 'leg raise', 'toe touch', 'jackknife'],
+            carry: ['carry', 'farmer', 'suitcase', 'walk']
+        }
+    },
+    'full-body': {
+        required: ['compound-lift', 'conditioning'],
+        optional: ['unilateral'],
+        keywords: {
+            'compound-lift': ['clean', 'snatch', 'thruster', 'deadlift', 'squat', 'swing', 'burpee'],
+            conditioning: ['row', 'bike', 'jump rope', 'kettlebell swing', 'mountain climber', 'battle rope', 'conditioning', 'cardio'],
+            unilateral: ['lunge', 'split squat', 'step-up', 'single-arm', 'single leg']
+        }
+    }
+};
+
+const EXERCISE_FOCUS_OVERRIDES = {
+    chest: {
+        'Low-to-High Cable Flyes': 'upper-chest',
+        'High-to-Low Cable Flyes': 'lower-chest',
+        'Decline Push-ups': 'lower-chest',
+        'Decline Barbell Bench Press': 'lower-chest',
+        'Incline Barbell Bench Press': 'upper-chest',
+        'Incline Dumbbell Press': 'upper-chest',
+        'Reverse Grip Bench Press': 'upper-chest',
+        'Deficit Push-ups': 'mid-chest',
+        'Dips': 'lower-chest'
+    },
+    back: {
+        'Deadlifts': 'posterior-chain',
+        'Romanian Deadlifts': 'posterior-chain',
+        'Good Mornings': 'posterior-chain',
+        'Face Pulls': 'upper-back',
+        'Hyperextensions': 'posterior-chain',
+        'Lat Pulldowns': 'vertical-pull',
+        'Pull-ups': 'vertical-pull',
+        'Pendlay Rows': 'horizontal-row',
+        'Seal Rows': 'horizontal-row',
+        'Inverted Rows': 'horizontal-row'
+    },
+    shoulders: {
+        'Face Pulls': 'rear-delt',
+        'Rear Delt Flyes': 'rear-delt',
+        'Arnold Press': 'overhead-press',
+        'Military Press': 'overhead-press',
+        'Lateral Raises': 'lateral-raise'
+    },
+    glutes: {
+        'Hip Thrusts': 'hip-hinge',
+        'Barbell Hip Thrusts': 'hip-hinge',
+        'Glute Bridges': 'hip-hinge',
+        'Banded Monster Walks': 'abduction',
+        'Cable Kickbacks': 'abduction'
+    },
+    calves: {
+        'Standing Calf Raises': 'standing-calf',
+        'Seated Calf Raises': 'seated-calf',
+        'Single-Leg Calf Raises': 'standing-calf'
+    },
+    core: {
+        'Pallof Press': 'rotation',
+        'Russian Twists': 'rotation',
+        'Plank': 'anti-extension',
+        'Hanging Leg Raises': 'flexion',
+        'Farmer\'s Carry': 'carry'
+    }
+};
+
+function shuffle(array) {
+    const cloned = [...array];
+    for (let i = cloned.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+    }
+    return cloned;
+}
+
+function computeExerciseFocus(muscle, exercise) {
+    if (!exercise) return 'general';
+    const overrides = EXERCISE_FOCUS_OVERRIDES[muscle];
+    if (overrides && overrides[exercise.name]) {
+        return overrides[exercise.name];
+    }
+
+    const rule = WORKOUT_BALANCE_RULES[muscle];
+    if (!rule) {
+        return 'general';
+    }
+
+    const text = `${exercise.name} ${exercise.notes || ''}`.toLowerCase();
+    const keywordsMap = rule.keywords || {};
+    for (const [focus, keywords] of Object.entries(keywordsMap)) {
+        if (keywords.some(keyword => text.includes(keyword))) {
+            return focus;
+        }
+    }
+
+    return 'general';
+}
+
+function formatFocusLabel(focus) {
+    if (!focus || focus === 'general') return 'Balanced Activation';
+    return focus
+        .split('-')
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+}
+
 // MASSIVE EXERCISE DATABASE
 const EXERCISE_DATABASE = {
     // ========== CHEST EXERCISES ==========
@@ -1431,30 +1620,91 @@ function getWorkoutFromDatabase(muscles, time, location, style) {
     const setsPerExercise = volumeChart.setsPerExercise;
     const restPeriod = volumeChart.restBetweenSets;
 
-    let workout = [];
-    const exercisesPerMuscle = Math.ceil(totalExercises / muscles.length);
+    const workout = [];
+    const exercisesPerMuscle = Math.max(1, Math.ceil(totalExercises / muscles.length));
 
-    muscles.forEach(muscle => {
-        const muscleExercises = EXERCISE_DATABASE[muscle][style][location];
+    const clonedMuscles = Array.isArray(muscles) ? [...muscles] : [muscles];
 
-        // Randomly select exercises from the pool
-        const shuffled = [...muscleExercises].sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, exercisesPerMuscle);
+    clonedMuscles.forEach(muscle => {
+        const muscleDatabase = EXERCISE_DATABASE[muscle];
+        if (!muscleDatabase) {
+            console.warn(`No exercise database found for muscle group: ${muscle}`);
+            return;
+        }
 
-        selected.forEach(exercise => {
+        const styleBucket = muscleDatabase[style] || muscleDatabase.routine || muscleDatabase.unique;
+        if (!styleBucket) {
+            console.warn(`No style bucket found for muscle ${muscle} and style ${style}`);
+            return;
+        }
+
+        const fallbackOrder = LOCATION_FALLBACKS[location] || LOCATION_FALLBACKS.default;
+        let locationUsed = null;
+        let locationExercises = [];
+
+        for (const candidate of fallbackOrder) {
+            if (styleBucket[candidate] && styleBucket[candidate].length) {
+                locationExercises = styleBucket[candidate];
+                locationUsed = candidate;
+                break;
+            }
+        }
+
+        if (!locationExercises.length) {
+            console.warn(`No exercises available for ${muscle} at any fallback location.`);
+            return;
+        }
+
+        const available = shuffle(locationExercises).map(exercise => ({
+            exercise,
+            focus: computeExerciseFocus(muscle, exercise)
+        }));
+
+        const selections = [];
+        const rule = WORKOUT_BALANCE_RULES[muscle];
+        const requiredFocuses = rule ? rule.required || [] : [];
+        const optionalFocuses = rule ? rule.optional || [] : [];
+
+        const takeFromFocus = focusName => {
+            const index = available.findIndex(item => item.focus === focusName);
+            if (index !== -1) {
+                const [picked] = available.splice(index, 1);
+                selections.push(picked);
+                return true;
+            }
+            return false;
+        };
+
+        requiredFocuses.forEach(focus => {
+            if (selections.length >= exercisesPerMuscle) return;
+            takeFromFocus(focus);
+        });
+
+        optionalFocuses.forEach(focus => {
+            if (selections.length >= exercisesPerMuscle) return;
+            takeFromFocus(focus);
+        });
+
+        while (selections.length < exercisesPerMuscle && available.length) {
+            selections.push(available.shift());
+        }
+
+        selections.forEach(entry => {
+            const { exercise, focus } = entry;
+            const formattedFocus = focus && focus !== 'general' ? formatFocusLabel(focus) : null;
             workout.push({
                 name: exercise.name,
                 sets: `${setsPerExercise} sets`,
                 reps: exercise.reps,
                 rest: restPeriod,
                 notes: exercise.notes,
-                muscle: muscle  // Add muscle group for linking to technique pages
+                muscle: muscle,
+                focus: formattedFocus,
+                baseLocation: locationUsed || location,
+                workoutStyle: style
             });
         });
     });
 
-    // Trim to exact number if we went over
-    workout = workout.slice(0, totalExercises);
-
-    return workout;
+    return workout.slice(0, totalExercises);
 }

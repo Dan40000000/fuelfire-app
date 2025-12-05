@@ -1,11 +1,21 @@
 // Simple test endpoint to check if Claude API key is working
-export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+import { callClaude, getClaudeModel } from './_lib/anthropic.js';
+import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+
+const corsOptions = {
+    methods: ['GET', 'POST', 'OPTIONS'],
+    headers: ['Content-Type'],
+};
+
+export default async function handler(req, res) {
+    if (handleCorsPreflight(req, res, corsOptions)) {
+        return;
+    }
+    applyCors(res, corsOptions);
+
+    if (!ensureMethod(req, res, ['GET', 'POST'])) {
+        return;
     }
 
     try {
@@ -30,45 +40,19 @@ export default async function handler(req, res) {
         }
 
         // Test a simple Claude API call
-        const testResponse = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': process.env.CLAUDE_API_KEY,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20241022',
-                max_tokens: 50,
-                messages: [
-                    {
-                        role: 'user',
-                        content: 'Say "API key is working!" and nothing else.'
-                    }
-                ]
-            })
+        const result = await callClaude({
+            prompt: 'Say "API key is working!" and nothing else.',
+            maxTokens: 20,
+            temperature: 0,
+            tags: ['healthcheck'],
         });
-
-        if (!testResponse.ok) {
-            const errorText = await testResponse.text();
-            console.error('Claude API Error:', errorText);
-            return res.status(500).json({
-                error: 'Claude API call failed',
-                status: testResponse.status,
-                statusText: testResponse.statusText,
-                errorDetails: errorText.substring(0, 200),
-                hasApiKey,
-                apiKeyLength,
-                apiKeyPrefix
-            });
-        }
-
-        const testData = await testResponse.json();
         
         return res.status(200).json({
             success: true,
             message: 'Claude API key is working perfectly!',
-            claudeResponse: testData.content[0].text,
+            claudeResponse: result.text,
+            model: getClaudeModel(),
+            apiKeyRedacted: result.metadata.apiKey,
             hasApiKey,
             apiKeyLength,
             apiKeyPrefix

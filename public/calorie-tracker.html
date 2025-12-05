@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Calorie Tracker - Well Fit</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="ai-paywall.js"></script>
+    <script src="revenuecat-bridge.js"></script>
     <script src="global-nav.js"></script>
     <script src="quick-food-entry.js"></script>
 </head>
@@ -46,7 +48,7 @@
                                 </div>
                                 <div style="text-align: center;">
                                     <div style="font-weight: bold;">Balance</div>
-                                    <div id="calories-remaining">2000</div>
+                                    <div id="calories-remaining" style="color: #fff;">2000</div>
                                 </div>
                             </div>
                         </div>
@@ -532,7 +534,7 @@
             <div id="manual-entry-content" style="display: none;">
                 <input type="text" id="manual-food-name" placeholder="Food name" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px;">
                     <input type="number" id="manual-calories" placeholder="Calories" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                     <input type="number" id="manual-protein" placeholder="Protein (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
                     <input type="number" id="manual-carbs" placeholder="Carbs (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
@@ -568,7 +570,7 @@
 
                 <input type="text" id="qa-name" placeholder="Item name (e.g., Protein Power)" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 12px; box-sizing: border-box;">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px;">
                     <input type="number" id="qa-calories" placeholder="Calories" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
                     <input type="number" id="qa-protein" placeholder="Protein (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
                     <input type="number" id="qa-carbs" placeholder="Carbs (g)" style="padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
@@ -712,6 +714,9 @@
         let isRecording = false;
 
         function startVoiceLogging() {
+            if (typeof requireAIAccess === 'function' && !requireAIAccess('Voice food logging')) {
+                return;
+            }
             // Stop and clear any existing recognition
             if (recognition) {
                 try {
@@ -1854,6 +1859,10 @@
         }
         
         async function searchFood(query) {
+            if (typeof requireAIAccess === 'function' && !requireAIAccess('AI typed food search')) {
+                document.getElementById('search-results').innerHTML = '';
+                return;
+            }
             if (!query || query.length < 2) {
                 document.getElementById('search-results').innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Enter at least 2 characters to search</div>';
                 return;

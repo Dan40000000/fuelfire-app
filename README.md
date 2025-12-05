@@ -1,5 +1,37 @@
 # FuelFire Fitness App 🔥
 
+### Firebase (AI subscriptions backend)
+`api/subscriptions.js` will use Firestore if these env vars are set (otherwise it falls back to a local JSON file):
+
+```
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=service-account@your-project-id.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n
+```
+
+Add them locally in a `.env` (see `.env.example`) and in your deploy settings (Vercel/Netlify/etc.). Keep the `\n` newline escapes in the private key. The paywall auto-logs subscription events to Firestore when these are present.
+
+### Stripe billing (Elite/Premium/Core subscriptions)
+- Create a Stripe account and enable payouts.
+- Create recurring prices in Stripe (e.g., Elite ~$96/mo, Premium $15/mo, Core $6/mo after the 20% uplift) and capture their price IDs.
+- Add these env vars (see `.env.example`):
+```
+STRIPE_SECRET_KEY=sk_live_or_test
+STRIPE_PUBLISHABLE_KEY=pk_live_or_test
+STRIPE_WEBHOOK_SECRET=whsec_from_dashboard
+STRIPE_PRICE_ID_PREMIUM=price_for_premium
+STRIPE_PRICE_ID_CORE=price_for_core
+```
+- Deploy the webhook endpoint `api/stripe-webhook.js` to your host and point a Stripe webhook at it for events: `checkout.session.completed`, `customer.subscription.created/updated/deleted`.
+- The paywall uses `/api/create-checkout-session` to start Stripe Checkout and `/api/stripe-config` to pull price IDs; successful webhooks post into the same subscription log store used by the Account page admin dashboard.
+
+### Apple IAP via RevenueCat (optional) + Android Play Billing
+- Create products/entitlements in RevenueCat that mirror Elite/Premium/Core (and map to Apple/Google products).
+- Set `REVENUECAT_WEBHOOK_SECRET` if you want webhook auth, and point RevenueCat webhooks to `/api/revenuecat-webhook`.
+- Webhook events (purchase/renew/cancel/expire) write into the same subscription log store (Firestore or local JSON), so Account admin tables stay consistent across Stripe and Apple purchases.
+- Native → webview unlock: send `postMessage` with `{ type: 'RC_ENTITLEMENT', entitlement: 'premium', email, name, expiresAt }` or call `window.RCBridge.applyEntitlement(...)` from native to unlock the paywall and log the event. Script is loaded on pages that use AI paywall (`revenuecat-bridge.js`).
+- See `APP_STORE_IAP_SETUP.md` for a concise integration and testing checklist.
+
 A modern, responsive fitness tracking app with AI-powered meal planning using Claude AI.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDan40000000%2Ffuelfire-app&env=CLAUDE_API_KEY&envDescription=Your%20Claude%20API%20key%20from%20console.anthropic.com&project-name=fuelfire-app&repository-name=fuelfire-app)
@@ -107,6 +139,10 @@ fuelfire-fitness-app/
 - [ ] Push notifications
 - [ ] PWA capabilities
 - [ ] Dark mode toggle
+
+## ✅ Quality Checks
+
+- `npm run verify` — confirms Anthropic model names stay centralized in `api/_lib/anthropic.js` so deployed endpoints never drift to unsupported models again.
 
 ## 🤝 Contributing
 

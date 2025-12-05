@@ -4,5 +4,12 @@
   "webDir": "public",
   "server": {
     "androidScheme": "https"
-  }
+  },
+  "packageClassList": [
+    "SpeechRecognition",
+    "BarcodeScannerPlugin",
+    "CAPCameraPlugin",
+    "HealthPlugin",
+    "HealthTotalsPlugin"
+  ]
 }

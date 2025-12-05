@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Expert Workout Plans | FuelFire</title>
+    <link rel="stylesheet" href="styles.css?v=24.0">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0c1424 0%, #081022 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 28px 22px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 8px;
+        }
+
+        .plan-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .expert-badge {
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .plan-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .expert-name {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 12px;
+        }
+
+        .plan-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .stat-pill {
+            background: rgba(255,255,255,0.1);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+        }
+
+        .plan-description {
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .price-tag {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4B9CD3;
+            margin: 16px 0;
+        }
+
+        .cta-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            border: none;
+            color: #fff;
+            padding: 16px;
+            font-size: 1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-pill {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-pill.active {
+            background: linear-gradient(135deg, #4B9CD3, #7BAFD4);
+            border-color: transparent;
+            color: #0b1628;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💪 Expert Workout Plans</h1>
+            <p style="opacity: 0.8;">Designed by certified trainers</p>
+        </div>
+
+        <div class="filter-pills">
+            <button class="filter-pill active" data-filter="all">All Programs</button>
+            <button class="filter-pill" data-filter="strength">Strength</button>
+            <button class="filter-pill" data-filter="hypertrophy">Muscle Building</button>
+            <button class="filter-pill" data-filter="endurance">Endurance</button>
+            <button class="filter-pill" data-filter="fat-loss">Fat Loss</button>
+        </div>
+
+        <div id="plansList"></div>
+    </div>
+
+    <script>
+        const expertWorkoutPlans = [
+            {
+                id: 'strength-foundations',
+                title: 'Strength Foundations Program',
+                expert: 'Dr. Sarah Mitchell, CSCS',
+                category: 'strength',
+                duration: '12 weeks',
+                frequency: '4 days/week',
+                level: 'Intermediate',
+                price: 179,
+                description: 'Build serious strength with proven powerlifting principles. Focus on squat, bench, deadlift progression with accessory work.',
+                features: [
+                    '12-week periodized program',
+                    'Video demos for all exercises',
+                    'Progressive overload system',
+                    'Deload weeks included',
+                    'Form check protocols'
+                ]
+            },
+            {
+                id: 'hypertrophy-blueprint',
+                title: 'Hypertrophy Blueprint',
+                expert: 'Dr. Sarah Mitchell, CSCS',
+                category: 'hypertrophy',
+                duration: '16 weeks',
+                frequency: '5 days/week',
+                level: 'Intermediate-Advanced',
+                price: 199,
+                description: 'Science-based muscle building program. High-volume training with optimal exercise selection for maximum growth.',
+                features: [
+                    '16 weeks of progressive training',
+                    'Muscle group specialization',
+                    'Volume and intensity periodization',
+                    'Exercise substitution guide',
+                    'Recovery protocols'
+                ]
+            },
+            {
+                id: 'endurance-athlete',
+                title: 'Endurance Athlete Training',
+                expert: 'Marcus Chen, ACSM-EP',
+                category: 'endurance',
+                duration: '12 weeks',
+                frequency: '5-6 days/week',
+                level: 'All Levels',
+                price: 169,
+                description: 'Build cardiovascular endurance for running, cycling, or multi-sport. Includes base building, tempo, and interval work.',
+                features: [
+                    'Heart rate zone training',
+                    'Base, build, peak phases',
+                    'Cross-training protocols',
+                    'Race-day preparation',
+                    'Taper strategies'
+                ]
+            },
+            {
+                id: 'fat-loss-accelerator',
+                title: 'Fat Loss Accelerator',
+                expert: 'Jessica Rodriguez, NASM-PES',
+                category: 'fat-loss',
+                duration: '8 weeks',
+                frequency: '4-5 days/week',
+                level: 'Beginner-Intermediate',
+                price: 149,
+                description: 'Efficient fat-burning workouts combining strength and metabolic conditioning. Maximize calorie burn while preserving muscle.',
+                features: [
+                    '8 weeks of fat-burning workouts',
+                    'HIIT and strength training',
+                    'Mobility work included',
+                    'Nutrition integration guide',
+                    'Progress tracking system'
+                ]
+            },
+            {
+                id: 'olympic-lifting',
+                title: 'Olympic Lifting Mastery',
+                expert: 'Dr. Sarah Mitchell, CSCS',
+                category: 'strength',
+                duration: '12 weeks',
+                frequency: '4 days/week',
+                level: 'Intermediate-Advanced',
+                price: 189,
+                description: 'Master the snatch and clean & jerk. Technical progression with video analysis and form correction.',
+                features: [
+                    'Technical progression system',
+                    'Video form analysis',
+                    'Mobility prerequisites',
+                    'Competition preparation',
+                    'Injury prevention protocols'
+                ]
+            },
+            {
+                id: 'bodyweight-mastery',
+                title: 'Bodyweight Mastery',
+                expert: 'Marcus Chen, ACSM-EP',
+                category: 'strength',
+                duration: '10 weeks',
+                frequency: '3-4 days/week',
+                level: 'All Levels',
+                price: 129,
+                description: 'Build strength anywhere with zero equipment. Progress to advanced calisthenics moves like muscle-ups and handstands.',
+                features: [
+                    'No equipment needed',
+                    'Skill progressions',
+                    'Calisthenics fundamentals',
+                    'Advanced movements',
+                    'Travel-friendly workouts'
+                ]
+            }
+        ];
+
+        function renderPlans(filter = 'all') {
+            const container = document.getElementById('plansList');
+            const filtered = filter === 'all'
+                ? expertWorkoutPlans
+                : expertWorkoutPlans.filter(p => p.category === filter);
+
+            container.innerHTML = filtered.map(plan => `
+                <div class="plan-card">
+                    <span class="expert-badge">✓ EXPERT CREATED</span>
+                    <div class="plan-title">${plan.title}</div>
+                    <div class="expert-name">By ${plan.expert}</div>
+                    <div class="plan-stats">
+                        <span class="stat-pill">⏱️ ${plan.duration}</span>
+                        <span class="stat-pill">📅 ${plan.frequency}</span>
+                        <span class="stat-pill">📈 ${plan.level}</span>
+                    </div>
+                    <div class="plan-description">${plan.description}</div>
+                    <ul style="opacity: 0.9; margin: 16px 0; padding-left: 20px;">
+                        ${plan.features.map(f => `<li style="margin-bottom: 8px;">${f}</li>`).join('')}
+                    </ul>
+                    <div class="price-tag">$${plan.price}</div>
+                    <button class="cta-btn" onclick="purchasePlan('${plan.id}')">Purchase Program</button>
+                </div>
+            `).join('');
+        }
+
+        function purchasePlan(planId) {
+            const plan = expertWorkoutPlans.find(p => p.id === planId);
+            alert(`🎉 Purchase feature coming soon!\n\nYou selected:\n${plan.title}\nPrice: $${plan.price}\n\nYou'll receive:\n${plan.features.join('\n')}`);
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                renderPlans(pill.dataset.filter);
+            });
+        });
+
+        renderPlans();
+    </script>
+</body>
+</html>

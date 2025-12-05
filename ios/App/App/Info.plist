@@ -22,6 +22,18 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to scan food barcodes for quick logging</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>FuelFire needs access to read your health data including steps, heart rate, workouts, and calories to provide personalized fitness tracking and insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>FuelFire needs permission to save your workouts, nutrition data, and fitness activities to Apple Health so all your health data stays in one place.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access to log meals using voice commands</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo library access to save and share your fitness progress photos and meal photos</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app uses speech recognition to log your meals</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,15 +57,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app needs microphone access to log meals using voice commands</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This app uses speech recognition to log your meals</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to scan food barcodes for quick logging</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>FuelFire needs access to read your health data including steps, heart rate, workouts, and calories to provide personalized fitness tracking and insights.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>FuelFire needs permission to save your workouts, nutrition data, and fitness activities to Apple Health so all your health data stays in one place.</string>
 </dict>
 </plist>

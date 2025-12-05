@@ -313,6 +313,13 @@
                             </div>
                         </div>
 
+                        <div id="active-workout-log-container" style="margin-top: 20px; display: none;">
+                            <div style="font-size: 14px; color: #666; margin-bottom: 10px; font-weight: 600;">Today's Logged Workouts</div>
+                            <div id="active-workout-log" style="max-height: 240px; overflow-y: auto;">
+                                <!-- Logged workouts render here -->
+                            </div>
+                        </div>
+
                         <div style="margin-top: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 10px;">
                             <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Tip</div>
                             <div style="font-size: 13px; color: #555;">Log manual activities like workouts, sports, or other exercises. Completed workouts from the Track Workouts page are automatically included!</div>
@@ -511,6 +518,16 @@
             </div>
             <label style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.7);">Date</label>
             <input type="date" id="body-comp-date" style="padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(8,14,24,0.85); color: white; font-size: 16px;">
+            <div id="body-comp-date-tools" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
+                <button type="button" class="body-comp-date-chip" onclick="setBodyCompDateFromOffset(0)" style="flex: 0 0 auto; background: rgba(75,156,211,0.18); color: rgba(255,255,255,0.95); border: 1px solid rgba(75,156,211,0.55); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;">Today</button>
+                <button type="button" class="body-comp-date-chip" onclick="setBodyCompDateFromOffset(1)" style="flex: 0 0 auto; background: rgba(75,156,211,0.12); color: rgba(255,255,255,0.85); border: 1px solid rgba(75,156,211,0.35); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;">Yesterday</button>
+                <button type="button" class="body-comp-date-chip" onclick="setBodyCompDateFromOffset(7)" style="flex: 0 0 auto; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.2); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;">7 Days Ago</button>
+                <button type="button" class="body-comp-date-chip" onclick="openBodyCompCalendar()" style="flex: 0 0 auto; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.25); padding: 8px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;">Calendar</button>
+                <div style="flex: 1 1 180px; display: flex; gap: 6px; min-width: 180px;">
+                    <select id="body-comp-month-select" style="flex: 1; padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(8,14,24,0.75); color: rgba(255,255,255,0.9); font-size: 14px;"></select>
+                    <select id="body-comp-year-select" style="width: 110px; padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(8,14,24,0.75); color: rgba(255,255,255,0.9); font-size: 14px;"></select>
+                </div>
+            </div>
         </div>
         <div style="display: flex; gap: 12px; margin-top: 24px;">
             <button type="button" id="body-comp-submit" onclick="submitBodyCompositionEntry()" style="flex: 1; background: linear-gradient(135deg, #4B9CD3, #13294B); border: none; color: white; padding: 12px 18px; border-radius: 16px; font-weight: 700; cursor: pointer;">Save Entry</button>
@@ -883,12 +900,114 @@
             visceral: { label: 'Visceral Fat Level', placeholder: '10', unit: '', step: 1, min: 1, max: 30 }
         };
         let pendingCompositionMetric = null;
+        const BODY_COMP_MONTHS = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        let bodyCompDateSelectorsInitialized = false;
 
         function formatDateForInput(date) {
             const yr = date.getFullYear();
             const mo = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${yr}-${mo}-${day}`;
+        }
+
+        function parseDateInputValue(value) {
+            if (!value) return null;
+            const parsed = new Date(`${value}T00:00:00`);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function daysInMonth(year, month) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        function ensureBodyCompDateSelectors(baseDate = new Date()) {
+            const monthSelect = document.getElementById('body-comp-month-select');
+            const yearSelect = document.getElementById('body-comp-year-select');
+            if (!monthSelect || !yearSelect) return;
+
+            if (!bodyCompDateSelectorsInitialized) {
+                monthSelect.innerHTML = BODY_COMP_MONTHS.map((name, index) =>
+                    `<option value="${index + 1}">${name}</option>`
+                ).join('');
+
+                const currentYear = new Date().getFullYear();
+                const years = [];
+                for (let offset = 0; offset <= 30; offset += 1) {
+                    years.push(currentYear - offset);
+                }
+                yearSelect.innerHTML = years.map(year =>
+                    `<option value="${year}">${year}</option>`
+                ).join('');
+
+                bodyCompDateSelectorsInitialized = true;
+            }
+
+            updateBodyCompSelectorsFromDate(baseDate);
+        }
+
+        function updateBodyCompSelectorsFromDate(date) {
+            const monthSelect = document.getElementById('body-comp-month-select');
+            const yearSelect = document.getElementById('body-comp-year-select');
+            if (!monthSelect || !yearSelect || !date) return;
+
+            monthSelect.value = String(date.getMonth() + 1);
+            yearSelect.value = String(date.getFullYear());
+        }
+
+        function applyBodyCompDate(date) {
+            const dateInput = document.getElementById('body-comp-date');
+            if (!dateInput || !date) return;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const chosen = new Date(date);
+            chosen.setHours(0, 0, 0, 0);
+            const capped = chosen > today ? today : chosen;
+
+            dateInput.value = formatDateForInput(capped);
+            updateBodyCompSelectorsFromDate(capped);
+        }
+
+        function setBodyCompDateFromOffset(daysAgo) {
+            const base = new Date();
+            base.setHours(0, 0, 0, 0);
+            base.setDate(base.getDate() - Number(daysAgo || 0));
+            applyBodyCompDate(base);
+        }
+
+        function openBodyCompCalendar() {
+            const dateInput = document.getElementById('body-comp-date');
+            if (!dateInput) return;
+            if (typeof dateInput.showPicker === 'function') {
+                dateInput.showPicker();
+            } else {
+                dateInput.focus();
+            }
+        }
+
+        function updateBodyCompDateFromSelectors() {
+            const dateInput = document.getElementById('body-comp-date');
+            const monthSelect = document.getElementById('body-comp-month-select');
+            const yearSelect = document.getElementById('body-comp-year-select');
+            if (!dateInput || !monthSelect || !yearSelect) return;
+
+            const currentDate = parseDateInputValue(dateInput.value) || new Date();
+            const month = parseInt(monthSelect.value, 10);
+            const year = parseInt(yearSelect.value, 10);
+            if (!Number.isFinite(month) || !Number.isFinite(year)) {
+                return;
+            }
+
+            const currentDay = currentDate.getDate();
+            const maxDay = daysInMonth(year, month);
+            const targetDay = Math.min(currentDay, maxDay);
+
+            const nextDate = new Date(year, month - 1, targetDay);
+            applyBodyCompDate(nextDate);
         }
 
         function openBodyCompositionModal(metric) {
@@ -898,6 +1017,8 @@
             const valueInput = document.getElementById('body-comp-value');
             const unitEl = document.getElementById('body-comp-unit');
             const dateInput = document.getElementById('body-comp-date');
+            const monthSelect = document.getElementById('body-comp-month-select');
+            const yearSelect = document.getElementById('body-comp-year-select');
 
             if (!config || !modal || !title || !valueInput || !unitEl || !dateInput) return;
 
@@ -911,9 +1032,11 @@
             valueInput.min = config.min !== undefined ? config.min : '';
             valueInput.max = config.max !== undefined ? config.max : '';
 
-            const today = formatDateForInput(new Date());
-            dateInput.value = today;
-            dateInput.max = today;
+            const today = new Date();
+            const todayFormatted = formatDateForInput(today);
+            dateInput.value = todayFormatted;
+            dateInput.max = todayFormatted;
+            ensureBodyCompDateSelectors(today);
 
             modal.style.display = 'flex';
             valueInput.onkeydown = (event) => {
@@ -928,6 +1051,27 @@
                     submitBodyCompositionEntry();
                 }
             };
+
+            if (dateInput._hasBodyCompListeners !== true) {
+                dateInput.addEventListener('change', () => {
+                    const parsed = parseDateInputValue(dateInput.value);
+                    if (parsed) {
+                        updateBodyCompSelectorsFromDate(parsed);
+                    }
+                });
+                dateInput._hasBodyCompListeners = true;
+            }
+
+            if (monthSelect && monthSelect._hasBodyCompListeners !== true) {
+                monthSelect.addEventListener('change', updateBodyCompDateFromSelectors);
+                monthSelect._hasBodyCompListeners = true;
+            }
+
+            if (yearSelect && yearSelect._hasBodyCompListeners !== true) {
+                yearSelect.addEventListener('change', updateBodyCompDateFromSelectors);
+                yearSelect._hasBodyCompListeners = true;
+            }
+
             setTimeout(() => valueInput.focus(), 80);
         }
 
@@ -1352,6 +1496,14 @@
             alert(`✅ Activity logged: ${activity} - ${calories} calories`);
         }
 
+        function deleteManualActiveEntry(timestamp) {
+            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            const updated = entries.filter(entry => entry.timestamp !== timestamp);
+            localStorage.setItem('fuelfire_active_calories', JSON.stringify(updated));
+            loadActiveCaloriesData();
+            alert('🗑️ Activity entry removed.');
+        }
+
         function getTodayWorkoutCalories() {
             // Get workouts from today
             const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
@@ -1407,6 +1559,111 @@
             return totalManualCalories;
         }
 
+        function getWorkoutIdentifier(workout, index) {
+            const dateMillis = workout?.date ? new Date(workout.date).getTime() : null;
+            const fallback = dateMillis
+                ? `ts-${dateMillis}-${(workout.workoutName || workout.type || index)}`
+                : `index-${index}`;
+            const identifier = workout?.id || workout?._id || workout?.uuid || workout?.timestamp || fallback;
+            return identifier ? identifier.toString() : fallback;
+        }
+
+        function getTodayWorkoutsDetailed() {
+            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            return workoutHistory.reduce((list, workout, index) => {
+                if (!workout?.date) return list;
+                const workoutDate = new Date(workout.date);
+                workoutDate.setHours(0, 0, 0, 0);
+                if (workoutDate.getTime() !== today.getTime()) {
+                    return list;
+                }
+                const identifier = getWorkoutIdentifier(workout, index);
+                list.push({
+                    identifier,
+                    name: workout.workoutName || workout.type || 'Logged Workout',
+                    type: workout.type || 'custom',
+                    duration: workout.duration || 0,
+                    calories: workout.calories || 0,
+                    time: new Date(workout.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                });
+                return list;
+            }, []);
+        }
+
+        function renderTodayWorkoutLog() {
+            const workouts = getTodayWorkoutsDetailed();
+            const container = document.getElementById('active-workout-log-container');
+            const list = document.getElementById('active-workout-log');
+
+            if (!container || !list) return;
+
+            if (workouts.length === 0) {
+                container.style.display = 'none';
+                list.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'block';
+            let html = '';
+            workouts.forEach(workout => {
+                const identifierString = JSON.stringify(workout.identifier);
+                const calorieInfo = workout.calories ? ` • ${workout.calories} cal` : '';
+                html += `
+                    <div style="display: flex; justify-content: space-between; gap: 10px; padding: 12px; background: var(--lighter-bg); border-radius: 10px; margin-bottom: 8px;">
+                        <div>
+                            <div style="font-weight: bold; color: var(--dark);">${workout.name}</div>
+                            <div style="font-size: 12px; color: #666;">${workout.time} • ${workout.duration} min${calorieInfo}</div>
+                            <div style="font-size: 11px; color: #999;">${(workout.type || 'WORKOUT').toUpperCase()}</div>
+                        </div>
+                        <button onclick='deleteLoggedWorkout(${identifierString})' style="background: transparent; border: 1px solid rgba(255,87,34,0.5); color: #FF5722; border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer;">Delete</button>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function deleteLoggedWorkout(identifier) {
+            const normalizedId = identifier != null ? identifier.toString() : '';
+            let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            let removed = false;
+
+            workoutHistory = workoutHistory.filter((workout, index) => {
+                if (removed) return true;
+                const currentId = getWorkoutIdentifier(workout, index);
+                if (currentId === normalizedId) {
+                    removed = true;
+                    return false;
+                }
+                return true;
+            });
+
+            if (!removed) {
+                alert('Could not find that workout entry.');
+                return;
+            }
+
+            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+
+            let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts') || '[]');
+            recentWorkouts = recentWorkouts.filter((workout, index) => {
+                const currentId = getWorkoutIdentifier(workout, index);
+                return currentId !== normalizedId;
+            });
+            localStorage.setItem('recentWorkouts', JSON.stringify(recentWorkouts));
+
+            loadActiveCaloriesData();
+            if (typeof updateFitnessDashboard === 'function') {
+                updateFitnessDashboard();
+            }
+            if (typeof loadWorkoutHistory === 'function') {
+                try { loadWorkoutHistory(); } catch (err) { console.warn('Unable to refresh workout history', err); }
+            }
+            alert('🗑️ Workout removed from today\'s log.');
+        }
+
         function loadActiveCaloriesData() {
             const workoutCalories = getTodayWorkoutCalories();
             const manualCalories = getTodayManualCalories();
@@ -1417,6 +1674,7 @@
 
             // Show history if there are manual entries today
             loadActiveCaloriesHistory();
+            renderTodayWorkoutLog();
         }
 
         function loadActiveCaloriesHistory() {
@@ -1441,13 +1699,17 @@
             let html = '';
             todayEntries.reverse().forEach(entry => {
                 const time = new Date(entry.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                const timestampString = JSON.stringify(entry.timestamp);
                 html += `
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; gap: 10px; padding: 10px; background: var(--lighter-bg); border-radius: 8px; margin-bottom: 5px;">
                         <div>
                             <div style="font-weight: bold; color: var(--dark);">${entry.activity}</div>
                             <div style="font-size: 11px; color: #999;">${time}</div>
                         </div>
-                        <div style="font-weight: bold; color: #FF5722;">${entry.calories} cal</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="font-weight: bold; color: #FF5722;">${entry.calories} cal</div>
+                            <button onclick='deleteManualActiveEntry(${timestampString})' style="background: transparent; border: 1px solid rgba(255,87,34,0.4); color: #FF5722; border-radius: 999px; padding: 4px 10px; font-size: 11px; cursor: pointer;">Delete</button>
+                        </div>
                     </div>
                 `;
             });
@@ -1590,7 +1852,8 @@
                 localStorage.setItem('fuelfire_last_bmr', String(bmr));
             } else {
                 const cached = parseInt(localStorage.getItem('fuelfire_last_bmr') || '0', 10);
-                baseCalEl.textContent = cached > 0 ? cached.toLocaleString() : '--';
+                const fallback = cached > 0 ? cached : 2000;
+                baseCalEl.textContent = fallback.toLocaleString();
             }
         }
 

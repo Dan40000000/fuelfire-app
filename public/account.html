@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>My Account | FuelFire</title>
+    <link rel="stylesheet" href="styles.css?v=24.0">
+    <script src="ai-paywall.js"></script>
+    <script src="revenuecat-bridge.js"></script>
+    <style>
+        :root {
+            --carolina-blue: #4B9CD3;
+            --carolina-dark: #13294B;
+            --carolina-light: #7BAFD4;
+            --light-bg: #F0F7FC;
+            --card-bg: #F5FAFD;
+            --gradient-1: linear-gradient(135deg, #4B9CD3 0%, #3A7CA5 100%);
+        }
+
+        body {
+            background: var(--light-bg);
+            min-height: 100vh;
+            color: var(--carolina-dark);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding-bottom: 80px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 24px 20px 20px;
+            padding-top: calc(24px + env(safe-area-inset-top));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            color: var(--carolina-blue);
+            margin: 0 0 8px;
+            font-size: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--carolina-dark);
+        }
+
+        .user-email {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .edit-profile-btn {
+            background: var(--light-bg);
+            border: 2px solid var(--carolina-blue);
+            color: var(--carolina-blue);
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-profile-btn:hover {
+            background: var(--carolina-blue);
+            color: white;
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--carolina-dark);
+        }
+
+        .subscription-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--gradient-1);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            color: white;
+            box-shadow: 0 8px 25px rgba(75, 156, 211, 0.3);
+        }
+
+        .status-badge {
+            background: white;
+            color: var(--carolina-blue);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-badge.inactive {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .subscription-info {
+            flex: 1;
+        }
+
+        .subscription-plan {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .subscription-details {
+            opacity: 0.9;
+            font-size: 0.85rem;
+        }
+
+        .action-btn {
+            background: var(--gradient-1);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            font-size: 0.95rem;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(75, 156, 211, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: var(--light-bg);
+            color: var(--carolina-blue);
+            border: 2px solid var(--carolina-blue);
+            box-shadow: none;
+        }
+
+        .action-btn.secondary:hover {
+            background: var(--carolina-blue);
+            color: white;
+        }
+
+        .action-btn.danger {
+            background: white;
+            border: 2px solid #f44336;
+            color: #f44336;
+            box-shadow: none;
+        }
+
+        .action-btn.danger:hover {
+            background: #f44336;
+            color: white;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--light-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-type {
+            font-weight: 600;
+            color: var(--carolina-dark);
+            margin-bottom: 4px;
+        }
+
+        .card-number {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .order-item {
+            padding: 16px;
+            background: var(--light-bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--carolina-blue);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .order-title {
+            font-weight: 700;
+            color: var(--carolina-dark);
+        }
+
+        .order-price {
+            color: var(--carolina-blue);
+            font-weight: 700;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--light-bg);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: var(--carolina-dark);
+        }
+
+        .setting-desc {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background: #ddd;
+            border-radius: 999px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--gradient-1);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            left: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--carolina-blue);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--carolina-blue);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--carolina-blue);
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            gap: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: var(--carolina-dark);
+            font-size: 0.9rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #e0e8f0;
+            background: #f7fbff;
+            font-size: 1rem;
+            color: var(--carolina-dark);
+            outline: none;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--carolina-blue);
+            box-shadow: 0 0 0 3px rgba(75, 156, 211, 0.15);
+        }
+
+        .plan-options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .plan-card {
+            border: 2px solid var(--light-bg);
+            border-radius: 14px;
+            padding: 16px;
+            background: #f8fbff;
+            display: grid;
+            gap: 6px;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .plan-card:hover {
+            border-color: var(--carolina-blue);
+            transform: translateY(-2px);
+        }
+
+        .plan-card.active {
+            border-color: var(--carolina-blue);
+            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.18);
+            background: linear-gradient(145deg, #fafdff 0%, #eef7ff 100%);
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plan-name {
+            font-weight: 800;
+            color: var(--carolina-dark);
+            font-size: 1.05rem;
+        }
+
+        .plan-price {
+            font-weight: 700;
+            color: var(--carolina-blue);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(75, 156, 211, 0.12);
+            color: var(--carolina-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .plan-features {
+            margin: 6px 0 0;
+            padding-left: 16px;
+            color: #43536a;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .inline-note {
+            background: #f1f7fd;
+            border: 1px solid #d9e8f7;
+            border-radius: 10px;
+            padding: 12px;
+            color: #27405c;
+            font-size: 0.9rem;
+            margin: 12px 0 0;
+        }
+
+        .admin-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .admin-card {
+            background: #f8fbff;
+            border: 1px solid #e0ebf7;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .admin-card .label {
+            font-size: 0.9rem;
+            color: #456;
+        }
+
+        .admin-card .value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--carolina-blue);
+        }
+
+        .table-wrapper {
+            overflow: auto;
+            border: 1px solid #e0e8f0;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 520px;
+        }
+
+        th, td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e8eef5;
+            font-size: 0.9rem;
+            color: #2b4059;
+        }
+
+        th { text-align: left; background: #f5f9ff; }
+
+        .pill.solid {
+            background: #4B9CD3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Back to Dashboard
+        </a>
+
+        <div class="header">
+            <h1>⚙️ My Account</h1>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="avatar">👤</div>
+            <div class="user-name" id="userName">John Athlete</div>
+            <div class="user-email" id="userEmail">john.athlete@email.com</div>
+            <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="section">
+            <div class="section-title">🧾 Profile Details</div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="profileNameInput">Name</label>
+                    <input id="profileNameInput" type="text" placeholder="Your name" autocomplete="name">
+                </div>
+                <div class="input-group">
+                    <label for="profileGenderInput">Gender</label>
+                    <select id="profileGenderInput">
+                        <option value="">Select</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="nonbinary">Non-binary</option>
+                        <option value="prefer-not">Prefer not to say</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="profileAgeInput">Age</label>
+                    <input id="profileAgeInput" type="number" min="0" max="110" placeholder="Age">
+                </div>
+                <div class="input-group">
+                    <label for="profileWeightInput">Weight (lbs)</label>
+                    <input id="profileWeightInput" type="number" min="0" step="0.1" placeholder="Weight">
+                </div>
+            </div>
+            <button class="action-btn" onclick="saveProfileDetails()">Save Profile</button>
+        </div>
+
+        <!-- Account Stats -->
+        <div class="section">
+            <div class="section-title">📊 Your Stats</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">47</div>
+                    <div class="stat-label">Workouts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Meal Plans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Active Plans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Sessions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Section -->
+        <div class="section">
+        <div class="section-title">💎 Subscription</div>
+
+        <div class="subscription-status">
+            <div class="subscription-info">
+                <div class="subscription-plan" id="currentPlanLabel">Elite Plan</div>
+                <div class="subscription-details" id="currentPlanDetails">$96/month • Renews on Dec 15, 2025</div>
+            </div>
+            <span class="status-badge">ACTIVE</span>
+        </div>
+
+        <div class="plan-options">
+            <div class="plan-card active" id="plan-elite" onclick="selectPlan('elite')">
+                <div class="plan-header">
+                    <div>
+                        <div class="plan-name">Elite</div>
+                        <div class="plan-price">$96/month</div>
+                    </div>
+                    <span class="pill">1 free coaching session</span>
+                </div>
+                <ul class="plan-features">
+                    <li>All AI features (food logging, typed search, workouts)</li>
+                    <li>Unlimited meal/workout plans</li>
+                    <li>Includes 1 free coaching session (diet or workout) monthly</li>
+                </ul>
+            </div>
+
+            <div class="plan-card" id="plan-premium" onclick="selectPlan('premium')">
+                <div class="plan-header">
+                    <div>
+                        <div class="plan-name">Premium</div>
+                        <div class="plan-price">$15/month</div>
+                    </div>
+                    <span class="pill">AI unlimited</span>
+                </div>
+                <ul class="plan-features">
+                    <li>All AI features (food logging, typed search, workouts)</li>
+                    <li>Unlimited meal/workout plans</li>
+                    <li>No coaching sessions included</li>
+                </ul>
+            </div>
+
+            <div class="plan-card" id="plan-core" onclick="selectPlan('core')">
+                <div class="plan-header">
+                    <div>
+                        <div class="plan-name">Core</div>
+                        <div class="plan-price">$6/month</div>
+                    </div>
+                    <span class="pill">Light</span>
+                </div>
+                <ul class="plan-features">
+                    <li>Up to 10 meal plans + 10 workout plans per month</li>
+                    <li>No AI food logging; basic features only</li>
+                    <li>No coaching sessions included</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="inline-note">
+            Elite includes every AI feature plus one free monthly coaching session (diet or workout). Premium includes every AI feature and unlimited plans, but no free coaching session. Core is a light tier with capped plans and no AI food logging.
+        </div>
+
+            <button class="action-btn" onclick="confirmPlanSelection()">Save Plan Preference</button>
+            <button class="action-btn secondary" onclick="openBillingPortal()">Manage Billing</button>
+        </div>
+
+        <!-- Order History -->
+        <div class="section">
+            <div class="section-title">📦 Purchase History</div>
+
+            <div class="order-item">
+                <div class="order-header">
+                    <div class="order-title">Elite Muscle Building Plan</div>
+                    <div class="order-price">$199</div>
+                </div>
+                <div class="order-date">Purchased Nov 15, 2025</div>
+            </div>
+
+            <div class="order-item">
+                <div class="order-header">
+                    <div class="order-title">1-on-1 Coaching (4 Sessions)</div>
+                    <div class="order-price">$360</div>
+                </div>
+                <div class="order-date">Purchased Nov 8, 2025</div>
+            </div>
+
+            <div class="order-item">
+                <div class="order-header">
+                    <div class="order-title">Professional Fat Loss Protocol</div>
+                    <div class="order-price">$149</div>
+                </div>
+                <div class="order-date">Purchased Oct 22, 2025</div>
+            </div>
+
+            <button class="action-btn secondary" onclick="viewAllOrders()">View All Orders</button>
+        </div>
+
+        <!-- App Settings -->
+        <div class="section">
+            <div class="section-title">🔔 Settings</div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Push Notifications</div>
+                    <div class="setting-desc">Get reminders for workouts</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Email Updates</div>
+                    <div class="setting-desc">Weekly progress reports</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Dark Mode</div>
+                    <div class="setting-desc">Always on for this app</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Share Workouts</div>
+                    <div class="setting-desc">Allow public workout sharing</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+            </div>
+        </div>
+
+        <!-- AI Access Admin (moved from separate page) -->
+        <div class="section">
+            <div class="section-title">🧠 AI Access Admin</div>
+            <div class="admin-cards" id="adminSummary">
+                <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">—</div></div>
+                <div class="admin-card"><div class="label">$1 Trials</div><div class="value">—</div></div>
+                <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">—</div></div>
+                <div class="admin-card"><div class="label">Users</div><div class="value">—</div></div>
+            </div>
+            <div class="table-wrapper" style="margin-top:12px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Plan</th>
+                            <th>Action</th>
+                            <th>Promo</th>
+                            <th>Expires</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminUserRows">
+                        <tr><td colspan="7" style="text-align:center; padding:14px; color:#64748b;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-wrapper" style="margin-top:12px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Plan</th>
+                            <th>Action</th>
+                            <th>Promo</th>
+                            <th>Expires</th>
+                            <th>When</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminEventRows">
+                        <tr><td colspan="7" style="text-align:center; padding:14px; color:#64748b;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="section">
+            <div class="section-title">🔐 Account Actions</div>
+
+            <button class="action-btn secondary" onclick="changePassword()">Change Password</button>
+            <button class="action-btn secondary" onclick="exportData()">Export My Data</button>
+            <button class="action-btn danger" onclick="deleteAccount()">Delete Account</button>
+        </div>
+
+        <!-- App Info -->
+        <div style="text-align: center; color: #666; margin-top: 24px; font-size: 0.85rem;">
+            <div>FuelFire App v1.0.0</div>
+            <div style="margin-top: 8px;">
+                <a href="#" style="color: var(--carolina-blue); text-decoration: none; margin: 0 8px; font-weight: 600;">Privacy Policy</a>
+                <a href="#" style="color: var(--carolina-blue); text-decoration: none; margin: 0 8px; font-weight: 600;">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
+                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
+                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
+                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.1);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item" id="health-dashboard-button" onclick="window.location.href='health-dashboard.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
+                </svg>
+            </div>
+        </div>
+        <div class="nav-item active" onclick="window.location.href='account.html'" style="transform: scale(1.15);">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="5" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="12" r="2" fill="white"/>
+                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle switch functionality
+        function toggleSetting(element) {
+            element.classList.toggle('active');
+            const isActive = element.classList.contains('active');
+            const settingName = element.previousElementSibling.querySelector('.setting-label').textContent;
+            console.log(`${settingName} ${isActive ? 'enabled' : 'disabled'}`);
+        }
+
+        // Edit Profile
+        function editProfile() {
+            const nameInput = document.getElementById('profileNameInput');
+            nameInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            nameInput?.focus();
+        }
+
+        function saveProfileDetails() {
+            const nameInput = document.getElementById('profileNameInput');
+            const genderInput = document.getElementById('profileGenderInput');
+            const ageInput = document.getElementById('profileAgeInput');
+            const weightInput = document.getElementById('profileWeightInput');
+
+            const name = nameInput.value.trim() || 'Athlete';
+            const gender = genderInput.value;
+            const age = ageInput.value.trim();
+            const weight = weightInput.value.trim();
+
+            document.getElementById('userName').textContent = name;
+
+            const avatar = document.querySelector('.avatar');
+            avatar.textContent = name ? name.charAt(0).toUpperCase() : '👤';
+
+            localStorage.setItem('userName', name);
+            localStorage.setItem('userGender', gender);
+            localStorage.setItem('userAge', age);
+            localStorage.setItem('userWeight', weight);
+
+            alert('✅ Profile updated');
+        }
+
+        let selectedPlan = 'elite';
+        const PLAN_DETAILS = {
+            elite: {
+                label: 'Elite Plan',
+                priceText: '$96/month • Renews on Dec 15, 2025',
+                summary: 'All AI features + 1 free monthly coaching session (diet or workout)'
+            },
+            premium: {
+                label: 'Premium Plan',
+                priceText: '$15/month • Renews on Dec 15, 2025',
+                summary: 'All AI features and unlimited plans (no included coaching session)'
+            },
+            core: {
+                label: 'Core Plan',
+                priceText: '$6/month • Renews on Dec 15, 2025',
+                summary: 'Up to 10 meal + 10 workout plans per month (no AI food logging, no coaching)'
+            }
+        };
+
+        function selectPlan(plan) {
+            if (!PLAN_DETAILS[plan]) {
+                plan = 'elite';
+            }
+            selectedPlan = plan;
+            localStorage.setItem('selectedPlan', plan);
+            syncPlanUI();
+        }
+
+        function syncPlanUI() {
+            const eliteCard = document.getElementById('plan-elite');
+            const premiumCard = document.getElementById('plan-premium');
+            const coreCard = document.getElementById('plan-core');
+            eliteCard?.classList.toggle('active', selectedPlan === 'elite');
+            premiumCard?.classList.toggle('active', selectedPlan === 'premium');
+            coreCard?.classList.toggle('active', selectedPlan === 'core');
+
+            const currentPlanLabel = document.getElementById('currentPlanLabel');
+            const currentPlanDetails = document.getElementById('currentPlanDetails');
+            const details = PLAN_DETAILS[selectedPlan];
+            if (details) {
+                currentPlanLabel.textContent = details.label;
+                currentPlanDetails.textContent = details.priceText;
+            }
+
+            const statusBadge = document.querySelector('.status-badge');
+            statusBadge.textContent = 'ACTIVE';
+        }
+
+        function confirmPlanSelection() {
+            const details = PLAN_DETAILS[selectedPlan];
+            alert(`✅ Plan saved\n\n${details.label}\n${details.summary}`);
+        }
+
+        function openBillingPortal() {
+            alert('🔐 Billing Portal\n\nManage your payment methods, invoices, and receipts from your billing portal. (Placeholder flow)');
+        }
+
+        function submitPaymentForm() {
+            document.getElementById('paymentForm')?.requestSubmit();
+        }
+
+        function savePaymentMethod(event) {
+            event.preventDefault();
+            const name = document.getElementById('cardNameInput').value.trim();
+            const numberRaw = document.getElementById('cardNumberInput').value.replace(/\D/g, '');
+            const expiry = document.getElementById('cardExpiryInput').value.trim();
+            const cvc = document.getElementById('cardCvcInput').value.trim();
+
+            if (!name || numberRaw.length < 12 || !expiry || cvc.length < 3) {
+                alert('Please enter a valid card, expiry, and CVC.');
+                return;
+            }
+
+            const last4 = numberRaw.slice(-4);
+            const paymentList = document.getElementById('paymentMethodsList');
+            const card = document.createElement('div');
+            card.className = 'payment-method';
+            card.innerHTML = `
+                <div class="card-icon">💳</div>
+                <div class="card-info">
+                    <div class="card-type">Card •••• ${last4}</div>
+                    <div class="card-number">Expires ${expiry} • Added now</div>
+                </div>
+            `;
+            paymentList?.prepend(card);
+
+            event.target.reset();
+            alert('✅ Payment method added (mock).');
+        }
+
+        // View All Orders
+        function viewAllOrders() {
+            alert('📦 Order History\n\nShowing recent purchases:\n\n• Elite Muscle Building Plan - $199\n• 1-on-1 Coaching (4 Sessions) - $360\n• Professional Fat Loss Protocol - $149\n• Strength Foundations Program - $179\n• Elite Subscription - $96/mo\n\nTotal lifetime value: $983.99');
+        }
+
+        // Change Password
+        function changePassword() {
+            const confirmed = confirm('Change Password\n\nYou will receive a password reset link via email.\n\nSend reset link to john.athlete@email.com?');
+            if (confirmed) {
+                alert('✅ Password reset link sent!\n\nCheck your email and follow the instructions.');
+            }
+        }
+
+        // Export Data
+        function exportData() {
+            alert('📥 Export Your Data\n\nWe\'ll prepare a complete export of:\n\n✓ Profile information\n✓ Workout history\n✓ Meal plans\n✓ Progress photos\n✓ Measurements & stats\n✓ Purchase history\n\nYou\'ll receive a download link via email within 24 hours.\n\nCompliance with GDPR & CCPA.');
+        }
+
+        // Delete Account
+        function deleteAccount() {
+            const confirmed = confirm('⚠️ DELETE ACCOUNT?\n\nThis will permanently delete:\n- Your profile\n- All workout data\n- All meal plans\n- Progress history\n- Active subscriptions will be cancelled\n\nThis action CANNOT be undone.\n\nAre you sure?');
+
+            if (confirmed) {
+                const finalConfirm = confirm('FINAL WARNING\n\nType your password to confirm account deletion.\n\nThis is your last chance to cancel!');
+                if (finalConfirm) {
+                    alert('❌ Account scheduled for deletion.\n\nYou have 30 days to log back in and reactivate.\n\nAfter 30 days, all data will be permanently deleted.');
+                }
+            }
+        }
+
+        // Load saved user data
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('userName') || 'John Athlete';
+            const savedGender = localStorage.getItem('userGender') || '';
+            const savedAge = localStorage.getItem('userAge') || '';
+            const savedWeight = localStorage.getItem('userWeight') || '';
+
+            document.getElementById('userName').textContent = savedName;
+            document.getElementById('profileNameInput').value = savedName;
+            document.getElementById('profileGenderInput').value = savedGender;
+            document.getElementById('profileAgeInput').value = savedAge;
+            document.getElementById('profileWeightInput').value = savedWeight;
+
+            const avatar = document.querySelector('.avatar');
+            avatar.textContent = savedName ? savedName.charAt(0).toUpperCase() : '👤';
+
+            const storedPlan = localStorage.getItem('selectedPlan');
+            if (storedPlan === 'elite' || storedPlan === 'premium' || storedPlan === 'core') {
+                selectedPlan = storedPlan;
+            } else {
+                selectedPlan = 'elite'; // default/migrate old values
+                localStorage.setItem('selectedPlan', 'elite');
+            }
+            syncPlanUI();
+
+            loadSubscriptionAdmin();
+        });
+
+        async function loadSubscriptionAdmin() {
+            const summaryEl = document.getElementById('adminSummary');
+            const userRows = document.getElementById('adminUserRows');
+            const eventRows = document.getElementById('adminEventRows');
+
+            const fallbackEmpty = () => {
+                summaryEl.innerHTML = `
+                    <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">0</div></div>
+                    <div class="admin-card"><div class="label">$1 Trials</div><div class="value">0</div></div>
+                    <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">0</div></div>
+                    <div class="admin-card"><div class="label">Users</div><div class="value">0</div></div>`;
+                userRows.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No data</td></tr>';
+                eventRows.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No data</td></tr>';
+            };
+
+            try {
+                const resp = await fetch('/api/subscriptions');
+                if (!resp.ok) throw new Error('bad status');
+                const data = await resp.json();
+                const events = data.events || [];
+                const users = data.users || [];
+
+                const trials = events.filter(e => e.action === 'start_trial').length;
+                const promos = events.filter(e => e.action === 'promo').length;
+                const premium = events.filter(e => e.plan === 'premium').length;
+                const uniqueUsers = new Set(users.map(u => u.email || u.name || 'unknown')).size;
+
+                summaryEl.innerHTML = `
+                    <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">${premium}</div></div>
+                    <div class="admin-card"><div class="label">$1 Trials</div><div class="value">${trials}</div></div>
+                    <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">${promos}</div></div>
+                    <div class="admin-card"><div class="label">Users</div><div class="value">${uniqueUsers}</div></div>`;
+
+                userRows.innerHTML = users.map(u => {
+                    const expires = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : '—';
+                    const when = u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '';
+                    return `<tr>
+                        <td>${u.name || 'Unknown'}</td>
+                        <td>${u.email || '—'}</td>
+                        <td><span class="pill solid">${u.latestPlan || '—'}</span></td>
+                        <td>${u.latestAction || '—'}</td>
+                        <td>${u.promo || '—'}</td>
+                        <td>${expires}</td>
+                        <td>${when}</td>
+                    </tr>`;
+                }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No users yet</td></tr>';
+
+                eventRows.innerHTML = events.map(e => {
+                    const expires = e.expiresAt ? new Date(e.expiresAt).toLocaleDateString() : '—';
+                    const when = e.ts ? new Date(e.ts).toLocaleString() : '';
+                    return `<tr>
+                        <td>${e.user?.name || 'Unknown'}</td>
+                        <td>${e.user?.email || '—'}</td>
+                        <td><span class="pill solid">${e.plan || '—'}</span></td>
+                        <td>${e.action || '—'}</td>
+                        <td>${e.code || '—'}</td>
+                        <td>${expires}</td>
+                        <td>${when}</td>
+                    </tr>`;
+                }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No events yet</td></tr>';
+            } catch (err) {
+                console.warn('Subscription admin load failed, using local log if available.', err);
+                if (window.__aiAccess && __aiAccess.getEvents) {
+                    const events = __aiAccess.getEvents();
+                    const userMap = {};
+                    events.forEach(evt => {
+                        const email = (evt.user?.email || 'unknown').toLowerCase();
+                        if (!userMap[email]) {
+                            userMap[email] = { ...evt.user, email, latestPlan: evt.plan, latestAction: evt.action, promo: evt.code, expiresAt: evt.expiresAt, updatedAt: evt.ts };
+                        }
+                    });
+                    const users = Object.values(userMap);
+                    const trials = events.filter(e => e.action === 'start_trial').length;
+                    const promos = events.filter(e => e.action === 'promo').length;
+                    const premium = events.filter(e => e.plan === 'premium').length;
+                    const uniqueUsers = users.length;
+
+                    summaryEl.innerHTML = `
+                        <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">${premium}</div></div>
+                        <div class="admin-card"><div class="label">$1 Trials</div><div class="value">${trials}</div></div>
+                        <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">${promos}</div></div>
+                        <div class="admin-card"><div class="label">Users</div><div class="value">${uniqueUsers}</div></div>`;
+
+                    userRows.innerHTML = users.map(u => {
+                        const expires = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : '—';
+                        const when = u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '';
+                        return `<tr>
+                            <td>${u.name || 'Unknown'}</td>
+                            <td>${u.email || '—'}</td>
+                            <td><span class="pill solid">${u.latestPlan || '—'}</span></td>
+                            <td>${u.latestAction || '—'}</td>
+                            <td>${u.promo || '—'}</td>
+                            <td>${expires}</td>
+                            <td>${when}</td>
+                        </tr>`;
+                    }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No users yet</td></tr>';
+
+                    eventRows.innerHTML = events.map(e => {
+                        const expires = e.expiresAt ? new Date(e.expiresAt).toLocaleDateString() : '—';
+                        const when = e.ts ? new Date(e.ts).toLocaleString() : '';
+                        return `<tr>
+                            <td>${e.user?.name || 'Unknown'}</td>
+                            <td>${e.user?.email || '—'}</td>
+                            <td><span class="pill solid">${e.plan || '—'}</span></td>
+                            <td>${e.action || '—'}</td>
+                            <td>${e.code || '—'}</td>
+                            <td>${expires}</td>
+                            <td>${when}</td>
+                        </tr>`;
+                    }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No events yet</td></tr>';
+                } else {
+                    fallbackEmpty();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
