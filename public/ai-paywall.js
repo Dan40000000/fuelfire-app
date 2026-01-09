@@ -132,9 +132,18 @@
         if (!Purchases) return null;
         try {
             const offerings = await Purchases.getOfferings();
+            // Check if offerings are empty (common during development)
+            if (!offerings?.current?.availablePackages?.length) {
+                console.info('RevenueCat: No packages in current offering. Configure packages in RevenueCat dashboard: https://app.revenuecat.com');
+            }
             offeringsCache = offerings;
             return offerings;
         } catch (err) {
+            // Suppress verbose error during development when offerings aren't configured
+            if (err?.message?.includes('empty') || err?.message?.includes('No packages')) {
+                console.info('RevenueCat: Offerings not configured yet. This is normal during development.');
+                return null;
+            }
             console.warn('Failed to load offerings', err);
             return null;
         }
