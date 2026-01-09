@@ -6,12 +6,13 @@
         premium: 'premium_monthly',
         trial_week: 'premium_monthly', // intro offer configured in App Store Connect
         voice_trial: 'premium_monthly',
-        core: 'core_monthly',
-        elite: 'elite_monthly',
-        coaching_single: 'coaching_single',
-        coaching_package: 'coaching_package'
+        core: 'Core_monthly',
+        elite: 'Elite_monthly',
+        coaching_single: 'Coaching_single',
+        coaching_package: 'Coaching_package'
     };
-    const RC_ENTITLEMENTS_FOR_AI = ['premium_access', 'elite_access'];
+    // Entitlement identifiers from RevenueCat dashboard (case-sensitive)
+    const RC_ENTITLEMENTS_FOR_AI = ['Premium_Access', 'Elite_access'];
     let rcReady = false;
     let rcEntitlements = {};
     let offeringsCache = null;
