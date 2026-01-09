@@ -1,13 +1,9 @@
 // Global navigation functions for all pages
 
 // Toggle Sidebar Menu
-function getOverlayElement() {
-    return document.getElementById('global-overlay') || document.querySelector('.overlay');
-}
-
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    const overlay = getOverlayElement();
+    const overlay = document.querySelector('.overlay');
     if (sidebar) {
         sidebar.classList.toggle('open');
     }
@@ -17,73 +13,143 @@ function toggleSidebar() {
 }
 
 // Navigation helper functions
-const PENDING_SCREEN_KEY = 'fuelfire_pending_screen';
-
-function closeSidebarIfOpen() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = getOverlayElement();
-    if (!sidebar) return;
-    if (sidebar.classList.contains('open')) {
-        sidebar.classList.remove('open');
-        if (overlay) {
-            overlay.classList.remove('show');
-        }
-    }
-}
-
-function setPendingScreen(screenId) {
-    try {
-        if (screenId) {
-            localStorage.setItem(PENDING_SCREEN_KEY, screenId);
-        }
-    } catch (error) {
-        console.warn('Unable to persist pending screen:', error);
-    }
-}
-
-function clearPendingScreen() {
-    try {
-        localStorage.removeItem(PENDING_SCREEN_KEY);
-    } catch (error) {
-        console.warn('Unable to clear pending screen:', error);
-    }
-}
-
 function goToPage(page) {
-    closeSidebarIfOpen();
     window.location.href = page;
 }
 
 function goToScreen(page, screenId) {
-    if (!screenId) {
-        goToPage(page || 'index.html');
-        return;
-    }
-
-    setPendingScreen(screenId);
-
-    const normalizedPage = (page || 'index.html').trim();
-    const currentPath = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
-    const targetPage = normalizedPage.toLowerCase();
-
-    if (screenId && (currentPath === '' || currentPath === 'index.html') &&
-        (targetPage === '' || targetPage === 'index.html' || targetPage === './')) {
-        if (typeof showScreen === 'function' && document.getElementById(screenId)) {
-            history.replaceState(null, '', `#${screenId}`);
-            showScreen(screenId);
-            closeSidebarIfOpen();
-            clearPendingScreen();
-            return;
-        }
-    }
-
-    closeSidebarIfOpen();
-    window.location.href = `${normalizedPage}#${screenId}`;
+    window.location.href = `${page}#${screenId}`;
 }
 
 function goBack() {
     window.history.back();
 }
+
+// Ensure Book a Coach appears in all sidebars
+function ensureBookCoachLink() {
+    const menu = document.querySelector('.sidebar-menu');
+    if (!menu) return;
+    const existing = menu.querySelector('[data-nav="book-coach"]');
+    if (existing) return;
+    const item = document.createElement('div');
+    item.className = 'menu-item';
+    item.dataset.nav = 'book-coach';
+    item.onclick = () => { window.location.href = 'coaching-scheduler.html'; };
+    item.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; margin-right:8px;">
+            <path d="M8 16L11 19L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        Book a Coach
+    `;
+    // Insert after Health Dashboard if present, else append
+    const healthItem = Array.from(menu.children).find(el => el.textContent && el.textContent.includes('Health Dashboard'));
+    if (healthItem && healthItem.nextSibling) {
+        menu.insertBefore(item, healthItem.nextSibling);
+    } else {
+        menu.appendChild(item);
+    }
+}
+
+function ensureBookCoachBottomNav() {
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav || nav.dataset.includeCoach !== 'true') return;
+
+    const hasCoachLink = Array.from(nav.querySelectorAll('.nav-item')).some((item) => {
+        const onclick = item.getAttribute('onclick') || '';
+        const href = item.querySelector('a')?.getAttribute('href') || '';
+        return item.dataset.nav === 'book-coach' ||
+            onclick.includes('coaching-scheduler.html') ||
+            href.includes('coaching-scheduler.html');
+    });
+    if (hasCoachLink) return;
+
+    const item = document.createElement('div');
+    item.className = 'nav-item';
+    item.dataset.nav = 'book-coach';
+    item.onclick = () => { window.location.href = 'coaching-scheduler.html'; };
+    item.innerHTML = `
+        <div class="nav-glow"></div>
+        <div class="nav-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 16L11 19L16 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="3" y="4" width="18" height="16" rx="3" stroke="white" stroke-width="2"/>
+            </svg>
+        </div>
+    `;
+    nav.appendChild(item);
+}
+
+function ensureAccountBottomNav() {
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+
+    const hasAccount = Array.from(nav.querySelectorAll('.nav-item')).some((item) => {
+        const onclick = item.getAttribute('onclick') || '';
+        return item.dataset.nav === 'account' || onclick.includes('account.html');
+    });
+    if (hasAccount) return;
+
+    const item = document.createElement('div');
+    item.className = 'nav-item';
+    item.dataset.nav = 'account';
+    item.onclick = () => { window.location.href = 'account.html'; };
+    item.innerHTML = `
+        <div class="nav-glow"></div>
+        <div class="nav-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="5" stroke="white" stroke-width="2" fill="none"/>
+                <path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    `;
+    nav.appendChild(item);
+}
+
+// Attach a global exercise image fallback to prevent broken blue icons
+const EXERCISE_IMG_FALLBACK = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg';
+function applyExerciseImageFallback(img) {
+    if (!img || img.dataset.hasFallback) return;
+    img.dataset.hasFallback = '1';
+    img.onerror = () => {
+        img.onerror = null;
+        img.src = EXERCISE_IMG_FALLBACK;
+    };
+}
+
+function scanExerciseImages(root = document) {
+    // Broadly scan for exercise images and attach fallback (covers pages that don't use exercise-img ids)
+    const imgs = root.querySelectorAll('img');
+    imgs.forEach((img) => {
+        const src = img.getAttribute('src') || '';
+        if (src.includes('exercises/') || img.id?.startsWith('exercise-img') || img.classList.contains('exercise-image') || img.dataset.exerciseImage !== undefined) {
+            applyExerciseImageFallback(img);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    ensureBookCoachLink();
+    ensureBookCoachBottomNav();
+    ensureAccountBottomNav();
+    scanExerciseImages();
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach(m => {
+            m.addedNodes.forEach(node => {
+                if (node.nodeType === 1) {
+                    if (node.tagName === 'IMG') applyExerciseImageFallback(node);
+                    scanExerciseImages(node);
+                    if (node.classList?.contains('bottom-nav')) {
+                        ensureBookCoachBottomNav();
+                        ensureAccountBottomNav();
+                    }
+                }
+            });
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+});
 
 // -------- Workout Form Helper --------
 

@@ -54,6 +54,7 @@
     "@capacitor/core": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
     "@capgo/capacitor-health": "^7.0.10",
+    "@revenuecat/purchases-capacitor": "^11.3.0",
     "firebase-admin": "^13.6.0",
     "stripe": "^20.0.0"
   }

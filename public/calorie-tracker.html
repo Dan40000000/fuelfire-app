@@ -48,7 +48,7 @@
                                 </div>
                                 <div style="text-align: center;">
                                     <div style="font-weight: bold;">Balance</div>
-                                    <div id="calories-remaining" style="color: #fff;">2000</div>
+                                    <div id="calories-remaining" style="color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.35);">2000</div>
                                 </div>
                             </div>
                         </div>
@@ -135,14 +135,17 @@
                     <!-- Epic Food Logging Section -->
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);">
                         <h3 style="color: white; text-align: center; margin: 0 0 15px 0; font-size: 20px;">🔥 LOG YOUR FUEL 🔥</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                            <button onclick="startBarcodeScanning()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
-                                📷<br>Scan
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+                            <button onclick="startFoodPhotoCapture()" style="background: linear-gradient(135deg, #00c6ff, #0072ff); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.4); padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,114,255,0.4);">
+                                📸<br>Photo
                             </button>
-                            <button onclick="startVoiceLogging()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                            <button onclick="startBarcodeScanning()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s;">
+                                🔲<br>Scan
+                            </button>
+                            <button onclick="startVoiceLogging()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s;">
                                 🎤<br>Voice
                             </button>
-                            <button onclick="showSmartEntry()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                            <button onclick="showSmartEntry()" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s;">
                                 ⌨️<br>Type
                             </button>
                         </div>
@@ -245,17 +248,16 @@
                         </svg>
                     </div>
                 </div>
-                <!-- Diet Plan -->
-                <div class="nav-item" onclick="window.location.href='workout-techniques.html'">
-                    <div class="nav-glow"></div>
-                    <div class="nav-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
-                            <circle cx="12" cy="12" r="2" fill="white"/>
-                            <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                </div>
+        <!-- Account -->
+        <div class="nav-item" data-nav="account" onclick="window.location.href='account.html'">
+            <div class="nav-glow"></div>
+            <div class="nav-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="5" stroke="white" stroke-width="2" fill="none"/>
+                    <path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
             </div>
         </div>
     </div>
@@ -496,6 +498,112 @@
         </div>
     </div>
 
+    <!-- Photo Food Analysis Modal -->
+    <div id="photo-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; overflow-y: auto;">
+        <div style="position: relative; top: 3vh; left: 50%; transform: translateX(-50%); background: white; border-radius: 20px; padding: 20px; width: 92%; max-width: 420px; margin-bottom: 5vh;">
+            <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center;">📸 Snap Your Food</h3>
+
+            <!-- Camera/Upload Section -->
+            <div id="photo-capture-section">
+                <div id="photo-preview-container" style="position: relative; width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 15px; margin-bottom: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <div id="photo-placeholder" style="text-align: center; color: white;">
+                        <div style="font-size: 64px; margin-bottom: 10px;">🍽️</div>
+                        <div style="font-size: 14px; opacity: 0.8;">Take a photo of your food</div>
+                    </div>
+                    <img id="photo-preview" style="display: none; width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <button onclick="capturePhoto()" style="background: linear-gradient(135deg, #00c6ff, #0072ff); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 20px;">📷</span> Camera
+                    </button>
+                    <label style="background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 20px;">🖼️</span> Gallery
+                        <input type="file" accept="image/*" onchange="handlePhotoSelect(event)" style="display: none;" />
+                    </label>
+                </div>
+
+                <button id="analyze-photo-btn" onclick="analyzePhotoFood()" style="display: none; width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px;">
+                    ✨ Analyze Food
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="photo-loading" style="display: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 48px; animation: pulse 1.5s infinite;">🔍</div>
+                <div style="margin-top: 15px; font-weight: bold; color: var(--primary);">Analyzing your food...</div>
+                <div style="margin-top: 8px; font-size: 13px; color: #666;">AI is identifying restaurants, menu items, and finding real nutrition data</div>
+                <div style="margin-top: 6px; font-size: 11px; color: #999;">Powered by Claude Opus 4.5 Extended Thinking</div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="photo-results" style="display: none;">
+                <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: #166534;">Total Calories</span>
+                        <span id="photo-total-calories" style="font-size: 24px; font-weight: bold; color: #166534;">0</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; font-size: 12px;">
+                        <div>
+                            <div style="font-weight: bold; color: #dc2626;" id="photo-total-protein">0g</div>
+                            <div style="color: #666;">Protein</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; color: #f59e0b;" id="photo-total-carbs">0g</div>
+                            <div style="color: #666;">Carbs</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; color: #22c55e;" id="photo-total-fat">0g</div>
+                            <div style="color: #666;">Fat</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; color: #8b5cf6;" id="photo-total-sugar">0g</div>
+                            <div style="color: #666;">Sugar</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="photo-confidence-alert" style="display: none; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 10px; padding: 12px; margin-bottom: 15px; font-size: 13px;">
+                    <span style="font-weight: bold;">⚠️ Low Confidence:</span> <span id="photo-confidence-message">These estimates may vary. Consider adjusting values.</span>
+                </div>
+
+                <div id="photo-food-items" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+                    <!-- Food items will be inserted here -->
+                </div>
+
+                <!-- Meal Type Selection -->
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Log as:</div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <button onclick="selectPhotoMealType('breakfast')" class="photo-meal-btn" data-meal="breakfast" style="padding: 10px 5px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; cursor: pointer;">🌅 Breakfast</button>
+                        <button onclick="selectPhotoMealType('lunch')" class="photo-meal-btn" data-meal="lunch" style="padding: 10px 5px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; cursor: pointer;">☀️ Lunch</button>
+                        <button onclick="selectPhotoMealType('dinner')" class="photo-meal-btn" data-meal="dinner" style="padding: 10px 5px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; cursor: pointer;">🌙 Dinner</button>
+                        <button onclick="selectPhotoMealType('snack')" class="photo-meal-btn" data-meal="snack" style="padding: 10px 5px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; cursor: pointer;">🍎 Snack</button>
+                    </div>
+                </div>
+
+                <button onclick="logPhotoFoods()" id="log-photo-btn" style="width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; opacity: 0.5;" disabled>
+                    Select a meal type to log
+                </button>
+            </div>
+
+            <button onclick="closePhotoModal()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 15px; font-weight: bold; margin-top: 15px; width: 100%;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .photo-meal-btn.selected {
+            border-color: #667eea !important;
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff) !important;
+        }
+    </style>
+
     <!-- Smart Entry Modal -->
     <div id="smart-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; overflow-y: auto;">
         <div style="position: relative; top: 5vh; left: 50%; transform: translateX(-50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 450px; margin-bottom: 5vh;">
@@ -707,6 +815,378 @@
             console.log('  Total:', totalActive);
 
             return totalActive;
+        }
+
+        // ============================================
+        // PHOTO FOOD ANALYSIS
+        // ============================================
+        let currentPhotoData = null;
+        let currentPhotoFoods = [];
+        let selectedPhotoMealType = null;
+
+        function startFoodPhotoCapture() {
+            if (typeof requireAIAccess === 'function' && !requireAIAccess('Photo food analysis')) {
+                return;
+            }
+            // Reset state
+            currentPhotoData = null;
+            currentPhotoFoods = [];
+            selectedPhotoMealType = null;
+
+            // Reset UI
+            document.getElementById('photo-modal').style.display = 'block';
+            document.getElementById('photo-preview').style.display = 'none';
+            document.getElementById('photo-placeholder').style.display = 'block';
+            document.getElementById('photo-capture-section').style.display = 'block';
+            document.getElementById('photo-loading').style.display = 'none';
+            document.getElementById('photo-results').style.display = 'none';
+            document.getElementById('analyze-photo-btn').style.display = 'none';
+            document.getElementById('photo-confidence-alert').style.display = 'none';
+
+            // Reset meal type buttons
+            document.querySelectorAll('.photo-meal-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('log-photo-btn').disabled = true;
+            document.getElementById('log-photo-btn').style.opacity = '0.5';
+            document.getElementById('log-photo-btn').textContent = 'Select a meal type to log';
+        }
+
+        function closePhotoModal() {
+            document.getElementById('photo-modal').style.display = 'none';
+            currentPhotoData = null;
+            currentPhotoFoods = [];
+        }
+
+        async function capturePhoto() {
+            try {
+                // Check if Capacitor is available
+                if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                    console.log('📷 Using Capacitor Camera...');
+
+                    // Try to get Camera from Capacitor Plugins
+                    let Camera;
+                    if (window.Capacitor.Plugins && window.Capacitor.Plugins.Camera) {
+                        Camera = window.Capacitor.Plugins.Camera;
+                    } else if (window.CapacitorCamera) {
+                        Camera = window.CapacitorCamera;
+                    } else {
+                        throw new Error('Camera plugin not available');
+                    }
+
+                    // Request camera permission first
+                    const permStatus = await Camera.checkPermissions();
+                    console.log('📷 Camera permission status:', permStatus);
+
+                    if (permStatus.camera !== 'granted') {
+                        const requestResult = await Camera.requestPermissions({ permissions: ['camera'] });
+                        console.log('📷 Permission request result:', requestResult);
+                        if (requestResult.camera !== 'granted') {
+                            alert('Camera permission is required to take photos.\n\nGo to Settings > Well Fit > Camera to enable.');
+                            return;
+                        }
+                    }
+
+                    const image = await Camera.getPhoto({
+                        quality: 80,
+                        allowEditing: false,
+                        resultType: 'base64',
+                        source: 'CAMERA',
+                        saveToGallery: false
+                    });
+
+                    console.log('📷 Photo captured successfully');
+                    handlePhotoData(image.base64String, `image/${image.format || 'jpeg'}`);
+                } else {
+                    // Web fallback - use file input with camera
+                    console.log('📷 Using web fallback for camera...');
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.onchange = (e) => handlePhotoSelect(e);
+                    input.click();
+                }
+            } catch (error) {
+                console.error('📷 Camera error:', error);
+
+                // More helpful error message
+                let errorMsg = 'Could not access camera.\n\n';
+                if (error.message && error.message.includes('permission')) {
+                    errorMsg += 'Please go to Settings > Well Fit and enable Camera access.';
+                } else if (error.message && error.message.includes('not available')) {
+                    errorMsg += 'Camera plugin not loaded. Try using the Gallery option instead.';
+                } else {
+                    errorMsg += 'Please try uploading a photo from your gallery instead.\n\nError: ' + (error.message || 'Unknown error');
+                }
+
+                alert(errorMsg);
+            }
+        }
+
+        function handlePhotoSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result.split(',')[1];
+                const mimeType = file.type || 'image/jpeg';
+                handlePhotoData(base64, mimeType);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handlePhotoData(base64, mimeType) {
+            currentPhotoData = { image: base64, mimeType };
+
+            // Show preview
+            const preview = document.getElementById('photo-preview');
+            preview.src = `data:${mimeType};base64,${base64}`;
+            preview.style.display = 'block';
+            document.getElementById('photo-placeholder').style.display = 'none';
+
+            // Show analyze button
+            document.getElementById('analyze-photo-btn').style.display = 'block';
+        }
+
+        async function analyzePhotoFood() {
+            if (!currentPhotoData) {
+                alert('Please take or select a photo first');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('photo-capture-section').style.display = 'none';
+            document.getElementById('photo-loading').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/ai-food-vision', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentPhotoData)
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to analyze photo');
+                }
+
+                currentPhotoFoods = result.foods || [];
+                displayPhotoResults(result);
+
+            } catch (error) {
+                console.error('Photo analysis error:', error);
+                alert('Could not analyze the photo. Please try again or use voice/text entry.');
+                // Reset to capture view
+                document.getElementById('photo-capture-section').style.display = 'block';
+                document.getElementById('photo-loading').style.display = 'none';
+            }
+        }
+
+        function displayPhotoResults(result) {
+            document.getElementById('photo-loading').style.display = 'none';
+            document.getElementById('photo-results').style.display = 'block';
+
+            // Update totals
+            document.getElementById('photo-total-calories').textContent = result.totalCalories || 0;
+            document.getElementById('photo-total-protein').textContent = (result.totalProtein || 0) + 'g';
+            document.getElementById('photo-total-carbs').textContent = (result.totalCarbs || 0) + 'g';
+            document.getElementById('photo-total-fat').textContent = (result.totalFat || 0) + 'g';
+            document.getElementById('photo-total-sugar').textContent = (result.totalSugar || 0) + 'g';
+
+            // Show restaurant identification if available
+            const confidenceAlert = document.getElementById('photo-confidence-alert');
+            if (result.restaurantIdentified) {
+                confidenceAlert.style.display = 'block';
+                confidenceAlert.style.background = 'linear-gradient(135deg, #d1fae5, #a7f3d0)';
+                confidenceAlert.style.border = '1px solid #6ee7b7';
+                document.getElementById('photo-confidence-message').innerHTML =
+                    `<strong>🏪 ${result.restaurantIdentified}</strong><br>${result.notes || 'Using published nutrition data for accuracy'}`;
+            } else if (result.overallConfidence === 'low') {
+                confidenceAlert.style.display = 'block';
+                confidenceAlert.style.background = 'linear-gradient(135deg, #fef3c7, #fde68a)';
+                confidenceAlert.style.border = '1px solid #fbbf24';
+                document.getElementById('photo-confidence-message').textContent =
+                    result.notes || 'These estimates may vary. Consider adjusting values if needed.';
+            } else if (result.overallConfidence === 'medium') {
+                confidenceAlert.style.display = 'block';
+                confidenceAlert.style.background = 'linear-gradient(135deg, #e0f2fe, #bae6fd)';
+                confidenceAlert.style.border = '1px solid #38bdf8';
+                document.getElementById('photo-confidence-message').textContent =
+                    result.notes || 'Good estimate based on similar foods and standard portions.';
+            } else {
+                confidenceAlert.style.display = 'none';
+            }
+
+            // Display food items with checkboxes and quantity controls
+            const itemsContainer = document.getElementById('photo-food-items');
+            itemsContainer.innerHTML = currentPhotoFoods.map((food, index) => {
+                const confidenceIcon = food.confidence === 'high' ? '✓' :
+                                      food.confidence === 'low' ? '⚠️' : 'ℹ️';
+                const confidenceColor = food.confidence === 'high' ? '#10b981' :
+                                       food.confidence === 'low' ? '#f59e0b' : '#3b82f6';
+
+                return `
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;">
+                        <input type="checkbox" class="photo-food-checkbox" data-index="${index}"
+                               data-name="${food.name}" data-calories="${food.calories}"
+                               data-protein="${food.protein}" data-carbs="${food.carbs}"
+                               data-fat="${food.fat}" data-sugar="${food.sugar || 0}"
+                               data-restaurant="${food.restaurant || ''}" data-source="${food.dataSource || ''}"
+                               checked style="width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary);">
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: bold; font-size: 14px; color: #333;">
+                                        ${food.name}
+                                        <span style="font-size: 11px; color: ${confidenceColor}; margin-left: 4px;">${confidenceIcon}</span>
+                                    </div>
+                                    ${food.restaurant ? `<div style="font-size: 11px; color: #10b981; margin-top: 2px;">📍 ${food.restaurant}</div>` : ''}
+                                    <div style="font-size: 12px; color: #666; margin-top: 2px;">
+                                        ${food.serving || '1 serving'}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; color: var(--primary); font-size: 16px;" id="photo-food-cal-${index}">${food.calories}</div>
+                                    <div style="font-size: 10px; color: #999;">cal</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; font-size: 11px; color: #666; border-top: 1px solid #e5e7eb; padding-top: 6px; flex-wrap: wrap; align-items: center;">
+                                <div><span style="color: #dc2626; font-weight: 600;">P:</span> ${food.protein}g</div>
+                                <div><span style="color: #f59e0b; font-weight: 600;">C:</span> ${food.carbs}g</div>
+                                <div><span style="color: #22c55e; font-weight: 600;">F:</span> ${food.fat}g</div>
+                                ${food.sugar ? `<div><span style="color: #a855f7; font-weight: 600;">S:</span> ${food.sugar}g</div>` : ''}
+                                <div style="margin-left: auto; display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-weight: 600; color: #333;">Qty:</span>
+                                    <input type="number" class="photo-food-qty" data-index="${index}" value="1" min="0.25" step="0.25"
+                                           onchange="updatePhotoFoodDisplay(${index})"
+                                           style="width: 55px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; text-align: center;">
+                                </div>
+                            </div>
+                            ${food.dataSource ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px; font-style: italic;">📊 ${food.dataSource}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // Add event listeners for checkboxes to update totals
+            document.querySelectorAll('.photo-food-checkbox').forEach(cb => {
+                cb.addEventListener('change', updatePhotoTotals);
+            });
+
+            updatePhotoTotals();
+        }
+
+        function updatePhotoFoodDisplay(index) {
+            const qtyInput = document.querySelector(`.photo-food-qty[data-index="${index}"]`);
+            const qty = parseFloat(qtyInput.value) || 1;
+            const baseCalories = parseFloat(currentPhotoFoods[index].calories);
+            const calDisplay = document.getElementById(`photo-food-cal-${index}`);
+            if (calDisplay) {
+                calDisplay.textContent = Math.round(baseCalories * qty);
+            }
+            updatePhotoTotals();
+        }
+
+        function updatePhotoTotals() {
+            let totalCal = 0, totalP = 0, totalC = 0, totalF = 0, totalS = 0;
+            let selectedCount = 0;
+
+            document.querySelectorAll('.photo-food-checkbox').forEach((cb, index) => {
+                if (cb.checked) {
+                    const qty = parseFloat(document.querySelector(`.photo-food-qty[data-index="${index}"]`)?.value) || 1;
+                    totalCal += Math.round(parseFloat(cb.dataset.calories) * qty);
+                    totalP += Math.round(parseFloat(cb.dataset.protein) * qty);
+                    totalC += Math.round(parseFloat(cb.dataset.carbs) * qty);
+                    totalF += Math.round(parseFloat(cb.dataset.fat) * qty);
+                    totalS += Math.round(parseFloat(cb.dataset.sugar || 0) * qty);
+                    selectedCount++;
+                }
+            });
+
+            document.getElementById('photo-total-calories').textContent = totalCal;
+            document.getElementById('photo-total-protein').textContent = totalP + 'g';
+            document.getElementById('photo-total-carbs').textContent = totalC + 'g';
+            document.getElementById('photo-total-fat').textContent = totalF + 'g';
+            document.getElementById('photo-total-sugar').textContent = totalS + 'g';
+
+            // Update log button text
+            const logBtn = document.getElementById('log-photo-btn');
+            if (selectedPhotoMealType && selectedCount > 0) {
+                logBtn.textContent = `Log ${selectedCount} item${selectedCount !== 1 ? 's' : ''} as ${selectedPhotoMealType}`;
+            }
+        }
+
+        function selectPhotoMealType(mealType) {
+            selectedPhotoMealType = mealType;
+
+            // Update button states
+            document.querySelectorAll('.photo-meal-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.meal === mealType) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            // Enable log button
+            const logBtn = document.getElementById('log-photo-btn');
+            const selectedCount = document.querySelectorAll('.photo-food-checkbox:checked').length;
+            logBtn.disabled = false;
+            logBtn.style.opacity = '1';
+            logBtn.textContent = `Log ${selectedCount} item${selectedCount !== 1 ? 's' : ''} as ${mealType}`;
+        }
+
+        function logPhotoFoods() {
+            const selectedCheckboxes = document.querySelectorAll('.photo-food-checkbox:checked');
+            if (!selectedPhotoMealType || selectedCheckboxes.length === 0) {
+                alert('Please select a meal type and at least one food item');
+                return;
+            }
+
+            // Log each selected food item with quantity adjustment
+            selectedCheckboxes.forEach(cb => {
+                const index = parseInt(cb.dataset.index);
+                const qty = parseFloat(document.querySelector(`.photo-food-qty[data-index="${index}"]`)?.value) || 1;
+                const food = currentPhotoFoods[index];
+
+                const meal = {
+                    id: Date.now() + Math.random(),
+                    name: qty !== 1 ? `${qty}x ${food.name}` : food.name,
+                    calories: Math.round(food.calories * qty),
+                    protein: Math.round(food.protein * qty),
+                    carbs: Math.round(food.carbs * qty),
+                    fat: Math.round(food.fat * qty),
+                    sugar: Math.round((food.sugar || 0) * qty),
+                    serving: food.serving || '1 serving',
+                    quantity: qty,
+                    mealType: selectedPhotoMealType,
+                    timestamp: new Date().toISOString(),
+                    source: 'photo-ai',
+                    restaurant: food.restaurant || null,
+                    dataSource: food.dataSource || null,
+                    confidence: food.confidence || 'medium'
+                };
+
+                // Get existing meals
+                const today = new Date().toISOString().split('T')[0];
+                const stored = localStorage.getItem('fuelfire_logged_meals');
+                const allMeals = stored ? JSON.parse(stored) : {};
+                if (!allMeals[today]) allMeals[today] = [];
+
+                allMeals[today].push(meal);
+                localStorage.setItem('fuelfire_logged_meals', JSON.stringify(allMeals));
+            });
+
+            // Close modal and refresh
+            closePhotoModal();
+            loadTodaysMeals();
+            updateMacros();
+
+            // Show success message
+            const totalCals = currentPhotoFoods.reduce((sum, f) => sum + f.calories, 0);
+            alert(`Logged ${currentPhotoFoods.length} item(s) - ${totalCals} calories total!`);
         }
 
         // Voice Recognition
@@ -1455,7 +1935,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ query: query })
+                    body: JSON.stringify({ query: query, forceWebSearch: true, source: 'voice' })
                 });
 
                 console.log('📡 API response status:', response.status, response.statusText);
@@ -1556,9 +2036,22 @@
             // Show all foods with checkboxes and quantity
             let html = `<div style="font-weight: bold; margin-bottom: 10px; color: #4CAF50;">🤖 Found ${foods.length} item(s):</div>`;
 
+            // Check if any items have low confidence
+            const hasLowConfidence = foods.some(f => f.confidence === 'low');
+            if (hasLowConfidence) {
+                html += `<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 10px; padding: 10px; margin-bottom: 12px; font-size: 13px;">
+                    <span style="font-weight: bold;">⚠️ Some estimates may vary.</span> Items marked with ⚠️ are best guesses - verify if needed.
+                </div>`;
+            }
+
             // Add checkboxes for each food item with quantity input
             html += '<div style="margin-bottom: 15px;">';
             foods.forEach((food, index) => {
+                const confidenceBadge = food.confidence === 'low'
+                    ? '<span style="color: #f59e0b; margin-left: 5px;" title="Low confidence estimate">⚠️</span>'
+                    : food.confidence === 'medium'
+                    ? '<span style="color: #3b82f6; margin-left: 5px;" title="Estimated based on similar items">~</span>'
+                    : '';
                 html += `
                     <div style="background: #f8f9ff; padding: 12px; border-radius: 10px; margin-bottom: 8px;">
                         <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
@@ -1571,7 +2064,7 @@
                                    data-food-sugar="${food.sugar || 0}"
                                    checked style="width: 20px; height: 20px; margin-top: 3px; flex-shrink: 0;">
                             <div style="flex: 1;">
-                                <div style="font-weight: bold;">${food.name}</div>
+                                <div style="font-weight: bold;">${food.name}${confidenceBadge}</div>
                                 <div style="font-size: 14px; color: #666;">${food.calories} cal | P: ${food.protein || 0}g | C: ${food.carbs || 0}g | F: ${food.fat || 0}g</div>
                                 ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
                                 <div style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
@@ -2104,15 +2597,14 @@
 
             // Show deficit (negative) or surplus (positive)
             const remainingEl = document.getElementById('calories-remaining');
+            remainingEl.style.color = '#fff';
+            remainingEl.style.textShadow = '0 1px 3px rgba(0,0,0,0.35)';
             if (remaining < 0) {
                 remainingEl.textContent = Math.abs(remaining).toLocaleString() + ' deficit';
-                remainingEl.style.color = '#4CAF50'; // Green for deficit (good for weight loss)
             } else if (remaining > 0) {
                 remainingEl.textContent = remaining.toLocaleString() + ' remaining';
-                remainingEl.style.color = '#2196F3'; // Blue for remaining
             } else {
                 remainingEl.textContent = '0 (balanced)';
-                remainingEl.style.color = '#666';
             }
             
             // Set sugar target from nutrition goals or WHO recommendation (max 25g/day for adults)
@@ -2623,20 +3115,6 @@
         let selectedMealData = null;
         
         function showMealPlanSelector() {
-            // Debug: Check all possible storage keys
-            console.log('🔍 DEBUG: Checking for meal plans...');
-            const allKeys = Object.keys(localStorage);
-            const mealKeys = allKeys.filter(key => key.toLowerCase().includes('meal') || key.toLowerCase().includes('plan'));
-            console.log('📦 Found storage keys:', mealKeys);
-            mealKeys.forEach(key => {
-                try {
-                    const value = localStorage.getItem(key);
-                    console.log(`   ${key}:`, value ? value.substring(0, 100) + '...' : 'empty');
-                } catch (e) {
-                    console.log(`   ${key}: error reading`);
-                }
-            });
-            
             // Load saved meal plans from the correct storage key
             const savedPlans = JSON.parse(localStorage.getItem('fuelfire_meal_plans') || '[]');
             console.log('📋 Loaded', savedPlans.length, 'meal plans from fuelfire_meal_plans');
@@ -3169,6 +3647,9 @@
                 // Auto-open the selected input method
                 setTimeout(() => {
                     switch(mode) {
+                        case 'photo':
+                            startFoodPhotoCapture();
+                            break;
                         case 'scan':
                             startBarcodeScanning();
                             break;

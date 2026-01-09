@@ -33,6 +33,17 @@ function showQuickFoodEntry() {
 
                 <!-- 3 Entry Options -->
                 <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Photo Entry -->
+                    <button onclick="quickEntryOption('photo')"
+                        style="background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); color: white; border: none; padding: 20px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.35); display: flex; align-items: center; justify-content: center; gap: 15px; transition: transform 0.2s;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="5" width="18" height="14" rx="3" stroke="white" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="4" stroke="white" stroke-width="2"/>
+                            <path d="M8 5L9.5 3H14.5L16 5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Photo (AI)</span>
+                    </button>
+
                     <!-- Barcode Scanner -->
                     <button onclick="quickEntryOption('scan')"
                         style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border: none; padding: 20px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); display: flex; align-items: center; justify-content: center; gap: 15px; transition: transform 0.2s;">

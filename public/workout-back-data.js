@@ -43,8 +43,8 @@ window.BACK_EXERCISES = [
                 icon: "🏃",
                 formIllustration: "🤲🔗 ↓🔻 ⬆️💪 ↓🔻\nHang • Pull up • Control down",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Pull-Up/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Pull-Up/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg"
                 ],
                 steps: [
                     "Hang from bar with palms facing away, hands shoulder-width apart",
@@ -78,8 +78,8 @@ window.BACK_EXERCISES = [
                 icon: "🚣",
                 formIllustration: "🧍↘️ 🏋️💪 ↖️⬆️ ↙️⬇️\nHinge forward • Row to chest • Control down",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/1.jpg"
                 ],
                 steps: [
                     "Stand with feet hip-width apart, hold bar with overhand grip",
@@ -183,8 +183,8 @@ window.BACK_EXERCISES = [
                 icon: "🔗",
                 formIllustration: "🪑→ 🤲⬅️ 💪↖️ ➡️🤲\nSit tall • Pull to chest • Squeeze back",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Row/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Cable_Rows/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Cable_Rows/1.jpg"
                 ],
                 steps: [
                     "Sit at cable row machine with feet on platform",
@@ -394,7 +394,7 @@ window.BACK_EXERCISES = [
                 formIllustration: "🏋️↘️ ⚡💪 ⬇️🏋️\nRest on floor • Explosive row • Reset",
                 images: [
                     "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/1.jpg"
                 ],
                 steps: [
                     "Bar rests on floor between each rep",
@@ -428,8 +428,8 @@ window.BACK_EXERCISES = [
                 icon: "🦭",
                 formIllustration: "🛏️↘️ 🤲💪 ⬆️⬇️\nLie face down • Row up • Squeeze back",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Row/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/1.jpg"
                 ],
                 steps: [
                     "Lie face down on elevated bench (chest supported)",
@@ -463,8 +463,8 @@ window.BACK_EXERCISES = [
                 icon: "📦",
                 formIllustration: "📦🏋️ ⬆️💪 ⬇️📦\nBar on pins • Pull to lockout • Control down",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rack_Pull/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rack_Pull/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rack_Pulls/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rack_Pulls/1.jpg"
                 ],
                 steps: [
                     "Set bar on rack pins at knee height",
@@ -498,8 +498,8 @@ window.BACK_EXERCISES = [
                 icon: "🌾",
                 formIllustration: "⚓🤲 ↗️💪 ↘️⬇️\nStagger stance • Row across body • Squeeze",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Landmine_Row/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Landmine_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/1.jpg"
                 ],
                 steps: [
                     "Stand perpendicular to landmine with staggered stance",
@@ -533,8 +533,8 @@ window.BACK_EXERCISES = [
                 icon: "↔️",
                 formIllustration: "🤲↔️ ⬆️💪 ⬇️🔻\nWide grip • Pull up • Control down",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide_Grip_Pull-Up/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide_Grip_Pull-Up/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg"
                 ],
                 steps: [
                     "Hang from bar with grip 1.5x shoulder width",
@@ -568,8 +568,8 @@ window.BACK_EXERCISES = [
                 icon: "📐",
                 formIllustration: "⬆️🤲 ↓💪 ⬆️🤲\nArms straight • Pull down • Squeeze lats",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight_Arm_Pulldown/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight_Arm_Pulldown/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/1.jpg"
                 ],
                 steps: [
                     "Stand facing cable machine with bar at head height",
@@ -673,8 +673,8 @@ window.BACK_EXERCISES = [
                 icon: "🎭",
                 formIllustration: "🛏️⬆️ ↘️💪 ⬆️🔼\nArms overhead • Pull down • Stretch",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Pullover/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Pullover/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent-Arm_Dumbbell_Pullover/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent-Arm_Dumbbell_Pullover/1.jpg"
                 ],
                 steps: [
                     "Lie perpendicular on bench with shoulders supported",
@@ -708,8 +708,8 @@ window.BACK_EXERCISES = [
                 icon: "🎰",
                 formIllustration: "🛏️🤲 ⬆️💪 ⬇️🤲\nChest on pad • Row handles • Squeeze back",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/1.jpg"
                 ],
                 steps: [
                     "Adjust pad height so chest is supported",
@@ -848,8 +848,8 @@ window.BACK_EXERCISES = [
                 icon: "🎰",
                 formIllustration: "🪑⬆️ 🤲💪 ⬅️\nSit tall • Pull to chest • Squeeze shoulder blades",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lever_High_Row/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lever_High_Row/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/T-Bar_Row_with_Handle/1.jpg"
                 ],
                 steps: [
                     "Adjust seat so handles are at upper chest height",
@@ -883,8 +883,8 @@ window.BACK_EXERCISES = [
                 icon: "🦋",
                 formIllustration: "↘️🤲 ↔️💪 🤲↘️\nBend over • Raise to sides • Squeeze back",
                 images: [
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Rear_Delt_Raise/0.jpg",
-                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Rear_Delt_Raise/1.jpg"
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Flyes/0.jpg",
+                    "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Flyes/1.jpg"
                 ],
                 steps: [
                     "Hinge at hips with flat back, dumbbells hanging",

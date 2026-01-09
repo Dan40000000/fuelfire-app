@@ -1,7 +1,20 @@
-// Lightweight AI paywall helper used across pages
+// AI paywall helper using RevenueCat entitlements (iOS/Android) with a local promo fallback
 (function() {
     const STORAGE_KEY = 'fuelfire_ai_access';
-    let configPromise = null;
+    const RC_KEY = 'appl_jODVYiKLuaYmvESjhFcYJGaVkLe'; // RevenueCat public SDK key (Apple)
+    const RC_PACKAGE_MAP = {
+        premium: 'premium_monthly',
+        trial_week: 'premium_monthly', // intro offer configured in App Store Connect
+        voice_trial: 'premium_monthly',
+        core: 'core_monthly',
+        elite: 'elite_monthly',
+        coaching_single: 'coaching_single',
+        coaching_package: 'coaching_package'
+    };
+    const RC_ENTITLEMENTS_FOR_AI = ['premium_access', 'elite_access'];
+    let rcReady = false;
+    let rcEntitlements = {};
+    let offeringsCache = null;
 
     function readStatus() {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -61,48 +74,152 @@
         }).catch(err => console.warn('Subscription log error', err));
     }
 
-    function loadConfig() {
-        if (!configPromise) {
-            configPromise = fetch('/api/stripe-config')
-                .then(res => (res.ok ? res.json() : { priceIds: {} }))
-                .catch(() => ({ priceIds: {} }));
-        }
-        return configPromise;
+    function getPurchasesPlugin() {
+        return (window.Capacitor?.Plugins?.Purchases) || (window.capacitor?.Plugins?.Purchases) || null;
     }
 
-    async function startCheckout(plan) {
-        try {
-            const cfg = await loadConfig();
-            const priceId = cfg?.priceIds?.[plan];
-            if (!priceId) {
-                alert('Billing is not configured yet. Please add Stripe price IDs.');
-                return;
-            }
-            const ctx = getUserContext();
-            const resp = await fetch('/api/create-checkout-session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan, priceId, email: ctx.email, returnPath: window.location.pathname.replace(/^\\//, '') })
-            });
-            if (!resp.ok) {
-                alert('Unable to start checkout. Please try again.');
-                return;
-            }
-            const data = await resp.json();
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                alert('Checkout link not available yet. Try again in a moment.');
-            }
-        } catch (err) {
-            console.error('Checkout error', err);
-            alert('Something went wrong starting checkout. Please try again.');
+    async function initRevenueCat() {
+        if (rcReady) return true;
+        const Purchases = getPurchasesPlugin();
+        if (!Purchases) {
+            console.warn('RevenueCat Purchases plugin not available yet.');
+            return false;
         }
+        try {
+            const appUserID = localStorage.getItem('rc_app_user_id') || `anon_${Math.random().toString(36).slice(2)}`;
+            localStorage.setItem('rc_app_user_id', appUserID);
+            await Purchases.configure({
+                apiKey: RC_KEY,
+                appUserID
+            });
+            rcReady = true;
+            Purchases.addCustomerInfoUpdateListener(async () => {
+                await refreshEntitlements();
+            });
+            await refreshEntitlements();
+            return true;
+        } catch (err) {
+            console.error('RevenueCat configure failed', err);
+            return false;
+        }
+    }
+
+    async function refreshEntitlements() {
+        const Purchases = getPurchasesPlugin();
+        if (!Purchases) return;
+        try {
+            const { customerInfo } = await Purchases.getCustomerInfo();
+            rcEntitlements = customerInfo?.entitlements?.active || {};
+            localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+        } catch (err) {
+            console.warn('Failed to refresh RevenueCat entitlements', err);
+        }
+    }
+
+    function getCachedEntitlements() {
+        if (rcEntitlements && Object.keys(rcEntitlements).length) return rcEntitlements;
+        try {
+            const raw = localStorage.getItem('rc_entitlements');
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    async function getOfferings() {
+        if (offeringsCache) return offeringsCache;
+        const Purchases = getPurchasesPlugin();
+        if (!Purchases) return null;
+        try {
+            const offerings = await Purchases.getOfferings();
+            offeringsCache = offerings;
+            return offerings;
+        } catch (err) {
+            console.warn('Failed to load offerings', err);
+            return null;
+        }
+    }
+
+    async function findPackageById(identifier) {
+        const offerings = await getOfferings();
+        if (!offerings) return null;
+        const allOfferings = Object.values(offerings?.all || {});
+        for (const off of allOfferings) {
+            if (!off?.availablePackages) continue;
+            const match = off.availablePackages.find(p => p.identifier === identifier);
+            if (match) return match;
+        }
+        return null;
+    }
+
+    async function purchasePackage(planKey) {
+        const Purchases = getPurchasesPlugin();
+        if (!Purchases) {
+            alert('In-app purchases are not available on this device/build.');
+            return;
+        }
+        const pkgId = RC_PACKAGE_MAP[planKey] || RC_PACKAGE_MAP.premium;
+        const pkg = await findPackageById(pkgId);
+        if (!pkg) {
+            alert('Offer is not available right now. Please try again later.');
+            return;
+        }
+        try {
+            const result = await Purchases.purchasePackage({ aPackage: pkg });
+            rcEntitlements = result?.customerInfo?.entitlements?.active || {};
+            localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            logEvent({ action: 'purchase', plan: planKey, package: pkgId, entitlements: Object.keys(rcEntitlements) });
+            alert('✅ Purchase complete.');
+        } catch (err) {
+            if (err?.userCancelled) {
+                console.info('Purchase cancelled by user');
+                return;
+            }
+            console.error('Purchase failed', err);
+            alert('Purchase failed. Please try again.');
+        }
+    }
+
+    async function restorePurchases() {
+        const Purchases = getPurchasesPlugin();
+        if (!Purchases) {
+            alert('In-app purchases are not available on this device/build.');
+            return;
+        }
+        try {
+            const { customerInfo } = await Purchases.restorePurchases();
+            rcEntitlements = customerInfo?.entitlements?.active || {};
+            localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            logEvent({ action: 'restore', entitlements: Object.keys(rcEntitlements) });
+            alert('Restored purchases.');
+        } catch (err) {
+            console.error('Restore failed', err);
+            alert('Restore failed. Please try again.');
+        }
+    }
+
+    function isFoodLoggingContext() {
+        const path = (window.location.pathname || '').toLowerCase();
+        return path.includes('calorie') || path.includes('food');
     }
 
     function hasAccess() {
+        const entitlements = getCachedEntitlements();
+        const entitlementKeys = Object.keys(entitlements || {});
+        if (entitlementKeys.some(key => RC_ENTITLEMENTS_FOR_AI.includes(key))) return true;
+
+        // Fallback to local selections (legacy UI, non-binding)
+        const plan = (localStorage.getItem('selectedPlan') || localStorage.getItem('subscriptionPlan') || '').toLowerCase();
+        if (plan === 'elite' || plan === 'premium') return true;
+
+        // Fallback to local paywall overrides
         const status = readStatus();
         if (status.plan === 'premium' || status.plan === 'promo') return true;
+        if (status.plan === 'owner_unlock') return true; // manual indefinite unlock
+        if (status.plan === 'promo_day' && status.expiresAt && Date.now() < status.expiresAt) return true;
+        if (status.plan === 'promo_ai_log' && status.expiresAt && Date.now() < status.expiresAt) {
+            return isFoodLoggingContext();
+        }
         if (status.plan === 'trial' && status.expiresAt && Date.now() < status.expiresAt) return true;
         return false;
     }
@@ -128,9 +245,14 @@
                     </div>
                     <div style="margin:14px 0 10px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);">
                         <div style="font-weight:800;margin-bottom:4px;">Premium access</div>
-                        <div style="font-size:0.9rem;opacity:0.85;">Checkout securely with Stripe. Cancel anytime.</div>
+                        <div style="font-size:0.9rem;opacity:0.85;">Apple/Google in-app purchase. Cancel anytime.</div>
                     </div>
-                    <button id="ai-start-trial" style="width:100%;margin:8px 0;background:linear-gradient(135deg,#4B9CD3,#8e54e9);border:none;color:#fff;padding:14px;border-radius:12px;font-weight:800;cursor:pointer;">Start subscription</button>
+                    <div style="display:grid;gap:8px;margin:8px 0;">
+                        <button id="ai-start-trial" style="width:100%;background:linear-gradient(135deg,#4B9CD3,#8e54e9);border:none;color:#fff;padding:14px;border-radius:12px;font-weight:800;cursor:pointer;">Start subscription</button>
+                        <button id="ai-trial-1week" style="width:100%;background:#e8f4ff;border:1px solid #4B9CD3;color:#0b1a2b;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;">$1 · 48h food logging trial</button>
+                        <button id="ai-voice-trial" style="width:100%;background:#f7f0ff;border:1px solid #8e54e9;color:#3a2950;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;">AI voice add-on</button>
+                        <button id="ai-restore" style="width:100%;background:#0f172a;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px;border-radius:12px;font-weight:700;cursor:pointer;">Restore purchases</button>
+                    </div>
                     <div style="margin-top:8px;">
                         <label for="ai-promo-input" style="display:block;font-weight:700;font-size:0.9rem;margin-bottom:6px;">Have a promo?</label>
                         <div style="display:flex;gap:8px;">
@@ -146,7 +268,20 @@
             modal.querySelector('#ai-paywall-close').onclick = () => modal.remove();
             modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
             modal.querySelector('#ai-start-trial').onclick = () => {
-                startCheckout('premium');
+                purchasePackage('premium');
+            };
+            modal.querySelector('#ai-trial-1week').onclick = () => {
+                const expiresAt = Date.now() + 48 * 60 * 60 * 1000; // 48h food logging only
+                saveStatus({ plan: 'promo_ai_log', promoCode: 'trial_food', expiresAt });
+                logEvent({ action: 'trial_food', plan: 'promo_ai_log', expiresAt });
+                alert('✅ 48-hour AI food logging trial activated. Meal plans and other AI stay locked.');
+                modal.remove();
+            };
+            modal.querySelector('#ai-voice-trial').onclick = () => {
+                purchasePackage('voice_trial');
+            };
+            modal.querySelector('#ai-restore').onclick = () => {
+                restorePurchases();
             };
             modal.querySelector('#ai-apply-promo').onclick = () => {
                 const code = modal.querySelector('#ai-promo-input').value.trim();
@@ -154,10 +289,16 @@
                     alert('Enter a promo code to unlock.');
                     return;
                 }
-                if (code.toLowerCase() === 'dan') {
-                    saveStatus({ plan: 'premium', promoCode: code });
-                    logEvent({ action: 'promo', code, plan: 'premium' });
-                    alert('✅ Promo DAN applied. Unlimited access granted.');
+                const normalized = code.toLowerCase();
+                if (normalized === 'dan') {
+                    saveStatus({ plan: 'owner_unlock', promoCode: code });
+                    logEvent({ action: 'promo', code, plan: 'owner_unlock' });
+                    alert('✅ Promo DAN applied. Unlimited access granted until you revoke it.');
+                } else if (normalized === 'ai') {
+                    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+                    saveStatus({ plan: 'promo_day', promoCode: code, expiresAt });
+                    logEvent({ action: 'promo', code, plan: 'promo_day', expiresAt });
+                    alert('✅ AI unlocked for 24 hours.');
                 } else {
                     saveStatus({ plan: 'promo', promoCode: code });
                     logEvent({ action: 'promo', code, plan: 'promo' });
@@ -182,8 +323,12 @@
         hasAccess,
         readStatus,
         saveStatus,
-        getEvents
+        getEvents,
+        refreshEntitlements,
+        purchasePackage,
+        restorePurchases
     };
 
     parseQueryFlags();
+    initRevenueCat();
 })();

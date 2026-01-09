@@ -895,7 +895,8 @@
             alert('✅ Profile updated');
         }
 
-        let selectedPlan = 'elite';
+        let currentPlan = (localStorage.getItem('subscriptionPlan') || 'elite').toLowerCase();
+        let selectedPlan = currentPlan;
         const PLAN_DETAILS = {
             elite: {
                 label: 'Elite Plan',
@@ -933,19 +934,22 @@
 
             const currentPlanLabel = document.getElementById('currentPlanLabel');
             const currentPlanDetails = document.getElementById('currentPlanDetails');
-            const details = PLAN_DETAILS[selectedPlan];
+            const details = PLAN_DETAILS[currentPlan];
             if (details) {
                 currentPlanLabel.textContent = details.label;
                 currentPlanDetails.textContent = details.priceText;
             }
 
             const statusBadge = document.querySelector('.status-badge');
-            statusBadge.textContent = 'ACTIVE';
+            statusBadge.textContent = details ? `${details.label}` : 'ACTIVE';
         }
 
         function confirmPlanSelection() {
             const details = PLAN_DETAILS[selectedPlan];
             alert(`✅ Plan saved\n\n${details.label}\n${details.summary}`);
+            currentPlan = selectedPlan;
+            localStorage.setItem('subscriptionPlan', currentPlan);
+            syncPlanUI();
         }
 
         function openBillingPortal() {

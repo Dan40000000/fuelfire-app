@@ -648,33 +648,8 @@
             }, 3000);
         }
 
-        function debugLocalStorage() {
-            console.log('🔍 DEBUG: Direct localStorage check');
-            const raw = localStorage.getItem('fuelfire_meal_plans');
-            console.log('📦 Raw data:', raw);
-
-            if (raw) {
-                try {
-                    const parsed = JSON.parse(raw);
-                    console.log('✅ Parsed successfully:', parsed.length, 'plans');
-                    console.log('📋 Plans:', parsed);
-                    alert(`Found ${parsed.length} meal plans in storage!\n\nCheck console for details.`);
-                } catch (error) {
-                    console.error('❌ Parse error:', error);
-                    alert('Error parsing meal plans data!');
-                }
-            } else {
-                console.log('❌ No data found');
-                alert('No meal plans found in localStorage!');
-            }
-
-            // Force reload
-            loadMealPlans();
-        }
-
         // Initialize
         window.addEventListener('load', function() {
-            console.log('🔄 Meal Plans page loaded');
 
             // Only update time if element exists
             if (document.getElementById('time')) {

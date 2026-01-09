@@ -3033,7 +3033,10 @@ function quickStartWorkout(workoutType) {
         'muscle-30': 'workout-muscle-30',
         'hiit-20': 'workout-hiit-20',
         'mobility-15': 'workout-mobility-15',
-        'core-10': 'workout-core-10'
+        'core-10': 'workout-core-10',
+        'chest-blast': 'workout-chest-blast',
+        'back-blast': 'workout-back-blast',
+        'arms-blast': 'workout-arms-blast'
     };
     
     const screenId = workoutScreens[workoutType];
@@ -3100,6 +3103,40 @@ function startQuickWorkout(workoutType) {
                 { name: 'Side Plank (Right)', sets: 1, reps: '45 sec' },
                 { name: 'Side Plank (Left)', sets: 1, reps: '45 sec' },
                 { name: 'Hollow Body Hold', sets: 1, reps: '45 sec' }
+            ]
+        },
+        'chest-blast': {
+            name: '15-Min Chest Blast',
+            duration: 15,
+            exercises: [
+                { name: 'Push-Ups', sets: 3, reps: '40 sec' },
+                { name: 'Incline Push-Ups', sets: 3, reps: '40 sec' },
+                { name: 'Dumbbell Floor Press', sets: 3, reps: '40 sec' },
+                { name: 'Dumbbell Flyes', sets: 3, reps: '40 sec' },
+                { name: 'Chair Dips', sets: 3, reps: '40 sec' }
+            ]
+        },
+        'back-blast': {
+            name: '15-Min Back Blast',
+            duration: 15,
+            exercises: [
+                { name: 'Bent-Over Rows', sets: 3, reps: '40 sec' },
+                { name: 'Band Pull-Aparts / Face Pulls', sets: 3, reps: '40 sec' },
+                { name: 'Reverse Flyes', sets: 3, reps: '40 sec' },
+                { name: 'Supermans Hold', sets: 3, reps: '40 sec' },
+                { name: 'Farmer Carry / March', sets: 3, reps: '40 sec' }
+            ]
+        },
+        'arms-blast': {
+            name: '12-Min Arms Blast',
+            duration: 12,
+            exercises: [
+                { name: 'Hammer Curls', sets: 3, reps: '30 sec' },
+                { name: 'Overhead Tricep Extension', sets: 3, reps: '30 sec' },
+                { name: 'Alternating Curls', sets: 3, reps: '30 sec' },
+                { name: 'Tricep Kickbacks / Dips', sets: 3, reps: '30 sec' },
+                { name: 'Reverse Curls', sets: 3, reps: '30 sec' },
+                { name: 'Diamond Push-Ups', sets: 3, reps: '30 sec' }
             ]
         }
     };
@@ -6800,6 +6837,9 @@ window.onload = function() {
     updateTime();
     setInterval(updateTime, 1000);
     updateDailyQuote();
+    if (typeof updateHydrationUI === 'function') {
+        updateHydrationUI();
+    }
 
     // Load exercise database for workout generation
     loadExerciseDatabases();

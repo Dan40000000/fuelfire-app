@@ -22,9 +22,6 @@
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">☰</div>
                 <div class="header-title">Enhanced Diet Quiz</div>
-                <button onclick="autoFillQuiz()" style="background: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin-left: auto;">
-                    ⚡ TEST
-                </button>
             </div>
 
             <div class="content">
@@ -193,8 +190,58 @@
         // Enhanced Diet Quiz Variables
         let currentStep = 1;
         const totalSteps = 10;
-        let quizData = {};
+        const SAVED_KEY = 'fuelfire_diet_quiz_answers';
         let measurementSystem = 'imperial'; // 'imperial' or 'metric'
+        let quizData = {
+            goal: '',
+            calories: '',
+            age: '',
+            gender: '',
+            weight: '',
+            activity: '',
+            bodytype: '',
+            measurementSystem: 'imperial',
+            feet: '',
+            inches: '',
+            heightCm: '',
+            allergies: [],
+            otherAllergies: '',
+            dietaryLifestyle: '',
+            meats: [],
+            meatFrequency: '',
+            vegetables: [],
+            fruits: [],
+            exerciseType: '',
+            exerciseFrequency: '',
+            workoutDuration: '',
+            fitnessGoal: '',
+            mealsPerDay: '',
+            largestMeal: '',
+            mealPrepTime: '',
+            mealVariety: '',
+            mealStyle: 'balanced-creative',
+            cookingSkill: '',
+            kitchenEquipment: [],
+            budgetRange: '',
+            preferredStores: [],
+            planDuration: '',
+            specialRequests: ''
+        };
+
+        function loadSavedAnswers() {
+            try {
+                const raw = localStorage.getItem(SAVED_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        const savedQuiz = loadSavedAnswers();
+        if (savedQuiz) {
+            quizData = { ...quizData, ...savedQuiz };
+            measurementSystem = quizData.measurementSystem || 'imperial';
+        }
 
         // Helper functions for check all/none buttons
         function selectAllMeats() {
@@ -1245,6 +1292,71 @@
             }
 
             content.innerHTML = html;
+
+            // Prefill inputs based on saved quizData
+            if (step === 1) {
+                document.getElementById('diet-goal').value = quizData.goal || '';
+                document.getElementById('calorie-target').value = quizData.calories || '';
+            } else if (step === 2) {
+                document.getElementById('quiz-age').value = quizData.age || '';
+                document.getElementById('quiz-gender').value = quizData.gender || '';
+                document.getElementById('quiz-weight').value = quizData.weight || '';
+                document.getElementById('quiz-activity').value = quizData.activity || '';
+                document.getElementById('quiz-bodytype').value = quizData.bodytype || '';
+                if (measurementSystem === 'imperial') {
+                    document.getElementById('quiz-feet').value = quizData.feet || '';
+                    document.getElementById('quiz-inches').value = quizData.inches || '';
+                } else {
+                    document.getElementById('quiz-height-cm').value = quizData.heightCm || '';
+                }
+            } else if (step === 3) {
+                document.getElementById('quiz-dietary-lifestyle').value = quizData.dietaryLifestyle || '';
+                (quizData.allergies || []).forEach(val => {
+                    const cb = document.querySelector(`.allergy-check[value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+                document.getElementById('other-allergies').value = quizData.otherAllergies || '';
+            } else if (step === 4) {
+                (quizData.meats || []).forEach(val => {
+                    const cb = document.querySelector(`.meat-check[value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+                document.getElementById('quiz-meat-frequency').value = quizData.meatFrequency || '';
+            } else if (step === 5) {
+                (quizData.vegetables || []).forEach(val => {
+                    const cb = document.querySelector(`.veggie-check[value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            } else if (step === 6) {
+                (quizData.fruits || []).forEach(val => {
+                    const cb = document.querySelector(`.fruit-check[value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            } else if (step === 7) {
+                document.getElementById('quiz-exercise-type').value = quizData.exerciseType || '';
+                document.getElementById('quiz-exercise-frequency').value = quizData.exerciseFrequency || '';
+                document.getElementById('quiz-workout-duration').value = quizData.workoutDuration || '';
+                document.getElementById('quiz-fitness-goal').value = quizData.fitnessGoal || '';
+            } else if (step === 8) {
+                document.getElementById('quiz-meals-per-day').value = quizData.mealsPerDay || '';
+                document.getElementById('quiz-largest-meal').value = quizData.largestMeal || '';
+                document.getElementById('quiz-meal-prep-time').value = quizData.mealPrepTime || '';
+                document.getElementById('quiz-meal-variety').value = quizData.mealVariety || '';
+                document.getElementById('quiz-meal-style').value = quizData.mealStyle || 'balanced-creative';
+                document.getElementById('quiz-cooking-skill').value = quizData.cookingSkill || '';
+                (quizData.kitchenEquipment || []).forEach(val => {
+                    const cb = document.querySelector(`.equipment-check[value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            } else if (step === 9) {
+                document.getElementById('quiz-budget-range').value = quizData.budgetRange || '';
+                document.getElementById('quiz-plan-duration').value = quizData.planDuration || '';
+                document.getElementById('quiz-special-requests').value = quizData.specialRequests || '';
+                (quizData.preferredStores || []).forEach(val => {
+                    const cb = document.querySelector(`.store-check[value="${val}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
         }
 
         function nextStep() {
@@ -1316,6 +1428,8 @@
                 quizData.planDuration = document.getElementById('quiz-plan-duration').value;
                 quizData.specialRequests = document.getElementById('quiz-special-requests').value || 'N/A';
             }
+            
+            localStorage.setItem(SAVED_KEY, JSON.stringify(quizData));
             
             if (currentStep < totalSteps) {
                 currentStep++;

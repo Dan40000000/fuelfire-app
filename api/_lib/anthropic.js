@@ -42,6 +42,8 @@ export async function callClaude({
     temperature,
     system,
     tags,
+    tools,
+    tool_choice,
 } = {}) {
     const model = getModel();
     const apiKey = process.env.CLAUDE_API_KEY;
@@ -61,6 +63,24 @@ export async function callClaude({
                 message: `model=${model}, tokens=${maxTokens}, promptLength=${prompt ? prompt.length : 'n/a'}`,
             });
 
+            const requestBody = {
+                model,
+                max_tokens: maxTokens,
+                temperature,
+                system,
+                messages: requestMessages,
+            };
+
+            // Add tools if provided
+            if (tools && tools.length > 0) {
+                requestBody.tools = tools;
+            }
+
+            // Add tool_choice if provided
+            if (tool_choice) {
+                requestBody.tool_choice = tool_choice;
+            }
+
             const response = await fetch(ANTHROPIC_URL, {
                 method: 'POST',
                 headers: {
@@ -68,13 +88,7 @@ export async function callClaude({
                     'x-api-key': apiKey,
                     'anthropic-version': ANTHROPIC_VERSION,
                 },
-                body: JSON.stringify({
-                    model,
-                    max_tokens: maxTokens,
-                    temperature,
-                    system,
-                    messages: requestMessages,
-                }),
+                body: JSON.stringify(requestBody),
             });
 
             if (!response.ok) {
@@ -94,7 +108,24 @@ export async function callClaude({
             }
 
             const data = await response.json();
+
+            // Check if response contains tool use
+            const toolUse = data?.content?.find?.((part) => part?.type === 'tool_use');
             const textPart = data?.content?.find?.((part) => part?.text)?.text;
+
+            if (toolUse) {
+                // Return both text and tool use information
+                return {
+                    text: textPart?.trim() || '',
+                    toolUse: toolUse,
+                    stopReason: data?.stop_reason,
+                    raw: data,
+                    metadata: {
+                        model,
+                        apiKey: redactKey(apiKey),
+                    },
+                };
+            }
 
             if (!textPart) {
                 throw new Error('Claude response missing text content.');

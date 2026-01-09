@@ -12,37 +12,28 @@
     <script src="global-nav.js"></script>
     <style>
         body {
-            background: linear-gradient(145deg, #0e172b 0%, #0a1020 55%, #0b1328 100%);
+            background: var(--light-bg);
             min-height: 100vh;
-            color: #fff;
+            color: var(--carolina-dark);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding-bottom: 96px;
         }
-        .phone-container {
-            max-width: 480px;
-            margin: 0 auto;
-            position: relative;
-        }
-        .scheduler-shell {
-            max-width: 460px;
-            margin: 0 auto;
-            padding: 26px 20px 60px;
-            padding-top: calc(22px + env(safe-area-inset-top));
-        }
+        .phone-container { max-width: 480px; margin: 0 auto; position: relative; }
+        .scheduler-shell { max-width: 460px; margin: 0 auto; padding: 26px 20px 60px; padding-top: calc(22px + env(safe-area-inset-top)); }
         .scheduler-card {
-            background: rgba(255,255,255,0.06);
+            background: white;
             border-radius: 22px;
             padding: 20px;
-            box-shadow: 0 20px 55px rgba(4,12,30,0.45);
+            box-shadow: 0 10px 30px rgba(19, 41, 75, 0.12);
             margin-bottom: 18px;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid var(--carolina-light);
         }
         .gradient-border {
-            border: 1px solid transparent;
+            border: 2px solid transparent;
             border-radius: 24px;
-            background: linear-gradient(#10192d,#10192d) padding-box,
-                        linear-gradient(135deg,#4B9CD3,#8e54e9) border-box;
+            background: linear-gradient(#fff,#fff) padding-box,
+                        var(--gradient-1) border-box;
         }
         .coach-roster {
             display: grid;
@@ -52,64 +43,64 @@
         .coach-card {
             border-radius: 16px;
             padding: 14px;
-            background: rgba(255,255,255,0.08);
+            background: var(--card-bg);
             border: 2px solid transparent;
             cursor: pointer;
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             display: grid;
             gap: 6px;
         }
-        .coach-card:hover { transform: translateY(-3px); }
+        .coach-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(19, 41, 75, 0.12); }
         .coach-card.active {
-            border-color: #4B9CD3;
-            box-shadow: 0 16px 30px rgba(75,156,211,0.32);
+            border-color: var(--carolina-blue);
+            box-shadow: 0 16px 30px rgba(75,156,211,0.24);
             transform: translateY(-4px);
         }
         .coach-header { display: flex; align-items: center; gap: 10px; }
-        .coach-avatar { width: 52px; height: 52px; border-radius: 14px; overflow: hidden; border: 2px solid rgba(255,255,255,0.18); }
+        .coach-avatar { width: 52px; height: 52px; border-radius: 14px; overflow: hidden; border: 2px solid var(--light-bg); }
         .coach-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .coach-meta { display: grid; gap: 2px; }
-        .coach-name { font-weight: 800; font-size: 1rem; }
-        .coach-role { font-size: 0.85rem; color: rgba(255,255,255,0.78); }
+        .coach-name { font-weight: 800; font-size: 1rem; color: var(--carolina-dark); }
+        .coach-role { font-size: 0.85rem; color: #556; }
         .coach-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-        .coach-tag { padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 0.8rem; color: #dce9f7; }
+        .coach-tag { padding: 6px 10px; border-radius: 999px; background: var(--light-bg); font-size: 0.8rem; color: var(--primary); }
         .session-type { display: flex; gap: 12px; }
         .session-type button {
             flex: 1;
             border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--carolina-light);
             padding: 12px 16px;
-            background: transparent;
-            color: #fff;
+            background: #f0f7fc;
+            color: var(--carolina-dark);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .session-type button.active { background: linear-gradient(135deg, #4B9CD3, #7BAFD4); border-color: transparent; color: #0b1628; }
+        .session-type button.active { background: var(--gradient-1); border-color: transparent; color: #fff; box-shadow: 0 10px 25px rgba(75,156,211,0.25); }
         .form-grid { display: grid; gap: 16px; }
-        label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; display: block; color: rgba(255,255,255,0.85); }
+        label { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; display: block; color: var(--carolina-dark); }
         input, select, textarea {
             width: 100%;
             padding: 14px;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(7,15,30,0.85);
-            color: #fff;
+            border: 1px solid var(--carolina-light);
+            background: #fff;
+            color: var(--carolina-dark);
             font-size: 0.95rem;
         }
         textarea { min-height: 100px; resize: vertical; }
         .summary-card {
-            background: rgba(255,255,255,0.05);
+            background: var(--card-bg);
             border-radius: 22px;
             padding: 18px;
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid var(--carolina-light);
             margin-top: 16px;
         }
         .price-options { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 14px; }
         .price-card {
             padding: 14px;
             border-radius: 14px;
-            background: rgba(255,255,255,0.07);
+            background: var(--card-bg);
             border: 2px solid transparent;
             cursor: pointer;
             display: grid;
@@ -117,14 +108,14 @@
             transition: border-color 0.2s ease, transform 0.2s ease;
         }
         .price-card:hover { transform: translateY(-3px); }
-        .price-card.active { border-color: #4B9CD3; box-shadow: 0 14px 28px rgba(75,156,211,0.28); }
-        .price-label { font-weight: 800; }
-        .price-value { font-weight: 800; color: #79c1ff; }
-        .price-meta { color: rgba(255,255,255,0.78); font-size: 0.88rem; }
+        .price-card.active { border-color: var(--carolina-blue); box-shadow: 0 14px 28px rgba(75,156,211,0.24); }
+        .price-label { font-weight: 800; color: var(--carolina-dark); }
+        .price-value { font-weight: 800; color: var(--carolina-blue); }
+        .price-meta { color: #556; font-size: 0.88rem; }
         .cta-button {
             width: 100%;
             margin-top: 20px;
-            background: linear-gradient(135deg, #4B9CD3, #8e54e9);
+            background: var(--gradient-1);
             border: none;
             color: #fff;
             padding: 16px;
@@ -132,7 +123,7 @@
             border-radius: 999px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 15px 35px rgba(75,156,211,0.45);
+            box-shadow: 0 15px 35px rgba(75,156,211,0.35);
         }
         .micro-badge {
             display: inline-flex;
@@ -140,21 +131,34 @@
             gap: 6px;
             padding: 6px 10px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.08);
+            background: var(--light-bg);
+            color: var(--primary);
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .upcoming-list { display: grid; gap: 10px; margin-top: 12px; }
         .upcoming-item {
-            background: rgba(255,255,255,0.08);
+            background: #fff;
             padding: 12px;
             border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid var(--carolina-light);
         }
+        .availability-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
+        .slot-card {
+            background: var(--card-bg);
+            border: 1px solid var(--carolina-light);
+            border-radius: 14px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+        .slot-card:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(19, 41, 75, 0.14); }
+        .slot-card.selected { border-color: var(--carolina-blue); background: #e8f4ff; }
     </style>
 </head>
 <body>
@@ -209,6 +213,10 @@
                                 </select>
                             </div>
                             <div>
+                                <label for="userEmail">Your email (confirmation)</label>
+                                <input type="email" id="userEmail" placeholder="you@example.com">
+                            </div>
+                            <div>
                                 <label for="sessionNotes">Notes for your coach</label>
                                 <textarea id="sessionNotes" placeholder="Example: Working toward a sub-20 5K + keeping protein high on travel weeks."></textarea>
                             </div>
@@ -227,13 +235,8 @@
                             </div>
                             <div class="price-card" data-plan="double">
                                 <div class="price-label">2-Session Pack</div>
-                                <div class="price-value">$150</div>
-                                <div class="price-meta">$75 per session • book anytime</div>
-                            </div>
-                            <div class="price-card" data-plan="monthly">
-                                <div class="price-label">Concierge Monthly</div>
-                                <div class="price-value">$70 / mo</div>
-                                <div class="price-meta">Includes 1 free session every month</div>
+                                <div class="price-value">$170</div>
+                                <div class="price-meta">$85 per session • book anytime</div>
                             </div>
                         </div>
 
@@ -242,9 +245,13 @@
 
                     <div class="scheduler-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h2 style="margin:0; font-size:1.1rem;">Upcoming concierge slots</h2>
-                            <button style="background:rgba(255,255,255,0.15); border:none; color:#fff; padding:8px 14px; border-radius:12px; cursor:pointer;">Sync Calendar</button>
+                            <h2 style="margin:0; font-size:1.1rem;">Upcoming coaching slots</h2>
+                            <div style="display:flex; gap:8px;">
+                                <button id="downloadIcsBtn" style="background:rgba(255,255,255,0.15); border:none; color:#fff; padding:8px 14px; border-radius:12px; cursor:pointer;">Add .ics</button>
+                                <button id="googleCalBtn" style="background:rgba(255,255,255,0.15); border:none; color:#fff; padding:8px 14px; border-radius:12px; cursor:pointer;">Add to Google</button>
+                            </div>
                         </div>
+                        <div id="availabilityGrid" class="availability-grid"></div>
                         <div class="upcoming-list" id="upcomingList"></div>
                     </div>
                 </div>
@@ -413,19 +420,65 @@
         const focusEl = document.getElementById('focusArea');
         const dateEl = document.getElementById('sessionDate');
         const timeEl = document.getElementById('sessionTime');
+        const availabilityGrid = document.getElementById('availabilityGrid');
+        const emailEl = document.getElementById('userEmail');
+        const CAL_COM_URL = 'https://cal.com/daniel-perry-7u3yr7/coaching-session';
+        const ADMIN_EMAIL = ''; // Set to your email to receive booking notifications
 
         const coaches = [
-            { id: 'sarah-pro', name: 'Dr. Sarah Mitchell', role: 'Performance Coach', tags: ['Biomechanics', 'Strength', 'ACL rehab'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80', type: 'trainer' },
-            { id: 'marcus-strength', name: 'Marcus Chen', role: 'Strength Specialist', tags: ['Powerlifting', 'Hypertrophy', 'Form tune-ups'], photo: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&w=300&q=80', type: 'trainer' },
-            { id: 'jessica-tonal', name: 'Jessica Rodriguez', role: 'Tonal Coach', tags: ['Glutes/legs', 'Lean mass', 'Fat loss'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80', type: 'trainer' },
-            { id: 'amanda-rdn', name: 'Dr. Amanda Foster', role: 'Sports Dietitian', tags: ['Performance fueling', 'Hormone health', 'Women’s health'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80', type: 'nutritionist' },
-            { id: 'kevin-rd', name: 'Kevin Park, RD', role: 'Clinical Nutrition', tags: ['Blood sugar', 'Macros', 'Travel tactics'], photo: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=300&q=80', type: 'nutritionist' },
-            { id: 'claire-rdn', name: 'Claire Benton, RDN', role: 'Nutritionist', tags: ['Metabolic health', 'Lab-guided', 'Macros'], photo: 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=300&q=80', type: 'nutritionist' }
+            {
+                id: 'dan-perry',
+                name: 'Dan Perry',
+                role: 'Personal Trainer & Nutrition Coach',
+                tags: ['Fat Loss', 'Strength', 'Clean Eating', 'Body Transformation'],
+                photo: 'images/dan-perry-profile.webp',
+                type: 'trainer',
+                bio: "Former heavyweight turned fitness coach. I transformed my own body through clean eating and focused training—now I help others do the same. If I can do it, you can too."
+            }
         ];
 
         let selectedCoachId = coaches[0].id;
         let sessionMode = 'video';
         let selectedPlan = 'single';
+        let selectedSlot = null;
+
+        function getAvailability() {
+            const slots = [];
+            const now = new Date();
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(now);
+                day.setDate(now.getDate() + i + 1);
+                const dayLabel = day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                ['09:00 AM', '01:00 PM', '06:00 PM'].forEach(time => {
+                    slots.push({
+                        id: `${day.toISOString().slice(0,10)}-${time.replace(/[^\\d]/g, '')}`,
+                        dateISO: day.toISOString().slice(0,10),
+                        label: `${dayLabel} • ${time}`,
+                        time
+                    });
+                });
+            }
+            return slots;
+        }
+
+        function renderAvailability() {
+            const slots = getAvailability();
+            availabilityGrid.innerHTML = '';
+            slots.forEach(slot => {
+                const div = document.createElement('div');
+                div.className = 'slot-card';
+                if (selectedSlot && selectedSlot.id === slot.id) div.classList.add('selected');
+                div.textContent = slot.label;
+                div.addEventListener('click', () => {
+                    selectedSlot = slot;
+                    dateEl.value = slot.dateISO;
+                    timeEl.value = slot.time;
+                    renderAvailability();
+                    renderSummary();
+                });
+                availabilityGrid.appendChild(div);
+            });
+        }
 
         function renderCoaches() {
             coachRosterEl.innerHTML = '';
@@ -485,8 +538,7 @@
         }
 
         function planLabel() {
-            if (selectedPlan === 'double') return '2-session pack ($150)';
-            if (selectedPlan === 'monthly') return 'Concierge Monthly ($70/mo, 1 free session)';
+            if (selectedPlan === 'double') return '2-session pack ($170)';
             return 'Single session ($100)';
         }
 
@@ -504,14 +556,120 @@
         }
         renderCoaches();
         renderSummary();
+        renderAvailability();
+        document.getElementById('downloadIcsBtn').addEventListener('click', downloadICS);
+        document.getElementById('googleCalBtn').addEventListener('click', addToGoogleCalendar);
 
         const submitBtn = document.getElementById('submitBooking');
         submitBtn.addEventListener('click', () => {
-            submitBtn.innerText = 'Request Sent ✓';
+            if (!emailEl.value || !emailEl.value.includes('@')) {
+                alert('Please enter a valid email so we can confirm your booking.');
+                return;
+            }
+            const params = new URLSearchParams();
+            if (emailEl.value) params.set('email', emailEl.value);
+            const notes = document.getElementById('sessionNotes').value || '';
+            if (notes) params.set('notes', notes);
+            if (selectedSlot) {
+                params.set('date', selectedSlot.dateISO);
+                params.set('time', selectedSlot.time);
+            }
+            window.open(`${CAL_COM_URL}?${params.toString()}`, '_blank');
+            submitBtn.innerText = 'Opening calendar...';
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.7';
-            createUpcomingEntry();
+            setTimeout(() => {
+                submitBtn.innerText = 'Send Request + AI Prep';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }, 3000);
         });
+
+        function parseTime12h(t) {
+            const [hm, ampmRaw] = (t || '09:00 AM').split(' ');
+            const ampm = (ampmRaw || 'AM').toUpperCase();
+            let [h, m] = hm.split(':').map(Number);
+            if (ampm === 'PM' && h !== 12) h += 12;
+            if (ampm === 'AM' && h === 12) h = 0;
+            return { h, m };
+        }
+
+        function buildICS(slot, coach, mode, focus, planLabel) {
+            const { h, m } = parseTime12h(slot.time || '09:00 AM');
+            const start = new Date(`${slot.dateISO}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
+            const end = new Date(start.getTime() + 60 * 60 * 1000);
+            const format = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const lines = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'BEGIN:VEVENT',
+                `SUMMARY:Coach Session with ${coach.name}`,
+                `DESCRIPTION:${mode} session · Focus: ${focus} · Plan: ${planLabel}`,
+                `DTSTART:${format(start)}`,
+                `DTEND:${format(end)}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ];
+            return lines.join('\n');
+        }
+
+        function downloadICS() {
+            if (!selectedSlot) {
+                alert('Select a slot first.');
+                return;
+            }
+            const coach = getSelectedCoach();
+            const focusLabel = focusEl.options[focusEl.selectedIndex].text;
+            const plan = planLabel();
+            const ics = buildICS(selectedSlot, coach, sessionMode === 'video' ? 'Video' : 'Phone', focusLabel, plan);
+            const blob = new Blob([ics], { type: 'text/calendar' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Coach-${selectedSlot.id}.ics`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function addToGoogleCalendar() {
+            if (!selectedSlot) {
+                alert('Select a slot first.');
+                return;
+            }
+            const coach = getSelectedCoach();
+            const focusLabel = focusEl.options[focusEl.selectedIndex].text;
+            const plan = planLabel();
+            const { h, m } = parseTime12h(selectedSlot.time || '09:00 AM');
+            const start = new Date(`${selectedSlot.dateISO}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
+            const end = new Date(start.getTime() + 60 * 60 * 1000);
+            const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            const params = new URLSearchParams({
+                action: 'TEMPLATE',
+                text: `Coach Session with ${coach.name}`,
+                details: `${sessionMode === 'video' ? 'Video' : 'Phone'} session · Focus: ${focusLabel} · Plan: ${plan}\nNotes: ${document.getElementById('sessionNotes').value || 'N/A'}`,
+                dates: `${fmt(start)}/${fmt(end)}`,
+                location: sessionMode === 'video' ? 'Video call (link provided separately)' : 'Phone call'
+            });
+            window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
+        }
+
+        function notifyAdminBooking() {
+            if (!ADMIN_EMAIL && !emailEl.value) return;
+            const coach = getSelectedCoach();
+            const focusLabel = focusEl.options[focusEl.selectedIndex].text;
+            const dateLabel = dateEl.value || 'TBD';
+            const timeLabel = timeEl.value || 'TBD';
+            const plan = planLabel();
+            const subject = encodeURIComponent('New Coaching Request');
+            const body = encodeURIComponent(
+                `New coaching request:\n\nCoach: ${coach.name} (${coach.role})\nFocus: ${focusLabel}\nWhen: ${dateLabel} at ${timeLabel}\nMode: ${sessionMode}\nPlan: ${plan}\n\nNotes:\n${document.getElementById('sessionNotes').value || 'N/A'}`
+            );
+            const to = ADMIN_EMAIL || emailEl.value;
+            const cc = ADMIN_EMAIL && emailEl.value ? `&cc=${encodeURIComponent(emailEl.value)}` : '';
+            window.location.href = `mailto:${to}?subject=${subject}&body=${body}${cc}`;
+        }
 
         function createUpcomingEntry() {
             const container = document.getElementById('upcomingList');
