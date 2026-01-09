@@ -1,5 +1,5 @@
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const DEFAULT_MODEL = 'claude-3-5-sonnet-20240620';
+const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
 const ANTHROPIC_VERSION = '2023-06-01';
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 750;
