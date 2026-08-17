@@ -35,8 +35,9 @@ beforeEach(() => {
     document.hidden = false;
     document.addEventListener.mockClear();
     window.dispatchEvent.mockClear();
-    localStorage.getItem.mockClear();
+    localStorage.getItem.mockReset().mockReturnValue(null);
     localStorage.setItem.mockClear();
+    localStorage.removeItem.mockClear();
 });
 
 afterEach(() => {
@@ -77,9 +78,9 @@ describe('Apple Health sync', () => {
     it('keeps partial Watch totals when one HealthKit metric is unavailable', async () => {
         const response = {
             steps: 9876,
-            distanceMeters: 0,
             activeEnergy: 420,
             partial: true,
+            successfulMetrics: ['steps', 'activeEnergy'],
             errors: ['heartRate: authorization denied']
         };
         const getDailyTotals = vi.fn().mockResolvedValue(response);
@@ -88,6 +89,50 @@ describe('Apple Health sync', () => {
         sync.HealthTotals = { getDailyTotals };
 
         await expect(sync.getAggregatedTotals()).resolves.toEqual(response);
+    });
+
+    it('falls back per metric when a partial native response omits a failed total', async () => {
+        const sync = new HealthSync();
+        sync.isAvailable = true;
+        sync.HealthTotals = {
+            getDailyTotals: vi.fn().mockResolvedValue({
+                activeEnergy: 220,
+                partial: true,
+                successfulMetrics: ['activeEnergy'],
+                errors: ['steps: authorization denied']
+            })
+        };
+        sync.Health = {
+            readSamples: vi.fn().mockResolvedValue({ samples: [{ value: 1000 }, { value: 2500 }] })
+        };
+
+        await expect(sync.getTodaySteps()).resolves.toBe(3500);
+        expect(sync.Health.readSamples).toHaveBeenCalledTimes(1);
+    });
+
+    it('expires a stored connection marker after one day', () => {
+        const sync = new HealthSync();
+        const now = new Date('2026-08-17T18:00:00.000Z').getTime();
+        localStorage.getItem.mockImplementation(key => (
+            key === 'fuelfire_apple_health_connected_at' ? String(now - 25 * 60 * 60 * 1000) : null
+        ));
+
+        expect(sync.hasRecentHealthConnection(now)).toBe(false);
+    });
+
+    it('does not mark Apple Health connected when authorization returns no readable data', async () => {
+        const sync = new HealthSync();
+        sync.requestPermissions = vi.fn().mockResolvedValue(true);
+        sync.invalidateDailyTotals = vi.fn();
+        sync.syncAllData = vi.fn().mockResolvedValue(null);
+        sync.refreshConnectionStatus = vi.fn().mockResolvedValue({ connected: false });
+
+        await expect(sync.connectAppleHealth()).resolves.toEqual({ permitted: true, data: null });
+        expect(localStorage.setItem).not.toHaveBeenCalledWith(
+            'fuelfire_apple_health_connected_at',
+            expect.any(String)
+        );
+        expect(localStorage.removeItem).toHaveBeenCalledWith('fuelfire_apple_health_connected_at');
     });
 
     it('reuses same-day totals until a forced Watch refresh is requested', async () => {

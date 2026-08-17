@@ -181,11 +181,29 @@ class HealthSync {
 
     hasRecentHealthConnection(now = Date.now()) {
         const connectedAt = Number(localStorage.getItem('fuelfire_apple_health_connected_at') || 0);
-        if (connectedAt > 0) return true;
+        const maxConnectionAge = 24 * 60 * 60 * 1000;
+        if (connectedAt > 0 && now >= connectedAt && now - connectedAt < maxConnectionAge) {
+            return true;
+        }
 
         const cached = this.getStoredHealthData();
         const syncTime = Date.parse(cached?.syncTime || '');
-        return Number.isFinite(syncTime) && now - syncTime < 24 * 60 * 60 * 1000;
+        return Number.isFinite(syncTime) && now >= syncTime && now - syncTime < maxConnectionAge;
+    }
+
+    hasUsableAggregatedTotals(totals) {
+        if (!totals || typeof totals !== 'object') return false;
+        if (Array.isArray(totals.successfulMetrics)) {
+            return totals.successfulMetrics.length > 0;
+        }
+
+        const hasNumericMetric = ['steps', 'distanceMeters', 'activeEnergy'].some(metric => (
+            Object.prototype.hasOwnProperty.call(totals, metric) && Number.isFinite(Number(totals[metric]))
+        ));
+        const heartRate = totals.heartRate;
+        const hasHeartMetric = heartRate && typeof heartRate === 'object' &&
+            ['average', 'min', 'max'].some(metric => Number.isFinite(Number(heartRate[metric])));
+        return hasNumericMetric || Boolean(hasHeartMetric);
     }
 
     async getAppleWatchStatus(force = false) {
@@ -246,10 +264,12 @@ class HealthSync {
         const permitted = await this.requestPermissions();
         if (!permitted) return { permitted: false, data: null };
 
-        localStorage.setItem('fuelfire_apple_health_connected_at', String(Date.now()));
         localStorage.removeItem('fuelfire_watch_prompt_dismissed_at');
         this.invalidateDailyTotals();
         const data = await this.syncAllData();
+        if (!data) {
+            localStorage.removeItem('fuelfire_apple_health_connected_at');
+        }
         await this.refreshConnectionStatus(true);
         return { permitted: true, data };
     }
@@ -263,6 +283,9 @@ class HealthSync {
         this.publishConnectionStatus({ ...status, syncing: true });
         this.invalidateDailyTotals();
         const data = await this.syncAllData();
+        if (!data) {
+            localStorage.removeItem('fuelfire_apple_health_connected_at');
+        }
         await this.refreshConnectionStatus(true);
         return Boolean(data);
     }
@@ -315,8 +338,8 @@ class HealthSync {
             message.style.display = 'none';
             try {
                 const result = await this.connectAppleHealth();
-                if (!result.permitted) {
-                    throw new Error('Apple Health access was not granted. You can change this in the Health app under Sharing.');
+                if (!result.permitted || !result.data) {
+                    throw new Error('Well Fit could not read Apple Health data. Check Health > Sharing > Apps > Well Fit, then try again.');
                 }
                 connectButton.textContent = 'Connected';
                 setTimeout(() => overlay.remove(), 500);
@@ -573,10 +596,6 @@ class HealthSync {
             }
 
             console.log('✅ Permissions appear to be granted');
-            localStorage.setItem('fuelfire_apple_health_connected_at', String(Date.now()));
-            this.refreshConnectionStatus(true).catch(error => {
-                console.warn('⚠️ Unable to refresh Apple Watch status after authorization:', error);
-            });
             return true;
         } catch (error) {
             console.error('❌ Permission request error:', error);
@@ -1018,7 +1037,7 @@ class HealthSync {
 
             // Check if we got any real data (not just zeros/nulls)
             // This helps detect permission issues
-            const hasRealData = Boolean(aggregatedTotals) ||
+            const hasRealData = this.hasUsableAggregatedTotals(aggregatedTotals) ||
                                (Number.isFinite(steps) && steps > 0) ||
                                (heartRateSummary && (Number.isFinite(heartRateSummary.average) ||
                                                      Number.isFinite(heartRateSummary.min) ||

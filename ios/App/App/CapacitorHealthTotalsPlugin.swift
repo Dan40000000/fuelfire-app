@@ -58,6 +58,17 @@ public class HealthTotalsPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate 
         if let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
             readTypes.insert(sleepType)
         }
+        [
+            HKQuantityTypeIdentifier.stepCount,
+            .distanceWalkingRunning,
+            .activeEnergyBurned,
+            .heartRate,
+            .bodyMass
+        ].forEach { identifier in
+            if let quantityType = HKObjectType.quantityType(forIdentifier: identifier) {
+                readTypes.insert(quantityType)
+            }
+        }
 
         let writeTypes: Set<HKSampleType> = [HKObjectType.workoutType()]
         healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
@@ -98,10 +109,17 @@ public class HealthTotalsPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate 
         var heartRateMin: Double?
         var heartRateMax: Double?
         var queryErrors: [String] = []
+        var successfulMetrics = Set<String>()
 
         func recordError(_ metric: String, _ error: Error) {
             lock.lock()
             queryErrors.append("\(metric): \(error.localizedDescription)")
+            lock.unlock()
+        }
+
+        func recordSuccess(_ metric: String) {
+            lock.lock()
+            successfulMetrics.insert(metric)
             lock.unlock()
         }
 
@@ -111,7 +129,10 @@ public class HealthTotalsPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate 
             unit: HKUnit,
             assign: @escaping (Double) -> Void
         ) {
-            guard let quantityType = HKObjectType.quantityType(forIdentifier: identifier) else { return }
+            guard let quantityType = HKObjectType.quantityType(forIdentifier: identifier) else {
+                lock.withLock { queryErrors.append("\(metric): unavailable on this device") }
+                return
+            }
             group.enter()
             let query = HKStatisticsQuery(
                 quantityType: quantityType,
@@ -124,6 +145,7 @@ public class HealthTotalsPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate 
                     return
                 }
                 assign(statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0)
+                recordSuccess(metric)
             }
             healthStore.execute(query)
         }
@@ -150,23 +172,39 @@ public class HealthTotalsPlugin: CAPPlugin, CAPBridgedPlugin, WCSessionDelegate 
                     heartRateMin = statistics?.minimumQuantity()?.doubleValue(for: unit)
                     heartRateMax = statistics?.maximumQuantity()?.doubleValue(for: unit)
                 }
+                recordSuccess("heartRate")
             }
             healthStore.execute(query)
         }
 
         group.notify(queue: .main) {
-            call.resolve([
-                "steps": steps,
-                "distanceMeters": distanceMeters,
-                "activeEnergy": activeEnergy,
-                "partial": !queryErrors.isEmpty,
-                "errors": queryErrors,
-                "heartRate": [
-                    "average": heartRateAverage as Any,
-                    "min": heartRateMin as Any,
-                    "max": heartRateMax as Any
-                ]
-            ])
+            lock.lock()
+            let errors = queryErrors
+            let successes = successfulMetrics
+            let stepTotal = steps
+            let distanceTotal = distanceMeters
+            let activeEnergyTotal = activeEnergy
+            let heartAverage = heartRateAverage
+            let heartMin = heartRateMin
+            let heartMax = heartRateMax
+            lock.unlock()
+
+            var response: [String: Any] = [
+                "partial": !errors.isEmpty,
+                "errors": errors,
+                "successfulMetrics": successes.sorted()
+            ]
+            if successes.contains("steps") { response["steps"] = stepTotal }
+            if successes.contains("distance") { response["distanceMeters"] = distanceTotal }
+            if successes.contains("activeEnergy") { response["activeEnergy"] = activeEnergyTotal }
+            if successes.contains("heartRate") {
+                var heartRate: [String: Double] = [:]
+                if let heartAverage { heartRate["average"] = heartAverage }
+                if let heartMin { heartRate["min"] = heartMin }
+                if let heartMax { heartRate["max"] = heartMax }
+                response["heartRate"] = heartRate
+            }
+            call.resolve(response)
         }
     }
 

@@ -27,7 +27,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan food barcodes for quick logging</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Well Fit Pro uses Apple Health to read steps, heart rate, workouts, active energy, distance, weight, and resting energy for personalized fitness tracking.</string>
+	<string>Well Fit Pro uses Apple Health to read steps, heart rate, workouts, active energy, distance, weight, and sleep for personalized fitness tracking. Profile details are used to estimate base calories.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Well Fit Pro uses Apple Health to save completed workouts and fitness activity so your health data stays in one place.</string>
 	<key>NSMicrophoneUsageDescription</key>
