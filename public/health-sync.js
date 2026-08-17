@@ -9,6 +9,10 @@ class HealthSync {
         this.lastSync = null;
         this.dailyTotalsCache = null;
         this.dailyTotalsCacheDate = null;
+        this.foregroundRefreshInstalled = false;
+        this.foregroundRefreshPromise = null;
+        this.lastSyncAttemptAt = 0;
+        this.watchStatusCache = null;
     }
 
     resolveHealthPlugin() {
@@ -92,16 +96,22 @@ class HealthSync {
             return null;
         }
 
-        const todayKey = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const todayKey = this.getLocalDateKey(now);
         if (!force && this.dailyTotalsCache && this.dailyTotalsCacheDate === todayKey) {
             return this.dailyTotalsCache;
         }
 
         try {
-            const response = await totalsPlugin.getDailyTotals({ date: todayKey });
+            // Send a complete ISO timestamp. The native bridge then computes midnight
+            // in the phone's local calendar instead of interpreting a UTC date key.
+            const response = await totalsPlugin.getDailyTotals({ date: now.toISOString() });
             if (response && typeof response === 'object') {
                 this.dailyTotalsCache = response;
                 this.dailyTotalsCacheDate = todayKey;
+                if (response.partial) {
+                    console.warn('⚠️ Health totals are partial:', response.errors || []);
+                }
                 console.log('📈 Aggregated health totals:', response);
                 return response;
             }
@@ -110,6 +120,216 @@ class HealthSync {
         }
 
         return null;
+    }
+
+    getLocalDateKey(date = new Date()) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    invalidateDailyTotals() {
+        this.dailyTotalsCache = null;
+        this.dailyTotalsCacheDate = null;
+    }
+
+    installForegroundRefresh() {
+        if (this.foregroundRefreshInstalled || typeof document === 'undefined') {
+            return;
+        }
+
+        this.foregroundRefreshInstalled = true;
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden || !this.isAvailable) return;
+
+            const now = Date.now();
+            if (now - this.lastSyncAttemptAt < 5000 || this.foregroundRefreshPromise) {
+                return;
+            }
+
+            this.invalidateDailyTotals();
+            this.watchStatusCache = null;
+            this.refreshConnectionStatus(true).catch(error => {
+                console.warn('⚠️ Apple Watch status refresh failed:', error);
+            });
+            this.foregroundRefreshPromise = this.syncAllData()
+                .catch(error => {
+                    console.warn('⚠️ Apple Health foreground refresh failed:', error);
+                    return null;
+                })
+                .finally(() => {
+                    this.foregroundRefreshPromise = null;
+                });
+        });
+    }
+
+    publishHealthData(data) {
+        if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function' || typeof CustomEvent !== 'function') {
+            return;
+        }
+        window.dispatchEvent(new CustomEvent('fuelfire:healthDataUpdated', { detail: data }));
+    }
+
+    getStoredHealthData() {
+        try {
+            return JSON.parse(localStorage.getItem('healthData') || 'null');
+        } catch (error) {
+            return null;
+        }
+    }
+
+    hasRecentHealthConnection(now = Date.now()) {
+        const connectedAt = Number(localStorage.getItem('fuelfire_apple_health_connected_at') || 0);
+        if (connectedAt > 0) return true;
+
+        const cached = this.getStoredHealthData();
+        const syncTime = Date.parse(cached?.syncTime || '');
+        return Number.isFinite(syncTime) && now - syncTime < 24 * 60 * 60 * 1000;
+    }
+
+    async getAppleWatchStatus(force = false) {
+        if (!this.isAvailable) {
+            return { supported: false, paired: false, connected: false, healthAvailable: false };
+        }
+
+        if (!force && this.watchStatusCache) {
+            return { ...this.watchStatusCache, connected: this.hasRecentHealthConnection() };
+        }
+
+        const totalsPlugin = this.resolveTotalsPlugin();
+        let nativeStatus = { supported: false, paired: false, watchAppInstalled: false, activationState: 'unknown' };
+        if (totalsPlugin && typeof totalsPlugin.getWatchStatus === 'function') {
+            try {
+                nativeStatus = await totalsPlugin.getWatchStatus();
+            } catch (error) {
+                console.warn('⚠️ Unable to detect Apple Watch pairing:', error);
+            }
+        }
+
+        this.watchStatusCache = {
+            supported: Boolean(nativeStatus?.supported),
+            paired: Boolean(nativeStatus?.paired),
+            watchAppInstalled: Boolean(nativeStatus?.watchAppInstalled),
+            activationState: nativeStatus?.activationState || 'unknown',
+            healthAvailable: true
+        };
+        return { ...this.watchStatusCache, connected: this.hasRecentHealthConnection() };
+    }
+
+    shouldPromptForAppleWatch(status, now = Date.now()) {
+        if (!status?.paired || status.connected) return false;
+        const dismissedAt = Number(localStorage.getItem('fuelfire_watch_prompt_dismissed_at') || 0);
+        return !dismissedAt || now - dismissedAt >= 7 * 24 * 60 * 60 * 1000;
+    }
+
+    publishConnectionStatus(status) {
+        if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function' || typeof CustomEvent !== 'function') {
+            return;
+        }
+        window.dispatchEvent(new CustomEvent('fuelfire:healthConnectionChanged', { detail: status }));
+    }
+
+    async refreshConnectionStatus(force = false) {
+        const status = await this.getAppleWatchStatus(force);
+        this.publishConnectionStatus(status);
+        return status;
+    }
+
+    dismissAppleWatchPrompt() {
+        localStorage.setItem('fuelfire_watch_prompt_dismissed_at', String(Date.now()));
+        const prompt = document.getElementById('apple-watch-connect-prompt');
+        if (prompt) prompt.remove();
+    }
+
+    async connectAppleHealth() {
+        const permitted = await this.requestPermissions();
+        if (!permitted) return { permitted: false, data: null };
+
+        localStorage.setItem('fuelfire_apple_health_connected_at', String(Date.now()));
+        localStorage.removeItem('fuelfire_watch_prompt_dismissed_at');
+        this.invalidateDailyTotals();
+        const data = await this.syncAllData();
+        await this.refreshConnectionStatus(true);
+        return { permitted: true, data };
+    }
+
+    async handleAppleHealthConnectionAction() {
+        const status = await this.getAppleWatchStatus(true);
+        if (!status.connected) {
+            return this.showAppleWatchConnectionPrompt({ force: true });
+        }
+
+        this.publishConnectionStatus({ ...status, syncing: true });
+        this.invalidateDailyTotals();
+        const data = await this.syncAllData();
+        await this.refreshConnectionStatus(true);
+        return Boolean(data);
+    }
+
+    async showAppleWatchConnectionPrompt(options = {}) {
+        if (typeof document === 'undefined' || !document.body) return false;
+
+        const status = await this.getAppleWatchStatus(Boolean(options.force));
+        this.publishConnectionStatus(status);
+        if (!options.force && !this.shouldPromptForAppleWatch(status)) return false;
+
+        const existing = document.getElementById('apple-watch-connect-prompt');
+        if (existing) return true;
+
+        const paired = Boolean(status.paired);
+        const overlay = document.createElement('div');
+        overlay.id = 'apple-watch-connect-prompt';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'apple-watch-connect-title');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:12000;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:rgba(5,24,37,.58);backdrop-filter:blur(5px);';
+        overlay.innerHTML = `
+            <div style="width:min(100%,430px);background:#fff;border-radius:18px 18px 8px 8px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.28);color:#17324a;">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+                    <div aria-hidden="true" style="width:46px;height:46px;display:grid;place-items:center;border-radius:12px;background:#eef8ff;color:#2789c4;font-size:25px;">⌚</div>
+                    <div>
+                        <h2 id="apple-watch-connect-title" style="margin:0;font-size:21px;letter-spacing:0;">${paired ? 'Apple Watch Detected' : 'Connect Apple Health'}</h2>
+                        <div style="margin-top:3px;font-size:13px;color:#5d7182;">${paired ? 'Ready to sync through Apple Health' : 'Keep activity and workouts together'}</div>
+                    </div>
+                </div>
+                <p style="margin:0 0 16px;line-height:1.5;font-size:15px;color:#42596c;">${paired
+                    ? 'Allow Well Fit to read the activity your Apple Watch saves to Apple Health.'
+                    : 'Allow Well Fit to read activity from Apple Health. If you pair a Watch later, its data will appear automatically.'}</p>
+                <div id="apple-watch-connect-message" role="status" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:8px;background:#fff4e5;color:#8a4b08;font-size:13px;line-height:1.4;"></div>
+                <button id="apple-watch-connect-now" type="button" style="width:100%;min-height:50px;border:0;border-radius:8px;background:#278fca;color:#fff;font-size:16px;font-weight:800;letter-spacing:0;">Connect Now</button>
+                <button id="apple-watch-connect-later" type="button" style="width:100%;min-height:44px;margin-top:8px;border:0;background:transparent;color:#5d7182;font-size:15px;font-weight:700;letter-spacing:0;">Not Now</button>
+                <div style="margin-top:10px;text-align:center;color:#7d8e9b;font-size:11px;">You choose which health categories Well Fit can access.</div>
+            </div>`;
+
+        document.body.appendChild(overlay);
+        const connectButton = overlay.querySelector('#apple-watch-connect-now');
+        const laterButton = overlay.querySelector('#apple-watch-connect-later');
+        const message = overlay.querySelector('#apple-watch-connect-message');
+
+        laterButton.addEventListener('click', () => this.dismissAppleWatchPrompt());
+        connectButton.addEventListener('click', async () => {
+            connectButton.disabled = true;
+            laterButton.disabled = true;
+            connectButton.textContent = 'Connecting...';
+            message.style.display = 'none';
+            try {
+                const result = await this.connectAppleHealth();
+                if (!result.permitted) {
+                    throw new Error('Apple Health access was not granted. You can change this in the Health app under Sharing.');
+                }
+                connectButton.textContent = 'Connected';
+                setTimeout(() => overlay.remove(), 500);
+            } catch (error) {
+                message.textContent = error?.message || 'Could not connect to Apple Health. Please try again.';
+                message.style.display = 'block';
+                connectButton.disabled = false;
+                laterButton.disabled = false;
+                connectButton.textContent = 'Try Again';
+            }
+        });
+
+        return true;
     }
 
     getStoredUserProfile() {
@@ -283,6 +503,7 @@ class HealthSync {
                 return false;
             }
 
+            this.installForegroundRefresh();
             console.log('✅ Health plugin loaded and available');
             return true;
         } catch (error) {
@@ -321,23 +542,41 @@ class HealthSync {
             // Request all health permissions
             // Note: Only use data types supported by @capgo/capacitor-health
             const permissionRequest = {
-                read: ['steps', 'distance', 'calories', 'heartRate', 'weight', 'sleep'],
-                write: ['steps', 'calories', 'weight']
+                read: ['steps', 'distance', 'calories', 'heartRate', 'weight'],
+                write: ['calories', 'weight']
             };
 
             console.log('Permission request:', JSON.stringify(permissionRequest));
 
             const permissions = await Health.requestAuthorization(permissionRequest);
 
+            const totalsPlugin = this.resolveTotalsPlugin();
+            if (totalsPlugin && typeof totalsPlugin.requestAuthorization === 'function') {
+                const extraPermissions = await totalsPlugin.requestAuthorization();
+                if (extraPermissions?.granted === false) {
+                    console.warn('Workout and sleep permissions were not granted.');
+                }
+            }
+
             console.log('✅ requestAuthorization returned:', JSON.stringify(permissions));
 
-            // Check if permission was granted
-            if (permissions && permissions.granted === false) {
-                console.log('❌ User denied permission');
+            const requestedReadCount = permissionRequest.read.length;
+            const readAuthorizedCount = Array.isArray(permissions?.readAuthorized)
+                ? permissions.readAuthorized.length
+                : 0;
+            const readDeniedCount = Array.isArray(permissions?.readDenied)
+                ? permissions.readDenied.length
+                : 0;
+            if (requestedReadCount > 0 && readAuthorizedCount === 0 && readDeniedCount >= requestedReadCount) {
+                console.log('❌ Health read permissions were denied');
                 return false;
             }
 
             console.log('✅ Permissions appear to be granted');
+            localStorage.setItem('fuelfire_apple_health_connected_at', String(Date.now()));
+            this.refreshConnectionStatus(true).catch(error => {
+                console.warn('⚠️ Unable to refresh Apple Watch status after authorization:', error);
+            });
             return true;
         } catch (error) {
             console.error('❌ Permission request error:', error);
@@ -534,32 +773,16 @@ class HealthSync {
         try {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
-            const { samples } = await this.Health.readSamples({
-                dataType: 'workout',
-                startDate: today.toISOString(),
-                endDate: new Date().toISOString(),
-                limit: 200
-            });
-
-            const filteredSamples = Array.isArray(samples) ? samples : [];
-
-            const workouts = [];
-            if (filteredSamples && Array.isArray(filteredSamples)) {
-                filteredSamples.forEach(workout => {
-                    workouts.push({
-                        type: workout.workoutActivityType || 'Unknown',
-                        duration: workout.duration || 0,
-                        calories: workout.totalEnergyBurned || 0,
-                        distance: workout.totalDistance || 0,
-                        startDate: workout.startDate,
-                        endDate: workout.endDate
-                    });
-                });
+            const totalsPlugin = this.resolveTotalsPlugin();
+            if (!totalsPlugin || typeof totalsPlugin.getWorkouts !== 'function') {
+                return [];
             }
-
+            const { workouts = [] } = await totalsPlugin.getWorkouts({
+                startDate: today.toISOString(),
+                endDate: new Date().toISOString()
+            });
             console.log(`💪 Today's workouts: ${workouts.length}`);
-            return workouts;
+            return Array.isArray(workouts) ? workouts : [];
         } catch (error) {
             console.error('❌ Error fetching workouts:', error);
             return [];
@@ -647,27 +870,17 @@ class HealthSync {
         if (!this.isAvailable) return 0;
 
         try {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const { samples } = await this.Health.readSamples({
-                dataType: 'sleep',
-                startDate: today.toISOString(),
-                endDate: new Date().toISOString(),
-                limit: 500
+            const totalsPlugin = this.resolveTotalsPlugin();
+            if (!totalsPlugin || typeof totalsPlugin.getSleep !== 'function') {
+                return 0;
+            }
+            const endDate = new Date();
+            const startDate = new Date(endDate.getTime() - (24 * 60 * 60 * 1000));
+            const result = await totalsPlugin.getSleep({
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString()
             });
-
-            let totalSleepMinutes = 0;
-            (Array.isArray(samples) ? samples : []).forEach(sample => {
-                const start = new Date(sample.startDate);
-                const end = new Date(sample.endDate);
-                const minutes = (end - start) / (1000 * 60);
-                if (!Number.isNaN(minutes) && Number.isFinite(minutes)) {
-                    totalSleepMinutes += minutes;
-                }
-            });
-
-            const hours = totalSleepMinutes / 60;
+            const hours = Number(result?.hours) || 0;
             console.log(`😴 Sleep today: ${hours.toFixed(1)} hours`);
             return hours;
         } catch (error) {
@@ -710,6 +923,7 @@ class HealthSync {
         }
 
         console.log('🔄 Syncing all health data...');
+        this.lastSyncAttemptAt = Date.now();
 
         try {
             const aggregatedTotals = await this.getAggregatedTotals(true);
@@ -825,6 +1039,11 @@ class HealthSync {
 
             // Store in localStorage for quick access
             localStorage.setItem('healthData', JSON.stringify(data));
+            localStorage.setItem('fuelfire_apple_health_connected_at', String(Date.now()));
+            this.publishHealthData(data);
+            this.refreshConnectionStatus(true).catch(error => {
+                console.warn('⚠️ Unable to refresh Apple Watch connection state:', error);
+            });
 
             return data;
         } catch (error) {
@@ -837,18 +1056,20 @@ class HealthSync {
         if (!this.isAvailable) return false;
 
         try {
-            await this.Health.saveSample({
-                dataType: 'workout',
+            const totalsPlugin = this.resolveTotalsPlugin();
+            if (!totalsPlugin || typeof totalsPlugin.saveWorkout !== 'function') {
+                console.warn('Workout HealthKit bridge is unavailable.');
+                return false;
+            }
+            const result = await totalsPlugin.saveWorkout({
+                type: workoutData.type || 'other',
                 startDate: workoutData.startDate || new Date().toISOString(),
                 endDate: workoutData.endDate || new Date().toISOString(),
-                value: {
-                    workoutActivityType: workoutData.type || 'other',
-                    totalEnergyBurned: workoutData.calories || 0,
-                    totalDistance: workoutData.distance || 0,
-                    duration: workoutData.duration || 0
-                }
+                calories: Number(workoutData.calories) || 0,
+                distance: Number(workoutData.distance) || 0,
+                duration: Number(workoutData.duration) || 0
             });
-
+            if (result?.saved === false) return false;
             console.log('✅ Workout written to Apple Health');
             return true;
         } catch (error) {

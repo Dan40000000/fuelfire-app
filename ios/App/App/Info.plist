@@ -22,12 +22,14 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan food barcodes for quick logging</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>FuelFire needs access to read your health data including steps, heart rate, workouts, and calories to provide personalized fitness tracking and insights.</string>
+	<string>Well Fit Pro uses Apple Health to read steps, heart rate, workouts, active energy, distance, weight, and resting energy for personalized fitness tracking.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>FuelFire needs permission to save your workouts, nutrition data, and fitness activities to Apple Health so all your health data stays in one place.</string>
+	<string>Well Fit Pro uses Apple Health to save completed workouts and fitness activity so your health data stays in one place.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs microphone access to log meals using voice commands</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -40,10 +42,6 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

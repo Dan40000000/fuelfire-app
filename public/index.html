@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -19,11 +19,12 @@
         /* Custom workout quiz – align look with Quick Workout page */
         #custom-workout-quiz {
             background: var(--light-bg);
+            z-index: 10050 !important;
         }
         #custom-workout-quiz .quiz-container {
             max-width: 420px;
             margin: 0 auto;
-            padding: 16px 20px 60px;
+            padding: 16px 20px max(150px, calc(132px + env(safe-area-inset-bottom)));
         }
         #custom-workout-quiz .quiz-header {
             text-align: center;
@@ -59,6 +60,27 @@
         }
         #custom-workout-quiz .quiz-container {
             padding-top: calc(40px + env(safe-area-inset-top));
+        }
+        #custom-workout-quiz .quiz-nav-actions {
+            position: sticky;
+            bottom: max(14px, calc(env(safe-area-inset-bottom) + 14px));
+            z-index: 10060;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin: 24px -4px 0;
+            padding: 12px;
+            border: 1px solid rgba(75, 156, 211, 0.16);
+            border-radius: 18px;
+            background: rgba(248, 251, 255, 0.96);
+            box-shadow: 0 14px 35px rgba(19, 41, 75, 0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        #custom-workout-quiz .quiz-nav-actions button {
+            min-height: 46px;
+            touch-action: manipulation;
         }
         #custom-workout-quiz .quiz-close-btn {
             position: fixed;
@@ -175,8 +197,15 @@
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
                             </svg>
-                            Health Today
+                            Apple Health Today
                         </h3>
+                        <div style="font-size: 12px; line-height: 1.45; color: #666; text-align: center; margin: -5px 0 15px;">
+                            Reads steps, heart rate, active energy, workouts, distance, weight, and resting energy from Apple Health when you grant permission.
+                        </div>
+                        <button id="home-watch-connection" type="button" onclick="event.stopPropagation(); window.healthSync.handleAppleHealthConnectionAction();" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px;padding:11px 12px;border:1px solid #dceaf3;border-radius:8px;background:#f7fbfe;color:#28475e;cursor:pointer;">
+                            <span style="display:flex;align-items:center;gap:8px;min-width:0;"><span id="home-watch-dot" aria-hidden="true" style="width:9px;height:9px;border-radius:50%;background:#9aaab5;flex:0 0 auto;"></span><span id="home-watch-label" style="font-size:13px;font-weight:750;letter-spacing:0;text-align:left;">Checking Apple Watch...</span></span>
+                            <span id="home-watch-action" style="font-size:12px;font-weight:800;color:#278fca;white-space:nowrap;">Connect</span>
+                        </button>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                             <div style="text-align: center;">
                                 <div style="margin-bottom: 8px;">
@@ -213,6 +242,29 @@
                         </div>
                         <div style="margin-top: 15px; text-align: center; font-size: 12px; color: var(--primary); font-weight: 600;">
                             Tap for full health dashboard →
+                        </div>
+                    </div>
+
+                    <!-- Home Hydration Tracker -->
+                    <div class="home-hydration-card" style="background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border-radius: 20px; padding: 18px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.28);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; margin-bottom: 12px;">
+                            <h3 style="margin:0; font-size:18px;">💧 Water Today</h3>
+                            <div style="font-size:12px; opacity:0.9;">Goal: <span data-hydration-goal>100</span> oz</div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 70px 1fr; gap:14px; align-items:center;">
+                            <div style="position: relative; width: 70px; height: 128px; border: 2px solid rgba(255,255,255,0.4); border-radius: 16px 16px 12px 12px; overflow: hidden; background: rgba(255,255,255,0.08);">
+                                <div data-hydration-fill style="position:absolute; bottom:0; left:0; width:100%; height:0%; background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(14,165,233,0.9)); transition: height 0.3s ease;"></div>
+                            </div>
+                            <div>
+                                <div style="font-size:30px; font-weight:800; line-height:1;" data-hydration-total>0 oz</div>
+                                <div style="font-size:13px; opacity:0.9; margin-top: 4px;" data-hydration-liters>0.0 L</div>
+                                <div style="margin-top:10px; display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:8px;">
+                                    <button onclick="addWater(8)" style="background: rgba(255,255,255,0.14); color:white; border:1px solid rgba(255,255,255,0.24); border-radius:12px; padding:9px 8px; font-weight:800; cursor:pointer;">+8 oz</button>
+                                    <button onclick="addWater(16.9)" style="background: rgba(255,255,255,0.14); color:white; border:1px solid rgba(255,255,255,0.24); border-radius:12px; padding:9px 8px; font-weight:800; cursor:pointer;">Bottle</button>
+                                    <button onclick="addWater(30)" style="background: rgba(255,255,255,0.14); color:white; border:1px solid rgba(255,255,255,0.24); border-radius:12px; padding:9px 8px; font-weight:800; cursor:pointer;">Stanley 30</button>
+                                    <button onclick="addWater(40)" style="background: rgba(255,255,255,0.14); color:white; border:1px solid rgba(255,255,255,0.24); border-radius:12px; padding:9px 8px; font-weight:800; cursor:pointer;">Stanley 40</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -264,44 +316,39 @@
                         </div>
                     </div>
 
-                    <!-- Expert Coaching -->
+                    <!-- AI Features -->
                     <div style="margin-bottom: 20px;">
-                        <h3 style="color: var(--dark); margin-bottom: 15px; font-size: 18px;">💎 Expert Coaching</h3>
+                        <h3 style="color: var(--dark); margin-bottom: 15px; font-size: 18px;">🤖 AI-Powered Features</h3>
                         <div class="quick-actions">
-                            <div class="action-card" onclick="window.location.href='expert-coaching.html'">
+                            <div class="action-card" onclick="window.location.href='enhanced-diet-quiz.html'">
                                 <div class="action-icon" style="background: linear-gradient(135deg, #4B9CD3, #8e54e9);">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                                        <circle cx="8.5" cy="7" r="4" stroke="white" stroke-width="2"/>
-                                        <path d="M20 8V14M17 11H23" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                </div>
-                                <div class="action-title">Book Expert</div>
-                                <div class="action-desc">$100/hour sessions</div>
-                            </div>
-                            <div class="action-card" onclick="window.location.href='expert-meal-plans.html'">
-                                <div class="action-icon" style="background: linear-gradient(135deg, #8e54e9, #4B9CD3);">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <path d="M3 2V7C3 8.06087 3.42143 9.07828 4.17157 9.82843C4.92172 10.5786 5.93913 11 7 11C8.06087 11 9.07828 10.5786 9.82843 9.82843C10.5786 9.07828 11 8.06087 11 7V2" stroke="white" stroke-width="2" stroke-linecap="round"/>
                                         <path d="M3 2H11M7 11V22M13 5H21M17 3V22" stroke="white" stroke-width="2" stroke-linecap="round"/>
                                     </svg>
                                 </div>
-                                <div class="action-title">Meal Plans</div>
-                                <div class="action-desc">Expert nutrition</div>
+                                <div class="action-title">AI Meal Plans</div>
+                                <div class="action-desc">Custom nutrition</div>
                             </div>
-                            <div class="action-card" onclick="window.location.href='expert-workout-plans.html'">
+                            <div class="action-card" onclick="window.location.href='calorie-tracker.html'">
+                                <div class="action-icon" style="background: linear-gradient(135deg, #8e54e9, #4B9CD3);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+                                        <path d="M12 6V12L16 14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </div>
+                                <div class="action-title">Food Vision</div>
+                                <div class="action-desc">Snap to log</div>
+                            </div>
+                            <div class="action-card" onclick="startCustomWorkout()">
                                 <div class="action-icon" style="background: linear-gradient(135deg, #4B9CD3, #8e54e9);">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <path d="M6.5 6.5L17.5 17.5M6.5 17.5L17.5 6.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
                                         <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2"/>
-                                        <circle cx="7" cy="7" r="1.5" fill="white"/>
-                                        <circle cx="17" cy="7" r="1.5" fill="white"/>
-                                        <circle cx="7" cy="17" r="1.5" fill="white"/>
-                                        <circle cx="17" cy="17" r="1.5" fill="white"/>
                                     </svg>
                                 </div>
-                                <div class="action-title">Workout Plans</div>
-                                <div class="action-desc">Pro programs</div>
+                                <div class="action-title">Workouts</div>
+                                <div class="action-desc">AI programs</div>
                             </div>
                         </div>
                     </div>
@@ -334,9 +381,22 @@
                             <button onclick="window.location.href='workout-quiz.html'" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
                                 🏋️ Quick Workout
                             </button>
-                            <button onclick="startManualWorkoutBuilder()" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
-                                💪 Build Your Own Workout
+                            <button onclick="openOneTimeWorkoutBuilder()" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
+                                Start One-Time Workout
                             </button>
+                            <button onclick="startManualWorkoutBuilder()" ontouchstart="" style="background: rgba(255,255,255,0.9); color: var(--carolina-blue); border: 2px solid white; padding: 15px 35px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; transition: all 0.3s ease;">
+                                Build Saved Plan
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="background: white; border: 1px solid rgba(75,156,211,0.18); border-radius: 18px; padding: 18px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(19,41,75,0.08);">
+                        <div style="display: flex; justify-content: space-between; gap: 14px; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0 0 6px; color: var(--dark); font-size: 18px;">One-Time Custom Workout</h3>
+                                <p style="margin: 0; color: #5d6b7a; font-size: 13px; line-height: 1.45;">Pick exercises from the library, start logging right away, then save it to workout history when complete.</p>
+                            </div>
+                            <button onclick="openOneTimeWorkoutBuilder()" style="flex: 0 0 auto; background: var(--gradient-1); color: white; border: none; min-height: 44px; padding: 0 16px; border-radius: 14px; font-weight: 900; cursor: pointer;">Create</button>
                         </div>
                     </div>
                     
@@ -404,21 +464,21 @@
                         <h3 style="color: var(--dark); margin-bottom: 12px;">🧠 Warm-Up Playbook</h3>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                             <div style="background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.08);">
-                                <img src="https://images.unsplash.com/photo-1518614189794-57711f057c5d?auto=format&fit=crop&w=600&q=80" alt="Dynamic full body warm-up" style="width:100%; height:120px; object-fit: cover;">
+                                <img src="images/exercises/Star_Jump/0.jpg" alt="Dynamic full body warm-up" loading="lazy" onerror="this.onerror=null;this.src='images/exercises/Pushups/0.jpg';" style="width:100%; height:120px; object-fit: cover;">
                                 <div style="padding: 12px;">
                                     <div style="font-weight: 700; color: var(--dark); margin-bottom: 6px;">Full-Body (5 min)</div>
                                     <div style="color:#666; font-size:13px; line-height:1.4;">Jumping jacks · Arm circles · Leg swings · Hip openers · Bodyweight squats</div>
                                 </div>
                             </div>
                             <div style="background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.08);">
-                                <img src="https://images.unsplash.com/photo-1559767943-6129b3b49c58?auto=format&fit=crop&w=600&q=80" alt="Upper body band warm-up" style="width:100%; height:120px; object-fit: cover;">
+                                <img src="images/exercises/Band_Pull_Apart/0.jpg" alt="Upper body band warm-up" loading="lazy" onerror="this.onerror=null;this.src='images/exercises/Face_Pull/0.jpg';" style="width:100%; height:120px; object-fit: cover;">
                                 <div style="padding: 12px;">
                                     <div style="font-weight: 700; color: var(--dark); margin-bottom: 6px;">Upper Body (4 min)</div>
                                     <div style="color:#666; font-size:13px; line-height:1.4;">Band pull-aparts · Face pulls · Scap push-ups · PVC/broomstick dislocates</div>
                                 </div>
                             </div>
                             <div style="background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.08); grid-column: span 2;">
-                                <img src="https://images.unsplash.com/photo-1526481280695-3c469c2f87ec?auto=format&fit=crop&w=900&q=80" alt="Lower body mobility warm-up" style="width:100%; height:140px; object-fit: cover;">
+                                <img src="images/exercises/Dumbbell_Lunges/0.jpg" alt="Lower body mobility warm-up" loading="lazy" onerror="this.onerror=null;this.src='images/exercises/Bodyweight_Squat/0.jpg';" style="width:100%; height:140px; object-fit: cover;">
                                 <div style="padding: 12px;">
                                     <div style="font-weight: 700; color: var(--dark); margin-bottom: 6px;">Lower Body (6 min)</div>
                                     <div style="color:#666; font-size:13px; line-height:1.4;">World’s greatest stretch · Walking lunges · Cossack squats · Ankle rocks · Glute bridges</div>
@@ -1168,10 +1228,10 @@
                                 <div style="font-size:30px; font-weight:800;" id="hydration-total">0 oz</div>
                                 <div style="font-size:14px; opacity:0.9;" id="hydration-liters">0.0 L</div>
                                 <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-                                    <button onclick="addWater(4)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+4 oz</button>
                                     <button onclick="addWater(8)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+8 oz</button>
-                                    <button onclick="addWater(33.8)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+1 L</button>
-                                    <button onclick="addWater(128)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+1 gal</button>
+                                    <button onclick="addWater(16.9)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">Bottle</button>
+                                    <button onclick="addWater(30)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">Stanley 30</button>
+                                    <button onclick="addWater(40)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">Stanley 40</button>
                                 </div>
                             </div>
                         </div>
@@ -1195,6 +1255,90 @@
 
                         <div id="nutrition-goals-display" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                             <!-- Will be populated by displayNutritionGoals() -->
+                        </div>
+                    </div>
+
+                    <!-- Macro + Calorie Calculator -->
+                    <div id="macro-target-calculator" style="background: #0f172a; color: white; border-radius: 22px; padding: 22px; margin-bottom: 25px; box-shadow: 0 8px 28px rgba(15, 23, 42, 0.35); border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 18px;">
+                            <div>
+                                <h4 style="margin: 0 0 6px 0; font-size: 19px;">Macro + Calorie Calculator</h4>
+                                <p style="margin: 0; color: rgba(255,255,255,0.72); font-size: 13px; line-height: 1.45;">Set targets from your body stats, workout schedule, daily movement, and diet style.</p>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 8px 10px; font-size: 12px; font-weight: 800; color: #93c5fd; white-space: nowrap;">Feeds app</div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)); gap: 12px; margin-bottom: 14px;">
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Goal
+                                <select id="macro-goal" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                    <option value="fat-loss">Fat loss</option>
+                                    <option value="recomp">Body recomp</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="lean-gain">Lean gain</option>
+                                    <option value="muscle-gain">Muscle gain</option>
+                                    <option value="performance">Performance</option>
+                                </select>
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Diet style
+                                <select id="macro-diet-style" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                    <option value="balanced">Balanced</option>
+                                    <option value="high-protein">High protein</option>
+                                    <option value="lower-carb">Lower carb</option>
+                                    <option value="keto">Keto / very low carb</option>
+                                    <option value="endurance">Higher carb</option>
+                                </select>
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Sex
+                                <select id="macro-sex" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Age
+                                <input id="macro-age" type="number" min="13" max="100" placeholder="35" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Weight
+                                <input id="macro-weight" type="number" min="70" max="700" placeholder="185 lbs" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                            </label>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Feet
+                                    <input id="macro-height-ft" type="number" min="3" max="8" placeholder="5" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                </label>
+                                <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Inches
+                                    <input id="macro-height-in" type="number" min="0" max="11" placeholder="10" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                </label>
+                            </div>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Workouts / week
+                                <input id="macro-workout-days" type="number" min="0" max="14" placeholder="4" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Minutes / workout
+                                <input id="macro-workout-minutes" type="number" min="10" max="180" placeholder="45" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Workout intensity
+                                <select id="macro-workout-intensity" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                    <option value="easy">Easy</option>
+                                    <option value="moderate" selected>Moderate</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </label>
+                            <label style="display:flex; flex-direction:column; gap:6px; font-size:12px; color:rgba(255,255,255,0.72);">Daily movement
+                                <select id="macro-daily-movement" style="width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.14); background:#111827; color:white;">
+                                    <option value="sedentary">Under 5k steps</option>
+                                    <option value="light">5k-8k steps</option>
+                                    <option value="moderate" selected>8k-12k steps</option>
+                                    <option value="active">12k+ steps / active job</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+                            <button onclick="calculateAndSaveMacroTargets()" style="flex: 1; min-width: 190px; background: linear-gradient(135deg, #22c55e, #14b8a6); color: white; border: none; padding: 14px 16px; border-radius: 15px; font-weight: 800; cursor: pointer;">Calculate + Save Targets</button>
+                            <button onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.16); padding: 14px 16px; border-radius: 15px; font-weight: 700; cursor: pointer;">Manual edit</button>
+                        </div>
+
+                        <div id="macro-calculator-results" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.5;">
+                            Enter your stats and save. The calorie tracker, macro bars, meal-plan defaults, and user profile will use these targets.
                         </div>
                     </div>
 
@@ -1854,6 +1998,44 @@
                                 </div>
                             </div>
                         </button>
+                        <div id="quick-home-equipment-followup" style="display: none; background: rgba(75, 156, 211, 0.08); border: 1px solid rgba(75, 156, 211, 0.25); border-radius: 18px; padding: 16px;">
+                            <div style="font-weight: 800; color: var(--dark); margin-bottom: 6px;">What equipment do you have at home?</div>
+                            <div style="font-size: 13px; color: #5f6f7a; margin-bottom: 12px;">Choose everything available so the workout can use it.</div>
+                            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="bodyweight" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Bodyweight</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="dumbbells" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Dumbbells</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="bands" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Bands</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="bench" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Bench/box</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="pull-up-bar" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Pull-up bar</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="kettlebell" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Kettlebell</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="barbell" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Barbell/rack</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="quick-home-equipment-check" value="cardio" onchange="updateQuickHomeEquipment(this)">
+                                    <span>Cardio gear</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2116,6 +2298,44 @@
                             <div style="font-weight: bold; font-size: 18px;">🏠 Home - Minimal</div>
                             <div style="font-size: 14px; color: #666; margin-top: 5px;">Bodyweight and resistance bands only</div>
                         </button>
+                        <div id="custom-home-equipment-followup" style="display: none; background: rgba(75, 156, 211, 0.08); border: 1px solid rgba(75, 156, 211, 0.25); border-radius: 18px; padding: 16px;">
+                            <div style="font-weight: 800; color: var(--dark); margin-bottom: 6px;">What equipment is actually available?</div>
+                            <div style="font-size: 13px; color: #5f6f7a; margin-bottom: 12px;">The AI will build around these, so be specific.</div>
+                            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="bodyweight" onchange="updateHomeEquipment(this)">
+                                    <span>Bodyweight</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="dumbbells" onchange="updateHomeEquipment(this)">
+                                    <span>Dumbbells</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="bands" onchange="updateHomeEquipment(this)">
+                                    <span>Bands</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="bench" onchange="updateHomeEquipment(this)">
+                                    <span>Bench/box</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="pull-up-bar" onchange="updateHomeEquipment(this)">
+                                    <span>Pull-up bar</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="kettlebell" onchange="updateHomeEquipment(this)">
+                                    <span>Kettlebell</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="barbell" onchange="updateHomeEquipment(this)">
+                                    <span>Barbell/rack</span>
+                                </label>
+                                <label style="background: white; border: 1px solid #dcebf5; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" class="custom-home-equipment-check" value="cardio" onchange="updateHomeEquipment(this)">
+                                    <span>Cardio gear</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -2183,13 +2403,48 @@
             </div>
             
             <!-- Navigation Buttons -->
-            <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+            <div class="quiz-nav-actions">
                 <button id="quiz-back-btn" onclick="previousQuestion()" style="background: transparent; border: 2px solid var(--lighter-bg); color: var(--primary-dark); padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; display: none;">← Back</button>
                 <button id="quiz-next-btn" onclick="nextQuestion()" style="background: var(--gradient-1); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-left: auto;">Next →</button>
             </div>
             
             <!-- Close button -->
             <button onclick="closeCustomWorkout()" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 24px; cursor: pointer; color: #999;">×</button>
+        </div>
+    </div>
+
+    <!-- One-Time Workout Builder -->
+    <div class="screen-content" id="one-time-workout-builder" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light-bg); z-index: 10040; overflow-y: auto;">
+        <div style="max-width: 420px; margin: 0 auto; padding: 18px 18px max(110px, calc(94px + env(safe-area-inset-bottom)));">
+            <div style="background: var(--gradient-1); color: white; padding: 22px; border-radius: 20px; margin-bottom: 16px; position: relative; box-shadow: 0 10px 26px rgba(75,156,211,0.28);">
+                <button type="button" onclick="closeOneTimeWorkoutBuilder()" aria-label="Close one-time workout builder" style="position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.42); background: rgba(255,255,255,0.18); color: white; font-size: 20px; font-weight: 900; cursor: pointer;">×</button>
+                <h2 style="margin: 0 38px 8px 0; font-size: 24px;">One-Time Workout</h2>
+                <p style="margin: 0; opacity: 0.9; font-size: 14px; line-height: 1.45;">Build it as you go, log it once, and keep the finished workout in your history.</p>
+            </div>
+
+            <div style="background: white; border-radius: 18px; padding: 16px; margin-bottom: 14px; box-shadow: 0 6px 18px rgba(19,41,75,0.08);">
+                <label style="display: block; color: var(--dark); font-weight: 900; font-size: 13px; margin-bottom: 8px;">Workout Name</label>
+                <input type="text" id="one-time-workout-name" placeholder="Today's custom workout" style="width: 100%; border: 2px solid #e3eaf0; border-radius: 12px; padding: 12px; font-size: 16px;">
+            </div>
+
+            <div style="background: white; border-radius: 18px; padding: 16px; margin-bottom: 14px; box-shadow: 0 6px 18px rgba(19,41,75,0.08);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+                    <div>
+                        <h3 style="margin: 0; color: var(--dark); font-size: 17px;">Selected Exercises</h3>
+                        <div style="color: #687789; font-size: 12px; font-weight: 700;"><span id="one-time-selected-count">0</span> ready to log</div>
+                    </div>
+                    <button type="button" onclick="clearOneTimeWorkout()" style="border: 1px solid rgba(231,76,60,0.28); background: rgba(231,76,60,0.08); color: #c0392b; padding: 8px 10px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer;">Clear</button>
+                </div>
+                <div id="one-time-selected-list" style="display: grid; gap: 10px;"></div>
+                <button type="button" id="one-time-start-btn" onclick="startOneTimeWorkoutLog()" style="width: 100%; margin-top: 14px; min-height: 48px; border: none; border-radius: 14px; background: var(--gradient-2); color: white; font-size: 16px; font-weight: 900; cursor: pointer;">Start Logging</button>
+            </div>
+
+            <div style="background: white; border-radius: 18px; padding: 16px; box-shadow: 0 6px 18px rgba(19,41,75,0.08);">
+                <label style="display: block; color: var(--dark); font-weight: 900; font-size: 13px; margin-bottom: 8px;">Find Exercises</label>
+                <input type="search" id="one-time-exercise-search" placeholder="Search bench, row, squat..." oninput="renderOneTimeExerciseList()" style="width: 100%; border: 2px solid #e3eaf0; border-radius: 12px; padding: 12px; font-size: 16px; margin-bottom: 12px;">
+                <div id="one-time-muscle-tabs" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px;"></div>
+                <div id="one-time-exercise-list" style="display: grid; gap: 10px;"></div>
+            </div>
         </div>
     </div>
 
@@ -2607,13 +2862,6 @@
                 </svg>
                 Fat Loss Guide
             </div>
-            <div class="menu-item" data-nav="book-coach" onclick="window.location.href='coaching-scheduler.html'" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; margin-right:8px;">
-                    <path d="M8 16L11 19L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                Book a Coach
-            </div>
             <div class="menu-item" id="menu-diet-creation" onclick="window.location.href='enhanced-diet-quiz.html'">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -2693,6 +2941,366 @@
 
     <script>
         // ==================== NUTRITION GOALS SYSTEM ====================
+        const DEFAULT_NUTRITION_GOALS = {
+            calories: 2000,
+            protein: 150,
+            carbs: 225,
+            fat: 67,
+            sugar: 25
+        };
+
+        function readStorageJSON(key, fallback = {}) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (error) {
+                console.warn(`Unable to read ${key}:`, error);
+                return fallback;
+            }
+        }
+
+        function getStoredNutritionGoals() {
+            return {
+                ...DEFAULT_NUTRITION_GOALS,
+                ...readStorageJSON('fuelfire_nutrition_goals', {})
+            };
+        }
+
+        function setInputValue(id, value) {
+            const input = document.getElementById(id);
+            if (input && value !== undefined && value !== null && value !== '') {
+                input.value = value;
+            }
+        }
+
+        function getNumericInput(id, fallback = 0) {
+            const input = document.getElementById(id);
+            const value = parseFloat(input?.value);
+            return Number.isFinite(value) ? value : fallback;
+        }
+
+        function getSelectValue(id, fallback) {
+            const input = document.getElementById(id);
+            return input?.value || fallback;
+        }
+
+        function roundToStep(value, step = 5) {
+            return Math.round(value / step) * step;
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function macroGoalLabel(goal) {
+            const labels = {
+                'fat-loss': 'Fat loss',
+                recomp: 'Body recomp',
+                maintenance: 'Maintenance',
+                'lean-gain': 'Lean gain',
+                'muscle-gain': 'Muscle gain',
+                performance: 'Performance'
+            };
+            return labels[goal] || 'Custom';
+        }
+
+        function dietStyleLabel(style) {
+            const labels = {
+                balanced: 'Balanced',
+                'high-protein': 'High protein',
+                'lower-carb': 'Lower carb',
+                keto: 'Keto / very low carb',
+                endurance: 'Higher carb'
+            };
+            return labels[style] || 'Balanced';
+        }
+
+        function mapMacroGoalToDietQuiz(goal) {
+            if (goal === 'fat-loss') return 'weight-loss';
+            if (goal === 'muscle-gain' || goal === 'lean-gain') return 'muscle-gain';
+            if (goal === 'recomp') return 'recomp';
+            return 'maintenance';
+        }
+
+        function mapMacroGoalToFitnessGoal(goal) {
+            if (goal === 'fat-loss') return 'lose-fat';
+            if (goal === 'muscle-gain' || goal === 'lean-gain') return 'build-muscle';
+            if (goal === 'performance') return 'athletic-performance';
+            return 'maintain';
+        }
+
+        function mapCalculatorActivity(workoutDays, movement) {
+            if (movement === 'active' || workoutDays >= 6) return 'very-active';
+            if (movement === 'moderate' || workoutDays >= 3) return 'moderate';
+            if (movement === 'light' || workoutDays >= 1) return 'light';
+            return 'sedentary';
+        }
+
+        function mapWorkoutDaysToQuizFrequency(workoutDays) {
+            if (workoutDays <= 1) return '0-1';
+            if (workoutDays <= 3) return '2-3';
+            if (workoutDays <= 5) return '4-5';
+            if (workoutDays <= 7) return '6-7';
+            return 'multiple-daily';
+        }
+
+        function parseWorkoutDays(value) {
+            if (typeof value === 'number') return value;
+            if (!value) return '';
+            if (value === '0-1') return 1;
+            if (value === '2-3') return 3;
+            if (value === '4-5') return 5;
+            if (value === '6-7') return 6;
+            if (value === 'multiple-daily') return 8;
+            const parsed = parseFloat(value);
+            return Number.isFinite(parsed) ? parsed : '';
+        }
+
+        function getNutritionActivityMultiplier(movement, workoutDays, workoutMinutes, intensity) {
+            const movementBase = {
+                sedentary: 1.2,
+                light: 1.3,
+                moderate: 1.43,
+                active: 1.56
+            }[movement] || 1.3;
+            const intensityBoost = {
+                easy: 0.045,
+                moderate: 0.07,
+                hard: 0.095
+            }[intensity] || 0.07;
+            const durationFactor = clamp(workoutMinutes / 45, 0.6, 1.8);
+            const weeklyBoost = (clamp(workoutDays, 0, 10) * intensityBoost * durationFactor) / 3;
+            return clamp(movementBase + weeklyBoost, 1.2, 1.9);
+        }
+
+        function calculateMacroTargetsFromForm() {
+            const goal = getSelectValue('macro-goal', 'fat-loss');
+            const dietStyle = getSelectValue('macro-diet-style', 'balanced');
+            const sex = getSelectValue('macro-sex', 'male');
+            const age = getNumericInput('macro-age');
+            const weight = getNumericInput('macro-weight');
+            const heightFt = getNumericInput('macro-height-ft');
+            const heightIn = getNumericInput('macro-height-in');
+            const workoutDays = getNumericInput('macro-workout-days', 0);
+            const workoutMinutes = getNumericInput('macro-workout-minutes', 45);
+            const workoutIntensity = getSelectValue('macro-workout-intensity', 'moderate');
+            const dailyMovement = getSelectValue('macro-daily-movement', 'moderate');
+            const height = (heightFt * 12) + heightIn;
+
+            if (!age || age < 13 || !weight || weight < 70 || !height || height < 48) {
+                alert('Enter age, weight, and height so the calculator can build useful targets.');
+                return null;
+            }
+
+            const kg = weight * 0.45359237;
+            const cm = height * 2.54;
+            const sexOffset = sex === 'male' ? 5 : sex === 'female' ? -161 : -78;
+            const bmr = Math.round((10 * kg) + (6.25 * cm) - (5 * age) + sexOffset);
+            const activityMultiplier = getNutritionActivityMultiplier(dailyMovement, workoutDays, workoutMinutes, workoutIntensity);
+            const tdee = Math.round(bmr * activityMultiplier);
+
+            const calorieMultiplier = {
+                'fat-loss': 0.82,
+                recomp: 0.95,
+                maintenance: 1,
+                'lean-gain': 1.07,
+                'muscle-gain': 1.12,
+                performance: 1.04
+            }[goal] || 1;
+            const calorieFloor = sex === 'female' ? 1200 : 1400;
+            let calories = roundToStep(tdee * calorieMultiplier, 25);
+            if (goal === 'fat-loss' || goal === 'recomp') {
+                calories = Math.max(calories, Math.max(calorieFloor, Math.round(bmr * 1.05)));
+            }
+
+            const proteinPerLb = {
+                'fat-loss': 1,
+                recomp: 1,
+                maintenance: 0.78,
+                'lean-gain': 0.9,
+                'muscle-gain': 0.9,
+                performance: 0.78
+            }[goal] || 0.85;
+
+            let protein = roundToStep(weight * proteinPerLb, 5);
+            if (dietStyle === 'high-protein') protein = roundToStep(weight * 1.05, 5);
+            if (dietStyle === 'keto') protein = roundToStep(weight * 0.85, 5);
+
+            let carbs;
+            let fat;
+            if (dietStyle === 'keto') {
+                carbs = 35;
+                fat = Math.max(45, roundToStep((calories - (protein * 4) - (carbs * 4)) / 9, 5));
+            } else {
+                const fatPct = {
+                    balanced: 0.28,
+                    'high-protein': 0.25,
+                    'lower-carb': 0.35,
+                    endurance: 0.22
+                }[dietStyle] || 0.28;
+                fat = Math.max(roundToStep(weight * 0.3, 5), roundToStep((calories * fatPct) / 9, 5));
+                const carbCalories = calories - (protein * 4) - (fat * 9);
+                carbs = Math.max(50, roundToStep(carbCalories / 4, 5));
+            }
+
+            const macroCalories = (protein * 4) + (carbs * 4) + (fat * 9);
+            if (Math.abs(macroCalories - calories) > 90 && dietStyle !== 'keto') {
+                carbs = Math.max(40, roundToStep((calories - (protein * 4) - (fat * 9)) / 4, 5));
+            }
+
+            const sugar = dietStyle === 'keto' || dietStyle === 'lower-carb' ? 20 : 25;
+            const activity = mapCalculatorActivity(workoutDays, dailyMovement);
+
+            return {
+                goals: {
+                    calories: Math.round(calories),
+                    protein: Math.round(protein),
+                    carbs: Math.round(carbs),
+                    fat: Math.round(fat),
+                    sugar,
+                    source: 'macro_calculator',
+                    goal,
+                    dietStyle,
+                    bmr,
+                    tdee,
+                    activityMultiplier: Number(activityMultiplier.toFixed(2)),
+                    workoutDays,
+                    workoutMinutes,
+                    workoutIntensity,
+                    dailyMovement,
+                    updatedAt: new Date().toISOString()
+                },
+                profile: {
+                    age: Math.round(age),
+                    weight: Math.round(weight * 10) / 10,
+                    height: Math.round(height),
+                    sex,
+                    activity,
+                    workoutDays,
+                    workoutMinutes,
+                    workoutIntensity,
+                    dailyMovement
+                },
+                quizPatch: {
+                    goal: mapMacroGoalToDietQuiz(goal),
+                    calories: Math.round(calories),
+                    calorieTarget: Math.round(calories),
+                    proteinGoal: Math.round(protein),
+                    age: Math.round(age),
+                    gender: sex,
+                    weight: Math.round(weight * 10) / 10,
+                    activity,
+                    measurementSystem: 'imperial',
+                    feet: Math.floor(height / 12),
+                    inches: Math.round(height % 12),
+                    exerciseFrequency: mapWorkoutDaysToQuizFrequency(workoutDays),
+                    workoutDuration: workoutMinutes >= 90 ? '90+' : workoutMinutes >= 60 ? '60-90' : workoutMinutes >= 45 ? '45-60' : '30-45',
+                    fitnessGoal: mapMacroGoalToFitnessGoal(goal),
+                    dietaryLifestyle: dietStyle === 'keto' ? 'keto' : ''
+                }
+            };
+        }
+
+        function persistNutritionTargets(goals, details = {}) {
+            const savedGoals = {
+                ...DEFAULT_NUTRITION_GOALS,
+                ...goals,
+                updatedAt: goals.updatedAt || new Date().toISOString()
+            };
+            localStorage.setItem('fuelfire_nutrition_goals', JSON.stringify(savedGoals));
+
+            const recentDietGoals = {
+                calorieTarget: savedGoals.calories,
+                proteinTarget: savedGoals.protein,
+                carbsTarget: savedGoals.carbs,
+                fatTarget: savedGoals.fat,
+                sugarTarget: savedGoals.sugar,
+                goal: savedGoals.goal || details.quizPatch?.goal || 'custom',
+                dietStyle: savedGoals.dietStyle || 'manual',
+                source: savedGoals.source || 'manual',
+                updatedAt: savedGoals.updatedAt
+            };
+            localStorage.setItem('fuelfire_recent_diet_goals', JSON.stringify(recentDietGoals));
+
+            if (details.profile) {
+                const existingProfile = readStorageJSON('fuelfire_user_profile', {});
+                const profile = {
+                    ...existingProfile,
+                    ...details.profile,
+                    calorieTarget: savedGoals.calories,
+                    proteinTarget: savedGoals.protein,
+                    carbsTarget: savedGoals.carbs,
+                    fatTarget: savedGoals.fat,
+                    updatedAt: savedGoals.updatedAt
+                };
+                localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+            }
+
+            if (details.quizPatch) {
+                const existingQuiz = readStorageJSON('fuelfire_diet_quiz_answers', {});
+                const quizAnswers = {
+                    ...existingQuiz,
+                    ...details.quizPatch,
+                    updatedAt: savedGoals.updatedAt
+                };
+                localStorage.setItem('fuelfire_diet_quiz_answers', JSON.stringify(quizAnswers));
+                localStorage.setItem('fuelfire_last_meal_plan_quiz_answers', JSON.stringify(quizAnswers));
+                localStorage.setItem('fuelfire_weekly_meal_plan_source', JSON.stringify(quizAnswers));
+            }
+
+            localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
+            window.dispatchEvent(new Event('fuelfire:nutritionTargetsUpdated'));
+        }
+
+        function renderMacroCalculatorResults(result) {
+            const display = document.getElementById('macro-calculator-results');
+            if (!display || !result) return;
+            const goals = result.goals;
+            display.innerHTML = `
+                <div style="display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px;">
+                    <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:900;color:#93c5fd;">${goals.calories}</div><div style="font-size:11px;color:rgba(255,255,255,0.65);">Calories</div></div>
+                    <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:900;color:#fca5a5;">${goals.protein}g</div><div style="font-size:11px;color:rgba(255,255,255,0.65);">Protein</div></div>
+                    <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:900;color:#fcd34d;">${goals.carbs}g</div><div style="font-size:11px;color:rgba(255,255,255,0.65);">Carbs</div></div>
+                    <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:900;color:#86efac;">${goals.fat}g</div><div style="font-size:11px;color:rgba(255,255,255,0.65);">Fat</div></div>
+                </div>
+                <div style="color:rgba(255,255,255,0.76);">
+                    Saved for ${macroGoalLabel(goals.goal)} using ${dietStyleLabel(goals.dietStyle)}. BMR ${goals.bmr.toLocaleString()} cal, estimated maintenance ${goals.tdee.toLocaleString()} cal.
+                </div>
+            `;
+        }
+
+        function calculateAndSaveMacroTargets() {
+            const result = calculateMacroTargetsFromForm();
+            if (!result) return;
+            persistNutritionTargets(result.goals, {
+                profile: result.profile,
+                quizPatch: result.quizPatch
+            });
+            displayNutritionGoals();
+            renderMacroCalculatorResults(result);
+            alert('Targets saved. Calorie tracker, macro bars, meal-plan defaults, and profile data are now synced.');
+        }
+
+        function prefillMacroCalculator() {
+            const profile = readStorageJSON('fuelfire_user_profile', {});
+            const quiz = readStorageJSON('fuelfire_diet_quiz_answers', readStorageJSON('fuelfire_last_meal_plan_quiz_answers', {}));
+            const goals = getStoredNutritionGoals();
+            const height = profile.height || ((parseInt(quiz.feet, 10) || 0) * 12) + (parseInt(quiz.inches, 10) || 0);
+
+            setInputValue('macro-sex', profile.sex || quiz.gender || 'male');
+            setInputValue('macro-age', profile.age || quiz.age || '');
+            setInputValue('macro-weight', profile.weight || quiz.weight || '');
+            if (height) {
+                setInputValue('macro-height-ft', Math.floor(height / 12));
+                setInputValue('macro-height-in', Math.round(height % 12));
+            }
+            setInputValue('macro-workout-days', profile.workoutDays || parseWorkoutDays(quiz.exerciseFrequency));
+            setInputValue('macro-workout-minutes', profile.workoutMinutes || 45);
+            setInputValue('macro-workout-intensity', profile.workoutIntensity || 'moderate');
+            setInputValue('macro-daily-movement', profile.dailyMovement || 'moderate');
+            if (goals.goal) setInputValue('macro-goal', goals.goal);
+            if (goals.dietStyle) setInputValue('macro-diet-style', goals.dietStyle);
+        }
 
         // Show the nutrition goal setter modal
         function showNutritionGoalSetter() {
@@ -2713,13 +3321,7 @@
 
         // Load current goals into the form
         function loadCurrentGoals() {
-            const goals = JSON.parse(localStorage.getItem('fuelfire_nutrition_goals')) || {
-                calories: 2000,
-                protein: 150,
-                carbs: 225,
-                fat: 67,
-                sugar: 25
-            };
+            const goals = getStoredNutritionGoals();
 
             document.getElementById('goal-calories').value = goals.calories;
             document.getElementById('goal-protein').value = goals.protein;
@@ -2735,21 +3337,25 @@
                 protein: parseInt(document.getElementById('goal-protein').value) || 150,
                 carbs: parseInt(document.getElementById('goal-carbs').value) || 225,
                 fat: parseInt(document.getElementById('goal-fat').value) || 67,
-                sugar: parseInt(document.getElementById('goal-sugar').value) || 25
+                sugar: parseInt(document.getElementById('goal-sugar').value) || 25,
+                source: 'manual',
+                updatedAt: new Date().toISOString()
             };
 
-            localStorage.setItem('fuelfire_nutrition_goals', JSON.stringify(goals));
+            persistNutritionTargets(goals);
 
             // Show success message
-            const saveBtn = event.target;
-            const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '✅ Goals Saved!';
-            saveBtn.style.background = '#27ae60';
+            const saveBtn = window.event?.target || document.querySelector('#nutrition-goal-modal button[onclick="saveNutritionGoals()"]');
+            if (saveBtn) {
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '✅ Goals Saved!';
+                saveBtn.style.background = '#27ae60';
 
-            setTimeout(() => {
-                saveBtn.innerHTML = originalText;
-                saveBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-            }, 2000);
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                }, 2000);
+            }
 
             // Update display
             displayNutritionGoals();
@@ -2789,13 +3395,10 @@
 
         // Display nutrition goals on the progress screen
         function displayNutritionGoals() {
-            const goals = JSON.parse(localStorage.getItem('fuelfire_nutrition_goals')) || {
-                calories: 2000,
-                protein: 150,
-                carbs: 225,
-                fat: 67,
-                sugar: 25
-            };
+            const goals = getStoredNutritionGoals();
+            const sourceLabel = goals.source === 'macro_calculator' ? 'Calculated targets' : goals.source === 'diet_quiz' ? 'Diet quiz targets' : goals.source === 'default' ? 'Default targets' : 'Manual targets';
+            const goalLabel = goals.goal ? macroGoalLabel(goals.goal) : 'Custom';
+            const updated = goals.updatedAt ? new Date(goals.updatedAt).toLocaleDateString() : 'Not saved yet';
 
             const display = document.getElementById('nutrition-goals-display');
             if (display) {
@@ -2825,6 +3428,9 @@
                                 <div style="font-size: 11px; color: #666; font-weight: 600;">🍭 Sugar</div>
                             </div>
                         </div>
+                        <div style="width:95%; background: rgba(255,255,255,0.16); border-radius: 12px; padding: 10px 12px; font-size: 12px; color: rgba(255,255,255,0.92); text-align: center;">
+                            ${sourceLabel} • ${goalLabel} • Updated ${updated}
+                        </div>
                     </div>
                 `;
             }
@@ -2832,77 +3438,25 @@
 
         // Edit nutrition goals (single modal to adjust everything at once)
         function editNutritionGoals() {
-            const currentGoals = JSON.parse(localStorage.getItem('fuelfire_nutrition_goals') || '{}');
-            const defaults = { calories: 2000, protein: 150, carbs: 225, fat: 67, sugar: 25 };
-            const goals = { ...defaults, ...currentGoals };
-
-            const existing = document.getElementById('nutrition-goal-modal');
-            if (existing) existing.remove();
-
-            const overlay = document.createElement('div');
-            overlay.id = 'nutrition-goal-modal';
-            overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);';
-            overlay.innerHTML = `
-                <div style="background:#0f172a;color:#fff;max-width:420px;width:100%;border-radius:18px;padding:20px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 60px rgba(0,0,0,0.35);">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                        <h3 style="margin:0;font-size:1.2rem;">Edit Nutrition Goals</h3>
-                        <button id="ng-close" style="background:transparent;border:none;color:#fff;font-size:1.2rem;cursor:pointer;">✕</button>
-                    </div>
-                    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
-                        <label style="display:flex;flex-direction:column;gap:6px;font-size:0.9rem;">Calories
-                            <input id="ng-calories" type="number" min="0" value="${goals.calories}" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;">
-                        </label>
-                        <label style="display:flex;flex-direction:column;gap:6px;font-size:0.9rem;">Protein (g)
-                            <input id="ng-protein" type="number" min="0" value="${goals.protein}" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;">
-                        </label>
-                        <label style="display:flex;flex-direction:column;gap:6px;font-size:0.9rem;">Carbs (g)
-                            <input id="ng-carbs" type="number" min="0" value="${goals.carbs}" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;">
-                        </label>
-                        <label style="display:flex;flex-direction:column;gap:6px;font-size:0.9rem;">Fat (g)
-                            <input id="ng-fat" type="number" min="0" value="${goals.fat}" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;">
-                        </label>
-                        <label style="display:flex;flex-direction:column;gap:6px;font-size:0.9rem;">Sugar (g)
-                            <input id="ng-sugar" type="number" min="0" value="${goals.sugar}" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;">
-                        </label>
-                    </div>
-                    <div style="display:flex;gap:10px;margin-top:16px;">
-                        <button id="ng-cancel" style="flex:1;background:rgba(255,255,255,0.08);border:none;color:#fff;padding:12px;border-radius:12px;font-weight:700;cursor:pointer;">Cancel</button>
-                        <button id="ng-save" style="flex:1;background:linear-gradient(135deg,#4B9CD3,#8e54e9);border:none;color:#fff;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;">Save</button>
-                    </div>
-                </div>
-            `;
-
-            function closeModal() { overlay.remove(); }
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-
-            document.body.appendChild(overlay);
-
-            overlay.querySelector('#ng-close').onclick = closeModal;
-            overlay.querySelector('#ng-cancel').onclick = closeModal;
-            overlay.querySelector('#ng-save').onclick = () => {
-                const calories = parseInt(document.getElementById('ng-calories').value, 10);
-                const protein = parseInt(document.getElementById('ng-protein').value, 10);
-                const carbs = parseInt(document.getElementById('ng-carbs').value, 10);
-                const fat = parseInt(document.getElementById('ng-fat').value, 10);
-                const sugar = parseInt(document.getElementById('ng-sugar').value, 10);
-
-                if ([calories, protein, carbs, fat, sugar].some(v => isNaN(v) || v < 0)) {
-                    alert('Please enter valid numbers for all goals.');
-                    return;
-                }
-
-                const newGoals = { calories, protein, carbs, fat, sugar };
-                localStorage.setItem('fuelfire_nutrition_goals', JSON.stringify(newGoals));
-                displayNutritionGoals();
-                alert('✅ Nutrition goals updated!');
-                closeModal();
-            };
+            showNutritionGoalSetter();
         }
 
         // Delete nutrition goals
         function deleteNutritionGoals() {
             if (confirm('Are you sure you want to delete your nutrition goals? This will reset them to defaults.')) {
-                localStorage.removeItem('fuelfire_nutrition_goals');
+                localStorage.setItem('fuelfire_nutrition_goals', JSON.stringify({
+                    ...DEFAULT_NUTRITION_GOALS,
+                    source: 'default',
+                    updatedAt: new Date().toISOString()
+                }));
+                localStorage.removeItem('fuelfire_recent_diet_goals');
+                const profile = readStorageJSON('fuelfire_user_profile', {});
+                delete profile.calorieTarget;
+                delete profile.proteinTarget;
+                delete profile.carbsTarget;
+                delete profile.fatTarget;
+                localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
+                localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
                 displayNutritionGoals();
 
                 // Show confirmation
@@ -3091,6 +3645,7 @@
         // Load all progress data when progress screen is shown
         window.addEventListener('load', function() {
             displayNutritionGoals();
+            prefillMacroCalculator();
             loadWeightStats();
             loadBodyFatStats();
             loadJourneyStats();
@@ -3128,6 +3683,43 @@
         });
 
         // Load Apple Health data for home page
+        window.addEventListener('fuelfire:healthDataUpdated', (event) => {
+            if (event.detail) {
+                updateHomeHealthUI(event.detail);
+            }
+        });
+
+        function updateHomeWatchConnection(status) {
+            const label = document.getElementById('home-watch-label');
+            const dot = document.getElementById('home-watch-dot');
+            const action = document.getElementById('home-watch-action');
+            if (!label || !dot || !action) return;
+
+            if (status?.syncing) {
+                label.textContent = status?.paired ? 'Syncing Apple Watch...' : 'Syncing Apple Health...';
+                dot.style.background = '#5798be';
+                action.textContent = 'Syncing';
+            } else if (status?.connected && status?.paired) {
+                label.textContent = 'Apple Watch connected';
+                dot.style.background = '#22a95a';
+                action.textContent = 'Sync';
+            } else if (status?.paired) {
+                label.textContent = 'Apple Watch detected';
+                dot.style.background = '#f0a12a';
+                action.textContent = 'Connect';
+            } else if (status?.healthAvailable) {
+                label.textContent = 'Apple Health available';
+                dot.style.background = '#5798be';
+                action.textContent = 'Set Up';
+            } else {
+                label.textContent = 'Apple Health unavailable';
+                dot.style.background = '#9aaab5';
+                action.textContent = 'Details';
+            }
+        }
+
+        window.addEventListener('fuelfire:healthConnectionChanged', (event) => updateHomeWatchConnection(event.detail));
+
         async function loadHomeHealthData() {
             try {
                 updateHomeBaseCaloriesFromStorage();
@@ -3144,6 +3736,9 @@
                     // Initialize health sync
                     const initialized = await window.healthSync.initialize();
                     if (initialized) {
+                        const watchStatus = await window.healthSync.refreshConnectionStatus(true);
+                        updateHomeWatchConnection(watchStatus);
+                        await window.healthSync.showAppleWatchConnectionPrompt();
                         // Silently sync in background (no permission prompt if already granted)
                         const data = await window.healthSync.syncAllData();
                         if (data) {
@@ -3411,18 +4006,27 @@
             const goalEl = document.getElementById('hydration-goal');
             const litersEl = document.getElementById('hydration-liters');
             const goalInput = document.getElementById('hydration-goal-input');
+            const totalEls = Array.from(document.querySelectorAll('[data-hydration-total]'));
+            const barEls = Array.from(document.querySelectorAll('[data-hydration-fill]'));
+            const goalEls = Array.from(document.querySelectorAll('[data-hydration-goal]'));
+            const litersEls = Array.from(document.querySelectorAll('[data-hydration-liters]'));
 
-            if (goalEl) goalEl.textContent = Math.round(goal);
+            if (goalEl && !goalEls.includes(goalEl)) goalEls.push(goalEl);
+            if (totalEl && !totalEls.includes(totalEl)) totalEls.push(totalEl);
+            if (barEl && !barEls.includes(barEl)) barEls.push(barEl);
+            if (litersEl && !litersEls.includes(litersEl)) litersEls.push(litersEl);
+
+            goalEls.forEach(el => { el.textContent = Math.round(goal); });
             if (goalInput && !goalInput.value) goalInput.value = Math.round(goal);
-            if (totalEl) totalEl.textContent = `${Math.round(total)} oz`;
-            if (litersEl) litersEl.textContent = `${(total * 0.0295735).toFixed(2)} L`;
-            if (barEl) {
+            totalEls.forEach(el => { el.textContent = `${Math.round(total)} oz`; });
+            litersEls.forEach(el => { el.textContent = `${(total * 0.0295735).toFixed(2)} L`; });
+            barEls.forEach(el => {
                 const pct = Math.min(100, Math.round((total / goal) * 100));
-                barEl.style.height = `${pct}%`;
-                if (barEl.style.width !== undefined) {
-                    barEl.style.width = `${pct}%`;
+                el.style.height = `${pct}%`;
+                if (el.style.width !== undefined) {
+                    el.style.width = `${pct}%`;
                 }
-            }
+            });
         }
 
         function addWater(ounces) {

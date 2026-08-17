@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Health Dashboard - FuelFire</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+    <title>Apple Health Dashboard - Well Fit Pro</title>
     <link rel="stylesheet" href="styles.css">
     <script src="health-sync.js"></script>
     <script src="quick-food-entry.js"></script>
@@ -18,17 +18,29 @@
 
             <div class="header">
                 <div class="hamburger" onclick="toggleSidebar()">☰</div>
-                <div class="header-title">Health Dashboard</div>
+                <div class="header-title">Apple Health Dashboard</div>
             </div>
 
             <div class="content">
                 <div style="padding: 20px;">
 
+                    <div style="background: #f5fbff; border: 1px solid rgba(75, 156, 211, 0.25); border-radius: 16px; padding: 16px; margin-bottom: 18px; color: #23364a; line-height: 1.45;">
+                        <div style="font-weight: 800; color: var(--primary); margin-bottom: 6px;">Apple Health Integration</div>
+                        <div style="font-size: 13px;">
+                            Well Fit Pro reads steps, heart rate, active energy, workouts, distance, weight, and resting energy from Apple Health when you grant permission. Completed workouts can also be saved back to Apple Health.
+                        </div>
+                    </div>
+
+                    <button id="dashboard-watch-connection" type="button" onclick="window.healthSync.handleAppleHealthConnectionAction();" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 18px;padding:13px 14px;border:1px solid #dceaf3;border-radius:8px;background:#fff;color:#28475e;box-shadow:0 2px 10px rgba(31,92,128,.08);cursor:pointer;">
+                        <span style="display:flex;align-items:center;gap:9px;min-width:0;"><span id="dashboard-watch-dot" aria-hidden="true" style="width:10px;height:10px;border-radius:50%;background:#9aaab5;flex:0 0 auto;"></span><span id="dashboard-watch-label" style="font-size:14px;font-weight:800;letter-spacing:0;text-align:left;">Checking Apple Watch...</span></span>
+                        <span id="dashboard-watch-action" style="font-size:13px;font-weight:800;color:#278fca;white-space:nowrap;">Connect</span>
+                    </button>
+
                     <!-- Action Buttons -->
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                             <button onclick="syncHealthData()" style="background: var(--gradient-1); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);">
-                                Sync Data
+                                Sync Apple Health
                             </button>
                             <button onclick="showQuickLogWorkout()" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);">
                                 Quick Log Workout
@@ -147,10 +159,10 @@
                                 <div style="font-size:30px; font-weight:800;" id="hydration-total">0 oz</div>
                                 <div style="font-size:14px; opacity:0.9;" id="hydration-liters">0.0 L</div>
                                 <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-                                    <button onclick="addWater(4)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+4 oz</button>
                                     <button onclick="addWater(8)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+8 oz</button>
-                                    <button onclick="addWater(33.8)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+1 L</button>
-                                    <button onclick="addWater(128)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">+1 gal</button>
+                                    <button onclick="addWater(16.9)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">Bottle</button>
+                                    <button onclick="addWater(30)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">Stanley 30</button>
+                                    <button onclick="addWater(40)" style="background: rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:8px 10px; font-weight:700; cursor:pointer;">Stanley 40</button>
                                 </div>
                             </div>
                         </div>
@@ -223,7 +235,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 15px; padding: 15px; background: var(--lighter-bg); border-radius: 10px; text-align: center;">
-                            <div style="font-size: 13px; color: #666; margin-bottom: 5px;">Your BMR will be calculated using the Mifflin-St Jeor equation</div>
+                            <div style="font-size: 13px; color: #666; margin-bottom: 5px;">Your BMR will be calculated using the Mifflin-St Jeor equation (<a href="https://pubmed.ncbi.nlm.nih.gov/2305711/" style="color: #007AFF; font-size: 12px;">Mifflin MD et al., 1990, Am J Clin Nutr</a>)</div>
                             <div style="font-size: 12px; color: #999;">Height + Weight + Age + Sex = Accurate Base Calories</div>
                         </div>
                     </div>
@@ -378,6 +390,17 @@
                     </div>
 
                 </div>
+
+                <!-- Scientific References -->
+                <div style="margin: 15px; padding: 15px; background: #f0f7ff; border-radius: 12px; border-left: 4px solid #2196F3;">
+                    <h3 style="color: #1565C0; margin: 0 0 8px 0; font-size: 14px;">⚠️ Health Data Disclaimer & References</h3>
+                    <p style="color: #666; font-size: 11px; margin: 0 0 8px 0;">Health calculations are estimates for informational purposes only and are not a substitute for professional medical advice. Consult a licensed healthcare provider for personalized health guidance.</p>
+                    <ul style="color: #444; font-size: 11px; margin: 0; padding-left: 16px; line-height: 1.8;">
+                        <li>BMR (Mifflin-St Jeor): <a href="https://pubmed.ncbi.nlm.nih.gov/2305711/" style="color: #1565C0;">Mifflin MD et al. (1990). A new predictive equation for resting energy expenditure. Am J Clin Nutr.</a></li>
+                        <li>Physical Activity Guidelines: <a href="https://health.gov/our-work/nutrition-physical-activity/physical-activity-guidelines" style="color: #1565C0;">U.S. Department of Health & Human Services, 2018.</a></li>
+                        <li>Calorie & Macronutrient Guidelines: <a href="https://www.dietaryguidelines.gov/" style="color: #1565C0;">U.S. Dietary Guidelines for Americans, 2020-2025.</a></li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Bottom Navigation Bar -->
@@ -487,7 +510,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                     <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
                 </svg>
-                Health Dashboard
+                Apple Health
             </div>
             <div class="menu-item" onclick="window.location.href='enhanced-diet-quiz.html'">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
@@ -655,8 +678,49 @@
             // Load cached data if available (but don't auto-request permissions)
             loadCachedData();
 
+            const watchStatus = await window.healthSync.refreshConnectionStatus(true);
+            updateDashboardWatchConnection(watchStatus);
+            await window.healthSync.showAppleWatchConnectionPrompt();
+
             document.getElementById('sync-status').innerHTML = 'Tap "Sync Apple Health" to connect';
         }
+
+        function updateDashboardWatchConnection(status) {
+            const label = document.getElementById('dashboard-watch-label');
+            const dot = document.getElementById('dashboard-watch-dot');
+            const action = document.getElementById('dashboard-watch-action');
+            if (!label || !dot || !action) return;
+
+            if (status?.syncing) {
+                label.textContent = status?.paired ? 'Syncing Apple Watch...' : 'Syncing Apple Health...';
+                dot.style.background = '#5798be';
+                action.textContent = 'Syncing';
+            } else if (status?.connected && status?.paired) {
+                label.textContent = 'Apple Watch connected';
+                dot.style.background = '#22a95a';
+                action.textContent = 'Sync';
+            } else if (status?.paired) {
+                label.textContent = 'Apple Watch detected';
+                dot.style.background = '#f0a12a';
+                action.textContent = 'Connect';
+            } else if (status?.healthAvailable) {
+                label.textContent = 'Apple Health available';
+                dot.style.background = '#5798be';
+                action.textContent = 'Set Up';
+            } else {
+                label.textContent = 'Apple Health unavailable';
+                dot.style.background = '#9aaab5';
+                action.textContent = 'Details';
+            }
+        }
+
+        window.addEventListener('fuelfire:healthConnectionChanged', (event) => updateDashboardWatchConnection(event.detail));
+
+        window.addEventListener('fuelfire:healthDataUpdated', (event) => {
+            if (!event.detail) return;
+            updateUI(event.detail);
+            document.getElementById('sync-status').innerHTML = `Synced at ${new Date(event.detail.syncTime).toLocaleTimeString()}`;
+        });
 
         function loadCachedData() {
             const cached = localStorage.getItem('healthData');
@@ -685,10 +749,10 @@
 
                 if (permitted) {
                     console.log('Permissions granted.');
-                    document.getElementById('sync-status').innerHTML = 'Permissions granted! Now tap "Sync Data"';
+                    document.getElementById('sync-status').innerHTML = 'Permissions granted! Now tap "Sync Apple Health"';
                 } else {
                     console.log('Permissions denied or dialog dismissed.');
-                    document.getElementById('sync-status').innerHTML = 'Please grant permissions in Settings → Health → Data Access & Devices → FuelFire';
+                    document.getElementById('sync-status').innerHTML = 'Please grant permissions in Settings > Health > Data Access & Devices > Well Fit Pro';
                 }
             } catch (error) {
                 console.error('Permission request error:', error);
@@ -699,7 +763,7 @@
         async function clearCacheAndRefresh() {
             if (confirm('This will clear all cached health data and force a fresh sync from Apple Health. Continue?')) {
                 localStorage.removeItem('healthData');
-                document.getElementById('sync-status').innerHTML = 'Cache cleared! Tap "Sync Data" to refresh';
+                document.getElementById('sync-status').innerHTML = 'Cache cleared! Tap "Sync Apple Health" to refresh';
                 document.getElementById('debug-info').style.display = 'block';
                 document.getElementById('debug-info').innerHTML = 'Cache cleared at ' + new Date().toLocaleTimeString();
             }
