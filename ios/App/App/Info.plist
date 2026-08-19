@@ -30,6 +30,8 @@
 	<string>Well Fit Pro uses Apple Health to read steps, heart rate, workouts, active energy, distance, weight, and sleep for personalized fitness tracking. Profile details are used to estimate base calories.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Well Fit Pro uses Apple Health to save completed workouts and fitness activity so your health data stays in one place.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Well Fit can use your approximate location once while logging food to help identify a nearby restaurant. Location is optional and is not saved with your meal.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs microphone access to log meals using voice commands</string>
 	<key>NSPhotoLibraryUsageDescription</key>

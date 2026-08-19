@@ -23,6 +23,11 @@ target 'App' do
   # Add your Pods here
 end
 
+target 'AppUITestHost' do
+  pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+end
+
 post_install do |installer|
   assertDeploymentTarget(installer)
 end

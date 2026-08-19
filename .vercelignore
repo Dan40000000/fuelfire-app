@@ -1,6 +1,13 @@
-node_modules
-ios
-android
-.git
-*.log
-.DS_Store
+*
+!api
+!api/**
+!public
+!public/**
+!package.json
+!package-lock.json
+!vercel.json
+
+# Diagnostic-only endpoints are never deployed.
+api/accuracy-lab-session.js
+api/test-api-key.js
+api/generate-meal-plan.js

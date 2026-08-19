@@ -3,6 +3,15 @@
   "outputDirectory": "public",
   "functions": {
     "api/claude-meal-plan.js": {
+      "maxDuration": 180
+    },
+    "api/ai-workout-plan.js": {
+      "maxDuration": 180
+    },
+    "api/ai-food-vision.js": {
+      "maxDuration": 60
+    },
+    "api/ai-food-parser.js": {
       "maxDuration": 60
     }
   }

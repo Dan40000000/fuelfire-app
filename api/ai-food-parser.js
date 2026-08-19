@@ -2,14 +2,15 @@
 // Uses Claude with comprehensive restaurant database for accurate nutrition data
 
 import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+import { anthropicConstants, getAnthropicApiKey, getClaudeModel, getFastClaudeModel } from './_lib/anthropic.js';
+import { requireAiAccess } from './_lib/security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
     headers: ['Content-Type'],
 };
 
-const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_VERSION = '2023-06-01';
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // =============================================================================
 // COMPREHENSIVE RESTAURANT NUTRITION DATABASE
@@ -17,8 +18,8 @@ const ANTHROPIC_VERSION = '2023-06-01';
 // =============================================================================
 const nutritionDatabase = {
     // ==================== McDONALD'S ====================
-    'big mac': { name: "McDonald's Big Mac", calories: 563, protein: 25, carbs: 45, fat: 33, sugar: 9, source: "McDonald's Official" },
-    'mcdonald\'s big mac': { name: "McDonald's Big Mac", calories: 563, protein: 25, carbs: 45, fat: 33, sugar: 9, source: "McDonald's Official" },
+    'big mac': { name: "McDonald's Big Mac", calories: 580, protein: 25, carbs: 46, fat: 34, sugar: 9, source: "McDonald's Official" },
+    'mcdonald\'s big mac': { name: "McDonald's Big Mac", calories: 580, protein: 25, carbs: 46, fat: 34, sugar: 9, source: "McDonald's Official" },
     'quarter pounder with cheese': { name: "McDonald's Quarter Pounder with Cheese", calories: 520, protein: 30, carbs: 42, fat: 26, sugar: 10, source: "McDonald's Official" },
     'quarter pounder': { name: "McDonald's Quarter Pounder with Cheese", calories: 520, protein: 30, carbs: 42, fat: 26, sugar: 10, source: "McDonald's Official" },
     'mcdouble': { name: "McDonald's McDouble", calories: 400, protein: 22, carbs: 33, fat: 20, sugar: 7, source: "McDonald's Official" },
@@ -27,6 +28,11 @@ const nutritionDatabase = {
     'filet o fish': { name: "McDonald's Filet-O-Fish", calories: 390, protein: 16, carbs: 39, fat: 19, sugar: 5, source: "McDonald's Official" },
     'egg mcmuffin': { name: "McDonald's Egg McMuffin", calories: 310, protein: 17, carbs: 30, fat: 13, sugar: 3, source: "McDonald's Official" },
     'sausage mcmuffin with egg': { name: "McDonald's Sausage McMuffin with Egg", calories: 480, protein: 21, carbs: 29, fat: 31, sugar: 2, source: "McDonald's Official" },
+    'sausage egg mcmuffin': { name: "McDonald's Sausage McMuffin with Egg", calories: 480, protein: 21, carbs: 29, fat: 31, sugar: 2, source: "McDonald's Official" },
+    'mcdonalds sausage egg mcmuffin': { name: "McDonald's Sausage McMuffin with Egg", calories: 480, protein: 21, carbs: 29, fat: 31, sugar: 2, source: "McDonald's Official" },
+    'mcdonald\'s sausage egg mcmuffin': { name: "McDonald's Sausage McMuffin with Egg", calories: 480, protein: 21, carbs: 29, fat: 31, sugar: 2, source: "McDonald's Official" },
+    'mcdonalds sausage mcmuffin with egg': { name: "McDonald's Sausage McMuffin with Egg", calories: 480, protein: 21, carbs: 29, fat: 31, sugar: 2, source: "McDonald's Official" },
+    'mcdonald\'s sausage mcmuffin with egg': { name: "McDonald's Sausage McMuffin with Egg", calories: 480, protein: 21, carbs: 29, fat: 31, sugar: 2, source: "McDonald's Official" },
     'sausage mcmuffin': { name: "McDonald's Sausage McMuffin", calories: 400, protein: 14, carbs: 29, fat: 26, sugar: 2, source: "McDonald's Official" },
     'hotcakes': { name: "McDonald's Hotcakes", calories: 350, protein: 9, carbs: 60, fat: 9, sugar: 14, source: "McDonald's Official" },
     'hash browns': { name: "McDonald's Hash Browns", calories: 140, protein: 1, carbs: 15, fat: 8, sugar: 0, source: "McDonald's Official" },
@@ -46,9 +52,9 @@ const nutritionDatabase = {
     'mcdonalds fries': { name: "McDonald's Medium Fries", calories: 320, protein: 5, carbs: 43, fat: 15, sugar: 0, source: "McDonald's Official" },
 
     // ==================== CHICK-FIL-A ====================
-    'chick-fil-a chicken sandwich': { name: "Chick-fil-A Chicken Sandwich", calories: 420, protein: 28, carbs: 41, fat: 16, sugar: 5, source: "Chick-fil-A Official" },
-    'chick-fil-a sandwich': { name: "Chick-fil-A Chicken Sandwich", calories: 420, protein: 28, carbs: 41, fat: 16, sugar: 5, source: "Chick-fil-A Official" },
-    'chick fil a chicken sandwich': { name: "Chick-fil-A Chicken Sandwich", calories: 420, protein: 28, carbs: 41, fat: 16, sugar: 5, source: "Chick-fil-A Official" },
+    'chick-fil-a chicken sandwich': { name: "Chick-fil-A Chicken Sandwich", calories: 420, protein: 29, carbs: 41, fat: 18, sugar: 6, source: "Chick-fil-A Official" },
+    'chick-fil-a sandwich': { name: "Chick-fil-A Chicken Sandwich", calories: 420, protein: 29, carbs: 41, fat: 18, sugar: 6, source: "Chick-fil-A Official" },
+    'chick fil a chicken sandwich': { name: "Chick-fil-A Chicken Sandwich", calories: 420, protein: 29, carbs: 41, fat: 18, sugar: 6, source: "Chick-fil-A Official" },
     'chick-fil-a spicy chicken sandwich': { name: "Chick-fil-A Spicy Chicken Sandwich", calories: 450, protein: 28, carbs: 43, fat: 19, sugar: 6, source: "Chick-fil-A Official" },
     'chick-fil-a spicy sandwich': { name: "Chick-fil-A Spicy Chicken Sandwich", calories: 450, protein: 28, carbs: 43, fat: 19, sugar: 6, source: "Chick-fil-A Official" },
     'chick-fil-a deluxe': { name: "Chick-fil-A Deluxe Sandwich", calories: 500, protein: 29, carbs: 44, fat: 22, sugar: 7, source: "Chick-fil-A Official" },
@@ -124,6 +130,13 @@ const nutritionDatabase = {
     // ==================== CHIPOTLE ====================
     'chipotle chicken burrito': { name: "Chipotle Chicken Burrito", calories: 1055, protein: 60, carbs: 106, fat: 38, sugar: 8, source: "Chipotle Official" },
     'chipotle chicken bowl': { name: "Chipotle Chicken Bowl", calories: 740, protein: 50, carbs: 56, fat: 30, sugar: 5, source: "Chipotle Official" },
+    'chipotle chicken': { name: "Chipotle Chicken (4 oz)", calories: 180, protein: 32, carbs: 0, fat: 7, sugar: 0, source: "Chipotle Official" },
+    'chipotle cilantro-lime white rice': { name: "Chipotle Cilantro-Lime White Rice (4 oz)", calories: 210, protein: 4, carbs: 40, fat: 4, sugar: 0, source: "Chipotle Official" },
+    'chipotle black beans': { name: "Chipotle Black Beans (4 oz)", calories: 130, protein: 8, carbs: 22, fat: 2, sugar: 2, source: "Chipotle Official" },
+    'chipotle fajita veggies': { name: "Chipotle Fajita Vegetables (2 oz)", calories: 20, protein: 1, carbs: 5, fat: 0, sugar: 2, source: "Chipotle Official" },
+    'chipotle fresh tomato salsa': { name: "Chipotle Fresh Tomato Salsa (4 oz)", calories: 25, protein: 0, carbs: 4, fat: 0, sugar: 1, source: "Chipotle Official" },
+    'chipotle cheese': { name: "Chipotle Cheese (1 oz)", calories: 110, protein: 6, carbs: 1, fat: 8, sugar: 0, source: "Chipotle Official" },
+    'chipotle romaine lettuce': { name: "Chipotle Romaine Lettuce (1 oz)", calories: 5, protein: 0, carbs: 1, fat: 0, sugar: 0, source: "Chipotle Official" },
     'chipotle steak burrito': { name: "Chipotle Steak Burrito", calories: 1045, protein: 59, carbs: 106, fat: 37, sugar: 8, source: "Chipotle Official" },
     'chipotle steak bowl': { name: "Chipotle Steak Bowl", calories: 730, protein: 49, carbs: 56, fat: 29, sugar: 5, source: "Chipotle Official" },
     'chipotle carnitas bowl': { name: "Chipotle Carnitas Bowl", calories: 750, protein: 40, carbs: 56, fat: 35, sugar: 5, source: "Chipotle Official" },
@@ -245,6 +258,261 @@ const nutritionDatabase = {
     'honey butter chicken biscuit': { name: "Whataburger Honey Butter Chicken Biscuit", calories: 610, protein: 21, carbs: 53, fat: 35, sugar: 8, source: "Whataburger Official" },
     'whataburger medium fries': { name: "Whataburger Medium Fries", calories: 400, protein: 5, carbs: 54, fat: 18, sugar: 0, source: "Whataburger Official" },
 
+    // ==================== ADDITIONAL NATIONAL CHAINS ====================
+    'arby\'s classic roast beef': {
+        name: "Arby's Classic Roast Beef Sandwich",
+        calories: 360,
+        protein: 23,
+        carbs: 37,
+        fat: 14,
+        sugar: 5,
+        source: "Arby's Official",
+        sourceType: 'official',
+        sourceUrl: 'https://www.arbys.com/menu/top-picks/classic-roast-beef/'
+    },
+    'arbys classic roast beef': {
+        name: "Arby's Classic Roast Beef Sandwich",
+        calories: 360,
+        protein: 23,
+        carbs: 37,
+        fat: 14,
+        sugar: 5,
+        source: "Arby's Official",
+        sourceType: 'official',
+        sourceUrl: 'https://www.arbys.com/menu/top-picks/classic-roast-beef/'
+    },
+    'domino\'s medium hand tossed pepperoni pizza 2 slices': {
+        name: "Domino's Medium Hand Tossed Pepperoni Pizza (2 slices)",
+        calories: 430,
+        protein: 18,
+        carbs: 52,
+        fat: 18,
+        sugar: 4,
+        source: "Domino's Official Nutrition Guide",
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://cache.dominos.com/olo/6_159_0/assets/build/market/US/_en/pdf/DominosNutritionGuide.pdf'
+    },
+    'dominos medium hand tossed pepperoni pizza 2 slices': {
+        name: "Domino's Medium Hand Tossed Pepperoni Pizza (2 slices)",
+        calories: 430,
+        protein: 18,
+        carbs: 52,
+        fat: 18,
+        sugar: 4,
+        source: "Domino's Official Nutrition Guide",
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://cache.dominos.com/olo/6_159_0/assets/build/market/US/_en/pdf/DominosNutritionGuide.pdf'
+    },
+    'pizza hut medium hand tossed pepperoni pizza 2 slices': {
+        name: 'Pizza Hut Medium Hand Tossed Pepperoni Pizza (2 slices)',
+        calories: 440,
+        protein: 18,
+        carbs: 50,
+        fat: 18,
+        sugar: 2,
+        source: 'Pizza Hut Official Nutrition',
+        sourceType: 'official',
+        sourceUrl: 'https://www.pizzahut.com/c/content/nutrition'
+    },
+    'papa john\'s large original crust pepperoni pizza 2 slices': {
+        name: "Papa Johns Large Original Crust Pepperoni Pizza (2 slices)",
+        calories: 580,
+        protein: 22,
+        carbs: 76,
+        fat: 20,
+        sugar: 10,
+        source: 'Papa Johns Official',
+        sourceType: 'official',
+        sourceUrl: 'https://www.papajohns.com/company/nutritional-details/index.html'
+    },
+    'papa johns large original crust pepperoni pizza 2 slices': {
+        name: "Papa Johns Large Original Crust Pepperoni Pizza (2 slices)",
+        calories: 580,
+        protein: 22,
+        carbs: 76,
+        fat: 20,
+        sugar: 10,
+        source: 'Papa Johns Official',
+        sourceType: 'official',
+        sourceUrl: 'https://www.papajohns.com/company/nutritional-details/index.html'
+    },
+    'little caesars classic pepperoni pizza 2 slices': {
+        name: 'Little Caesars Classic Pepperoni Pizza (2 slices)',
+        calories: 580,
+        protein: 27,
+        carbs: 63,
+        fat: 24,
+        sugar: 5,
+        source: 'Little Caesars Official Nutrition Guide',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://littlecaesars.com/static/usnutritionguide.pdf'
+    },
+    'dairy queen small oreo blizzard': {
+        name: 'Dairy Queen OREO Cookie Blizzard Treat (Small)',
+        calories: 620,
+        protein: 12,
+        carbs: 92,
+        fat: 23,
+        sugar: 67,
+        source: 'Dairy Queen Official',
+        sourceType: 'official',
+        sourceUrl: 'https://www.dairyqueen.com/en-us/menu/oreo-cookie-blizzard-treat/'
+    },
+    'dq small oreo blizzard': {
+        name: 'Dairy Queen OREO Cookie Blizzard Treat (Small)',
+        calories: 620,
+        protein: 12,
+        carbs: 92,
+        fat: 23,
+        sugar: 67,
+        source: 'Dairy Queen Official',
+        sourceType: 'official',
+        sourceUrl: 'https://www.dairyqueen.com/en-us/menu/oreo-cookie-blizzard-treat/'
+    },
+    'shake shack shackburger': {
+        name: 'Shake Shack ShackBurger',
+        calories: 530,
+        protein: 29,
+        carbs: 26,
+        fat: 34,
+        sugar: 7,
+        source: 'Shake Shack Official Nutrition',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://shakeshack.com/sites/default/files/2022-05/Shake%20Shack%20Nutrition%20Spreadsheets%20May%203%2C%202022%20LTOs.pdf'
+    },
+    'jimmy john\'s turkey tom': {
+        name: "Jimmy John's Turkey Tom",
+        calories: 480,
+        protein: 23,
+        carbs: 57,
+        fat: 19,
+        sugar: 2,
+        source: "Jimmy John's Official Nutrition Guide",
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://resources.jimmyjohns.com/downloadable-files/NutritionGuide.pdf'
+    },
+    'jimmy johns turkey tom': {
+        name: "Jimmy John's Turkey Tom",
+        calories: 480,
+        protein: 23,
+        carbs: 57,
+        fat: 19,
+        sugar: 2,
+        source: "Jimmy John's Official Nutrition Guide",
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://resources.jimmyjohns.com/downloadable-files/NutritionGuide.pdf'
+    },
+    'jersey mike\'s regular original italian': {
+        name: "Jersey Mike's Original Italian (Regular)",
+        calories: 940,
+        protein: 45,
+        carbs: 65,
+        fat: 55,
+        sugar: 10,
+        source: "Jersey Mike's Official Nutrition",
+        sourceType: 'official',
+        sourceUrl: 'https://www.jerseymikes.com/menu/nutrition'
+    },
+    'jersey mikes regular original italian': {
+        name: "Jersey Mike's Original Italian (Regular)",
+        calories: 940,
+        protein: 45,
+        carbs: 65,
+        fat: 55,
+        sugar: 10,
+        source: "Jersey Mike's Official Nutrition",
+        sourceType: 'official',
+        sourceUrl: 'https://www.jerseymikes.com/menu/nutrition'
+    },
+    'culver\'s butterburger cheese single': {
+        name: "Culver's ButterBurger Cheese Single",
+        calories: 460,
+        protein: 23,
+        carbs: 39,
+        fat: 23,
+        sugar: 7,
+        source: "Culver's Official Nutrition Guide",
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://cdn.culvers.com/page-content/menu/nutrition-allergen.pdf'
+    },
+    'culvers butterburger cheese single': {
+        name: "Culver's ButterBurger Cheese Single",
+        calories: 460,
+        protein: 23,
+        carbs: 39,
+        fat: 23,
+        sugar: 7,
+        source: "Culver's Official Nutrition Guide",
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://cdn.culvers.com/page-content/menu/nutrition-allergen.pdf'
+    },
+    'qdoba grilled adobo chicken': {
+        name: 'Qdoba Grilled Adobo Chicken (3.5 oz)',
+        calories: 150,
+        protein: 16,
+        carbs: 2,
+        fat: 9,
+        sugar: 1,
+        source: 'Qdoba Official Nutrition Information',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://www.qdoba.com/public/assets/documents/qdoba-nutrition-information.pdf'
+    },
+    'qdoba cilantro lime rice': {
+        name: 'Qdoba Cilantro Lime Rice',
+        calories: 190,
+        protein: 3,
+        carbs: 38,
+        fat: 3,
+        sugar: 1,
+        source: 'Qdoba Official Nutrition Information',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://www.qdoba.com/public/assets/documents/qdoba-nutrition-information.pdf'
+    },
+    'qdoba black beans': {
+        name: 'Qdoba Black Beans',
+        calories: 130,
+        protein: 8,
+        carbs: 22,
+        fat: 1,
+        sugar: 1,
+        source: 'Qdoba Official Nutrition Information',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://www.qdoba.com/public/assets/documents/qdoba-nutrition-information.pdf'
+    },
+    'qdoba fajita veggies': {
+        name: 'Qdoba Fajita Vegetables',
+        calories: 35,
+        protein: 1,
+        carbs: 4,
+        fat: 2,
+        sugar: 2,
+        source: 'Qdoba Official Nutrition Information',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://www.qdoba.com/public/assets/documents/qdoba-nutrition-information.pdf'
+    },
+    'qdoba pico de gallo': {
+        name: 'Qdoba Pico de Gallo',
+        calories: 10,
+        protein: 0,
+        carbs: 2,
+        fat: 0,
+        sugar: 1,
+        source: 'Qdoba Official Nutrition Information',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://www.qdoba.com/public/assets/documents/qdoba-nutrition-information.pdf'
+    },
+    'qdoba shredded lettuce': {
+        name: 'Qdoba Shredded Lettuce',
+        calories: 5,
+        protein: 0,
+        carbs: 1,
+        fat: 0,
+        sugar: 0,
+        source: 'Qdoba Official Nutrition Information',
+        sourceType: 'menu_pdf',
+        sourceUrl: 'https://www.qdoba.com/public/assets/documents/qdoba-nutrition-information.pdf'
+    },
+
     // ==================== GROCERY/GENERIC ITEMS ====================
     'great value 2% milk 1 cup': { name: "2% Milk (1 cup)", calories: 122, protein: 8, carbs: 12, fat: 5, sugar: 12, source: "USDA" },
     '2% milk': { name: "2% Milk (1 cup)", calories: 122, protein: 8, carbs: 12, fat: 5, sugar: 12, source: "USDA" },
@@ -264,6 +532,22 @@ const nutritionDatabase = {
     'doritos': { name: "Doritos Nacho Cheese (1 oz)", calories: 140, protein: 2, carbs: 18, fat: 7, sugar: 1, source: "Frito-Lay" },
     'oreos 3 cookies': { name: "Oreo Cookies (3)", calories: 160, protein: 1, carbs: 25, fat: 7, sugar: 14, source: "Nabisco" },
     'oreo': { name: "Oreo Cookie (1)", calories: 53, protein: 0, carbs: 8, fat: 2, sugar: 5, source: "Nabisco" },
+    // Blueberry muffin sizes vary wildly. Use the package/standard serving as the safe default,
+    // and only use large bakery/Costco values when the user says that size/type.
+    'blueberry muffin': { name: "Blueberry Muffins (standard / box mix)", calories: 270, protein: 3, carbs: 63, fiber: 1, netCarbs: 62, fat: 1, sugar: 31, serving: '2 muffins (81g dry mix and blueberries)', source: "Blueberry muffin package label default", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'blueberry muffins': { name: "Blueberry Muffins (standard / box mix)", calories: 270, protein: 3, carbs: 63, fiber: 1, netCarbs: 62, fat: 1, sugar: 31, serving: '2 muffins (81g dry mix and blueberries)', source: "Blueberry muffin package label default", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'standard blueberry muffin': { name: "Blueberry Muffins (standard / box mix)", calories: 270, protein: 3, carbs: 63, fiber: 1, netCarbs: 62, fat: 1, sugar: 31, serving: '2 muffins (81g dry mix and blueberries)', source: "Blueberry muffin package label default", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'regular blueberry muffin': { name: "Blueberry Muffins (standard / box mix)", calories: 270, protein: 3, carbs: 63, fiber: 1, netCarbs: 62, fat: 1, sugar: 31, serving: '2 muffins (81g dry mix and blueberries)', source: "Blueberry muffin package label default", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'box mix blueberry muffin': { name: "Blueberry Muffins (standard / box mix)", calories: 270, protein: 3, carbs: 63, fiber: 1, netCarbs: 62, fat: 1, sugar: 31, serving: '2 muffins (81g dry mix and blueberries)', source: "Blueberry muffin package label default", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'blueberry muffin mix': { name: "Blueberry Muffins (standard / box mix)", calories: 270, protein: 3, carbs: 63, fiber: 1, netCarbs: 62, fat: 1, sugar: 31, serving: '2 muffins (81g dry mix and blueberries)', source: "Blueberry muffin package label default", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'large blueberry muffin': { name: "Large Blueberry Muffin", calories: 385, protein: 6, carbs: 55, fiber: 1, netCarbs: 54, fat: 15, sugar: 28, serving: '1 large bakery muffin', source: "Large bakery muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'large bakery blueberry muffin': { name: "Large Blueberry Muffin", calories: 385, protein: 6, carbs: 55, fiber: 1, netCarbs: 54, fat: 15, sugar: 28, serving: '1 large bakery muffin', source: "Large bakery muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'bakery blueberry muffin': { name: "Large Blueberry Muffin", calories: 385, protein: 6, carbs: 55, fiber: 1, netCarbs: 54, fat: 15, sugar: 28, serving: '1 large bakery muffin', source: "Large bakery muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'jumbo blueberry muffin': { name: "Large Blueberry Muffin", calories: 385, protein: 6, carbs: 55, fiber: 1, netCarbs: 54, fat: 15, sugar: 28, serving: '1 large bakery muffin', source: "Large bakery muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'costco blueberry muffin': { name: "Costco/Kirkland Blueberry Muffin (large)", calories: 580, protein: 8, carbs: 68, fiber: 2, netCarbs: 66, fat: 29, sugar: 35, serving: '1 large muffin', source: "Costco bakery muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'kirkland blueberry muffin': { name: "Costco/Kirkland Blueberry Muffin (large)", calories: 580, protein: 8, carbs: 68, fiber: 2, netCarbs: 66, fat: 29, sugar: 35, serving: '1 large muffin', source: "Costco bakery muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'mini blueberry muffin': { name: "Mini Blueberry Muffin", calories: 45, protein: 1, carbs: 10, fiber: 0, netCarbs: 10, fat: 1, sugar: 5, serving: '1 mini muffin', source: "Mini muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'mini blueberry muffins': { name: "Mini Blueberry Muffin", calories: 45, protein: 1, carbs: 10, fiber: 0, netCarbs: 10, fat: 1, sugar: 5, serving: '1 mini muffin', source: "Mini muffin estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
 
     // ==================== NATURAL FOODS ====================
     'avocado half': { name: "Avocado (1/2)", calories: 160, protein: 2, carbs: 9, fat: 15, sugar: 0, source: "USDA" },
@@ -281,6 +565,16 @@ const nutritionDatabase = {
     'brown rice 1 cup cooked': { name: "Brown Rice (1 cup cooked)", calories: 216, protein: 5, carbs: 45, fat: 2, sugar: 0, source: "USDA" },
     'brown rice': { name: "Brown Rice (1 cup cooked)", calories: 216, protein: 5, carbs: 45, fat: 2, sugar: 0, source: "USDA" },
     'white rice': { name: "White Rice (1 cup cooked)", calories: 205, protein: 4, carbs: 45, fat: 0, sugar: 0, source: "USDA" },
+    'rice': { name: "White Rice (1 cup cooked)", calories: 205, protein: 4, carbs: 45, fat: 0, sugar: 0, source: "USDA" },
+    'oatmeal': { name: "Oatmeal (1 cup cooked)", calories: 154, protein: 6, carbs: 27, fiber: 4, netCarbs: 23, fat: 3, sugar: 1, source: "USDA" },
+    'protein shake': { name: "Protein Shake (generic)", calories: 180, protein: 30, carbs: 8, fiber: 1, netCarbs: 7, fat: 3, sugar: 4, source: "Generic protein shake estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'popcorn': { name: "Popcorn (air-popped, 1 cup)", calories: 31, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 0, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/167959/nutrients' },
+    'pop corn': { name: "Popcorn (air-popped, 1 cup)", calories: 31, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 0, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/167959/nutrients' },
+    'air popped popcorn': { name: "Popcorn (air-popped, 1 cup)", calories: 31, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 0, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/167959/nutrients' },
+    'plain popcorn': { name: "Popcorn (air-popped, 1 cup)", calories: 31, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 0, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/167959/nutrients' },
+    'buttered popcorn': { name: "Popcorn (buttered/oil-popped, 1 cup)", calories: 55, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 3, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central estimate", sourceType: 'database' },
+    'butter popcorn': { name: "Popcorn (buttered/oil-popped, 1 cup)", calories: 55, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 3, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central estimate", sourceType: 'database' },
+    'microwave popcorn': { name: "Popcorn (microwave/oil-popped, 1 cup)", calories: 60, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 3, sugar: 0, serving: '1 cup popped', source: "USDA FoodData Central estimate", sourceType: 'database' },
     'salmon fillet 4 oz': { name: "Salmon Fillet (4 oz)", calories: 234, protein: 25, carbs: 0, fat: 14, sugar: 0, source: "USDA" },
     'salmon': { name: "Salmon Fillet (4 oz)", calories: 234, protein: 25, carbs: 0, fat: 14, sugar: 0, source: "USDA" },
     'greek yogurt 1 cup': { name: "Greek Yogurt (1 cup)", calories: 130, protein: 17, carbs: 8, fat: 0, sugar: 7, source: "USDA" },
@@ -304,6 +598,25 @@ const nutritionDatabase = {
     '2 slices pepperoni pizza': { name: "Pepperoni Pizza (2 slices)", calories: 570, protein: 24, carbs: 60, fat: 26, sugar: 6, source: "USDA" },
     'cheese pizza': { name: "Cheese Pizza (1 slice, large)", calories: 250, protein: 11, carbs: 30, fat: 10, sugar: 3, source: "USDA" },
     'pizza slice': { name: "Pizza (1 slice, large)", calories: 285, protein: 12, carbs: 30, fat: 13, sugar: 3, source: "USDA" },
+    'margherita pizza whole': { name: "Margherita Pizza (whole 10-12 inch)", calories: 950, protein: 38, carbs: 120, fat: 34, sugar: 9, source: "USDA Estimate" },
+    'whole margherita pizza': { name: "Margherita Pizza (whole 10-12 inch)", calories: 950, protein: 38, carbs: 120, fat: 34, sugar: 9, source: "USDA Estimate" },
+    'neapolitan margherita pizza whole': { name: "Neapolitan Margherita Pizza (whole 10-12 inch)", calories: 950, protein: 38, carbs: 120, fat: 34, sugar: 9, source: "USDA Estimate" },
+    'whole neapolitan margherita pizza': { name: "Neapolitan Margherita Pizza (whole 10-12 inch)", calories: 950, protein: 38, carbs: 120, fat: 34, sugar: 9, source: "USDA Estimate" },
+    'kirkland signature supreme cauliflower crust pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza", calories: 310, protein: 14, carbs: 31, fiber: 1, netCarbs: 30, fat: 15, sugar: 4, serving: '1/4 pizza (138g)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'kirkland signature cauliflower crust supreme pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza", calories: 310, protein: 14, carbs: 31, fiber: 1, netCarbs: 30, fat: 15, sugar: 4, serving: '1/4 pizza (138g)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'kirkland supreme cauliflower pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza", calories: 310, protein: 14, carbs: 31, fiber: 1, netCarbs: 30, fat: 15, sugar: 4, serving: '1/4 pizza (138g)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'kirkland cauliflower pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza", calories: 310, protein: 14, carbs: 31, fiber: 1, netCarbs: 30, fat: 15, sugar: 4, serving: '1/4 pizza (138g)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'costco kirkland cauliflower pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza", calories: 310, protein: 14, carbs: 31, fiber: 1, netCarbs: 30, fat: 15, sugar: 4, serving: '1/4 pizza (138g)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'kirkland signature supreme cauliflower crust pizza whole pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza (whole pizza)", calories: 1240, protein: 56, carbs: 124, fiber: 4, netCarbs: 120, fat: 60, sugar: 16, serving: '1 whole pizza (4 label servings)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'whole kirkland signature supreme cauliflower crust pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza (whole pizza)", calories: 1240, protein: 56, carbs: 124, fiber: 4, netCarbs: 120, fat: 60, sugar: 16, serving: '1 whole pizza (4 label servings)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'kirkland cauliflower pizza whole pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza (whole pizza)", calories: 1240, protein: 56, carbs: 124, fiber: 4, netCarbs: 120, fat: 60, sugar: 16, serving: '1 whole pizza (4 label servings)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'whole kirkland cauliflower pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza (whole pizza)", calories: 1240, protein: 56, carbs: 124, fiber: 4, netCarbs: 120, fat: 60, sugar: 16, serving: '1 whole pizza (4 label servings)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'costco kirkland cauliflower pizza whole pizza': { name: "Kirkland Signature Supreme Cauliflower Crust Pizza (whole pizza)", calories: 1240, protein: 56, carbs: 124, fiber: 4, netCarbs: 120, fat: 60, sugar: 16, serving: '1 whole pizza (4 label servings)', source: "Kirkland package nutrition label", sourceType: 'official' },
+    'quest supreme pizza': { name: "Quest Supreme Thin Crust Pizza (1/3 pizza)", calories: 260, protein: 20, carbs: 18, fiber: 12, netCarbs: 6, fat: 17, sugar: 2, serving: '1/3 pizza (126g)', source: "Quest manufacturer nutrition / package label", sourceType: 'official', sourceUrl: 'https://www.questnutrition.com/collections/more-products/products/supreme-pizza' },
+    'quest supreme thin crust pizza': { name: "Quest Supreme Thin Crust Pizza (1/3 pizza)", calories: 260, protein: 20, carbs: 18, fiber: 12, netCarbs: 6, fat: 17, sugar: 2, serving: '1/3 pizza (126g)', source: "Quest manufacturer nutrition / package label", sourceType: 'official', sourceUrl: 'https://www.questnutrition.com/collections/more-products/products/supreme-pizza' },
+    'quest supreme whole pizza': { name: "Quest Supreme Thin Crust Pizza (whole pizza)", calories: 780, protein: 60, carbs: 54, fiber: 36, netCarbs: 18, fat: 51, sugar: 6, serving: '1 whole pizza', source: "Quest manufacturer nutrition / package label", sourceType: 'official', sourceUrl: 'https://www.questnutrition.com/collections/more-products/products/supreme-pizza' },
+    'quest supreme full pizza': { name: "Quest Supreme Thin Crust Pizza (whole pizza)", calories: 780, protein: 60, carbs: 54, fiber: 36, netCarbs: 18, fat: 51, sugar: 6, serving: '1 whole pizza', source: "Quest manufacturer nutrition / package label", sourceType: 'official', sourceUrl: 'https://www.questnutrition.com/collections/more-products/products/supreme-pizza' },
+    'quest thin crust supreme whole pizza': { name: "Quest Supreme Thin Crust Pizza (whole pizza)", calories: 780, protein: 60, carbs: 54, fiber: 36, netCarbs: 18, fat: 51, sugar: 6, serving: '1 whole pizza', source: "Quest manufacturer nutrition / package label", sourceType: 'official', sourceUrl: 'https://www.questnutrition.com/collections/more-products/products/supreme-pizza' },
 
     // ==================== PANERA ADDITIONAL ====================
     'panera grilled chicken salad': { name: "Panera Green Goddess Cobb Salad with Chicken", calories: 450, protein: 35, carbs: 20, fat: 28, sugar: 8, source: "Panera Official" },
@@ -312,6 +625,33 @@ const nutritionDatabase = {
     // ==================== TYSON PRODUCTS ====================
     'tyson grilled chicken breast': { name: "Tyson Grilled Chicken Breast", calories: 110, protein: 21, carbs: 2, fat: 3, sugar: 0, source: "Tyson Official" },
     'tyson chicken breast': { name: "Tyson Grilled Chicken Breast", calories: 110, protein: 21, carbs: 2, fat: 3, sugar: 0, source: "Tyson Official" },
+
+    // ==================== PACKAGED BREAKFAST SAUSAGE LINKS ====================
+    // Johnsonville Vermont Maple small breakfast links are roughly 150-170 calories per 3 links.
+    // Use this for visible small breakfast links so 6 links lands around 300-340 calories, not 900.
+    'johnsonville vermont maple syrup breakfast sausage links': { name: "Johnsonville Vermont Maple Syrup Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 cooked links (55g)', source: "Johnsonville Vermont Maple links nutrition reference", sourceType: 'database', sourceUrl: 'https://www.calorieking.com/us/en/foods/f/calories-in-franks-wieners-sausages-vermont-maple-syrup-breakfast-sausage-links/mz4dOyNORMWVCjKVD37Xxg' },
+    'johnsonville vermont maple breakfast sausage links': { name: "Johnsonville Vermont Maple Syrup Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 cooked links (55g)', source: "Johnsonville Vermont Maple links nutrition reference", sourceType: 'database', sourceUrl: 'https://www.calorieking.com/us/en/foods/f/calories-in-franks-wieners-sausages-vermont-maple-syrup-breakfast-sausage-links/mz4dOyNORMWVCjKVD37Xxg' },
+    'johnsonville maple breakfast sausage links': { name: "Johnsonville Vermont Maple Syrup Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 cooked links (55g)', source: "Johnsonville Vermont Maple links nutrition reference", sourceType: 'database', sourceUrl: 'https://www.calorieking.com/us/en/foods/f/calories-in-franks-wieners-sausages-vermont-maple-syrup-breakfast-sausage-links/mz4dOyNORMWVCjKVD37Xxg' },
+    'vermont maple syrup breakfast sausage links': { name: "Johnsonville Vermont Maple Syrup Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 cooked links (55g)', source: "Johnsonville Vermont Maple links nutrition reference", sourceType: 'database', sourceUrl: 'https://www.calorieking.com/us/en/foods/f/calories-in-franks-wieners-sausages-vermont-maple-syrup-breakfast-sausage-links/mz4dOyNORMWVCjKVD37Xxg' },
+    'vermont maple breakfast sausage links': { name: "Johnsonville Vermont Maple Syrup Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 cooked links (55g)', source: "Johnsonville Vermont Maple links nutrition reference", sourceType: 'database', sourceUrl: 'https://www.calorieking.com/us/en/foods/f/calories-in-franks-wieners-sausages-vermont-maple-syrup-breakfast-sausage-links/mz4dOyNORMWVCjKVD37Xxg' },
+    'small breakfast sausage links': { name: "Small Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 small links', source: "Breakfast sausage links nutrition reference", sourceType: 'database' },
+    'breakfast sausage links': { name: "Breakfast Sausage Links", calories: 170, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 13, sugar: 1, serving: '3 small links', source: "Breakfast sausage links nutrition reference", sourceType: 'database' },
+    'large sausage link': { name: "Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central bratwurst/large cooked link estimate", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+    'large sausage links': { name: "Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central bratwurst/large cooked link estimate", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+    'regular sausage link': { name: "Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central bratwurst/large cooked link estimate", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+    'regular sausage links': { name: "Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central bratwurst/large cooked link estimate", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+    'bratwurst': { name: "Bratwurst / Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+    'bratwurst sausage links': { name: "Bratwurst / Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+    'sausage links': { name: "Large Sausage Link", calories: 225, protein: 10, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 1, serving: '1 large link (about 70g)', source: "USDA FoodData Central bratwurst/large cooked link estimate", sourceType: 'database', sourceUrl: 'https://fdc.nal.usda.gov/fdc-app.html#/food-details/171622/nutrients' },
+
+    // ==================== PACKAGED CANDY LABELS ====================
+    // Verified from package nutrition label: serving size 20 pieces (31g)
+    'trolli sour brite eggs': { name: "Trolli Sour Brite Eggs", calories: 110, protein: 1, carbs: 26, fat: 0, sugar: 19, serving: '20 pieces (31g)', source: "Trolli package nutrition label", sourceType: 'official' },
+    'trolli sour bright eggs': { name: "Trolli Sour Brite Eggs", calories: 110, protein: 1, carbs: 26, fat: 0, sugar: 19, serving: '20 pieces (31g)', source: "Trolli package nutrition label", sourceType: 'official' },
+    'trolley sour brite eggs': { name: "Trolli Sour Brite Eggs", calories: 110, protein: 1, carbs: 26, fat: 0, sugar: 19, serving: '20 pieces (31g)', source: "Trolli package nutrition label", sourceType: 'official' },
+    'trolley sour bright eggs': { name: "Trolli Sour Brite Eggs", calories: 110, protein: 1, carbs: 26, fat: 0, sugar: 19, serving: '20 pieces (31g)', source: "Trolli package nutrition label", sourceType: 'official' },
+    'sour brite eggs': { name: "Trolli Sour Brite Eggs", calories: 110, protein: 1, carbs: 26, fat: 0, sugar: 19, serving: '20 pieces (31g)', source: "Trolli package nutrition label", sourceType: 'official' },
+    'sour bright eggs': { name: "Trolli Sour Brite Eggs", calories: 110, protein: 1, carbs: 26, fat: 0, sugar: 19, serving: '20 pieces (31g)', source: "Trolli package nutrition label", sourceType: 'official' },
 
     // ==================== DRINKS ====================
     'coffee with cream and sugar': { name: "Coffee with Cream and Sugar", calories: 60, protein: 0, carbs: 8, fat: 2, sugar: 7, source: "USDA" },
@@ -322,6 +662,41 @@ const nutritionDatabase = {
     'pepsi': { name: "Pepsi (12 oz)", calories: 150, protein: 0, carbs: 41, fat: 0, sugar: 41, source: "PepsiCo" },
     'sprite': { name: "Sprite (12 oz)", calories: 140, protein: 0, carbs: 38, fat: 0, sugar: 38, source: "Coca-Cola" },
     'dr pepper': { name: "Dr Pepper (12 oz)", calories: 150, protein: 0, carbs: 40, fat: 0, sugar: 40, source: "Keurig Dr Pepper" },
+
+    // ==================== DAIRY PRODUCTS ====================
+    // Daisy Brand Cottage Cheese
+    'daisy cottage cheese with pineapple': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy pineapple cottage cheese': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy brand cottage cheese with pineapple': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy brand pineapple cottage cheese': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'pineapple cottage cheese daisy': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'cottage cheese with pineapple daisy': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy cottage cheese pineapple': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy cottage cheese 1 container': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy cottage cheese 170g': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy cottage cheese 160 calories': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    'daisy cottage cheese 15 carbs': { name: "Daisy Cottage Cheese with Pineapple (1 container, 170g)", calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11, serving: '1 container (170g)', source: "Daisy package nutrition label" },
+    // Plain Daisy Cottage Cheese
+    'daisy cottage cheese': { name: "Daisy Cottage Cheese 4% (1/2 cup)", calories: 110, protein: 13, carbs: 4, fat: 5, sugar: 3, source: "Daisy Brand Official" },
+    'daisy brand cottage cheese': { name: "Daisy Cottage Cheese 4% (1/2 cup)", calories: 110, protein: 13, carbs: 4, fat: 5, sugar: 3, source: "Daisy Brand Official" },
+    // Generic cottage cheese
+    'cottage cheese': { name: "Cottage Cheese 4% (1/2 cup)", calories: 110, protein: 13, carbs: 4, fat: 5, sugar: 3, source: "USDA" },
+    'cottage cheese with pineapple': { name: "Cottage Cheese with Pineapple (6oz)", calories: 160, protein: 14, carbs: 15, fat: 5, sugar: 12, source: "USDA" },
+    'pineapple cottage cheese': { name: "Cottage Cheese with Pineapple (6oz)", calories: 160, protein: 14, carbs: 15, fat: 5, sugar: 12, source: "USDA" },
+    'low fat cottage cheese': { name: "Low Fat Cottage Cheese 2% (1/2 cup)", calories: 90, protein: 12, carbs: 5, fat: 2, sugar: 4, source: "USDA" },
+    'fat free cottage cheese': { name: "Fat Free Cottage Cheese (1/2 cup)", calories: 80, protein: 14, carbs: 6, fat: 0, sugar: 4, source: "USDA" },
+
+    // Other Dairy
+    'string cheese': { name: "String Cheese (1 stick)", calories: 80, protein: 7, carbs: 1, fat: 6, sugar: 0, source: "USDA" },
+    'cheddar cheese': { name: "Cheddar Cheese (1 oz)", calories: 113, protein: 7, carbs: 0, fat: 9, sugar: 0, source: "USDA" },
+    'mozzarella cheese': { name: "Mozzarella Cheese (1 oz)", calories: 85, protein: 6, carbs: 1, fat: 6, sugar: 0, source: "USDA" },
+    'cream cheese': { name: "Cream Cheese (2 tbsp)", calories: 100, protein: 2, carbs: 1, fat: 10, sugar: 1, source: "USDA" },
+    'whole milk': { name: "Whole Milk (1 cup)", calories: 149, protein: 8, carbs: 12, fat: 8, sugar: 12, source: "USDA" },
+    'skim milk': { name: "Skim Milk (1 cup)", calories: 83, protein: 8, carbs: 12, fat: 0, sugar: 12, source: "USDA" },
+    'almond milk': { name: "Almond Milk Unsweetened (1 cup)", calories: 30, protein: 1, carbs: 1, fat: 3, sugar: 0, source: "USDA" },
+    'oat milk': { name: "Oat Milk (1 cup)", calories: 120, protein: 3, carbs: 16, fat: 5, sugar: 7, source: "USDA" },
+    'butter': { name: "Butter (1 tbsp)", calories: 102, protein: 0, carbs: 0, fat: 12, sugar: 0, source: "USDA" },
+    'sour cream': { name: "Sour Cream (2 tbsp)", calories: 60, protein: 1, carbs: 1, fat: 5, sugar: 1, source: "USDA" },
 };
 
 // =============================================================================
@@ -334,6 +709,432 @@ function normalizeQuery(query) {
         .replace(/\s+/g, ' ')
         .replace(/['']/g, "'")
         .trim();
+}
+
+function normalizeInputSource(value) {
+    const normalized = String(value || '').toLowerCase().trim();
+    if (normalized === 'voice' || normalized === 'search' || normalized === 'message' || normalized === 'photo' || normalized === 'test') {
+        return normalized;
+    }
+    return 'search';
+}
+
+function normalizeVoiceTranscript(query) {
+    let normalized = String(query || '').trim();
+    if (!normalized) return normalized;
+
+    const replacements = [
+        [/\b(?:trolley|trolly|trollie|troli|truly)\b/gi, 'Trolli'],
+        [/\bsour\s+bright\b/gi, 'Sour Brite'],
+        [/\bsour\s+bite\b/gi, 'Sour Brite'],
+        [/\bbrite\s+eggs?\b/gi, 'Brite Eggs'],
+        [/\bnuggests?\b/gi, 'nuggets'],
+        [/\bchickn\b/gi, 'chicken'],
+        [/\bchik fil a\b/gi, 'chick fil a'],
+        [/\bchick filet\b/gi, 'chick-fil-a'],
+        [/\bmacdonalds\b/gi, "McDonald's"],
+        [/\bmcdonalds\b/gi, "McDonald's"],
+        [/\btoco bell\b/gi, 'Taco Bell'],
+        [/\bpanda express orange chikn\b/gi, 'Panda Express Orange Chicken'],
+        [/\bpapa johns\b/gi, 'Papa Johns'],
+        [/\bdominos\b/gi, "Domino's"],
+        [/\bjohnson\s*ville\b/gi, 'Johnsonville'],
+        [/\bjohnsonvilled\b/gi, 'Johnsonville'],
+        [/\bvermont\s+maple\s+sirup\b/gi, 'Vermont Maple Syrup'],
+        [/\blittle ceasars\b/gi, 'Little Caesars'],
+        [/\bjersey mikes\b/gi, "Jersey Mike's"],
+        [/\bjimmy johns\b/gi, "Jimmy John's"],
+        [/\bculvers\b/gi, "Culver's"],
+        [/\barbys\b/gi, "Arby's"],
+        [/\bsausage\s+egg\s+mc\s*muffin\b/gi, 'Sausage McMuffin with Egg'],
+        [/\b(?:sick|sic)\s+cups?\b/gi, 'six cups'],
+        [/\bpop\s+corn\b/gi, 'popcorn'],
+        [/\bquestion(?=\s+(?:supreme|thin|pizza|crust|whole|full))/gi, 'Quest'],
+        [/\bquest\s+(?:supper|suppereme|supereme)\b/gi, 'Quest Supreme'],
+        [/\bfair\s+life\b/gi, 'Fairlife'],
+        [/\bdazy\b/gi, 'Daisy'],
+        [/\bfour\s*nett?\b/gi, '4 net'],
+        [/\bfournette\b/gi, '4 net'],
+        [/\bfor\s+nett?\b/gi, '4 net'],
+        [/\bfore\s+nett?\b/gi, '4 net'],
+        [/\bfour\s+net\b/gi, '4 net'],
+        [/\bquest\s+supreme\s+full\s+pizza\b/gi, 'Quest Supreme whole pizza'],
+        [/\bfull\s+pizza\b/gi, 'whole pizza'],
+        [/\bmeal drink\b/gi, 'meal with drink'],
+        [/\bhousten\b/gi, 'houston']
+    ];
+
+    for (const [pattern, replacement] of replacements) {
+        normalized = normalized.replace(pattern, replacement);
+    }
+
+    return normalized.replace(/\s+/g, ' ').trim();
+}
+
+function buildQueryMeta(originalQuery, normalizedQuery) {
+    if (normalizedQuery && normalizedQuery !== originalQuery) {
+        return { originalQuery, normalizedQuery };
+    }
+    return { originalQuery };
+}
+
+function selectVoiceQuery(originalQuery, alternatives = []) {
+    const candidates = [originalQuery, ...(Array.isArray(alternatives) ? alternatives : [])]
+        .map((value) => normalizeVoiceTranscript(String(value || '').trim()))
+        .filter((value, index, arr) => value && arr.indexOf(value) === index);
+    if (!candidates.length) return normalizeVoiceTranscript(originalQuery);
+
+    const scoreCandidate = (candidate, index) => {
+        const databaseResult = searchDatabase(candidate);
+        const explicitFacts = /\b\d+(?:\.\d+)?\s*(?:cal|cals|calories|kcal|g\s*(?:protein|carbs?|fat|fiber|sugar)|net\s*carbs?)\b/i.test(candidate);
+        const listSignals = (candidate.match(/,/g) || []).length + (candidate.match(/\band\b/gi) || []).length;
+        const tokenCount = normalizeQuery(candidate).split(/\s+/).filter(Boolean).length;
+        let score = Math.min(40, tokenCount * 2) - index;
+        if (databaseResult) score += 55;
+        if (isVerifiedPackagedDbResult(databaseResult)) score += 35;
+        if (explicitFacts) score += 180;
+        if (listSignals >= 2 || (listSignals >= 1 && tokenCount >= 7)) score += 150;
+        if (index === 0) score += 8;
+        return score;
+    };
+
+    return candidates
+        .map((candidate, index) => ({ candidate, score: scoreCandidate(candidate, index) }))
+        .sort((a, b) => b.score - a.score)[0].candidate;
+}
+
+function replaceSpokenNutritionNumbers(value) {
+    const smallNumbers = {
+        zero: 0,
+        one: 1,
+        two: 2,
+        three: 3,
+        four: 4,
+        five: 5,
+        six: 6,
+        seven: 7,
+        eight: 8,
+        nine: 9,
+        ten: 10,
+        eleven: 11,
+        twelve: 12,
+        thirteen: 13,
+        fourteen: 14,
+        fifteen: 15,
+        sixteen: 16,
+        seventeen: 17,
+        eighteen: 18,
+        nineteen: 19,
+        twenty: 20,
+        thirty: 30,
+        forty: 40,
+        fifty: 50,
+        sixty: 60,
+        seventy: 70,
+        eighty: 80,
+        ninety: 90
+    };
+
+    const numberWords = [
+        ...Object.keys(smallNumbers),
+        'hundred',
+        'thousand',
+        'and'
+    ];
+    const numberWordPattern = new RegExp(`\\b(?:${numberWords.join('|')})(?:[\\s-]+(?:${numberWords.join('|')}))*\\b`, 'gi');
+
+    const parseSpokenNumber = (phrase) => {
+        const tokens = phrase.toLowerCase().replace(/-/g, ' ').split(/\s+/).filter((token) => token && token !== 'and');
+        let total = 0;
+        let current = 0;
+        let matched = false;
+
+        for (const token of tokens) {
+            if (smallNumbers[token] !== undefined) {
+                current += smallNumbers[token];
+                matched = true;
+            } else if (token === 'hundred') {
+                current = (current || 1) * 100;
+                matched = true;
+            } else if (token === 'thousand') {
+                total += (current || 1) * 1000;
+                current = 0;
+                matched = true;
+            } else {
+                return null;
+            }
+        }
+
+        return matched ? total + current : null;
+    };
+
+    return String(value || '').replace(numberWordPattern, (match) => {
+        const parsed = parseSpokenNumber(match);
+        return Number.isFinite(parsed) ? String(parsed) : match;
+    });
+}
+
+function normalizeUserNutritionQuery(query) {
+    return normalizeQuery(replaceSpokenNutritionNumbers(normalizeVoiceTranscript(query)))
+        .replace(/\bfour\s+net\b/g, '4 net')
+        .replace(/\bfor\s+net\b/g, '4 net')
+        .replace(/\bfore\s+net\b/g, '4 net')
+        .replace(/\bnet\s+carb\b/g, 'net carbs')
+        .replace(/\bcals\b/g, 'calories');
+}
+
+function extractNutritionNumber(normalizedQuery, patterns) {
+    for (const pattern of patterns) {
+        const match = normalizedQuery.match(pattern);
+        if (match?.[1] !== undefined) {
+            const value = toFiniteNumber(match[1], null);
+            if (Number.isFinite(value)) return value;
+        }
+    }
+    return null;
+}
+
+function findFirstNutritionMarkerIndex(normalizedQuery) {
+    const markers = [
+        /\bshould\s+be\b/,
+        /\b(?:about|around|approximately|approx\.?|roughly|at|with|and)?\s*\d+(?:\.\d+)?\s*(?:g|grams?)?\s*(?:of\s*)?(?:cal|cals|calories?|kcal|net\s*carbs?|carbs?|fiber|fibre|protein|pro|fat|sugar)\b/,
+        /\b(?:cal|cals|calories?|kcal|net\s*carbs?|carbs?|fiber|fibre|protein|pro|fat|sugar)\s*(?:is|are|should\s+be|=|equals|at|about|around|approximately|approx\.?|roughly)?\s*\d+(?:\.\d+)?\b/
+    ];
+
+    return markers.reduce((best, pattern) => {
+        const match = normalizedQuery.match(pattern);
+        if (!match || match.index === undefined) return best;
+        return best === -1 ? match.index : Math.min(best, match.index);
+    }, -1);
+}
+
+function cleanUserProvidedFoodName(normalizedQuery) {
+    const nutritionMarker = findFirstNutritionMarkerIndex(normalizedQuery);
+    const prefix = (nutritionMarker >= 0 ? normalizedQuery.slice(0, nutritionMarker) : normalizedQuery)
+        .replace(/\b(i|we)\s+(had|ate|logged?|want|need|did|drank|made|mixed|took|used)\b/g, '')
+        .replace(/\b(log|add|track)\b/g, '')
+        .replace(/\b(a|an|the)\b/g, '')
+        .replace(/\b(full|whole|entire)\b(?=\s+pizza\b)/g, '')
+        .replace(/\b\d+(?:\.\d+)?\s*$/g, '')
+        .replace(/\b(with|at|for)\s*$/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    if (/\bquest\b/.test(normalizedQuery) && /\bsupreme\b/.test(normalizedQuery) && /\bpizza\b/.test(normalizedQuery)) {
+        return 'Quest Supreme Thin Crust Pizza';
+    }
+
+    if (!/[a-z]/.test(prefix)) {
+        return 'Quick calorie entry';
+    }
+
+    return cleanText(prefix, cleanText(normalizedQuery, 'Food item', 100), 100);
+}
+
+function userWantsRemainingCaloriesAsCarbs(normalizedQuery) {
+    return /\b(rest|remaining|remainder|leftover|however many)\b.{0,90}\b(carbs?|carbohydrates?)\b/.test(normalizedQuery)
+        || /\b(carbs?|carbohydrates?)\b.{0,60}\b(rest|remaining|remainder|leftover)\b/.test(normalizedQuery)
+        || /\ball\b.{0,30}\b(?:other|remaining|rest)\b.{0,60}\b(carbs?|carbohydrates?)\b/.test(normalizedQuery);
+}
+
+function userWantsRemainingCaloriesAsFat(normalizedQuery) {
+    return /\b(rest|remaining|remainder|leftover|however many)\b.{0,90}\bfat\b/.test(normalizedQuery)
+        || /\bfat\b.{0,60}\b(rest|remaining|remainder|leftover)\b/.test(normalizedQuery);
+}
+
+function extractUserProvidedNutritionDetails(query) {
+    const normalizedQuery = normalizeUserNutritionQuery(query);
+    if (!/\b(cal|cals|calories?|kcal|net carbs?|carbs?|fiber|fibre|protein|pro|fat|sugar)\b/.test(normalizedQuery)) {
+        return null;
+    }
+
+    const calories = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:cal|cals|calories?|kcal)\b/,
+        /\b(?:cal|cals|calories?|kcal)\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/
+    ]);
+    const netCarbs = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*(?:of\s*)?net\s*carbs?\b/,
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*net\b/,
+        /\bnet\s*(?:carbs?)?\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/
+    ]);
+    const totalCarbs = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*(?:of\s*)?(?:total\s*)?carbs?\b/,
+        /\b(?:total\s*)?carbs?\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/,
+        /\bc\s*[:=]\s*(\d+(?:\.\d+)?)\b/
+    ]);
+    const fiber = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*(?:of\s*)?(?:fiber|fibre)\b/,
+        /\b(?:fiber|fibre)\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/
+    ]);
+    const protein = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*(?:of\s*)?(?:protein|pro)\b/,
+        /\b(?:protein|pro)\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/,
+        /\bp\s*[:=]\s*(\d+(?:\.\d+)?)\b/
+    ]);
+    const fat = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*(?:of\s*)?fat\b/,
+        /\bfat\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/,
+        /\bf\s*[:=]\s*(\d+(?:\.\d+)?)\b/
+    ]);
+    const sugar = extractNutritionNumber(normalizedQuery, [
+        /(\d+(?:\.\d+)?)\s*(?:g|grams?)?\s*(?:of\s*)?sugar\b/,
+        /\bsugar\s*(?:is|are|should be|=|equals|at)?\s*(\d+(?:\.\d+)?)\b/
+    ]);
+
+    const hasUsefulNutrition = calories !== null || netCarbs !== null || totalCarbs !== null || fiber !== null || protein !== null || fat !== null || sugar !== null;
+    if (!hasUsefulNutrition) return null;
+
+    const name = cleanUserProvidedFoodName(normalizedQuery);
+    const serving = /\b(full|whole|entire|all)\s+(pizza|bag|package|container|box)\b/.test(normalizedQuery)
+        ? `1 whole ${normalizedQuery.match(/\b(full|whole|entire|all)\s+(pizza|bag|package|container|box)\b/)?.[2] || 'package'}`
+        : '1 serving';
+    const databaseHint = /\bquest\b/.test(normalizedQuery) && /\bsupreme\b/.test(normalizedQuery) && /\bpizza\b/.test(normalizedQuery)
+        ? (/\b(full|whole|entire|all)\s+pizza\b/.test(normalizedQuery)
+            ? nutritionDatabase['quest supreme whole pizza']
+            : nutritionDatabase['quest supreme pizza'])
+        : null;
+    const lookupName = name === 'Quick calorie entry' ? '' : name;
+
+    return {
+        normalizedQuery,
+        name,
+        lookupName,
+        serving,
+        databaseHint,
+        explicit: {
+            calories,
+            protein,
+            carbs: totalCarbs,
+            fiber,
+            netCarbs,
+            fat,
+            sugar
+        },
+        derived: {
+            carbsFromRemainingCalories: calories !== null
+                && userWantsRemainingCaloriesAsCarbs(normalizedQuery)
+                && totalCarbs === null
+                && netCarbs === null,
+            fatFromRemainingCalories: calories !== null
+                && userWantsRemainingCaloriesAsFat(normalizedQuery)
+                && fat === null
+        }
+    };
+}
+
+function resolveUserProvidedNutritionValues(details, baseFood = null) {
+    const explicit = details?.explicit || {};
+    const derived = details?.derived || {};
+    const base = baseFood || details?.databaseHint || {};
+    const caloriesValue = explicit.calories ?? base?.calories ?? 0;
+    const proteinValue = explicit.protein ?? base?.protein ?? 0;
+    let fatValue = explicit.fat ?? base?.fat ?? 0;
+    let carbsValue = explicit.carbs ?? base?.carbs ?? explicit.netCarbs ?? 0;
+    let sugarValue = explicit.sugar ?? base?.sugar ?? 0;
+    let fiberValue = explicit.fiber ?? (
+        explicit.netCarbs !== null && explicit.netCarbs !== undefined && explicit.carbs === null && base?.carbs !== undefined
+            ? Math.max(0, base.carbs - explicit.netCarbs)
+            : (explicit.carbs !== null && explicit.carbs !== undefined && explicit.netCarbs !== null && explicit.netCarbs !== undefined
+                ? Math.max(0, explicit.carbs - explicit.netCarbs)
+                : (explicit.carbs !== null && explicit.carbs !== undefined ? 0 : (base?.fiber ?? 0)))
+    );
+
+    if (derived.carbsFromRemainingCalories) {
+        fatValue = explicit.fat ?? 0;
+        fiberValue = explicit.fiber ?? 0;
+        sugarValue = explicit.sugar ?? 0;
+        carbsValue = Math.max(0, (caloriesValue - (proteinValue * 4) - (fatValue * 9)) / 4);
+    }
+
+    if (derived.fatFromRemainingCalories) {
+        carbsValue = explicit.carbs ?? explicit.netCarbs ?? 0;
+        fiberValue = explicit.fiber ?? 0;
+        sugarValue = explicit.sugar ?? 0;
+        fatValue = Math.max(0, (caloriesValue - (proteinValue * 4) - (carbsValue * 4)) / 9);
+    }
+
+    const netCarbsValue = explicit.netCarbs ?? Math.max(0, carbsValue - fiberValue);
+
+    return {
+        calories: clampAndRound(caloriesValue, 0, 5000),
+        protein: clampAndRound(proteinValue, 0, 500),
+        carbs: clampAndRound(carbsValue, 0, 700),
+        fiber: clampAndRound(fiberValue, 0, 300),
+        netCarbs: clampAndRound(netCarbsValue, 0, 700),
+        fat: clampAndRound(fatValue, 0, 300),
+        sugar: clampAndRound(sugarValue, 0, 300),
+    };
+}
+
+function extractUserProvidedNutrition(query) {
+    const details = extractUserProvidedNutritionDetails(query);
+    if (!details) return null;
+
+    const values = resolveUserProvidedNutritionValues(details);
+    const explicit = details.explicit;
+
+    return {
+        name: details.name,
+        matchedItem: details.name,
+        restaurant: /\bquest\b/.test(details.normalizedQuery) ? 'Quest' : null,
+        ...values,
+        serving: details.serving,
+        quantity: 1,
+        confidence: 'high',
+        needsVerification: false,
+        source: explicit.netCarbs !== null ? 'User-provided nutrition label (net carbs)' : 'User-provided nutrition label',
+        sourceType: 'database',
+        sourceUrl: /\bquest\b/.test(details.normalizedQuery) ? 'https://www.questnutrition.com/collections/more-products/products/supreme-pizza' : null,
+        evidence: 'User dictated exact nutrition values; used those instead of an AI estimate.'
+    };
+}
+
+function applyUserProvidedNutritionOverrides(food, details) {
+    if (!food || !details?.explicit) return food;
+
+    const explicit = details.explicit;
+    const derived = details.derived || {};
+    const hasOverride = Object.values(explicit).some((value) => value !== null && value !== undefined);
+    const hasDerivedOverride = Boolean(derived.carbsFromRemainingCalories || derived.fatFromRemainingCalories);
+    if (!hasOverride && !hasDerivedOverride) return food;
+
+    const values = resolveUserProvidedNutritionValues(details, food);
+    const updated = { ...food };
+
+    for (const key of ['calories', 'protein', 'carbs', 'fiber', 'netCarbs', 'fat', 'sugar']) {
+        if (explicit[key] !== null && explicit[key] !== undefined) {
+            updated[key] = values[key];
+        }
+    }
+
+    if ((explicit.netCarbs !== null && explicit.netCarbs !== undefined) || explicit.carbs !== null || explicit.fiber !== null || derived.carbsFromRemainingCalories || derived.fatFromRemainingCalories) {
+        updated.carbs = values.carbs;
+        updated.fiber = values.fiber;
+        updated.netCarbs = values.netCarbs;
+    }
+
+    if (derived.carbsFromRemainingCalories || derived.fatFromRemainingCalories) {
+        updated.fat = values.fat;
+        updated.sugar = values.sugar;
+    }
+
+    updated.source = cleanText(`${updated.source || 'nutrition lookup'} + user dictated values`, 'User dictated values', 180);
+    updated.evidence = cleanText(
+        `${updated.evidence || 'Matched food'}; user dictated one or more nutrition values${hasDerivedOverride ? ' and remaining calories were calculated into macros' : ''}.`,
+        'User dictated nutrition values',
+        260
+    );
+    updated.needsVerification = Boolean(updated.needsVerification) && updated.sourceType === 'estimate';
+    return updated;
+}
+
+function applyUserProvidedNutritionOverridesToFoods(foods, details) {
+    if (!details || !Array.isArray(foods) || foods.length === 0) return foods;
+    const targetIndex = foods.findIndex((food) => !foodLooksLikeDrink(food));
+    const index = targetIndex >= 0 ? targetIndex : 0;
+    return foods.map((food, foodIndex) => (
+        foodIndex === index ? applyUserProvidedNutritionOverrides(food, details) : food
+    ));
 }
 
 // Extract food items from conversational text
@@ -365,19 +1166,20 @@ function extractQuantityAndFood(text) {
         return { quantity: parseInt(pieceMatch[1]), food: pieceMatch[2].trim() };
     }
 
+    const linkMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:x\s*)?(?:(small|breakfast)\s+)?(?:sausage\s+)?links?\b(?:\s*(?:of\s*)?(.+))?/i);
+    if (linkMatch) {
+        const count = toFiniteNumber(linkMatch[1], 1);
+        const rest = (linkMatch[3] || '').trim();
+        const prefix = linkMatch[2] ? `${linkMatch[2]} ` : '';
+        const food = rest ? `${rest} ${prefix}sausage links` : `${prefix}sausage links`;
+        return { quantity: count, food: food.trim() };
+    }
+
     return { quantity: 1, food: text };
 }
 
-// Search database with fuzzy matching
-function searchDatabase(query) {
+function searchDatabaseDirect(query) {
     const normalizedQuery = normalizeQuery(query);
-
-    // 1. Exact match
-    if (nutritionDatabase[normalizedQuery]) {
-        return { ...nutritionDatabase[normalizedQuery], matchType: 'exact' };
-    }
-
-    // 2. Try common variations
     const variations = [
         normalizedQuery,
         normalizedQuery.replace(/-/g, ' '),
@@ -387,9 +1189,38 @@ function searchDatabase(query) {
 
     for (const variant of variations) {
         if (nutritionDatabase[variant]) {
-            return { ...nutritionDatabase[variant], matchType: 'variation' };
+            return { ...nutritionDatabase[variant], matchType: variant === normalizedQuery ? 'exact' : 'variation' };
         }
     }
+
+    const extractedFood = extractFoodFromText(normalizedQuery);
+    if (extractedFood !== normalizedQuery) {
+        const extractedVariations = [
+            extractedFood,
+            extractedFood.replace(/-/g, ' '),
+            extractedFood.replace(/'/g, ''),
+        ];
+
+        for (const variant of extractedVariations) {
+            if (nutritionDatabase[variant]) {
+                return { ...nutritionDatabase[variant], matchType: 'extracted-variation' };
+            }
+        }
+    }
+
+    return null;
+}
+
+// Search database with fuzzy matching
+function searchDatabase(query) {
+    const normalizedQuery = normalizeQuery(query);
+
+    // 1. Exact match
+    const directMatch = searchDatabaseDirect(query);
+    if (directMatch) return directMatch;
+
+    const muffinMatch = resolveMuffinDatabaseResult(normalizedQuery);
+    if (muffinMatch) return muffinMatch;
 
     // 3. Extract food from conversational text (handles "I had a big mac for lunch")
     const extractedFood = extractFoodFromText(normalizedQuery);
@@ -417,12 +1248,17 @@ function searchDatabase(query) {
         // Try singular form with quantity in name
         if (nutritionDatabase[food]) {
             const baseFood = nutritionDatabase[food];
+            if (/\b(links?|pieces?|pcs?|count|ct|patties?)\b/i.test(baseFood.serving || '')) {
+                return { ...baseFood, matchType: 'quantity-base-serving' };
+            }
             return {
                 ...baseFood,
                 name: `${baseFood.name} (${quantity}x)`,
                 calories: baseFood.calories * quantity,
                 protein: baseFood.protein * quantity,
                 carbs: baseFood.carbs * quantity,
+                fiber: (baseFood.fiber || 0) * quantity,
+                netCarbs: (baseFood.netCarbs ?? Math.max(0, (baseFood.carbs || 0) - (baseFood.fiber || 0))) * quantity,
                 fat: baseFood.fat * quantity,
                 sugar: (baseFood.sugar || 0) * quantity,
                 matchType: 'quantity-calculated'
@@ -450,12 +1286,193 @@ function searchDatabase(query) {
     return null;
 }
 
+function isVerifiedPackagedDbResult(dbResult) {
+    const sourceText = normalizeQuery(`${dbResult?.source || ''} ${dbResult?.sourceType || ''}`);
+    return Boolean(dbResult)
+        && dbResult.sourceType === 'official'
+        && /\b(package|label|manufacturer)\b/.test(sourceText);
+}
+
+function matchCompositeDatabaseFoods(query) {
+    const normalizedQuery = normalizeQuery(query);
+    if (!normalizedQuery) return [];
+
+    const matches = [];
+    const usedNames = new Set();
+    const addMatch = (value, queryText = '') => {
+        if (!value) return;
+        const normalizedName = normalizeQuery(value.name);
+        const built = buildFoodFromDatabase(queryText || value.name, {
+            ...value,
+            matchType: 'composite-database'
+        });
+        if (usedNames.has(normalizedName)) {
+            const existing = matches.find((food) => normalizeQuery(food.name) === normalizedName);
+            if (existing) existing.quantity = toFiniteNumber(existing.quantity, 1) + toFiniteNumber(built.quantity, 1);
+            return;
+        }
+        matches.push(built);
+        usedNames.add(normalizedName);
+    };
+
+    const segments = splitCompositeFoodSegments(query);
+    const isExplicitChipotleBuild = normalizedQuery.includes('chipotle')
+        && segments.length >= 2
+        && /\b(chicken|steak|carnitas|barbacoa|sofritas|rice|beans|veggies|salsa|cheese|lettuce)\b/.test(normalizedQuery);
+    if (segments.length >= 2 && !isBrandedProduct(query) && !isExplicitChipotleBuild) {
+        for (const segment of segments) {
+            const dbResult = findDatabaseMatchForSegment(segment);
+            if (dbResult) {
+                addMatch(dbResult, segment);
+            } else if (segment.length >= 3 && matches.length > 0) {
+                const estimated = buildEstimatedFood(segment, 'estimated (multi-item list fallback)');
+                const normalizedName = normalizeQuery(estimated.name);
+                if (!usedNames.has(normalizedName)) {
+                    matches.push(estimated);
+                    usedNames.add(normalizedName);
+                }
+            }
+        }
+
+        if (matches.length >= 2) {
+            return matches;
+        }
+    }
+
+    const brandedComponentMatches = [];
+    if (normalizedQuery.includes('chipotle')) {
+        brandedComponentMatches.push(
+            ['chicken', 'chipotle chicken'],
+            ['white rice', 'chipotle cilantro-lime white rice'],
+            ['cilantro lime white rice', 'chipotle cilantro-lime white rice'],
+            ['cilantro-lime white rice', 'chipotle cilantro-lime white rice'],
+            ['black beans', 'chipotle black beans'],
+            ['fajita veggies', 'chipotle fajita veggies'],
+            ['fajita vegetables', 'chipotle fajita veggies'],
+            ['fresh tomato salsa', 'chipotle fresh tomato salsa'],
+            ['cheese', 'chipotle cheese'],
+            ['romaine lettuce', 'chipotle romaine lettuce'],
+            ['lettuce', 'chipotle romaine lettuce']
+        );
+    }
+    if (normalizedQuery.includes('panda express')) {
+        brandedComponentMatches.push(
+            ['orange chicken', 'panda express orange chicken'],
+            ['chow mein', 'panda express chow mein'],
+            ['fried rice', 'panda express fried rice'],
+            ['white rice', 'panda express white rice']
+        );
+    }
+    if (normalizedQuery.includes('chick-fil-a') || normalizedQuery.includes('chick fil a')) {
+        brandedComponentMatches.push(
+            ['chicken sandwich', 'chick-fil-a chicken sandwich'],
+            ['waffle fries', 'chick-fil-a waffle fries'],
+            ['fries', 'chick-fil-a waffle fries']
+        );
+    }
+    if (normalizedQuery.includes('qdoba')) {
+        brandedComponentMatches.push(
+            ['grilled adobo chicken', 'qdoba grilled adobo chicken'],
+            ['adobo chicken', 'qdoba grilled adobo chicken'],
+            ['chicken', 'qdoba grilled adobo chicken'],
+            ['cilantro lime rice', 'qdoba cilantro lime rice'],
+            ['cilantro-lime rice', 'qdoba cilantro lime rice'],
+            ['rice', 'qdoba cilantro lime rice'],
+            ['black beans', 'qdoba black beans'],
+            ['fajita veggies', 'qdoba fajita veggies'],
+            ['fajita vegetables', 'qdoba fajita veggies'],
+            ['pico de gallo', 'qdoba pico de gallo'],
+            ['pico', 'qdoba pico de gallo'],
+            ['shredded lettuce', 'qdoba shredded lettuce'],
+            ['lettuce', 'qdoba shredded lettuce']
+        );
+    }
+
+    const addedBrandedKeys = new Set();
+    for (const [alias, key] of brandedComponentMatches) {
+        if (normalizedQuery.includes(normalizeQuery(alias)) && !addedBrandedKeys.has(key)) {
+            addMatch(nutritionDatabase[key], alias);
+            addedBrandedKeys.add(key);
+        }
+    }
+
+    if (matches.length >= 2) {
+        return matches;
+    }
+
+    const sortedEntries = Object.entries(nutritionDatabase)
+        .filter(([key]) => key.length >= 6)
+        .sort((a, b) => b[0].length - a[0].length);
+
+    for (const [key, value] of sortedEntries) {
+        if (!normalizedQuery.includes(key)) continue;
+        addMatch(value, key);
+    }
+
+    return matches;
+}
+
+function splitCompositeFoodSegments(query) {
+    const cleaned = String(query || '')
+        .replace(/^\s*(?:i|we)\s+(?:had|ate|did|logged?|want|need|added?|tracked?)\s+/i, '')
+        .replace(/^\s*(?:log|add|track)\s+/i, '')
+        .trim();
+    if (!cleaned) return [];
+
+    let parts = cleaned
+        .split(/\s*(?:,|;|\+|&)\s*|\s+(?:also|plus|then)\s+/i)
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+    const hasExplicitNutritionText = /\b\d+(?:\.\d+)?\s*(?:cal|cals|calories?|kcal|grams?\s+of\s+protein|g\s+(?:protein|carbs?|fiber|fat|sugar)|net\s*carbs?)\b/i.test(cleaned);
+    if (parts.length < 2 && !hasExplicitNutritionText) {
+        const andParts = cleaned.split(/\s+and\s+/i).map((part) => part.trim()).filter(Boolean);
+        const allAndPartsKnown = andParts.length >= 2 && andParts.every((part) => Boolean(findDatabaseMatchForSegment(part)));
+        if (!isKnownSingleFoodPhrase(cleaned) || andParts.length >= 3 || allAndPartsKnown) {
+            parts = andParts;
+        }
+    }
+
+    return parts
+        .map((part) => part
+            .replace(/\b(?:for|as)\s+(?:breakfast|lunch|dinner|snack|meal)\b.*$/i, '')
+            .replace(/^\s*(?:and|plus|also|then)\s+/i, '')
+            .replace(/^\s*(?:a|an|the|some)\s+/i, '')
+            .replace(/\s+/g, ' ')
+            .trim())
+        .filter((part) => normalizeQuery(part).length >= 2)
+        .slice(0, 12);
+}
+
+function findDatabaseMatchForSegment(segment) {
+    const normalized = normalizeQuery(segment);
+    if (!normalized) return null;
+
+    let result = searchDatabaseDirect(segment) || searchDatabase(segment);
+    if (result) return result;
+
+    const leadingQuantityMatch = normalized.match(/^(\d+(?:\.\d+)?)\s+(.+)$/);
+    const itemWithoutQuantity = leadingQuantityMatch?.[2] || normalized;
+    const variants = [itemWithoutQuantity];
+    if (itemWithoutQuantity.endsWith('s')) {
+        variants.push(itemWithoutQuantity.slice(0, -1));
+    }
+
+    for (const variant of variants) {
+        result = searchDatabaseDirect(variant) || searchDatabase(variant);
+        if (result) return result;
+    }
+
+    return null;
+}
+
 // Extract quantity from query
 function extractQuantity(query) {
     const quantityPatterns = [
         /(\d+)\s*piece/i,
         /(\d+)\s*count/i,
         /(\d+)\s*pc/i,
+        /(\d+)\s*muffins?/i,
         /(\d+)\s*x\s/i,
         /(\d+)\s*slices?/i,
         /(\d+)\s*oz/i,
@@ -471,6 +1488,1468 @@ function extractQuantity(query) {
     return 1;
 }
 
+function extractServingQuantityFromQuery(query, dbResult = {}) {
+    const normalized = normalizeQuery(replaceSpokenNutritionNumbers(query));
+    const servingText = normalizeQuery(dbResult.serving || dbResult.name || '');
+
+    const servingMatch = normalized.match(/\b(\d+(?:\.\d+)?)\s*(?:x\s*)?servings?\b/);
+    if (servingMatch) {
+        return Math.max(0.25, Math.min(50, toFiniteNumber(servingMatch[1], 1)));
+    }
+
+    const pieceMatch = normalized.match(/\b(\d+(?:\.\d+)?)\s*(?:x\s*)?(?:(?:small|breakfast|sausage|standard|regular|large|bakery|mini)\s+)*(?:pieces?|pcs?|count|ct|links?|patties?|muffins?)\b/);
+    const servingPieceMatch = servingText.match(/\b(\d+(?:\.\d+)?)\s*(?:(?:cooked|small|breakfast|sausage|standard|regular|large|bakery|mini)\s+)*(?:pieces?|pcs?|count|ct|links?|patties?|muffins?)\b/);
+    if (pieceMatch && servingPieceMatch) {
+        const pieces = toFiniteNumber(pieceMatch[1], 0);
+        const servingPieces = toFiniteNumber(servingPieceMatch[1], 0);
+        if (pieces > 0 && servingPieces > 0) {
+            return Math.max(0.25, Math.min(50, pieces / servingPieces));
+        }
+    }
+
+    const leadingCountWithUnitLater = normalized.match(/^(\d+(?:\.\d+)?)\s*x?\s+?.+\b(?:pieces?|pcs?|count|ct|links?|patties?|muffins?)\b/);
+    if (leadingCountWithUnitLater && servingPieceMatch) {
+        const pieces = toFiniteNumber(leadingCountWithUnitLater[1], 0);
+        const servingPieces = toFiniteNumber(servingPieceMatch[1], 0);
+        if (pieces > 0 && servingPieces > 0) {
+            return Math.max(0.25, Math.min(50, pieces / servingPieces));
+        }
+    }
+
+    const volumeMatch = normalized.match(/\b(\d+(?:\.\d+)?)\s*(?:x\s*)?(?:cups?|c)\b/);
+    const servingVolumeMatch = servingText.match(/\b(\d+(?:\.\d+)?)\s*(?:cups?|c)\b/);
+    if (volumeMatch && servingVolumeMatch) {
+        const cups = toFiniteNumber(volumeMatch[1], 0);
+        const servingCups = toFiniteNumber(servingVolumeMatch[1], 0);
+        if (cups > 0 && servingCups > 0) {
+            return Math.max(0.25, Math.min(50, cups / servingCups));
+        }
+    }
+
+    const weightMatch = normalized.match(/\b(\d+(?:\.\d+)?)\s*(oz|ounce|ounces|g|gram|grams)\b/);
+    const servingWeightMatch = servingText.match(/\b(\d+(?:\.\d+)?)\s*(oz|ounce|ounces|g|gram|grams)\b/);
+    if (weightMatch && servingWeightMatch) {
+        const toGrams = (amount, unit) => /^(?:oz|ounce|ounces)$/.test(unit) ? amount * 28.3495 : amount;
+        const requestedGrams = toGrams(toFiniteNumber(weightMatch[1], 0), weightMatch[2]);
+        const servingGrams = toGrams(toFiniteNumber(servingWeightMatch[1], 0), servingWeightMatch[2]);
+        if (requestedGrams > 0 && servingGrams > 0) {
+            return Math.max(0.05, Math.min(50, requestedGrams / servingGrams));
+        }
+    }
+
+    return 1;
+}
+
+function resolveMuffinDatabaseResult(query) {
+    const normalized = normalizeQuery(query);
+    if (!/\bmuffins?\b/.test(normalized) || !/\bblueberry\b/.test(normalized)) {
+        return null;
+    }
+
+    let key = 'blueberry muffin';
+    if (/\b(costco|kirkland)\b/.test(normalized)) {
+        key = 'costco blueberry muffin';
+    } else if (/\b(large|jumbo|bakery)\b/.test(normalized)) {
+        key = 'large bakery blueberry muffin';
+    } else if (/\bmini\b/.test(normalized)) {
+        key = 'mini blueberry muffin';
+    } else if (/\b(box mix|muffin mix|standard|regular|normal|package|label)\b/.test(normalized)) {
+        key = 'blueberry muffin';
+    }
+
+    const result = nutritionDatabase[key];
+    return result ? { ...result, matchType: 'muffin-size-default' } : null;
+}
+
+function isBrandedProduct(query) {
+    const lower = normalizeQuery(query);
+    const brandIndicators = [
+        'daisy', 'chobani', 'fage', 'yoplait', 'dannon', 'oikos', 'siggi',
+        'fairlife', 'kraft', 'oscar mayer', 'tyson', 'perdue', 'hormel', 'hillshire',
+        'johnsonville',
+        'great value', 'kirkland', 'trader joe', 'whole foods', 'quest', 'rxbar',
+        'kind', 'clif', 'larabar', 'nature valley', 'cheerios', 'special k',
+        'kashi', 'quaker', 'post', 'ben & jerry', 'haagen-dazs', 'breyers',
+        'talenti', 'coca-cola', 'pepsi', 'gatorade', 'powerade', 'body armor',
+        'mcdonald', 'chick-fil-a', 'chick fil a', 'chipotle', 'taco bell',
+        'wendy', 'burger king', 'subway', 'starbucks', 'dunkin', 'popeyes',
+        'kfc', 'panera', 'olive garden', 'panda express', 'five guys',
+        'in-n-out', 'in n out', 'raising cane', 'sonic', 'whataburger',
+        'arby', 'arbys', 'domino', 'dominos', 'pizza hut', 'papa john',
+        'little caesars', 'little ceasars', 'dairy queen', 'dq', 'shake shack',
+        'jimmy john', 'jersey mike', 'culver', 'culvers', 'qdoba',
+        'trolli', 'trolley', 'ferrara', 'sour brite', 'sour bright'
+    ];
+
+    return brandIndicators.some((indicator) => lower.includes(indicator));
+}
+
+function isKnownSingleFoodPhrase(query) {
+    const lower = normalizeQuery(query);
+    const singleFoodPhrases = [
+        'mac and cheese',
+        'fish and chips',
+        'peanut butter and jelly',
+        'cookies and cream',
+        'salt and vinegar',
+        'biscuits and gravy'
+    ];
+    return singleFoodPhrases.some((phrase) => lower.includes(phrase));
+}
+
+function isLikelyCompositeQuery(query) {
+    const lower = normalizeQuery(query);
+
+    if (lower.includes(',')) return true;
+    if (lower.includes('+')) return true;
+    if (lower.includes(' then ') || lower.includes(' also ') || lower.includes(' plus ')) return true;
+    if (lower.includes(' with ')) return true;
+    if (queryImpliesMealCombo(lower)) return true;
+    if (!isKnownSingleFoodPhrase(lower) && /\sand\s/.test(lower)) return true;
+    return false;
+}
+
+function toFiniteNumber(value, fallback = 0) {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+        const parsed = Number(value.replace(/,/g, '').trim());
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return fallback;
+}
+
+function clampAndRound(value, min = 0, max = 5000) {
+    const num = toFiniteNumber(value, 0);
+    const clamped = Math.min(Math.max(num, min), max);
+    return Math.round(clamped);
+}
+
+function cleanText(value, fallback, maxLength = 120) {
+    if (typeof value !== 'string') return fallback;
+    const cleaned = value.replace(/\s+/g, ' ').trim();
+    return cleaned ? cleaned.slice(0, maxLength) : fallback;
+}
+
+function sanitizeFoodMemoryHints(value) {
+    const hints = Array.isArray(value) ? value : [];
+    return hints.slice(0, 5).map((hint) => {
+        if (!hint || typeof hint !== 'object') return null;
+        const name = cleanText(hint.name, '', 100);
+        const calories = clampAndRound(hint.calories, 0, 5000);
+        if (!name || !calories) return null;
+
+        const carbs = clampAndRound(hint.carbs, 0, 1000);
+        const fiber = clampAndRound(hint.fiber, 0, 500);
+        const netCarbs = hint.netCarbs === undefined || hint.netCarbs === null
+            ? Math.max(0, carbs - fiber)
+            : clampAndRound(hint.netCarbs, 0, 1000);
+
+        return {
+            name,
+            restaurant: cleanText(hint.restaurant || '', '', 80) || null,
+            serving: cleanText(hint.serving, '1 serving', 100),
+            calories,
+            protein: clampAndRound(hint.protein, 0, 1000),
+            carbs,
+            fiber,
+            netCarbs,
+            fat: clampAndRound(hint.fat, 0, 1000),
+            sugar: clampAndRound(hint.sugar, 0, 1000),
+            source: cleanText(hint.source, 'Saved user food memory', 120),
+            aliases: Array.isArray(hint.aliases)
+                ? hint.aliases.map((alias) => cleanText(alias, '', 80)).filter(Boolean).slice(0, 6)
+                : []
+        };
+    }).filter(Boolean);
+}
+
+function formatFoodMemoryHints(hints) {
+    return hints.map((hint, index) => {
+        const title = [hint.restaurant, hint.name].filter(Boolean).join(' ');
+        const aliases = hint.aliases.length ? `; aliases ${hint.aliases.join(', ')}` : '';
+        return `${index + 1}. ${title}; serving ${hint.serving}; per unit ${hint.calories} cal, P ${hint.protein}g, C ${hint.carbs}g, fiber ${hint.fiber}g, net ${hint.netCarbs}g, F ${hint.fat}g, sugar ${hint.sugar}g; source ${hint.source}${aliases}`;
+    }).join('\n');
+}
+
+function sanitizeLocationContext(value) {
+    if (!value || typeof value !== 'object') return null;
+    const latitude = toFiniteNumber(value.latitude, NaN);
+    const longitude = toFiniteNumber(value.longitude, NaN);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return null;
+    return {
+        latitude: Math.round(latitude * 1000) / 1000,
+        longitude: Math.round(longitude * 1000) / 1000,
+        accuracyMeters: Math.max(0, Math.min(10000, Math.round(toFiniteNumber(value.accuracyMeters, 0))))
+    };
+}
+
+function scoreFoodMemoryHint(query, hint) {
+    const normalizedQuery = normalizeQuery(query)
+        .replace(/\b(my|usual|regular|saved|same|food|meal|breakfast|lunch|dinner|snack)\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    const searchable = [hint.name, hint.restaurant, ...(hint.aliases || [])]
+        .filter((value) => typeof value === 'string' && value.trim())
+        .map((value) => normalizeQuery(value))
+        .filter(Boolean);
+    if (!normalizedQuery || !searchable.length) return 0;
+
+    const querySize = normalizedQuery.match(/\b(mini|small|standard|regular|medium|large|big|thick|jumbo)\b/)?.[1] || '';
+    let best = 0;
+    searchable.forEach((candidate) => {
+        const candidateSize = candidate.match(/\b(mini|small|standard|regular|medium|large|big|thick|jumbo)\b/)?.[1] || '';
+        if (querySize && candidateSize && querySize !== candidateSize) return;
+        if (normalizedQuery === candidate) best = Math.max(best, 100);
+        else if (normalizedQuery.includes(candidate) && candidate.length >= 5) best = Math.max(best, 94);
+        else if (candidate.includes(normalizedQuery) && normalizedQuery.length >= 5) best = Math.max(best, 88);
+        else {
+            const queryTokens = normalizedQuery.split(' ').filter((token) => token.length > 2);
+            const candidateTokens = new Set(candidate.split(' ').filter((token) => token.length > 2));
+            const overlap = queryTokens.filter((token) => candidateTokens.has(token)).length;
+            if (queryTokens.length) best = Math.max(best, Math.round((overlap / queryTokens.length) * 80));
+        }
+    });
+    return best;
+}
+
+function buildFoodFromMemoryHint(query, memoryHints) {
+    const ranked = (Array.isArray(memoryHints) ? memoryHints : [])
+        .map((hint) => ({ hint, score: scoreFoodMemoryHint(query, hint) }))
+        .filter(({ score }) => score >= 88)
+        .sort((a, b) => b.score - a.score);
+    const match = ranked[0]?.hint;
+    if (!match) return null;
+    const quantity = extractServingQuantityFromQuery(query, match);
+    return {
+        name: match.name,
+        matchedItem: match.name,
+        restaurant: match.restaurant || null,
+        calories: match.calories,
+        protein: match.protein,
+        carbs: match.carbs,
+        fiber: match.fiber,
+        netCarbs: match.netCarbs,
+        fat: match.fat,
+        sugar: match.sugar,
+        serving: match.serving || '1 serving',
+        quantity,
+        confidence: 'high',
+        needsVerification: false,
+        source: match.source || 'Saved user food memory',
+        sourceType: 'user-saved',
+        sourceUrl: null,
+        evidence: 'Matched a user-confirmed saved food before generic database lookup',
+        fromFoodMemory: true
+    };
+}
+
+function normalizeConfidence(value) {
+    const normalized = String(value || '').toLowerCase().trim();
+    if (normalized === 'high' || normalized === 'medium' || normalized === 'low') {
+        return normalized;
+    }
+    return 'medium';
+}
+
+function normalizeSourceType(value, fallback = 'estimate') {
+    const normalized = String(value || '').toLowerCase().trim();
+    if (normalized === 'official' || normalized === 'menu_pdf' || normalized === 'aggregator' || normalized === 'estimate' || normalized === 'database') {
+        return normalized;
+    }
+    return fallback;
+}
+
+function inferSourceTypeFromSource(sourceText, fallback = 'estimate') {
+    const lower = normalizeQuery(sourceText || '');
+    if (!lower) return fallback;
+    if (lower.includes('official')) return 'official';
+    if (lower.includes('database') || lower === 'usda') return 'database';
+    if (lower.includes('pdf')) return 'menu_pdf';
+    if (lower.includes('estimate')) return 'estimate';
+    if (
+        lower.includes('aggregator')
+        || lower.includes('myfitnesspal')
+        || lower.includes('calorieking')
+        || lower.includes('fatsecret')
+        || lower.includes('mynetdiary')
+        || lower.includes('loseit')
+        || lower.includes('lose it')
+        || lower.includes('carb manager')
+    ) {
+        return 'aggregator';
+    }
+    return fallback;
+}
+
+function cleanSourceUrl(value) {
+    if (typeof value !== 'string') return null;
+    const candidate = value.trim();
+    if (!candidate) return null;
+    try {
+        const parsed = new URL(candidate);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return parsed.toString();
+        }
+    } catch {
+        return null;
+    }
+    return null;
+}
+
+function deriveRestaurantFromSource(sourceText) {
+    const source = cleanText(sourceText, '', 120);
+    if (!source) return null;
+    if (/official$/i.test(source)) {
+        return cleanText(source.replace(/\s+official$/i, ''), '', 80) || null;
+    }
+    return null;
+}
+
+function queryImpliesMealCombo(query) {
+    return /\b(meal|combo|combos|box|bundle)\b/.test(normalizeQuery(query));
+}
+
+function isRestaurantLikeQuery(query) {
+    const lower = normalizeQuery(query);
+    if (!lower) return false;
+
+    if (queryImpliesMealCombo(lower)) return true;
+    if (/\bfrom\s+[a-z0-9&'.-]{2,}/.test(lower)) return true;
+    if (/\b\d+\s*(piece|pc|count|ct)\b/.test(lower)) return true;
+
+    const restaurantMenuTerms = [
+        'burger', 'fries', 'nuggets', 'wings', 'sandwich', 'taco', 'burrito',
+        'quesadilla', 'pizza', 'shake', 'milkshake', 'soda', 'drink'
+    ];
+    const hasRestaurantMenuTerm = restaurantMenuTerms.some((term) => lower.includes(term));
+
+    if (hasRestaurantMenuTerm && /\b(meal|combo|menu|bucket|platter|value)\b/.test(lower)) {
+        return true;
+    }
+
+    const tokens = lower.split(/\s+/).filter(Boolean);
+    return tokens.length >= 4 && hasRestaurantMenuTerm;
+}
+
+function queryMentionsDrink(query) {
+    const lower = normalizeQuery(query);
+    return /\b(drink|soda|coke|sprite|tea|lemonade|shake|milkshake|coffee)\b/.test(lower);
+}
+
+function querySpecifiesDrinkType(query) {
+    const lower = normalizeQuery(query);
+    return /\b(coke|coca cola|pepsi|sprite|dr pepper|fanta|mountain dew|sweet tea|unsweet tea|lemonade|shake|milkshake|latte|mocha|frappuccino|espresso|coffee)\b/.test(lower);
+}
+
+function querySpecifiesDrinkSize(query) {
+    const lower = normalizeQuery(query);
+    return /\b(small|medium|large|xl|extra large|kids|kid|oz|ounce|ounces|fl oz|liter|litre|ml)\b/.test(lower);
+}
+
+function queryHasUnspecifiedDrink(query) {
+    return queryMentionsDrink(query) && !querySpecifiesDrinkType(query);
+}
+
+function foodLooksLikeDrink(food) {
+    const text = normalizeQuery(`${food?.name || ''} ${food?.matchedItem || ''}`);
+    return /\b(drink|soda|coke|sprite|tea|lemonade|shake|milkshake|coffee)\b/.test(text);
+}
+
+function foodLooksLikeSauce(food) {
+    const text = normalizeQuery(`${food?.name || ''} ${food?.matchedItem || ''}`);
+    return /\b(sauce|ketchup|ranch|buffalo|bbq|mayo|aioli|dressing)\b/.test(text);
+}
+
+function foodLooksLikeSide(food) {
+    const text = normalizeQuery(`${food?.name || ''} ${food?.matchedItem || ''}`);
+    return /\b(fries|french fries|waffle fries|crinkle|tots|chips|coleslaw|slaw|mac|cheese|side|toast|bread|biscuit)\b/.test(text);
+}
+
+function queryMentionsExtraSide(query) {
+    const lower = normalizeQuery(query);
+    return (
+        /\bside of\b/.test(lower)
+        || /\b(extra|additional|add)\b.{0,20}\b(fries|tots|chips|coleslaw|slaw|mac|cheese|toast|bread|biscuit|side)\b/.test(lower)
+    );
+}
+
+function hasDrinkFood(foods) {
+    return (Array.isArray(foods) ? foods : []).some((food) => foodLooksLikeDrink(food));
+}
+
+function hasOfficialNonAggregatorSource(foods) {
+    return (Array.isArray(foods) ? foods : []).some((food) => (
+        (food?.sourceType === 'official' || food?.sourceType === 'menu_pdf')
+        && Boolean(food?.sourceUrl)
+        && !isAggregatorHost(food.sourceUrl)
+    ));
+}
+
+function getHostFromUrl(url) {
+    if (!url) return '';
+    try {
+        return new URL(url).hostname.toLowerCase();
+    } catch {
+        return '';
+    }
+}
+
+function isAggregatorHost(url) {
+    const host = getHostFromUrl(url);
+    return [
+        'mynetdiary.com',
+        'www.mynetdiary.com',
+        'myfitnesspal.com',
+        'www.myfitnesspal.com',
+        'fatsecret.com',
+        'www.fatsecret.com',
+        'calorieking.com',
+        'www.calorieking.com',
+        'loseit.com',
+        'www.loseit.com',
+        'carbmanager.com',
+        'www.carbmanager.com'
+    ].some((domain) => host === domain || host.endsWith(`.${domain}`));
+}
+
+function decodeHtmlEntities(value) {
+    if (typeof value !== 'string') return '';
+    return value
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;|&apos;/gi, "'")
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>');
+}
+
+function stripHtml(value) {
+    return decodeHtmlEntities(String(value || '').replace(/<[^>]*>/g, ' '))
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function buildQueryTokens(query) {
+    const stopWords = new Set([
+        'with', 'and', 'the', 'for', 'from', 'meal', 'combo', 'box', 'bundle',
+        'a', 'an', 'to', 'of', 'in', 'on', 'at', 'drink'
+    ]);
+
+    return normalizeQuery(query)
+        .split(/\s+/)
+        .map((token) => token.replace(/[^a-z0-9]/g, ''))
+        .filter((token) => token.length >= 2 && !stopWords.has(token));
+}
+
+function extractQueryNumbers(query) {
+    return [...new Set((normalizeQuery(query).match(/\b\d+\b/g) || []))];
+}
+
+function normalizeNutritionLabel(label) {
+    const normalized = normalizeQuery(stripHtml(label));
+    if (!normalized) return null;
+
+    if (normalized.includes('calories')) return 'calories';
+    if (normalized.includes('protein')) return 'protein';
+    if (normalized.includes('carbs')) return 'carbs';
+    if (normalized.includes('fiber') || normalized.includes('fibre')) return 'fiber';
+    if (normalized.includes('tot. fat') || normalized.includes('total fat') || normalized === 'fat') return 'fat';
+    if (normalized.includes('sugar')) return 'sugar';
+
+    return null;
+}
+
+function parseNutritionItemsFromHtml(html, pageUrl) {
+    if (typeof html !== 'string' || !html) return [];
+
+    const items = [];
+    const itemRegex = /<a\s+href="([^"]*\/menu\/[^"#?]+)"[^>]*class="[^"]*nutr__link[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
+    let itemMatch;
+
+    while ((itemMatch = itemRegex.exec(html)) !== null) {
+        const href = itemMatch[1];
+        const block = itemMatch[2];
+        const titleMatch = block.match(/<h[1-4][^>]*class="[^"]*nutr__h3[^"]*"[^>]*>([\s\S]*?)<\/h[1-4]>/i)
+            || block.match(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/i);
+        const itemName = stripHtml(titleMatch?.[1] || '');
+        if (!itemName) continue;
+
+        const nutrition = {
+            calories: null,
+            protein: null,
+            carbs: null,
+            fiber: null,
+            fat: null,
+            sugar: null
+        };
+
+        const pairRegex = /<div[^>]*class="[^"]*nutr__value[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*nutr__label[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
+        let pairMatch;
+        while ((pairMatch = pairRegex.exec(block)) !== null) {
+            const value = Number(stripHtml(pairMatch[1]).replace(/,/g, ''));
+            const labelKey = normalizeNutritionLabel(pairMatch[2]);
+            if (!labelKey || !Number.isFinite(value)) continue;
+            nutrition[labelKey] = value;
+        }
+
+        if (!Number.isFinite(nutrition.calories) || nutrition.calories <= 0) continue;
+
+        let absoluteUrl = null;
+        try {
+            absoluteUrl = new URL(href, pageUrl).toString();
+        } catch {
+            absoluteUrl = pageUrl;
+        }
+
+        items.push({
+            name: itemName,
+            calories: nutrition.calories,
+            protein: Number.isFinite(nutrition.protein) ? nutrition.protein : 0,
+            carbs: Number.isFinite(nutrition.carbs) ? nutrition.carbs : 0,
+            fiber: Number.isFinite(nutrition.fiber) ? nutrition.fiber : 0,
+            netCarbs: Math.max(0, (Number.isFinite(nutrition.carbs) ? nutrition.carbs : 0) - (Number.isFinite(nutrition.fiber) ? nutrition.fiber : 0)),
+            fat: Number.isFinite(nutrition.fat) ? nutrition.fat : 0,
+            sugar: Number.isFinite(nutrition.sugar) ? nutrition.sugar : 0,
+            sourceUrl: absoluteUrl
+        });
+    }
+
+    return items;
+}
+
+function buildNutritionCandidateUrls(sourceUrl) {
+    try {
+        const parsed = new URL(sourceUrl);
+        const origin = parsed.origin;
+        return [...new Set([
+            `${origin}/nutrition`,
+            sourceUrl,
+            `${origin}/nutrition-facts`,
+            `${origin}/nutrition-information`,
+            `${origin}/nutritional-information`,
+            `${origin}/menu`
+        ])];
+    } catch {
+        return [sourceUrl];
+    }
+}
+
+function extractRestaurantHintFromQuery(query) {
+    const tokens = normalizeQuery(query).split(/\s+/).filter(Boolean);
+    const stopTokens = new Set([
+        'meal', 'combo', 'combos', 'box', 'bundle', 'with', 'and', 'drink', 'drinks',
+        'nugget', 'nuggets', 'tender', 'tenders', 'wing', 'wings', 'fries', 'burger',
+        'sandwich', 'pizza', 'taco', 'burrito', 'piece', 'pieces', 'count', 'pc', 'ct'
+    ]);
+
+    const restaurantTokens = [];
+    for (const token of tokens) {
+        if (/^\d+$/.test(token)) break;
+        if (stopTokens.has(token) && restaurantTokens.length > 0) break;
+        if (!stopTokens.has(token)) {
+            restaurantTokens.push(token);
+        }
+        if (restaurantTokens.length >= 5) break;
+    }
+
+    return restaurantTokens.length >= 2 ? restaurantTokens.join(' ') : '';
+}
+
+function buildRestaurantDomainCandidates(foods, query) {
+    const restaurantHints = [];
+    for (const food of (Array.isArray(foods) ? foods : [])) {
+        const restaurant = cleanText(food?.restaurant, '', 120);
+        if (restaurant) restaurantHints.push(restaurant);
+    }
+    const queryHint = extractRestaurantHintFromQuery(query);
+    if (queryHint) restaurantHints.push(queryHint);
+
+    const candidates = new Set();
+    const tlds = ['com', 'net', 'org', 'co', 'io', 'ooo'];
+    const ignored = new Set(['tx', 'texas', 'usa', 'us']);
+
+    for (const hint of restaurantHints.slice(0, 4)) {
+        const words = normalizeQuery(hint)
+            .split(/\s+/)
+            .map((word) => word.replace(/[^a-z0-9]/g, ''))
+            .filter((word) => word.length >= 2 && !ignored.has(word))
+            .slice(0, 4);
+        if (words.length < 2) continue;
+
+        const joined = words.join('');
+        const hyphen = words.join('-');
+        const acronym = words.map((word) => word[0]).join('');
+
+        for (const tld of tlds) {
+            candidates.add(`https://www.${joined}.${tld}`);
+            candidates.add(`https://${joined}.${tld}`);
+            candidates.add(`https://www.${hyphen}.${tld}`);
+            candidates.add(`https://${hyphen}.${tld}`);
+            if (acronym.length >= 2) {
+                candidates.add(`https://www.${acronym}.${tld}`);
+                candidates.add(`https://${acronym}.${tld}`);
+            }
+        }
+    }
+
+    return [...candidates].slice(0, 18);
+}
+
+async function fetchTextWithTimeout(url, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            signal: controller.signal,
+            headers: {
+                'User-Agent': 'FuelFireNutritionBot/1.0',
+                'Accept': 'text/html,application/xhtml+xml'
+            }
+        });
+
+        if (!response.ok) return null;
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('text/html')) return null;
+        return await response.text();
+    } catch {
+        return null;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+async function resolveOfficialNutritionFromRestaurantHint(foods, query) {
+    const candidates = buildRestaurantDomainCandidates(foods, query);
+    if (!candidates.length) return null;
+
+    let bestMatch = null;
+    let bestScore = -Infinity;
+    const seenPages = new Set();
+
+    for (const candidateUrl of candidates) {
+        let origin;
+        try {
+            origin = new URL(candidateUrl).origin;
+        } catch {
+            continue;
+        }
+
+        const probeUrls = [...new Set([
+            `${origin}/nutrition`,
+            `${origin}/menu`,
+            `${origin}/nutrition-facts`,
+            `${origin}`
+        ])];
+
+        for (const probeUrl of probeUrls) {
+            if (seenPages.has(probeUrl)) continue;
+            seenPages.add(probeUrl);
+
+            const html = await fetchTextWithTimeout(probeUrl, 3500);
+            if (!html) continue;
+
+            const pageItems = parseNutritionItemsFromHtml(html, probeUrl);
+            for (const item of pageItems) {
+                const score = scoreNutritionItemForQuery(item, query);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = { ...item, matchScore: score };
+                }
+            }
+        }
+    }
+
+    if (!bestMatch || bestScore < 6) return null;
+    return bestMatch;
+}
+
+function scoreNutritionItemForQuery(item, query) {
+    const queryText = normalizeQuery(query);
+    const itemText = normalizeQuery(`${item?.name || ''} ${item?.sourceUrl || ''}`);
+    const queryTokens = buildQueryTokens(query);
+    const queryNumbers = extractQueryNumbers(query);
+    const itemNumbers = new Set(itemText.match(/\b\d+\b/g) || []);
+
+    let score = 0;
+
+    for (const token of queryTokens) {
+        if (itemText.includes(token)) {
+            score += token.length >= 5 ? 2 : 1;
+        }
+    }
+
+    for (const num of queryNumbers) {
+        if (itemNumbers.has(num)) {
+            score += 4;
+        } else if (itemNumbers.size > 0) {
+            score -= 1;
+        }
+    }
+
+    if (queryImpliesMealCombo(queryText)) {
+        if (/\b(meal|combo|combos|box|bundle)\b/.test(itemText)) {
+            score += 4;
+        } else {
+            score -= 2;
+        }
+    }
+
+    if (queryText.includes('nugget') && itemText.includes('nugget')) score += 3;
+    if (queryText.includes('tender') && itemText.includes('tender')) score += 2;
+    if (queryText.includes('wing') && itemText.includes('wing')) score += 2;
+    if (queryText.includes('fries') && itemText.includes('fries')) score += 1;
+    if (queryMentionsDrink(queryText) && foodLooksLikeDrink(item)) score -= 2;
+
+    if (Number.isFinite(item?.calories) && item.calories > 0) score += 1;
+
+    return score;
+}
+
+async function resolveOfficialNutritionFromSourceUrls(foods, query) {
+    const allowEstimateSources = isRestaurantLikeQuery(query);
+    const officialUrls = [...new Set((foods || [])
+        .filter((food) => (
+            (
+                food?.sourceType === 'official'
+                || food?.sourceType === 'menu_pdf'
+                || (allowEstimateSources && food?.sourceType === 'estimate')
+            )
+            && Boolean(food?.sourceUrl)
+            && !isAggregatorHost(food.sourceUrl)
+        ))
+        .map((food) => food.sourceUrl))];
+
+    const restaurantLikeQuery = isRestaurantLikeQuery(query);
+    if (!officialUrls.length && !restaurantLikeQuery) return null;
+
+    let bestMatch = null;
+    let bestScore = -Infinity;
+    const seenPages = new Set();
+
+    for (const sourceUrl of officialUrls.slice(0, 2)) {
+        const candidateUrls = buildNutritionCandidateUrls(sourceUrl);
+        for (const candidateUrl of candidateUrls) {
+            if (seenPages.has(candidateUrl)) continue;
+            seenPages.add(candidateUrl);
+
+            const html = await fetchTextWithTimeout(candidateUrl, 10000);
+            if (!html) continue;
+
+            const pageItems = parseNutritionItemsFromHtml(html, candidateUrl);
+            for (const item of pageItems) {
+                const score = scoreNutritionItemForQuery(item, query);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = { ...item, matchScore: score };
+                }
+            }
+        }
+    }
+
+    if ((!bestMatch || bestScore < 6) && restaurantLikeQuery) {
+        const hintedMatch = await resolveOfficialNutritionFromRestaurantHint(foods, query);
+        if (hintedMatch && toFiniteNumber(hintedMatch.matchScore, -Infinity) > bestScore) {
+            bestMatch = hintedMatch;
+            bestScore = toFiniteNumber(hintedMatch.matchScore, bestScore);
+        }
+    }
+
+    if (!bestMatch || bestScore < 6) {
+        return null;
+    }
+
+    return bestMatch;
+}
+
+async function refineFoodsWithOfficialNutrition(foods, query) {
+    if (!Array.isArray(foods) || !foods.length) return foods;
+
+    const resolved = await resolveOfficialNutritionFromSourceUrls(foods, query);
+    if (!resolved) return foods;
+
+    const replaceIndex = foods.findIndex((food) => !foodLooksLikeDrink(food));
+    if (replaceIndex === -1) return foods;
+
+    const existing = foods[replaceIndex];
+    const shouldPreferResolvedMeal = queryImpliesMealCombo(query) && /\b(meal|combo|combos|box|bundle)\b/.test(normalizeQuery(resolved.name));
+    const shouldReplaceByDifference = Math.abs(toFiniteNumber(existing?.calories, 0) - toFiniteNumber(resolved.calories, 0)) >= 120;
+
+    if (!shouldPreferResolvedMeal && !shouldReplaceByDifference) {
+        return foods;
+    }
+
+    const replacement = {
+        ...existing,
+        name: cleanText(resolved.name, existing?.name || 'Menu item', 120),
+        matchedItem: cleanText(resolved.name, existing?.matchedItem || 'Menu item', 120),
+        calories: clampAndRound(resolved.calories, 0, 5000),
+        protein: clampAndRound(resolved.protein, 0, 500),
+        carbs: clampAndRound(resolved.carbs, 0, 700),
+        fiber: clampAndRound(resolved.fiber || 0, 0, 300),
+        netCarbs: clampAndRound(resolved.netCarbs ?? Math.max(0, toFiniteNumber(resolved.carbs, 0) - toFiniteNumber(resolved.fiber, 0)), 0, 700),
+        fat: clampAndRound(resolved.fat, 0, 300),
+        sugar: clampAndRound(resolved.sugar, 0, 300),
+        confidence: 'high',
+        source: cleanText('Official nutrition page', 'Official nutrition page', 120),
+        sourceType: 'official',
+        sourceUrl: cleanSourceUrl(resolved.sourceUrl),
+        evidence: cleanText(`Matched "${resolved.name}" on official nutrition page`, 'Matched item on official nutrition page', 240)
+    };
+
+    const updated = [...foods];
+    updated[replaceIndex] = replacement;
+
+    const replacementIsMeal = /\b(meal|combo|combos|box|bundle)\b/.test(normalizeQuery(replacement.name));
+    if (replacementIsMeal) {
+        const queryMentionsSauce = /\b(sauce|ketchup|ranch|buffalo|bbq|mayo|aioli|dressing)\b/.test(normalizeQuery(query));
+        const extraSideRequested = queryMentionsExtraSide(query);
+        return updated.filter((food, index) => {
+            if (index === replaceIndex) return true;
+            if (!queryMentionsSauce && foodLooksLikeSauce(food)) return false;
+            if (!extraSideRequested && foodLooksLikeSide(food)) return false;
+            return true;
+        });
+    }
+
+    return updated;
+}
+
+function ensureComponentSeparation(foods, query) {
+    if (!Array.isArray(foods)) return [];
+    let separated = [...foods];
+    const wantsDrink = queryImpliesMealCombo(query) && queryMentionsDrink(query);
+    const unspecifiedDrink = queryHasUnspecifiedDrink(query);
+
+    if (wantsDrink) {
+        const drinkIndexes = separated
+            .map((food, index) => (foodLooksLikeDrink(food) ? index : -1))
+            .filter((index) => index !== -1);
+        const hasOfficialDrink = drinkIndexes.some((index) => (
+            (separated[index]?.sourceType === 'official' || separated[index]?.sourceType === 'menu_pdf')
+            && Boolean(separated[index]?.sourceUrl)
+        ));
+
+        if (unspecifiedDrink && drinkIndexes.length > 0 && !hasOfficialDrink) {
+            const keepIndex = drinkIndexes[0];
+            separated[keepIndex] = {
+                ...separated[keepIndex],
+                name: 'Drink (unspecified)',
+                matchedItem: 'Drink (unspecified)',
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fiber: 0,
+                netCarbs: 0,
+                fat: 0,
+                sugar: 0,
+                serving: '1 drink',
+                quantity: 1,
+                confidence: 'low',
+                source: 'Drink mentioned, type not specified',
+                sourceType: 'estimate',
+                sourceUrl: null,
+                evidence: 'User requested a drink but did not specify drink type'
+            };
+
+            separated = separated.filter((food, index) => (
+                index === keepIndex || !foodLooksLikeDrink(food)
+            ));
+        }
+    }
+
+    if (wantsDrink && !hasDrinkFood(separated)) {
+        separated.push({
+            name: 'Drink (unspecified)',
+            matchedItem: 'Drink (unspecified)',
+            restaurant: separated.find((food) => food?.restaurant)?.restaurant || null,
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            sugar: 0,
+            serving: '1 drink',
+            quantity: 1,
+            confidence: 'low',
+            source: 'Drink mentioned, type not specified',
+            sourceType: 'estimate',
+            sourceUrl: null,
+            evidence: 'Added placeholder drink item because query explicitly included a drink'
+        });
+    }
+    return separated;
+}
+
+function buildClarifyingQuestions(query, foods) {
+    const questions = [];
+    const normalizedQuery = normalizeQuery(query);
+    const drinkItems = (Array.isArray(foods) ? foods : []).filter((food) => foodLooksLikeDrink(food));
+    const hasUnspecifiedDrinkItem = drinkItems.some((food) => (
+        normalizeQuery(food?.name || '') === 'drink unspecified'
+        || normalizeQuery(food?.matchedItem || '') === 'drink unspecified'
+        || (
+            toFiniteNumber(food?.calories, 0) === 0
+            && (food?.sourceType === 'estimate' || !food?.sourceType)
+            && /\bdrink\b/.test(normalizeQuery(`${food?.name || ''} ${food?.matchedItem || ''}`))
+        )
+    ));
+
+    const needsDrinkClarification = queryHasUnspecifiedDrink(normalizedQuery) || hasUnspecifiedDrinkItem;
+    if (needsDrinkClarification) {
+        if (!querySpecifiesDrinkType(normalizedQuery)) {
+            questions.push({
+                id: 'drink_type',
+                question: 'What type of drink is it?',
+                examples: ['Coke', 'Sprite', 'Sweet tea', 'Lemonade', 'Milkshake'],
+                reason: 'Drink was mentioned but drink type was not specified.'
+            });
+        }
+        if (!querySpecifiesDrinkSize(normalizedQuery)) {
+            questions.push({
+                id: 'drink_size',
+                question: 'What size is the drink?',
+                examples: ['Small', 'Medium', 'Large', '16 oz', '20 oz'],
+                reason: 'Drink size is needed for accurate calories.'
+            });
+        }
+    }
+
+    const mentionsMuffin = /\bmuffins?\b/.test(normalizedQuery);
+    const mentionsMuffinSize = /\b(mini|small|standard|regular|normal|medium|large|jumbo|bakery|costco|kirkland|box mix|muffin mix|package|label)\b/.test(normalizedQuery);
+    const muffinFood = (Array.isArray(foods) ? foods : []).find((food) => /\bmuffins?\b/i.test(`${food?.name || ''} ${food?.serving || ''}`));
+    if (mentionsMuffin && muffinFood && !mentionsMuffinSize) {
+        questions.push({
+            id: 'muffin_size',
+            question: 'What size/type were the muffins?',
+            examples: ['standard / box mix', 'mini', 'large bakery', 'Costco large', 'use package label'],
+            reason: 'Muffins vary a lot by size, so the app needs the size or label serving to avoid overcounting.'
+        });
+    }
+
+    const mentionsSausageLinks = /\bsausage\s+links?\b|\blinks?\b/.test(normalizedQuery)
+        && (Array.isArray(foods) ? foods : []).some((food) => /\bsausage\b|\blinks?\b/i.test(`${food?.name || ''} ${food?.serving || ''}`));
+    const specifiesSausageSize = /\b(mini|small|breakfast|standard|regular|large|thick|bratwurst|brat|kielbasa|\d+(?:\.\d+)?\s*(?:g|gram|grams|oz|ounce|ounces))\b/.test(normalizedQuery);
+    const specifiesSausageBrand = /\b(johnsonville|jimmy dean|bob evans|banquet|aidells|hillshire|applegate)\b/.test(normalizedQuery);
+    if (mentionsSausageLinks && !specifiesSausageSize && !specifiesSausageBrand) {
+        questions.push({
+            id: 'sausage_size',
+            question: 'What size/type were the sausage links?',
+            examples: ['small breakfast links', 'large bratwurst-size links', 'about 2 oz each', 'use the package label'],
+            reason: 'A large sausage link can have several times the calories of a small breakfast link.'
+        });
+    }
+
+    const mentionsGenericSteak = /\bsteak\b/.test(normalizedQuery)
+        && !/\b(chipotle|taco bell|steak burrito|steak bowl)\b/.test(normalizedQuery);
+    const specifiesSteakSize = /\b\d+(?:\.\d+)?\s*(?:g|gram|grams|oz|ounce|ounces|lb|lbs|pound|pounds)\b/.test(normalizedQuery)
+        || /\b(small|medium|large|petite)\b/.test(normalizedQuery);
+    if (mentionsGenericSteak && !specifiesSteakSize) {
+        questions.push({
+            id: 'steak_size',
+            question: 'About how large was the steak?',
+            examples: ['6 oz', '8 oz', '12 oz', 'weighed portion'],
+            reason: 'Steak calories depend heavily on weight and cut.'
+        });
+    }
+
+    const mentionsPancakes = /\bpancakes?\b/.test(normalizedQuery);
+    const specifiesPancakeSize = /\b(mini|silver dollar|small|medium|large|restaurant|\d+(?:\.\d+)?\s*(?:inch|inches|in))\b/.test(normalizedQuery);
+    if (mentionsPancakes && !specifiesPancakeSize) {
+        questions.push({
+            id: 'pancake_size',
+            question: 'What size were the pancakes?',
+            examples: ['silver dollar', 'about 4 inches', 'about 8 inches', 'restaurant large'],
+            reason: 'Pancake diameter materially changes the estimated serving size.'
+        });
+    }
+
+    const asksForWholePackage = /\b(full|whole|entire|all|rest of)\s+(bag|package|pack|container|box)\b/.test(normalizedQuery);
+    const packagedServingFood = (Array.isArray(foods) ? foods : []).find((food) => (
+        food?.serving
+        && /\b(piece|pieces|serving|servings|g|gram|grams|oz)\b/i.test(food.serving)
+        && /\b(package|label|manufacturer|official|database)\b/i.test(`${food.source || ''} ${food.sourceType || ''}`)
+    ));
+
+    if (asksForWholePackage && packagedServingFood && !/\b\d+(?:\.\d+)?\s*(?:servings?|pieces?|pcs?|count|ct)\b/.test(normalizedQuery)) {
+        questions.push({
+            id: 'servings_consumed',
+            question: `I found ${packagedServingFood.calories} calories per ${packagedServingFood.serving}. How much did you eat?`,
+            examples: ['1 serving', '2 servings', '40 pieces', 'the whole bag if the label says servings per container'],
+            reason: 'A full package needs servings or pieces to calculate exact total calories.'
+        });
+    }
+
+    return questions;
+}
+
+function isWeakWebSearchFoods(foods, query) {
+    if (!Array.isArray(foods) || foods.length === 0) return true;
+
+    const mealLikeQuery = queryImpliesMealCombo(query);
+    const singleCombinedMeal = mealLikeQuery && foods.length === 1;
+    const missingSourceUrl = foods.every((food) => !food?.sourceUrl);
+    const hasAggregatorUrl = foods.some((food) => isAggregatorHost(food?.sourceUrl));
+    const lowConfidence = foods.some((food) => food?.confidence === 'low');
+    const weakSourceType = foods.some((food) => food?.sourceType === 'estimate' || food?.sourceType === 'aggregator');
+    const missingDrinkSplit = queryMentionsDrink(query) && !hasDrinkFood(foods);
+    const mealNamedMatch = foods.some((food) => (
+        /\b(meal|combo|combos|box|bundle)\b/.test(normalizeQuery(`${food?.name || ''} ${food?.matchedItem || ''}`))
+    ));
+    const totalCalories = calculateTotals(foods).calories;
+    const highCountMealQuery = /\b(1[0-9]|[2-9]\d)\s*(piece|pc|count|ct|nugget|nuggets|tender|tenders)\b/.test(normalizeQuery(query));
+    const possibleMealMiss = mealLikeQuery && highCountMealQuery && !mealNamedMatch && totalCalories < 1600;
+    const unspecifiedDrinkWasAssumed = queryHasUnspecifiedDrink(query) && foods.some((food) => (
+        foodLooksLikeDrink(food)
+        && toFiniteNumber(food?.calories, 0) > 0
+        && food?.sourceType !== 'official'
+        && food?.sourceType !== 'menu_pdf'
+    ));
+    const hasOfficialSource = hasOfficialNonAggregatorSource(foods);
+    const restaurantLikeQuery = mealLikeQuery || isBrandedProduct(query) || isRestaurantLikeQuery(query);
+    const lacksOfficialForRestaurantLikeQuery = restaurantLikeQuery && !hasOfficialSource;
+
+    return singleCombinedMeal
+        || missingSourceUrl
+        || hasAggregatorUrl
+        || lowConfidence
+        || weakSourceType
+        || missingDrinkSplit
+        || possibleMealMiss
+        || unspecifiedDrinkWasAssumed
+        || lacksOfficialForRestaurantLikeQuery;
+}
+
+function calculateTotals(foods) {
+    return foods.reduce((totals, food) => {
+        const qty = toFiniteNumber(food.quantity, 1);
+        const carbs = toFiniteNumber(food.carbs, 0);
+        const fiber = toFiniteNumber(food.fiber, 0);
+        const explicitNetCarbs = toFiniteNumber(food.netCarbs, NaN);
+        const netCarbs = Number.isFinite(explicitNetCarbs)
+            ? explicitNetCarbs
+            : Math.max(0, carbs - fiber);
+
+        totals.calories += Math.round(toFiniteNumber(food.calories, 0) * qty);
+        totals.protein += Math.round(toFiniteNumber(food.protein, 0) * qty);
+        totals.carbs += Math.round(carbs * qty);
+        totals.fiber += Math.round(fiber * qty);
+        totals.netCarbs += Math.round(netCarbs * qty);
+        totals.fat += Math.round(toFiniteNumber(food.fat, 0) * qty);
+        totals.sugar += Math.round((food.sugar || 0) * qty);
+        return totals;
+    }, { calories: 0, protein: 0, carbs: 0, fiber: 0, netCarbs: 0, fat: 0, sugar: 0 });
+}
+
+function buildNutritionTotals(totals) {
+    return {
+        totalCalories: totals.calories,
+        totalProtein: totals.protein,
+        totalCarbs: totals.carbs,
+        totalFiber: totals.fiber,
+        totalNetCarbs: totals.netCarbs,
+        totalFat: totals.fat,
+        totalSugar: totals.sugar
+    };
+}
+
+function buildEstimatedFood(query, source = 'estimated') {
+    const lower = normalizeQuery(query);
+    let estimate = { calories: 250, protein: 12, carbs: 22, fiber: 0, netCarbs: 22, fat: 10, sugar: 5 };
+
+    if (lower.includes('salad')) estimate = { calories: 180, protein: 8, carbs: 14, fiber: 3, netCarbs: 11, fat: 10, sugar: 6 };
+    if (lower.includes('pizza')) estimate = { calories: 285, protein: 12, carbs: 30, fiber: 2, netCarbs: 28, fat: 13, sugar: 3 };
+    if (lower.includes('burger')) estimate = { calories: 520, protein: 26, carbs: 40, fiber: 2, netCarbs: 38, fat: 28, sugar: 8 };
+    if (lower.includes('protein shake') || lower.includes('protein drink')) {
+        estimate = { calories: 180, protein: 30, carbs: 8, fiber: 1, netCarbs: 7, fat: 3, sugar: 4 };
+    }
+    if (lower.includes('popcorn') || lower.includes('pop corn')) {
+        estimate = { calories: 31, protein: 1, carbs: 6, fiber: 1, netCarbs: 5, fat: 0, sugar: 0 };
+    }
+
+    return {
+        name: cleanText(query, 'Food item'),
+        matchedItem: cleanText(query, 'Food item'),
+        restaurant: null,
+        calories: estimate.calories,
+        protein: estimate.protein,
+        carbs: estimate.carbs,
+        fiber: estimate.fiber,
+        netCarbs: estimate.netCarbs,
+        fat: estimate.fat,
+        sugar: estimate.sugar,
+        serving: '1 serving',
+        quantity: 1,
+        confidence: 'low',
+        needsVerification: true,
+        source,
+        sourceType: 'estimate',
+        sourceUrl: null,
+        evidence: 'Estimated from generic nutrition profile'
+    };
+}
+
+function buildFoodFromDatabase(query, dbResult) {
+    const normalized = normalizeQuery(query);
+    let quantity = extractServingQuantityFromQuery(query, dbResult);
+    const source = dbResult.source || 'database';
+    const sourceType = normalizeSourceType(dbResult.sourceType, dbResult.sourceUrl ? 'official' : 'database');
+    const confidence = normalizeConfidence(dbResult.confidence || 'high');
+
+    // Multiply by leading quantity for simple entries like "3 eggs"
+    const leadingQuantityMatch = normalized.match(/^(\d+(?:\.\d+)?)\s+(.+)$/);
+    const hasExplicitServingUnit = /\b(piece|pieces|count|slice|slices|links?|patties?|muffins?|oz|ounce|ounces|lb|lbs|cup|cups)\b/.test(normalized);
+    if (quantity === 1 && leadingQuantityMatch && !hasExplicitServingUnit && !/\b\d+\b/.test(dbResult.name)) {
+        quantity = Math.max(0.25, Math.min(20, toFiniteNumber(leadingQuantityMatch[1], 1)));
+    }
+
+    return {
+        name: dbResult.name,
+        matchedItem: dbResult.name,
+        restaurant: deriveRestaurantFromSource(source),
+        calories: clampAndRound(dbResult.calories, 0, 5000),
+        protein: clampAndRound(dbResult.protein, 0, 500),
+        carbs: clampAndRound(dbResult.carbs, 0, 700),
+        fiber: clampAndRound(dbResult.fiber || 0, 0, 300),
+        netCarbs: clampAndRound(
+            dbResult.netCarbs ?? Math.max(0, toFiniteNumber(dbResult.carbs, 0) - toFiniteNumber(dbResult.fiber, 0)),
+            0,
+            700
+        ),
+        fat: clampAndRound(dbResult.fat, 0, 300),
+        sugar: clampAndRound(dbResult.sugar || 0, 0, 300),
+        serving: cleanText(dbResult.serving, '1 serving', 100),
+        quantity,
+        confidence,
+        needsVerification: Boolean(dbResult.needsVerification)
+            || confidence === 'low'
+            || sourceType === 'estimate'
+            || sourceType === 'aggregator',
+        source,
+        sourceType,
+        sourceUrl: cleanSourceUrl(dbResult.sourceUrl),
+        evidence: cleanText(`Matched local nutrition database (${dbResult.matchType || 'lookup'})`, 'Matched local nutrition database', 240)
+    };
+}
+
+function extractTextFromClaudeResponse(data) {
+    const parts = Array.isArray(data?.content) ? data.content : [];
+    return parts
+        .filter((part) => part?.type === 'text' && typeof part?.text === 'string')
+        .map((part) => part.text.trim())
+        .filter(Boolean)
+        .join('\n');
+}
+
+function parseClaudeFoodPayload(text) {
+    const cleaned = String(text || '')
+        .replace(/```json/gi, '```')
+        .replace(/```/g, '')
+        .trim();
+
+    if (!cleaned) return { foods: [], notes: '' };
+
+    const candidates = [];
+    candidates.push(cleaned);
+
+    const objectStart = cleaned.indexOf('{');
+    const objectEnd = cleaned.lastIndexOf('}');
+    if (objectStart !== -1 && objectEnd > objectStart) {
+        candidates.push(cleaned.slice(objectStart, objectEnd + 1));
+    }
+
+    const arrayStart = cleaned.indexOf('[');
+    const arrayEnd = cleaned.lastIndexOf(']');
+    if (arrayStart !== -1 && arrayEnd > arrayStart) {
+        candidates.push(cleaned.slice(arrayStart, arrayEnd + 1));
+    }
+
+    for (const candidate of [...new Set(candidates)]) {
+        try {
+            const parsed = JSON.parse(candidate);
+            if (Array.isArray(parsed)) {
+                return { foods: parsed, notes: '' };
+            }
+            if (parsed && Array.isArray(parsed.foods)) {
+                return {
+                    foods: parsed.foods,
+                    notes: typeof parsed.notes === 'string' ? parsed.notes : '',
+                    overallConfidence: parsed.overallConfidence
+                };
+            }
+            if (parsed && typeof parsed === 'object' && parsed.name) {
+                return { foods: [parsed], notes: '' };
+            }
+        } catch {
+            // Try next candidate
+        }
+    }
+
+    return { foods: [], notes: '' };
+}
+
+function sanitizeFoods(rawFoods, query) {
+    const foods = (Array.isArray(rawFoods) ? rawFoods : []).map((food, index) => {
+        const quantity = Math.max(0.25, Math.min(20, toFiniteNumber(food?.quantity, 1)));
+        const source = cleanText(food?.source, 'ai-estimated', 150);
+        const sourceUrl = cleanSourceUrl(food?.sourceUrl);
+        const urlInferredSourceType = sourceUrl && isAggregatorHost(sourceUrl) ? 'aggregator' : null;
+        const inferredSourceType = inferSourceTypeFromSource(source, 'estimate');
+        const carbs = clampAndRound(food?.carbs, 0, 700);
+        const fiber = clampAndRound(food?.fiber || 0, 0, 300);
+        const explicitNetCarbs = toFiniteNumber(food?.netCarbs, NaN);
+        return {
+            name: cleanText(food?.name, index === 0 ? cleanText(query, 'Food item') : `Food item ${index + 1}`),
+            matchedItem: cleanText(food?.matchedItem, cleanText(food?.name, cleanText(query, 'Food item'), 150), 150),
+            restaurant: cleanText(food?.restaurant, deriveRestaurantFromSource(source), 100) || null,
+            calories: clampAndRound(food?.calories, 0, 5000),
+            protein: clampAndRound(food?.protein, 0, 500),
+            carbs,
+            fiber,
+            netCarbs: clampAndRound(Number.isFinite(explicitNetCarbs) ? explicitNetCarbs : Math.max(0, carbs - fiber), 0, 700),
+            fat: clampAndRound(food?.fat, 0, 300),
+            sugar: clampAndRound(food?.sugar || 0, 0, 300),
+            serving: cleanText(food?.serving, '1 serving', 100),
+            quantity,
+            confidence: normalizeConfidence(food?.confidence),
+            needsVerification: normalizeConfidence(food?.confidence) === 'low'
+                || normalizeSourceType(food?.sourceType, urlInferredSourceType || inferredSourceType) === 'estimate'
+                || normalizeSourceType(food?.sourceType, urlInferredSourceType || inferredSourceType) === 'aggregator',
+            source,
+            sourceType: normalizeSourceType(food?.sourceType, urlInferredSourceType || inferredSourceType),
+            sourceUrl,
+            evidence: cleanText(food?.evidence, '', 240) || null
+        };
+    }).filter((food) => (
+        food.calories > 0 || food.protein > 0 || food.carbs > 0 || food.fiber > 0 || food.fat > 0 || food.sugar > 0
+    ));
+
+    return foods;
+}
+
+function deriveOverallConfidence(foods, explicitConfidence) {
+    const explicit = normalizeConfidence(explicitConfidence);
+    if (explicitConfidence) return explicit;
+
+    if (!foods.length) return 'low';
+    if (foods.every((food) => food.confidence === 'high')) return 'high';
+    if (foods.some((food) => food.confidence === 'low')) return 'low';
+    return 'medium';
+}
+
+function getDeepFoodClaudeModel() {
+    return process.env.CLAUDE_FOOD_DEEP_MODEL?.trim() || getClaudeModel();
+}
+
+function getDeepFoodMaxTokens() {
+    const configured = Number(process.env.CLAUDE_FOOD_DEEP_MAX_TOKENS);
+    if (Number.isFinite(configured) && configured >= 1500) {
+        return Math.min(Math.round(configured), 8000);
+    }
+    return 4000;
+}
+
+function supportsAdaptiveThinking(model) {
+    const normalized = String(model || '').toLowerCase();
+    return normalized === 'claude-mythos-preview'
+        || /claude-(?:sonnet|opus)-4-(?:6|7|8)\b/.test(normalized);
+}
+
+function buildFoodThinkingConfig(model, deepSearch) {
+    if (!deepSearch || process.env.CLAUDE_FOOD_THINKING === 'off' || !supportsAdaptiveThinking(model)) {
+        return null;
+    }
+
+    return {
+        thinking: { type: 'adaptive', display: 'omitted' },
+        output_config: { effort: process.env.CLAUDE_FOOD_THINKING_EFFORT?.trim() || 'high' }
+    };
+}
+
+async function callClaudeFoodParser({
+    apiKey,
+    query,
+    useWebSearch,
+    strictMode = false,
+    officialOnly = false,
+    deepSearch = false,
+    inputSource = 'search',
+    memoryHints = [],
+    locationContext = null
+}) {
+    const sanitizedMemoryHints = sanitizeFoodMemoryHints(memoryHints);
+    const strictInstructions = strictMode
+        ? `
+Strict mode requirements:
+- Enforce official-source evidence for restaurant/branded foods.
+- For meal/combo/box/bundle inputs, split into separate items (entree, side, drink) when implied.
+- Avoid single combined meal entries if components can be identified.
+- Prefer sourceType "official" or "menu_pdf"; only use "aggregator" as last resort with low confidence.
+- If user says "meal/combo/box/bundle", prefer an exact meal/combo menu match when official nutrition lists one.
+- Do not downgrade a meal request to entree-only nutrition unless no meal nutrition entry exists.
+- If user says "with a drink" but no specific drink type, use "Drink (unspecified)" with 0 calories and low confidence.
+- Restaurant items should include a valid sourceUrl when available.`
+        : '';
+    const officialOnlyInstructions = officialOnly
+        ? `
+Official-only requirements:
+- Use ONLY official restaurant/manufacturer domains or official menu PDFs for nutrition values.
+- Do NOT use MyFitnessPal, MyNetDiary, FatSecret, CalorieKing, Lose It, Carb Manager, or other aggregators.
+- If you cannot find an official source, return {"foods":[],"overallConfidence":"low","notes":"No official source found"}.
+- Every returned food must include sourceType "official" or "menu_pdf" and a valid sourceUrl.`
+        : '';
+    const voiceInstructions = inputSource === 'voice'
+        ? `
+Voice input requirements:
+- Treat speech-to-text as noisy. Consider likely brand, restaurant, and food-name corrections before estimating.
+- If the user says exact calories, macros, serving size, package facts, or "net carbs", preserve those facts and use them before generic database values.
+- If size materially changes calories, make the serving assumption explicit and return a clarifying question through confidence/serving text when needed.
+- For branded or restaurant items, search official manufacturer/restaurant nutrition before using broad estimates.`
+        : '';
+    const thinkingInstructions = deepSearch
+        ? `
+Reasoning requirement:
+- This is a high-accuracy nutrition lookup. Think carefully before responding, compare the query against serving size, quantity, brand, restaurant, and source reliability, then return only the JSON.`
+        : '';
+    const memoryInstructions = sanitizedMemoryHints.length
+        ? `
+Saved/product nutrition candidates:
+${formatFoodMemoryHints(sanitizedMemoryHints)}
+
+Hint requirements:
+- Use a saved/product nutrition candidate only when it clearly matches the query, brand/product, and size/serving.
+- Do not use a candidate if the query says a conflicting size, brand, restaurant, exact package label, or explicit macros.
+- Explicit user-provided calories/macros, visible labels, and official restaurant/manufacturer sources override candidates.
+- If a candidate clearly matches, preserve its per-unit macros and serving, and set source to the candidate source.`
+        : '';
+    const sanitizedLocation = sanitizeLocationContext(locationContext);
+    const locationInstructions = sanitizedLocation
+        ? `
+Foreground location hint (coarse and user-authorized for this request only): ${sanitizedLocation.latitude}, ${sanitizedLocation.longitude}; accuracy about ${sanitizedLocation.accuracyMeters || 'unknown'} meters.
+Location requirements:
+- Use location only to narrow a restaurant candidate when the spoken food is restaurant-like.
+- Do not assume a restaurant from coordinates alone. Confirm the nearby restaurant and exact menu item with an official source before using its nutrition.
+- Ignore location for packaged, homemade, or generic foods.`
+        : '';
+
+    const prompt = `You are FuelFire's nutrition parsing engine.
+
+Parse this user food log:
+"${query}"
+
+Return ONLY valid JSON with this shape:
+{
+  "foods": [
+    {
+      "name": "food name shown to user",
+      "matchedItem": "exact menu/database item used for nutrition",
+      "restaurant": "restaurant/brand name or null",
+      "calories": 0,
+	      "protein": 0,
+	      "carbs": 0,
+	      "fiber": 0,
+	      "netCarbs": 0,
+	      "fat": 0,
+	      "sugar": 0,
+      "serving": "serving description",
+      "quantity": 1,
+      "confidence": "high|medium|low",
+      "source": "where nutrition came from",
+      "sourceType": "official|menu_pdf|aggregator|estimate|database",
+      "sourceUrl": "https://...",
+      "evidence": "short evidence snippet or rationale"
+    }
+  ],
+  "overallConfidence": "high|medium|low",
+  "notes": "optional short note"
+}
+
+Rules:
+- Break the text into separate consumed items.
+- If the user lists several foods in one sentence, return one food object for every listed food instead of combining the list into a single entry.
+- If meal/combo/box/bundle is mentioned or implied, split into separate components: entree, side, and drink.
+- Quantity is how many units were consumed.
+- Calories/protein/carbs/fiber/netCarbs/fat/sugar must be PER ONE UNIT, not multiplied by quantity.
+- Use carbs for total carbohydrates, fiber for dietary fiber, and netCarbs for carbs minus fiber. If a package advertises net carbs, preserve that explicit netCarbs value.
+- Include drinks, sauces, toppings, and sides when implied.
+- If query says drink but no specific drink type, return "Drink (unspecified)" with 0 calories and low confidence.
+- For branded and restaurant foods, prioritize official nutrition values from the restaurant/manufacturer domains.
+- Avoid user-generated nutrition trackers and aggregators unless no official data exists.
+- Set sourceType using only: official, menu_pdf, aggregator, estimate, database.
+- sourceUrl must be an http(s) URL when available; otherwise null.
+- If uncertain, still return best estimate with confidence "low".
+- Never return markdown or prose outside JSON.${strictInstructions}${officialOnlyInstructions}${voiceInstructions}${memoryInstructions}${locationInstructions}${thinkingInstructions}`;
+
+    const model = deepSearch ? getDeepFoodClaudeModel() : getFastClaudeModel();
+    const thinkingConfig = buildFoodThinkingConfig(model, deepSearch);
+
+    const requestBody = {
+        model,
+        max_tokens: deepSearch ? getDeepFoodMaxTokens() : 1000,
+        messages: [{ role: 'user', content: prompt }]
+    };
+
+    if (thinkingConfig) {
+        Object.assign(requestBody, thinkingConfig);
+    } else {
+        requestBody.temperature = 0;
+    }
+
+    if (useWebSearch) {
+        requestBody.tools = [
+            {
+                type: 'web_search_20250305',
+                name: 'web_search',
+                max_uses: 3
+            }
+        ];
+    }
+
+    const maxAttempts = useWebSearch ? 3 : 2;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const response = await fetch(anthropicConstants.ANTHROPIC_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': anthropicConstants.ANTHROPIC_VERSION,
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+            return response.json();
+        }
+
+        const errorText = await response.text();
+        const thinkingConfigRejected = response.status === 400
+            && requestBody.thinking
+            && /thinking|output_config|effort|adaptive|display/i.test(errorText);
+        if (thinkingConfigRejected) {
+            console.warn('Claude food parser thinking config unavailable; retrying without adaptive thinking.');
+            delete requestBody.thinking;
+            delete requestBody.output_config;
+            requestBody.temperature = 0;
+            continue;
+        }
+
+        const isRetryable = [408, 429, 500, 502, 503, 504].includes(response.status);
+        if (isRetryable && attempt < maxAttempts) {
+            const retryAfterSeconds = Number(response.headers.get('retry-after'));
+            const delayMs = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+                ? Math.min(retryAfterSeconds * 1000, 65000)
+                : Math.min(2500 * attempt, 10000);
+            console.warn(`Claude food parser ${response.status}; retrying attempt ${attempt + 1}/${maxAttempts} in ${delayMs}ms`);
+            await sleep(delayMs);
+            continue;
+        }
+
+        throw new Error(`Claude API ${response.status}: ${errorText.slice(0, 500)}`);
+    }
+
+    throw new Error('Claude API failed after retries.');
+}
+
 export default async function handler(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
         return;
@@ -481,229 +2960,478 @@ export default async function handler(req, res) {
         return;
     }
 
+    if (!await requireAiAccess(req, res, { capability: 'ai_food' })) {
+        return;
+    }
+
     try {
         const body = req.body || {};
-        const { query } = body;
+        const rawQuery = typeof body.query === 'string' ? body.query : '';
+        const originalQuery = rawQuery.trim();
+        const inputSource = normalizeInputSource(body.source);
+        const voiceAlternatives = Array.isArray(body.alternatives)
+            ? body.alternatives.map((value) => cleanText(value, '', 180)).filter(Boolean).slice(0, 5)
+            : [];
+        const normalizedVoiceQuery = inputSource === 'voice'
+            ? selectVoiceQuery(originalQuery, voiceAlternatives)
+            : originalQuery;
+        const query = normalizedVoiceQuery;
+        const queryMeta = buildQueryMeta(originalQuery, query);
+        const forceWebSearch = Boolean(body.forceWebSearch);
+        const foodMemoryHints = sanitizeFoodMemoryHints(body.foodMemoryHints);
+        const locationContext = sanitizeLocationContext(body.locationContext);
 
-        if (!query || query.trim().length < 2) {
+        if (!query || query.length < 2) {
             return res.status(400).json({ error: 'Food description required' });
         }
 
-        console.log(`🍔 AI parsing food: "${query}"`);
+        console.log(`🍔 Parsing food input (${inputSource}): "${query}"`);
 
-        // Step 1: Try local database first (fastest and most accurate)
-        const dbResult = searchDatabase(query);
-        if (dbResult) {
-            console.log(`✅ Found in database: ${dbResult.name} (${dbResult.matchType})`);
-            return res.status(200).json({
-                success: true,
-                foods: [{
-                    name: dbResult.name,
-                    calories: dbResult.calories,
-                    protein: dbResult.protein,
-                    carbs: dbResult.carbs,
-                    fat: dbResult.fat,
-                    sugar: dbResult.sugar || 0,
-                    serving: '1 serving',
-                    quantity: 1,
-                    confidence: 'high',
-                    source: dbResult.source
-                }],
-                source: 'database',
-                originalQuery: query
+        const userProvidedNutritionDetails = extractUserProvidedNutritionDetails(query);
+        const userProvidedNutrition = userProvidedNutritionDetails ? extractUserProvidedNutrition(query) : null;
+        const lookupQuery = userProvidedNutritionDetails?.lookupName || query;
+
+        if (userProvidedNutritionDetails?.databaseHint) {
+            const hintedFood = applyUserProvidedNutritionOverrides(
+                buildFoodFromDatabase(lookupQuery, {
+                    ...userProvidedNutritionDetails.databaseHint,
+                    matchType: 'user-provided-database-hint'
+                }),
+                userProvidedNutritionDetails
+            );
+            const totals = calculateTotals([hintedFood]);
+	            return res.status(200).json({
+	                success: true,
+	                foods: [hintedFood],
+	                ...buildNutritionTotals(totals),
+	                overallConfidence: 'high',
+	                source: 'database+user-provided-nutrition',
+                clarifyingQuestions: [],
+                ...queryMeta
             });
         }
 
-        // Step 2: Use Claude with web search for items not in database
-        const apiKey = process.env.CLAUDE_API_KEY;
-        if (!apiKey) {
-            console.warn('Claude API key not configured, using estimate');
-            return res.status(200).json({
-                success: true,
-                foods: [{
-                    name: query,
-                    calories: 250,
-                    protein: 10,
-                    carbs: 25,
-                    fat: 10,
-                    sugar: 5,
-                    serving: '1 serving',
-                    quantity: 1,
-                    confidence: 'low',
-                    source: 'estimated'
-                }],
-                source: 'estimate',
-                message: 'Claude API key not configured'
+        if (userProvidedNutrition && !userProvidedNutritionDetails?.lookupName) {
+            const totals = calculateTotals([userProvidedNutrition]);
+	            return res.status(200).json({
+	                success: true,
+	                foods: [userProvidedNutrition],
+	                ...buildNutritionTotals(totals),
+	                overallConfidence: 'high',
+	                source: 'user-provided-nutrition',
+                clarifyingQuestions: [],
+                ...queryMeta
             });
         }
 
-        console.log('🔍 Searching with Claude AI...');
-
-        const searchPrompt = `You are a nutrition expert. The user said: "${query}"
-
-Identify the food item(s) and provide ACCURATE nutrition information.
-
-CRITICAL RULES:
-1. Search your knowledge for REAL published nutrition data from restaurants or USDA
-2. DO NOT estimate or guess - only return data you are confident about
-3. If you can't find accurate data, say so in the confidence field
-4. For restaurant items, use their official published nutrition information
-5. Break combo meals into individual items
-
-Return ONLY a valid JSON array (no explanation, no markdown):
-[
-  {
-    "name": "Exact Food Name",
-    "calories": 0,
-    "protein": 0,
-    "carbs": 0,
-    "fat": 0,
-    "sugar": 0,
-    "serving": "serving description",
-    "quantity": 1,
-    "confidence": "high|medium|low",
-    "source": "Restaurant Name Official" or "USDA" or "estimated"
-  }
-]
-
-If you cannot identify the food or find nutrition data, return:
-[{"name": "${query}", "calories": 0, "protein": 0, "carbs": 0, "fat": 0, "sugar": 0, "serving": "unknown", "quantity": 1, "confidence": "none", "source": "unidentified"}]`;
-
-        const response = await fetch(ANTHROPIC_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': ANTHROPIC_VERSION,
-            },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 4000,
-                temperature: 0,
-                tools: [
-                    {
-                        type: 'web_search_20250305',
-                        name: 'web_search',
-                        max_uses: 3
-                    }
-                ],
-                messages: [{ role: 'user', content: searchPrompt }]
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Claude API error:', errorText);
-            throw new Error('Claude API request failed');
-        }
-
-        const data = await response.json();
-
-        // Extract text response
-        const textContent = data.content
-            ?.filter(block => block.type === 'text')
-            ?.map(block => block.text)
-            ?.join('\n') || '';
-
-        console.log('🤖 Claude response:', textContent.substring(0, 200));
-
-        // Parse JSON response
-        let foods;
-        try {
-            const jsonMatch = textContent.match(/\[[\s\S]*\]/);
-            if (jsonMatch) {
-                foods = JSON.parse(jsonMatch[0]);
-            } else {
-                throw new Error('No JSON array found');
+        if (!userProvidedNutritionDetails) {
+            const memoryFood = buildFoodFromMemoryHint(lookupQuery, foodMemoryHints);
+            if (memoryFood) {
+                const totals = calculateTotals([memoryFood]);
+                return res.status(200).json({
+                    success: true,
+                    foods: [memoryFood],
+                    ...buildNutritionTotals(totals),
+                    overallConfidence: 'high',
+                    source: 'user-saved-memory',
+                    clarifyingQuestions: buildClarifyingQuestions(lookupQuery, [memoryFood]),
+                    ...queryMeta
+                });
             }
-        } catch (parseError) {
-            console.error('Failed to parse Claude response:', parseError);
-            // Return a basic estimate
-            return res.status(200).json({
-                success: true,
-                foods: [{
-                    name: query,
-                    calories: 250,
-                    protein: 10,
-                    carbs: 25,
-                    fat: 10,
-                    sugar: 5,
-                    serving: '1 serving',
-                    quantity: 1,
-                    confidence: 'low',
-                    source: 'estimated (parse error)'
-                }],
-                source: 'estimate',
-                originalQuery: query
+        }
+
+        const verifiedPackagedResult = searchDatabase(lookupQuery);
+        if (isVerifiedPackagedDbResult(verifiedPackagedResult)) {
+            const dbFood = applyUserProvidedNutritionOverrides(
+                buildFoodFromDatabase(lookupQuery, verifiedPackagedResult),
+                userProvidedNutritionDetails
+            );
+            const totals = calculateTotals([dbFood]);
+	            return res.status(200).json({
+	                success: true,
+	                foods: [dbFood],
+	                ...buildNutritionTotals(totals),
+	                overallConfidence: 'high',
+	                source: 'verified-package-database',
+                clarifyingQuestions: buildClarifyingQuestions(query, [dbFood]),
+                ...queryMeta
             });
         }
 
-        // Validate and format foods
-        const validatedFoods = foods.map(food => ({
-            name: food.name || query,
-            calories: Math.round(food.calories || 0),
-            protein: Math.round(food.protein || 0),
-            carbs: Math.round(food.carbs || 0),
-            fat: Math.round(food.fat || 0),
-            sugar: Math.round(food.sugar || 0),
-            serving: food.serving || '1 serving',
-            quantity: parseFloat(food.quantity) || 1,
-            confidence: food.confidence || 'medium',
-            source: food.source || 'ai'
-        }));
+        if (!forceWebSearch && !locationContext && !queryHasUnspecifiedDrink(lookupQuery)) {
+            const directDbResult = searchDatabaseDirect(lookupQuery);
+            if (directDbResult) {
+                const dbFood = applyUserProvidedNutritionOverrides(
+                    buildFoodFromDatabase(lookupQuery, directDbResult),
+                    userProvidedNutritionDetails
+                );
+                const totals = calculateTotals([dbFood]);
+                const clarifyingQuestions = buildClarifyingQuestions(lookupQuery, [dbFood]);
+	                return res.status(200).json({
+	                    success: true,
+	                    foods: [dbFood],
+	                    ...buildNutritionTotals(totals),
+	                    overallConfidence: clarifyingQuestions.length ? 'medium' : deriveOverallConfidence([dbFood]),
+	                    source: 'database',
+                    clarifyingQuestions,
+                    ...queryMeta
+                });
+            }
+        }
 
-        // Filter out items with 0 calories (unidentified)
-        const filteredFoods = validatedFoods.filter(f => f.calories > 0);
+        const looksComposite = isLikelyCompositeQuery(lookupQuery);
+        const isBranded = isBrandedProduct(lookupQuery);
+        const restaurantLikeQuery = isRestaurantLikeQuery(lookupQuery);
+        const requiresLiveSearch = forceWebSearch || isBranded || looksComposite || restaurantLikeQuery || Boolean(locationContext);
 
-        if (filteredFoods.length === 0) {
-            // All items were unidentified, return a reasonable estimate
-            return res.status(200).json({
-                success: true,
-                foods: [{
-                    name: query,
-                    calories: 250,
-                    protein: 10,
-                    carbs: 25,
-                    fat: 10,
-                    sugar: 5,
-                    serving: '1 serving',
-                    quantity: 1,
-                    confidence: 'low',
-                    source: 'estimated'
-                }],
-                source: 'estimate',
-                originalQuery: query
+        if (!forceWebSearch && !locationContext && looksComposite) {
+            const compositeFoods = applyUserProvidedNutritionOverridesToFoods(
+                ensureComponentSeparation(matchCompositeDatabaseFoods(lookupQuery), lookupQuery),
+                userProvidedNutritionDetails
+            );
+            if (compositeFoods.length >= 2 || (compositeFoods.length === 1 && splitCompositeFoodSegments(lookupQuery).length >= 2)) {
+                const totals = calculateTotals(compositeFoods);
+                const clarifyingQuestions = buildClarifyingQuestions(lookupQuery, compositeFoods);
+	                return res.status(200).json({
+	                    success: true,
+	                    foods: compositeFoods,
+	                    ...buildNutritionTotals(totals),
+	                    overallConfidence: clarifyingQuestions.length ? 'medium' : 'high',
+	                    source: 'database-composite',
+                    clarifyingQuestions,
+                    ...queryMeta
+                });
+            }
+        }
+
+        // Fast path: known single items from local nutrition database
+        if (!forceWebSearch && !locationContext && !looksComposite) {
+            let dbResult = searchDatabase(lookupQuery);
+
+            // Retry database lookup without leading quantity ("3 eggs" -> "eggs")
+            const leadingQuantityMatch = normalizeQuery(lookupQuery).match(/^(\d+(?:\.\d+)?)\s+(.+)$/);
+            if (!dbResult && leadingQuantityMatch?.[2]) {
+                const noQuantityQuery = leadingQuantityMatch[2];
+                dbResult = searchDatabase(noQuantityQuery);
+                if (!dbResult && noQuantityQuery.endsWith('s')) {
+                    dbResult = searchDatabase(noQuantityQuery.slice(0, -1));
+                }
+            }
+
+            if (dbResult) {
+                const dbFood = applyUserProvidedNutritionOverrides(
+                    buildFoodFromDatabase(lookupQuery, dbResult),
+                    userProvidedNutritionDetails
+                );
+                const totals = calculateTotals([dbFood]);
+                const clarifyingQuestions = buildClarifyingQuestions(lookupQuery, [dbFood]);
+	                return res.status(200).json({
+	                    success: true,
+	                    foods: [dbFood],
+	                    ...buildNutritionTotals(totals),
+	                    overallConfidence: clarifyingQuestions.length ? 'medium' : deriveOverallConfidence([dbFood]),
+	                    source: 'database',
+                    clarifyingQuestions,
+                    ...queryMeta
+                });
+            }
+        }
+
+        const apiKey = getAnthropicApiKey();
+        if (!apiKey) {
+            console.warn('CLAUDE_API_KEY not configured - falling back to estimate');
+
+            if (requiresLiveSearch) {
+                return res.status(503).json({
+                    success: false,
+                    error: 'Exact branded or restaurant nutrition lookup is temporarily unavailable.',
+                    code: 'LIVE_NUTRITION_REQUIRED',
+                    source: 'live-search-unavailable',
+                    ...queryMeta
+                });
+            }
+
+            let dbFallback = searchDatabase(lookupQuery);
+            const leadingQuantityMatch = normalizeQuery(lookupQuery).match(/^(\d+(?:\.\d+)?)\s+(.+)$/);
+            if (!dbFallback && leadingQuantityMatch?.[2]) {
+                const noQuantityQuery = leadingQuantityMatch[2];
+                dbFallback = searchDatabase(noQuantityQuery) || (noQuantityQuery.endsWith('s')
+                    ? searchDatabase(noQuantityQuery.slice(0, -1))
+                    : null);
+            }
+
+            if (dbFallback) {
+                const dbFood = applyUserProvidedNutritionOverrides(
+                    buildFoodFromDatabase(lookupQuery, dbFallback),
+                    userProvidedNutritionDetails
+                );
+                const totals = calculateTotals([dbFood]);
+                const clarifyingQuestions = buildClarifyingQuestions(lookupQuery, [dbFood]);
+	                return res.status(200).json({
+	                    success: true,
+	                    foods: [dbFood],
+	                    ...buildNutritionTotals(totals),
+	                    overallConfidence: clarifyingQuestions.length ? 'medium' : deriveOverallConfidence([dbFood]),
+	                    source: 'database-fallback',
+                    clarifyingQuestions,
+                    message: 'Claude API key not configured, served from local nutrition database',
+                    ...queryMeta
+                });
+            }
+
+            const estimated = applyUserProvidedNutritionOverrides(
+                buildEstimatedFood(lookupQuery, 'estimated (no api key)'),
+                userProvidedNutritionDetails
+            );
+            const totals = calculateTotals([estimated]);
+	            return res.status(200).json({
+	                success: true,
+	                foods: [estimated],
+	                ...buildNutritionTotals(totals),
+	                overallConfidence: 'low',
+	                source: 'estimate',
+                message: 'Claude API key not configured',
+                ...queryMeta
             });
         }
 
-        console.log(`✅ Claude found ${filteredFoods.length} foods`);
+        const voiceDeepSearch = inputSource === 'voice';
+        const deepSearch = voiceDeepSearch || requiresLiveSearch;
+        const useWebSearch = requiresLiveSearch || voiceDeepSearch;
+        let responseSource = useWebSearch
+            ? (voiceDeepSearch ? 'voice-ai-deep-web-search' : 'ai-web-search')
+            : (deepSearch ? 'ai-deep' : 'ai');
+        let claudeData;
 
-        res.status(200).json({
-            success: true,
-            foods: filteredFoods,
-            source: 'ai',
-            originalQuery: query
+        try {
+            claudeData = await callClaudeFoodParser({
+                apiKey,
+                query: lookupQuery,
+                useWebSearch,
+                strictMode: requiresLiveSearch,
+                deepSearch,
+                inputSource,
+                memoryHints: foodMemoryHints,
+                locationContext
+            });
+        } catch (error) {
+            // Restaurant-like queries should fail closed instead of silently switching to non-search mode
+            if (useWebSearch) {
+                if (requiresLiveSearch) {
+                    throw error;
+                }
+                console.warn(`Web-search parsing failed, retrying without web search: ${error.message}`);
+                claudeData = await callClaudeFoodParser({
+                    apiKey,
+                    query: lookupQuery,
+                    useWebSearch: false,
+                    deepSearch,
+                    inputSource,
+                    memoryHints: foodMemoryHints,
+                    locationContext
+                });
+                responseSource = deepSearch ? 'voice-ai-deep' : 'ai';
+            } else {
+                throw error;
+            }
+        }
+
+        const textContent = extractTextFromClaudeResponse(claudeData);
+        let parsedPayload = parseClaudeFoodPayload(textContent);
+        let foods = sanitizeFoods(parsedPayload.foods, lookupQuery);
+
+        const strictRetryEligible = useWebSearch && requiresLiveSearch;
+        if (strictRetryEligible && isWeakWebSearchFoods(foods, lookupQuery)) {
+            try {
+                const strictData = await callClaudeFoodParser({
+                    apiKey,
+                    query: lookupQuery,
+                    useWebSearch: true,
+                    strictMode: true,
+                    deepSearch,
+                    inputSource,
+                    memoryHints: foodMemoryHints,
+                    locationContext
+                });
+                const strictPayload = parseClaudeFoodPayload(extractTextFromClaudeResponse(strictData));
+                const strictFoods = sanitizeFoods(strictPayload.foods, lookupQuery);
+
+                if (strictFoods.length > 0 && !isWeakWebSearchFoods(strictFoods, lookupQuery)) {
+                    foods = strictFoods;
+                    parsedPayload = strictPayload;
+                    responseSource = 'ai-web-search-strict';
+                }
+            } catch (strictError) {
+                console.warn(`Strict web-search retry failed: ${strictError.message}`);
+            }
+        }
+
+        const officialRetryEligible = useWebSearch && requiresLiveSearch && !hasOfficialNonAggregatorSource(foods);
+        if (officialRetryEligible) {
+            try {
+                const officialData = await callClaudeFoodParser({
+                    apiKey,
+                    query: lookupQuery,
+                    useWebSearch: true,
+                    strictMode: true,
+                    officialOnly: true,
+                    deepSearch,
+                    inputSource,
+                    memoryHints: foodMemoryHints,
+                    locationContext
+                });
+                const officialPayload = parseClaudeFoodPayload(extractTextFromClaudeResponse(officialData));
+                const officialFoods = sanitizeFoods(officialPayload.foods, lookupQuery);
+
+                if (officialFoods.length > 0 && hasOfficialNonAggregatorSource(officialFoods)) {
+                    foods = officialFoods;
+                    parsedPayload = officialPayload;
+                    responseSource = 'ai-web-search-official-retry';
+                }
+            } catch (officialRetryError) {
+                console.warn(`Official-only retry failed: ${officialRetryError.message}`);
+            }
+        }
+
+        if (requiresLiveSearch && foods.length > 0 && (queryImpliesMealCombo(lookupQuery) || isBranded)) {
+            try {
+                const refinedFoods = await refineFoodsWithOfficialNutrition(foods, lookupQuery);
+                if (refinedFoods !== foods) {
+                    foods = refinedFoods;
+                    parsedPayload.notes = 'Matched meal nutrition from an official nutrition page.';
+                    responseSource = responseSource.includes('web-search')
+                        ? `${responseSource}+official-page`
+                        : 'official-page';
+                }
+            } catch (refineError) {
+                console.warn(`Official nutrition refinement skipped: ${refineError.message}`);
+            }
+        }
+
+        if (foods.length === 0) {
+            if (requiresLiveSearch) {
+                return res.status(502).json({
+                    success: false,
+                    error: 'No reliable official nutrition match was found. Add the brand, restaurant, serving size, or label values and try again.',
+                    code: 'OFFICIAL_NUTRITION_NOT_FOUND',
+                    source: 'live-search-no-match',
+                    ...queryMeta
+                });
+            } else {
+                const dbFallback = searchDatabase(lookupQuery);
+                if (dbFallback) {
+                    foods = [buildFoodFromDatabase(lookupQuery, dbFallback)];
+                } else {
+                    foods = [buildEstimatedFood(lookupQuery, 'estimated (ai parse fallback)')];
+                }
+            }
+        }
+
+        foods = applyUserProvidedNutritionOverridesToFoods(
+            ensureComponentSeparation(foods, lookupQuery),
+            userProvidedNutritionDetails
+        );
+
+        const totals = calculateTotals(foods);
+        const overallConfidence = deriveOverallConfidence(foods, parsedPayload.overallConfidence);
+        const clarifyingQuestions = buildClarifyingQuestions(lookupQuery, foods);
+
+	        res.status(200).json({
+	            success: true,
+	            foods,
+	            ...buildNutritionTotals(totals),
+	            overallConfidence,
+	            notes: cleanText(parsedPayload.notes || '', '', 240) || null,
+            source: responseSource,
+            clarifyingQuestions,
+            ...queryMeta
         });
 
     } catch (error) {
         console.error('AI food parsing error:', error);
 
-        res.status(200).json({
-            success: true,
-            foods: [{
-                name: req.body?.query || 'Unknown food',
-                calories: 250,
-                protein: 10,
-                carbs: 25,
-                fat: 10,
-                sugar: 5,
-                serving: '1 serving',
-                quantity: 1,
-                confidence: 'low',
-                source: 'estimated (error)'
-            }],
-            source: 'estimate',
-            error: error.message
+        const body = req.body || {};
+        const rawQuery = typeof body.query === 'string' ? body.query : '';
+        const originalQuery = rawQuery.trim() || 'Food item';
+        const inputSource = normalizeInputSource(body.source);
+        const voiceAlternatives = Array.isArray(body.alternatives)
+            ? body.alternatives.map((value) => cleanText(value, '', 180)).filter(Boolean).slice(0, 5)
+            : [];
+        const normalizedQuery = inputSource === 'voice'
+            ? selectVoiceQuery(originalQuery, voiceAlternatives)
+            : originalQuery;
+        const userProvidedNutritionDetails = extractUserProvidedNutritionDetails(normalizedQuery);
+        const userProvidedNutrition = userProvidedNutritionDetails ? extractUserProvidedNutrition(normalizedQuery) : null;
+        const fallbackQuery = userProvidedNutritionDetails?.lookupName || normalizedQuery;
+        const requiresLiveSearch = Boolean(body.forceWebSearch)
+            || isBrandedProduct(fallbackQuery)
+            || isLikelyCompositeQuery(fallbackQuery)
+            || isRestaurantLikeQuery(fallbackQuery);
+        const errorMessage = String(error?.message || '');
+        const statusMatch = errorMessage.match(/Claude API\s+(\d{3})/i);
+        const providerStatus = statusMatch ? Number(statusMatch[1]) : null;
+        const isProviderFailure = /Claude API \d{3}/i.test(errorMessage)
+            || /rate_limit_error/i.test(errorMessage)
+            || /credit balance is too low/i.test(errorMessage);
+
+        if (requiresLiveSearch && isProviderFailure) {
+            if (userProvidedNutrition) {
+                const totals = calculateTotals([userProvidedNutrition]);
+                return res.status(200).json({
+                    success: true,
+                    foods: [userProvidedNutrition],
+                    ...buildNutritionTotals(totals),
+                    overallConfidence: 'high',
+                    source: 'user-provided-nutrition-provider-fallback',
+                    error: error.message,
+                    ...buildQueryMeta(originalQuery, normalizedQuery)
+                });
+            }
+
+            let statusCode = 502;
+            let userMessage = 'Live nutrition lookup is temporarily unavailable.';
+
+            if (providerStatus === 429 || /rate_limit_error/i.test(errorMessage)) {
+                statusCode = 429;
+                userMessage = 'Live nutrition lookup is rate-limited right now. Please retry in about 30 seconds.';
+            } else if (/credit balance is too low/i.test(errorMessage)) {
+                statusCode = 503;
+                userMessage = 'Live nutrition lookup is unavailable because the provider account is out of credits.';
+            }
+
+            return res.status(statusCode).json({
+                success: false,
+                error: userMessage,
+                source: 'live-search-unavailable',
+                providerStatus,
+                ...buildQueryMeta(originalQuery, normalizedQuery)
+            });
+        }
+
+        if (requiresLiveSearch) {
+            return res.status(502).json({
+                success: false,
+                error: 'A reliable branded or restaurant nutrition match could not be verified. Add label values or try again.',
+                code: 'OFFICIAL_NUTRITION_NOT_VERIFIED',
+                source: 'live-search-unverified',
+                ...buildQueryMeta(originalQuery, normalizedQuery)
+            });
+        }
+
+        const fallback = applyUserProvidedNutritionOverrides(
+            buildEstimatedFood(fallbackQuery, 'estimated (error)'),
+            userProvidedNutritionDetails
+        );
+        const totals = calculateTotals([fallback]);
+
+	        res.status(200).json({
+	            success: true,
+	            foods: [fallback],
+	            ...buildNutritionTotals(totals),
+	            overallConfidence: 'low',
+	            source: 'estimate',
+            error: error.message,
+            ...buildQueryMeta(originalQuery, normalizedQuery)
         });
     }
 }

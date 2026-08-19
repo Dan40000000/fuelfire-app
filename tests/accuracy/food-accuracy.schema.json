@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fuelfire-app.vercel.app/schemas/food-accuracy-case.json",
+  "title": "Well Fit Food Accuracy Dataset",
+  "type": "object",
+  "required": ["schemaVersion", "cases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "name": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "modality", "evidence", "input", "truth"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string" },
+          "modality": { "enum": ["voice", "photo", "typed"] },
+          "evidence": { "enum": ["visible_label", "dictated_values", "official_brand", "generic"] },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "input": {
+            "type": "object",
+            "properties": {
+              "intendedPhrase": { "type": "string" },
+              "transcript": { "type": "string" },
+              "alternatives": { "type": "array", "items": { "type": "string" } },
+              "imagePath": { "type": "string" },
+              "imageData": { "type": "string" },
+              "mimeType": { "type": "string" },
+              "context": { "type": "string" },
+              "photoContextDetails": { "type": "object" }
+            },
+            "additionalProperties": true
+          },
+          "truth": {
+            "type": "object",
+            "required": ["totals"],
+            "properties": {
+              "names": { "type": "array", "items": { "type": "string" } },
+              "foodCount": { "type": "number", "minimum": 0 },
+              "totals": {
+                "type": "object",
+                "properties": {
+                  "calories": { "type": "number", "minimum": 0 },
+                  "protein": { "type": "number", "minimum": 0 },
+                  "carbs": { "type": "number", "minimum": 0 },
+                  "fiber": { "type": "number", "minimum": 0 },
+                  "netCarbs": { "type": "number", "minimum": 0 },
+                  "fat": { "type": "number", "minimum": 0 },
+                  "sugar": { "type": "number", "minimum": 0 }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": true
+          },
+          "fixturePrediction": { "type": "object" },
+          "tolerance": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "name": "Well Fit seed food accuracy set",
+  "createdAt": "2026-08-09T00:00:00.000Z",
+  "cases": [
+    {
+      "id": "voice-mcdonalds-sausage-mcmuffin",
+      "title": "McDonald's Sausage McMuffin with Egg",
+      "modality": "voice",
+      "evidence": "official_brand",
+      "tags": ["restaurant", "brand"],
+      "input": { "intendedPhrase": "McDonald's sausage egg McMuffin", "transcript": "McDonald's sausage egg McMuffin", "alternatives": ["McDonald's sausage McMuffin with egg"] },
+      "truth": { "names": ["McDonald's Sausage McMuffin with Egg"], "foodCount": 1, "totals": { "calories": 480, "protein": 21, "carbs": 29, "fat": 31 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "database", "foods": [{ "name": "McDonald's Sausage McMuffin with Egg", "quantity": 1, "calories": 480, "protein": 21, "carbs": 29, "fat": 31 }] }
+    },
+    {
+      "id": "voice-trolli-spelling-drift",
+      "title": "Trolli Sour Brite Eggs speech drift",
+      "modality": "voice",
+      "evidence": "official_brand",
+      "tags": ["packaged", "speech-drift"],
+      "input": { "intendedPhrase": "Trolli Sour Brite Eggs", "transcript": "trolley sour bright eggs", "alternatives": ["Trolli sour brite eggs", "trolly sour bite eggs"] },
+      "truth": { "names": ["Trolli Sour Brite Eggs"], "foodCount": 1, "totals": { "calories": 110, "protein": 1, "carbs": 26, "fat": 0, "sugar": 19 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "verified-package-database", "foods": [{ "name": "Trolli Sour Brite Eggs", "quantity": 1, "calories": 110, "protein": 1, "carbs": 26, "fat": 0, "sugar": 19 }] }
+    },
+    {
+      "id": "voice-quest-supreme-drift",
+      "title": "Quest pizza net-carb speech drift",
+      "modality": "voice",
+      "evidence": "dictated_values",
+      "tags": ["packaged", "net-carbs", "speech-drift"],
+      "input": { "intendedPhrase": "Quest Supreme whole pizza, 760 calories and 4 net carbs", "transcript": "question supreme full pizza should be Fournett carbs and 760 cal", "alternatives": ["Quest supreme whole pizza 4 net carbs 760 calories"] },
+      "truth": { "names": ["Quest Supreme Pizza"], "foodCount": 1, "totals": { "calories": 760, "protein": 60, "carbs": 54, "fiber": 50, "netCarbs": 4, "fat": 51 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "user-provided-nutrition", "foods": [{ "name": "Quest Supreme Pizza", "quantity": 1, "calories": 760, "protein": 60, "carbs": 54, "fiber": 50, "netCarbs": 4, "fat": 51 }] }
+    },
+    {
+      "id": "voice-calories-only",
+      "title": "Calories-only dictation",
+      "modality": "voice",
+      "evidence": "dictated_values",
+      "tags": ["explicit-values"],
+      "input": { "intendedPhrase": "Add 300 calories", "transcript": "add three hundred calories" },
+      "truth": { "names": ["Quick calorie entry"], "foodCount": 1, "totals": { "calories": 300, "protein": 0, "carbs": 0, "fiber": 0, "netCarbs": 0, "fat": 0 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "user-provided-nutrition", "foods": [{ "name": "Quick calorie entry", "quantity": 1, "calories": 300, "protein": 0, "carbs": 0, "fiber": 0, "netCarbs": 0, "fat": 0 }] }
+    },
+    {
+      "id": "voice-protein-shake-derived-carbs",
+      "title": "Derive remaining calories as carbs",
+      "modality": "voice",
+      "evidence": "dictated_values",
+      "tags": ["explicit-values", "macro-math"],
+      "input": { "intendedPhrase": "Protein shake, 500 calories, 30 grams of protein, put the remaining calories in carbs", "transcript": "I did a protein shake with 30 g of protein and it's about 500 cal so however many of the rest of the calories are in carbs" },
+      "truth": { "names": ["Protein Shake"], "foodCount": 1, "totals": { "calories": 500, "protein": 30, "carbs": 95, "fiber": 0, "netCarbs": 95, "fat": 0, "sugar": 0 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "user-provided-nutrition", "foods": [{ "name": "Protein Shake (generic)", "quantity": 1, "calories": 500, "protein": 30, "carbs": 95, "fiber": 0, "netCarbs": 95, "fat": 0, "sugar": 0 }] }
+    },
+    {
+      "id": "voice-six-foods",
+      "title": "Six foods in one utterance",
+      "modality": "voice",
+      "evidence": "generic",
+      "tags": ["multi-item"],
+      "input": { "intendedPhrase": "Two eggs, a banana, oatmeal, a protein shake, chicken breast, and rice", "transcript": "2 eggs banana oatmeal protein shake chicken breast rice" },
+      "truth": { "names": ["Egg", "Banana", "Oatmeal", "Protein Shake", "Chicken Breast", "Rice"], "foodCount": 6, "totals": { "calories": 924, "protein": 79, "carbs": 109, "fat": 19 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "medium", "source": "database-composite", "calories": 924, "protein": 79, "carbs": 109, "fat": 19, "foods": [{ "name": "Egg", "quantity": 2, "calories": 70, "protein": 6, "carbs": 0, "fat": 5 }, { "name": "Banana", "quantity": 1, "calories": 105, "protein": 1, "carbs": 27, "fat": 0 }, { "name": "Oatmeal", "quantity": 1, "calories": 150, "protein": 5, "carbs": 27, "fat": 3 }, { "name": "Protein Shake", "quantity": 1, "calories": 200, "protein": 30, "carbs": 8, "fat": 4 }, { "name": "Chicken Breast", "quantity": 1, "calories": 187, "protein": 31, "carbs": 0, "fat": 2 }, { "name": "Rice", "quantity": 1, "calories": 142, "protein": 0, "carbs": 47, "fat": 0 }] }
+    },
+    {
+      "id": "voice-blueberry-muffins-standard",
+      "title": "Four standard blueberry muffins",
+      "modality": "voice",
+      "evidence": "generic",
+      "tags": ["portion-size", "clarification"],
+      "input": { "intendedPhrase": "Four standard blueberry muffins", "transcript": "four blueberry muffins" },
+      "truth": { "names": ["Blueberry Muffin"], "foodCount": 1, "totals": { "calories": 540, "protein": 6, "carbs": 126, "fiber": 2, "netCarbs": 124, "fat": 2, "sugar": 62 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "medium", "source": "database", "foods": [{ "name": "Blueberry Muffin", "quantity": 4, "serving": "1 standard muffin", "calories": 135, "protein": 1.5, "carbs": 31.5, "fiber": 0.5, "netCarbs": 31, "fat": 0.5, "sugar": 15.5 }] }
+    },
+    {
+      "id": "voice-six-cups-popcorn",
+      "title": "Six cups of air-popped popcorn",
+      "modality": "voice",
+      "evidence": "dictated_values",
+      "tags": ["portion-size", "speech-drift"],
+      "input": { "intendedPhrase": "Six cups of air-popped popcorn", "transcript": "sick cups pop corn", "alternatives": ["six cups popcorn"] },
+      "truth": { "names": ["Popcorn"], "foodCount": 1, "totals": { "calories": 186, "protein": 6, "carbs": 36, "fiber": 6, "netCarbs": 30, "fat": 0, "sugar": 0 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "database", "foods": [{ "name": "Popcorn", "quantity": 6, "serving": "1 cup popped", "calories": 31, "protein": 1, "carbs": 6, "fiber": 1, "netCarbs": 5, "fat": 0, "sugar": 0 }] }
+    },
+    {
+      "id": "photo-daisy-visible-label",
+      "title": "Daisy cottage cheese visible label",
+      "modality": "photo",
+      "evidence": "visible_label",
+      "tags": ["packaged", "label"],
+      "input": { "context": "Daisy cottage cheese, whole 170g container; nutrition label visible", "photoContextDetails": { "brand": "Daisy", "labelVisibility": "nutrition-label-visible", "portionMode": "whole-item", "portionDetail": "1 container 170g" } },
+      "truth": { "names": ["Daisy Cottage Cheese"], "foodCount": 1, "totals": { "calories": 160, "protein": 14, "carbs": 15, "fiber": 0, "netCarbs": 15, "fat": 5, "sugar": 11 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "visible-label", "foods": [{ "name": "Daisy Cottage Cheese", "quantity": 1, "serving": "1 container (170g)", "calories": 160, "protein": 14, "carbs": 15, "fiber": 0, "netCarbs": 15, "fat": 5, "sugar": 11 }] }
+    },
+    {
+      "id": "photo-kirkland-whole-pizza-label",
+      "title": "Kirkland cauliflower pizza whole package math",
+      "modality": "photo",
+      "evidence": "visible_label",
+      "tags": ["packaged", "label", "serving-math"],
+      "input": { "context": "Kirkland Signature supreme cauliflower crust pizza, whole pizza; label says 1/4 pizza is 310 calories", "photoContextDetails": { "brand": "Kirkland Signature", "labelVisibility": "nutrition-label-visible", "portionMode": "whole-item", "portionDetail": "whole pizza; 4 label servings" } },
+      "truth": { "names": ["Kirkland Signature Supreme Cauliflower Crust Pizza"], "foodCount": 1, "totals": { "calories": 1240, "protein": 56, "carbs": 124, "fiber": 4, "netCarbs": 120, "fat": 60, "sugar": 16 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "visible-label", "foods": [{ "name": "Kirkland Signature Supreme Cauliflower Crust Pizza", "quantity": 4, "serving": "1/4 pizza", "calories": 310, "protein": 14, "carbs": 31, "fiber": 1, "netCarbs": 30, "fat": 15, "sugar": 4 }] }
+    },
+    {
+      "id": "photo-large-sausage-links",
+      "title": "Two large sausage links",
+      "modality": "photo",
+      "evidence": "generic",
+      "tags": ["portion-size", "scale-reference"],
+      "input": { "context": "Two thick full-size sausage links on a standard dinner plate", "photoContextDetails": { "portionMode": "all-visible", "portionDetail": "2 large links; standard dinner plate for scale" } },
+      "truth": { "names": ["Large Sausage Link"], "foodCount": 1, "totals": { "calories": 450, "protein": 20, "carbs": 4, "fiber": 0, "netCarbs": 4, "fat": 40, "sugar": 2 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "medium", "source": "photo-estimate", "foods": [{ "name": "Large Sausage Link", "quantity": 2, "serving": "1 large link (about 70g)", "calories": 225, "protein": 10, "carbs": 2, "fiber": 0, "netCarbs": 2, "fat": 20, "sugar": 1 }] }
+    },
+    {
+      "id": "photo-small-vermont-maple-links",
+      "title": "Six small Vermont Maple breakfast links",
+      "modality": "photo",
+      "evidence": "official_brand",
+      "tags": ["packaged", "portion-size"],
+      "input": { "context": "Six Johnsonville Vermont Maple Syrup small breakfast sausage links", "photoContextDetails": { "brand": "Johnsonville Vermont Maple Syrup", "portionMode": "all-visible", "portionDetail": "6 small breakfast links" } },
+      "truth": { "names": ["Johnsonville Vermont Maple Breakfast Sausage Links"], "foodCount": 1, "totals": { "calories": 340, "protein": 20, "carbs": 4, "fiber": 0, "netCarbs": 4, "fat": 26, "sugar": 2 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "high", "source": "verified-package-database", "foods": [{ "name": "Johnsonville Vermont Maple Breakfast Sausage Links", "quantity": 2, "serving": "3 small links", "calories": 170, "protein": 10, "carbs": 2, "fiber": 0, "netCarbs": 2, "fat": 13, "sugar": 1 }] }
+    },
+    {
+      "id": "photo-mixed-popcorn-six-cups",
+      "title": "Six cups mixed popcorn",
+      "modality": "photo",
+      "evidence": "generic",
+      "tags": ["portion-size", "mixed-food"],
+      "input": { "context": "About 6 cups mixed butter, plain, and caramel popcorn on a standard 9-inch plate", "photoContextDetails": { "portionMode": "all-visible", "portionDetail": "about 6 cups; 9-inch plate" } },
+      "truth": { "names": ["Mixed Popcorn"], "foodCount": 1, "totals": { "calories": 300, "protein": 6, "carbs": 48, "fiber": 5, "netCarbs": 43, "fat": 10, "sugar": 8 } },
+      "fixturePrediction": { "success": true, "overallConfidence": "low", "source": "photo-estimate", "foods": [{ "name": "Mixed Popcorn", "quantity": 1, "serving": "about 6 cups", "calories": 300, "protein": 6, "carbs": 48, "fiber": 5, "netCarbs": 43, "fat": 10, "sugar": 8 }] }
+    }
+  ]
+}

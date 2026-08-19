@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#fff"/>
+  <rect x="80" y="60" width="640" height="480" fill="none" stroke="#111" stroke-width="12"/>
+  <text x="110" y="130" font-family="Arial" font-size="48" font-weight="700">Nutrition Facts</text>
+  <text x="110" y="205" font-family="Arial" font-size="32">1 serving per container</text>
+  <text x="110" y="260" font-family="Arial" font-size="32">Calories 160</text>
+  <text x="110" y="320" font-family="Arial" font-size="28">Protein 14g</text>
+  <text x="110" y="370" font-family="Arial" font-size="28">Total Carbohydrate 15g</text>
+  <text x="110" y="420" font-family="Arial" font-size="28">Total Fat 5g</text>
+</svg>
