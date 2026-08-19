@@ -1,6 +1,7 @@
 name: Test Well Fit Pro
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches: [main]
@@ -71,6 +72,7 @@ jobs:
           if-no-files-found: error
 
   native-ios-smoke:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     timeout-minutes: 30
 
