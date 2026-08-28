@@ -21,6 +21,8 @@
     }
 
     function applyEntitlement(payload = {}) {
+        const rcAppUserId = payload.rcAppUserId || payload.appUserID || '';
+        if (rcAppUserId) localStorage.setItem('rc_app_user_id', String(rcAppUserId));
         const plan = payload.entitlement || payload.plan || 'premium';
         const expiresAt = payload.expiresAt || null;
         const email = payload.email || 'ios_user';
@@ -45,7 +47,7 @@
         applyEntitlement
     };
 
-    // Allow native → webview postMessage with { type: 'RC_ENTITLEMENT', entitlement, email, name, expiresAt }
+    // Allow native → webview postMessage with { type: 'RC_ENTITLEMENT', rcAppUserId, entitlement, email, name, expiresAt }
     window.addEventListener('message', (event) => {
         const data = event?.data || {};
         if (data.type === 'RC_ENTITLEMENT') {

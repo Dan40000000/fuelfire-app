@@ -657,6 +657,64 @@ test('photo flow sends brand and portion context before displaying mocked result
     await page.evaluate(() => window.closePhotoModal());
 });
 
+test('photo requests include the RevenueCat user needed by the production AI gate', async ({ page }) => {
+    let requestHeaders;
+    await page.addInitScript(() => {
+        localStorage.setItem('rc_app_user_id', 'testflight-photo-user');
+    });
+    await page.route('**/api/ai-food-vision', async (route) => {
+        requestHeaders = route.request().headers();
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                overallConfidence: 'medium',
+                foods: [{
+                    name: 'Bone-in Smoked Beef', calories: 720, protein: 78, carbs: 4,
+                    fiber: 0, netCarbs: 4, fat: 42, sugar: 2, quantity: 1,
+                    serving: 'estimated visible portion', confidence: 'medium',
+                    dataSource: 'visual estimate pending weight confirmation',
+                }],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.requireAIAccess = () => true;
+        window.startFoodPhotoCapture();
+    });
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+
+    await expect(page.locator('#photo-results')).toBeVisible();
+    expect(requestHeaders['x-fuelfire-rc-app-user-id']).toBe('testflight-photo-user');
+});
+
+test('photo authorization errors stop the loading state and return to retry controls', async ({ page }) => {
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 402,
+            contentType: 'application/json',
+            body: JSON.stringify({ success: false, error: 'AI subscription required', code: 'AI_ACCESS_REQUIRED' }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.requireAIAccess = () => true;
+        window.startFoodPhotoCapture();
+    });
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+
+    await expect(page.locator('#photo-live-alert')).toContainText('AI access could not be verified');
+    await expect(page.locator('#photo-loading')).toBeHidden();
+    await expect(page.locator('#photo-capture-section')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Analyze Food' })).toBeVisible();
+});
+
 test('photo questions resolve before one parser recalculation and preserve range assumptions', async ({ page }) => {
     const parserRequests = [];
     await page.route('**/api/ai-food-vision', async (route) => {

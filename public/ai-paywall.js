@@ -13,6 +13,18 @@
     };
     // Entitlement identifiers from RevenueCat dashboard (case-sensitive)
     const RC_ENTITLEMENTS_FOR_AI = ['Premium_Access', 'Elite_access'];
+    const AI_ACCESS_TOKEN_KEY = 'fuelfire_ai_access_token';
+    const PRODUCTION_API_ORIGIN = 'https://fuelfire-app.vercel.app';
+    const AI_API_PATHS = new Set([
+        '/api/accuracy-lab-session',
+        '/api/ai-food-parser',
+        '/api/ai-food-vision',
+        '/api/claude-meal-plan',
+        '/api/generate-meal-plan',
+        '/api/ai-workout-plan',
+        '/api/treadmill-vision'
+    ]);
+    const nativeFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
     let rcReady = false;
     let rcEntitlements = {};
     let offeringsCache = null;
@@ -234,6 +246,49 @@
         return false;
     }
 
+    function getAiRequestHeaders() {
+        const headers = {};
+        const accessToken = localStorage.getItem(AI_ACCESS_TOKEN_KEY) || '';
+        const revenueCatAppUserId = localStorage.getItem('rc_app_user_id') || '';
+        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+        if (revenueCatAppUserId) headers['X-FuelFire-RC-App-User-ID'] = revenueCatAppUserId;
+        return headers;
+    }
+
+    function resolveAiApiRequest(input) {
+        const value = typeof input === 'string' ? input : input?.url;
+        if (!value) return null;
+        try {
+            const parsed = new URL(value, window.location.href);
+            if (!AI_API_PATHS.has(parsed.pathname)) return null;
+
+            const currentOriginIsHttp = /^https?:$/i.test(window.location.protocol);
+            if (/^https?:$/i.test(parsed.protocol)) {
+                const allowedOrigins = new Set([PRODUCTION_API_ORIGIN]);
+                if (currentOriginIsHttp) allowedOrigins.add(window.location.origin);
+                return allowedOrigins.has(parsed.origin) ? parsed.href : null;
+            }
+
+            return `${PRODUCTION_API_ORIGIN}${parsed.pathname}${parsed.search || ''}`;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function installAiFetchCredentials() {
+        if (!nativeFetch || window.__fuelfireAiFetchCredentialsInstalled) return;
+        window.__fuelfireAiFetchCredentialsInstalled = true;
+        window.fetch = function authenticatedAiFetch(input, init = {}) {
+            const resolvedUrl = resolveAiApiRequest(input);
+            if (!resolvedUrl) return nativeFetch(input, init);
+
+            const headers = new Headers(init.headers || input?.headers || {});
+            Object.entries(getAiRequestHeaders()).forEach(([name, value]) => headers.set(name, value));
+            const requestInput = typeof input === 'string' ? resolvedUrl : new Request(resolvedUrl, input);
+            return nativeFetch(requestInput, { ...init, headers });
+        };
+    }
+
     function ensurePaywall(actionLabel) {
         let modal = document.getElementById('ai-paywall');
         if (!modal) {
@@ -333,12 +388,14 @@
         hasAccess,
         readStatus,
         saveStatus,
+        getRequestHeaders: getAiRequestHeaders,
         getEvents,
         refreshEntitlements,
         purchasePackage,
         restorePurchases
     };
 
+    installAiFetchCredentials();
     parseQueryFlags();
     initRevenueCat();
 })();
