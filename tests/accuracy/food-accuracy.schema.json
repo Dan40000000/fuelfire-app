@@ -29,7 +29,46 @@
               "imageData": { "type": "string" },
               "mimeType": { "type": "string" },
               "context": { "type": "string" },
-              "photoContextDetails": { "type": "object" }
+              "photoContextDetails": { "type": "object" },
+              "captureSource": { "enum": ["lidar", "existing-photo"] },
+              "spatialContext": {
+                "type": "object",
+                "properties": {
+                  "captureMode": { "type": "string" },
+                  "lidarAvailable": { "type": "boolean" },
+                  "sceneDepthAvailable": { "type": "boolean" },
+                  "smoothedSceneDepthAvailable": { "type": "boolean" },
+                  "confidenceAvailable": { "type": "boolean" },
+                  "imageResolution": {
+                    "type": "object",
+                    "properties": {
+                      "width": { "type": "integer", "minimum": 1 },
+                      "height": { "type": "integer", "minimum": 1 }
+                    },
+                    "additionalProperties": true
+                  },
+                  "depthMapResolution": {
+                    "type": "object",
+                    "properties": {
+                      "width": { "type": "integer", "minimum": 0 },
+                      "height": { "type": "integer", "minimum": 0 }
+                    },
+                    "additionalProperties": true
+                  },
+                  "centerDistanceMeters": { "type": ["number", "null"], "minimum": 0 },
+                  "platePlaneDistanceMeters": { "type": ["number", "null"], "minimum": 0 },
+                  "estimatedFoodHeightMeters": { "type": ["number", "null"], "minimum": 0 },
+                  "depthStats": {
+                    "type": "object",
+                    "properties": {
+                      "validSampleRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+                      "highConfidenceRatio": { "type": "number", "minimum": 0, "maximum": 1 }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": true
+              }
             },
             "additionalProperties": true
           },

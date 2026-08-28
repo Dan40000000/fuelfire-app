@@ -406,5 +406,8 @@ final class WellFitBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
         bridge?.registerPluginInstance(HealthTotalsPlugin())
+        if let foodDepthPluginClass = NSClassFromString("FoodDepthCapturePlugin") as? CAPPlugin.Type {
+            bridge?.registerPluginInstance(foodDepthPluginClass.init())
+        }
     }
 }

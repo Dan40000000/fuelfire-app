@@ -32,6 +32,81 @@
         return SIZE_WORDS.find((word) => normalized.includes(` ${word} `)) || '';
     }
 
+    function extractPortionBasis(value) {
+        const normalized = ` ${normalizeText(value)} `;
+        if (/\b\d+(?:\.\d+)?\s*(?:g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|pound|pounds)\b/.test(normalized)) return 'weight';
+        if (/\b\d+(?:\.\d+)?\s*(?:cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|ml|milliliter|milliliters|liter|liters)\b/.test(normalized)) return 'volume';
+        if (/\b(?:whole|entire|full)\s+(?:pizza|pie|package|container|bag|bottle|can)\b/.test(normalized)) return 'whole';
+        if (/\b(?:slice|slices|half|quarter|third|1\s+[234568])\b/.test(normalized)) return 'part';
+        if (/\b(?:container|package|packet|pouch|carton|bottle|bottles|can|cans|bag|bags|bar|bars)\b/.test(normalized)) return 'package';
+        if (
+            /\b\d+(?:\.\d+)?\b/.test(normalized)
+            && /\b(?:shrimp|prawn|link|links|piece|pieces|item|items|egg|eggs|muffin|muffins|pancake|pancakes|wing|wings|nugget|nuggets|meatball|meatballs|dumpling|dumplings|taco|tacos|cookie|cookies|cracker|crackers)\b/.test(normalized)
+        ) return 'count';
+        return '';
+    }
+
+    function extractServingPortionAmount(value, basis) {
+        const normalized = ` ${normalizeText(value)} `;
+        if (basis === 'weight') {
+            const match = normalized.match(/\b(\d+(?:\.\d+)?)\s*(kg|kilogram|kilograms|g|gram|grams|oz|ounce|ounces|lb|pound|pounds)\b/);
+            if (!match) return 0;
+            const amount = numberValue(match[1], 0);
+            if (/^(kg|kilogram)/.test(match[2])) return amount * 1000;
+            if (/^(oz|ounce)/.test(match[2])) return amount * 28.3495;
+            if (/^(lb|pound)/.test(match[2])) return amount * 453.592;
+            return amount;
+        }
+        if (basis === 'volume') {
+            const match = normalized.match(/\b(\d+(?:\.\d+)?)\s*(cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|ml|milliliter|milliliters|liter|liters)\b/);
+            if (!match) return 0;
+            const amount = numberValue(match[1], 0);
+            if (/^cup/.test(match[2])) return amount * 236.588;
+            if (/^(tbsp|tablespoon)/.test(match[2])) return amount * 14.7868;
+            if (/^(tsp|teaspoon)/.test(match[2])) return amount * 4.92892;
+            if (/^liter/.test(match[2])) return amount * 1000;
+            return amount;
+        }
+        if (basis === 'count') {
+            const match = normalized.match(/\b(\d+(?:\.\d+)?)\b/);
+            return match ? numberValue(match[1], 0) : 0;
+        }
+        if (basis === 'whole') return 1;
+        if (basis === 'part') {
+            const fraction = normalized.match(/\b1\s+([234568])\b/);
+            if (fraction) return 1 / numberValue(fraction[1], 1);
+            if (/\bhalf\b/.test(normalized)) return 0.5;
+            if (/\bthird\b/.test(normalized)) return 1 / 3;
+            if (/\bquarter\b/.test(normalized)) return 0.25;
+            const slices = normalized.match(/\b(\d+(?:\.\d+)?)\s+slices?\b/);
+            return slices ? numberValue(slices[1], 0) : 1;
+        }
+        if (basis === 'package') {
+            const match = normalized.match(/\b(\d+(?:\.\d+)?)\s+(?:containers?|packages?|packets?|pouches?|cartons?|bottles?|cans?|bags?|bars?)\b/);
+            return match ? numberValue(match[1], 0) : 1;
+        }
+        return 0;
+    }
+
+    function portionsAreCompatible(left, right, tolerance = 1.35) {
+        const leftText = `${left?.name || ''} ${left?.serving || ''}`;
+        const rightText = `${right?.name || ''} ${right?.serving || ''}`;
+        const leftSize = extractSize(leftText);
+        const rightSize = extractSize(rightText);
+        if (leftSize && rightSize && leftSize !== rightSize) return false;
+
+        const leftBasis = extractPortionBasis(leftText);
+        const rightBasis = extractPortionBasis(rightText);
+        if (leftBasis && rightBasis && leftBasis !== rightBasis) return false;
+        if (!leftBasis || !rightBasis) return true;
+
+        const leftAmount = extractServingPortionAmount(left?.serving, leftBasis);
+        const rightAmount = extractServingPortionAmount(right?.serving, rightBasis);
+        if (!leftAmount || !rightAmount) return true;
+        const ratio = Math.max(leftAmount, rightAmount) / Math.min(leftAmount, rightAmount);
+        return ratio <= tolerance;
+    }
+
     function inferEvidenceTier(food) {
         const sourceType = String(food?.sourceType || '').toLowerCase();
         const sourceText = `${food?.source || ''} ${food?.dataSource || ''} ${food?.evidence || ''}`;
@@ -59,9 +134,13 @@
 
     function shouldMemoryOverride(candidate, memoryItem) {
         if (!isMemoryEligible(memoryItem)) return false;
-        const candidateSize = extractSize(`${candidate?.name || ''} ${candidate?.serving || ''}`);
-        const memorySize = extractSize(`${memoryItem?.name || ''} ${memoryItem?.serving || ''}`);
-        if (candidateSize && memorySize && candidateSize !== memorySize) return false;
+        if (
+            candidate?.nutritionBasis === 'user-provided'
+            || /user dictated|user-provided nutrition/i.test(`${candidate?.source || ''} ${candidate?.evidence || ''}`)
+        ) {
+            return false;
+        }
+        if (!portionsAreCompatible(candidate, memoryItem)) return false;
         return inferEvidenceTier(memoryItem) > inferEvidenceTier(candidate);
     }
 
@@ -240,6 +319,7 @@
         normalizeText,
         recordMealPattern,
         sanitizeLocationContext,
+        portionsAreCompatible,
         shouldMemoryOverride
     };
 }));

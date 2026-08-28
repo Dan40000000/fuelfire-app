@@ -19,6 +19,10 @@ import { getTestAuthHeaders, invokeApi, loadEnvFile } from './lib/api-test-utils
 loadEnvFile('.env.local');
 delete process.env.CLAUDE_API_KEY;
 delete process.env.ANTHROPIC_API_KEY;
+delete process.env.FOOD_AI_API_KEY;
+delete process.env.HF_TOKEN;
+delete process.env.HUGGING_FACE_HUB_TOKEN;
+delete process.env.FOOD_AI_BASE_URL;
 
 const outputDir = process.env.AI_FOOD_REGRESSION_OUTPUT_DIR || 'output/test-results';
 fs.mkdirSync(outputDir, { recursive: true });
@@ -108,6 +112,39 @@ const voiceCases = [
         expected: { calories: 160, protein: 14, carbs: 15, fiber: 0, netCarbs: 15, fat: 5, sugar: 11 },
         tolerance: { calories: 0.01, protein: 0.01, carbs: 0.01, fiber: 0.01, netCarbs: 0.01, fat: 0.01, sugar: 0.01 },
         expectedFirstFoodName: 'Daisy Cottage Cheese',
+    },
+    {
+        name: 'Voice Zero Calorie Saved Food Memory',
+        query: 'my usual diet soda',
+        foodMemoryHints: [{
+            name: 'Diet Soda', serving: '1 can', calories: 0,
+            protein: 0, carbs: 0, fiber: 0, netCarbs: 0, fat: 0, sugar: 0,
+            source: 'Saved correction', aliases: ['usual diet soda', 'diet soda'],
+        }],
+        expected: { calories: 0, protein: 0, carbs: 0, fiber: 0, netCarbs: 0, fat: 0, sugar: 0 },
+        tolerance: { calories: 0.01, protein: 0.01, carbs: 0.01, fiber: 0.01, netCarbs: 0.01, fat: 0.01, sugar: 0.01 },
+        expectedFirstFoodName: 'Diet Soda',
+    },
+    {
+        name: 'Voice Two Chicken Breasts Applies Leading Quantity',
+        query: '2 chicken breasts',
+        expected: { calories: 280, protein: 52, carbs: 0, fat: 6 },
+        tolerance: { calories: 0.01, protein: 0.01, carbs: 0.01, fat: 0.01 },
+        expectedFirstFoodName: 'Grilled Chicken Breast (4 oz)',
+    },
+    {
+        name: 'Voice Explicit Nutrition For Multiple Foods Is A Total',
+        query: '2 chicken breasts 500 calories 60 protein total',
+        expected: { calories: 500, protein: 60 },
+        tolerance: { calories: 0.01, protein: 0.01 },
+        expectedFirstFoodName: 'Grilled Chicken Breast (4 oz)',
+    },
+    {
+        name: 'Voice Explicit Nutrition Per Item Remains Per Item',
+        query: '2 chicken breasts 250 calories 30 protein each',
+        expected: { calories: 500, protein: 60 },
+        tolerance: { calories: 0.01, protein: 0.01 },
+        expectedFirstFoodName: 'Grilled Chicken Breast (4 oz)',
     },
     {
         name: 'Voice Six Cups Popcorn',
