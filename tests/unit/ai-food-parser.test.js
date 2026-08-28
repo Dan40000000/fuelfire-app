@@ -7,9 +7,62 @@ const ORIGINAL_ENV = { ...process.env };
 
 describe('AI food parser composite meals', () => {
     beforeEach(() => {
+        process.env.FOOD_AI_PROVIDER = 'qwen';
         process.env.FOOD_AI_BASE_URL = 'https://food-ai.test/v1';
         process.env.FOOD_AI_API_KEY = 'test-food-key';
         process.env.FOOD_AI_TEXT_MODEL = 'test-food-model';
+    });
+
+    it('uses Claude Sonnet first and Claude Opus only to review a low-confidence voice result', async () => {
+        process.env.FOOD_AI_PROVIDER = 'claude';
+        process.env.CLAUDE_API_KEY = 'test-claude-key';
+        const claudeResponse = (foods, overallConfidence, clarifyingQuestions = []) => new Response(JSON.stringify({
+            content: [{ type: 'text', text: JSON.stringify({ foods, overallConfidence, clarifyingQuestions }) }],
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        const fetchMock = vi.fn()
+            .mockResolvedValueOnce(claudeResponse([{
+                name: 'Roasted Fennel', calories: 55, protein: 2, carbs: 12,
+                fiber: 4, netCarbs: 8, fat: 1, sugar: 5,
+                serving: '1 cup', quantity: 1, confidence: 'low',
+                source: 'initial estimate', sourceType: 'estimate', sourceUrl: null,
+            }], 'low'))
+            .mockResolvedValueOnce(claudeResponse([{
+                name: 'Roasted Fennel', calories: 73, protein: 2, carbs: 13,
+                fiber: 5, netCarbs: 8, fat: 3, sugar: 6,
+                serving: '1 cup', quantity: 1, confidence: 'medium',
+                source: 'reviewed standard reference', sourceType: 'estimate', sourceUrl: null,
+            }], 'medium', [{
+                id: 'cooking_oil',
+                question: 'How much oil was used?',
+                examples: ['None', '1 teaspoon'],
+                reason: 'Oil changes calories.',
+                affectedFood: 'Roasted Fennel',
+                estimatedCalorieImpact: 40,
+                acceptsVoice: true,
+            }]));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const response = await invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: { query: 'one cup of roasted fennel', source: 'voice', forceWebSearch: false },
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+            success: true,
+            source: 'voice-ai-claude-review',
+            aiProvider: 'claude',
+            aiModel: 'claude-opus-5',
+            aiReviewModel: 'claude-opus-5',
+            degradedMode: false,
+            totalCalories: 73,
+        });
+        expect(response.body.clarifyingQuestions).toEqual([
+            expect.objectContaining({ id: 'cooking_oil', acceptsVoice: true }),
+        ]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(JSON.parse(fetchMock.mock.calls[0][1].body).model).toBe('claude-sonnet-5');
+        expect(JSON.parse(fetchMock.mock.calls[1][1].body).model).toBe('claude-opus-5');
     });
 
     afterEach(() => {

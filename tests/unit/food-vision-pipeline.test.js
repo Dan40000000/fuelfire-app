@@ -8,6 +8,7 @@ describe('food vision evidence pipeline', () => {
     const originalFetch = global.fetch;
 
     beforeEach(() => {
+        process.env.FOOD_AI_PROVIDER = 'qwen';
         process.env.FOOD_AI_BASE_URL = 'http://127.0.0.1:9999/v1';
         process.env.FOOD_AI_VISION_MODEL = 'test-vision';
         process.env.FOOD_AI_TEXT_MODEL = 'test-text';
@@ -66,6 +67,53 @@ describe('food vision evidence pipeline', () => {
         expect(secondBody.messages[0].content).toContain('DEVICE DEPTH MEASUREMENTS');
         expect(result.text).toContain('Blueberry Muffin');
         expect(result.metadata.visionModel).toBe('test-vision');
+    });
+
+    it('escalates low-confidence Claude vision and nutrition passes to Opus without using Qwen', async () => {
+        process.env.FOOD_AI_PROVIDER = 'claude';
+        process.env.CLAUDE_API_KEY = 'test-claude-key';
+        const claudeResponse = (payload) => new Response(JSON.stringify({
+            content: [{ type: 'text', text: JSON.stringify(payload) }],
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        global.fetch = vi.fn()
+            .mockResolvedValueOnce(claudeResponse({
+                foods: [{ name: 'fried egg', count: 1, confidence: 'low' }],
+                overallConfidence: 'low',
+            }))
+            .mockResolvedValueOnce(claudeResponse({
+                foods: [{ name: 'fried egg', count: 1, sizeClass: 'large', confidence: 'medium' }],
+                overallConfidence: 'medium',
+            }))
+            .mockResolvedValueOnce(claudeResponse({
+                foods: [{ name: 'Fried Egg', quantity: 1, serving: '1 large egg', calories: 70, confidence: 'low' }],
+                overallConfidence: 'low',
+            }))
+            .mockResolvedValueOnce(claudeResponse({
+                foods: [{ name: 'Fried Egg', quantity: 1, serving: '1 large egg', calories: 90, protein: 6, carbs: 1, fat: 7, confidence: 'medium' }],
+                overallConfidence: 'medium',
+            }));
+
+        const result = await callFoodVision({
+            image: 'ZmFrZS1pbWFnZQ==',
+            mimeType: 'image/jpeg',
+        });
+
+        expect(global.fetch).toHaveBeenCalledTimes(4);
+        const models = global.fetch.mock.calls.map(([, request]) => JSON.parse(request.body).model);
+        expect(models).toEqual(['claude-sonnet-5', 'claude-opus-5', 'claude-sonnet-5', 'claude-opus-5']);
+        const firstBody = JSON.parse(global.fetch.mock.calls[0][1].body);
+        expect(firstBody.messages[0].content[0]).toMatchObject({
+            type: 'image',
+            source: { type: 'base64', media_type: 'image/jpeg' },
+        });
+        expect(result.metadata).toMatchObject({
+            provider: 'claude',
+            model: 'claude-opus-5',
+            visionModel: 'claude-opus-5',
+            reviewModel: 'claude-opus-5',
+            degraded: false,
+        });
+        expect(result.text).toContain('Fried Egg');
     });
 
     it('returns an AI-first voice-enabled conversation contract for ambiguous photos', async () => {
