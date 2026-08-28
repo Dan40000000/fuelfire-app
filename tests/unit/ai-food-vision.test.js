@@ -245,6 +245,22 @@ describe('AI food vision normalization', () => {
         expect(calculateTotals(foods)).toMatchObject({ calories: 740, protein: 38, fat: 51 });
     });
 
+    it('treats a counted breakfast-sausage plate as small links even when the model omits the word small', () => {
+        const [sausage] = sanitizeVisionFoods([{
+            name: 'Breakfast Sausage', serving: '1 link', quantity: 6, visualCount: 6,
+            visualAmount: 'six browned links arranged beside the eggs',
+            calories: 160, protein: 10, carbs: 0, fat: 12,
+            confidence: 'medium', dataSource: 'generic visual nutrition estimate',
+        }]);
+
+        expect(sausage).toMatchObject({
+            serving: '1 small breakfast sausage link', quantity: 6, visualCount: 6,
+            needsVerification: true,
+        });
+        expect(sausage.calories).toBeCloseTo(160 / 3, 6);
+        expect(calculateTotals([sausage])).toMatchObject({ calories: 320, protein: 20, fat: 24 });
+    });
+
     it('does not apply small-sausage normalization to unsized, large, or authoritative values', () => {
         const foods = sanitizeVisionFoods([
             {
