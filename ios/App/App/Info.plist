@@ -25,7 +25,7 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to scan food barcodes for quick logging</string>
+	<string>Well Fit uses the camera for depth-assisted food portion measurement and to scan food, barcodes, and treadmill consoles for quick logging.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Well Fit Pro uses Apple Health to read steps, heart rate, workouts, active energy, distance, weight, and sleep for personalized fitness tracking. Profile details are used to estimate base calories.</string>
 	<key>NSHealthUpdateUsageDescription</key>
@@ -35,7 +35,7 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs microphone access to log meals using voice commands</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs photo library access to save and share your fitness progress photos and meal photos</string>
+	<string>Well Fit uses your photo library for food, treadmill, and fitness progress photos you choose.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs permission to save photos to your library for fitness progress tracking and meal logging</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

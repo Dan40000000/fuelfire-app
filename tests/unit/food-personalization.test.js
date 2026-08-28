@@ -49,6 +49,76 @@ describe('food personalization', () => {
         )).toBe(false);
     });
 
+    it('does not replace a visually counted shrimp plate with one saved 100g serving', () => {
+        const saved = {
+            name: 'Cooked Shrimp', serving: '100 grams', count: 4,
+            correctionCount: 1, memoryAction: 'corrected', sourceType: 'user-saved',
+        };
+        expect(personalization.shouldMemoryOverride(
+            {
+                name: 'Cooked Shrimp', serving: '15 large cooked shrimp', quantity: 15,
+                sourceType: 'estimate', source: 'photo visual estimate',
+            },
+            saved
+        )).toBe(false);
+    });
+
+    it('does not replace a six-cup portion with a saved one-cup serving', () => {
+        const saved = {
+            name: 'Popcorn', serving: '1 cup', count: 4,
+            correctionCount: 1, memoryAction: 'corrected', sourceType: 'user-saved',
+        };
+        expect(personalization.shouldMemoryOverride(
+            { name: 'Popcorn', serving: '6 cups', quantity: 1, sourceType: 'estimate', source: 'photo estimate' },
+            saved
+        )).toBe(false);
+    });
+
+    it('separates whole, sliced, package, weight, volume, and count portion variants', () => {
+        expect(personalization.portionsAreCompatible(
+            { name: 'Pepperoni Pizza', serving: '1 whole pizza' },
+            { name: 'Pepperoni Pizza', serving: '1 slice' },
+        )).toBe(false);
+        expect(personalization.portionsAreCompatible(
+            { name: 'Protein Shake', serving: '1 bottle' },
+            { name: 'Protein Shake', serving: '12 oz' },
+        )).toBe(false);
+        expect(personalization.portionsAreCompatible(
+            { name: 'Popcorn', serving: '6 cups' },
+            { name: 'Popcorn', serving: '5.5 cups' },
+        )).toBe(true);
+        expect(personalization.portionsAreCompatible(
+            { name: 'Popcorn', serving: '6 cups' },
+            { name: 'Popcorn', serving: '1 cup' },
+        )).toBe(false);
+        expect(personalization.portionsAreCompatible(
+            { name: 'Cooked Shrimp', serving: '100g' },
+            { name: 'Cooked Shrimp', serving: '1 large shrimp' },
+        )).toBe(false);
+    });
+
+    it('can reuse the same per-item correction while preserving a new count', () => {
+        const saved = {
+            name: 'Large Egg', serving: '1 large egg', count: 4,
+            correctionCount: 1, memoryAction: 'corrected', sourceType: 'user-saved',
+        };
+        expect(personalization.shouldMemoryOverride(
+            { name: 'Large Eggs', serving: '1 large egg', quantity: 3, sourceType: 'estimate', source: 'photo estimate' },
+            saved
+        )).toBe(true);
+    });
+
+    it('never replaces nutrition the user explicitly dictated with saved memory', () => {
+        const correction = { name: 'Protein Shake', count: 3, correctionCount: 1, memoryAction: 'corrected' };
+        expect(personalization.shouldMemoryOverride(
+            {
+                name: 'Protein Shake', nutritionBasis: 'user-provided', source: 'User dictated values',
+                calories: 500, protein: 30, carbs: 95, fat: 0,
+            },
+            correction
+        )).toBe(false);
+    });
+
     it('saves and resolves a multi-food usual breakfast without an AI call', () => {
         const bundle = personalization.createMealBundle('Dan usual breakfast', [eggs, sausage], 'breakfast', ['eggs and sausage'], '2026-08-19T12:00:00.000Z');
         const match = personalization.findMealBundle('log my usual breakfast', [bundle]);

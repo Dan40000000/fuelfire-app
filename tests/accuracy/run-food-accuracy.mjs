@@ -52,6 +52,7 @@ async function runLiveCase(testCase) {
                 mimeType: testCase.input?.mimeType || 'image/jpeg',
                 imageContext: testCase.input?.context || '',
                 photoContextDetails: testCase.input?.photoContextDetails || {},
+                ...(testCase.input?.spatialContext ? { spatialContext: testCase.input.spatialContext } : {}),
                 forceWebSearch: true,
             },
         });
@@ -110,6 +111,10 @@ async function main() {
     if (mode !== 'live') {
         delete process.env.CLAUDE_API_KEY;
         delete process.env.ANTHROPIC_API_KEY;
+        delete process.env.FOOD_AI_API_KEY;
+        delete process.env.HF_TOKEN;
+        delete process.env.HUGGING_FACE_HUB_TOKEN;
+        delete process.env.FOOD_AI_BASE_URL;
     }
     const dataset = readDataset();
     fs.mkdirSync(outputDir, { recursive: true });
