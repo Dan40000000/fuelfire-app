@@ -3372,7 +3372,8 @@ function parseFoodAiPayload(text) {
                 return {
                     foods: parsed.foods,
                     notes: typeof parsed.notes === 'string' ? parsed.notes : '',
-                    overallConfidence: parsed.overallConfidence
+                    overallConfidence: parsed.overallConfidence,
+                    clarifyingQuestions: Array.isArray(parsed.clarifyingQuestions) ? parsed.clarifyingQuestions : []
                 };
             }
             if (parsed && typeof parsed === 'object' && parsed.name) {
@@ -3384,6 +3385,18 @@ function parseFoodAiPayload(text) {
     }
 
     return { foods: [], notes: '' };
+}
+
+function shouldEscalateToClaudeReview(payload, response) {
+    if (response?.metadata?.provider !== 'claude'
+        || response?.metadata?.tier === 'review'
+        || response?.metadata?.degraded === true) {
+        return false;
+    }
+    const foods = Array.isArray(payload?.foods) ? payload.foods : [];
+    return foods.length === 0
+        || normalizeConfidence(payload?.overallConfidence) === 'low'
+        || foods.some((food) => normalizeConfidence(food?.confidence) === 'low');
 }
 
 function sanitizeFoods(rawFoods, query) {
@@ -3466,7 +3479,9 @@ async function callFoodParserAi({
     deepSearch = false,
     inputSource = 'search',
     memoryHints = [],
-    locationContext = null
+    locationContext = null,
+    tier = 'primary',
+    allowDegradedFallback = true
 }) {
     const sanitizedMemoryHints = sanitizeFoodMemoryHints(memoryHints);
     const strictInstructions = strictMode
@@ -3590,6 +3605,8 @@ Rules:
         temperature: 0,
         json: true,
         thinking: deepSearch,
+        tier,
+        allowDegradedFallback,
         tags: [inputSource === 'voice' ? 'food-voice' : 'food-text', useWebSearch ? 'lookup-requested' : 'parse-only']
     });
 }
@@ -3917,8 +3934,7 @@ export default async function handler(req, res) {
         const voiceDeepSearch = inputSource === 'voice';
         const deepSearch = voiceDeepSearch || requiresLiveSearch;
         const requestOfficialEvidence = requiresLiveSearch || voiceDeepSearch;
-        let responseSource = voiceDeepSearch ? 'voice-ai-qwen' : 'ai-qwen';
-        const foodAiData = await callFoodParserAi({
+        let foodAiData = await callFoodParserAi({
             query: lookupQuery,
             useWebSearch: requestOfficialEvidence,
             strictMode: requiresLiveSearch,
@@ -3928,8 +3944,37 @@ export default async function handler(req, res) {
             locationContext
         });
 
-        const textContent = extractTextFromFoodAiResponse(foodAiData);
+        let textContent = extractTextFromFoodAiResponse(foodAiData);
         let parsedPayload = parseFoodAiPayload(textContent);
+        let reviewModel = null;
+        if (shouldEscalateToClaudeReview(parsedPayload, foodAiData)) {
+            try {
+                const reviewedData = await callFoodParserAi({
+                    query: lookupQuery,
+                    useWebSearch: requestOfficialEvidence,
+                    strictMode: requiresLiveSearch,
+                    deepSearch,
+                    inputSource,
+                    memoryHints: foodMemoryHints,
+                    locationContext,
+                    tier: 'review',
+                    allowDegradedFallback: false
+                });
+                const reviewedText = extractTextFromFoodAiResponse(reviewedData);
+                const reviewedPayload = parseFoodAiPayload(reviewedText);
+                if (Array.isArray(reviewedPayload.foods) && reviewedPayload.foods.length) {
+                    foodAiData = reviewedData;
+                    textContent = reviewedText;
+                    parsedPayload = reviewedPayload;
+                    reviewModel = reviewedData.metadata?.model || null;
+                }
+            } catch (error) {
+                console.warn(`Claude food parsing review skipped: ${error.message}`);
+            }
+        }
+        const degradedMode = foodAiData.metadata?.degraded === true;
+        const providerLabel = degradedMode ? 'qwen-degraded' : (foodAiData.metadata?.provider || 'claude');
+        let responseSource = `${voiceDeepSearch ? 'voice-ai' : 'ai'}-${providerLabel}${reviewModel ? '-review' : ''}`;
         let foods = sanitizeFoods(parsedPayload.foods, lookupQuery);
         if (looksComposite && !isBranded && !locationContext) {
             const missingSegments = findMissingCompositeAiSegments(foods, lookupQuery);
@@ -4019,6 +4064,10 @@ export default async function handler(req, res) {
                 ? `${responseSource}+user-provided-nutrition`
                 : responseSource,
             clarifyingQuestions,
+            aiProvider: foodAiData.metadata?.provider || null,
+            aiModel: foodAiData.metadata?.model || null,
+            aiReviewModel: reviewModel,
+            degradedMode,
             ...queryMeta
         });
 
