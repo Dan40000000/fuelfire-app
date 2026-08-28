@@ -144,7 +144,7 @@ export function planAllowsCapability(plan, capability = 'planning') {
         return ['core', 'ai_food', 'legacy_premium', 'meal_import', 'promo_ai_log'].includes(normalizedPlan);
     }
     if (normalizedCapability === 'ai_food') {
-        return ['ai_food', 'promo_ai_log'].includes(normalizedPlan);
+        return ['ai_food', 'legacy_premium', 'promo_ai_log'].includes(normalizedPlan);
     }
     return ['core', 'ai_food', 'legacy_premium'].includes(normalizedPlan);
 }

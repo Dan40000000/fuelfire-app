@@ -1325,7 +1325,20 @@
 
                     if (!response.ok) {
                         const text = await response.text();
-                        throw new Error(`HTTP ${response.status} at ${endpoint}: ${text.slice(0, 200)}`);
+                        let payload = null;
+                        try {
+                            payload = JSON.parse(text);
+                        } catch (parseError) {
+                            // Keep the response text for non-JSON gateway errors.
+                        }
+                        const error = new Error(
+                            payload?.error
+                            || payload?.message
+                            || `HTTP ${response.status} at ${endpoint}: ${text.slice(0, 200)}`
+                        );
+                        error.status = response.status;
+                        error.code = payload?.code || '';
+                        throw error;
                     }
 
                     return await response.json();
@@ -1562,6 +1575,14 @@
             announcePhotoError(message);
             const target = document.getElementById(focusTargetId);
             if (target && typeof target.focus === 'function') requestAnimationFrame(() => target.focus());
+        }
+
+        function setPhotoLoadingVisible(visible) {
+            const loading = document.getElementById('photo-loading');
+            if (!loading) return;
+            loading.hidden = !visible;
+            loading.style.display = visible ? 'block' : 'none';
+            loading.setAttribute('aria-busy', visible ? 'true' : 'false');
         }
 
         function openPhotoModal(trigger = document.activeElement) {
@@ -1924,7 +1945,7 @@
 
             // Show loading
             document.getElementById('photo-capture-section').style.display = 'none';
-            document.getElementById('photo-loading').style.display = 'block';
+            setPhotoLoadingVisible(true);
             document.getElementById('photo-results').setAttribute('aria-busy', 'true');
             announcePhotoStatus('Analyzing the food photo.');
             requestAnimationFrame(() => document.getElementById('photo-loading-heading')?.focus());
@@ -2027,7 +2048,7 @@
                 let finalResult = result;
                 let foods = Array.isArray(result.foods) ? result.foods : [];
                 if (questions.length) {
-                    document.getElementById('photo-loading').style.display = 'none';
+                    setPhotoLoadingVisible(false);
                     announcePhotoStatus(`${questions.length} detail${questions.length === 1 ? '' : 's'} can improve this estimate.`);
                     const outcome = await collectClarificationAnswers(questions, 'photo');
                     currentPhotoClarificationOutcome = outcome;
@@ -2075,7 +2096,7 @@
                 console.error('Photo analysis error:', error);
                 // Reset to capture view
                 document.getElementById('photo-capture-section').style.display = 'block';
-                document.getElementById('photo-loading').style.display = 'none';
+                setPhotoLoadingVisible(false);
                 document.getElementById('photo-results').setAttribute('aria-busy', 'false');
                 const conversation = document.getElementById('photo-conversation');
                 conversation?.removeAttribute('aria-busy');
@@ -2083,7 +2104,13 @@
                     conversation.style.display = 'none';
                     conversation.textContent = '';
                 }
-                showPhotoFlowError('Could not analyze the photo. Try again or use voice or text entry.', 'analyze-photo-btn');
+                const accessRejected = error?.status === 402 || error?.code === 'AI_ACCESS_REQUIRED';
+                showPhotoFlowError(
+                    accessRejected
+                        ? 'AI access could not be verified. Reopen the app or restore purchases, then try again.'
+                        : 'Could not analyze the photo. Try again or use voice or text entry.',
+                    'analyze-photo-btn'
+                );
             }
         }
 
