@@ -1908,16 +1908,45 @@
             const baseQuery = buildPhotoDetectedMealQuery(visionResult);
             const clarifiedQuery = buildNaturalClarifiedQuery(baseQuery, outcome.records);
             outcome.resolvedQuery = clarifiedQuery;
-            const parserResult = await postJsonWithFallback('/api/ai-food-parser', {
-                query: clarifiedQuery,
-                forceWebSearch: true,
-                source: 'photo',
-                alternatives: photoContextAlternatives.slice(0, 8),
-                foodMemoryHints: buildFoodMemoryHints(clarifiedQuery, photoContextAlternatives, 5),
-                locationContext: currentFoodLocationContext
-            }, 60000);
-            if (!parserResult.success || !Array.isArray(parserResult.foods) || parserResult.foods.length === 0) {
-                throw new Error(parserResult.error || parserResult.message || 'No foods returned after photo clarification');
+            let parserResult;
+            try {
+                parserResult = await postJsonWithFallback('/api/ai-food-parser', {
+                    query: clarifiedQuery,
+                    // Let the parser choose live evidence only when the query actually contains
+                    // a brand, restaurant, or label. Generic plated food must not require an
+                    // official-source match just because the user answered a follow-up question.
+                    forceWebSearch: false,
+                    source: 'photo',
+                    alternatives: photoContextAlternatives.slice(0, 8),
+                    foodMemoryHints: buildFoodMemoryHints(clarifiedQuery, photoContextAlternatives, 5),
+                    locationContext: currentFoodLocationContext
+                }, 60000);
+                if (!parserResult.success || !Array.isArray(parserResult.foods) || parserResult.foods.length === 0) {
+                    throw new Error(parserResult.error || parserResult.message || 'No foods returned after photo clarification');
+                }
+            } catch (error) {
+                console.warn('Photo clarification nutrition refresh unavailable; keeping the successful vision result:', error);
+                const fallbackFoods = applyFoodMemoryToFoods(Array.isArray(visionResult?.foods) ? visionResult.foods : [])
+                    .map((food) => ({
+                        ...food,
+                        confidence: String(food?.confidence || '').toLowerCase() === 'high' ? 'medium' : (food?.confidence || 'medium'),
+                        needsVerification: true,
+                        dataSource: `${food?.dataSource || food?.source || 'Photo estimate'}; live nutrition refresh unavailable`
+                    }));
+                if (!fallbackFoods.length) throw error;
+                outcome.nutritionVerificationUnavailable = true;
+                return {
+                    parserResult: {
+                        ...visionResult,
+                        success: true,
+                        foods: fallbackFoods,
+                        clarifyingQuestions: [],
+                        notes: 'Live nutrition verification was unavailable after your answers. The successful photo estimate is shown for review instead.'
+                    },
+                    foods: fallbackFoods,
+                    clarifiedQuery,
+                    usedVisionFallback: true
+                };
             }
             const remainingQuestions = normalizeClarifyingQuestions(parserResult.clarifyingQuestions);
             if (remainingQuestions.length) {

@@ -780,6 +780,56 @@ test('photo questions resolve before one parser recalculation and preserve range
     expect(parserRequests).toHaveLength(1);
     expect(parserRequests[0].query).toMatch(/canned tuna in water/i);
     expect(parserRequests[0].query).toMatch(/10 crackers/i);
+    expect(parserRequests[0].forceWebSearch).toBe(false);
+});
+
+test('photo clarification lookup failure keeps the successful vision estimate visible for review', async ({ page }) => {
+    let parserRequest;
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                overallConfidence: 'medium',
+                foods: [
+                    { name: 'Fried Eggs', calories: 140, protein: 6, carbs: 1, fiber: 0, netCarbs: 1, fat: 9, sugar: 0, quantity: 3, serving: '1 large egg', confidence: 'medium', dataSource: 'photo estimate' },
+                    { name: 'Breakfast Sausage', calories: 53.33, protein: 3.33, carbs: 0, fiber: 0, netCarbs: 0, fat: 4, sugar: 0, quantity: 6, serving: '1 small breakfast sausage link', confidence: 'medium', dataSource: 'small-link visual estimate' },
+                ],
+                clarifyingQuestions: [{
+                    id: 'eggs_eaten', question: 'Did you eat all three eggs?', examples: ['All three', 'Two'],
+                    reason: 'The count changes calories.', affectedFood: 'fried egg', acceptsVoice: true,
+                }],
+            }),
+        });
+    });
+    await page.route('**/api/ai-food-parser', async (route) => {
+        parserRequest = route.request().postDataJSON();
+        await route.fulfill({
+            status: 502,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: false,
+                error: 'No reliable official nutrition match was found.',
+                code: 'OFFICIAL_NUTRITION_NOT_FOUND',
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => { window.requireAIAccess = () => true; });
+    await page.getByRole('button', { name: 'Photo', exact: true }).click();
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+    await page.getByRole('button', { name: 'Answer question 1 with All three' }).click();
+
+    await expect(page.locator('#photo-results')).toBeVisible();
+    await expect(page.locator('#photo-loading')).toBeHidden();
+    await expect(page.locator('#photo-live-alert')).toBeEmpty();
+    await expect(page.locator('#photo-confidence-message')).toContainText('successful photo estimate is shown for review');
+    await expect(page.locator('#photo-live-status')).toContainText('ready for review');
+    await expect(page.locator('#photo-total-calories')).toHaveText('740');
+    expect(parserRequest.forceWebSearch).toBe(false);
 });
 
 test('photo dialog Escape returns focus and labeled gallery controls pass an open-state axe scan', async ({ page }) => {

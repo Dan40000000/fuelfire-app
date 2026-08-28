@@ -291,7 +291,7 @@ function hasExplicitSmallBreakfastSausageEvidence(text) {
 }
 
 function hasLargeSausageEvidence(text) {
-    return /\b(large|big|huge|thick|full[-\s]?size|regular|bratwurst|brat|italian|dinner|grilled|charred|browned)\b/.test(cleanText(text || '', '', 320).toLowerCase());
+    return /\b(large|big|huge|thick|full[-\s]?size|regular|bratwurst|brat|italian|dinner)\b/.test(cleanText(text || '', '', 320).toLowerCase());
 }
 
 function hasAuthoritativeVisionNutritionEvidence(food) {
@@ -305,11 +305,38 @@ function hasAuthoritativeVisionNutritionEvidence(food) {
 function normalizeSmallBreakfastSausageNutrition(food, evidenceFood = food) {
     if (hasAuthoritativeVisionNutritionEvidence(evidenceFood)) return food;
 
-    const text = cleanText(`${food?.name || ''} ${food?.serving || ''} ${food?.dataSource || ''}`, '', 260).toLowerCase();
+    const text = cleanText([
+        food?.name,
+        food?.serving,
+        food?.dataSource,
+        food?.sizeClass,
+        food?.visualAmount,
+        evidenceFood?.name,
+        evidenceFood?.serving,
+        evidenceFood?.dataSource,
+        evidenceFood?.sizeClass,
+        evidenceFood?.visualAmount
+    ].filter(Boolean).join(' '), '', 520).toLowerCase();
+    const qty = Math.max(
+        toFiniteNumber(food?.quantity, 1),
+        positiveNumber(food?.visualCount, 0),
+        positiveNumber(evidenceFood?.visualCount ?? evidenceFood?.count, 0)
+    );
+    const estimatedGramsPerUnit = positiveNumber(
+        food?.estimatedGramsPerUnit ?? evidenceFood?.estimatedGramsPerUnit,
+        0
+    );
+    const explicitlySmall = hasExplicitSmallBreakfastSausageEvidence(text)
+        || (estimatedGramsPerUnit > 0 && estimatedGramsPerUnit <= 35);
+    const looksLikeBreakfastLinks = /\bbreakfast\s+sausage(?:s|\s+links?)?\b/.test(text)
+        || /\bsausage\s+links?\b/.test(text) && /\bbreakfast\b/.test(text);
+    const explicitlyLarge = /\b(large|big|huge|thick|full[-\s]?size|bratwurst|brat|italian|dinner)\b/.test(text)
+        || estimatedGramsPerUnit >= 55;
     const isSmallBreakfastLinks = /\b(?:small|mini|little)\s+(?:breakfast\s+)?sausage(?:s|\s+links?)?\b/.test(text)
         || /\bjohnsonville\b/.test(text) && /\b(vermont\s+maple|breakfast|links?)\b/.test(text)
-        || /\bvermont\s+maple\b/.test(text);
-    const qty = toFiniteNumber(food?.quantity, 1);
+        || /\bvermont\s+maple\b/.test(text)
+        || (looksLikeBreakfastLinks && qty >= 3 && !explicitlyLarge)
+        || (explicitlySmall && qty >= 3 && !explicitlyLarge);
 
     if (!isSmallBreakfastLinks || qty < 3 || toFiniteNumber(food?.calories, 0) < 100) {
         return food;
@@ -324,6 +351,7 @@ function normalizeSmallBreakfastSausageNutrition(food, evidenceFood = food) {
         ...perLink,
         serving: servingText,
         confidence: food.confidence === 'low' ? 'medium' : food.confidence,
+        needsVerification: true,
         dataSource: 'Small breakfast sausage normalization; aggregate 3-link nutrition converted to per-link values'
     };
 }
