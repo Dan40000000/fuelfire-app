@@ -6,7 +6,7 @@
       "maxDuration": 180
     },
     "api/ai-food-vision.js": {
-      "maxDuration": 60
+      "maxDuration": 120
     },
     "api/ai-food-parser.js": {
       "maxDuration": 60
