@@ -1294,6 +1294,7 @@
         let currentPhotoClarificationOutcome = null;
         let activeClarificationState = null;
         let photoTotalsAnnouncementTimer = null;
+        const PHOTO_ANALYSIS_TIMEOUT_MS = 120000;
 
         function getApiEndpoints(path) {
             const endpoints = [];
@@ -1979,6 +1980,8 @@
             announcePhotoStatus('Analyzing the food photo.');
             requestAnimationFrame(() => document.getElementById('photo-loading-heading')?.focus());
 
+            let successfulVisionResult = null;
+            let photoAnalysisStage = 'prepare-photo';
             try {
                 const requestSession = photoLogSessionId;
                 const photoContextDetails = getPhotoContextDetails();
@@ -2060,11 +2063,15 @@
                     photoPayload.locationContext = currentFoodLocationContext;
                 }
 
-	                const result = await postJsonWithFallback('/api/ai-food-vision', photoPayload, 60000);
+	                photoAnalysisStage = 'request-photo-analysis';
+	                const result = await postJsonWithFallback('/api/ai-food-vision', photoPayload, PHOTO_ANALYSIS_TIMEOUT_MS);
 
                 if (!result.success) {
                     throw new Error(result.error || 'Failed to analyze photo');
                 }
+
+                successfulVisionResult = result;
+                photoAnalysisStage = 'show-photo-result';
 
                 if (requestSession !== photoLogSessionId || !document.getElementById('photo-modal')?.open) return;
                 currentPhotoAnalysisMeta = {
@@ -2077,6 +2084,7 @@
                 let finalResult = result;
                 let foods = Array.isArray(result.foods) ? result.foods : [];
                 if (questions.length) {
+                    photoAnalysisStage = 'collect-photo-clarifications';
                     setPhotoLoadingVisible(false);
                     announcePhotoStatus(`${questions.length} detail${questions.length === 1 ? '' : 's'} can improve this estimate.`);
                     const outcome = await collectClarificationAnswers(questions, 'photo');
@@ -2087,6 +2095,7 @@
                     conversation.setAttribute('aria-busy', 'true');
                     announcePhotoStatus('Recalculating the identified foods.');
                     const recalculated = await recalculatePhotoFromClarifications(result, outcome);
+                    photoAnalysisStage = 'show-recalculated-photo-result';
                     foods = recalculated.foods;
                     finalResult = {
                         ...result,
@@ -2123,6 +2132,37 @@
 
             } catch (error) {
                 console.error('Photo analysis error:', error);
+                if (successfulVisionResult && Array.isArray(successfulVisionResult.foods) && successfulVisionResult.foods.length) {
+                    try {
+                        const conversation = document.getElementById('photo-conversation');
+                        conversation?.removeAttribute('aria-busy');
+                        if (conversation) {
+                            conversation.style.display = 'none';
+                            conversation.textContent = '';
+                        }
+                        setPhotoLoadingVisible(false);
+                        currentPhotoFoods = applyFoodMemoryToFoods(successfulVisionResult.foods);
+                        displayPhotoResults(buildFoodResultFromFoods(
+                            {
+                                ...successfulVisionResult,
+                                notes: [
+                                    successfulVisionResult.notes,
+                                    'The photo was analyzed successfully, but follow-up questions were unavailable. Review the estimate before logging.'
+                                ].filter(Boolean).join(' ')
+                            },
+                            currentPhotoFoods,
+                            'Showing the completed photo estimate without follow-up questions.'
+                        ));
+                        announcePhotoStatus('The photo was analyzed successfully. Follow-up questions were skipped, so review the estimate before logging.');
+                        console.warn('Recovered completed photo analysis after a client flow error.', {
+                            stage: photoAnalysisStage,
+                            code: error?.code || error?.name || 'PHOTO_RESULT_FLOW_ERROR'
+                        });
+                        return;
+                    } catch (recoveryError) {
+                        console.error('Photo result recovery error:', recoveryError);
+                    }
+                }
                 // Reset to capture view
                 document.getElementById('photo-capture-section').style.display = 'block';
                 setPhotoLoadingVisible(false);

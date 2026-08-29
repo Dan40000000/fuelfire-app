@@ -832,6 +832,53 @@ test('photo clarification lookup failure keeps the successful vision estimate vi
     expect(parserRequest.forceWebSearch).toBe(false);
 });
 
+test('completed photo analysis survives a follow-up UI error instead of showing a false analysis failure', async ({ page }) => {
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                totalCalories: 1050,
+                totalProtein: 70,
+                totalCarbs: 0,
+                totalFiber: 0,
+                totalNetCarbs: 0,
+                totalFat: 84,
+                totalSugar: 0,
+                overallConfidence: 'medium',
+                notes: 'One large smoked bone-in beef short rib.',
+                foods: [{
+                    name: 'Smoked beef short rib (bone-in)', calories: 1050, protein: 70,
+                    carbs: 0, fiber: 0, netCarbs: 0, fat: 84, sugar: 0, quantity: 1,
+                    serving: 'estimated edible portion', confidence: 'medium', dataSource: 'photo estimate',
+                }],
+                clarifyingQuestions: [{
+                    id: 'meat_weight', question: 'About how much edible meat was there?',
+                    examples: ['250 g', '400 g'], affectedFood: 'smoked beef short rib', acceptsVoice: true,
+                }],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.requireAIAccess = () => true;
+        window.normalizeClarifyingQuestions = () => {
+            throw new Error('simulated follow-up renderer failure');
+        };
+    });
+    await page.getByRole('button', { name: 'Photo', exact: true }).click();
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+
+    await expect(page.locator('#photo-results')).toBeVisible();
+    await expect(page.locator('#photo-total-calories')).toHaveText('1050');
+    await expect(page.locator('#photo-food-items')).toContainText('Smoked beef short rib');
+    await expect(page.locator('#photo-live-alert')).toBeEmpty();
+    await expect(page.locator('#photo-live-status')).toContainText('analyzed successfully');
+});
+
 test('photo dialog Escape returns focus and labeled gallery controls pass an open-state axe scan', async ({ page }) => {
     await page.goto('/calorie-tracker.html');
     await page.evaluate(() => { window.requireAIAccess = () => true; });
