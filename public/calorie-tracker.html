@@ -1895,14 +1895,115 @@
                 if (!name) return '';
                 const quantity = macroNumber(food?.visualCount ?? food?.visualQuantity ?? food?.quantity, 1);
                 const quantityText = Number.isFinite(quantity) && quantity > 1 ? `${formatMacro(quantity)} ` : '';
-                const visualAmount = sanitizeClarificationAnswer(String(food?.visualAmount || ''), 80);
-                return `${quantityText}${name}${visualAmount ? ` (${visualAmount})` : ''}`;
+                // Keep the follow-up lookup query factual and compact. Free-form
+                // visualAmount prose (for example, "plated together") can be
+                // mistaken for an additional food by the text parser.
+                return `${quantityText}${name}`;
             }).filter(Boolean);
             const detectedFoods = Array.isArray(result?.detectedFoods)
                 ? result.detectedFoods.map(item => sanitizeClarificationAnswer(String(item || ''), 100)).filter(Boolean)
                 : [];
             const context = getPhotoContextDetails().text;
             return [...(parts.length ? parts : detectedFoods), context].filter(Boolean).join(', ') || 'food shown in the photo';
+        }
+
+        function photoResultFoodTokens(food) {
+            const ignored = new Set(['cooked', 'fried', 'fresh', 'plain', 'food', 'item', 'serving', 'standard', 'small', 'large', 'medium']);
+            return new Set([food?.name, food?.serving, food?.matchedItem]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .split(/\s+/)
+                .filter(token => token.length > 2 && !ignored.has(token))
+                .map(token => token.length > 4 && token.endsWith('s') ? token.slice(0, -1) : token));
+        }
+
+        function photoResultFoodMatches(left, right) {
+            const leftTokens = photoResultFoodTokens(left);
+            const rightTokens = photoResultFoodTokens(right);
+            if (!leftTokens.size || !rightTokens.size) return false;
+            const overlap = [...leftTokens].filter(token => rightTokens.has(token)).length;
+            return overlap >= 1 && overlap / Math.max(1, Math.min(leftTokens.size, rightTokens.size)) >= 0.34;
+        }
+
+        function photoResultCalories(foods) {
+            return (Array.isArray(foods) ? foods : []).reduce((sum, food) => {
+                const quantity = Math.max(0.01, macroNumber(food?.quantity, 1) || 1);
+                return sum + Math.round(macroNumber(food?.calories, 0) * quantity);
+            }, 0);
+        }
+
+        function photoClarificationImpactAllowance(outcome) {
+            const records = Array.isArray(outcome?.records) ? outcome.records : [];
+            const impact = records.reduce((sum, record) => {
+                const explicit = macroNumber(record?.question?.estimatedCalorieImpact, 0);
+                if (explicit > 0) return sum + Math.min(5000, explicit);
+                const kind = photoClarificationKind(record?.question, []);
+                return sum + photoClarificationImpact(record?.question, kind);
+            }, 0);
+            return Math.max(180, impact * 2 + 100);
+        }
+
+        /**
+         * Guard the one parser recalculation allowed after a photo answer.
+         * A text parser may turn explanatory prose into phantom foods or apply a
+         * full-package serving. Keep the successful vision result when identity,
+         * portion count, or calories contradict the original photo evidence.
+         */
+        function validatePhotoClarificationParserResult(visionResult, parserResult, outcome = {}) {
+            const visionFoods = Array.isArray(visionResult?.foods) ? visionResult.foods : [];
+            const parserFoods = Array.isArray(parserResult?.foods) ? parserResult.foods : [];
+            if (!visionFoods.length || !parserFoods.length) return { accept: false, reason: 'No foods returned after photo clarification.' };
+            if (parserFoods.length !== visionFoods.length) {
+                return { accept: false, reason: 'The follow-up lookup returned an unexpected number of foods.' };
+            }
+            const usedVisionIndexes = new Set();
+            for (const parserFood of parserFoods) {
+                const matchIndex = visionFoods.findIndex((visionFood, index) => (
+                    !usedVisionIndexes.has(index) && photoResultFoodMatches(visionFood, parserFood)
+                ));
+                if (matchIndex === -1) {
+                    return { accept: false, reason: 'The follow-up lookup returned an unexpected food item.' };
+                }
+                usedVisionIndexes.add(matchIndex);
+            }
+
+            // The UI recomputes totals from per-unit nutrition and quantity. Use
+            // that same value as the guard baseline when a mocked/provider
+            // payload carries a stale totalCalories field.
+            const computedOriginalTotal = photoResultCalories(visionFoods);
+            const originalTotal = computedOriginalTotal > 0
+                ? computedOriginalTotal
+                : macroNumber(visionResult.totalCalories, 0);
+            const parserTotal = photoResultCalories(parserFoods);
+            const range = visionResult?.calorieRange && typeof visionResult.calorieRange === 'object'
+                ? visionResult.calorieRange
+                : {};
+            const rangeLow = macroNumber(range.low ?? range.min, originalTotal);
+            const rangeHigh = macroNumber(range.high ?? range.max, originalTotal);
+            const allowance = photoClarificationImpactAllowance(outcome);
+            const lowerBound = Math.max(0, Math.min(originalTotal, rangeLow) - allowance);
+            const upperBound = Math.max(originalTotal, rangeHigh) + allowance;
+            if (parserTotal < lowerBound || parserTotal > upperBound) {
+                return {
+                    accept: false,
+                    reason: `The follow-up lookup changed the estimate from ${Math.round(originalTotal)} to ${Math.round(parserTotal)} calories, beyond the useful impact of the answered question.`
+                };
+            }
+            return { accept: true, originalTotal, parserTotal, allowance };
+        }
+
+        window.validatePhotoClarificationParserResult = validatePhotoClarificationParserResult;
+
+        function buildPhotoClarificationFallbackFoods(visionResult, note) {
+            return (Array.isArray(visionResult?.foods) ? visionResult.foods : []).map(food => ({
+                ...food,
+                confidence: String(food?.confidence || '').toLowerCase() === 'high' ? 'medium' : (food?.confidence || 'medium'),
+                needsVerification: true,
+                requiresReview: true,
+                dataSource: `${food?.dataSource || food?.source || 'Photo estimate'}; ${note}`
+            }));
         }
 
         async function recalculatePhotoFromClarifications(visionResult, outcome) {
@@ -1927,13 +2028,10 @@
                 }
             } catch (error) {
                 console.warn('Photo clarification nutrition refresh unavailable; keeping the successful vision result:', error);
-                const fallbackFoods = applyFoodMemoryToFoods(Array.isArray(visionResult?.foods) ? visionResult.foods : [])
-                    .map((food) => ({
-                        ...food,
-                        confidence: String(food?.confidence || '').toLowerCase() === 'high' ? 'medium' : (food?.confidence || 'medium'),
-                        needsVerification: true,
-                        dataSource: `${food?.dataSource || food?.source || 'Photo estimate'}; live nutrition refresh unavailable`
-                    }));
+                const fallbackFoods = applyFoodMemoryToFoods(buildPhotoClarificationFallbackFoods(
+                    visionResult,
+                    'live nutrition refresh unavailable'
+                ));
                 if (!fallbackFoods.length) throw error;
                 outcome.nutritionVerificationUnavailable = true;
                 return {
@@ -1943,6 +2041,27 @@
                         foods: fallbackFoods,
                         clarifyingQuestions: [],
                         notes: 'Live nutrition verification was unavailable after your answers. The successful photo estimate is shown for review instead.'
+                    },
+                    foods: fallbackFoods,
+                    clarifiedQuery,
+                    usedVisionFallback: true
+                };
+            }
+            const safety = validatePhotoClarificationParserResult(visionResult, parserResult, outcome);
+            if (!safety.accept) {
+                const note = `Follow-up nutrition was not applied: ${safety.reason} Original photo estimate kept for review.`;
+                console.warn(note);
+                const fallbackFoods = buildPhotoClarificationFallbackFoods(visionResult, note);
+                if (!fallbackFoods.length) throw new Error(safety.reason);
+                outcome.clarificationRejected = true;
+                outcome.clarificationRejectionReason = safety.reason;
+                return {
+                    parserResult: {
+                        ...visionResult,
+                        success: true,
+                        foods: fallbackFoods,
+                        clarifyingQuestions: [],
+                        notes: [visionResult?.notes, note].filter(Boolean).join(' ')
                     },
                     foods: fallbackFoods,
                     clarifiedQuery,
@@ -2080,7 +2199,7 @@
                     notes: result.notes || ''
                 };
 
-                const questions = normalizeClarifyingQuestions(result.clarifyingQuestions);
+                const questions = selectPhotoClarifyingQuestions(result.clarifyingQuestions, result);
                 let finalResult = result;
                 let foods = Array.isArray(result.foods) ? result.foods : [];
                 if (questions.length) {
@@ -5030,8 +5149,9 @@
             return value.replace(/\s+/g, ' ').trim().slice(0, maxLength);
         }
 
-        function normalizeClarifyingQuestions(questions) {
-            return (Array.isArray(questions) ? questions : []).slice(0, 3).map((question, index) => ({
+        function normalizeClarifyingQuestions(questions, limit = 3) {
+            const safeLimit = Math.max(1, Math.min(8, Number(limit) || 3));
+            return (Array.isArray(questions) ? questions : []).slice(0, safeLimit).map((question, index) => ({
                 id: sanitizeClarificationAnswer(question?.id || `detail_${index + 1}`, 40).replace(/[^a-z0-9_]/gi, '_').toLowerCase(),
                 question: sanitizeClarificationAnswer(question?.question || '', 180) || 'Can you provide one more detail?',
                 reason: sanitizeClarificationAnswer(question?.reason || '', 180),
@@ -5046,6 +5166,105 @@
                     : null
             })).filter(question => question.question);
         }
+
+        function photoClarificationText(question) {
+            return [question?.id, question?.question, question?.affectedFood, question?.reason]
+                .filter(Boolean)
+                .join(' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+        }
+
+        function isPhotoCompletenessQuestion(question) {
+            const text = photoClarificationText(question);
+            return /\b(?:did\s+you|have\s+you|has\s+the\s+user|do\s+you)\s+(?:eat|eaten|consume|consumed|finish|finished)\b[\s\S]*\b(?:all|everything|entire|whole|full|fully|complete(?:ly)?)\b/.test(text)
+                || /\b(?:ate|eaten|consumed|finished|finish(?:ed)?)\s+(?:all|everything|the\s+whole|the\s+entire|the\s+full|fully|completely)\b/.test(text)
+                || /\b(?:all|everything|the\s+whole|the\s+entire|the\s+full|fully|completely|full)\s+(?:was\s+)?(?:eaten|consumed|finished)\b/.test(text)
+                || /\b(?:what|which|how\s+much)\s+(?:fraction|portion|percentage|percent|amount)\b[\s\S]*\b(?:eat|eaten|consume|consumed|finish|finished)\b/.test(text)
+                || /\b(?:fraction|portion|percentage|percent)\b[\s\S]*\b(?:did\s+you|was\s+eaten|was\s+consumed)\b/.test(text)
+                || /\b(?:ate|eaten|consume|consumed|finish|finished)\s+(?:all|everything)\b/.test(text)
+                || /\b(?:all|everything|the\s+full|the\s+whole)\s+(?:of\s+it|of\s+the\s+food|of\s+both)\b/.test(text)
+                || /\bhow\s+much\b[\s\S]*\b(?:of\s+(?:it|the)|did\s+you)\b[\s\S]*\b(?:eat|eaten|consume|consumed)\b/.test(text);
+        }
+
+        function photoQuestionFoodMatch(question, foods) {
+            const questionTokens = new Set(photoClarificationText(question)
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .split(/\s+/)
+                .filter(token => token.length > 2 && !['what', 'which', 'how', 'many', 'much', 'did', 'you', 'eat', 'eaten', 'consume', 'consumed', 'packed', 'packing', 'liquid', 'used', 'use', 'was', 'were', 'the', 'this', 'that', 'food', 'item', 'serving', 'portion', 'count', 'quantity', 'number', 'size', 'large', 'small', 'about'].includes(token)));
+            if (!questionTokens.size) return null;
+            let best = null;
+            let bestScore = 0;
+            (Array.isArray(foods) ? foods : []).forEach(food => {
+                const foodTokens = new Set([food?.name, food?.serving, food?.matchedItem]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s]/g, ' ')
+                    .split(/\s+/)
+                    .filter(token => token.length > 2)
+                    .map(token => token.length > 4 && token.endsWith('s') ? token.slice(0, -1) : token));
+                const overlap = [...questionTokens].filter(token => foodTokens.has(token)).length;
+                const score = overlap / Math.max(1, Math.min(questionTokens.size, foodTokens.size));
+                if (score > bestScore) {
+                    best = food;
+                    bestScore = score;
+                }
+            });
+            return bestScore >= 0.34 ? best : null;
+        }
+
+        function photoFoodHasKnownCount(food) {
+            if (!food || typeof food !== 'object') return false;
+            const directCount = Number(food.visualCount ?? food.count ?? food.visualQuantity);
+            if (Number.isFinite(directCount) && directCount > 0) return true;
+            const quantity = Number(food.quantity);
+            if (Number.isFinite(quantity) && quantity > 1) return true;
+            const text = [food.name, food.serving, food.visualAmount].filter(Boolean).join(' ').toLowerCase();
+            return /\b(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\s+(?:counted\s+)?[a-z][a-z-]*s\b/.test(text)
+                || /\b(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\s*(?:[- ]?count|pieces?|pcs?|items?)\b/.test(text);
+        }
+
+        function photoClarificationKind(question, foods = []) {
+            const text = photoClarificationText(question);
+            const id = String(question?.id || '').toLowerCase();
+            if (/\b(?:packed|packing|liquid|water)\b/.test(text) && /\b(?:water|oil|liquid|packed|packing)\b/.test(text)) return 'packing-liquid';
+            if (/\b(?:ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|weight|weighed|size|small|medium|large|jumbo|diameter|quarter[- ]?lb|half[- ]?lb|patty|patties|burger)\b/.test(text)
+                || /(?:^|_)(?:weight|size|diameter|patty|pattie)(?:_|$)/.test(id)) return 'weight-size';
+            if (/\b(?:how many|count|quantity|number of|pieces?|pcs?|counted)\b/.test(text)
+                || /(?:^|_)(?:count|quantity|number)(?:_|$)/.test(id)) {
+                const matchedFood = photoQuestionFoodMatch(question, foods);
+                return matchedFood && photoFoodHasKnownCount(matchedFood) ? '' : 'count';
+            }
+            if (/\b(?:oil|butter|spray|grease|fat|mayo(?:nnaise)?|dressing|sauce|gravy|marinade)\b/.test(text)
+                || /(?:^|_)(?:oil|fat|sauce|dressing|butter)(?:_|$)/.test(id)) return 'added-fat-sauce';
+            return '';
+        }
+
+        function photoClarificationImpact(question, kind) {
+            const explicit = Number(question?.estimatedCalorieImpact);
+            if (Number.isFinite(explicit) && explicit > 0) return Math.min(5000, explicit);
+            return { 'weight-size': 250, 'packing-liquid': 90, count: 80, 'added-fat-sauce': 100 }[kind] || 0;
+        }
+
+        function selectPhotoClarifyingQuestions(questions, result = {}) {
+            const foods = Array.isArray(result?.foods) ? result.foods : [];
+            const candidates = normalizeClarifyingQuestions(questions, 8)
+                .filter(question => !isPhotoCompletenessQuestion(question))
+                .map((question, index) => {
+                    const kind = photoClarificationKind(question, foods);
+                    if (!kind) return null;
+                    const impact = photoClarificationImpact(question, kind);
+                    if (kind === 'added-fat-sauce' && impact < 40) return null;
+                    return { question, impact, index };
+                })
+                .filter(Boolean)
+                .sort((left, right) => right.impact - left.impact || left.index - right.index);
+            return candidates.length ? [candidates[0].question] : [];
+        }
+
+        window.selectPhotoClarifyingQuestions = selectPhotoClarifyingQuestions;
 
         function clarificationAnnouncement(source, message, isError = false) {
             if (source === 'photo') {

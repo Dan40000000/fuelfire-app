@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
     buildHighImpactClarifyingQuestions,
+    isPhotoCompletenessQuestion,
     mergeClarifyingQuestions,
     sanitizeClarifyingQuestions,
+    selectPhotoClarifyingQuestions,
 } from '../../api/_lib/food-clarifications.js';
 
 describe('food clarification contract', () => {
@@ -42,5 +44,44 @@ describe('food clarification contract', () => {
             estimatedCalorieImpact: 100,
         }]));
         expect(merged.map((question) => question.id)).toEqual(['cracker_count', 'cooking_fat']);
+    });
+
+    it('removes photo completeness questions while retaining useful explicit count questions', () => {
+        expect(isPhotoCompletenessQuestion({ question: 'Did you eat all of the photographed food?' })).toBe(true);
+        expect(isPhotoCompletenessQuestion({ question: 'What fraction of the portion did you eat?' })).toBe(true);
+        expect(selectPhotoClarifyingQuestions([
+            { id: 'ate_everything', question: 'Ate everything?', estimatedCalorieImpact: 600 },
+            { id: 'portion_eaten', question: 'What portion did you eat?', estimatedCalorieImpact: 500 },
+        ], { foods: [{ name: 'Breakfast sausage links' }] })).toEqual([]);
+
+        expect(selectPhotoClarifyingQuestions([{
+            id: 'cracker_count', question: 'How many crackers did you eat?',
+            affectedFood: 'Crackers', answerType: 'number', estimatedCalorieImpact: 80,
+        }], { foods: [{ name: 'Crackers', serving: '1 cracker', quantity: 1 }] })).toEqual([
+            expect.objectContaining({ id: 'cracker_count', answerType: 'number' }),
+        ]);
+    });
+
+    it('keeps materially useful patty size and tuna packing questions', () => {
+        expect(selectPhotoClarifyingQuestions([
+            { id: 'patty_size', question: 'Were the patties 1/4 lb or 1/2 lb?', affectedFood: 'beef patties', estimatedCalorieImpact: 300 },
+        ], { foods: [{ name: 'Beef patties' }] })).toEqual([
+            expect.objectContaining({ id: 'patty_size' }),
+        ]);
+        expect(selectPhotoClarifyingQuestions([
+            { id: 'tuna_packing_liquid', question: 'Was the tuna packed in water or oil?', affectedFood: 'Canned tuna', estimatedCalorieImpact: 90 },
+        ], { foods: [{ name: 'Canned tuna' }] })).toEqual([
+            expect.objectContaining({ id: 'tuna_packing_liquid' }),
+        ]);
+    });
+
+    it('returns at most one question, ordered by estimated calorie impact, and drops low-impact fat noise', () => {
+        const result = selectPhotoClarifyingQuestions([
+            { id: 'cooking_spray', question: 'Was a light spray used?', affectedFood: 'eggs', estimatedCalorieImpact: 10 },
+            { id: 'cracker_count', question: 'How many crackers did you eat?', affectedFood: 'crackers', estimatedCalorieImpact: 80 },
+            { id: 'patty_size', question: 'Were the patties 1/4 lb or 1/2 lb?', affectedFood: 'patties', estimatedCalorieImpact: 300 },
+        ], { foods: [{ name: 'crackers' }, { name: 'patties' }] });
+        expect(result).toHaveLength(1);
+        expect(result[0].id).toBe('patty_size');
     });
 });

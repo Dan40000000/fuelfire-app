@@ -715,7 +715,7 @@ test('photo authorization errors stop the loading state and return to retry cont
     await expect(page.getByRole('button', { name: 'Analyze Food' })).toBeVisible();
 });
 
-test('photo questions resolve before one parser recalculation and preserve range assumptions', async ({ page }) => {
+test('photo keeps one highest-impact question before one parser recalculation and preserves range assumptions', async ({ page }) => {
     const parserRequests = [];
     await page.route('**/api/ai-food-vision', async (route) => {
         await route.fulfill({
@@ -764,13 +764,9 @@ test('photo questions resolve before one parser recalculation and preserve range
     await page.getByRole('button', { name: 'Photo', exact: true }).click();
     await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
     await page.getByRole('button', { name: 'Analyze Food' }).click();
-    await expect(page.locator('#photo-clarification')).toContainText('Question 1 of 2');
+    await expect(page.locator('#photo-clarification')).toContainText('Question 1 of 1');
     await expect(page.locator('.clarification-option').first()).not.toHaveAttribute('aria-pressed');
     await page.getByRole('button', { name: 'Answer question 1 with Water' }).click();
-    await page.getByRole('button', { name: 'Use answer' }).click();
-    await expect(page.locator('#clarification-answer-error')).toContainText('Enter an answer');
-    await expect(page.locator('#clarification-answer-input')).toHaveAttribute('aria-invalid', 'true');
-    expect(await page.evaluate(() => window.submitClarificationVoiceAnswer('ten'))).toBe(true);
 
     await expect(page.locator('#photo-total-calories')).toHaveText('270');
     await expect(page.locator('#photo-results-title')).toBeFocused();
@@ -779,8 +775,110 @@ test('photo questions resolve before one parser recalculation and preserve range
     await expect(page.locator('#photo-live-status')).toContainText('ready for review');
     expect(parserRequests).toHaveLength(1);
     expect(parserRequests[0].query).toMatch(/canned tuna in water/i);
-    expect(parserRequests[0].query).toMatch(/10 crackers/i);
+    expect(parserRequests[0].query).toMatch(/6 crackers/i);
     expect(parserRequests[0].forceWebSearch).toBe(false);
+});
+
+test('photo plated meal ignores eat-all and low-impact cooking questions without a parser call', async ({ page }) => {
+    let parserCalls = 0;
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                totalCalories: 793,
+                totalProtein: 38,
+                totalCarbs: 3,
+                totalFiber: 0,
+                totalNetCarbs: 3,
+                totalFat: 51,
+                totalSugar: 0,
+                overallConfidence: 'medium',
+                calorieRange: { low: 700, high: 900, midpoint: 740 },
+                foods: [
+                    { name: 'Fried Eggs', calories: 140, protein: 6, carbs: 1, fiber: 0, netCarbs: 1, fat: 9, sugar: 0, quantity: 3, serving: '1 large egg', confidence: 'medium', dataSource: 'photo estimate' },
+                    { name: 'Breakfast Sausage', calories: 53.33, protein: 3.33, carbs: 0, fiber: 0, netCarbs: 0, fat: 4, sugar: 0, quantity: 7, serving: '1 small breakfast sausage link', confidence: 'medium', dataSource: 'small-link visual estimate' },
+                ],
+                clarifyingQuestions: [
+                    { id: 'ate_everything', question: 'Did you eat all of the photographed food?', estimatedCalorieImpact: 600 },
+                    { id: 'cooking_spray', question: 'Was just a light spray used on the eggs?', affectedFood: 'Fried eggs', estimatedCalorieImpact: 10 },
+                    { id: 'sausage_detail', question: 'What kind of standard pork breakfast sausage was it?', affectedFood: 'Breakfast sausage', estimatedCalorieImpact: 20 },
+                ],
+            }),
+        });
+    });
+    await page.route('**/api/ai-food-parser', async (route) => {
+        parserCalls += 1;
+        await route.abort();
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => { window.requireAIAccess = () => true; window.startFoodPhotoCapture(); });
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+
+    await expect(page.locator('#photo-results')).toBeVisible();
+    await expect(page.locator('#photo-total-calories')).toHaveText('793');
+    await expect(page.locator('#photo-clarification')).toHaveCount(0);
+    await expect(page.locator('#photo-live-alert')).toBeEmpty();
+    expect(parserCalls).toBe(0);
+});
+
+test('photo clarification rejects a bogus high-calorie parser result and keeps the original meal', async ({ page }) => {
+    let parserCalls = 0;
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                totalCalories: 793,
+                overallConfidence: 'medium',
+                calorieRange: { low: 700, high: 900, midpoint: 740 },
+                foods: [
+                    { name: 'Fried Eggs', calories: 140, protein: 6, carbs: 1, fiber: 0, netCarbs: 1, fat: 9, sugar: 0, quantity: 3, serving: '1 large egg', confidence: 'medium', dataSource: 'photo estimate' },
+                    { name: 'Breakfast Sausage', calories: 53.33, protein: 3.33, carbs: 0, fiber: 0, netCarbs: 0, fat: 4, sugar: 0, quantity: 7, serving: '1 small breakfast sausage link', confidence: 'medium', dataSource: 'small-link visual estimate' },
+                ],
+                clarifyingQuestions: [{
+                    id: 'patty_size', question: 'Were these patties 1/4 lb or 1/2 lb?', affectedFood: 'Breakfast sausage',
+                    examples: ['1/4 lb', '1/2 lb'], estimatedCalorieImpact: 300,
+                }],
+            }),
+        });
+    });
+    await page.route('**/api/ai-food-parser', async (route) => {
+        parserCalls += 1;
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                totalCalories: 2532,
+                foods: [
+                    { name: 'Fried Eggs', calories: 140, quantity: 3, serving: '1 large egg', protein: 6, carbs: 1, fiber: 0, netCarbs: 1, fat: 9, sugar: 0 },
+                    { name: 'Breakfast sausage links', calories: 300, quantity: 7, serving: '1 standard pork breakfast sausage link', protein: 12, carbs: 2, fiber: 0, netCarbs: 2, fat: 25, sugar: 1 },
+                    { name: 'plated together', calories: 100, quantity: 1, serving: '1 serving', protein: 0, carbs: 0, fiber: 0, netCarbs: 0, fat: 0, sugar: 0 },
+                ],
+                clarifyingQuestions: [],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => { window.requireAIAccess = () => true; window.startFoodPhotoCapture(); });
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+    await expect(page.locator('#photo-clarification')).toContainText('1/4 lb or 1/2 lb');
+    await page.getByRole('button', { name: 'Answer question 1 with 1/4 lb' }).click();
+
+    await expect(page.locator('#photo-results')).toBeVisible();
+    await expect(page.locator('#photo-total-calories')).toHaveText('793');
+    await expect(page.locator('#photo-food-items')).toContainText('Fried Eggs');
+    await expect(page.locator('#photo-food-items')).toContainText('Breakfast Sausage');
+    await expect(page.locator('#photo-food-items')).not.toContainText('plated together');
+    await expect(page.locator('#photo-live-alert')).toBeEmpty();
+    expect(parserCalls).toBe(1);
 });
 
 test('photo clarification lookup failure keeps the successful vision estimate visible for review', async ({ page }) => {
@@ -797,8 +895,9 @@ test('photo clarification lookup failure keeps the successful vision estimate vi
                     { name: 'Breakfast Sausage', calories: 53.33, protein: 3.33, carbs: 0, fiber: 0, netCarbs: 0, fat: 4, sugar: 0, quantity: 6, serving: '1 small breakfast sausage link', confidence: 'medium', dataSource: 'small-link visual estimate' },
                 ],
                 clarifyingQuestions: [{
-                    id: 'eggs_eaten', question: 'Did you eat all three eggs?', examples: ['All three', 'Two'],
-                    reason: 'The count changes calories.', affectedFood: 'fried egg', acceptsVoice: true,
+                    id: 'sausage_size', question: 'Were the sausage links small breakfast links or large links?',
+                    examples: ['Small breakfast links', 'Large links'],
+                    reason: 'Sausage size changes calories.', affectedFood: 'Breakfast sausage', estimatedCalorieImpact: 300,
                 }],
             }),
         });
@@ -821,7 +920,7 @@ test('photo clarification lookup failure keeps the successful vision estimate vi
     await page.getByRole('button', { name: 'Photo', exact: true }).click();
     await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
     await page.getByRole('button', { name: 'Analyze Food' }).click();
-    await page.getByRole('button', { name: 'Answer question 1 with All three' }).click();
+    await page.getByRole('button', { name: 'Answer question 1 with Small breakfast links' }).click();
 
     await expect(page.locator('#photo-results')).toBeVisible();
     await expect(page.locator('#photo-loading')).toBeHidden();
