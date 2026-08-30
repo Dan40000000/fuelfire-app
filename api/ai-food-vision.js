@@ -1,6 +1,6 @@
 import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
 import { callFoodAi, isFoodAiConfigured } from './_lib/food-ai-provider.js';
-import { buildHighImpactClarifyingQuestions, mergeClarifyingQuestions, sanitizeClarifyingQuestions } from './_lib/food-clarifications.js';
+import { buildHighImpactClarifyingQuestions, mergeClarifyingQuestions, sanitizeClarifyingQuestions, selectPhotoClarifyingQuestions } from './_lib/food-clarifications.js';
 import { requireAiAccess } from './_lib/security.js';
 
 const corsOptions = {
@@ -1730,6 +1730,13 @@ function buildParserBackedResponse(parserResult, source, lookupQuery, notes = ''
         ? foodsOverride
         : (Array.isArray(parserResult?.foods) ? parserResult.foods : []);
     const totals = calculateTotals(foods);
+    const mergedQuestions = mergeClarifyingQuestions(
+        buildHighImpactClarifyingQuestions({ query: clarificationContext, foods, evidenceText }),
+        parserResult?.clarifyingQuestions
+    );
+    const clarifyingQuestions = String(source || '').toLowerCase().startsWith('photo')
+        ? selectPhotoClarifyingQuestions(mergedQuestions, { query: clarificationContext, foods, evidenceText })
+        : mergedQuestions;
     return {
         success: true,
         foods,
@@ -1744,10 +1751,7 @@ function buildParserBackedResponse(parserResult, source, lookupQuery, notes = ''
         restaurantIdentified: foods.find((food) => food?.restaurant)?.restaurant || null,
         notes: cleanText(notes || parserResult.notes || '', '', 280) || null,
         lookupQuery: lookupQuery || null,
-        clarifyingQuestions: mergeClarifyingQuestions(
-            buildHighImpactClarifyingQuestions({ query: clarificationContext, foods, evidenceText }),
-            parserResult?.clarifyingQuestions
-        ),
+        clarifyingQuestions,
         source
     };
 }
@@ -1926,7 +1930,7 @@ ${memoryLine}
 ${locationLine}
 ${spatialLine}
 
-Return one JSON object containing: foods; visibleLabel; lookupQuery; restaurantIdentified; overallConfidence; notes; assumptions; calorieRange with low, high, and midpoint; and clarifyingQuestions. Every food needs name, quantity, serving, calories, protein, carbs, fiber, netCarbs, fat, sugar, confidence, restaurant, dataSource, visualCount, estimatedGramsPerUnit, and estimatedTotalGrams. Numeric nutrients must be per one unit and quantity is the consumed count. Preserve the visual count and gram estimates from the evidence instead of replacing them with a database serving.
+Return one JSON object containing: foods; visibleLabel; lookupQuery; restaurantIdentified; overallConfidence; notes; assumptions; calorieRange with low, high, and midpoint; and clarifyingQuestions. Every food needs name, quantity, serving, calories, protein, carbs, fiber, netCarbs, fat, sugar, confidence, restaurant, dataSource, visualCount, estimatedGramsPerUnit, and estimatedTotalGrams. Numeric nutrients must be per one unit and quantity is the consumed count. Preserve the visual count and gram estimates from the evidence instead of replacing them with a database serving. Assume the visible plated meal is the portion to log; never ask whether the user ate or finished all of the photographed food.
 
 Rules:
 - Visible Nutrition Facts values override generic estimates. Preserve exact serving fractions and servings per container; use null for unreadable label fields instead of guessing.
@@ -1939,8 +1943,8 @@ Rules:
 - Classify size-sensitive food before choosing a reference serving. State the assumed size or grams in serving or dataSource and lower confidence when scale is ambiguous.
 - When device depth evidence is present, use it to bound physical size. A center distance alone does not establish width, volume, edible mass, or density; never claim exact grams from that measurement alone.
 - State every material assumption briefly. Return a realistic calorie range when brand, preparation, packing liquid, count eaten, oil, sauce, or portion remains uncertain.
-- Ask up to three short clarifying questions only when the user can answer and the answer could materially change calories. Each question needs id, question, examples, reason, affectedFood, estimatedCalorieImpact, and acceptsVoice true. Prefer questions such as water versus oil, the count actually eaten, cooking fat, serving size, or whether the whole container was consumed. Do not ask for information already readable in the image or explicitly supplied by the user.
-- A package or sleeve visible beside food does not prove the entire package was eaten. For countable foods such as crackers, distinguish visible count from consumed count and ask how many were eaten when that is unknown.
+- Ask at most one short clarifying question, and only when the answer could materially change calories. Permit only a meaningful weight/size distinction (especially patty ounces or 1/4 lb versus 1/2 lb), packing liquid (water versus oil), a genuinely unknown count for countable food, or a substantial amount of added fat or sauce. Each question needs id, question, examples, reason, affectedFood, estimatedCalorieImpact, and acceptsVoice true. Never ask whether the user ate or finished all of the photographed plated food, what fraction or portion they ate, or other generic completeness questions. Do not ask for information already readable in the image or explicitly supplied by the user.
+- A package or sleeve visible beside food does not prove the entire package was eaten. For countable foods such as crackers, distinguish visible count from consumed count and ask how many were eaten only when that count is genuinely unknown.
 - Plain popped popcorn is roughly 31 calories per cup; oil or butter raises it. Small breakfast sausage is commonly 150-170 calories per three links, while a large bratwurst-style link is commonly 200-250 calories.
 - An unbranded whole Margherita or Neapolitan pizza with no scale reference should default to a 10-12 inch assumption (roughly 900-1200 calories), never a 16-18 inch delivery-pizza estimate. State the size assumption and lower confidence.
 - Use total carbohydrates for carbs and calculate netCarbs as carbs minus fiber unless an exact label states net carbs.
@@ -2236,10 +2240,15 @@ export default async function handler(req, res) {
             parsedPayload?.visibleLabel?.product,
             parsedPayload?.visibleLabel?.brand
         ].filter(Boolean).join(' ');
-        const clarifyingQuestions = mergeClarifyingQuestions(
+        const mergedClarifyingQuestions = mergeClarifyingQuestions(
             buildHighImpactClarifyingQuestions({ query: imageContext, foods, evidenceText: visibleEvidenceText }),
             sanitizeClarifyingQuestions(parsedPayload.clarifyingQuestions)
         );
+        const clarifyingQuestions = selectPhotoClarifyingQuestions(mergedClarifyingQuestions, {
+            query: imageContext,
+            foods,
+            evidenceText: visibleEvidenceText
+        });
         const assumptions = sanitizeAssumptions(parsedPayload.assumptions);
         const calorieRange = sanitizeCalorieRange(parsedPayload.calorieRange, totals.calories);
 

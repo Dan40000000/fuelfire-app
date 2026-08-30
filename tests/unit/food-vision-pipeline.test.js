@@ -169,8 +169,6 @@ describe('food vision evidence pipeline', () => {
             assumptions: ['The tuna can appears to be about five ounces.'],
         });
         expect(response.body.clarifyingQuestions).toEqual([
-            expect.objectContaining({ id: 'tuna_packing_liquid', acceptsVoice: true }),
-            expect.objectContaining({ id: 'cracker_count', acceptsVoice: true }),
             expect.objectContaining({ id: 'tuna_mayonnaise', acceptsVoice: true }),
         ]);
         expect(global.fetch).toHaveBeenCalledTimes(2);
