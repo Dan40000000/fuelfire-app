@@ -784,6 +784,8 @@ body {
     color: white;
     padding: 20px 0;
     box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .sidebar.open {
@@ -807,10 +809,17 @@ body {
 }
 
 .menu-item {
+    display: block;
+    width: 100%;
     padding: 15px 25px;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 0;
     border-left: 4px solid transparent;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
 }
 
 .menu-item:hover {
@@ -1014,6 +1023,16 @@ body {
     touch-action: manipulation;
     flex: 1;
     max-width: 80px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
+
+.menu-item:focus-visible,
+.nav-item:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: -3px;
 }
 
 .nav-item:active {
@@ -1278,40 +1297,39 @@ body {
 }
 
 /*
- * The home dashboard is the only screen that owns an internal viewport. Keep
- * the shared shell defaults above intact for the other pages that use this
- * stylesheet, then opt this page into a bounded flex layout explicitly.
+ * Keep the iPhone safe area and top navigation anchored on every standard app
+ * page. Long page content owns the scrolling viewport instead of the document.
  */
-html:has(body.home-app-shell),
-body.home-app-shell {
+html:has(body > .phone-container > .screen > .status-bar),
+body:has(> .phone-container > .screen > .status-bar) {
     height: 100%;
 }
 
-body.home-app-shell {
+body:has(> .phone-container > .screen > .status-bar) {
     min-height: 100vh;
     min-height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
 }
 
-body.home-app-shell .phone-container {
+body:has(> .phone-container > .screen > .status-bar) > .phone-container {
     display: flex;
     flex-direction: column;
 }
 
-body.home-app-shell .screen {
+body:has(> .phone-container > .screen > .status-bar) > .phone-container > .screen {
     height: 100%;
     min-height: 0;
     display: flex;
     flex-direction: column;
 }
 
-body.home-app-shell .status-bar,
-body.home-app-shell .header {
+body:has(> .phone-container > .screen > .status-bar) > .phone-container > .screen > .status-bar,
+body:has(> .phone-container > .screen > .status-bar) > .phone-container > .screen > .header {
     flex: 0 0 auto;
 }
 
-body.home-app-shell .content {
+body:has(> .phone-container > .screen > .status-bar) > .phone-container > .screen > .content {
     flex: 1 1 auto;
     min-height: 0;
     height: auto;
@@ -1319,9 +1337,82 @@ body.home-app-shell .content {
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    scroll-padding-top: 16px;
+    scroll-padding-bottom: max(100px, calc(84px + env(safe-area-inset-bottom)));
 }
 
-body.home-app-shell .content:focus-visible {
+body:has(> .phone-container > .screen > .status-bar) > .phone-container > .screen > .content:focus-visible {
+    outline: 3px solid var(--carolina-dark);
+    outline-offset: -3px;
+}
+
+.header > button.hamburger {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.header > button.hamburger:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Class-based fallback for embedded webviews that do not support :has(). */
+html.fixed-app-shell-root,
+body.fixed-app-shell {
+    height: 100%;
+}
+
+body.fixed-app-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+body.fixed-app-shell > .phone-container {
+    display: flex;
+    flex-direction: column;
+}
+
+body.fixed-app-shell > .phone-container > .screen {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body.fixed-app-shell > .phone-container > .screen > .status-bar,
+body.fixed-app-shell > .phone-container > .screen > .header {
+    flex: 0 0 auto;
+}
+
+body.fixed-app-shell > .phone-container > .screen > .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    padding-bottom: max(100px, calc(84px + env(safe-area-inset-bottom)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-top: 16px;
+    scroll-padding-bottom: max(100px, calc(84px + env(safe-area-inset-bottom)));
+}
+
+body.fixed-app-shell > .phone-container > .screen > .content:focus-visible {
     outline: 3px solid var(--carolina-dark);
     outline-offset: -3px;
 }
@@ -1333,16 +1424,40 @@ body.home-app-shell #logFoodModal {
 }
 
 @media (max-width: 768px) {
-    body.home-app-shell .phone-container {
+    body:has(> .phone-container > .screen > .status-bar) > .phone-container {
+        height: 100%;
+        min-height: 0;
+    }
+
+    body.fixed-app-shell > .phone-container {
         height: 100%;
         min-height: 0;
     }
 }
 
 @media (min-width: 769px) and (max-width: 1023px) {
-    body.home-app-shell .phone-container {
+    body:has(> .phone-container > .screen > .status-bar) > .phone-container {
         height: 100vh;
         height: 100dvh;
         min-height: 0;
+    }
+
+    body.fixed-app-shell > .phone-container {
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .overlay,
+    .menu-item,
+    .nav-item,
+    .nav-icon,
+    .nav-label,
+    .nav-glow {
+        animation: none !important;
+        transition: none !important;
     }
 }

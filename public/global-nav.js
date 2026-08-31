@@ -1,5 +1,16 @@
 // Global navigation functions for all pages
 
+// App pages scroll inside their content panel so the iPhone safe area and
+// header remain anchored. Prevent the browser from restoring document scroll
+// and moving that shell underneath the native status bar after navigation.
+try {
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+} catch (error) {
+    // Older embedded webviews may expose a read-only history object.
+}
+
 // Toggle Sidebar Menu
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
@@ -23,6 +34,209 @@ function goToScreen(page, screenId) {
 
 function goBack() {
     window.history.back();
+}
+
+function replaceClickTargetWithButton(element) {
+    if (!element || element.tagName === 'BUTTON' || element.tagName === 'A') return element;
+
+    const button = document.createElement('button');
+    const propertyClickHandler = element.onclick;
+    Array.from(element.attributes).forEach((attribute) => {
+        if (attribute.name !== 'role' && attribute.name !== 'tabindex') {
+            button.setAttribute(attribute.name, attribute.value);
+        }
+    });
+    button.type = 'button';
+    button.innerHTML = element.innerHTML;
+    if (propertyClickHandler && !button.getAttribute('onclick')) {
+        button.onclick = propertyClickHandler;
+    }
+    element.replaceWith(button);
+    return button;
+}
+
+function getBottomNavigationLabel(item, index) {
+    const visibleLabel = item.querySelector('.nav-label')?.textContent?.trim();
+    if (visibleLabel) return visibleLabel;
+
+    const action = `${item.dataset.nav || ''} ${item.getAttribute('onclick') || ''}`.toLowerCase();
+    if (action.includes('workout-quiz')) return 'Quick workout';
+    if (action.includes('showquickfoodentry') || action.includes('calorie-tracker')) return 'Log food';
+    if (action.includes('health-dashboard')) return 'Health dashboard';
+    if (action.includes('account')) return 'Account';
+    if (action.includes('book-coach') || action.includes('coaching-scheduler')) return 'Book a coach';
+    if (action.includes('index.html') || action.includes("'home'")) return 'Home';
+    return `Primary navigation item ${index + 1}`;
+}
+
+function enhanceNavigationSemantics() {
+    document.querySelectorAll('.sidebar').forEach((sidebar) => {
+        sidebar.setAttribute('role', 'navigation');
+        sidebar.setAttribute('aria-label', 'Main navigation');
+        sidebar.querySelectorAll('.menu-item').forEach((item) => {
+            const button = replaceClickTargetWithButton(item);
+            button.querySelectorAll('svg').forEach((icon) => icon.setAttribute('aria-hidden', 'true'));
+        });
+
+        const syncSidebarCurrentPage = () => {
+            sidebar.querySelectorAll('.menu-item').forEach((item) => {
+                if (item.classList.contains('active')) item.setAttribute('aria-current', 'page');
+                else item.removeAttribute('aria-current');
+            });
+        };
+        syncSidebarCurrentPage();
+        if (sidebar.dataset.currentPageManaged !== 'true') {
+            sidebar.dataset.currentPageManaged = 'true';
+            new MutationObserver(syncSidebarCurrentPage).observe(sidebar, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['class'],
+            });
+        }
+    });
+
+    document.querySelectorAll('.bottom-nav').forEach((navigation) => {
+        navigation.setAttribute('role', 'navigation');
+        navigation.setAttribute('aria-label', 'Primary navigation');
+        navigation.querySelectorAll('.nav-item').forEach((item, index) => {
+            const label = getBottomNavigationLabel(item, index);
+            const button = replaceClickTargetWithButton(item);
+            button.setAttribute('aria-label', label);
+            button.querySelectorAll('svg').forEach((icon) => icon.setAttribute('aria-hidden', 'true'));
+        });
+
+        const syncBottomCurrentPage = () => {
+            navigation.querySelectorAll('.nav-item').forEach((item) => {
+                if (item.classList.contains('active')) item.setAttribute('aria-current', 'page');
+                else item.removeAttribute('aria-current');
+            });
+        };
+        syncBottomCurrentPage();
+        if (navigation.dataset.currentPageManaged !== 'true') {
+            navigation.dataset.currentPageManaged = 'true';
+            new MutationObserver(syncBottomCurrentPage).observe(navigation, {
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['class'],
+            });
+        }
+    });
+}
+
+function enhanceFixedAppShell() {
+    const screen = document.querySelector('.phone-container > .screen');
+    const statusBar = screen?.querySelector(':scope > .status-bar');
+    const header = screen?.querySelector(':scope > .header');
+    const content = screen?.querySelector(':scope > .content');
+
+    if (!screen || !statusBar || !header || !content) return;
+
+    document.documentElement.classList.add('fixed-app-shell-root');
+    document.body.classList.add('fixed-app-shell');
+
+    if (!content.hasAttribute('tabindex')) {
+        content.tabIndex = 0;
+    }
+    if (!content.hasAttribute('aria-label')) {
+        const pageTitle = header.querySelector('.header-title')?.textContent?.trim();
+        content.setAttribute('aria-label', pageTitle ? `${pageTitle} content` : 'Page content');
+    }
+
+    const originalTrigger = header.querySelector('.hamburger');
+    if (!originalTrigger) return;
+
+    let trigger = originalTrigger;
+    if (originalTrigger.tagName !== 'BUTTON') {
+        trigger = document.createElement('button');
+        Array.from(originalTrigger.attributes).forEach((attribute) => {
+            if (attribute.name !== 'role' && attribute.name !== 'tabindex') {
+                trigger.setAttribute(attribute.name, attribute.value);
+            }
+        });
+        trigger.type = 'button';
+        trigger.innerHTML = originalTrigger.innerHTML;
+        originalTrigger.replaceWith(trigger);
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    const opensMenu = Boolean(sidebar) && (trigger.getAttribute('onclick') || '').includes('toggleSidebar');
+    trigger.setAttribute('aria-label', opensMenu ? 'Open navigation menu' : 'Go back');
+
+    if (!opensMenu) return;
+
+    trigger.setAttribute('aria-controls', sidebar.id);
+}
+
+function enhanceSidebarFocusManagement() {
+    const sidebar = document.getElementById('sidebar');
+    const trigger = document.querySelector('.header > .hamburger[aria-controls="sidebar"]');
+    if (!sidebar || !trigger || sidebar.dataset.focusManaged === 'true') return;
+
+    sidebar.dataset.focusManaged = 'true';
+    const overlay = document.querySelector('.overlay');
+    const backgroundElements = [
+        document.querySelector('.phone-container'),
+        document.querySelector('.bottom-nav'),
+    ].filter(Boolean);
+    let wasOpen = false;
+    let returnFocus = trigger;
+
+    const focusableElements = () => Array.from(sidebar.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((element) => !element.hidden && element.getClientRects().length > 0);
+
+    const syncSidebarState = () => {
+        const isOpen = sidebar.classList.contains('open');
+        trigger.setAttribute('aria-expanded', String(isOpen));
+        trigger.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+        sidebar.inert = !isOpen;
+        sidebar.setAttribute('aria-hidden', String(!isOpen));
+        if (overlay) overlay.setAttribute('aria-hidden', 'true');
+        backgroundElements.forEach((element) => { element.inert = isOpen; });
+
+        if (isOpen && !wasOpen) {
+            returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : trigger;
+            requestAnimationFrame(() => focusableElements()[0]?.focus());
+        } else if (!isOpen && wasOpen) {
+            requestAnimationFrame(() => {
+                const focusTarget = returnFocus?.isConnected ? returnFocus : trigger;
+                focusTarget.focus();
+            });
+        }
+        wasOpen = isOpen;
+    };
+
+    document.addEventListener('keydown', (event) => {
+        if (!sidebar.classList.contains('open')) return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            window.toggleSidebar();
+            return;
+        }
+        if (event.key !== 'Tab') return;
+
+        const focusable = focusableElements();
+        if (!focusable.length) {
+            event.preventDefault();
+            return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    new MutationObserver(syncSidebarState).observe(sidebar, {
+        attributes: true,
+        attributeFilter: ['class'],
+    });
+    syncSidebarState();
 }
 
 // Ensure Book a Coach appears in all sidebars
@@ -129,9 +343,12 @@ function scanExerciseImages(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    enhanceFixedAppShell();
     ensureBookCoachLink();
     ensureBookCoachBottomNav();
     ensureAccountBottomNav();
+    enhanceNavigationSemantics();
+    enhanceSidebarFocusManagement();
     scanExerciseImages();
 
     const observer = new MutationObserver((mutations) => {
@@ -143,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (node.classList?.contains('bottom-nav')) {
                         ensureBookCoachBottomNav();
                         ensureAccountBottomNav();
+                        enhanceNavigationSemantics();
                     }
                 }
             });
