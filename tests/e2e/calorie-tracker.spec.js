@@ -779,6 +779,81 @@ test('photo keeps one highest-impact question before one parser recalculation an
     expect(parserRequests[0].forceWebSearch).toBe(false);
 });
 
+test('photo rib species chip replaces a guessed beef species before parser recalculation', async ({ page }) => {
+    const parserRequests = [];
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                overallConfidence: 'low',
+                calorieRange: { low: 700, high: 1300, midpoint: 900 },
+                foods: [{
+                    name: 'Smoked beef short rib (bone-in)', calories: 900, protein: 65, carbs: 0,
+                    fiber: 0, netCarbs: 0, fat: 70, sugar: 0, quantity: 1,
+                    serving: 'estimated bone-in slab portion', confidence: 'low', dataSource: 'photo estimate',
+                }],
+                clarifyingQuestions: [
+                    {
+                        id: 'rib_species', question: 'Are these pork ribs, beef ribs, or another kind?',
+                        examples: ['Pork ribs', 'Beef ribs', 'Lamb ribs', 'Goat ribs', 'Not sure'],
+                        reason: 'Species changes the nutrition reference.', affectedFood: 'Ribs',
+                        acceptsVoice: true, estimatedCalorieImpact: 5,
+                    },
+                    { id: 'cooking_oil', question: 'Was oil used?', affectedFood: 'ribs', estimatedCalorieImpact: 400 },
+                    { id: 'ate_everything', question: 'Did you eat all of the photographed food?', estimatedCalorieImpact: 900 },
+                ],
+            }),
+        });
+    });
+    await page.route('**/api/ai-food-parser', async (route) => {
+        const body = route.request().postDataJSON();
+        parserRequests.push(body);
+        const isPorkQuery = /\bpork ribs?\b/i.test(body.query) && !/\bbeef\b/i.test(body.query);
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                foods: [{
+                    name: 'Pork ribs', calories: isPorkQuery ? 820 : 2200, protein: 58, carbs: 0,
+                    fiber: 0, netCarbs: 0, fat: isPorkQuery ? 62 : 180, sugar: 0, quantity: 1,
+                    serving: '1 bone-in pork rib portion', confidence: 'medium', sourceType: 'database',
+                }],
+                clarifyingQuestions: [],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => { window.requireAIAccess = () => true; window.startFoodPhotoCapture(); });
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+
+    await expect(page.locator('#photo-clarification')).toContainText('Question 1 of 1');
+    await expect(page.locator('#photo-clarification')).toContainText('Are these pork ribs, beef ribs, or another kind?');
+    await expect(page.getByRole('button', { name: 'Answer question 1 with Pork ribs' })).toBeVisible();
+
+    const lambRewrite = await page.evaluate(() => window.buildNaturalClarifiedQuery(
+        'Smoked beef ribs, pork sausage',
+        [{
+            question: { id: 'rib_species', affectedFood: 'Ribs' },
+            answer: 'Lamb ribs',
+        }]
+    ));
+    expect(lambRewrite).toMatch(/lamb ribs/i);
+    expect(lambRewrite).toMatch(/pork sausage/i);
+    expect(lambRewrite).not.toMatch(/\bbeef\b/i);
+
+    await page.getByRole('button', { name: 'Answer question 1 with Pork ribs' }).click();
+
+    await expect(page.locator('#photo-total-calories')).toHaveText('820');
+    expect(parserRequests).toHaveLength(1);
+    expect(parserRequests[0].query).toMatch(/pork ribs?/i);
+    expect(parserRequests[0].query).not.toMatch(/\bbeef\b/i);
+});
+
 test('photo plated meal ignores eat-all and low-impact cooking questions without a parser call', async ({ page }) => {
     let parserCalls = 0;
     await page.route('**/api/ai-food-vision', async (route) => {

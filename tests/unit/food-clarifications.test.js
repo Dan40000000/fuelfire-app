@@ -84,4 +84,49 @@ describe('food clarification contract', () => {
         expect(result).toHaveLength(1);
         expect(result[0].id).toBe('patty_size');
     });
+
+    it('asks for rib species when the model guesses beef without user or label evidence', () => {
+        const questions = buildHighImpactClarifyingQuestions({
+            photo: true,
+            foods: [{ name: 'Smoked beef rib meat', serving: 'estimated edible portion' }],
+        });
+
+        expect(questions).toEqual([
+            expect.objectContaining({
+                id: 'rib_species',
+                question: 'Are these pork ribs, beef ribs, or another kind?',
+                examples: ['Pork ribs', 'Beef ribs', 'Lamb ribs', 'Goat ribs', 'Not sure'],
+                acceptsVoice: true,
+            }),
+        ]);
+    });
+
+    it('suppresses rib species when context or readable evidence explicitly names the animal', () => {
+        const guessedFoods = [{ name: 'Smoked beef rib meat', serving: 'estimated edible portion' }];
+
+        expect(buildHighImpactClarifyingQuestions({
+            photo: true,
+            query: 'User note: pork ribs',
+            foods: guessedFoods,
+        })).toEqual([]);
+        expect(buildHighImpactClarifyingQuestions({
+            photo: true,
+            evidenceText: 'Readable package label: beef ribs',
+            foods: guessedFoods,
+        })).toEqual([]);
+    });
+
+    it('keeps rib species ahead of lower-impact photo questions', () => {
+        const result = selectPhotoClarifyingQuestions([
+            { id: 'cooking_oil', question: 'Was oil used?', affectedFood: 'ribs', estimatedCalorieImpact: 500 },
+            {
+                id: 'rib_species', question: 'Are these pork ribs, beef ribs, or another kind?',
+                affectedFood: 'Ribs', examples: ['Pork ribs', 'Beef ribs', 'Lamb ribs', 'Goat ribs', 'Not sure'], estimatedCalorieImpact: 5,
+            },
+            { id: 'rib_size', question: 'Were the ribs small or large?', affectedFood: 'ribs', estimatedCalorieImpact: 300 },
+        ], { foods: [{ name: 'Smoked beef rib meat' }] });
+
+        expect(result).toHaveLength(1);
+        expect(result[0].id).toBe('rib_species');
+    });
 });
