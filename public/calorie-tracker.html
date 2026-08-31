@@ -118,6 +118,29 @@
             display: none;
         }
 
+        .calorie-goal-edit-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            margin-top: 14px;
+            padding: 8px 14px;
+            border: 2px solid rgba(255, 255, 255, 0.92);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.2;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .calorie-goal-edit-link:focus-visible {
+            outline: 3px solid #fff;
+            outline-offset: 3px;
+            box-shadow: 0 0 0 5px rgba(15, 23, 42, 0.9);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             #photo-modal *,
             #voice-modal * {
@@ -359,6 +382,9 @@
                                 </div>
                             </div>
                         </div>
+                        <a class="calorie-goal-edit-link" href="index.html#edit-nutrition-goals">
+                            Edit calorie goal/target
+                        </a>
                     </div>
                     
                     <!-- Macro Tracking -->

@@ -1280,7 +1280,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <h4 style="margin: 0; font-size: 18px;">🍽️ Nutrition Goals</h4>
                             <div style="display: flex; gap: 8px;">
-                                <button onclick="editNutritionGoals()" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit</button>
+                                <button id="nutrition-goals-edit" aria-haspopup="dialog" onclick="editNutritionGoals()" style="background: rgba(255,255,255,0.95); color: #FF6B6B; border: none; padding: 10px 18px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.2); transition: all 0.3s;">✏️ Edit</button>
                                 <button onclick="deleteNutritionGoals()" style="background: rgba(0,0,0,0.2); color: white; border: none; padding: 10px 14px; border-radius: 15px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.3s;">🗑️</button>
                             </div>
                         </div>
@@ -1366,7 +1366,7 @@
 
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
                             <button onclick="calculateAndSaveMacroTargets()" style="flex: 1; min-width: 190px; background: linear-gradient(135deg, #22c55e, #14b8a6); color: white; border: none; padding: 14px 16px; border-radius: 15px; font-weight: 800; cursor: pointer;">Calculate + Save Targets</button>
-                            <button onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.16); padding: 14px 16px; border-radius: 15px; font-weight: 700; cursor: pointer;">Manual edit</button>
+                            <button aria-haspopup="dialog" onclick="showNutritionGoalSetter()" style="background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.16); padding: 14px 16px; border-radius: 15px; font-weight: 700; cursor: pointer;">Manual edit</button>
                         </div>
 
                         <div id="macro-calculator-results" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.5;">
@@ -2707,16 +2707,16 @@
     </div>
 
     <!-- NUTRITION GOAL SETTER MODAL -->
-    <div id="nutrition-goal-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+    <div id="nutrition-goal-modal" role="dialog" aria-modal="true" aria-labelledby="nutrition-goal-modal-title" aria-hidden="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 25px; padding: 30px; max-width: 450px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out;">
             <div style="text-align: center; margin-bottom: 25px;">
-                <h2 style="color: var(--primary); margin: 0 0 10px 0; font-size: 24px;">🎯 Set Your Nutrition Goals</h2>
+                <h2 id="nutrition-goal-modal-title" style="color: var(--primary); margin: 0 0 10px 0; font-size: 24px;">🎯 Set Your Nutrition Goals</h2>
                 <p style="color: #666; font-size: 14px; margin: 0;">These targets will sync to your Calorie Tracker</p>
             </div>
 
             <!-- Calories Goal -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
-                <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🔥 Daily Calories</label>
+                <label for="goal-calories" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🔥 Daily Calories</label>
                 <input type="number" id="goal-calories" placeholder="e.g. 2000" style="width: 100%; padding: 15px; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
                 <div style="text-align: center; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.9);">Total daily energy target</div>
             </div>
@@ -2725,28 +2725,28 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <!-- Protein -->
                 <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);">
-                    <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🥩 Protein</label>
+                    <label for="goal-protein" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🥩 Protein</label>
                     <input type="number" id="goal-protein" placeholder="150" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
                     <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
                 </div>
 
                 <!-- Carbs -->
                 <div style="background: linear-gradient(135deg, #f39c12, #d68910); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);">
-                    <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🍞 Carbs</label>
+                    <label for="goal-carbs" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🍞 Carbs</label>
                     <input type="number" id="goal-carbs" placeholder="225" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
                     <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
                 </div>
 
                 <!-- Fat -->
                 <div style="background: linear-gradient(135deg, #27ae60, #229954); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);">
-                    <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🥑 Fat</label>
+                    <label for="goal-fat" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🥑 Fat</label>
                     <input type="number" id="goal-fat" placeholder="67" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
                     <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
                 </div>
 
                 <!-- Sugar -->
                 <div style="background: linear-gradient(135deg, #3498db, #2980b9); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);">
-                    <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🍭 Sugar Limit</label>
+                    <label for="goal-sugar" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🍭 Sugar Limit</label>
                     <input type="number" id="goal-sugar" placeholder="25" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
                     <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
                 </div>
@@ -2756,10 +2756,10 @@
             <div style="background: #f8f9ff; border-radius: 15px; padding: 15px; margin-bottom: 20px;">
                 <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: bold;">⚡ Quick Presets:</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <button onclick="setPresetGoals('bulk')" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">💪 Bulk (3000 cal)</button>
-                    <button onclick="setPresetGoals('cut')" style="background: white; color: #e74c3c; border: 2px solid #e74c3c; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🔥 Cut (1800 cal)</button>
-                    <button onclick="setPresetGoals('maintain')" style="background: white; color: #27ae60; border: 2px solid #27ae60; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">⚖️ Maintain (2200 cal)</button>
-                    <button onclick="setPresetGoals('keto')" style="background: white; color: #9b59b6; border: 2px solid #9b59b6; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🥑 Keto (2000 cal)</button>
+                    <button onclick="setPresetGoals('bulk')" style="background: white; color: #3949ab; border: 2px solid #667eea; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">💪 Bulk (3000 cal)</button>
+                    <button onclick="setPresetGoals('cut')" style="background: white; color: #b42318; border: 2px solid #e74c3c; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🔥 Cut (1800 cal)</button>
+                    <button onclick="setPresetGoals('maintain')" style="background: white; color: #1f7a44; border: 2px solid #27ae60; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">⚖️ Maintain (2200 cal)</button>
+                    <button onclick="setPresetGoals('keto')" style="background: white; color: #5a2a75; border: 2px solid #9b59b6; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">🥑 Keto (2000 cal)</button>
                 </div>
             </div>
 
@@ -2943,13 +2943,17 @@
         // Load correct screen IMMEDIATELY based on hash - before anything else
         document.addEventListener('DOMContentLoaded', function() {
             const hash = window.location.hash.substring(1);
+            const hasEditNutritionGoalsQuery = new URLSearchParams(window.location.search).get('editNutritionGoals') === '1';
+            const hasEditNutritionGoalsHash = hash === 'edit-nutrition-goals';
+            const shouldEditNutritionGoals = hasEditNutritionGoalsQuery || hasEditNutritionGoalsHash;
+            const initialScreen = shouldEditNutritionGoals ? 'progress' : hash;
 
             // Hide all screens first
             document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
 
             // If there's a hash, show that screen
-            if (hash && document.getElementById(hash)) {
-                showScreen(hash);
+            if (initialScreen && document.getElementById(initialScreen)) {
+                showScreen(initialScreen);
             } else {
                 // Otherwise show home by default
                 document.getElementById('home').classList.add('active');
@@ -2957,6 +2961,15 @@
 
             // Update home food calories and deficit/surplus on page load
             updateHomeFoodCalories();
+
+            // Open the nutrition editor for the one-shot deep link, then replace its sentinel with #progress.
+            if (shouldEditNutritionGoals) {
+                showNutritionGoalSetter();
+                const cleanUrl = new URL(window.location.href);
+                cleanUrl.searchParams.delete('editNutritionGoals');
+                cleanUrl.hash = '#progress';
+                window.history.replaceState(window.history.state, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+            }
         });
 
         // Listen for nutrition updates from calorie tracker
@@ -3334,12 +3347,111 @@
             if (goals.dietStyle) setInputValue('macro-diet-style', goals.dietStyle);
         }
 
+        let nutritionGoalReturnFocus = null;
+        let nutritionGoalInertElements = [];
+
+        function getNutritionGoalModalFocusableElements() {
+            const modal = document.getElementById('nutrition-goal-modal');
+            if (!modal) return [];
+
+            return Array.from(modal.querySelectorAll(
+                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+            )).filter((element) => {
+                const style = window.getComputedStyle(element);
+                return style.display !== 'none' && style.visibility !== 'hidden' && !element.closest('[hidden]');
+            });
+        }
+
+        function setNutritionGoalModalBackgroundInert(shouldInert) {
+            const modal = document.getElementById('nutrition-goal-modal');
+            if (!modal || !modal.parentElement) return;
+
+            if (shouldInert) {
+                if (nutritionGoalInertElements.length) return;
+                nutritionGoalInertElements = Array.from(modal.parentElement.children).filter((element) => {
+                    if (element === modal || element.hasAttribute('inert')) return false;
+                    element.setAttribute('inert', '');
+                    return true;
+                });
+                return;
+            }
+
+            nutritionGoalInertElements.forEach((element) => element.removeAttribute('inert'));
+            nutritionGoalInertElements = [];
+        }
+
+        function handleNutritionGoalModalFocusIn(event) {
+            const modal = document.getElementById('nutrition-goal-modal');
+            if (!modal || modal.style.display === 'none' || modal.contains(event.target)) return;
+            const firstFocusable = getNutritionGoalModalFocusableElements()[0];
+            if (firstFocusable) firstFocusable.focus();
+        }
+
+        function handleNutritionGoalModalKeydown(event) {
+            const modal = document.getElementById('nutrition-goal-modal');
+            if (!modal || modal.style.display === 'none') return;
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                closeNutritionGoalSetter();
+                return;
+            }
+
+            if (event.key !== 'Tab') return;
+            const focusableElements = getNutritionGoalModalFocusableElements();
+            if (!focusableElements.length) {
+                event.preventDefault();
+                return;
+            }
+
+            const firstFocusable = focusableElements[0];
+            const lastFocusable = focusableElements[focusableElements.length - 1];
+            const focusIsInside = modal.contains(document.activeElement);
+            if (event.shiftKey && (!focusIsInside || document.activeElement === firstFocusable)) {
+                event.preventDefault();
+                lastFocusable.focus();
+            } else if (!event.shiftKey && (!focusIsInside || document.activeElement === lastFocusable)) {
+                event.preventDefault();
+                firstFocusable.focus();
+            }
+        }
+
+        function enableNutritionGoalModalKeyboardSupport() {
+            document.addEventListener('keydown', handleNutritionGoalModalKeydown, true);
+            document.addEventListener('focusin', handleNutritionGoalModalFocusIn, true);
+        }
+
+        function disableNutritionGoalModalKeyboardSupport() {
+            document.removeEventListener('keydown', handleNutritionGoalModalKeydown, true);
+            document.removeEventListener('focusin', handleNutritionGoalModalFocusIn, true);
+        }
+
         // Show the nutrition goal setter modal
         function showNutritionGoalSetter() {
             const modal = document.getElementById('nutrition-goal-modal');
             if (modal) {
+                const activeElement = document.activeElement;
+                const fallback = document.getElementById('nutrition-goals-edit');
+                if (!nutritionGoalReturnFocus) {
+                    nutritionGoalReturnFocus = activeElement instanceof HTMLElement &&
+                        activeElement !== document.body &&
+                        activeElement !== document.documentElement &&
+                        !modal.contains(activeElement)
+                        ? activeElement
+                        : fallback;
+                }
                 modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                setNutritionGoalModalBackgroundInert(true);
+                disableNutritionGoalModalKeyboardSupport();
+                enableNutritionGoalModalKeyboardSupport();
                 loadCurrentGoals();
+                requestAnimationFrame(function() {
+                    if (modal.style.display === 'none') return;
+                    const caloriesInput = document.getElementById('goal-calories');
+                    if (caloriesInput) caloriesInput.focus();
+                });
             }
         }
 
@@ -3347,7 +3459,21 @@
         function closeNutritionGoalSetter() {
             const modal = document.getElementById('nutrition-goal-modal');
             if (modal) {
+                const wasOpen = modal.style.display !== 'none';
                 modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                disableNutritionGoalModalKeyboardSupport();
+                setNutritionGoalModalBackgroundInert(false);
+
+                if (wasOpen) {
+                    const returnFocus = nutritionGoalReturnFocus;
+                    nutritionGoalReturnFocus = null;
+                    const fallback = document.getElementById('nutrition-goals-edit');
+                    const focusTarget = returnFocus && document.contains(returnFocus) ? returnFocus : fallback;
+                    if (focusTarget && !focusTarget.hasAttribute('inert')) {
+                        focusTarget.focus({ preventScroll: true });
+                    }
+                }
             }
         }
 
