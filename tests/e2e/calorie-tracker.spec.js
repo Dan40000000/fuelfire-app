@@ -32,6 +32,10 @@ test('calorie goal link opens the nutrition editor and focuses daily calories', 
     await expect(nutritionDialog).toHaveAttribute('aria-modal', 'true');
     await expect(page.locator('#goal-calories')).toBeFocused();
     await expect(page.locator('#goal-calories')).toHaveValue('2000');
+    for (const field of ['calories', 'protein', 'carbs', 'fat', 'sugar']) {
+        await expect(page.locator(`#goal-${field}`)).toHaveAttribute('aria-describedby', `goal-${field}-help`);
+    }
+    await expect(page.locator('#nutrition-goal-save-status')).toHaveAttribute('role', 'status');
     await page.waitForTimeout(700);
     await expect(page.locator('#onboarding-overlay')).toBeHidden();
     await expect(nutritionDialog).toBeVisible();
@@ -62,6 +66,17 @@ test('calorie goal link opens the nutrition editor and focuses daily calories', 
     await expect(page.locator('#goal-calories')).toBeFocused();
     await page.reload();
     await expect(page.locator('#nutrition-goal-modal')).toBeHidden();
+});
+
+test('opening the nutrition editor during onboarding startup dismisses the tour', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(100);
+    await page.evaluate(() => window.showNutritionGoalSetter());
+
+    await expect(page.locator('#nutrition-goal-modal')).toBeVisible();
+    await page.waitForTimeout(700);
+    await expect(page.locator('#onboarding-overlay')).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem('fuelfire_onboarding_v1'))).toBeNull();
 });
 
 test('manual food entry persists valid nutrition and timestamp data', async ({ page }) => {

@@ -2715,40 +2715,40 @@
             </div>
 
             <!-- Calories Goal -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);">
+            <div style="background: linear-gradient(135deg, #312e81 0%, #4c1d95 100%); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(49, 46, 129, 0.3);">
                 <label for="goal-calories" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 16px;">🔥 Daily Calories</label>
-                <input type="number" id="goal-calories" placeholder="e.g. 2000" style="width: 100%; padding: 15px; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
-                <div style="text-align: center; margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.9);">Total daily energy target</div>
+                <input type="number" id="goal-calories" aria-describedby="goal-calories-help" placeholder="e.g. 2000" style="width: 100%; padding: 15px; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
+                <div id="goal-calories-help" style="text-align: center; margin-top: 8px; font-size: 12px; color: #fff;">Total daily energy target</div>
             </div>
 
             <!-- Macros Grid -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <!-- Protein -->
-                <div style="background: linear-gradient(135deg, #e74c3c, #c0392b); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);">
+                <div style="background: linear-gradient(135deg, #991b1b, #7f1d1d); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(153, 27, 27, 0.3);">
                     <label for="goal-protein" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🥩 Protein</label>
-                    <input type="number" id="goal-protein" placeholder="150" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
-                    <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
+                    <input type="number" id="goal-protein" aria-describedby="goal-protein-help" placeholder="150" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
+                    <div id="goal-protein-help" style="text-align: center; margin-top: 6px; font-size: 11px; color: #fff;">grams per day</div>
                 </div>
 
                 <!-- Carbs -->
-                <div style="background: linear-gradient(135deg, #f39c12, #d68910); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);">
+                <div style="background: linear-gradient(135deg, #92400e, #78350f); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(146, 64, 14, 0.3);">
                     <label for="goal-carbs" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🍞 Carbs</label>
-                    <input type="number" id="goal-carbs" placeholder="225" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
-                    <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
+                    <input type="number" id="goal-carbs" aria-describedby="goal-carbs-help" placeholder="225" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
+                    <div id="goal-carbs-help" style="text-align: center; margin-top: 6px; font-size: 11px; color: #fff;">grams per day</div>
                 </div>
 
                 <!-- Fat -->
-                <div style="background: linear-gradient(135deg, #27ae60, #229954); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);">
+                <div style="background: linear-gradient(135deg, #166534, #14532d); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(22, 101, 52, 0.3);">
                     <label for="goal-fat" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🥑 Fat</label>
-                    <input type="number" id="goal-fat" placeholder="67" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
-                    <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
+                    <input type="number" id="goal-fat" aria-describedby="goal-fat-help" placeholder="67" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
+                    <div id="goal-fat-help" style="text-align: center; margin-top: 6px; font-size: 11px; color: #fff;">grams per day</div>
                 </div>
 
                 <!-- Sugar -->
-                <div style="background: linear-gradient(135deg, #3498db, #2980b9); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);">
+                <div style="background: linear-gradient(135deg, #1e40af, #1e3a8a); border-radius: 20px; padding: 20px; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3);">
                     <label for="goal-sugar" style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 14px;">🍭 Sugar Limit</label>
-                    <input type="number" id="goal-sugar" placeholder="25" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
-                    <div style="text-align: center; margin-top: 6px; font-size: 11px; color: rgba(255,255,255,0.9);">grams per day</div>
+                    <input type="number" id="goal-sugar" aria-describedby="goal-sugar-help" placeholder="25" style="width: 100%; padding: 12px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);">
+                    <div id="goal-sugar-help" style="text-align: center; margin-top: 6px; font-size: 11px; color: #fff;">grams per day</div>
                 </div>
             </div>
 
@@ -2765,13 +2765,15 @@
 
             <!-- Action Buttons -->
             <div style="display: flex; gap: 12px;">
-                <button onclick="saveNutritionGoals()" style="flex: 1; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; border: none; padding: 16px; border-radius: 18px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3); transition: all 0.3s;">
-                    💾 Save Goals
-                </button>
-                <button onclick="closeNutritionGoalSetter()" style="background: #6c757d; color: white; border: none; padding: 16px 24px; border-radius: 18px; font-weight: bold; cursor: pointer;">
+                    <button onclick="saveNutritionGoals()" style="flex: 1; background: linear-gradient(135deg, #166534, #14532d); color: white; border: none; padding: 16px; border-radius: 18px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 5px 15px rgba(22, 101, 52, 0.3); transition: all 0.3s;">
+                        💾 Save Goals
+                    </button>
+                <button onclick="closeNutritionGoalSetter()" style="background: #475569; color: white; border: none; padding: 16px 24px; border-radius: 18px; font-weight: bold; cursor: pointer;">
                     Cancel
                 </button>
             </div>
+
+            <div id="nutrition-goal-save-status" role="status" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;"></div>
 
             <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #4b5563;">
                 💡 Tip: Adjust goals based on your activity level and fitness targets
@@ -3443,10 +3445,13 @@
                 }
                 modal.style.display = 'flex';
                 modal.setAttribute('aria-hidden', 'false');
+                window.dispatchEvent(new Event('nutrition-goal-modal-opened'));
                 setNutritionGoalModalBackgroundInert(true);
                 disableNutritionGoalModalKeyboardSupport();
                 enableNutritionGoalModalKeyboardSupport();
                 loadCurrentGoals();
+                const saveStatus = document.getElementById('nutrition-goal-save-status');
+                if (saveStatus) saveStatus.textContent = '';
                 requestAnimationFrame(function() {
                     if (modal.style.display === 'none') return;
                     const caloriesInput = document.getElementById('goal-calories');
@@ -3507,13 +3512,16 @@
             if (saveBtn) {
                 const originalText = saveBtn.innerHTML;
                 saveBtn.innerHTML = '✅ Goals Saved!';
-                saveBtn.style.background = '#27ae60';
+                saveBtn.style.background = '#166534';
 
                 setTimeout(() => {
                     saveBtn.innerHTML = originalText;
-                    saveBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                    saveBtn.style.background = 'linear-gradient(135deg, #166534, #14532d)';
                 }, 2000);
             }
+
+            const saveStatus = document.getElementById('nutrition-goal-save-status');
+            if (saveStatus) saveStatus.textContent = 'Nutrition goals saved.';
 
             // Update display
             displayNutritionGoals();
