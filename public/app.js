@@ -1,3 +1,14 @@
+// Keep browser history restoration from moving the app shell after reload.
+// The dashboard has its own .content scroller, so restoring the document
+// scroll position would place the status bar/header underneath the safe area.
+try {
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+} catch (error) {
+    // Older embedded webviews may expose a read-only history object.
+}
+
 // Motivational quotes array
 const motivationalQuotes = [
     "Success isn't given. It's earned in the gym, kitchen, and every choice you make. Fuel your fire today.",
@@ -2830,8 +2841,12 @@ function completeWorkout() {
 
 // Update showScreen to load saved workouts
 function showScreen(screenId) {
-    // Update URL hash for persistence on refresh
-    window.location.hash = screenId;
+    // Persist the active screen without navigating to an in-page anchor.  A
+    // location.hash assignment scrolls the document to an element with the
+    // same id, which can move the app shell underneath the native status bar.
+    const screenUrl = `${window.location.pathname}${window.location.search}#${screenId}`;
+    window.history.replaceState(window.history.state, '', screenUrl);
+    window.scrollTo(0, 0);
 
     // Scroll content to top
     const contentDiv = document.querySelector('.content');

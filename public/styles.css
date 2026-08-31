@@ -1276,3 +1276,73 @@ body {
         background: var(--light-bg);
     }
 }
+
+/*
+ * The home dashboard is the only screen that owns an internal viewport. Keep
+ * the shared shell defaults above intact for the other pages that use this
+ * stylesheet, then opt this page into a bounded flex layout explicitly.
+ */
+html:has(body.home-app-shell),
+body.home-app-shell {
+    height: 100%;
+}
+
+body.home-app-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+body.home-app-shell .phone-container {
+    display: flex;
+    flex-direction: column;
+}
+
+body.home-app-shell .screen {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body.home-app-shell .status-bar,
+body.home-app-shell .header {
+    flex: 0 0 auto;
+}
+
+body.home-app-shell .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    padding-bottom: max(100px, calc(84px + env(safe-area-inset-bottom)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.home-app-shell .content:focus-visible {
+    outline: 3px solid var(--carolina-dark);
+    outline-offset: -3px;
+}
+
+/* This menu is opened by showLogFoodMenu(); keep its initially unstyled
+ * placeholder from becoming a stray document-level tab stop/scroll extent. */
+body.home-app-shell #logFoodModal {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body.home-app-shell .phone-container {
+        height: 100%;
+        min-height: 0;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1023px) {
+    body.home-app-shell .phone-container {
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+    }
+}
