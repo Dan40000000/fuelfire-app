@@ -321,6 +321,22 @@ describe('AI food vision normalization', () => {
         expect(calculateTotals(foods)).toMatchObject({ calories: 1020, protein: 38, carbs: 148, fat: 34 });
     });
 
+    it('normalizes a grouped rib serving to per-rib nutrition and quantity', () => {
+        const [ribs] = sanitizeVisionFoods([{
+            name: 'Smoked pork ribs', serving: '6 pork ribs', quantity: 1,
+            calories: 690, protein: 54, carbs: 0, fat: 48,
+            confidence: 'medium', dataSource: 'generic visual nutrition estimate',
+        }]);
+
+        expect(ribs).toMatchObject({
+            name: 'Smoked pork ribs', serving: '1 rib', quantity: 6, visualCount: 6,
+        });
+        expect(ribs.calories).toBeCloseTo(115, 6);
+        expect(ribs.protein).toBeCloseTo(9, 6);
+        expect(ribs.fat).toBeCloseTo(8, 6);
+        expect(calculateTotals([ribs])).toMatchObject({ calories: 690, protein: 54, fat: 48 });
+    });
+
     it.each([
         '4 dumplings',
         '4-count dumplings',

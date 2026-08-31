@@ -389,7 +389,7 @@ function singularizeCountServing(value) {
         .replace(/\b([a-z]+)s\b/gi, '$1');
 }
 
-const COUNTABLE_FOOD_NOUN_PATTERN = /\b(?:shrimp|prawns?|links?|slices?|pieces?|items?|eggs?|muffins?|pancakes?|wings?|nuggets?|meatballs?|dumplings?|tacos?|cookies?|crackers?|bars?|bananas?|apples?|oranges?|breasts?|tenders?|fillets?|patties?|sandwiches?|burgers?|hot\s+dogs?)\b/i;
+const COUNTABLE_FOOD_NOUN_PATTERN = /\b(?:shrimp|prawns?|links?|slices?|pieces?|items?|eggs?|muffins?|pancakes?|wings?|nuggets?|meatballs?|dumplings?|tacos?|cookies?|crackers?|bars?|bananas?|apples?|oranges?|breasts?|tenders?|fillets?|patties?|sandwiches?|burgers?|hot\s+dogs?|ribs?)\b/i;
 const SMALL_WORD_NUMBERS = {
     one: 1,
     two: 2,
@@ -1730,11 +1730,17 @@ function buildParserBackedResponse(parserResult, source, lookupQuery, notes = ''
         ? foodsOverride
         : (Array.isArray(parserResult?.foods) ? parserResult.foods : []);
     const totals = calculateTotals(foods);
+    const isPhoto = String(source || '').toLowerCase().startsWith('photo');
     const mergedQuestions = mergeClarifyingQuestions(
-        buildHighImpactClarifyingQuestions({ query: clarificationContext, foods, evidenceText }),
+        buildHighImpactClarifyingQuestions({
+            query: clarificationContext,
+            foods,
+            evidenceText,
+            photo: isPhoto
+        }),
         parserResult?.clarifyingQuestions
     );
-    const clarifyingQuestions = String(source || '').toLowerCase().startsWith('photo')
+    const clarifyingQuestions = isPhoto
         ? selectPhotoClarifyingQuestions(mergedQuestions, { query: clarificationContext, foods, evidenceText })
         : mergedQuestions;
     return {
@@ -1876,7 +1882,7 @@ export async function callFoodVision({
 
     const evidencePrompt = `Inspect this food photo and extract visual evidence before calculating nutrition.
 
-Every visible food or drink must be identified. First read any visible Nutrition Facts panel, package text, barcode text, brand, product, or restaurant marks line by line. Then describe each food's count, apparent size, plate or bowl coverage, volume, and whether the image shows a whole item, a single serving, or part of an item. Distinguish small breakfast sausage from large links, one pizza slice from a whole pizza, and a label-only package from food actually visible. Use valid device depth measurements to improve physical size classification, but do not treat a center-ray distance as food volume. When a reliable scale or segmented depth reference is available, estimate grams per item and total visible grams; otherwise return null rather than inventing precision.
+Every visible food or drink must be identified. First read any visible Nutrition Facts panel, package text, barcode text, brand, product, or restaurant marks line by line. Then describe each food's count, apparent size, plate or bowl coverage, volume, and whether the image shows a whole item, a single serving, or part of an item. Distinguish small breakfast sausage from large links, one pizza slice from a whole pizza, and a label-only package from food actually visible. For ribs, identify the cut as ribs when visually supported and count individual ribs only when distinct ribs are reliably visible; otherwise return a null/unknown count. Do not assign pork, beef, lamb, mutton, or goat from appearance, color, or cooking style alone; only explicit user context or readable label text establishes species. Distinguish the weight of a bone-in slab/rack from edible meat, and never invent exact edible grams from plate coverage or depth alone. Use valid device depth measurements to improve physical size classification, but do not treat a center-ray distance as food volume. When a reliable scale or segmented depth reference is available, estimate grams per item and total visible grams for foods where that estimate is supported; otherwise return null rather than inventing precision.
 
 Return one JSON object containing: a non-empty foods array when edible material is visible; for each food, name, visualAmount, count, sizeClass, estimatedGramsPerUnit, estimatedTotalGrams, and confidence; visibleText as an array of exact readable strings; visibleLabel with hasNutritionFacts plus only facts actually readable; packageBrand; productName; restaurantIdentified; lookupQuery; overallConfidence; and notes. Do not estimate calories or macros in this stage. Do not use placeholder values. Return JSON only.${contextLine}${locationLine}${spatialLine}`;
 
@@ -1942,8 +1948,9 @@ Rules:
 - For a whole pizza with a label serving of one quarter, use per-quarter nutrients and quantity four. A loose single slice remains one slice.
 - Classify size-sensitive food before choosing a reference serving. State the assumed size or grams in serving or dataSource and lower confidence when scale is ambiguous.
 - When device depth evidence is present, use it to bound physical size. A center distance alone does not establish width, volume, edible mass, or density; never claim exact grams from that measurement alone.
+- For visually identified ribs, do not treat a model-guessed name such as "smoked beef rib meat" as species or count evidence. If the user context and readable label do not establish both a rib species (pork, beef, lamb/mutton, or goat) and an explicit rib count, keep the species/count unresolved and ask exactly one high-impact "protein-type" question: "What kind of ribs are these, and about how many?" The user can say or type "six pork ribs". Count individual ribs only when the visual evidence supports that count. When a reliable count is known, output quantity equal to the count and serving/nutrition for 1 rib; never output quantity 1 for a counted rack or slab. Never assign an animal from appearance alone. Distinguish a bone-in slab/rack's total weight from edible meat, and do not invent exact edible grams from plate coverage or depth alone.
 - State every material assumption briefly. Return a realistic calorie range when brand, preparation, packing liquid, count eaten, oil, sauce, or portion remains uncertain.
-- Ask at most one short clarifying question, and only when the answer could materially change calories. Permit only a meaningful weight/size distinction (especially patty ounces or 1/4 lb versus 1/2 lb), packing liquid (water versus oil), a genuinely unknown count for countable food, or a substantial amount of added fat or sauce. Each question needs id, question, examples, reason, affectedFood, estimatedCalorieImpact, and acceptsVoice true. Never ask whether the user ate or finished all of the photographed plated food, what fraction or portion they ate, or other generic completeness questions. Do not ask for information already readable in the image or explicitly supplied by the user.
+- Ask at most one short clarifying question, and only when the answer could materially change calories. Permit a meaningful rib species-and-count distinction (for example, "six pork ribs"), a meaningful weight/size distinction (especially patty ounces or 1/4 lb versus 1/2 lb), packing liquid (water versus oil), a genuinely unknown count for countable food, or a substantial amount of added fat or sauce. Each question needs id, question, examples, reason, affectedFood, estimatedCalorieImpact, and acceptsVoice true. Never ask whether the user ate or finished all of the photographed plated food, what fraction or portion they ate, or other generic completeness questions. Do not ask for information already readable in the image or explicitly supplied by the user.
 - A package or sleeve visible beside food does not prove the entire package was eaten. For countable foods such as crackers, distinguish visible count from consumed count and ask how many were eaten only when that count is genuinely unknown.
 - Plain popped popcorn is roughly 31 calories per cup; oil or butter raises it. Small breakfast sausage is commonly 150-170 calories per three links, while a large bratwurst-style link is commonly 200-250 calories.
 - An unbranded whole Margherita or Neapolitan pizza with no scale reference should default to a 10-12 inch assumption (roughly 900-1200 calories), never a 16-18 inch delivery-pizza estimate. State the size assumption and lower confidence.
@@ -2241,7 +2248,12 @@ export default async function handler(req, res) {
             parsedPayload?.visibleLabel?.brand
         ].filter(Boolean).join(' ');
         const mergedClarifyingQuestions = mergeClarifyingQuestions(
-            buildHighImpactClarifyingQuestions({ query: imageContext, foods, evidenceText: visibleEvidenceText }),
+            buildHighImpactClarifyingQuestions({
+                query: imageContext,
+                foods,
+                evidenceText: visibleEvidenceText,
+                photo: true
+            }),
             sanitizeClarifyingQuestions(parsedPayload.clarifyingQuestions)
         );
         const clarifyingQuestions = selectPhotoClarifyingQuestions(mergedClarifyingQuestions, {

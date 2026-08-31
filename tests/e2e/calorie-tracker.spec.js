@@ -779,6 +779,91 @@ test('photo keeps one highest-impact question before one parser recalculation an
     expect(parserRequests[0].forceWebSearch).toBe(false);
 });
 
+test('photo rib details chip replaces guessed species and slab weight before parser recalculation', async ({ page }) => {
+    const parserRequests = [];
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                overallConfidence: 'low',
+                calorieRange: { low: 700, high: 1300, midpoint: 900 },
+                foods: [{
+                    name: 'Smoked beef short rib 650g bone-in slab', calories: 900, protein: 65, carbs: 0,
+                    fiber: 0, netCarbs: 0, fat: 70, sugar: 0, quantity: 1,
+                    serving: 'estimated bone-in slab portion', confidence: 'low', dataSource: 'photo estimate',
+                }],
+                clarifyingQuestions: [
+                    {
+                        id: 'rib_details', question: 'What kind of ribs are these, and about how many?',
+                        examples: ['4 pork ribs', '6 pork ribs', '8 pork ribs', '2 beef ribs', 'Not sure'],
+                        reason: 'Say or type a complete answer such as six pork ribs.', affectedFood: 'Ribs',
+                        acceptsVoice: true, estimatedCalorieImpact: 5,
+                    },
+                    { id: 'cooking_oil', question: 'Was oil used?', affectedFood: 'ribs', estimatedCalorieImpact: 400 },
+                    { id: 'ate_everything', question: 'Did you eat all of the photographed food?', estimatedCalorieImpact: 900 },
+                ],
+            }),
+        });
+    });
+    await page.route('**/api/ai-food-parser', async (route) => {
+        const body = route.request().postDataJSON();
+        parserRequests.push(body);
+        const isPorkQuery = /\b6 pork ribs\b/i.test(body.query)
+            && !/\bbeef\b|\b650g\b|\bslab\b/i.test(body.query);
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                foods: [{
+                    name: 'Pork Rib (medium, cooked)', calories: 115, protein: 9, carbs: 0,
+                    fiber: 0, netCarbs: 0, fat: 8, sugar: 0, quantity: isPorkQuery ? 6 : 1,
+                    serving: '1 medium cooked pork rib (bone excluded)', confidence: 'medium', sourceType: 'estimate',
+                }],
+                totalCalories: isPorkQuery ? 690 : 115,
+                clarifyingQuestions: [],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => { window.requireAIAccess = () => true; window.startFoodPhotoCapture(); });
+    await page.locator('#photo-gallery-input').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.getByRole('button', { name: 'Analyze Food' }).click();
+
+    await expect(page.locator('#photo-clarification')).toContainText('Question 1 of 1');
+    await expect(page.locator('#photo-clarification')).toContainText('What kind of ribs are these, and about how many?');
+    await expect(page.getByRole('button', { name: 'Answer question 1 with 6 pork ribs' })).toBeVisible();
+
+    await page.locator('#clarification-answer-input').fill('Pork ribs');
+    await page.locator('#food-clarification-use').click();
+    await expect(page.locator('#clarification-answer-error')).toContainText('kind and count');
+    await expect(page.locator('#clarification-answer-input')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#photo-clarification')).toContainText('Question 1 of 1');
+    expect(parserRequests).toHaveLength(0);
+
+    const lambRewrite = await page.evaluate(() => window.buildNaturalClarifiedQuery(
+        'Smoked beef ribs, pork sausage',
+        [{
+            question: { id: 'rib_details', affectedFood: 'Ribs' },
+            answer: '6 lamb ribs',
+        }]
+    ));
+    expect(lambRewrite).toMatch(/lamb ribs/i);
+    expect(lambRewrite).toMatch(/pork sausage/i);
+    expect(lambRewrite).not.toMatch(/\bbeef\b/i);
+
+    await page.getByRole('button', { name: 'Answer question 1 with 6 pork ribs' }).click();
+
+    await expect(page.locator('#photo-total-calories')).toHaveText('690');
+    expect(parserRequests).toHaveLength(1);
+    expect(parserRequests[0].query).toMatch(/\b6 pork ribs\b/i);
+    expect(parserRequests[0].query).not.toMatch(/\bbeef\b/i);
+    expect(parserRequests[0].query).not.toMatch(/\b650g\b|\bslab\b/i);
+});
+
 test('photo plated meal ignores eat-all and low-impact cooking questions without a parser call', async ({ page }) => {
     let parserCalls = 0;
     await page.route('**/api/ai-food-vision', async (route) => {

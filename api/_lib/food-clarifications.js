@@ -13,6 +13,42 @@ function combinedFoodText(foods) {
         .join(' ');
 }
 
+// A vision model can call a rib "beef" based on appearance alone. Treat the
+// cut and the animal as separate facts: the cut can come from visual evidence,
+// but the species must come from the user's context or readable label text.
+const RIB_PATTERN = /\b(?:ribs?|short\s+ribs?|spare\s+ribs?|baby\s+back(?:\s+ribs?)?|back\s+ribs?)\b/i;
+const RIB_COUNT_PATTERN = new RegExp(
+    '(?:' +
+        '\\b(?:[1-9]\\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\\s+' +
+        '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*' +
+        '(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\\s+' +
+        '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*ribs?\\b' +
+        '|' +
+        '\\b(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\\s+' +
+        '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*ribs?\\b\\s*(?:[,;:]\\s*)?' +
+        '(?:(?:about|around|approximately)\\s+)?' +
+        '(?:[1-9]\\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\\b' +
+    ')',
+    'i'
+);
+
+function ribDetailsQuestion() {
+    return {
+        id: 'rib_details',
+        question: 'What kind of ribs are these, and about how many?',
+        examples: ['4 pork ribs', '6 pork ribs', '8 pork ribs', '2 beef ribs', 'Not sure'],
+        reason: 'Say or type a complete answer such as “six pork ribs.” Count individual ribs, not a bone-in slab; appearance alone cannot establish species or exact edible meat grams.',
+        answerType: 'single-choice-or-voice',
+        acceptsVoice: true,
+        affectedFood: 'Ribs',
+        estimatedCalorieImpact: 700
+    };
+}
+
+function hasExplicitRibDetails(value) {
+    return RIB_COUNT_PATTERN.test(normalizeText(value));
+}
+
 function querySpecifiesCrackerCount(value) {
     const text = normalizeText(value);
     return /\b\d+(?:\.\d+)?\s+(?:(?:ritz|round|butter)\s+)*crackers?\b/.test(text)
@@ -107,6 +143,9 @@ function hasExplicitFoodCount(food) {
 function photoQuestionKind(question, foods = []) {
     const text = photoQuestionText(question);
     const id = normalizeText(question?.id || '');
+    if (id === 'rib_details' || id === 'rib_species'
+        || /\b(?:protein[- ]?type|species|animal|kind|type)\b/.test(text) && RIB_PATTERN.test(text)
+        || /\b(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\b/.test(text) && RIB_PATTERN.test(text)) return 'protein-type';
     if (/\b(?:packed|packing|liquid|water)\b/.test(text)
         && /\b(?:water|oil|liquid|packed|packing)\b/.test(text)) return 'packing-liquid';
     if (/\b(?:ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|weight|weighed|size|small|medium|large|jumbo|diameter|quarter[- ]?lb|half[- ]?lb|patty|patties|burger)\b/.test(text)
@@ -123,8 +162,15 @@ function photoQuestionKind(question, foods = []) {
 
 function estimatedQuestionImpact(question, kind) {
     const explicit = Number(question?.estimatedCalorieImpact);
+    if (kind === 'protein-type') {
+        // Species is the one permitted identity question for ribs. Keep it
+        // ahead of size/oil/count noise even if a model supplies a tiny or
+        // missing impact estimate.
+        return Math.max(1000, Number.isFinite(explicit) ? Math.min(5000, explicit) : 0);
+    }
     if (Number.isFinite(explicit) && explicit > 0) return Math.min(5000, explicit);
     return {
+        'protein-type': 1000,
         'weight-size': 250,
         'packing-liquid': 90,
         count: 80,
@@ -183,12 +229,15 @@ export function selectPhotoClarifyingQuestions(value, context = {}) {
     const foods = Array.isArray(context?.foods)
         ? context.foods
         : (Array.isArray(value?.foods) ? value.foods : []);
+    const contextText = normalizeText(`${context?.query || ''} ${context?.evidenceText || ''}`);
+    const ribDetailsAlreadyKnown = hasExplicitRibDetails(contextText);
     const sanitized = sanitizeClarifyingQuestions(questions, 8);
     const candidates = sanitized
         .filter((question) => !photoCompletenessQuestion(question))
         .map((question, index) => {
             const kind = photoQuestionKind(question, foods);
             if (!kind) return null;
+            if (kind === 'protein-type' && ribDetailsAlreadyKnown) return null;
 
             const impact = estimatedQuestionImpact(question, kind);
             // A generic "was any spray/oil used?" question is not useful when
@@ -220,10 +269,15 @@ export function mergeClarifyingQuestions(...questionSets) {
     return sanitizeClarifyingQuestions(questionSets.flat(), 3);
 }
 
-export function buildHighImpactClarifyingQuestions({ query = '', foods = [], evidenceText = '' } = {}) {
+export function buildHighImpactClarifyingQuestions({ query = '', foods = [], evidenceText = '', photo = false } = {}) {
     const context = normalizeText(`${query} ${evidenceText}`);
     const foodsText = normalizeText(combinedFoodText(foods));
     const questions = [];
+
+    if (photo && RIB_PATTERN.test(`${foodsText} ${context}`)
+        && !hasExplicitRibDetails(context)) {
+        questions.push(ribDetailsQuestion());
+    }
 
     if (/\btuna\b/.test(foodsText) && !/\b(?:packed|canned|tuna)?\s*(?:in\s+)?(?:spring\s+)?water\b|\b(?:packed|canned|tuna)?\s*(?:in\s+)?(?:olive\s+|vegetable\s+)?oil\b/.test(context)) {
         questions.push({
