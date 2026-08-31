@@ -63,6 +63,8 @@
         return;
     }
 
+    window.addEventListener('nutrition-goal-modal-opened', dismissTour);
+
     window.addEventListener('load', () => {
         if (localStorage.getItem(TOUR_KEY)) {
             return;
@@ -81,7 +83,11 @@
             return;
         }
 
-        setTimeout(startTour, START_DELAY_MS);
+        setTimeout(() => {
+            if (!isNutritionGoalDialogVisible()) {
+                startTour();
+            }
+        }, START_DELAY_MS);
     });
 
     function isNutritionGoalDialogVisible() {
@@ -92,6 +98,7 @@
     }
 
     function startTour() {
+        if (isNutritionGoalDialogVisible()) return;
         ensureOverlay();
         overlay.classList.add('onboard-visible');
         showStep(0);
@@ -233,6 +240,10 @@
     }
 
     function showStep(index) {
+        if (isNutritionGoalDialogVisible()) {
+            dismissTour();
+            return;
+        }
         if (index < 0) {
             index = 0;
         }
@@ -273,6 +284,7 @@
 
         target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         requestAnimationFrame(() => {
+            if (!overlay || !overlay.classList.contains('onboard-visible')) return;
             positionHighlight(target);
             updateTooltip(step, index);
         });
@@ -332,8 +344,43 @@
         document.removeEventListener('keydown', handleKeydown);
     }
 
+    function dismissTour() {
+        if (!overlay || !overlay.classList.contains('onboard-visible')) return;
+
+        if (currentStep >= 0 && currentStep < steps.length) {
+            const step = steps[currentStep];
+            if (step && typeof step.onAfter === 'function') {
+                try {
+                    step.onAfter();
+                } catch (error) {
+                    console.warn('Onboarding onAfter error:', error);
+                }
+            }
+        }
+
+        currentStep = -1;
+        const dismissedOverlay = overlay;
+        overlay.classList.remove('onboard-visible');
+        setTimeout(() => dismissedOverlay.remove(), 250);
+        overlay = null;
+        highlight = null;
+        tooltip = null;
+        titleEl = null;
+        descEl = null;
+        stepEl = null;
+        prevBtn = null;
+        nextBtn = null;
+        skipBtn = null;
+        setSidebarOpen(false);
+        document.removeEventListener('keydown', handleKeydown);
+    }
+
     function handleKeydown(event) {
         if (!overlay || !overlay.classList.contains('onboard-visible')) return;
+        if (isNutritionGoalDialogVisible()) {
+            dismissTour();
+            return;
+        }
         if (event.key === 'ArrowRight' || event.key === ' ') {
             event.preventDefault();
             showStep(currentStep + 1);
