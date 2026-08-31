@@ -15,6 +15,55 @@ test('page exposes one page-title heading', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 1, name: 'Calorie Tracker' })).toBeVisible();
 });
 
+test('calorie goal link opens the nutrition editor and focuses daily calories', async ({ page }) => {
+    await page.goto('/calorie-tracker.html');
+
+    const goalLink = page.getByRole('link', { name: 'Edit calorie goal/target' });
+    await expect(goalLink).toHaveAttribute('href', 'index.html#edit-nutrition-goals');
+    await expect(goalLink).toHaveCSS('text-decoration-line', 'underline');
+    await expect(goalLink).toHaveCSS('min-height', '44px');
+    await goalLink.click();
+
+    // The local static server canonicalizes index.html to / (production may retain /index.html).
+    await expect(page).toHaveURL(/\/(?:index)?#progress$/);
+    await expect(page.locator('#progress')).toHaveClass(/active/);
+    const nutritionDialog = page.getByRole('dialog', { name: /Set Your Nutrition Goals/ });
+    await expect(nutritionDialog).toBeVisible();
+    await expect(nutritionDialog).toHaveAttribute('aria-modal', 'true');
+    await expect(page.locator('#goal-calories')).toBeFocused();
+    await expect(page.locator('#goal-calories')).toHaveValue('2000');
+    await page.waitForTimeout(700);
+    await expect(page.locator('#onboarding-overlay')).toBeHidden();
+    await expect(nutritionDialog).toBeVisible();
+    await expect(page.locator('#goal-calories')).toBeFocused();
+    expect(await page.evaluate(() => localStorage.getItem('fuelfire_onboarding_v1'))).toBeNull();
+
+    await expect(page.locator('.phone-container')).toHaveAttribute('inert', '');
+    const axeResults = await new AxeBuilder({ page }).include('#nutrition-goal-modal').analyze();
+    const criticalOrSerious = axeResults.violations.filter((violation) => ['critical', 'serious'].includes(violation.impact));
+    expect(criticalOrSerious, criticalOrSerious.map((item) => `${item.id}: ${item.help}`).join('\n')).toEqual([]);
+
+    const caloriesInput = page.locator('#goal-calories');
+    const cancelButton = nutritionDialog.getByRole('button', { name: 'Cancel', exact: true });
+    await cancelButton.focus();
+    await page.keyboard.press('Tab');
+    await expect(caloriesInput).toBeFocused();
+    await caloriesInput.focus();
+    await page.keyboard.press('Shift+Tab');
+    await expect(cancelButton).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(nutritionDialog).toBeHidden();
+    await expect(page.locator('.phone-container')).not.toHaveAttribute('inert', '');
+    await expect(page.locator('#nutrition-goals-edit')).toBeFocused();
+
+    await page.goto('/?keep=1#edit-nutrition-goals');
+    await expect(page).toHaveURL(/\/(?:index)?\?keep=1#progress$/);
+    await expect(page.locator('#goal-calories')).toBeFocused();
+    await page.reload();
+    await expect(page.locator('#nutrition-goal-modal')).toBeHidden();
+});
+
 test('manual food entry persists valid nutrition and timestamp data', async ({ page }) => {
     const date = localDateKey();
     await page.goto('/calorie-tracker.html');

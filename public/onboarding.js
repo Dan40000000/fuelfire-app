@@ -74,8 +74,22 @@
             return;
         }
 
+        // A deep-linked nutrition editor is already the user's active task. Do
+        // not let the tour overlay cover it, but leave the tour eligible on a
+        // later normal dashboard visit.
+        if (isNutritionGoalDialogVisible()) {
+            return;
+        }
+
         setTimeout(startTour, START_DELAY_MS);
     });
+
+    function isNutritionGoalDialogVisible() {
+        const dialog = document.getElementById('nutrition-goal-modal');
+        if (!dialog) return false;
+        const style = window.getComputedStyle(dialog);
+        return style.display !== 'none' && style.visibility !== 'hidden' && dialog.getAttribute('aria-hidden') !== 'true';
+    }
 
     function startTour() {
         ensureOverlay();
