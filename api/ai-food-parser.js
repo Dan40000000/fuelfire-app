@@ -539,6 +539,8 @@ const nutritionDatabase = {
     'tuna in oil': { name: "Canned Tuna in Oil (5 oz)", calories: 200, protein: 25, carbs: 0, fiber: 0, netCarbs: 0, fat: 10, sugar: 0, serving: '1 five-ounce can', source: "Generic canned tuna in oil estimate", sourceType: 'database', confidence: 'medium', needsVerification: true },
     'canned tuna in oil': { name: "Canned Tuna in Oil (5 oz)", calories: 200, protein: 25, carbs: 0, fiber: 0, netCarbs: 0, fat: 10, sugar: 0, serving: '1 five-ounce can', source: "Generic canned tuna in oil estimate", sourceType: 'database', confidence: 'medium', needsVerification: true },
     'tuna packed in oil': { name: "Canned Tuna in Oil (5 oz)", calories: 200, protein: 25, carbs: 0, fiber: 0, netCarbs: 0, fat: 10, sugar: 0, serving: '1 five-ounce can', source: "Generic canned tuna in oil estimate", sourceType: 'database', confidence: 'medium', needsVerification: true },
+    'pork rib': { name: "Pork Rib (medium cooked, bone excluded)", calories: 115, protein: 9, carbs: 0, fiber: 0, netCarbs: 0, fat: 8, sugar: 0, serving: '1 medium cooked pork rib (bone excluded)', source: "Generic cooked pork rib estimate", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
+    'pork ribs': { name: "Pork Rib (medium cooked, bone excluded)", calories: 115, protein: 9, carbs: 0, fiber: 0, netCarbs: 0, fat: 8, sugar: 0, serving: '1 medium cooked pork rib (bone excluded)', source: "Generic cooked pork rib estimate", sourceType: 'estimate', confidence: 'medium', needsVerification: true },
     'ritz cracker': { name: "Ritz-style Butter Cracker", calories: 16, protein: 0, carbs: 2, fiber: 0, netCarbs: 2, fat: 1, sugar: 0, serving: '1 cracker', source: "Generic round butter cracker estimate", sourceType: 'database', confidence: 'medium', needsVerification: true },
     'ritz crackers': { name: "Ritz-style Butter Cracker", calories: 16, protein: 0, carbs: 2, fiber: 0, netCarbs: 2, fat: 1, sugar: 0, serving: '1 cracker', source: "Generic round butter cracker estimate", sourceType: 'database', confidence: 'medium', needsVerification: true },
     'butter cracker': { name: "Round Butter Cracker", calories: 16, protein: 0, carbs: 2, fiber: 0, netCarbs: 2, fat: 1, sugar: 0, serving: '1 cracker', source: "Generic round butter cracker estimate", sourceType: 'database', confidence: 'medium', needsVerification: true },
@@ -907,9 +909,9 @@ function replaceSpokenNutritionNumbers(value) {
     });
 }
 
-const foodCountUnitPattern = '(?:pieces?|pcs?|pc|counts?|ct|nuggets?|tenders?|wings?|links?|patties?|muffins?|slices?|bars?|items?|eggs?|bananas?|apples?|oranges?|shrimp|prawns?|meatballs?|dumplings?|tacos?|cookies?|crackers?|breasts?|fillets?|sandwiches?|burgers?|hot\s+dogs?)';
+const foodCountUnitPattern = '(?:pieces?|pcs?|pc|counts?|ct|nuggets?|tenders?|wings?|links?|patties?|muffins?|slices?|bars?|items?|eggs?|bananas?|apples?|oranges?|shrimp|prawns?|meatballs?|dumplings?|tacos?|cookies?|crackers?|breasts?|fillets?|sandwiches?|burgers?|hot\s+dogs?|ribs?)';
 const outerQuantityUnitPattern = '(?:orders?|servings?|meals?|boxes?|packages?|containers?|sets?)';
-const countDescriptorPattern = '(?:(?:small|breakfast|sausage|standard|regular|large|bakery|mini|chicken)\\s+)*';
+const countDescriptorPattern = '(?:(?:small|medium|breakfast|sausage|standard|regular|large|bakery|mini|chicken|pork|pig|swine|beef|cow|lamb|mutton|goat|cooked|short|spare|baby\\s+back|back|bone[- ]?in)\\s+)*';
 
 function normalizeCountPhrase(value) {
     return normalizeQuery(replaceSpokenNutritionNumbers(String(value || '')));
@@ -967,6 +969,7 @@ function canonicalCountUnit(unit) {
     if (/^sandwiches?$/.test(normalized)) return 'sandwich';
     if (/^burgers?$/.test(normalized)) return 'burger';
     if (/^hot\s+dogs?$/.test(normalized)) return 'hot dog';
+    if (/^ribs?$/.test(normalized)) return 'rib';
     return 'item';
 }
 

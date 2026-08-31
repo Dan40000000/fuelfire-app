@@ -343,6 +343,37 @@ describe('AI food parser composite meals', () => {
         expect(response.body.foods[0]).toMatchObject({ calories: 80, quantity: 2 });
     });
 
+    it('resolves counted pork ribs as per-rib nutrition and multiplies once', async () => {
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+
+        const response = await invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: { query: '6 pork ribs', source: 'search' },
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+            success: true,
+            source: 'database',
+            totalCalories: 690,
+        });
+        expect(response.body.foods).toHaveLength(1);
+        expect(response.body.foods[0]).toMatchObject({
+            name: 'Pork Rib (medium cooked, bone excluded)',
+            serving: '1 medium cooked pork rib (bone excluded)',
+            quantity: 6,
+            calories: 115,
+            protein: 9,
+            fat: 8,
+            source: 'Generic cooked pork rib estimate',
+            sourceType: 'estimate',
+            confidence: 'medium',
+            needsVerification: true,
+        });
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     it('treats conversational dictated totals as totals instead of per-item values', async () => {
         const response = await invokeApi(foodParserHandler, {
             headers: getTestAuthHeaders(),

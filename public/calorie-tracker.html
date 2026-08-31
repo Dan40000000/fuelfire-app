@@ -5230,8 +5230,8 @@
             const text = photoClarificationText(question);
             const id = String(question?.id || '').toLowerCase();
             const ribQuestion = /\bribs?\b/.test(text)
-                && (id === 'rib_species' || /\b(?:protein[- ]?type|species|animal|kind|type)\b/.test(text));
-            if (ribQuestion || id === 'rib_species') return 'protein-type';
+                && (id === 'rib_details' || id === 'rib_species' || /\b(?:protein[- ]?type|species|animal|kind|type)\b/.test(text));
+            if (ribQuestion || id === 'rib_details' || id === 'rib_species') return 'protein-type';
             if (/\b(?:packed|packing|liquid|water)\b/.test(text) && /\b(?:water|oil|liquid|packed|packing)\b/.test(text)) return 'packing-liquid';
             if (/\b(?:ounce|ounces|oz|pound|pounds|lb|lbs|gram|grams|weight|weighed|size|small|medium|large|jumbo|diameter|quarter[- ]?lb|half[- ]?lb|patty|patties|burger)\b/.test(text)
                 || /(?:^|_)(?:weight|size|diameter|patty|pattie)(?:_|$)/.test(id)) return 'weight-size';
@@ -5440,6 +5440,55 @@
             return String(total);
         }
 
+        function isRibDetailsQuestion(question) {
+            const id = String(question?.id || '').toLowerCase();
+            const text = photoClarificationText(question);
+            return id === 'rib_details' || id === 'rib_species'
+                || /\bribs?\b/.test(text) && /\b(?:protein[- ]?type|species|animal|kind|type)\b/.test(text);
+        }
+
+        function isRibUnknownAnswer(value) {
+            return /^(?:not\s+sure|unsure|unknown|i\s+do(?:n['’]t| not)\s+know)$/i.test(
+                sanitizeClarificationAnswer(String(value || ''), 80).replace(/[.!?]+$/, '').trim()
+            );
+        }
+
+        function parseRibDetailsAnswer(value) {
+            const normalized = sanitizeClarificationAnswer(String(value || ''), 80)
+                .toLowerCase()
+                .replace(/[–—]/g, '-')
+                .replace(/\band\b/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (!normalized) return null;
+
+            const countToken = '(?:\\d+(?:\\.\\d+)?|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)';
+            const speciesToken = '(?:pork|pig|swine|beef|cow|lamb|mutton|goat)';
+            const descriptors = '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*';
+            const beforePattern = new RegExp(
+                '\\b(' + countToken + ')\\s+' + descriptors + '(' + speciesToken + ')\\s+' + descriptors + 'ribs?\\b',
+                'i'
+            );
+            const afterPattern = new RegExp(
+                '\\b(' + speciesToken + ')\\s+' + descriptors + 'ribs?\\b\\s*(?:[,;:]\\s*)?(?:(?:about|around|approximately)\\s+)?(' + countToken + ')\\b',
+                'i'
+            );
+            const match = normalized.match(beforePattern) || normalized.match(afterPattern);
+            if (!match) return null;
+
+            const countTokenValue = new RegExp('^' + countToken + '$', 'i').test(match[1])
+                ? match[1]
+                : match[2];
+            const count = Number(normalizeSimpleSpokenNumber(countTokenValue));
+            if (!Number.isFinite(count) || count <= 0) return null;
+
+            const speciesValue = new RegExp('^' + speciesToken + '$', 'i').test(match[1])
+                ? match[1]
+                : match[2];
+            const species = ({ pig: 'pork', swine: 'pork', cow: 'beef' }[speciesValue.toLowerCase()] || speciesValue.toLowerCase());
+            return { count, species, normalized: String(count) + ' ' + species + ' ribs' };
+        }
+
         function submitCurrentClarificationAnswer(rawAnswer, skipped = false) {
             const state = activeClarificationState;
             if (!state) return false;
@@ -5462,6 +5511,16 @@
             }
             if (!skipped && question.answerType === 'number' && (!Number.isFinite(Number(answer)) || Number(answer) <= 0)) {
                 const message = `Enter a number greater than zero for ${question.affectedFood || 'this question'}.`;
+                if (input) {
+                    input.setAttribute('aria-invalid', 'true');
+                    input.focus();
+                }
+                if (error) error.textContent = message;
+                clarificationAnnouncement(state.source, message, true);
+                return false;
+            }
+            if (!skipped && isRibDetailsQuestion(question) && !isRibUnknownAnswer(answer) && !parseRibDetailsAnswer(answer)) {
+                const message = 'Include the rib kind and count, for example “six pork ribs,” or choose Not sure.';
                 if (input) {
                     input.setAttribute('aria-invalid', 'true');
                     input.focus();
@@ -5596,6 +5655,24 @@
                 const affectedFood = sanitizeClarificationAnswer(question?.affectedFood || '', 80);
                 const cleanAnswer = sanitizeClarificationAnswer(String(answer || ''), 80);
                 if (!cleanAnswer) return;
+
+                if (isRibDetailsQuestion(question)) {
+                    const parsedRibAnswer = parseRibDetailsAnswer(cleanAnswer);
+                    if (!parsedRibAnswer && !isRibUnknownAnswer(cleanAnswer)) return;
+                    const normalizedRibAnswer = parsedRibAnswer ? parsedRibAnswer.normalized : 'ribs';
+                    const ribPhrase = /\b(?:(?:short|spare|baby\s+back|back)\s+)?ribs?\b/i;
+                    const queryParts = query.split(/([,;])/);
+                    let rewroteRibPart = false;
+                    for (let partIndex = 0; partIndex < queryParts.length; partIndex += 2) {
+                        if (!ribPhrase.test(queryParts[partIndex])) continue;
+                        rewroteRibPart = true;
+                        queryParts[partIndex] = normalizedRibAnswer;
+                    }
+                    query = rewroteRibPart
+                        ? queryParts.join('').replace(/\s+/g, ' ').trim()
+                        : [query, normalizedRibAnswer].filter(Boolean).join(', ');
+                    return;
+                }
 
                 if (id === 'rib_species'
                     || /\bribs?\b/i.test(affectedFood)

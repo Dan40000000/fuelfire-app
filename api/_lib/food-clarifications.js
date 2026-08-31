@@ -17,19 +17,36 @@ function combinedFoodText(foods) {
 // cut and the animal as separate facts: the cut can come from visual evidence,
 // but the species must come from the user's context or readable label text.
 const RIB_PATTERN = /\b(?:ribs?|short\s+ribs?|spare\s+ribs?|baby\s+back(?:\s+ribs?)?|back\s+ribs?)\b/i;
-const RIB_SPECIES_PATTERN = /\b(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\b/i;
+const RIB_COUNT_PATTERN = new RegExp(
+    '(?:' +
+        '\\b(?:[1-9]\\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\\s+' +
+        '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*' +
+        '(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\\s+' +
+        '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*ribs?\\b' +
+        '|' +
+        '\\b(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\\s+' +
+        '(?:(?:small|medium|large|short|spare|baby\\s+back|back|cooked|bone[- ]?in)\\s+)*ribs?\\b\\s*(?:[,;:]\\s*)?' +
+        '(?:(?:about|around|approximately)\\s+)?' +
+        '(?:[1-9]\\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\\b' +
+    ')',
+    'i'
+);
 
-function ribSpeciesQuestion() {
+function ribDetailsQuestion() {
     return {
-        id: 'rib_species',
-        question: 'Are these pork ribs, beef ribs, or another kind?',
-        examples: ['Pork ribs', 'Beef ribs', 'Lamb ribs', 'Goat ribs', 'Not sure'],
-        reason: 'Rib species changes the nutrition reference. Appearance alone cannot establish the animal, and a bone-in slab is not the same as its edible meat weight.',
+        id: 'rib_details',
+        question: 'What kind of ribs are these, and about how many?',
+        examples: ['4 pork ribs', '6 pork ribs', '8 pork ribs', '2 beef ribs', 'Not sure'],
+        reason: 'Say or type a complete answer such as “six pork ribs.” Count individual ribs, not a bone-in slab; appearance alone cannot establish species or exact edible meat grams.',
         answerType: 'single-choice-or-voice',
         acceptsVoice: true,
         affectedFood: 'Ribs',
         estimatedCalorieImpact: 700
     };
+}
+
+function hasExplicitRibDetails(value) {
+    return RIB_COUNT_PATTERN.test(normalizeText(value));
 }
 
 function querySpecifiesCrackerCount(value) {
@@ -126,7 +143,7 @@ function hasExplicitFoodCount(food) {
 function photoQuestionKind(question, foods = []) {
     const text = photoQuestionText(question);
     const id = normalizeText(question?.id || '');
-    if (id === 'rib_species'
+    if (id === 'rib_details' || id === 'rib_species'
         || /\b(?:protein[- ]?type|species|animal|kind|type)\b/.test(text) && RIB_PATTERN.test(text)
         || /\b(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\b/.test(text) && RIB_PATTERN.test(text)) return 'protein-type';
     if (/\b(?:packed|packing|liquid|water)\b/.test(text)
@@ -255,8 +272,8 @@ export function buildHighImpactClarifyingQuestions({ query = '', foods = [], evi
     const questions = [];
 
     if (photo && RIB_PATTERN.test(`${foodsText} ${context}`)
-        && !RIB_SPECIES_PATTERN.test(context)) {
-        questions.push(ribSpeciesQuestion());
+        && !hasExplicitRibDetails(context)) {
+        questions.push(ribDetailsQuestion());
     }
 
     if (/\btuna\b/.test(foodsText) && !/\b(?:packed|canned|tuna)?\s*(?:in\s+)?(?:spring\s+)?water\b|\b(?:packed|canned|tuna)?\s*(?:in\s+)?(?:olive\s+|vegetable\s+)?oil\b/.test(context)) {

@@ -85,7 +85,7 @@ describe('food clarification contract', () => {
         expect(result[0].id).toBe('patty_size');
     });
 
-    it('asks for rib species when the model guesses beef without user or label evidence', () => {
+    it('asks for rib species and count when the model guesses beef without user or label evidence', () => {
         const questions = buildHighImpactClarifyingQuestions({
             photo: true,
             foods: [{ name: 'Smoked beef rib meat', serving: 'estimated edible portion' }],
@@ -93,40 +93,50 @@ describe('food clarification contract', () => {
 
         expect(questions).toEqual([
             expect.objectContaining({
-                id: 'rib_species',
-                question: 'Are these pork ribs, beef ribs, or another kind?',
-                examples: ['Pork ribs', 'Beef ribs', 'Lamb ribs', 'Goat ribs', 'Not sure'],
+                id: 'rib_details',
+                question: 'What kind of ribs are these, and about how many?',
+                examples: ['4 pork ribs', '6 pork ribs', '8 pork ribs', '2 beef ribs', 'Not sure'],
                 acceptsVoice: true,
             }),
         ]);
     });
 
-    it('suppresses rib species when context or readable evidence explicitly names the animal', () => {
+    it('requires a count in addition to an explicit rib species', () => {
         const guessedFoods = [{ name: 'Smoked beef rib meat', serving: 'estimated edible portion' }];
 
         expect(buildHighImpactClarifyingQuestions({
             photo: true,
             query: 'User note: pork ribs',
             foods: guessedFoods,
+        })).toEqual([expect.objectContaining({ id: 'rib_details' })]);
+        expect(buildHighImpactClarifyingQuestions({
+            photo: true,
+            query: 'User note: 0 pork ribs',
+            foods: guessedFoods,
+        })).toEqual([expect.objectContaining({ id: 'rib_details' })]);
+        expect(buildHighImpactClarifyingQuestions({
+            photo: true,
+            query: 'User note: 6 pork ribs',
+            foods: guessedFoods,
         })).toEqual([]);
         expect(buildHighImpactClarifyingQuestions({
             photo: true,
-            evidenceText: 'Readable package label: beef ribs',
+            evidenceText: 'Readable package label: 6 beef ribs',
             foods: guessedFoods,
         })).toEqual([]);
     });
 
-    it('keeps rib species ahead of lower-impact photo questions', () => {
+    it('keeps rib species and count ahead of lower-impact photo questions', () => {
         const result = selectPhotoClarifyingQuestions([
             { id: 'cooking_oil', question: 'Was oil used?', affectedFood: 'ribs', estimatedCalorieImpact: 500 },
             {
-                id: 'rib_species', question: 'Are these pork ribs, beef ribs, or another kind?',
-                affectedFood: 'Ribs', examples: ['Pork ribs', 'Beef ribs', 'Lamb ribs', 'Goat ribs', 'Not sure'], estimatedCalorieImpact: 5,
+                id: 'rib_details', question: 'What kind of ribs are these, and about how many?',
+                affectedFood: 'Ribs', examples: ['4 pork ribs', '6 pork ribs', '8 pork ribs', '2 beef ribs', 'Not sure'], estimatedCalorieImpact: 5,
             },
             { id: 'rib_size', question: 'Were the ribs small or large?', affectedFood: 'ribs', estimatedCalorieImpact: 300 },
         ], { foods: [{ name: 'Smoked beef rib meat' }] });
 
         expect(result).toHaveLength(1);
-        expect(result[0].id).toBe('rib_species');
+        expect(result[0].id).toBe('rib_details');
     });
 });

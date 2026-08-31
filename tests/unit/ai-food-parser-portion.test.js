@@ -16,6 +16,7 @@ describe('AI food parser portion reconciliation', () => {
         ['4 large blueberry muffins', { serving: '1 large bakery muffin', name: 'Large Blueberry Muffin' }, 4],
         ['6 Johnsonville Vermont Maple Syrup breakfast sausage links', { serving: '3 cooked links (55g)', name: 'Breakfast Sausage Links' }, 2],
         ['2 orders of 10-piece chicken nuggets', { serving: '10 pieces', name: '10-piece Chicken Nuggets' }, 2],
+        ['6 pork ribs', { serving: '1 medium cooked pork rib (bone excluded)', name: 'Pork Rib' }, 6],
     ])('extracts the consumed amount from "%s"', (query, reference, expected) => {
         expect(extractServingQuantityFromQuery(query, reference)).toBe(expected);
     });
