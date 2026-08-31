@@ -229,12 +229,15 @@ export function selectPhotoClarifyingQuestions(value, context = {}) {
     const foods = Array.isArray(context?.foods)
         ? context.foods
         : (Array.isArray(value?.foods) ? value.foods : []);
+    const contextText = normalizeText(`${context?.query || ''} ${context?.evidenceText || ''}`);
+    const ribDetailsAlreadyKnown = hasExplicitRibDetails(contextText);
     const sanitized = sanitizeClarifyingQuestions(questions, 8);
     const candidates = sanitized
         .filter((question) => !photoCompletenessQuestion(question))
         .map((question, index) => {
             const kind = photoQuestionKind(question, foods);
             if (!kind) return null;
+            if (kind === 'protein-type' && ribDetailsAlreadyKnown) return null;
 
             const impact = estimatedQuestionImpact(question, kind);
             // A generic "was any spray/oil used?" question is not useful when

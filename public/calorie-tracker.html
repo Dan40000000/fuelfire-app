@@ -2199,7 +2199,16 @@
                     notes: result.notes || ''
                 };
 
-                const questions = selectPhotoClarifyingQuestions(result.clarifyingQuestions, result);
+                const questions = selectPhotoClarifyingQuestions(result.clarifyingQuestions, {
+                    ...result,
+                    query: imageContext,
+                    evidenceText: [
+                        ...(Array.isArray(result.visibleText) ? result.visibleText : []),
+                        result?.visibleLabel?.rawText,
+                        result?.visibleLabel?.product,
+                        result?.visibleLabel?.brand
+                    ].filter(Boolean).join(' ')
+                });
                 let finalResult = result;
                 let foods = Array.isArray(result.foods) ? result.foods : [];
                 if (questions.length) {
@@ -5254,11 +5263,15 @@
 
         function selectPhotoClarifyingQuestions(questions, result = {}) {
             const foods = Array.isArray(result?.foods) ? result.foods : [];
+            const contextText = [result?.query, result?.evidenceText].filter(Boolean).join(' ').toLowerCase();
+            const ribDetailsAlreadyKnown = /\b(?:[1-9]\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\s+(?:(?:small|medium|large|short|spare|baby\s+back|back|cooked|bone[- ]?in)\s+)*(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\s+(?:(?:small|medium|large|short|spare|baby\s+back|back|cooked|bone[- ]?in)\s+)*ribs?\b/i.test(contextText)
+                || /\b(?:pork|pig|swine|beef|cow|lamb|mutton|goat)\s+(?:(?:small|medium|large|short|spare|baby\s+back|back|cooked|bone[- ]?in)\s+)*ribs?\b\s*(?:[,;:]\s*)?(?:(?:about|around|approximately)\s+)?(?:[1-9]\d*|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\b/i.test(contextText);
             const candidates = normalizeClarifyingQuestions(questions, 8)
                 .filter(question => !isPhotoCompletenessQuestion(question))
                 .map((question, index) => {
                     const kind = photoClarificationKind(question, foods);
                     if (!kind) return null;
+                    if (kind === 'protein-type' && ribDetailsAlreadyKnown) return null;
                     const impact = photoClarificationImpact(question, kind);
                     if (kind === 'added-fat-sauce' && impact < 40) return null;
                     return { question, impact, index };

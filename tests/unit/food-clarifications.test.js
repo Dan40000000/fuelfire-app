@@ -139,4 +139,20 @@ describe('food clarification contract', () => {
         expect(result).toHaveLength(1);
         expect(result[0].id).toBe('rib_details');
     });
+
+    it('does not repeat a rib question when user or label context already supplies species and count', () => {
+        const question = {
+            id: 'rib_details', question: 'What kind of ribs are these, and about how many?',
+            affectedFood: 'Ribs', estimatedCalorieImpact: 700,
+        };
+
+        expect(selectPhotoClarifyingQuestions([question], {
+            query: 'User note: 6 pork ribs',
+            foods: [{ name: 'Smoked beef rib meat' }],
+        })).toEqual([]);
+        expect(selectPhotoClarifyingQuestions([question], {
+            evidenceText: 'Readable package label: 6 beef ribs',
+            foods: [{ name: 'Smoked beef rib meat' }],
+        })).toEqual([]);
+    });
 });

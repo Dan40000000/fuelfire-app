@@ -389,7 +389,7 @@ function singularizeCountServing(value) {
         .replace(/\b([a-z]+)s\b/gi, '$1');
 }
 
-const COUNTABLE_FOOD_NOUN_PATTERN = /\b(?:shrimp|prawns?|links?|slices?|pieces?|items?|eggs?|muffins?|pancakes?|wings?|nuggets?|meatballs?|dumplings?|tacos?|cookies?|crackers?|bars?|bananas?|apples?|oranges?|breasts?|tenders?|fillets?|patties?|sandwiches?|burgers?|hot\s+dogs?)\b/i;
+const COUNTABLE_FOOD_NOUN_PATTERN = /\b(?:shrimp|prawns?|links?|slices?|pieces?|items?|eggs?|muffins?|pancakes?|wings?|nuggets?|meatballs?|dumplings?|tacos?|cookies?|crackers?|bars?|bananas?|apples?|oranges?|breasts?|tenders?|fillets?|patties?|sandwiches?|burgers?|hot\s+dogs?|ribs?)\b/i;
 const SMALL_WORD_NUMBERS = {
     one: 1,
     two: 2,
