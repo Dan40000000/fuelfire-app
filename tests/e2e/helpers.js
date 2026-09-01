@@ -1,10 +1,15 @@
 import { expect } from '@playwright/test';
 
-export function localDateKey() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+export function localDateKey(now = new Date()) {
+    const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Denver',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).formatToParts(now).map(({ type, value }) => [type, value]),
+    );
+    const { year, month, day } = parts;
     return `${year}-${month}-${day}`;
 }
 
