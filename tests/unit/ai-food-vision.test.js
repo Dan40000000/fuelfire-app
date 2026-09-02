@@ -9,10 +9,12 @@ import {
     mergeVisualPortionEvidence,
     normalizeGenericWholePizzaNutrition,
     parserPortionConflictsWithVision,
+    reconcileVolumePortionWithCalorieRange,
     reconcileParserNutritionWithVision,
     formatSpatialContextForPrompt,
     sanitizeSpatialContext,
     sanitizeVisionFoods,
+    shouldLookupPhotoNutrition,
     shouldRefocusVisibleNutritionLabel,
     validateVisionNutrition,
 } from '../../api/ai-food-vision.js';
@@ -216,6 +218,34 @@ describe('AI food vision normalization', () => {
         expect(result.every((food) => ['high', 'medium', 'low'].includes(food.confidence))).toBe(true);
         expect(result[1]).toMatchObject({ serving: '1 cup popped', quantity: 6 });
         expect(calculateTotals([result[1]]).calories).toBe(250);
+    });
+
+    it('does not collapse a plate of popcorn to one database cup', () => {
+        const foods = sanitizeVisionFoods([{
+            name: 'Popped popcorn', serving: '1 cup popped', quantity: 1,
+            calories: 31, protein: 1, carbs: 6.2, fiber: 1.2, fat: 0,
+            confidence: 'low', dataSource: 'generic cup reference',
+        }]);
+        const corrected = reconcileVolumePortionWithCalorieRange(foods, {
+            low: 90, high: 170, midpoint: 130,
+        });
+
+        expect(corrected[0]).toMatchObject({
+            serving: '1 cup popped', quantity: 4, portionAdjustedToRange: true,
+            needsVerification: true,
+        });
+        expect(calculateTotals(corrected).calories).toBe(124);
+    });
+
+    it('reserves the slower parser handoff for identified brands or restaurants', () => {
+        const generic = [{ name: 'Popped popcorn', serving: '1 cup popped', quantity: 6 }];
+        expect(shouldLookupPhotoNutrition(generic, { lookupQuery: 'popped popcorn' }, '')).toBe(false);
+        expect(shouldLookupPhotoNutrition(generic, { packageBrand: 'Orville Redenbacher' }, '')).toBe(true);
+        expect(shouldLookupPhotoNutrition(
+            [{ name: 'Chicken nuggets', restaurant: 'McDonalds' }],
+            { restaurantIdentified: 'McDonalds' },
+            ''
+        )).toBe(true);
     });
 
     it('normalizes screenshot-shaped bare small sausages without changing the egg estimate', () => {
