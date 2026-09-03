@@ -1322,6 +1322,8 @@
         let activeClarificationState = null;
         let photoTotalsAnnouncementTimer = null;
         const PHOTO_ANALYSIS_TIMEOUT_MS = 120000;
+        const PHOTO_QUANTITY_MIN = 0.25;
+        const PHOTO_QUANTITY_MAX = 100;
 
         function getApiEndpoints(path) {
             const endpoints = [];
@@ -3319,7 +3321,7 @@
                                 <div style="margin-left: auto; display: flex; align-items: center; gap: 6px;">
 	                                    <label for="photo-food-qty-${index}" class="visually-hidden">Quantity for ${escapeHtml(food.name || 'food item')}</label>
                                     <span aria-hidden="true" style="font-weight: 600; color: #333;">Qty:</span>
-	                                    <input id="photo-food-qty-${index}" type="number" class="photo-food-qty" data-index="${index}" value="${food.quantity || 1}" min="0.25" max="20" step="0.25" aria-describedby="photo-validation-message"
+	                                    <input id="photo-food-qty-${index}" type="number" class="photo-food-qty" data-index="${index}" value="${food.quantity || 1}" min="${PHOTO_QUANTITY_MIN}" max="${PHOTO_QUANTITY_MAX}" step="0.25" aria-describedby="photo-validation-message"
 	                                           onchange="updatePhotoFoodDisplay(${index})"
 	                                           style="width: 55px; padding: 4px 6px; border: 1px solid #64748b; border-radius: 6px; font-size: 12px; text-align: center;">
 	                                </div>
@@ -3349,7 +3351,9 @@
         function updatePhotoFoodDisplay(index) {
             const qtyInput = document.querySelector(`.photo-food-qty[data-index="${index}"]`);
             const qty = Number(qtyInput?.value);
-            if (!validatePhotoQuantity(qtyInput, false)) {
+            if (!validatePhotoQuantity(qtyInput, true)) {
+                const calDisplay = document.getElementById(`photo-food-cal-${index}`);
+                if (calDisplay) calDisplay.textContent = '—';
                 updatePhotoTotals(true);
                 return;
             }
@@ -3366,13 +3370,13 @@
             const quantity = Number(input.value);
             const index = Number.parseInt(input.dataset.index, 10);
             const foodName = currentPhotoFoods[index]?.name || 'food item';
-            const valid = Number.isFinite(quantity) && quantity >= 0.25 && quantity <= 20;
+            const valid = Number.isFinite(quantity) && quantity >= PHOTO_QUANTITY_MIN && quantity <= PHOTO_QUANTITY_MAX;
             if (valid) {
                 input.removeAttribute('aria-invalid');
                 return true;
             }
             input.setAttribute('aria-invalid', 'true');
-            const message = `Enter a quantity from 0.25 to 20 for ${foodName}.`;
+            const message = `Enter a quantity from ${PHOTO_QUANTITY_MIN} to ${PHOTO_QUANTITY_MAX} for ${foodName}.`;
             const validation = document.getElementById('photo-validation-message');
             if (validation) validation.textContent = message;
             if (focusOnError) {
@@ -3389,9 +3393,12 @@
 
             document.querySelectorAll('.photo-food-checkbox').forEach((cb, index) => {
                 if (cb.checked) {
+                    selectedCount++;
                     const qtyInput = document.querySelector(`.photo-food-qty[data-index="${index}"]`);
                     if (!validatePhotoQuantity(qtyInput, false)) {
                         quantitiesValid = false;
+                        const calDisplay = document.getElementById(`photo-food-cal-${index}`);
+                        if (calDisplay) calDisplay.textContent = '—';
                         return;
                     }
                     const qty = Number(qtyInput.value);
@@ -3402,17 +3409,16 @@
 	                    totalNetC += Math.round(parseFloat(cb.dataset.netCarbs || Math.max(0, (parseFloat(cb.dataset.carbs) || 0) - (parseFloat(cb.dataset.fiber || 0) || 0))) * qty);
 	                    totalF += Math.round(parseFloat(cb.dataset.fat) * qty);
                     totalS += Math.round(parseFloat(cb.dataset.sugar || 0) * qty);
-                    selectedCount++;
                 }
             });
 
-            document.getElementById('photo-total-calories').textContent = totalCal;
-	            document.getElementById('photo-total-protein').textContent = totalP + 'g';
-	            document.getElementById('photo-total-carbs').textContent = totalC + 'g';
-	            document.getElementById('photo-total-fiber').textContent = totalFiber + 'g';
-	            document.getElementById('photo-total-net-carbs').textContent = totalNetC + 'g';
-	            document.getElementById('photo-total-fat').textContent = totalF + 'g';
-            document.getElementById('photo-total-sugar').textContent = totalS + 'g';
+            document.getElementById('photo-total-calories').textContent = quantitiesValid ? totalCal : '—';
+	            document.getElementById('photo-total-protein').textContent = quantitiesValid ? totalP + 'g' : '—';
+	            document.getElementById('photo-total-carbs').textContent = quantitiesValid ? totalC + 'g' : '—';
+	            document.getElementById('photo-total-fiber').textContent = quantitiesValid ? totalFiber + 'g' : '—';
+	            document.getElementById('photo-total-net-carbs').textContent = quantitiesValid ? totalNetC + 'g' : '—';
+	            document.getElementById('photo-total-fat').textContent = quantitiesValid ? totalF + 'g' : '—';
+            document.getElementById('photo-total-sugar').textContent = quantitiesValid ? totalS + 'g' : '—';
 
             // Update log button text
             const logBtn = document.getElementById('log-photo-btn');
@@ -3425,7 +3431,7 @@
                 const validation = document.getElementById('photo-validation-message');
                 if (validation) validation.textContent = '';
             }
-            if (announceTotals) {
+            if (announceTotals && quantitiesValid) {
                 clearTimeout(photoTotalsAnnouncementTimer);
                 photoTotalsAnnouncementTimer = setTimeout(() => {
                     announcePhotoStatus(`${selectedCount} item${selectedCount === 1 ? '' : 's'} selected. Total ${totalCal} calories, ${totalP} grams protein, ${totalC} grams carbohydrates, and ${totalF} grams fat.`);

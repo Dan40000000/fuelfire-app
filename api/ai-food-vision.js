@@ -7,6 +7,7 @@ const corsOptions = {
     methods: ['POST', 'OPTIONS'],
     headers: ['Content-Type'],
 };
+const MAX_COUNTABLE_FOOD_QUANTITY = 100;
 
 function toFiniteNumber(value, fallback = 0) {
     if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -620,7 +621,7 @@ function normalizePlainCookedShrimpNutrition(food, contextText = '') {
     if (!/\b(shrimp|prawn)\b/.test(combined)) return food;
     if (/\b(breaded|fried|tempura|coconut|scampi|butter|sauce|cream|batter)\b/.test(combined)) return food;
 
-    const quantity = Math.max(0.25, Math.min(30, toFiniteNumber(food?.quantity, 1)));
+    const quantity = Math.max(0.25, Math.min(MAX_COUNTABLE_FOOD_QUANTITY, toFiniteNumber(food?.quantity, 1)));
     const grams = shrimpGramsPerItem(combined);
     const perItem = {
         calories: Math.max(1, Math.round(0.99 * grams)),
@@ -911,8 +912,8 @@ export function validateVisionNutrition(food) {
 
 export function sanitizeVisionFoods(rawFoods, contextText = '') {
     return (Array.isArray(rawFoods) ? rawFoods : []).map((food, index) => {
-        const quantity = Math.max(0.25, Math.min(20, toFiniteNumber(food?.quantity, 1)));
-        const visualCount = Math.max(0, Math.min(50, positiveNumber(food?.visualCount ?? food?.count, 0)));
+        const quantity = Math.max(0.25, Math.min(MAX_COUNTABLE_FOOD_QUANTITY, toFiniteNumber(food?.quantity, 1)));
+        const visualCount = Math.max(0, Math.min(MAX_COUNTABLE_FOOD_QUANTITY, positiveNumber(food?.visualCount ?? food?.count, 0)));
         const estimatedGramsPerUnit = Math.max(0, Math.min(5000, positiveNumber(food?.estimatedGramsPerUnit, 0)));
         const estimatedTotalGrams = Math.max(0, Math.min(10000, positiveNumber(food?.estimatedTotalGrams, 0)));
         const dataSource = cleanText(food?.dataSource || food?.source, 'AI estimate', 180);

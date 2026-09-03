@@ -1240,6 +1240,55 @@ test('photo flow preserves a counted portion instead of applying a mismatched sa
     await expect(page.locator('#photo-food-items')).toContainText('Needs review');
 });
 
+test('photo totals keep high-count foods and never show stale math for an invalid quantity', async ({ page }) => {
+    await page.route('**/api/ai-food-vision', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                overallConfidence: 'medium',
+                foods: [
+                    {
+                        name: 'Cooked shrimp', serving: '1 cooked shrimp (estimated 12g)', quantity: 30,
+                        visualCount: 30, calories: 12, protein: 3, carbs: 0, fiber: 0,
+                        netCarbs: 0, fat: 0, sugar: 0, confidence: 'medium',
+                        dataSource: 'standard cooked shrimp reference scaled to visible count',
+                    },
+                    {
+                        name: 'Cocktail sauce', serving: '30g', quantity: 1,
+                        calories: 35, protein: 0, carbs: 8, fiber: 0,
+                        netCarbs: 8, fat: 0, sugar: 6, confidence: 'medium',
+                    },
+                ],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.requireAIAccess = () => true;
+        window.startFoodPhotoCapture();
+    });
+    await page.locator('#photo-modal input[type="file"]').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.locator('#analyze-photo-btn').click();
+
+    const shrimpQuantity = page.locator('.photo-food-qty').first();
+    await expect(page.locator('#photo-results')).toBeVisible();
+    await expect(shrimpQuantity).toHaveValue('30');
+    await expect(shrimpQuantity).toHaveAttribute('max', '100');
+    await expect(shrimpQuantity).not.toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#photo-food-cal-0')).toHaveText('360');
+    await expect(page.locator('#photo-total-calories')).toHaveText('395');
+
+    await shrimpQuantity.fill('101');
+    await shrimpQuantity.dispatchEvent('change');
+    await expect(shrimpQuantity).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#photo-validation-message')).toContainText('0.25 to 100');
+    await expect(page.locator('#photo-food-cal-0')).toHaveText('—');
+    await expect(page.locator('#photo-total-calories')).toHaveText('—');
+});
+
 test('food memory keeps incompatible portion variants separate', async ({ page }) => {
     await page.goto('/calorie-tracker.html');
     const memory = await page.evaluate(() => {

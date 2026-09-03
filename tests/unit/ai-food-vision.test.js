@@ -340,6 +340,17 @@ describe('AI food vision normalization', () => {
         expect(shrimp.dataSource).toContain('99 cal');
     });
 
+    it('preserves a visible count above the old twenty-item UI limit', () => {
+        const [shrimp] = sanitizeVisionFoods([{
+            name: 'Cooked shrimp', serving: '1 cooked shrimp (estimated 12g)',
+            quantity: 30, visualCount: 30, calories: 12, protein: 3,
+            carbs: 0, fiber: 0, fat: 0, sugar: 0, confidence: 'medium',
+        }], 'standard cooked peeled tail-on shrimp');
+
+        expect(shrimp).toMatchObject({ quantity: 30, visualCount: 30 });
+        expect(calculateTotals([shrimp]).calories).toBe(420);
+    });
+
     it('normalizes grouped servings for countable foods without double multiplication', () => {
         const foods = sanitizeVisionFoods([
             { name: 'Meatballs', serving: '6 meatballs', quantity: 6, calories: 480, protein: 30, carbs: 24, fat: 30 },
