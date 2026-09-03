@@ -292,6 +292,26 @@ export function buildHighImpactClarifyingQuestions({ query = '', foods = [], evi
         });
     }
 
+    const popcornCups = (Array.isArray(foods) ? foods : []).reduce((sum, food) => {
+        const text = normalizeText(`${food?.name || ''} ${food?.serving || ''}`);
+        if (!/\bpop\s?corn\b/.test(text) || !/\bcups?\b/.test(text)) return sum;
+        const quantity = Number(food?.quantity);
+        return sum + (Number.isFinite(quantity) && quantity > 0 ? quantity : 1);
+    }, 0);
+    const popcornPreparationKnown = /\b(?:plain|air[-\s]?popped|oil[-\s]?popped|cooked\s+in\s+oil|buttered|movie[-\s]?theater|microwave)\b/.test(context);
+    if (photo && popcornCups >= 3 && !popcornPreparationKnown) {
+        questions.push({
+            id: 'popcorn_preparation',
+            question: 'Was the popcorn plain/air-popped, oil-popped, or buttered?',
+            examples: ['Plain or air-popped', 'Oil-popped', 'Buttered', 'Not sure'],
+            reason: 'For a plate this size, oil or butter can materially change the calorie total.',
+            answerType: 'single-choice-or-voice',
+            acceptsVoice: true,
+            affectedFood: 'Popcorn',
+            estimatedCalorieImpact: Math.max(100, Math.round(popcornCups * 30))
+        });
+    }
+
     if (/\b(?:ritz|butter\s+crackers?|crackers?)\b/.test(foodsText) && !querySpecifiesCrackerCount(context)) {
         questions.push({
             id: 'cracker_count',

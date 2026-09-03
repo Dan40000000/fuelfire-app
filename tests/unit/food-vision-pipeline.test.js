@@ -20,25 +20,20 @@ describe('food vision evidence pipeline', () => {
         vi.restoreAllMocks();
     });
 
-    it('extracts visual evidence before resolving nutrition', async () => {
-        global.fetch = vi.fn()
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({
-                    choices: [{ message: { content: JSON.stringify({
-                        foods: [{ name: 'blueberry muffin', visualAmount: 'four standard muffins' }],
-                        visibleText: []
-                    }) } }]
-                })
+    it('resolves visual evidence and nutrition in one high-quality pass', async () => {
+        global.fetch = vi.fn().mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                choices: [{ message: { content: JSON.stringify({
+                    foods: [{
+                        name: 'Blueberry Muffin', visualAmount: 'four standard muffins',
+                        visualCount: 4, quantity: 4, serving: '1 standard muffin', calories: 135,
+                    }],
+                    visibleText: [],
+                    calorieRange: { low: 480, high: 620, midpoint: 540 },
+                }) } }]
             })
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({
-                    choices: [{ message: { content: JSON.stringify({
-                        foods: [{ name: 'Blueberry Muffin', quantity: 4, serving: '1 standard muffin', calories: 135 }]
-                    }) } }]
-                })
-            });
+        });
 
         const result = await callFoodVision({
             image: 'ZmFrZS1pbWFnZQ==',
@@ -55,52 +50,36 @@ describe('food vision evidence pipeline', () => {
             },
         });
 
-        expect(global.fetch).toHaveBeenCalledTimes(2);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
         const firstBody = JSON.parse(global.fetch.mock.calls[0][1].body);
-        const secondBody = JSON.parse(global.fetch.mock.calls[1][1].body);
         expect(firstBody.model).toBe('test-vision');
         expect(firstBody.messages[0].content[0].type).toBe('image_url');
         expect(firstBody.messages[0].content[1].text).toContain('DEVICE DEPTH MEASUREMENTS');
         expect(firstBody.messages[0].content[1].text).toContain('Estimated height above the plate/support plane: 0.05 m');
-        expect(secondBody.model).toBe('test-text');
-        expect(secondBody.messages[0].content).toContain('blueberry muffin');
-        expect(secondBody.messages[0].content).toContain('DEVICE DEPTH MEASUREMENTS');
+        expect(firstBody.messages[0].content[1].text).toContain('sum(calories × quantity)');
         expect(result.text).toContain('Blueberry Muffin');
         expect(result.metadata.visionModel).toBe('test-vision');
     });
 
-    it('escalates low-confidence Claude vision and nutrition passes to Opus without using Qwen', async () => {
+    it('uses one Opus multimodal pass instead of repeated low-confidence reviews', async () => {
         process.env.FOOD_AI_PROVIDER = 'claude';
         process.env.CLAUDE_API_KEY = 'test-claude-key';
         const claudeResponse = (payload) => new Response(JSON.stringify({
             content: [{ type: 'text', text: JSON.stringify(payload) }],
         }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        global.fetch = vi.fn()
-            .mockResolvedValueOnce(claudeResponse({
-                foods: [{ name: 'fried egg', count: 1, confidence: 'low' }],
-                overallConfidence: 'low',
-            }))
-            .mockResolvedValueOnce(claudeResponse({
-                foods: [{ name: 'fried egg', count: 1, sizeClass: 'large', confidence: 'medium' }],
-                overallConfidence: 'medium',
-            }))
-            .mockResolvedValueOnce(claudeResponse({
-                foods: [{ name: 'Fried Egg', quantity: 1, serving: '1 large egg', calories: 70, confidence: 'low' }],
-                overallConfidence: 'low',
-            }))
-            .mockResolvedValueOnce(claudeResponse({
-                foods: [{ name: 'Fried Egg', quantity: 1, serving: '1 large egg', calories: 90, protein: 6, carbs: 1, fat: 7, confidence: 'medium' }],
-                overallConfidence: 'medium',
-            }));
+        global.fetch = vi.fn().mockResolvedValueOnce(claudeResponse({
+            foods: [{ name: 'Fried Egg', quantity: 1, serving: '1 large egg', calories: 90, protein: 6, carbs: 1, fat: 7, confidence: 'low' }],
+            overallConfidence: 'low',
+        }));
 
         const result = await callFoodVision({
             image: 'ZmFrZS1pbWFnZQ==',
             mimeType: 'image/jpeg',
         });
 
-        expect(global.fetch).toHaveBeenCalledTimes(4);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
         const models = global.fetch.mock.calls.map(([, request]) => JSON.parse(request.body).model);
-        expect(models).toEqual(['claude-sonnet-5', 'claude-opus-5', 'claude-sonnet-5', 'claude-opus-5']);
+        expect(models).toEqual(['claude-opus-5']);
         const firstBody = JSON.parse(global.fetch.mock.calls[0][1].body);
         expect(firstBody.messages[0].content[0]).toMatchObject({
             type: 'image',
@@ -118,18 +97,6 @@ describe('food vision evidence pipeline', () => {
 
     it('returns an AI-first voice-enabled conversation contract for ambiguous photos', async () => {
         global.fetch = vi.fn()
-            .mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({
-                    choices: [{ message: { content: JSON.stringify({
-                        foods: [
-                            { name: 'canned tuna', count: 1, confidence: 'high' },
-                            { name: 'round butter crackers', count: 1, confidence: 'medium' },
-                        ],
-                        visibleText: [],
-                    }) } }],
-                }),
-            })
             .mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
@@ -171,6 +138,38 @@ describe('food vision evidence pipeline', () => {
         expect(response.body.clarifyingQuestions).toEqual([
             expect.objectContaining({ id: 'tuna_mayonnaise', acceptsVoice: true }),
         ]);
-        expect(global.fetch).toHaveBeenCalledTimes(2);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('repairs the one-cup popcorn mismatch without starting a generic parser lookup', async () => {
+        global.fetch = vi.fn().mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                choices: [{ message: { content: JSON.stringify({
+                    foods: [{
+                        name: 'Popped popcorn', visualAmount: 'a loose mound covering a small plate',
+                        quantity: 1, serving: '1 cup popped', calories: 31,
+                        protein: 1, carbs: 6.2, fiber: 1.2, netCarbs: 5, fat: 0, sugar: 0,
+                        confidence: 'low', dataSource: 'generic cup reference',
+                    }],
+                    lookupQuery: 'popped popcorn',
+                    overallConfidence: 'low',
+                    calorieRange: { low: 90, high: 170, midpoint: 130 },
+                }) } }],
+            }),
+        });
+
+        const response = await invokeApi(foodVisionHandler, {
+            headers: getTestAuthHeaders(),
+            body: { image: 'ZmFrZS1pbWFnZQ==', mimeType: 'image/jpeg' },
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body.foods[0]).toMatchObject({
+            serving: '1 cup popped', quantity: 4, portionAdjustedToRange: true,
+        });
+        expect(response.body.totalCalories).toBe(124);
+        expect(response.body.calorieRange).toEqual({ low: 90, high: 170, midpoint: 130 });
+        expect(global.fetch).toHaveBeenCalledTimes(1);
     });
 });

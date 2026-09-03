@@ -75,6 +75,28 @@ describe('food clarification contract', () => {
         ]);
     });
 
+    it('asks one high-impact preparation question for a multi-cup popcorn plate', () => {
+        const questions = buildHighImpactClarifyingQuestions({
+            photo: true,
+            foods: [{ name: 'Popped popcorn', serving: '1 cup popped', quantity: 6 }],
+        });
+        expect(selectPhotoClarifyingQuestions(questions, {
+            foods: [{ name: 'Popped popcorn', serving: '1 cup popped', quantity: 6 }],
+        })).toEqual([
+            expect.objectContaining({
+                id: 'popcorn_preparation',
+                acceptsVoice: true,
+                estimatedCalorieImpact: 180,
+            }),
+        ]);
+
+        expect(buildHighImpactClarifyingQuestions({
+            photo: true,
+            query: 'User note: air-popped',
+            foods: [{ name: 'Popped popcorn', serving: '1 cup popped', quantity: 6 }],
+        })).toEqual([]);
+    });
+
     it('returns at most one question, ordered by estimated calorie impact, and drops low-impact fat noise', () => {
         const result = selectPhotoClarifyingQuestions([
             { id: 'cooking_spray', question: 'Was a light spray used?', affectedFood: 'eggs', estimatedCalorieImpact: 10 },

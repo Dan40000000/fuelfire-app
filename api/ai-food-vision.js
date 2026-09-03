@@ -7,6 +7,7 @@ const corsOptions = {
     methods: ['POST', 'OPTIONS'],
     headers: ['Content-Type'],
 };
+const MAX_COUNTABLE_FOOD_QUANTITY = 100;
 
 function toFiniteNumber(value, fallback = 0) {
     if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -620,7 +621,7 @@ function normalizePlainCookedShrimpNutrition(food, contextText = '') {
     if (!/\b(shrimp|prawn)\b/.test(combined)) return food;
     if (/\b(breaded|fried|tempura|coconut|scampi|butter|sauce|cream|batter)\b/.test(combined)) return food;
 
-    const quantity = Math.max(0.25, Math.min(30, toFiniteNumber(food?.quantity, 1)));
+    const quantity = Math.max(0.25, Math.min(MAX_COUNTABLE_FOOD_QUANTITY, toFiniteNumber(food?.quantity, 1)));
     const grams = shrimpGramsPerItem(combined);
     const perItem = {
         calories: Math.max(1, Math.round(0.99 * grams)),
@@ -911,8 +912,8 @@ export function validateVisionNutrition(food) {
 
 export function sanitizeVisionFoods(rawFoods, contextText = '') {
     return (Array.isArray(rawFoods) ? rawFoods : []).map((food, index) => {
-        const quantity = Math.max(0.25, Math.min(20, toFiniteNumber(food?.quantity, 1)));
-        const visualCount = Math.max(0, Math.min(50, positiveNumber(food?.visualCount ?? food?.count, 0)));
+        const quantity = Math.max(0.25, Math.min(MAX_COUNTABLE_FOOD_QUANTITY, toFiniteNumber(food?.quantity, 1)));
+        const visualCount = Math.max(0, Math.min(MAX_COUNTABLE_FOOD_QUANTITY, positiveNumber(food?.visualCount ?? food?.count, 0)));
         const estimatedGramsPerUnit = Math.max(0, Math.min(5000, positiveNumber(food?.estimatedGramsPerUnit, 0)));
         const estimatedTotalGrams = Math.max(0, Math.min(10000, positiveNumber(food?.estimatedTotalGrams, 0)));
         const dataSource = cleanText(food?.dataSource || food?.source, 'AI estimate', 180);
@@ -961,6 +962,50 @@ export function sanitizeVisionFoods(rawFoods, contextText = '') {
         food.name &&
         (food.calories > 0 || food.protein > 0 || food.carbs > 0 || food.fiber > 0 || food.fat > 0 || food.sugar > 0)
     ));
+}
+
+/**
+ * Keep a structured per-unit row from contradicting the model's estimate for
+ * the whole visible plate. This is intentionally narrow: it only repairs a
+ * single cup-based food when the returned one-cup total is far below the
+ * model's own calorie range. The model remains responsible for identifying
+ * the food and estimating the range.
+ */
+export function reconcileVolumePortionWithCalorieRange(foods, rawCalorieRange) {
+    const items = Array.isArray(foods) ? foods : [];
+    if (items.length !== 1) return items;
+
+    const totals = calculateTotals(items);
+    const range = sanitizeCalorieRange(rawCalorieRange, totals.calories);
+    if (!range || totals.calories >= range.low * 0.75) return items;
+
+    const food = items[0];
+    const quantity = positiveNumber(food?.quantity, 1);
+    const perUnitCalories = positiveNumber(food?.calories, 0);
+    const isSingleCupReference = quantity <= 1
+        && /^\s*1(?:\.0+)?\s+cups?\b/i.test(cleanText(food?.serving || '', '', 100));
+    if (!isSingleCupReference || perUnitCalories <= 0) return items;
+
+    const targetCalories = range.midpoint || Math.round((range.low + range.high) / 2);
+    let correctedQuantity = Math.round((targetCalories / perUnitCalories) * 2) / 2;
+    correctedQuantity = Math.max(1, Math.min(30, correctedQuantity));
+    if (correctedQuantity <= 1) return items;
+
+    const correctedTotal = correctedQuantity * perUnitCalories;
+    if (correctedTotal < range.low * 0.8 || correctedTotal > range.high * 1.2) return items;
+
+    return [{
+        ...food,
+        quantity: correctedQuantity,
+        confidence: 'low',
+        needsVerification: true,
+        portionAdjustedToRange: true,
+        dataSource: cleanText(
+            `${food?.dataSource || 'Photo estimate'}; cup quantity restored from whole-photo calorie range`,
+            'Photo estimate; cup quantity restored from whole-photo calorie range',
+            180
+        )
+    }];
 }
 
 function sanitizeVisibleNutritionLabel(rawLabel) {
@@ -1230,6 +1275,20 @@ export function shouldUseVisionNutritionWithoutParser(foods, parsedPayload = {},
             && toFiniteNumber(food?.fat, 0) >= 0;
         return hasLabelSignal && hasUsableNutrition;
     });
+}
+
+export function shouldLookupPhotoNutrition(foods, parsedPayload = {}, imageContext = '') {
+    const explicitIdentity = [
+        imageContext,
+        parsedPayload?.restaurantIdentified,
+        parsedPayload?.packageBrand,
+        parsedPayload?.productName,
+        ...(Array.isArray(foods) ? foods.flatMap((food) => [food?.restaurant, food?.brand]) : [])
+    ].filter(Boolean).join(' ');
+
+    return Boolean(cleanText(parsedPayload?.restaurantIdentified || '', '', 80))
+        || Boolean(cleanText(parsedPayload?.packageBrand || parsedPayload?.productName || '', '', 120))
+        || contextLooksSpecificEnoughForLookup(explicitIdentity);
 }
 
 function contextLooksSpecificEnoughForLookup(value) {
@@ -1858,6 +1917,87 @@ async function lookupFirstParserMatch(baseUrl, lookupQueries, memoryHints = [], 
     return bestMatch;
 }
 
+async function callFoodVisionSinglePass({
+    image,
+    mimeType,
+    contextLine,
+    memoryLine,
+    locationLine,
+    spatialLine
+}) {
+    const prompt = `Analyze this food photo and return the nutrition estimate in one pass.
+
+First inspect the whole image for every visible food or drink, readable package text, Nutrition Facts, brand marks, item counts, physical size, plate or bowl coverage, and total visible volume. Then calculate nutrition for that same visible portion. Do not replace the total visible amount with a database's one-serving reference.
+
+Return one JSON object containing: foods; visibleText; visibleLabel; packageBrand; productName; lookupQuery; restaurantIdentified; overallConfidence; notes; assumptions; calorieRange with low, high, and midpoint; and clarifyingQuestions. Every food needs name, visualAmount, visualCount, sizeClass, estimatedGramsPerUnit, estimatedTotalGrams, quantity, serving, calories, protein, carbs, fiber, netCarbs, fat, sugar, confidence, restaurant, and dataSource. Nutrients must be per one unit and quantity must be the number of those units in the visible portion. Return JSON only.
+
+Accuracy rules:
+- The foods and calorieRange must describe the same whole photographed portion. Before returning, calculate sum(calories × quantity); it must fall inside calorieRange. If it does not, correct quantity, serving, or per-unit nutrition.
+- For loose volume foods such as popcorn, rice, cereal, pasta, and chips, estimate the total visible cups. Use serving "1 cup" and quantity equal to total visible cups. Never return quantity 1 merely because a database reference is per cup. Plain popped popcorn is about 31 calories and about 8 grams per cup; oil or butter raises calories and fat.
+- Do not call popcorn buttered or oil-coated while returning plain-popcorn calories or zero fat. If preparation cannot be established visually, say it is uncertain and ask one preparation question only when the answer could materially change the total.
+- Count distinct items when reliable. For ribs, appearance alone cannot establish animal species. Ask "What kind of ribs are these, and about how many?" when species and count are not explicit.
+- A center-ray depth distance is not food volume. Use valid depth only to bound physical size, and never invent exact edible grams from plate coverage or depth alone.
+- Visible Nutrition Facts and exact user-stated facts override generic estimates. A saved 100 g reference is nutrient density, not the visible amount.
+- Keep prepared foods such as pizza, burgers, sandwiches, tacos, burritos, and wraps as one item rather than double-counting ingredients.
+- Assume the visible plated food is the portion to log. Never ask whether the user ate or finished all of it.
+- Ask at most one short follow-up, only when the answer could materially change calories (for example rib species/count, 1/4- versus 1/2-pound patty, tuna in water versus oil, or substantial added fat). Set acceptsVoice true.
+- Use total carbohydrates and netCarbs = carbs - fiber unless an exact label states otherwise.
+${contextLine}${memoryLine}${locationLine}${spatialLine}`;
+
+    const response = await callFoodAi({
+        prompt,
+        image,
+        mimeType,
+        modality: 'vision',
+        maxTokens: 1600,
+        temperature: 0,
+        json: true,
+        tier: 'review',
+        tags: ['food-photo', 'direct-vision-nutrition']
+    });
+    const payload = parseVisionPayload(extractTextFromFoodAiResponse(response));
+    if (!Array.isArray(payload.foods) || !payload.foods.length) {
+        throw new Error('Food vision returned no foods.');
+    }
+
+    let mergedLabel = payload.visibleLabel || payload.nutritionLabel;
+    if (shouldRefocusVisibleNutritionLabel(mergedLabel)) {
+        try {
+            const focusedLabelResponse = await callFoodAi({
+                prompt: `Read only the visible Nutrition Facts panel in this image. Copy printed values exactly and return JSON only as {"foods":[],"visibleLabel":{"hasNutritionFacts":true,"product":"","brand":"","servingSize":"","servingsPerContainer":null,"calories":null,"protein":null,"carbs":null,"fiber":null,"fat":null,"sugar":null}}. Use null only for genuinely unreadable fields.`,
+                image,
+                mimeType,
+                modality: 'vision',
+                maxTokens: 350,
+                temperature: 0,
+                json: true,
+                tier: 'review',
+                tags: ['food-photo', 'focused-label-ocr']
+            });
+            const focusedPayload = parseVisionPayload(extractTextFromFoodAiResponse(focusedLabelResponse));
+            mergedLabel = mergeVisibleNutritionLabels(
+                mergedLabel,
+                focusedPayload.visibleLabel || focusedPayload.nutritionLabel
+            );
+        } catch (error) {
+            console.warn(`Focused nutrition label read failed: ${error.message}`);
+        }
+    }
+
+    if (mergedLabel) payload.visibleLabel = mergedLabel;
+    response.text = JSON.stringify(payload);
+    return {
+        ...response,
+        metadata: {
+            ...(response.metadata || {}),
+            visionModel: response.metadata?.model || null,
+            reviewModel: response.metadata?.tier === 'review' ? response.metadata?.model || null : null,
+            degraded: response.metadata?.degraded === true,
+            primaryProvider: response.metadata?.primaryProvider || response.metadata?.provider || null
+        }
+    };
+}
+
 export async function callFoodVision({
     image,
     mimeType,
@@ -1879,6 +2019,20 @@ export async function callFoodVision({
         : '';
     const spatialPrompt = formatSpatialContextForPrompt(spatialContext);
     const spatialLine = spatialPrompt ? `\n${spatialPrompt}` : '';
+
+    // The normal path mirrors a direct multimodal chat: one strong model sees
+    // the image and returns both identity and nutrition. The old two-stage
+    // path remains available as a temporary rollback switch.
+    if (process.env.FOOD_AI_TWO_STAGE_VISION !== 'true') {
+        return callFoodVisionSinglePass({
+            image,
+            mimeType,
+            contextLine,
+            memoryLine,
+            locationLine,
+            spatialLine
+        });
+    }
 
     const evidencePrompt = `Inspect this food photo and extract visual evidence before calculating nutrition.
 
@@ -2140,10 +2294,13 @@ export default async function handler(req, res) {
             .filter(Boolean)
             .join(' ');
         let foods = removePreparedFoodComponents(
-            applyPackagedServingMath(
-                applyVisibleNutritionLabel(sanitizeVisionFoods(parsedPayload.foods, popcornContext), parsedPayload.visibleLabel || parsedPayload.nutritionLabel, imageContext, parsedPayload),
-                imageContext,
-                parsedPayload
+            reconcileVolumePortionWithCalorieRange(
+                applyPackagedServingMath(
+                    applyVisibleNutritionLabel(sanitizeVisionFoods(parsedPayload.foods, popcornContext), parsedPayload.visibleLabel || parsedPayload.nutritionLabel, imageContext, parsedPayload),
+                    imageContext,
+                    parsedPayload
+                ),
+                parsedPayload.calorieRange
             )
         );
 
@@ -2207,7 +2364,8 @@ export default async function handler(req, res) {
         }
         const lookupQuery = lookupQueries[0] || '';
         const shouldTrustVisibleLabel = shouldUseVisionNutritionWithoutParser(foods, parsedPayload, textContent);
-        if (preferWebSearch && lookupQueries.length && !shouldTrustVisibleLabel) {
+        const shouldLookupNutrition = shouldLookupPhotoNutrition(foods, parsedPayload, imageContext);
+        if (preferWebSearch && shouldLookupNutrition && lookupQueries.length && !shouldTrustVisibleLabel) {
             try {
                 const lookupMatch = await lookupFirstParserMatch(baseUrl, lookupQueries, foodMemoryHints, locationContext, callerAuthorization);
                 if (lookupMatch?.parserResult?.success && Array.isArray(lookupMatch.parserResult.foods) && lookupMatch.parserResult.foods.length > 0) {
@@ -2235,6 +2393,8 @@ export default async function handler(req, res) {
             }
         } else if (shouldTrustVisibleLabel && lookupQuery) {
             console.log(`Skipping parser handoff for visible nutrition label values: ${lookupQuery}`);
+        } else if (lookupQuery && !shouldLookupNutrition) {
+            console.log(`Skipping extra parser handoff for generic photographed food: ${lookupQuery}`);
         }
 
         const totals = calculateTotals(foods);
