@@ -19,6 +19,7 @@
         '/api/accuracy-lab-session',
         '/api/ai-food-parser',
         '/api/ai-food-vision',
+        '/api/client-diagnostics',
         '/api/claude-meal-plan',
         '/api/generate-meal-plan',
         '/api/ai-workout-plan',

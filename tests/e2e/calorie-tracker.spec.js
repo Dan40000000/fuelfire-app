@@ -618,6 +618,68 @@ test('open voice review dialog has an accessible name, labeled fields, and no cr
     await expect(trigger).toBeFocused();
 });
 
+test('failed voice nutrition lookup can send a privacy-safe diagnostic report', async ({ page }) => {
+    let diagnosticBody = null;
+    await page.route('**/api/ai-food-parser', async (route) => {
+        await route.fulfill({
+            status: 502,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: false,
+                error: 'No verifiable official nutrition source was found.',
+                code: 'OFFICIAL_NUTRITION_NOT_VERIFIED',
+                source: 'official-evidence-required',
+            }),
+        });
+    });
+    await page.route('**/api/client-diagnostics', async (route) => {
+        diagnosticBody = route.request().postDataJSON();
+        await route.fulfill({
+            status: 201,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                reportId: 'VFD-20260911-ABC12345',
+                message: 'Diagnostic report received. No microphone audio was uploaded.',
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.openVoiceModal(document.getElementById('voice-log-trigger'));
+        return window.searchFoodByVoice('seven strips of bacon and four eggs');
+    });
+
+    const dialog = page.getByRole('dialog', { name: 'Voice Logging' });
+    await expect(dialog.locator('#voice-text')).toContainText('nutrition lookup failed');
+    await expect(dialog.locator('#voice-text')).not.toContainText('No food found');
+    const sendButton = dialog.getByRole('button', { name: 'Send diagnostic report' });
+    await expect(sendButton).toBeVisible();
+    await expect(dialog.locator('#voice-diagnostic-panel')).toContainText('No microphone audio, photos, account details, or precise location');
+
+    await sendButton.focus();
+    await expect(sendButton).toBeFocused();
+    await sendButton.click();
+    await expect(dialog.locator('#voice-diagnostic-status')).toContainText('VFD-20260911-ABC12345');
+    expect(diagnosticBody).toMatchObject({
+        category: 'voice-food',
+        event: 'parser-error',
+        transcript: 'seven strips of bacon and four eggs',
+        error: {
+            code: 'OFFICIAL_NUTRITION_NOT_VERIFIED',
+            status: 502,
+        },
+    });
+    expect(diagnosticBody).not.toHaveProperty('rawAudio');
+    expect(diagnosticBody).not.toHaveProperty('authorization');
+    expect(diagnosticBody).not.toHaveProperty('preciseLocation');
+
+    const axeResults = await new AxeBuilder({ page }).include('#voice-diagnostic-panel').analyze();
+    const criticalOrSerious = axeResults.violations.filter((violation) => ['critical', 'serious'].includes(violation.impact));
+    expect(criticalOrSerious, criticalOrSerious.map((item) => `${item.id}: ${item.help}`).join('\n')).toEqual([]);
+});
+
 test('foreground restaurant location is coarse, opt-in, and not stored with the meal', async ({ page }) => {
     let requestBody;
     await page.addInitScript(() => {

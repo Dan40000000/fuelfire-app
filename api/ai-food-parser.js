@@ -576,6 +576,10 @@ const nutritionDatabase = {
     'large egg': { name: "Egg (large)", calories: 70, protein: 6, carbs: 1, fat: 5, sugar: 0, serving: '1 large egg', source: "USDA", sourceType: 'database' },
     'large eggs': { name: "Egg (large)", calories: 70, protein: 6, carbs: 1, fat: 5, sugar: 0, serving: '1 large egg', source: "USDA", sourceType: 'database' },
     'egg': { name: "Egg (large)", calories: 70, protein: 6, carbs: 1, fat: 5, sugar: 0, source: "USDA" },
+    'bacon strip': { name: "Cooked Bacon Strip", calories: 43, protein: 3, carbs: 0, fiber: 0, netCarbs: 0, fat: 3, sugar: 0, serving: '1 cooked strip', source: "Generic cooked bacon estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'bacon strips': { name: "Cooked Bacon Strip", calories: 43, protein: 3, carbs: 0, fiber: 0, netCarbs: 0, fat: 3, sugar: 0, serving: '1 cooked strip', source: "Generic cooked bacon estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'thick cut bacon': { name: "Thick-cut Cooked Bacon Strip", calories: 70, protein: 5, carbs: 0, fiber: 0, netCarbs: 0, fat: 5, sugar: 0, serving: '1 cooked strip', source: "Generic thick-cut cooked bacon estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
+    'thick-cut bacon': { name: "Thick-cut Cooked Bacon Strip", calories: 70, protein: 5, carbs: 0, fiber: 0, netCarbs: 0, fat: 5, sugar: 0, serving: '1 cooked strip', source: "Generic thick-cut cooked bacon estimate", sourceType: 'estimate', confidence: 'low', needsVerification: true },
     'chicken breast grilled 4 oz': { name: "Grilled Chicken Breast (4 oz)", calories: 140, protein: 26, carbs: 0, fat: 3, sugar: 0, source: "USDA" },
     'grilled chicken breast': { name: "Grilled Chicken Breast (4 oz)", calories: 140, protein: 26, carbs: 0, fat: 3, sugar: 0, source: "USDA" },
     'chicken breast': { name: "Grilled Chicken Breast (4 oz)", calories: 140, protein: 26, carbs: 0, fat: 3, sugar: 0, source: "USDA" },
@@ -909,9 +913,9 @@ function replaceSpokenNutritionNumbers(value) {
     });
 }
 
-const foodCountUnitPattern = '(?:pieces?|pcs?|pc|counts?|ct|nuggets?|tenders?|wings?|links?|patties?|muffins?|slices?|bars?|items?|eggs?|bananas?|apples?|oranges?|shrimp|prawns?|meatballs?|dumplings?|tacos?|cookies?|crackers?|breasts?|fillets?|sandwiches?|burgers?|hot\s+dogs?|ribs?)';
+const foodCountUnitPattern = '(?:pieces?|pcs?|pc|counts?|ct|nuggets?|tenders?|wings?|links?|patties?|muffins?|slices?|strips?|bars?|items?|eggs?|bananas?|apples?|oranges?|shrimp|prawns?|meatballs?|dumplings?|tacos?|cookies?|crackers?|breasts?|fillets?|sandwiches?|burgers?|hot\\s+dogs?|ribs?)';
 const outerQuantityUnitPattern = '(?:orders?|servings?|meals?|boxes?|packages?|containers?|sets?)';
-const countDescriptorPattern = '(?:(?:small|medium|breakfast|sausage|standard|regular|large|bakery|mini|chicken|pork|pig|swine|beef|cow|lamb|mutton|goat|cooked|short|spare|baby\\s+back|back|bone[- ]?in)\\s+)*';
+const countDescriptorPattern = '(?:(?:small|medium|breakfast|sausage|standard|regular|large|bakery|mini|chicken|pork|pig|swine|beef|cow|lamb|mutton|goat|cooked|organic|free|range|thick|cut|applewood|short|spare|baby\\s+back|back|bone[- ]?in)\\s+)*';
 
 function normalizeCountPhrase(value) {
     return normalizeQuery(replaceSpokenNutritionNumbers(String(value || '')));
@@ -953,6 +957,7 @@ function canonicalCountUnit(unit) {
     if (/^patties?$/.test(normalized)) return 'patty';
     if (/^muffins?$/.test(normalized)) return 'muffin';
     if (/^slices?$/.test(normalized)) return 'slice';
+    if (/^strips?$/.test(normalized)) return 'strip';
     if (/^bars?$/.test(normalized)) return 'bar';
     if (/^eggs?$/.test(normalized)) return 'egg';
     if (/^bananas?$/.test(normalized)) return 'banana';
@@ -1917,6 +1922,66 @@ function findDatabaseMatchForSegment(segment) {
     }
 
     return null;
+}
+
+function buildVoiceCompositeEstimateFallback(query) {
+    const segments = splitCompositeFoodSegments(query);
+    if (segments.length < 2) return [];
+
+    const foods = segments.map((segment) => {
+        const normalized = normalizeQuery(segment);
+        let dbResult = findDatabaseMatchForSegment(segment);
+        if (!dbResult && /\bbacon\b/.test(normalized)) {
+            dbResult = /\bthick[- ]?cut\b/.test(normalized)
+                ? nutritionDatabase['thick cut bacon']
+                : nutritionDatabase['bacon strip'];
+        }
+        if (!dbResult && /\beggs?\b/.test(normalized)) {
+            dbResult = nutritionDatabase['large egg'];
+        }
+        if (!dbResult) return null;
+
+        const food = buildFoodFromDatabase(segment, {
+            ...dbResult,
+            matchType: 'voice-generic-fallback'
+        });
+        return {
+            ...food,
+            confidence: 'low',
+            needsVerification: true,
+            requiresReview: true,
+            officiallyVerified: false,
+            sourceType: 'estimate',
+            evidence: cleanText(
+                `${food.evidence}; exact brand nutrition was unavailable, so a generic serving estimate was used`,
+                'Generic serving estimate used because exact brand nutrition was unavailable',
+                240
+            ),
+            nutritionWarnings: Array.from(new Set([
+                ...(Array.isArray(food.nutritionWarnings) ? food.nutritionWarnings : []),
+                'Exact brand nutrition was not verified; review the generic estimate.'
+            ]))
+        };
+    });
+
+    return foods.every(Boolean) ? foods : [];
+}
+
+function buildVoiceCompositeFallbackPayload(query, queryMeta, message) {
+    const foods = buildVoiceCompositeEstimateFallback(query);
+    if (foods.length < 2) return null;
+    const totals = calculateTotals(foods);
+    return {
+        success: true,
+        foods,
+        ...buildNutritionTotals(totals),
+        overallConfidence: 'low',
+        source: 'voice-generic-composite-fallback',
+        clarifyingQuestions: [],
+        notes: 'The foods and spoken quantities were preserved, but exact brand nutrition could not be verified.',
+        message,
+        ...queryMeta
+    };
 }
 
 function hasCompleteCompositeDatabaseCoverage(query) {
@@ -3881,6 +3946,15 @@ export default async function handler(req, res) {
             }
 
             if (requiresLiveSearch) {
+                const voiceFallback = inputSource === 'voice' && looksComposite
+                    ? buildVoiceCompositeFallbackPayload(
+                        lookupQuery,
+                        queryMeta,
+                        'Exact brand nutrition is temporarily unavailable. Review the generic estimates before logging.'
+                    )
+                    : null;
+                if (voiceFallback) return res.status(200).json(voiceFallback);
+
                 return res.status(503).json({
                     success: false,
                     error: 'Exact branded or restaurant nutrition lookup is temporarily unavailable.',
@@ -4016,6 +4090,15 @@ export default async function handler(req, res) {
         }
 
         if (requiresLiveSearch && foods.length > 0 && !userProvidedNutritionDetails && !foods.some((food) => food?.officiallyVerified === true)) {
+            const voiceFallback = inputSource === 'voice' && looksComposite
+                ? buildVoiceCompositeFallbackPayload(
+                    lookupQuery,
+                    queryMeta,
+                    'The exact brands could not be verified. Review the generic estimates before logging.'
+                )
+                : null;
+            if (voiceFallback) return res.status(200).json(voiceFallback);
+
             return res.status(502).json({
                 success: false,
                 error: 'No verifiable official nutrition source was found. Add package label values, scan the barcode, or include a clearer brand and serving size.',
@@ -4027,6 +4110,15 @@ export default async function handler(req, res) {
 
         if (foods.length === 0) {
             if (requiresLiveSearch && !userProvidedNutritionDetails) {
+                const voiceFallback = inputSource === 'voice' && looksComposite
+                    ? buildVoiceCompositeFallbackPayload(
+                        lookupQuery,
+                        queryMeta,
+                        'No exact brand match was returned. Review the generic estimates before logging.'
+                    )
+                    : null;
+                if (voiceFallback) return res.status(200).json(voiceFallback);
+
                 return res.status(502).json({
                     success: false,
                     error: 'No reliable official nutrition match was found. Add the brand, restaurant, serving size, or label values and try again.',
@@ -4116,6 +4208,15 @@ export default async function handler(req, res) {
                 });
             }
 
+            const voiceFallback = inputSource === 'voice' && isLikelyCompositeQuery(fallbackQuery)
+                ? buildVoiceCompositeFallbackPayload(
+                    fallbackQuery,
+                    buildQueryMeta(originalQuery, normalizedQuery),
+                    'Live brand lookup is temporarily unavailable. Review the generic estimates before logging.'
+                )
+                : null;
+            if (voiceFallback) return res.status(200).json(voiceFallback);
+
             let statusCode = 502;
             let userMessage = 'Live nutrition lookup is temporarily unavailable.';
 
@@ -4154,6 +4255,15 @@ export default async function handler(req, res) {
         }
 
         if (requiresLiveSearch) {
+            const voiceFallback = inputSource === 'voice' && isLikelyCompositeQuery(fallbackQuery)
+                ? buildVoiceCompositeFallbackPayload(
+                    fallbackQuery,
+                    buildQueryMeta(originalQuery, normalizedQuery),
+                    'The exact brands could not be verified. Review the generic estimates before logging.'
+                )
+                : null;
+            if (voiceFallback) return res.status(200).json(voiceFallback);
+
             return res.status(502).json({
                 success: false,
                 error: 'A reliable branded or restaurant nutrition match could not be verified. Add label values or try again.',

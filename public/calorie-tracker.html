@@ -838,6 +838,12 @@
             <div id="voice-text" style="min-height: 50px; padding: 15px; background: #f0f0f0; border-radius: 10px; margin-bottom: 15px; font-style: italic;">
                 Click the microphone to start speaking...
             </div>
+            <div id="voice-diagnostic-panel" hidden style="background: #fff7ed; border: 1px solid #c2410c; border-radius: 12px; padding: 12px; margin: -5px 0 15px; color: #7c2d12; font-size: 12px; line-height: 1.4; text-align: left;">
+                <strong>Help us fix this failure.</strong>
+                <p style="margin: 5px 0 10px;">This sends the transcript shown above, the error code, and basic app/device details. No microphone audio, photos, account details, or precise location are uploaded.</p>
+                <button id="voice-send-diagnostic" type="button" onclick="sendVoiceDiagnostic()" style="width: 100%; border: 1px solid #9a3412; background: #fff; color: #7c2d12; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 700; cursor: pointer;">Send diagnostic report</button>
+                <div id="voice-diagnostic-status" role="status" aria-live="polite" aria-atomic="true" style="min-height: 18px; margin-top: 7px; font-weight: 700;"></div>
+            </div>
             <div id="voice-specificity-tip" style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 12px; padding: 10px 12px; margin: -5px 0 15px; color: #1e3a8a; font-size: 12px; line-height: 1.35; text-align: left;">
                 <strong>More detail = better accuracy.</strong> You can list multiple foods in one entry. Say quantity, brand or restaurant, size, and any label facts you know. Exact calories or macros you say will be used. Example: "2 eggs, a banana, chicken breast, rice, and 4 standard blueberry muffins."
             </div>
@@ -1368,6 +1374,7 @@
                         );
                         error.status = response.status;
                         error.code = payload?.code || '';
+                        error.responseSource = payload?.source || '';
                         throw error;
                     }
 
@@ -3614,6 +3621,8 @@
         let currentVoiceReviewEffectiveQuery = '';
         let currentVoiceClarificationOutcome = null;
         let voiceTotalsAnnouncementTimer = null;
+        let currentVoiceDiagnostic = null;
+        let currentVoiceParserFailure = null;
 
         const VOICE_MEAL_TYPES = Object.freeze(['breakfast', 'lunch', 'dinner', 'snack']);
 
@@ -3675,11 +3684,111 @@
             button.setAttribute('aria-busy', busy ? 'true' : 'false');
         }
 
+        function resetVoiceDiagnostic() {
+            currentVoiceDiagnostic = null;
+            currentVoiceParserFailure = null;
+            const panel = document.getElementById('voice-diagnostic-panel');
+            const button = document.getElementById('voice-send-diagnostic');
+            const status = document.getElementById('voice-diagnostic-status');
+            if (panel) panel.hidden = true;
+            if (button) {
+                button.disabled = false;
+                button.textContent = 'Send diagnostic report';
+                button.removeAttribute('aria-busy');
+            }
+            if (status) status.textContent = '';
+        }
+
+        function buildVoiceClientDiagnosticContext() {
+            const capacitor = window.Capacitor || window.capacitor;
+            const platform = typeof capacitor?.getPlatform === 'function'
+                ? capacitor.getPlatform()
+                : (navigator.platform || 'web');
+            const native = typeof capacitor?.isNativePlatform === 'function'
+                ? capacitor.isNativePlatform()
+                : platform !== 'web';
+            return {
+                platform,
+                appVersion: document.documentElement.dataset.appVersion || '',
+                language: navigator.language || '',
+                route: window.location?.pathname || '',
+                userAgent: navigator.userAgent || '',
+                online: typeof navigator.onLine === 'boolean' ? navigator.onLine : null,
+                native,
+                viewport: {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    dpr: window.devicePixelRatio || 1
+                }
+            };
+        }
+
+        function showVoiceDiagnostic(details = {}) {
+            currentVoiceDiagnostic = {
+                category: 'voice-food',
+                event: details.event || 'parser-error',
+                occurredAt: new Date().toISOString(),
+                stage: details.stage || 'voice-food-lookup',
+                transcript: String(details.transcript || '').trim(),
+                alternatives: Array.isArray(details.alternatives) ? details.alternatives.slice(0, 5) : [],
+                context: String(details.context || '').trim(),
+                error: {
+                    message: String(details.error?.message || ''),
+                    code: String(details.error?.code || ''),
+                    status: Number(details.error?.status) || null
+                },
+                parser: {
+                    source: String(details.parser?.source || ''),
+                    foodCount: Number(details.parser?.foodCount) || 0
+                },
+                client: buildVoiceClientDiagnosticContext()
+            };
+            const panel = document.getElementById('voice-diagnostic-panel');
+            const status = document.getElementById('voice-diagnostic-status');
+            if (panel) panel.hidden = false;
+            if (status) status.textContent = '';
+        }
+
+        async function sendVoiceDiagnostic() {
+            if (!currentVoiceDiagnostic) return;
+            const button = document.getElementById('voice-send-diagnostic');
+            const status = document.getElementById('voice-diagnostic-status');
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Sending report…';
+                button.setAttribute('aria-busy', 'true');
+            }
+            if (status) status.textContent = 'Sending diagnostic report…';
+
+            try {
+                const result = await postJsonWithFallback('/api/client-diagnostics', currentVoiceDiagnostic, 15000);
+                const reportId = String(result?.reportId || '').trim();
+                const message = reportId
+                    ? `Diagnostic sent. Report ID: ${reportId}`
+                    : 'Diagnostic sent. Thank you.';
+                if (status) status.textContent = message;
+                if (button) button.textContent = 'Diagnostic sent';
+                announceVoiceStatus(message);
+            } catch (error) {
+                console.error('Voice diagnostic upload failed:', error);
+                if (status) status.textContent = 'Could not send the report. Check your connection and try again.';
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'Try sending diagnostic again';
+                    button.removeAttribute('aria-busy');
+                }
+                announceVoiceError('Could not send the diagnostic report. Check your connection and try again.');
+            }
+        }
+
+        window.sendVoiceDiagnostic = sendVoiceDiagnostic;
+
         function resetVoiceResults() {
             currentVoiceReviewResults = [];
             currentVoiceReviewQuery = '';
             currentVoiceReviewEffectiveQuery = '';
             currentVoiceClarificationOutcome = null;
+            resetVoiceDiagnostic();
             const results = document.getElementById('food-results');
             if (results) {
                 results.removeAttribute('aria-busy');
@@ -4245,6 +4354,13 @@
                 document.getElementById('voice-status').textContent = '🎤';
                 setMainVoiceButtonState(false, false);
                 announceVoiceError(`Speech recognition error: ${event.error}.`);
+                showVoiceDiagnostic({
+                    event: 'speech-error',
+                    stage: 'speech-recognition',
+                    transcript: finalTranscript.trim(),
+                    alternatives: currentVoiceAlternatives,
+                    error: { message: `Speech recognition error: ${event.error}`, code: event.error }
+                });
             };
         }
         
@@ -5124,6 +5240,7 @@
         // Search food from voice input using AI
         async function searchFoodByVoice(query, alternatives = []) {
             try {
+                resetVoiceDiagnostic();
                 const normalizedQuery = normalizeVoiceFoodText(query);
                 const intent = extractVoiceMealLogIntent(normalizedQuery);
                 console.log('🎙️ Processing voice input:', intent.foodQuery);
@@ -5148,10 +5265,23 @@
                 if (requestSession !== voiceLogSessionId || !document.getElementById('voice-modal')?.open) return;
                 console.log('🤖 AI returned:', results);
                 if (!Array.isArray(results) || results.length === 0) {
-                    document.getElementById('voice-text').textContent = 'No food found. Try describing what you ate more clearly.';
+                    const failure = currentVoiceParserFailure;
+                    const message = failure
+                        ? 'We understood the words, but the nutrition lookup failed. Try again or send a diagnostic report.'
+                        : 'No foods were returned. Try again or send a diagnostic report.';
+                    document.getElementById('voice-text').textContent = message;
                     setVoiceAction('Start Recording', toggleVoiceRecording);
                     document.getElementById('voice-status').textContent = '🎤';
-                    announceVoiceError('No food found. Try a clearer description.');
+                    announceVoiceError(message);
+                    showVoiceDiagnostic({
+                        event: failure?.event || 'empty-result',
+                        stage: failure?.stage || 'nutrition-parser',
+                        transcript: intent.foodQuery,
+                        alternatives: cleanAlternatives,
+                        context: voiceContext,
+                        error: failure?.error || { message: 'The parser returned no foods.' },
+                        parser: failure?.parser || { foodCount: 0 }
+                    });
                     return;
                 }
 
@@ -5179,10 +5309,18 @@
                 }
             } catch (error) {
                 console.error('❌ Voice processing error:', error);
-                document.getElementById('voice-text').textContent = `Error: ${error.message}. Try typing your food instead.`;
+                const message = 'We understood the words, but could not finish the nutrition lookup. Try again or send a diagnostic report.';
+                document.getElementById('voice-text').textContent = message;
                 setVoiceAction('Try Again', toggleVoiceRecording);
                 document.getElementById('voice-status').textContent = '❌';
-                announceVoiceError('Could not process the voice entry. Try again or use text entry.');
+                announceVoiceError(message);
+                showVoiceDiagnostic({
+                    event: 'parser-error',
+                    stage: 'voice-processing',
+                    transcript: normalizeVoiceFoodText(query),
+                    alternatives,
+                    error: { message: error.message, code: error.code, status: error.status }
+                });
             }
         }
         
@@ -5789,6 +5927,7 @@
         // AI-powered food parsing with deterministic database and provider fallbacks.
         async function parseWithAI(query, source = 'search', clarifyDepth = 0, alternatives = []) {
             try {
+                if (source === 'voice') currentVoiceParserFailure = null;
                 console.log('🤖 AI parsing food:', query);
 
                 // Show loading state
@@ -5889,14 +6028,29 @@
             } catch (error) {
                 console.error('❌ AI food parsing error:', error);
                 const voiceText = document.getElementById('voice-text');
-                if (voiceText) {
+                if (source === 'voice') {
+                    currentVoiceParserFailure = {
+                        event: 'parser-error',
+                        stage: 'nutrition-parser',
+                        error: {
+                            message: String(error?.message || 'Nutrition parser failed'),
+                            code: String(error?.code || ''),
+                            status: Number(error?.status) || null
+                        },
+                        parser: {
+                            source: String(error?.responseSource || ''),
+                            foodCount: 0
+                        }
+                    };
+                } else if (voiceText) {
                     voiceText.textContent = `AI Error: ${error.message}`;
                 }
 
-                // Reset button
-                document.getElementById('voice-button').textContent = 'Start Recording';
-                document.getElementById('voice-button').style.background = '#b42335';
-                document.getElementById('voice-status').textContent = '🎤';
+                if (source !== 'voice') {
+                    document.getElementById('voice-button').textContent = 'Start Recording';
+                    document.getElementById('voice-button').style.background = '#b42335';
+                    document.getElementById('voice-status').textContent = '🎤';
+                }
 
                 return [];
             }

@@ -177,6 +177,83 @@ describe('AI food parser composite meals', () => {
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
+    it('preserves the foods and quantities in the branded bacon and egg voice repro when live lookup is unavailable', async () => {
+        delete process.env.FOOD_AI_API_KEY;
+        delete process.env.HF_TOKEN;
+        delete process.env.HUGGING_FACE_HUB_TOKEN;
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+
+        const originalQuery = 'Seven strips of Applewood thick cut bacon from great value brand and four organic free range eggs from Kirkland signature brand';
+        const response = await invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: { query: originalQuery, source: 'voice', forceWebSearch: false },
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+            success: true,
+            source: 'voice-generic-composite-fallback',
+            overallConfidence: 'low',
+            totalCalories: 770,
+            clarifyingQuestions: [],
+        });
+        expect(response.body.foods).toEqual([
+            expect.objectContaining({
+                name: 'Thick-cut Cooked Bacon Strip', quantity: 7, calories: 70,
+                confidence: 'low', needsVerification: true, requiresReview: true,
+            }),
+            expect.objectContaining({
+                name: 'Egg (large)', quantity: 4, calories: 70,
+                confidence: 'low', needsVerification: true, requiresReview: true,
+            }),
+        ]);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('uses the same reviewable fallback when a configured provider cannot verify the spoken brands', async () => {
+        const providerResponse = new Response(JSON.stringify({
+            choices: [{ message: { content: JSON.stringify({
+                foods: [
+                    {
+                        name: 'Great Value Applewood Thick Cut Bacon', calories: 70, protein: 5,
+                        carbs: 0, fiber: 0, netCarbs: 0, fat: 5, sugar: 0,
+                        serving: '1 strip', quantity: 7, confidence: 'medium',
+                        source: 'generic estimate', sourceType: 'estimate', sourceUrl: null,
+                    },
+                    {
+                        name: 'Kirkland Organic Eggs', calories: 70, protein: 6,
+                        carbs: 1, fiber: 0, netCarbs: 1, fat: 5, sugar: 0,
+                        serving: '1 egg', quantity: 4, confidence: 'medium',
+                        source: 'generic estimate', sourceType: 'estimate', sourceUrl: null,
+                    },
+                ],
+                overallConfidence: 'medium',
+            }) } }],
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        const fetchMock = vi.fn().mockResolvedValue(providerResponse);
+        vi.stubGlobal('fetch', fetchMock);
+
+        const response = await invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: {
+                query: 'Seven strips of Applewood thick cut bacon from great value brand and four organic free range eggs from Kirkland signature brand',
+                source: 'voice',
+                forceWebSearch: false,
+            },
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+            success: true,
+            source: 'voice-generic-composite-fallback',
+            overallConfidence: 'low',
+            totalCalories: 770,
+        });
+        expect(response.body.foods.map((food) => food.quantity)).toEqual([7, 4]);
+        expect(fetchMock).toHaveBeenCalledOnce();
+    });
+
     it('canonicalizes only the adjacent repeated sausage referent in the exact voice repro', async () => {
         delete process.env.FOOD_AI_API_KEY;
         delete process.env.HF_TOKEN;
