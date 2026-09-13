@@ -835,7 +835,7 @@
             <div id="voice-live-status" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
             <div id="voice-live-alert" class="visually-hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
             <div id="voice-status" aria-hidden="true" style="font-size: 48px; margin: 15px 0;">🎤</div>
-            <div id="voice-text" style="min-height: 50px; padding: 15px; background: #f0f0f0; border-radius: 10px; margin-bottom: 15px; font-style: italic;">
+            <div id="voice-text" style="min-height: 50px; padding: 15px; background: #f0f0f0; border-radius: 10px; margin-bottom: 15px; font-style: italic; white-space: pre-line;">
                 Click the microphone to start speaking...
             </div>
             <div id="voice-diagnostic-panel" hidden style="background: #fff7ed; border: 1px solid #c2410c; border-radius: 12px; padding: 12px; margin: -5px 0 15px; color: #7c2d12; font-size: 12px; line-height: 1.4; text-align: left;">
@@ -3623,6 +3623,7 @@
         let voiceTotalsAnnouncementTimer = null;
         let currentVoiceDiagnostic = null;
         let currentVoiceParserFailure = null;
+        let currentVoiceRetryState = null;
 
         const VOICE_MEAL_TYPES = Object.freeze(['breakfast', 'lunch', 'dinner', 'snack']);
 
@@ -3673,7 +3674,11 @@
             button.disabled = Boolean(options.disabled);
             button.style.display = options.hidden ? 'none' : '';
             button.style.background = options.background || '#b42335';
-            button.setAttribute('aria-pressed', options.pressed ? 'true' : 'false');
+            if (options.toggle) {
+                button.setAttribute('aria-pressed', options.pressed ? 'true' : 'false');
+            } else {
+                button.removeAttribute('aria-pressed');
+            }
             button.setAttribute('aria-busy', options.busy ? 'true' : 'false');
         }
 
@@ -3682,6 +3687,18 @@
             if (!button) return;
             button.setAttribute('aria-pressed', recording ? 'true' : 'false');
             button.setAttribute('aria-busy', busy ? 'true' : 'false');
+        }
+
+        function getVoiceParserFailureMessage(failure) {
+            const status = Number(failure?.error?.status) || null;
+            const code = String(failure?.error?.code || '').trim().toUpperCase();
+            if (status === 402 || code === 'AI_ACCESS_REQUIRED') {
+                return 'Your AI access could not be verified. Your transcript is still shown above. Check your subscription, then retry analysis or send a diagnostic report.';
+            }
+            if (failure) {
+                return 'We understood the words, but the nutrition lookup failed. Your transcript is still shown above. Retry analysis or send a diagnostic report.';
+            }
+            return 'No foods were returned. Your transcript is still shown above. Retry analysis or send a diagnostic report.';
         }
 
         function resetVoiceDiagnostic() {
@@ -3788,6 +3805,7 @@
             currentVoiceReviewQuery = '';
             currentVoiceReviewEffectiveQuery = '';
             currentVoiceClarificationOutcome = null;
+            currentVoiceRetryState = null;
             resetVoiceDiagnostic();
             const results = document.getElementById('food-results');
             if (results) {
@@ -3801,6 +3819,36 @@
             }
         }
 
+        async function retryVoiceAnalysis() {
+            const modal = document.getElementById('voice-modal');
+            const saved = currentVoiceRetryState;
+            if (!modal?.open || !saved?.transcript) return false;
+            const retrySession = voiceLogSessionId;
+
+            setVoiceAction('Retrying Analysis…', null, { disabled: true, busy: true, background: '#6c757d' });
+            document.getElementById('voice-status').textContent = '🤖';
+            const failure = currentVoiceParserFailure;
+            const status = Number(failure?.error?.status) || null;
+            const code = String(failure?.error?.code || '').trim().toUpperCase();
+            if ((status === 402 || code === 'AI_ACCESS_REQUIRED')
+                && typeof window.__aiAccess?.refreshEntitlements === 'function') {
+                announceVoiceStatus('Refreshing AI access, then retrying the nutrition lookup.');
+                try {
+                    await window.__aiAccess.refreshEntitlements();
+                } catch (error) {
+                    console.warn('AI access refresh failed before voice retry:', error);
+                }
+            } else {
+                announceVoiceStatus('Retrying the nutrition lookup with your saved transcript.');
+            }
+            if (!document.getElementById('voice-modal')?.open
+                || retrySession !== voiceLogSessionId
+                || currentVoiceRetryState !== saved) return false;
+            return searchFoodByVoice(saved.transcript, saved.alternatives, { context: saved.context });
+        }
+
+        window.retryVoiceAnalysis = retryVoiceAnalysis;
+
         function openVoiceModal(trigger = document.activeElement) {
             const modal = document.getElementById('voice-modal');
             if (!modal) return;
@@ -3811,7 +3859,13 @@
                 announceVoiceStatus('');
                 announceVoiceError('');
                 openAccessibleDialog(modal, document.getElementById('voice-close-button'));
-                requestAnimationFrame(() => announceVoiceStatus('Voice logging is ready.'));
+                const readySession = voiceLogSessionId;
+                requestAnimationFrame(() => {
+                    const status = document.getElementById('voice-live-status');
+                    if (readySession === voiceLogSessionId && status && !status.textContent.trim()) {
+                        announceVoiceStatus('Voice logging is ready.');
+                    }
+                });
             }
         }
 
@@ -4256,7 +4310,7 @@
             // Reset modal UI
             openVoiceModal(trigger);
             document.getElementById('voice-text').textContent = 'Click the microphone and describe the food as specifically as you can.';
-            setVoiceAction('Start Recording', toggleVoiceRecording);
+            setVoiceAction('Start Recording', toggleVoiceRecording, { toggle: true });
             document.getElementById('voice-status').textContent = '🎤';
             resetVoiceResults();
 
@@ -4905,7 +4959,7 @@
             document.getElementById('voice-text').textContent = 'Click the microphone and describe the food as specifically as you can.';
             document.getElementById('voice-status').textContent = '🎤';
             resetVoiceResults();
-            setVoiceAction('Start Recording', toggleVoiceRecording);
+            setVoiceAction('Start Recording', toggleVoiceRecording, { toggle: true });
             voiceCommitInProgress = false;
         }
 
@@ -5238,15 +5292,16 @@
         }
 
         // Search food from voice input using AI
-        async function searchFoodByVoice(query, alternatives = []) {
+        async function searchFoodByVoice(query, alternatives = [], options = {}) {
             try {
                 resetVoiceDiagnostic();
+                announceVoiceError('');
                 const normalizedQuery = normalizeVoiceFoodText(query);
                 const intent = extractVoiceMealLogIntent(normalizedQuery);
                 console.log('🎙️ Processing voice input:', intent.foodQuery);
                 if (!intent.foodQuery || intent.foodQuery.length < 2) {
                     document.getElementById('voice-text').textContent = 'Please say something about food you ate.';
-                    setVoiceAction('Start Recording', toggleVoiceRecording);
+                    setVoiceAction('Start Recording', toggleVoiceRecording, { toggle: true });
                     document.getElementById('voice-status').textContent = '🎤';
                     announceVoiceError('Describe at least one food to continue.');
                     return;
@@ -5257,20 +5312,27 @@
                     .map(normalizeVoiceFoodText)
                     .map(value => extractVoiceMealLogIntent(value).foodQuery)
                     .filter(Boolean)));
-                const voiceContext = String(document.getElementById('voice-context-input')?.value || '').trim();
+                const hasSavedContext = options && Object.prototype.hasOwnProperty.call(options, 'context');
+                const voiceContext = hasSavedContext
+                    ? String(options.context || '').trim()
+                    : String(document.getElementById('voice-context-input')?.value || '').trim();
                 const effectiveQuery = voiceContext ? `${intent.foodQuery}; context: ${voiceContext}` : intent.foodQuery;
+                currentVoiceRetryState = {
+                    transcript: normalizedQuery,
+                    alternatives: cleanAlternatives.slice(0, 5),
+                    context: voiceContext
+                };
                 document.getElementById('voice-text').textContent = `Transcript: ${intent.foodQuery}`;
+                setVoiceAction('Analyzing…', null, { disabled: true, busy: true, background: '#6c757d' });
                 announceVoiceStatus('Processing.');
                 const results = await parseWithAI(effectiveQuery, 'voice', 0, cleanAlternatives);
                 if (requestSession !== voiceLogSessionId || !document.getElementById('voice-modal')?.open) return;
                 console.log('🤖 AI returned:', results);
                 if (!Array.isArray(results) || results.length === 0) {
                     const failure = currentVoiceParserFailure;
-                    const message = failure
-                        ? 'We understood the words, but the nutrition lookup failed. Try again or send a diagnostic report.'
-                        : 'No foods were returned. Try again or send a diagnostic report.';
-                    document.getElementById('voice-text').textContent = message;
-                    setVoiceAction('Start Recording', toggleVoiceRecording);
+                    const message = getVoiceParserFailureMessage(failure);
+                    document.getElementById('voice-text').textContent = `Transcript: ${intent.foodQuery}\n\n${message}`;
+                    setVoiceAction('Retry Analysis', retryVoiceAnalysis, { background: '#0f172a' });
                     document.getElementById('voice-status').textContent = '🎤';
                     announceVoiceError(message);
                     showVoiceDiagnostic({
@@ -5309,17 +5371,34 @@
                 }
             } catch (error) {
                 console.error('❌ Voice processing error:', error);
-                const message = 'We understood the words, but could not finish the nutrition lookup. Try again or send a diagnostic report.';
-                document.getElementById('voice-text').textContent = message;
-                setVoiceAction('Try Again', toggleVoiceRecording);
+                const normalizedTranscript = normalizeVoiceFoodText(query);
+                const failure = {
+                    event: 'parser-error',
+                    stage: 'voice-processing',
+                    error: { message: error.message, code: error.code, status: error.status },
+                    parser: { foodCount: 0 }
+                };
+                currentVoiceParserFailure = failure;
+                if (!currentVoiceRetryState?.transcript) {
+                    currentVoiceRetryState = {
+                        transcript: normalizedTranscript,
+                        alternatives: Array.isArray(alternatives) ? alternatives.slice(0, 5) : [],
+                        context: String(document.getElementById('voice-context-input')?.value || '').trim()
+                    };
+                }
+                const message = getVoiceParserFailureMessage(failure);
+                document.getElementById('voice-text').textContent = `Transcript: ${extractVoiceMealLogIntent(normalizedTranscript).foodQuery || normalizedTranscript}\n\n${message}`;
+                setVoiceAction('Retry Analysis', retryVoiceAnalysis, { background: '#0f172a' });
                 document.getElementById('voice-status').textContent = '❌';
                 announceVoiceError(message);
                 showVoiceDiagnostic({
-                    event: 'parser-error',
-                    stage: 'voice-processing',
-                    transcript: normalizeVoiceFoodText(query),
+                    event: failure.event,
+                    stage: failure.stage,
+                    transcript: normalizedTranscript,
                     alternatives,
-                    error: { message: error.message, code: error.code, status: error.status }
+                    context: currentVoiceRetryState?.context || '',
+                    error: failure.error,
+                    parser: failure.parser
                 });
             }
         }
