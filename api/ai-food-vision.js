@@ -1911,7 +1911,7 @@ async function lookupFirstParserMatch(baseUrl, lookupQueries, memoryHints = [], 
                 }
             }
         } catch (error) {
-            console.warn(`Photo context lookup failed for "${lookupQuery}": ${error.message}`);
+            console.warn('Photo context lookup failed.');
         }
     }
     return bestMatch;
@@ -1980,7 +1980,7 @@ ${contextLine}${memoryLine}${locationLine}${spatialLine}`;
                 focusedPayload.visibleLabel || focusedPayload.nutritionLabel
             );
         } catch (error) {
-            console.warn(`Focused nutrition label read failed: ${error.message}`);
+            console.warn('Focused nutrition label read failed.');
         }
     }
 
@@ -2077,7 +2077,7 @@ Return one JSON object containing: a non-empty foods array when edible material 
                 evidenceReviewModel = reviewedEvidenceResponse.metadata?.model || null;
             }
         } catch (error) {
-            console.warn(`Claude visual evidence review skipped: ${error.message}`);
+            console.warn('Claude visual evidence review skipped.');
         }
     }
 
@@ -2141,7 +2141,7 @@ Rules:
                 nutritionReviewModel = reviewedNutritionResponse.metadata?.model || null;
             }
         } catch (error) {
-            console.warn(`Claude nutrition review skipped: ${error.message}`);
+            console.warn('Claude nutrition review skipped.');
         }
     }
     nutritionPayload.foods = mergeVisualPortionEvidence(nutritionPayload.foods, evidencePayload.foods);
@@ -2174,7 +2174,7 @@ Use numeric values without units. Use null only when a field is genuinely unread
                 focusedPayload.visibleLabel || focusedPayload.nutritionLabel
             );
         } catch (error) {
-            console.warn(`Focused nutrition label read failed: ${error.message}`);
+            console.warn('Focused nutrition label read failed.');
         }
     }
 
@@ -2267,7 +2267,7 @@ export default async function handler(req, res) {
             });
         } catch (error) {
             visionError = error;
-            console.warn(`Food vision analysis failed: ${error.message}`);
+            console.warn('Food vision analysis failed:', { status: Number(error?.status) || null });
         }
 
         if (!foodAiResponse && preferWebSearch && hintLookupQueries.length) {
@@ -2386,15 +2386,15 @@ export default async function handler(req, res) {
                             ].filter(Boolean).join(' ')
                         ));
                     }
-                    console.warn(`Skipping parser handoff because it conflicts with the visual portion: ${lookupMatch.lookupQuery}`);
+                    console.warn('Skipping parser handoff because it conflicts with the visual portion.');
                 }
             } catch (lookupError) {
-                console.warn(`Photo lookupQuery handoff failed: ${lookupError.message}`);
+                console.warn('Photo parser handoff failed.');
             }
         } else if (shouldTrustVisibleLabel && lookupQuery) {
-            console.log(`Skipping parser handoff for visible nutrition label values: ${lookupQuery}`);
+            console.log('Skipping parser handoff for visible nutrition label values.');
         } else if (lookupQuery && !shouldLookupNutrition) {
-            console.log(`Skipping extra parser handoff for generic photographed food: ${lookupQuery}`);
+            console.log('Skipping extra parser handoff for generic photographed food.');
         }
 
         const totals = calculateTotals(foods);
@@ -2424,7 +2424,7 @@ export default async function handler(req, res) {
         const assumptions = sanitizeAssumptions(parsedPayload.assumptions);
         const calorieRange = sanitizeCalorieRange(parsedPayload.calorieRange, totals.calories);
 
-        console.log(`✅ Photo analyzed: ${foods.length} item(s), ${totals.calories} calories`);
+        console.log('Photo analyzed:', { foodCount: foods.length });
 
         const degradedMode = foodAiResponse.metadata?.degraded === true;
         const aiProvider = degradedMode ? 'qwen-degraded' : (foodAiResponse.metadata?.provider || 'claude');
@@ -2453,7 +2453,7 @@ export default async function handler(req, res) {
             degradedMode
         });
     } catch (error) {
-        console.error('Food vision analysis error:', error);
+        console.error('Food vision analysis error:', { status: Number(error?.status) || null });
         res.status(500).json({
             success: false,
             error: 'Failed to analyze food photo. Please retry or add a label/brand description.',
