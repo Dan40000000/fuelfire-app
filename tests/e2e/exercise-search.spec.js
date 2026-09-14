@@ -33,7 +33,7 @@ test('workout search accepts aliases, spacing, and a common typo', async ({ page
 
             await input.fill(query);
 
-            await expect(page.locator('.supplement-title').filter({ hasText: expectedName })).toBeVisible();
+            await expect(page.locator('.supplement-title').getByText(expectedName, { exact: true })).toBeVisible();
             await expect(page.locator(searchStatus)).toHaveText(/found\./i);
         });
     }
