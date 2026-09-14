@@ -8,10 +8,16 @@
         return String(value || '')
             .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
             .toLowerCase().replace(/&/g, ' and ').replace(/[’']/g, '')
-            .replace(/\bd\s*\.?\s*b\.?(?=\s|$)/g, 'dumbbell')
-            .replace(/\bb\s*\.?\s*b\.?(?=\s|$)/g, 'barbell')
-            .replace(/\bk\s*\.?\s*b\.?(?=\s|$)/g, 'kettlebell')
+            // Expand equipment abbreviations before punctuation and whitespace
+            // are removed. The lookahead deliberately allows joined queries
+            // such as "dbbench" and "kbswing" while keeping words like
+            // "adbench" untouched.
+            .replace(/\b(?:d\s*\.?\s*b\.?|dbs?)(?=[a-z0-9]|\s|$)/g, 'dumbbell ')
+            .replace(/\b(?:b\s*\.?\s*b\.?|bbs?)(?=[a-z0-9]|\s|$)/g, 'barbell ')
+            .replace(/\b(?:k\s*\.?\s*b\.?|kbs?)(?=[a-z0-9]|\s|$)/g, 'kettlebell ')
             .replace(/[^a-z0-9]+/g, ' ').trim()
+            // A joined equipment prefix is common in quick searches.
+            .replace(/\b(dumbbell|barbell|kettlebell)(?=[a-z])/g, '$1 ')
             .replace(/\b(?:db|dbs|dumb bells?)\b/g, 'dumbbell')
             .replace(/\b(?:bb|bbs)\b/g, 'barbell')
             .replace(/\b(?:kb|kbs|kettle bells?)\b/g, 'kettlebell')
@@ -28,10 +34,166 @@
             .replace(/\b(?:flyes|flies|flys)\b/g, 'fly')
             .replace(/\b(?:biceps|bicep)\b/g, 'bicep')
             .replace(/\b(?:triceps|tricep)\b/g, 'tricep')
+            // Keep singularisation limited to exercise terms. A broad
+            // trailing-s rule corrupts ordinary words such as "classes".
             .replace(/\bpresses\b/g, 'press')
-            .replace(/\b([a-z]{2,}[^s])s\b/g, '$1')
+            .replace(/\brows\b/g, 'row')
+            .replace(/\bcurls\b/g, 'curl')
+            .replace(/\bdips\b/g, 'dip')
+            .replace(/\braises\b/g, 'raise')
+            .replace(/\blunges\b/g, 'lunge')
+            .replace(/\bsquats\b/g, 'squat')
+            .replace(/\bdeadlifts\b/g, 'deadlift')
+            .replace(/\bthrusts\b/g, 'thrust')
+            .replace(/\bbridges\b/g, 'bridge')
+            .replace(/\bpullups\b/g, 'pullup')
+            .replace(/\bpushups\b/g, 'pushup')
+            .replace(/\bpulldowns\b/g, 'pulldown')
+            .replace(/\bcrunches\b/g, 'crunch')
+            .replace(/\bcrushers\b/g, 'crusher')
+            .replace(/\btwists\b/g, 'twist')
+            .replace(/\bwalks\b/g, 'walk')
+            .replace(/\bcarries\b/g, 'carry')
+            .replace(/\bextensions\b/g, 'extension')
+            .replace(/\bface pulls\b/g, 'face pull')
+            .replace(/\bshrugs\b/g, 'shrug')
+            .replace(/\bjumps\b/g, 'jump')
+            .replace(/\bplanks\b/g, 'plank')
+            .replace(/\bbugs\b/g, 'bug')
+            .replace(/\bburpees\b/g, 'burpee')
+            .replace(/\bcrossovers\b/g, 'crossover')
+            .replace(/\bclimbers\b/g, 'climber')
+            .replace(/\bjacks\b/g, 'jack')
+            .replace(/\bget ups\b/g, 'get up')
             .replace(/\s+/g, ' ').trim();
     }
+
+    // These are common names for the movements that actually exist in one or
+    // more of the app's catalogs. Keeping the table explicit prevents a query
+    // for a specific variation from silently matching an unrelated movement.
+    const aliasRules = [
+        { match: /^barbell bench press$/, aliases: [
+            'flat barbell press', 'barbell chest press', 'flat bench press'
+        ] },
+        { match: /^incline barbell press$/, aliases: [
+            'incline bench press', 'incline barbell bench'
+        ] },
+        { match: /^(?:dumbbell )?fly(?: on floor)?$/, aliases: [
+            'chest fly', 'pec fly'
+        ] },
+        { match: /^incline dumbbell fly$/, aliases: [
+            'incline chest fly', 'incline pec fly'
+        ] },
+        { match: /^(?:low|mid|high) cable fly$/, aliases: [
+            'chest fly', 'pec fly'
+        ] },
+        { match: /^(?:cable crossover|chest cable fly)$/, aliases: [
+            'chest fly', 'pec fly'
+        ] },
+        { match: /^pec deck machine$/, aliases: [
+            'pec fly', 'chest fly', 'machine fly'
+        ] },
+        { match: /^dip$/, aliases: [
+            'chest dip', 'parallel bar dip'
+        ] },
+        { match: /^(?:floor press|dumbbell floor press)(?: feet up)?$/, aliases: [
+            'floor press'
+        ] },
+        { match: /^(?:svend press|dumbbell squeeze press|hex press)$/, aliases: [
+            'squeeze press'
+        ] },
+
+        // Back and pulling movements.
+        { match: /^pullup(?: if bar available)?$/, aliases: [
+            'neutral grip pull up', 'parallel grip pull up'
+        ] },
+        { match: /^lat pulldown$/, aliases: [
+            'cable lat pulldown', 'cable pull down'
+        ] },
+        { match: /^(?:single arm dumbbell row(?: .*)?|dumbbell row)$/, aliases: [
+            'one arm row', 'dumbbell one arm row'
+        ] },
+        { match: /^(?:cable row|seated cable row|seated row)$/, aliases: [
+            'low row', 'low cable row'
+        ] },
+        { match: /^shrug$/, aliases: [
+            'dumbbell shrug'
+        ] },
+        { match: /^(?:farmer walk|farmers walk)(?: on)? toe?s?$/, aliases: [
+            'farmer carry', 'farmers carry'
+        ] },
+        { match: /^(?:farmer walk|farmers walk)$/, aliases: [
+            'farmer carry', 'farmers carry'
+        ] },
+        { match: /^bent over reverse fly$/, aliases: [
+            'rear delt fly', 'rear deltoid fly'
+        ] },
+        { match: /^face pull(?: high)?$/, aliases: [
+            'rope face pull', 'rope face pull high'
+        ] },
+        { match: /^rope face pull high$/, aliases: [
+            'rope face pull'
+        ] },
+
+        // Shoulder variations.
+        { match: /^(?:overhead press|military press)$/, aliases: [
+            'seated overhead press', 'barbell shoulder press'
+        ] },
+        { match: /^(?:alternating dumbbell press|single arm dumbbell press)$/, aliases: [
+            'single arm overhead press', 'single arm shoulder press'
+        ] },
+        { match: /^(?:lateral raise|cable lateral raise|incline lateral raise)$/, aliases: [
+            'lateral shoulder raise'
+        ] },
+
+        // Lower-body names and abbreviations.
+        { match: /^(?:back squat|barbell back squat)$/, aliases: [
+            'high bar squat', 'low bar squat', 'high bar back squat',
+            'low bar back squat'
+        ] },
+        { match: /^romanian deadlift$/, aliases: [
+            'dumbbell rdl', 'dumbbell romanian deadlift'
+        ] },
+        { match: /^single leg deadlift$/, aliases: [
+            'single leg rdl', 'single leg romanian deadlift'
+        ] },
+        { match: /^bulgarian split squat$/, aliases: [
+            'bss'
+        ] },
+        { match: /^(?:walking lunge|lunge)$/, aliases: [
+            'forward lunge'
+        ] },
+        { match: /^goblet squat$/, aliases: [
+            'kettlebell squat', 'kettlebell goblet squat'
+        ] },
+        { match: /^glute ham raise$/, aliases: [
+            'ghr'
+        ] },
+
+        // Core and cardio names.
+        { match: /^turkish get up$/, aliases: [
+            'tgu'
+        ] },
+        { match: /^running jogging$/, aliases: [
+            'treadmill', 'treadmill running', 'treadmill jogging'
+        ] },
+        { match: /^(?:stair climbing|stair climber)$/, aliases: [
+            'stairmaster', 'stair master', 'stepmill', 'stair climber',
+            'stair stepper', 'stair machine'
+        ] },
+        { match: /^elliptical training$/, aliases: [
+            'cross trainer', 'elliptical trainer'
+        ] },
+        { match: /^dance fitness$/, aliases: [
+            'dance workout', 'dance cardio'
+        ] },
+        { match: /^pogo jump$/, aliases: [
+            'ankle hops', 'ankle bounce'
+        ] },
+        { match: /^calf raise on leg press$/, aliases: [
+            'calf press', 'leg press calf raise'
+        ] }
+    ];
 
     function aliasesFor(name) {
         const aliases = new Set();
@@ -144,6 +306,10 @@
         if (name === 'chinup') {
             add('underhand pullup');
             add('supinated pullup');
+        }
+
+        for (const rule of aliasRules) {
+            if (rule.match.test(name)) rule.aliases.forEach(add);
         }
 
         aliases.delete(name);
