@@ -23,6 +23,14 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 0;
+            border-radius: 0;
+            width: 100%;
+            margin: 0;
+            font: inherit;
+            text-align: left;
         }
 
         .supplement-header:hover {
@@ -137,6 +145,7 @@
     </style>
     <script src="quick-food-entry.js"></script>
     <script src="global-nav.js"></script>
+    <script src="exercise-search.js"></script>
 </head>
 <body>
     <div class="phone-container">
@@ -161,9 +170,12 @@
                     </div>
                     <!-- Search Bar -->
                     <div style="margin-bottom: 20px;">
-                        <input type="text" id="exercise-search" placeholder="🔍 Search exercises..."
-                               onkeyup="filterExercises()"
+                        <label for="exercise-search" style="display: block; margin-bottom: 6px; color: var(--carolina-dark); font-weight: 600; font-size: 14px;">Search exercises</label>
+                        <input type="search" id="exercise-search" placeholder="Search by name, equipment, or muscle"
+                               oninput="filterExercises()" aria-describedby="exercise-search-hint exercise-search-status"
                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
+                        <p id="exercise-search-hint" style="margin: 6px 0 0; color: #666; font-size: 12px;">Search by exercise name, equipment, or muscle group.</p>
+                        <p id="exercise-search-status" role="status" aria-live="polite" aria-atomic="true" style="margin: 6px 0 0; color: #666; font-size: 13px;"></p>
                     </div>
 
                     <!-- Exercises List -->
@@ -306,20 +318,21 @@
             const container = document.getElementById('exercises-container');
             let html = '';
 
-            exercisesToShow.forEach((exercise, index) => {
+            exercisesToShow.forEach((exercise) => {
+                const exerciseIndex = backExercises.indexOf(exercise);
                 html += `
                     <div class="supplement-card">
-                        <div class="supplement-header" onclick="toggleExercise(${index})">
-                            <div>
-                                <div class="supplement-title">${exercise.name}</div>
-                                <div class="supplement-rating">
+                        <button type="button" class="supplement-header" aria-expanded="false" aria-controls="content-${exerciseIndex}" onclick="toggleExercise(${exerciseIndex})">
+                            <span>
+                                <span class="supplement-title">${exercise.name}</span>
+                                <span class="supplement-rating">
                                     <span>${generateDifficultyStars(exercise.difficulty)}</span>
                                     <span>Difficulty</span>
-                                </div>
-                            </div>
-                            <div class="expand-icon" id="icon-${index}">▼</div>
-                        </div>
-                        <div class="supplement-content" id="content-${index}">
+                                </span>
+                            </span>
+                            <span class="expand-icon" id="icon-${exerciseIndex}">▼</span>
+                        </button>
+                        <div class="supplement-content" id="content-${exerciseIndex}" hidden aria-hidden="true">
                             <div class="content-inner">
                                 <div class="quick-info">
                                     <div class="quick-stat">
@@ -334,20 +347,20 @@
 
                                 ${exercise.images ? `
                                     <div style="margin-bottom: 20px; text-align: center; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 3px 15px rgba(22, 160, 133, 0.1);">
-                                        <img id="exercise-img-${index}"
+                                        <img id="exercise-img-${exerciseIndex}"
                                              src="${exercise.images[0]}"
                                              alt="${exercise.name} form diagram"
                                              style="width: 100%; max-width: 400px; height: auto; border-radius: 10px;">
                                         <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px;">
-                                            <button onclick="prevStep(${index})"
+                                            <button type="button" onclick="prevStep(${exerciseIndex})"
                                                     style="background: #16a085; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
                                                 ◀ Previous
                                             </button>
-                                            <span id="step-indicator-${index}"
+                                            <span id="step-indicator-${exerciseIndex}" role="status" aria-live="polite" aria-atomic="true"
                                                   style="font-size: 14px; font-weight: 600; color: #16a085; min-width: 100px; text-align: center;">
                                                 Step 1 of ${exercise.images.length}
                                             </span>
-                                            <button onclick="nextStep(${index})"
+                                            <button type="button" onclick="nextStep(${exerciseIndex})"
                                                     style="background: #16a085; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
                                                 Next ▶
                                             </button>
@@ -398,6 +411,13 @@
             });
 
             container.innerHTML = html;
+            const status = document.getElementById('exercise-search-status');
+            const query = document.getElementById('exercise-search').value.trim();
+            if (status) {
+                status.textContent = exercisesToShow.length === 0
+                    ? (query ? `No exercises found for "${query}".` : 'No exercises available.')
+                    : (query ? `${exercisesToShow.length} exercise${exercisesToShow.length === 1 ? '' : 's'} found.` : `${exercisesToShow.length} exercises available.`);
+            }
         }
 
 
@@ -410,31 +430,24 @@
                 content.classList.remove('expanded');
                 icon.classList.remove('rotated');
                 header.classList.remove('active');
+                header.setAttribute('aria-expanded', 'false');
+                content.setAttribute('aria-hidden', 'true');
+                content.hidden = true;
                 content.style.maxHeight = '0px';
             } else {
+                content.hidden = false;
+                content.setAttribute('aria-hidden', 'false');
                 content.classList.add('expanded');
                 icon.classList.add('rotated');
                 header.classList.add('active');
+                header.setAttribute('aria-expanded', 'true');
                 content.style.maxHeight = content.scrollHeight + 'px';
             }
         }
 
         function filterExercises() {
-            const searchTerm = document.getElementById('exercise-search').value.toLowerCase();
-
-            if (!searchTerm) {
-                displayExercises();
-                return;
-            }
-
-            const filtered = backExercises.filter(exercise => {
-                return exercise.name.toLowerCase().includes(searchTerm) ||
-                       exercise.description.toLowerCase().includes(searchTerm) ||
-                       exercise.equipment.toLowerCase().includes(searchTerm) ||
-                       exercise.primaryMuscles.some(muscle => muscle.toLowerCase().includes(searchTerm));
-            });
-
-            displayExercises(filtered);
+            const searchTerm = document.getElementById('exercise-search').value;
+            displayExercises(window.ExerciseSearch.search(backExercises, searchTerm));
         }
 
         // Image navigation for exercises
