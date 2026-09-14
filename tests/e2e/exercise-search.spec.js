@@ -2,6 +2,16 @@ import { expect, test } from '@playwright/test';
 
 const searchInput = '#exercise-search';
 const searchStatus = '#exercise-search-status';
+const workoutCatalogs = [
+    { fileName: 'workout-chest.html', arrayName: 'chestExercises' },
+    { fileName: 'workout-back.html', arrayName: 'backExercises' },
+    { fileName: 'workout-shoulders.html', arrayName: 'shoulderExercises' },
+    { fileName: 'workout-arms.html', arrayName: 'armExercises' },
+    { fileName: 'workout-legs.html', arrayName: 'legExercises' },
+    { fileName: 'workout-core.html', arrayName: 'coreExercises' },
+    { fileName: 'workout-calves.html', arrayName: 'calfExercises' },
+    { fileName: 'workout-cardio.html', arrayName: 'cardioExercises' },
+];
 
 test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -34,6 +44,41 @@ test('workout search accepts aliases, spacing, and a common typo', async ({ page
             await input.fill(query);
 
             await expect(page.locator('.supplement-title').getByText(expectedName, { exact: true })).toBeVisible();
+            await expect(page.locator(searchStatus)).toHaveText(/found\./i);
+        });
+    }
+});
+
+test('every workout catalog returns its original objects from the browser matcher', async ({ page }) => {
+    for (const { fileName, arrayName } of workoutCatalogs) {
+        await test.step(fileName, async () => {
+            await openWorkoutPage(page, fileName);
+            const catalog = await page.evaluate((name) => {
+                const availableCatalogs = {};
+                if (typeof chestExercises !== 'undefined') availableCatalogs.chestExercises = chestExercises;
+                if (typeof backExercises !== 'undefined') availableCatalogs.backExercises = backExercises;
+                if (typeof shoulderExercises !== 'undefined') availableCatalogs.shoulderExercises = shoulderExercises;
+                if (typeof armExercises !== 'undefined') availableCatalogs.armExercises = armExercises;
+                if (typeof legExercises !== 'undefined') availableCatalogs.legExercises = legExercises;
+                if (typeof coreExercises !== 'undefined') availableCatalogs.coreExercises = coreExercises;
+                if (typeof calfExercises !== 'undefined') availableCatalogs.calfExercises = calfExercises;
+                if (typeof cardioExercises !== 'undefined') availableCatalogs.cardioExercises = cardioExercises;
+                const exercises = availableCatalogs[name] || [];
+                const missingReferences = exercises
+                    .filter((exercise) => !window.ExerciseSearch.search(exercises, exercise.name).includes(exercise))
+                    .map((exercise) => exercise.name);
+                return {
+                    count: exercises.length,
+                    firstName: exercises[0]?.name || '',
+                    missingReferences,
+                };
+            }, arrayName);
+
+            expect(catalog.count, `${fileName} catalog should not be empty`).toBeGreaterThan(0);
+            expect(catalog.missingReferences, `${fileName} matcher reference identity`).toEqual([]);
+
+            await page.locator(searchInput).fill(catalog.firstName);
+            await expect(page.locator('.supplement-title').getByText(catalog.firstName, { exact: true })).toBeVisible();
             await expect(page.locator(searchStatus)).toHaveText(/found\./i);
         });
     }
