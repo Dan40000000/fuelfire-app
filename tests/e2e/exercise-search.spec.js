@@ -84,6 +84,67 @@ test('every workout catalog returns its original objects from the browser matche
     }
 });
 
+test('filtered exercise cards open from the keyboard and keep collapsed content untabbable', async ({ page }) => {
+    await openWorkoutPage(page, 'workout-chest.html');
+
+    const collapsedControls = await page.evaluate(() => [...document.querySelectorAll('.supplement-content[hidden]')]
+        .flatMap((panel) => [...panel.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')])
+        .filter((control) => {
+            control.focus({ preventScroll: true });
+            return document.activeElement === control;
+        }).length);
+    expect(collapsedControls).toBe(0);
+
+    await page.locator(searchInput).fill(' db bench ');
+    const card = page.locator('.supplement-card').filter({
+        has: page.locator('.supplement-title').getByText('Dumbbell Bench Press', { exact: true }),
+    });
+    const header = card.locator('.supplement-header');
+    const panel = card.locator('.supplement-content');
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await expect(header).toHaveAttribute('aria-controls', /content-/);
+    await expect(panel).toHaveAttribute('hidden', '');
+    await expect(panel).toHaveAttribute('aria-hidden', 'true');
+
+    await header.focus();
+    await page.keyboard.press('Enter');
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel).not.toHaveAttribute('hidden');
+    await expect(panel).toHaveAttribute('aria-hidden', 'false');
+
+    await page.keyboard.press('Space');
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel).toHaveAttribute('hidden', '');
+    await expect(panel).toHaveAttribute('aria-hidden', 'true');
+});
+
+test('all workout step indicators announce image changes politely', async ({ page }) => {
+    for (const { fileName } of workoutCatalogs) {
+        await test.step(fileName, async () => {
+            await openWorkoutPage(page, fileName);
+            const indicator = page.locator('[id^="step-indicator-"]').first();
+            await expect(indicator).toHaveAttribute('role', 'status');
+            await expect(indicator).toHaveAttribute('aria-live', 'polite');
+            await expect(indicator).toHaveAttribute('aria-atomic', 'true');
+        });
+    }
+
+    await openWorkoutPage(page, 'workout-chest.html');
+    await page.locator(searchInput).fill(' db bench ');
+    const card = page.locator('.supplement-card').filter({
+        has: page.locator('.supplement-title').getByText('Dumbbell Bench Press', { exact: true }),
+    });
+    await card.locator('.supplement-header').click();
+    await expect(card.getByRole('button', { name: 'Previous exercise image' })).toBeVisible();
+    const nextImage = card.getByRole('button', { name: 'Next exercise image' });
+    await expect(nextImage).toBeVisible();
+
+    const indicator = card.locator('[id^="step-indicator-"]');
+    await expect(indicator).toHaveText('Step 1 of 2');
+    await nextImage.click();
+    await expect(indicator).toHaveText('Step 2 of 2');
+});
+
 test('filtered image controls keep the source exercise index', async ({ page }) => {
     await openWorkoutPage(page, 'workout-back.html');
 

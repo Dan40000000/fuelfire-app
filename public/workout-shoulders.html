@@ -23,6 +23,14 @@
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 0;
+            border-radius: 0;
+            width: 100%;
+            margin: 0;
+            font: inherit;
+            text-align: left;
         }
 
         .supplement-header:hover {
@@ -162,7 +170,7 @@
                     </div>
                     <!-- Search Bar -->
                     <div style="margin-bottom: 20px;">
-                        <label for="exercise-search" style="display: block; margin-bottom: 6px; color: var(--primary); font-weight: 600; font-size: 14px;">Search exercises</label>
+                        <label for="exercise-search" style="display: block; margin-bottom: 6px; color: var(--carolina-dark); font-weight: 600; font-size: 14px;">Search exercises</label>
                         <input type="search" id="exercise-search" placeholder="Search by name, equipment, or muscle"
                                oninput="filterExercises()" aria-describedby="exercise-search-hint exercise-search-status"
                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--primary-light); border-radius: 15px; font-size: 14px;">
@@ -1294,17 +1302,17 @@
                 const exerciseIndex = shoulderExercises.indexOf(exercise);
                 html += `
                     <div class="supplement-card">
-                        <div class="supplement-header" onclick="toggleExercise(${exerciseIndex})">
-                            <div>
-                                <div class="supplement-title">${exercise.name}</div>
-                                <div class="supplement-rating">
+                        <button type="button" class="supplement-header" aria-expanded="false" aria-controls="content-${exerciseIndex}" onclick="toggleExercise(${exerciseIndex})">
+                            <span>
+                                <span class="supplement-title">${exercise.name}</span>
+                                <span class="supplement-rating">
                                     <span>${generateDifficultyStars(exercise.difficulty)}</span>
                                     <span>Difficulty</span>
-                                </div>
-                            </div>
-                            <div class="expand-icon" id="icon-${exerciseIndex}">▼</div>
-                        </div>
-                        <div class="supplement-content" id="content-${exerciseIndex}">
+                                </span>
+                            </span>
+                            <span class="expand-icon" id="icon-${exerciseIndex}">▼</span>
+                        </button>
+                        <div class="supplement-content" id="content-${exerciseIndex}" hidden aria-hidden="true">
                             <div class="content-inner">
                                 <div class="quick-info">
                                     <div class="quick-stat">
@@ -1324,15 +1332,15 @@
                                              alt="${exercise.name} form diagram"
                                              style="width: 100%; max-width: 400px; height: auto; border-radius: 10px;">
                                         <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 12px;">
-                                            <button onclick="prevStep(${exerciseIndex})"
+                                            <button type="button" onclick="prevStep(${exerciseIndex})"
                                                     style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
                                                 ◀ Previous
                                             </button>
-                                            <span id="step-indicator-${exerciseIndex}"
+                                            <span id="step-indicator-${exerciseIndex}" role="status" aria-live="polite" aria-atomic="true"
                                                   style="font-size: 14px; font-weight: 600; color: #e74c3c; min-width: 100px; text-align: center;">
                                                 Step 1 of ${exercise.images.length}
                                             </span>
-                                            <button onclick="nextStep(${exerciseIndex})"
+                                            <button type="button" onclick="nextStep(${exerciseIndex})"
                                                     style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;">
                                                 Next ▶
                                             </button>
@@ -1402,11 +1410,17 @@
                 content.classList.remove('expanded');
                 icon.classList.remove('rotated');
                 header.classList.remove('active');
+                header.setAttribute('aria-expanded', 'false');
+                content.setAttribute('aria-hidden', 'true');
+                content.hidden = true;
                 content.style.maxHeight = '0px';
             } else {
+                content.hidden = false;
+                content.setAttribute('aria-hidden', 'false');
                 content.classList.add('expanded');
                 icon.classList.add('rotated');
                 header.classList.add('active');
+                header.setAttribute('aria-expanded', 'true');
                 content.style.maxHeight = content.scrollHeight + 'px';
             }
         }
