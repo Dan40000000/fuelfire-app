@@ -618,6 +618,95 @@ test('open voice review dialog has an accessible name, labeled fields, and no cr
     await expect(trigger).toBeFocused();
 });
 
+test('voice parser access failures preserve the transcript and retry analysis without recording again', async ({ page }) => {
+    const requests = [];
+    await page.route('**/api/ai-food-parser', async (route) => {
+        const body = route.request().postDataJSON();
+        requests.push({ body, url: route.request().url() });
+        if (requests.length < 3) {
+            await route.fulfill({
+                status: 402,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    success: false,
+                    error: 'AI subscription required.',
+                    code: 'AI_ACCESS_REQUIRED',
+                }),
+            });
+            return;
+        }
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                source: 'test-fixture',
+                foods: [
+                    { name: 'Thick-cut bacon', calories: 490, protein: 35, carbs: 0, fiber: 0, netCarbs: 0, fat: 38, sugar: 0, quantity: 7, serving: '1 strip', confidence: 'low', sourceType: 'estimate', needsVerification: true },
+                    { name: 'Large egg', calories: 280, protein: 24, carbs: 2, fiber: 0, netCarbs: 2, fat: 20, sugar: 0, quantity: 4, serving: '1 egg', confidence: 'low', sourceType: 'estimate', needsVerification: true },
+                ],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        document.getElementById('voice-context-input').value = 'Kirkland Signature';
+        window.openVoiceModal(document.getElementById('voice-log-trigger'));
+        return window.searchFoodByVoice(
+            'Seven strips of Applewood thick cut bacon from great value brand and four organic free range eggs from Kirkland signature brand',
+            ['seven strips of applewood thick cut bacon and four organic free range eggs']
+        );
+    });
+
+    const dialog = page.getByRole('dialog', { name: 'Voice Logging' });
+    await expect(dialog.locator('#voice-text')).toContainText('Seven strips of Applewood thick cut bacon');
+    await expect(dialog.locator('#voice-text')).toContainText('AI access could not be verified');
+    await expect(dialog.locator('#voice-text')).toHaveCSS('white-space', 'pre-line');
+    await expect(dialog.locator('#voice-live-alert')).toContainText('AI access could not be verified');
+    await expect(dialog.getByRole('button', { name: 'Retry Analysis' })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Retry Analysis' })).not.toHaveAttribute('aria-pressed');
+    await expect(dialog.locator('#voice-diagnostic-panel')).toBeVisible();
+
+    await dialog.getByRole('button', { name: 'Retry Analysis' }).click();
+    await expect(dialog.locator('.food-checkbox')).toHaveCount(2);
+    await expect(dialog.locator('#voice-live-status')).toContainText('ready for review');
+    await expect(dialog.locator('#voice-live-alert')).toHaveText('');
+    await expect(dialog.locator('#food-results')).toContainText('Review required');
+    expect(requests.length).toBe(3);
+    expect(requests[2].body.query).toBe(requests[0].body.query);
+    expect(requests[2].body.alternatives).toEqual(requests[0].body.alternatives);
+});
+
+test('immediate voice parser results keep the review announcement after the dialog ready frame', async ({ page }) => {
+    await page.route('**/api/ai-food-parser', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                success: true,
+                foods: [{
+                    name: 'Estimated breakfast item', calories: 230, protein: 11, carbs: 4, fiber: 0,
+                    netCarbs: 4, fat: 19, sugar: 1, quantity: 1, sourceType: 'estimate',
+                    confidence: 'low', needsVerification: true,
+                }],
+            }),
+        });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.openVoiceModal(document.getElementById('voice-log-trigger'));
+        return window.searchFoodByVoice('estimated breakfast item');
+    });
+
+    const status = page.locator('#voice-live-status');
+    await expect(status).toHaveText(/ready for review/);
+    await page.waitForTimeout(100);
+    await expect(status).toHaveText(/ready for review/);
+    await expect(status).not.toContainText('Voice logging is ready.');
+});
+
 test('failed voice nutrition lookup can send a privacy-safe diagnostic report', async ({ page }) => {
     let diagnosticBody = null;
     await page.route('**/api/ai-food-parser', async (route) => {
