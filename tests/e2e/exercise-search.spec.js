@@ -28,9 +28,17 @@ async function openWorkoutPage(page, fileName) {
 test('workout search accepts aliases, spacing, and a common typo', async ({ page }) => {
     const cases = [
         { fileName: 'workout-chest.html', query: ' db bench ', expectedName: 'Dumbbell Bench Press' },
+        { fileName: 'workout-chest.html', query: 'flat barbell press', expectedName: 'Barbell Bench Press' },
         { fileName: 'workout-back.html', query: 'lat pull down', expectedName: 'Lat Pulldowns' },
+        { fileName: 'workout-back.html', query: 'neutral grip pull up', expectedName: 'Pull-ups' },
         { fileName: 'workout-legs.html', query: 'rdl', expectedName: 'Romanian Deadlift' },
+        { fileName: 'workout-legs.html', query: 'low bar squat', expectedName: 'Barbell Back Squat' },
         { fileName: 'workout-shoulders.html', query: 'side raise', expectedName: 'Lateral Raises' },
+        { fileName: 'workout-shoulders.html', query: 'single arm overhead press', expectedName: 'Alternating Dumbbell Press' },
+        { fileName: 'workout-arms.html', query: 'barbell bicep curl', expectedName: 'Barbell Bicep Curls' },
+        { fileName: 'workout-core.html', query: 'tgu', expectedName: 'Turkish Get-Up' },
+        { fileName: 'workout-calves.html', query: 'ankle hops', expectedName: 'Pogo Jumps' },
+        { fileName: 'workout-cardio.html', query: 'stairmaster', expectedName: 'Stair Climbing' },
         { fileName: 'workout-chest.html', query: 'dumbel bench', expectedName: 'Dumbbell Bench Press' },
     ];
 
