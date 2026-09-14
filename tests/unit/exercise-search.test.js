@@ -107,6 +107,7 @@ describe('exercise search', () => {
             ['back', 'dumbbell shrug', 'Shrugs'],
             ['back', 'rear delt fly', 'Bent Over Reverse Flyes'],
             ['back', 'rope face pull', 'Rope Face Pulls (High)'],
+            ['back', 'tbarrow', 'T-Bar Rows'],
             ['shoulders', 'seated overhead press', 'Overhead Press'],
             ['shoulders', 'single arm overhead press', 'Alternating Dumbbell Press'],
             ['shoulders', 'barbell shoulder press', 'Overhead Press'],
@@ -160,6 +161,7 @@ describe('exercise search', () => {
         expect(normalize('dbbench')).toBe('dumbbell bench');
         expect(normalize('dbrow')).toBe('dumbbell row');
         expect(normalize('kbswing')).toBe('kettlebell swing');
+        expect(normalize('tbarrow')).toBe('t bar row');
         expect(normalize('D.B. bench')).toBe('dumbbell bench');
         expect(normalize('classes')).toBe('classes');
         expect(normalize('calves')).toBe('calves');

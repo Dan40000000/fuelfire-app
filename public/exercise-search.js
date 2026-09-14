@@ -15,6 +15,7 @@
             .replace(/\b(?:d\s*\.?\s*b\.?|dbs?)(?=[a-z0-9]|\s|$)/g, 'dumbbell ')
             .replace(/\b(?:b\s*\.?\s*b\.?|bbs?)(?=[a-z0-9]|\s|$)/g, 'barbell ')
             .replace(/\b(?:k\s*\.?\s*b\.?|kbs?)(?=[a-z0-9]|\s|$)/g, 'kettlebell ')
+            .replace(/\btbar(?=row\b|\s|$)/g, 't bar ')
             .replace(/[^a-z0-9]+/g, ' ').trim()
             // A joined equipment prefix is common in quick searches.
             .replace(/\b(dumbbell|barbell|kettlebell)(?=[a-z])/g, '$1 ')
