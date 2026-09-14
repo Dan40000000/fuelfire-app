@@ -381,17 +381,44 @@ export async function resolveAiAccess(req, options = {}) {
 }
 
 export async function requireAiAccess(req, res, options = {}) {
+    let denialReason = 'not_entitled';
     try {
         const access = await resolveAiAccess(req, options);
         if (access.allowed) return access;
+        if (access.reason === 'plan_missing_capability') denialReason = 'plan_missing_capability';
     } catch (error) {
-        console.warn('AI access verification failed:', error.message);
+        denialReason = 'verification_failed';
+    }
+
+    let reportId = null;
+    if (options.capability === 'ai_food') {
+        // Access failures cannot use the authenticated diagnostics endpoint.
+        // Record one bounded server-side reference without account, food, or URL query data.
+        const pathname = String(req?.url || '').split('?')[0];
+        const route = pathname === '/api/ai-food-parser'
+            ? 'parser'
+            : pathname === '/api/ai-food-vision'
+                ? 'vision'
+                : pathname === '/api/client-diagnostics'
+                    ? 'diagnostics'
+                    : 'unknown';
+        const inputSource = req?.body?.source;
+        const source = inputSource === 'voice' || inputSource === 'photo'
+            ? inputSource
+            : inputSource === 'search' || inputSource === 'typed'
+                ? 'typed'
+                : 'unknown';
+        reportId = `AIA-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+        console.warn('[fuelfire-ai-access-denied]', JSON.stringify({
+            reportId, route, source, reason: denialReason, status: 402,
+        }));
     }
 
     res.status(402).json({
         success: false,
         error: 'AI subscription required',
         code: 'AI_ACCESS_REQUIRED',
+        ...(reportId ? { reportId } : {}),
     });
     return null;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-app-version="1.8.89">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
@@ -840,6 +840,7 @@
             </div>
             <div id="voice-diagnostic-panel" hidden style="background: #fff7ed; border: 1px solid #c2410c; border-radius: 12px; padding: 12px; margin: -5px 0 15px; color: #7c2d12; font-size: 12px; line-height: 1.4; text-align: left;">
                 <strong>Help us fix this failure.</strong>
+                <p style="margin: 5px 0 10px;">A basic failure report with the error code and app platform is sent automatically, without your food words or photos.</p>
                 <p style="margin: 5px 0 10px;">This sends the transcript shown above, the error code, and basic app/device details. No microphone audio, photos, account details, or precise location are uploaded.</p>
                 <button id="voice-send-diagnostic" type="button" onclick="sendVoiceDiagnostic()" style="width: 100%; border: 1px solid #9a3412; background: #fff; color: #7c2d12; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 700; cursor: pointer;">Send diagnostic report</button>
                 <div id="voice-diagnostic-status" role="status" aria-live="polite" aria-atomic="true" style="min-height: 18px; margin-top: 7px; font-weight: 700;"></div>
@@ -1374,6 +1375,7 @@
                         );
                         error.status = response.status;
                         error.code = payload?.code || '';
+                        error.reportId = String(payload?.reportId || '');
                         error.responseSource = payload?.source || '';
                         throw error;
                     }
@@ -1381,7 +1383,7 @@
                     return await response.json();
                 } catch (error) {
                     lastError = error;
-                    console.warn(`API call failed for ${endpoint}:`, error.message);
+                    console.warn('AI API request failed:', { route: path, status: error?.status || null });
                 } finally {
                     if (timeoutId) clearTimeout(timeoutId);
                 }
@@ -2063,7 +2065,10 @@
                     throw new Error(parserResult.error || parserResult.message || 'No foods returned after photo clarification');
                 }
             } catch (error) {
-                console.warn('Photo clarification nutrition refresh unavailable; keeping the successful vision result:', error);
+                console.warn('Photo clarification nutrition refresh unavailable; keeping the successful vision result.');
+                void sendAutomaticAiFoodDiagnostic({
+                    event: 'parser-error', stage: 'photo-clarification', source: 'photo', error
+                });
                 const fallbackFoods = applyFoodMemoryToFoods(buildPhotoClarificationFallbackFoods(
                     visionResult,
                     'live nutrition refresh unavailable'
@@ -2295,7 +2300,7 @@
                 ));
 
             } catch (error) {
-                console.error('Photo analysis error:', error);
+                console.error('Photo analysis failed:', { stage: photoAnalysisStage, status: error?.status || null });
                 if (successfulVisionResult && Array.isArray(successfulVisionResult.foods) && successfulVisionResult.foods.length) {
                     try {
                         const conversation = document.getElementById('photo-conversation');
@@ -2327,6 +2332,9 @@
                         console.error('Photo result recovery error:', recoveryError);
                     }
                 }
+                void sendAutomaticAiFoodDiagnostic({
+                    event: 'vision-error', stage: 'photo-analysis', source: 'photo', error
+                });
                 // Reset to capture view
                 document.getElementById('photo-capture-section').style.display = 'block';
                 setPhotoLoadingVisible(false);
@@ -2338,10 +2346,13 @@
                     conversation.textContent = '';
                 }
                 const accessRejected = error?.status === 402 || error?.code === 'AI_ACCESS_REQUIRED';
+                const referenceId = /^AIA-\d{8}-[A-F0-9]{8}$/.test(String(error?.reportId || ''))
+                    ? ` Reference: ${error.reportId}.`
+                    : '';
                 showPhotoFlowError(
                     accessRejected
-                        ? 'AI access could not be verified. Reopen the app or restore purchases, then try again.'
-                        : 'Could not analyze the photo. Try again or use voice or text entry.',
+                        ? `AI access could not be verified. Reopen the app or restore purchases, then try again.${referenceId}`
+                        : `Could not analyze the photo. Try again or use voice or text entry.${referenceId}`,
                     'analyze-photo-btn'
                 );
             }
@@ -3740,7 +3751,42 @@
             };
         }
 
+        // Best-effort failure telemetry contains only fixed metadata. The server
+        // independently allow-lists these fields before logging anything.
+        function sendAutomaticAiFoodDiagnostic(details = {}) {
+            const capacitor = window.Capacitor || window.capacitor;
+            const nativePlatform = typeof capacitor?.getPlatform === 'function' ? capacitor.getPlatform() : 'web';
+            const platform = nativePlatform === 'ios' || nativePlatform === 'android' ? nativePlatform : 'web';
+            const status = Number(details.error?.status) || null;
+            const reportedCode = String(details.error?.code || '').toUpperCase().replace(/[^A-Z0-9_]/g, '').slice(0, 64);
+            const code = reportedCode || (details.error?.name === 'AbortError' ? 'TIMEOUT' : status ? 'AI_PROVIDER_ERROR' : 'NETWORK_ERROR');
+            const report = {
+                mode: 'automatic',
+                category: 'ai-food',
+                event: details.event || 'parser-error',
+                stage: details.stage || 'nutrition-parser',
+                source: details.source || 'typed',
+                error: {
+                    code,
+                    status
+                },
+                parser: { foodCount: Number(details.parser?.foodCount) || 0 },
+                client: {
+                    platform,
+                    appVersion: document.documentElement.dataset.appVersion || '',
+                    online: typeof navigator.onLine === 'boolean' ? navigator.onLine : null,
+                    native: typeof capacitor?.isNativePlatform === 'function' ? capacitor.isNativePlatform() : platform !== 'web'
+                }
+            };
+            return postJsonWithFallback('/api/client-diagnostics', report, 10000)
+                .then(result => String(result?.reportId || '').trim())
+                .catch(() => '');
+        }
+
         function showVoiceDiagnostic(details = {}) {
+            const referenceId = /^AIA-\d{8}-[A-F0-9]{8}$/.test(String(details.error?.reportId || ''))
+                ? String(details.error.reportId)
+                : '';
             currentVoiceDiagnostic = {
                 category: 'voice-food',
                 event: details.event || 'parser-error',
@@ -3763,7 +3809,20 @@
             const panel = document.getElementById('voice-diagnostic-panel');
             const status = document.getElementById('voice-diagnostic-status');
             if (panel) panel.hidden = false;
-            if (status) status.textContent = '';
+            if (status) status.textContent = referenceId ? `Request reference: ${referenceId}` : '';
+            const diagnostic = currentVoiceDiagnostic;
+            void sendAutomaticAiFoodDiagnostic({
+                event: diagnostic.event,
+                stage: diagnostic.stage,
+                source: 'voice',
+                error: diagnostic.error,
+                parser: diagnostic.parser
+            }).then(reportId => {
+                if (currentVoiceDiagnostic !== diagnostic || !reportId) return;
+                if (referenceId) return;
+                if (status?.textContent?.startsWith('Diagnostic sent')) return;
+                if (status) status.textContent = `Basic failure report sent. Reference: ${reportId}`;
+            });
         }
 
         async function sendVoiceDiagnostic() {
@@ -4204,7 +4263,7 @@
                 announceVoiceStatus('Listening.');
                 return true;
             } catch (error) {
-                console.error('Native speech start failed:', error);
+                console.error('Native speech start failed.');
                 await cleanupNativeSpeechListener();
                 clearTimeout(nativeSpeechAutoStopTimer);
                 document.getElementById('voice-text').textContent = error.message || 'Could not start microphone. Please check microphone permissions.';
@@ -4212,6 +4271,10 @@
                 document.getElementById('voice-button').style.background = '#b42335';
                 document.getElementById('voice-status').textContent = '🎤';
                 announceVoiceError(error.message || 'Could not start the microphone. Check microphone permissions.');
+                showVoiceDiagnostic({
+                    event: 'speech-error', stage: 'speech-recognition',
+                    error: { message: error.message || 'Native speech start failed', code: error.code || error.name }
+                });
                 isRecording = false;
                 return true;
             }
@@ -5298,7 +5361,7 @@
                 announceVoiceError('');
                 const normalizedQuery = normalizeVoiceFoodText(query);
                 const intent = extractVoiceMealLogIntent(normalizedQuery);
-                console.log('🎙️ Processing voice input:', intent.foodQuery);
+                console.log('Voice food analysis started.');
                 if (!intent.foodQuery || intent.foodQuery.length < 2) {
                     document.getElementById('voice-text').textContent = 'Please say something about food you ate.';
                     setVoiceAction('Start Recording', toggleVoiceRecording, { toggle: true });
@@ -5327,7 +5390,7 @@
                 announceVoiceStatus('Processing.');
                 const results = await parseWithAI(effectiveQuery, 'voice', 0, cleanAlternatives);
                 if (requestSession !== voiceLogSessionId || !document.getElementById('voice-modal')?.open) return;
-                console.log('🤖 AI returned:', results);
+                console.log('Voice food analysis completed:', { foodCount: Array.isArray(results) ? results.length : 0 });
                 if (!Array.isArray(results) || results.length === 0) {
                     const failure = currentVoiceParserFailure;
                     const message = getVoiceParserFailureMessage(failure);
@@ -5370,12 +5433,12 @@
                     announceVoiceStatus(`${prefix} ${mealLabel} preselected.`);
                 }
             } catch (error) {
-                console.error('❌ Voice processing error:', error);
+                console.error('Voice processing failed:', { status: error?.status || null });
                 const normalizedTranscript = normalizeVoiceFoodText(query);
                 const failure = {
                     event: 'parser-error',
                     stage: 'voice-processing',
-                    error: { message: error.message, code: error.code, status: error.status },
+                    error: { message: error.message, code: error.code, status: error.status, reportId: error.reportId },
                     parser: { foodCount: 0 }
                 };
                 currentVoiceParserFailure = failure;
@@ -6007,7 +6070,7 @@
         async function parseWithAI(query, source = 'search', clarifyDepth = 0, alternatives = []) {
             try {
                 if (source === 'voice') currentVoiceParserFailure = null;
-                console.log('🤖 AI parsing food:', query);
+                console.log('AI food parsing started:', { source });
 
                 // Show loading state
                 const voiceText = document.getElementById('voice-text');
@@ -6019,7 +6082,7 @@
                     const savedRequest = [query, ...(Array.isArray(alternatives) ? alternatives : [])].some(queryRequestsSavedFood);
                     const savedBundle = savedRequest ? getSavedMealMatch(query, alternatives) : null;
                     if (savedRequest && savedBundle) {
-                        console.log('⚡ Used saved meal bundle:', savedBundle.name);
+                        console.log('Used saved meal bundle.');
                         if (voiceText) voiceText.textContent = `Found saved meal: ${savedBundle.name}`;
                         return getFoodsFromSavedMeal(savedBundle);
                     }
@@ -6027,7 +6090,7 @@
                         ? findLearnedFoodMatches(query, alternatives, 4, { allowContainment: true })
                         : [];
                     if (savedRequest && savedMatches.length > 0) {
-                        console.log('⚡ Used saved food memory:', savedMatches.map(food => food.name));
+                        console.log('Used saved food memory.');
                         if (voiceText) {
                             voiceText.textContent = `Found saved food: ${savedMatches.map(food => food.name).join(' + ')}`;
                         }
@@ -6086,10 +6149,7 @@
                         currentVoiceClarificationOutcome.resolvedQuery = resolvedQuery;
                     }
                     const usedMemory = foodsWithMemory.some(food => food?.fromFoodMemory);
-                    console.log(`🍔 AI found ${foodsWithMemory.length} foods from ${data.source || 'unknown source'}${usedMemory ? ' with saved memory applied' : ''}`);
-                    if (data.message) {
-                        console.log('📝', data.message);
-                    }
+                    console.log('AI food parsing completed:', { foodCount: foodsWithMemory.length, usedMemory });
 
                     // Update the voice text to show what was found
                     if (voiceText && foodsWithMemory.length > 1) {
@@ -6105,7 +6165,7 @@
                 throw new Error(data.error || data.message || 'No foods returned from AI parser');
 
             } catch (error) {
-                console.error('❌ AI food parsing error:', error);
+                console.error('AI food parsing failed:', { source, status: error?.status || null });
                 const voiceText = document.getElementById('voice-text');
                 if (source === 'voice') {
                     currentVoiceParserFailure = {
@@ -6114,7 +6174,8 @@
                         error: {
                             message: String(error?.message || 'Nutrition parser failed'),
                             code: String(error?.code || ''),
-                            status: Number(error?.status) || null
+                            status: Number(error?.status) || null,
+                            reportId: String(error?.reportId || '')
                         },
                         parser: {
                             source: String(error?.responseSource || ''),
@@ -6123,6 +6184,13 @@
                     };
                 } else if (voiceText) {
                     voiceText.textContent = `AI Error: ${error.message}`;
+                }
+
+                if (source !== 'voice') {
+                    void sendAutomaticAiFoodDiagnostic({
+                        event: 'parser-error', stage: source === 'photo' ? 'photo-clarification' : 'nutrition-parser',
+                        source: source === 'photo' ? 'photo' : 'typed', error
+                    });
                 }
 
                 if (source !== 'voice') {

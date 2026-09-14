@@ -3714,7 +3714,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Food description required' });
         }
 
-        console.log(`🍔 Parsing food input (${inputSource}): "${query}"`);
+        console.log('Food parsing started:', { source: inputSource, queryLength: query.length });
 
         const userProvidedNutritionDetails = extractUserProvidedNutritionDetails(query);
         const userProvidedNutrition = userProvidedNutritionDetails ? extractUserProvidedNutrition(query) : null;
@@ -4046,7 +4046,7 @@ export default async function handler(req, res) {
                     reviewModel = reviewedData.metadata?.model || null;
                 }
             } catch (error) {
-                console.warn(`Claude food parsing review skipped: ${error.message}`);
+                console.warn('Claude food parsing review skipped.');
             }
         }
         const degradedMode = foodAiData.metadata?.degraded === true;
@@ -4069,7 +4069,7 @@ export default async function handler(req, res) {
                     const retryPayload = parseFoodAiPayload(extractTextFromFoodAiResponse(retryData));
                     foods = [...foods, ...sanitizeFoods(retryPayload.foods, missingSegments.join(', '))];
                 } catch (retryError) {
-                    console.warn(`Missing composite food retry failed: ${retryError.message}`);
+                    console.warn('Missing composite food retry failed.');
                 }
             }
             foods = reconcileCompositeAiFoodsWithDatabase(foods, lookupQuery);
@@ -4085,7 +4085,7 @@ export default async function handler(req, res) {
                     responseSource = `${responseSource}+official-page`;
                 }
             } catch (refineError) {
-                console.warn(`Official nutrition refinement skipped: ${refineError.message}`);
+                console.warn('Official nutrition refinement skipped.');
             }
         }
 
@@ -4167,7 +4167,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('AI food parsing error:', error);
+        console.error('AI food parsing error:', { status: Number(error?.status) || null });
 
         const body = req.body || {};
         const rawQuery = typeof body.query === 'string' ? body.query : '';

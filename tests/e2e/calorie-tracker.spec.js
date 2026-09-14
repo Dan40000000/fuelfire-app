@@ -6,6 +6,12 @@ import { expectInsideViewport, localDateKey, seedPaidAiAccess } from './helpers.
 const fixtureDir = path.resolve(process.cwd(), 'tests/fixtures');
 
 test.beforeEach(async ({ page }) => {
+    // Automatic failure telemetry stays in the test browser unless a test
+    // explicitly inspects its payload below.
+    await page.route('**/api/client-diagnostics', route => route.fulfill({
+        status: 201, contentType: 'application/json',
+        body: JSON.stringify({ success: true, reportId: 'AIF-20260914-00000000' }),
+    }));
     await seedPaidAiAccess(page);
 });
 
@@ -631,6 +637,7 @@ test('voice parser access failures preserve the transcript and retry analysis wi
                     success: false,
                     error: 'AI subscription required.',
                     code: 'AI_ACCESS_REQUIRED',
+                    reportId: 'AIA-20260914-ABC12345',
                 }),
             });
             return;
@@ -667,6 +674,7 @@ test('voice parser access failures preserve the transcript and retry analysis wi
     await expect(dialog.getByRole('button', { name: 'Retry Analysis' })).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Retry Analysis' })).not.toHaveAttribute('aria-pressed');
     await expect(dialog.locator('#voice-diagnostic-panel')).toBeVisible();
+    await expect(dialog.locator('#voice-diagnostic-status')).toContainText('AIA-20260914-ABC12345');
 
     await dialog.getByRole('button', { name: 'Retry Analysis' }).click();
     await expect(dialog.locator('.food-checkbox')).toHaveCount(2);
@@ -708,7 +716,7 @@ test('immediate voice parser results keep the review announcement after the dial
 });
 
 test('failed voice nutrition lookup can send a privacy-safe diagnostic report', async ({ page }) => {
-    let diagnosticBody = null;
+    const diagnosticBodies = [];
     await page.route('**/api/ai-food-parser', async (route) => {
         await route.fulfill({
             status: 502,
@@ -722,7 +730,7 @@ test('failed voice nutrition lookup can send a privacy-safe diagnostic report', 
         });
     });
     await page.route('**/api/client-diagnostics', async (route) => {
-        diagnosticBody = route.request().postDataJSON();
+        diagnosticBodies.push(route.request().postDataJSON());
         await route.fulfill({
             status: 201,
             contentType: 'application/json',
@@ -746,11 +754,23 @@ test('failed voice nutrition lookup can send a privacy-safe diagnostic report', 
     const sendButton = dialog.getByRole('button', { name: 'Send diagnostic report' });
     await expect(sendButton).toBeVisible();
     await expect(dialog.locator('#voice-diagnostic-panel')).toContainText('No microphone audio, photos, account details, or precise location');
+    await expect(dialog.locator('#voice-diagnostic-status')).toContainText('Basic failure report sent. Reference:');
+    const automaticBody = diagnosticBodies.find(body => body.mode === 'automatic');
+    expect(automaticBody).toMatchObject({
+        category: 'ai-food', event: 'parser-error', stage: 'nutrition-parser', source: 'voice',
+        error: { code: 'OFFICIAL_NUTRITION_NOT_VERIFIED', status: 502 }
+    });
+    expect(JSON.stringify(automaticBody)).not.toContain('seven strips of bacon');
+    expect(automaticBody).not.toHaveProperty('transcript');
+    expect(automaticBody).not.toHaveProperty('alternatives');
+    expect(automaticBody).not.toHaveProperty('context');
+    expect(automaticBody.error).not.toHaveProperty('message');
 
     await sendButton.focus();
     await expect(sendButton).toBeFocused();
     await sendButton.click();
     await expect(dialog.locator('#voice-diagnostic-status')).toContainText('VFD-20260911-ABC12345');
+    const diagnosticBody = diagnosticBodies.find(body => body.category === 'voice-food');
     expect(diagnosticBody).toMatchObject({
         category: 'voice-food',
         event: 'parser-error',
@@ -767,6 +787,54 @@ test('failed voice nutrition lookup can send a privacy-safe diagnostic report', 
     const axeResults = await new AxeBuilder({ page }).include('#voice-diagnostic-panel').analyze();
     const criticalOrSerious = axeResults.violations.filter((violation) => ['critical', 'serious'].includes(violation.impact));
     expect(criticalOrSerious, criticalOrSerious.map((item) => `${item.id}: ${item.help}`).join('\n')).toEqual([]);
+});
+
+test('typed food failure sends metadata automatically without the search words', async ({ page }) => {
+    const reports = [];
+    await page.route('**/api/ai-food-parser', route => route.fulfill({
+        status: 503, contentType: 'application/json',
+        body: JSON.stringify({ success: false, error: 'Provider unavailable', code: 'FOOD_AI_UNAVAILABLE' }),
+    }));
+    await page.route('**/api/client-diagnostics', async route => {
+        reports.push(route.request().postDataJSON());
+        await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ success: true, reportId: 'VFD-20260914-11111111' }) });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.requireAIAccess = () => true;
+        return window.searchFood('private blueberry breakfast');
+    });
+    await expect.poll(() => reports.length).toBe(1);
+    expect(reports[0]).toMatchObject({ mode: 'automatic', category: 'ai-food', source: 'typed', event: 'parser-error' });
+    expect(JSON.stringify(reports[0])).not.toContain('blueberry');
+    expect(reports[0].error).not.toHaveProperty('message');
+});
+
+test('photo food failure sends metadata automatically without the image', async ({ page }) => {
+    const reports = [];
+    await page.route('**/api/ai-food-vision', route => route.fulfill({
+        status: 502, contentType: 'application/json',
+        body: JSON.stringify({ success: false, error: 'Vision provider failed', code: 'FOOD_AI_UNAVAILABLE' }),
+    }));
+    await page.route('**/api/client-diagnostics', async route => {
+        reports.push(route.request().postDataJSON());
+        await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ success: true, reportId: 'VFD-20260914-22222222' }) });
+    });
+
+    await page.goto('/calorie-tracker.html');
+    await page.evaluate(() => {
+        window.requireAIAccess = () => true;
+        window.startFoodPhotoCapture();
+    });
+    await page.locator('#photo-modal input[type="file"]').setInputFiles(path.join(fixtureDir, 'food-label.svg'));
+    await page.locator('#analyze-photo-btn').click();
+    await expect(page.locator('#photo-live-alert')).toContainText('Could not analyze the photo');
+    await expect.poll(() => reports.length).toBe(1);
+    expect(reports[0]).toMatchObject({ mode: 'automatic', category: 'ai-food', source: 'photo', event: 'vision-error' });
+    expect(JSON.stringify(reports[0])).not.toContain('data:image');
+    expect(reports[0]).not.toHaveProperty('photo');
+    expect(reports[0]).not.toHaveProperty('image');
 });
 
 test('foreground restaurant location is coarse, opt-in, and not stored with the meal', async ({ page }) => {
