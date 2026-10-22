@@ -9,7 +9,19 @@ const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 800;
 const DEFAULT_TIMEOUT_MS = 60000;
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms, signal) => new Promise((resolve, reject) => {
+    const onAbort = () => {
+        clearTimeout(timer);
+        signal.removeEventListener('abort', onAbort);
+        reject(signal.reason);
+    };
+    const timer = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve();
+    }, ms);
+    if (signal?.aborted) onAbort();
+    else signal?.addEventListener('abort', onAbort, { once: true });
+});
 
 function cleanEnv(value) {
     return String(value || '')
@@ -197,7 +209,10 @@ async function callConfiguredProvider(config, options) {
     let lastError;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        options.signal?.throwIfAborted();
         const controller = new AbortController();
+        const onAbort = () => controller.abort();
+        options.signal?.addEventListener('abort', onAbort, { once: true });
         const timeout = setTimeout(() => controller.abort(), requestTimeoutMs());
         try {
             const response = await fetch(request.endpoint, {
@@ -222,7 +237,7 @@ async function callConfiguredProvider(config, options) {
                     const delay = Number.isFinite(retryAfter) && retryAfter > 0
                         ? Math.min(retryAfter * 1000, 65000)
                         : RETRY_BASE_DELAY_MS * attempt;
-                    await sleep(delay);
+                    await sleep(delay, options.signal);
                     continue;
                 }
                 throw error;
@@ -258,6 +273,7 @@ async function callConfiguredProvider(config, options) {
                 }
             };
         } catch (error) {
+            if (options.signal?.aborted) throw options.signal.reason;
             const normalizedError = error?.name === 'AbortError'
                 ? Object.assign(new Error(`Food AI provider timed out after ${requestTimeoutMs()}ms.`), {
                     provider: config.provider,
@@ -273,12 +289,13 @@ async function callConfiguredProvider(config, options) {
                     });
             lastError = normalizedError;
             if (normalizedError.retryable && attempt < MAX_RETRIES) {
-                await sleep(RETRY_BASE_DELAY_MS * attempt);
+                await sleep(RETRY_BASE_DELAY_MS * attempt, options.signal);
                 continue;
             }
             break;
         } finally {
             clearTimeout(timeout);
+            options.signal?.removeEventListener('abort', onAbort);
         }
     }
 
@@ -302,13 +319,15 @@ export async function callFoodAi({
     thinking = false,
     tags = [],
     tier = 'primary',
-    allowDegradedFallback = true
+    allowDegradedFallback = true,
+    signal
 } = {}) {
     if (!prompt || typeof prompt !== 'string') {
         throw new Error('Food AI prompt is required.');
     }
 
-    const options = { prompt, image, mimeType, maxTokens, temperature, json, thinking, tags };
+    signal?.throwIfAborted();
+    const options = { prompt, image, mimeType, maxTokens, temperature, json, thinking, tags, signal };
     const primary = getFoodAiConfig(modality, { tier });
     const fallback = primary.provider === 'claude' ? getFoodAiFallbackConfig(modality) : null;
 
@@ -331,6 +350,7 @@ export async function callFoodAi({
     try {
         return await callConfiguredProvider(primary, options);
     } catch (error) {
+        if (signal?.aborted) throw signal.reason;
         if (!allowDegradedFallback || !fallback?.configured || !canUseDegradedFallback(error)) throw error;
         const result = await callConfiguredProvider(fallback, options);
         return {

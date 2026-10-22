@@ -32,6 +32,39 @@ afterEach(() => {
 });
 
 describe('food AI provider', () => {
+    it('cancels retry backoff at the caller deadline without starting a fallback provider', async () => {
+        clearProviderEnv();
+        process.env.CLAUDE_API_KEY = 'test-claude-key';
+        process.env.FOOD_AI_API_KEY = 'test-fallback-key';
+        vi.useFakeTimers();
+        const controller = new AbortController();
+        const fetchMock = vi.fn().mockResolvedValue(new Response('temporary outage', {
+            status: 503, headers: { 'retry-after': '65' },
+        }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const pending = callFoodAi({ prompt: 'Parse food', signal: controller.signal });
+        const assertion = expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+        await vi.advanceTimersByTimeAsync(1000);
+        controller.abort();
+        await assertion;
+
+        expect(fetchMock).toHaveBeenCalledOnce();
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('does not start a provider request after the caller deadline has already expired', async () => {
+        clearProviderEnv();
+        const controller = new AbortController();
+        controller.abort();
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+
+        await expect(callFoodAi({ prompt: 'Parse food', signal: controller.signal }))
+            .rejects.toMatchObject({ name: 'AbortError' });
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
     it('defaults to Claude Sonnet 5 with Qwen available only as the fallback provider', () => {
         clearProviderEnv();
 
