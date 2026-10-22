@@ -12,6 +12,9 @@ const corsOptions = {
     headers: ['Content-Type'],
 };
 
+// Leave room for the reviewable local result before Vercel's 60-second limit.
+const VOICE_COMPOSITE_LOOKUP_TIMEOUT_MS = 20000;
+
 // =============================================================================
 // COMPREHENSIVE RESTAURANT NUTRITION DATABASE
 // All values from official published nutrition data (as of 2026)
@@ -2807,8 +2810,11 @@ function buildRestaurantDomainCandidates(foods, query) {
     return [...candidates].slice(0, 18);
 }
 
-async function fetchTextWithTimeout(url, timeoutMs = 10000) {
+async function fetchTextWithTimeout(url, timeoutMs = 10000, signal) {
+    signal?.throwIfAborted();
     const controller = new AbortController();
+    const onAbort = () => controller.abort();
+    signal?.addEventListener('abort', onAbort, { once: true });
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
         const response = await fetch(url, {
@@ -2824,14 +2830,16 @@ async function fetchTextWithTimeout(url, timeoutMs = 10000) {
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.includes('text/html')) return null;
         return await response.text();
-    } catch {
+    } catch (error) {
+        if (signal?.aborted) throw signal.reason;
         return null;
     } finally {
         clearTimeout(timeoutId);
+        signal?.removeEventListener('abort', onAbort);
     }
 }
 
-async function resolveOfficialNutritionFromRestaurantHint(foods, query) {
+async function resolveOfficialNutritionFromRestaurantHint(foods, query, signal) {
     const candidates = buildRestaurantDomainCandidates(foods, query);
     if (!candidates.length) return null;
 
@@ -2858,7 +2866,7 @@ async function resolveOfficialNutritionFromRestaurantHint(foods, query) {
             if (seenPages.has(probeUrl)) continue;
             seenPages.add(probeUrl);
 
-            const html = await fetchTextWithTimeout(probeUrl, 3500);
+            const html = await fetchTextWithTimeout(probeUrl, 3500, signal);
             if (!html) continue;
 
             const pageItems = parseNutritionItemsFromHtml(html, probeUrl);
@@ -2918,7 +2926,7 @@ function scoreNutritionItemForQuery(item, query) {
     return score;
 }
 
-async function resolveOfficialNutritionFromSourceUrls(foods, query) {
+async function resolveOfficialNutritionFromSourceUrls(foods, query, signal) {
     const allowEstimateSources = isRestaurantLikeQuery(query);
     const officialUrls = [...new Set((foods || [])
         .filter((food) => (
@@ -2945,7 +2953,7 @@ async function resolveOfficialNutritionFromSourceUrls(foods, query) {
             if (seenPages.has(candidateUrl)) continue;
             seenPages.add(candidateUrl);
 
-            const html = await fetchTextWithTimeout(candidateUrl, 10000);
+            const html = await fetchTextWithTimeout(candidateUrl, 10000, signal);
             if (!html) continue;
 
             const pageItems = parseNutritionItemsFromHtml(html, candidateUrl);
@@ -2960,7 +2968,7 @@ async function resolveOfficialNutritionFromSourceUrls(foods, query) {
     }
 
     if ((!bestMatch || bestScore < 6) && restaurantLikeQuery) {
-        const hintedMatch = await resolveOfficialNutritionFromRestaurantHint(foods, query);
+        const hintedMatch = await resolveOfficialNutritionFromRestaurantHint(foods, query, signal);
         if (hintedMatch && toFiniteNumber(hintedMatch.matchScore, -Infinity) > bestScore) {
             bestMatch = hintedMatch;
             bestScore = toFiniteNumber(hintedMatch.matchScore, bestScore);
@@ -3038,10 +3046,10 @@ export function applyOfficialNutritionReplacement(existing, resolved, query) {
     return applyNutritionPlausibilityValidation(replacement);
 }
 
-async function refineFoodsWithOfficialNutrition(foods, query) {
+async function refineFoodsWithOfficialNutrition(foods, query, signal) {
     if (!Array.isArray(foods) || !foods.length) return foods;
 
-    const resolved = await resolveOfficialNutritionFromSourceUrls(foods, query);
+    const resolved = await resolveOfficialNutritionFromSourceUrls(foods, query, signal);
     if (!resolved) return foods;
 
     const replaceIndex = foods.findIndex((food) => !foodLooksLikeDrink(food));
@@ -3549,7 +3557,8 @@ async function callFoodParserAi({
     memoryHints = [],
     locationContext = null,
     tier = 'primary',
-    allowDegradedFallback = true
+    allowDegradedFallback = true,
+    signal
 }) {
     const sanitizedMemoryHints = sanitizeFoodMemoryHints(memoryHints);
     const strictInstructions = strictMode
@@ -3675,6 +3684,7 @@ Rules:
         thinking: deepSearch,
         tier,
         allowDegradedFallback,
+        signal,
         tags: [inputSource === 'voice' ? 'food-voice' : 'food-text', useWebSearch ? 'lookup-requested' : 'parse-only']
     });
 }
@@ -3692,6 +3702,10 @@ export default async function handler(req, res) {
     if (!await requireAiAccess(req, res, { capability: 'ai_food' })) {
         return;
     }
+
+    let lookupController;
+    let lookupTimeout;
+    let deadlineFallback;
 
     try {
         const body = req.body || {};
@@ -4011,6 +4025,18 @@ export default async function handler(req, res) {
         const voiceDeepSearch = inputSource === 'voice';
         const deepSearch = voiceDeepSearch || requiresLiveSearch;
         const requestOfficialEvidence = requiresLiveSearch || voiceDeepSearch;
+        deadlineFallback = voiceDeepSearch && looksComposite && !userProvidedNutritionDetails
+            ? buildVoiceCompositeFallbackPayload(
+                lookupQuery,
+                queryMeta,
+                'Exact brand lookup took too long. Review the generic estimates before logging.'
+            )
+            : null;
+        if (deadlineFallback) {
+            lookupController = new AbortController();
+            lookupTimeout = setTimeout(() => lookupController.abort(), VOICE_COMPOSITE_LOOKUP_TIMEOUT_MS);
+        }
+        const lookupSignal = lookupController?.signal;
         let foodAiData = await callFoodParserAi({
             query: lookupQuery,
             useWebSearch: requestOfficialEvidence,
@@ -4018,7 +4044,8 @@ export default async function handler(req, res) {
             deepSearch,
             inputSource,
             memoryHints: foodMemoryHints,
-            locationContext
+            locationContext,
+            signal: lookupSignal
         });
 
         let textContent = extractTextFromFoodAiResponse(foodAiData);
@@ -4035,7 +4062,8 @@ export default async function handler(req, res) {
                     memoryHints: foodMemoryHints,
                     locationContext,
                     tier: 'review',
-                    allowDegradedFallback: false
+                    allowDegradedFallback: false,
+                    signal: lookupSignal
                 });
                 const reviewedText = extractTextFromFoodAiResponse(reviewedData);
                 const reviewedPayload = parseFoodAiPayload(reviewedText);
@@ -4049,6 +4077,7 @@ export default async function handler(req, res) {
                 console.warn('Claude food parsing review skipped.');
             }
         }
+        lookupSignal?.throwIfAborted();
         const degradedMode = foodAiData.metadata?.degraded === true;
         const providerLabel = degradedMode ? 'qwen-degraded' : (foodAiData.metadata?.provider || 'claude');
         let responseSource = `${voiceDeepSearch ? 'voice-ai' : 'ai'}-${providerLabel}${reviewModel ? '-review' : ''}`;
@@ -4064,13 +4093,15 @@ export default async function handler(req, res) {
                         deepSearch: false,
                         inputSource,
                         memoryHints: foodMemoryHints,
-                        locationContext: null
+                        locationContext: null,
+                        signal: lookupSignal
                     });
                     const retryPayload = parseFoodAiPayload(extractTextFromFoodAiResponse(retryData));
                     foods = [...foods, ...sanitizeFoods(retryPayload.foods, missingSegments.join(', '))];
                 } catch (retryError) {
                     console.warn('Missing composite food retry failed.');
                 }
+                lookupSignal?.throwIfAborted();
             }
             foods = reconcileCompositeAiFoodsWithDatabase(foods, lookupQuery);
             parsedPayload.overallConfidence = null;
@@ -4078,7 +4109,7 @@ export default async function handler(req, res) {
 
         if (requiresLiveSearch && foods.length > 0 && (queryImpliesMealCombo(lookupQuery) || isBranded)) {
             try {
-                const refinedFoods = await refineFoodsWithOfficialNutrition(foods, lookupQuery);
+                const refinedFoods = await refineFoodsWithOfficialNutrition(foods, lookupQuery, lookupSignal);
                 if (refinedFoods !== foods) {
                     foods = refinedFoods;
                     parsedPayload.notes = 'Matched meal nutrition from an official nutrition page.';
@@ -4088,6 +4119,7 @@ export default async function handler(req, res) {
                 console.warn('Official nutrition refinement skipped.');
             }
         }
+        lookupSignal?.throwIfAborted();
 
         if (requiresLiveSearch && foods.length > 0 && !userProvidedNutritionDetails && !foods.some((food) => food?.officiallyVerified === true)) {
             const voiceFallback = inputSource === 'voice' && looksComposite
@@ -4167,6 +4199,10 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
+        if (lookupController?.signal.aborted && deadlineFallback) {
+            console.warn('Voice nutrition lookup deadline reached:', { code: 'VOICE_LOOKUP_TIMEOUT' });
+            return res.status(200).json({ ...deadlineFallback, fallbackReason: 'VOICE_LOOKUP_TIMEOUT' });
+        }
         console.error('AI food parsing error:', { status: Number(error?.status) || null });
 
         const body = req.body || {};
@@ -4288,6 +4324,8 @@ export default async function handler(req, res) {
             error: error.message,
             ...buildQueryMeta(originalQuery, normalizedQuery)
         });
+    } finally {
+        clearTimeout(lookupTimeout);
     }
 }
 

@@ -67,6 +67,7 @@ describe('AI food parser composite meals', () => {
 
     afterEach(() => {
         process.env = { ...ORIGINAL_ENV };
+        vi.useRealTimers();
         vi.unstubAllGlobals();
         vi.restoreAllMocks();
     });
@@ -252,6 +253,113 @@ describe('AI food parser composite meals', () => {
         });
         expect(response.body.foods.map((food) => food.quantity)).toEqual([7, 4]);
         expect(fetchMock).toHaveBeenCalledOnce();
+    });
+
+    it('returns the reviewable bacon and egg counts before a stalled provider reaches the server timeout', async () => {
+        vi.useFakeTimers();
+        const fetchMock = vi.fn((url, { signal }) => new Promise((resolve, reject) => {
+            signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+        }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        let completed = false;
+        const pending = invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: {
+                query: 'Seven strips of Applewood thick cut bacon from great value brand and four organic free range eggs from Kirkland signature brand',
+                source: 'voice',
+            },
+        }).then(response => { completed = true; return response; });
+
+        await vi.advanceTimersByTimeAsync(19999);
+        expect(completed).toBe(false);
+        await vi.advanceTimersByTimeAsync(1);
+        const response = await pending;
+
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({
+            fallbackReason: 'VOICE_LOOKUP_TIMEOUT',
+            overallConfidence: 'low',
+            totalCalories: 770,
+        });
+        expect(response.body.foods.map(food => food.quantity)).toEqual([7, 4]);
+        expect(response.body.foods.every(food => food.requiresReview && food.needsVerification)).toBe(true);
+        expect(fetchMock).toHaveBeenCalledOnce();
+        expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('shares the voice lookup deadline with a slow Claude review instead of starting a second budget', async () => {
+        vi.useFakeTimers();
+        process.env.FOOD_AI_PROVIDER = 'claude';
+        process.env.CLAUDE_API_KEY = 'test-claude-key';
+        const fetchMock = vi.fn()
+            .mockImplementationOnce(async () => {
+                await new Promise(resolve => setTimeout(resolve, 10000));
+                return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify({
+                    foods: [{ name: 'Bacon', calories: 70, protein: 5, carbs: 0, fat: 5, quantity: 7, confidence: 'low' }],
+                    overallConfidence: 'low',
+                }) }] }), { status: 200 });
+            })
+            .mockImplementationOnce((url, { signal }) => new Promise((resolve, reject) => {
+                signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const pending = invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: {
+                query: 'Seven strips of Applewood thick cut bacon from great value brand and four organic free range eggs from Kirkland signature brand',
+                source: 'voice',
+            },
+        });
+        await vi.advanceTimersByTimeAsync(20000);
+        const response = await pending;
+
+        expect(response.body).toMatchObject({ totalCalories: 770, fallbackReason: 'VOICE_LOOKUP_TIMEOUT' });
+        expect(response.body.foods.map(food => food.quantity)).toEqual([7, 4]);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(JSON.parse(fetchMock.mock.calls[1][1].body).model).toBe('claude-opus-5');
+        expect(fetchMock.mock.calls[1][1].signal.aborted).toBe(true);
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('also cancels stalled official nutrition pages within the shared voice deadline', async () => {
+        vi.useFakeTimers();
+        const fetchMock = vi.fn((url, { method, signal }) => {
+            if (method === 'POST') {
+                return Promise.resolve(new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+                    foods: [{
+                        name: 'Great Value Bacon', calories: 70, protein: 5, carbs: 0, fat: 5,
+                        serving: '1 strip', quantity: 7, confidence: 'high',
+                        sourceType: 'official', source: 'Manufacturer nutrition',
+                        sourceUrl: 'https://www.walmart.com/ip/great-value-bacon/123',
+                    }],
+                    overallConfidence: 'high',
+                }) } }] }), { status: 200 }));
+            }
+            return new Promise((resolve, reject) => {
+                signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            });
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        const pending = invokeApi(foodParserHandler, {
+            headers: getTestAuthHeaders(),
+            body: {
+                query: 'Seven strips of Applewood thick cut bacon from great value brand and four organic free range eggs from Kirkland signature brand',
+                source: 'voice',
+            },
+        });
+        await vi.advanceTimersByTimeAsync(20000);
+        const response = await pending;
+
+        expect(response.body).toMatchObject({ totalCalories: 770, fallbackReason: 'VOICE_LOOKUP_TIMEOUT' });
+        expect(response.body.foods.map(food => food.quantity)).toEqual([7, 4]);
+        const pageCalls = fetchMock.mock.calls.filter(([, request]) => request.method === 'GET');
+        expect(pageCalls.length).toBeGreaterThan(0);
+        expect(pageCalls.every(([, request]) => request.signal.aborted)).toBe(true);
+        expect(vi.getTimerCount()).toBe(0);
     });
 
     it('canonicalizes only the adjacent repeated sausage referent in the exact voice repro', async () => {
