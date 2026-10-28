@@ -14,8 +14,10 @@
         'fuelfire_user_profile',
         'userProfile',
         'workoutHistory',
+        'workoutHistory.legacy',
         'fuelfire_logged_meals',
         'fuelfire_logged_meals_recovery_backup',
+        'fuelfire_workout_recovery_backups',
         'fuelfire_meal_plans',
         'fuelfire_saved_meal_plans',
         'fuelfire_saved_meals',
@@ -65,6 +67,71 @@
         'fuelfire_food_drafts',
         'stepGoal',
     ]);
+    const RECOVERY_KEYS = new Set([
+        'workoutHistory.legacy',
+        'fuelfire_logged_meals_recovery_backup',
+        'fuelfire_workout_recovery_backups',
+    ]);
+    const RAW_VALUE_KEYS = new Set([
+        'workoutHistory.legacy',
+        'fuelfire_recent_meal_plan',
+    ]);
+    const NUMERIC_STORAGE_KEYS = new Set([
+        'fuelfire_hydration_goal_oz',
+        'stepGoal',
+    ]);
+    const MARKER_STORAGE_KEYS = new Set([
+        'fuelfire_onboarding_v1',
+    ]);
+    const WORKOUT_RECOVERY_KEY_PATTERN = /^workoutHistory\.legacy\.[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)?$/;
+    const KNOWN_STORE_SHAPES = Object.freeze({
+        workoutHistory: 'collection',
+        fuelfire_logged_meals: 'collection',
+        fuelfire_meal_plans: 'array',
+        fuelfire_saved_meal_plans: 'array',
+        fuelfire_saved_meals: 'array',
+        fuelfire_saved_meal_bundles_v1: 'array',
+        fuelfire_learned_foods: 'array',
+        fuelfire_meal_patterns_v1: 'array',
+        fuelfire_body_stats: 'record',
+        fuelfire_bodyfat_entries: 'array',
+        fuelfire_weight_entries: 'array',
+        fuelfire_personal_records: 'array',
+        fuelfire_tracked_workouts: 'array',
+        recentWorkouts: 'array',
+        fitnessProgress: 'record',
+        savedWorkouts: 'array',
+        weeklySchedule: 'record',
+        fuelfire_calorie_log: 'array',
+        dailyFoodLog: 'array',
+        quickAddItems: 'array',
+        personalRecords: 'array',
+        workoutTemplates: 'array',
+        fuelfire_user_profile: 'record',
+        userProfile: 'record',
+        fuelfire_nutrition_goals: 'record',
+        fuelfire_recent_diet_goals: 'record',
+        fuelfire_diet_quiz_answers: 'record',
+        fuelfire_last_meal_plan_quiz_answers: 'record',
+        fuelfire_weekly_meal_plan_source: 'record',
+        fuelfire_hydration_today: 'record',
+        fuelfire_settings: 'record',
+        fuelfire_account_settings: 'record',
+        healthData: 'record',
+        currentWorkout: 'record',
+        activeWorkout: 'record',
+        currentQuickWorkout: 'record',
+        dailyNutrition: 'record',
+        currentDietPlan: 'record',
+        fuelfire_active_calories: 'array',
+        fuelfire_workout_draft: 'record',
+        fuelfire_workout_drafts: 'array',
+        fuelfire_workout_session_draft: 'record',
+        fuelfire_workout_session: 'record',
+        fuelfire_food_draft: 'record',
+        fuelfire_food_entry_draft: 'record',
+        fuelfire_food_drafts: 'array',
+    });
     const LEGACY_TEXT_KEYS = new Set([
         'userName',
         'userGender',
@@ -125,6 +192,76 @@
         return proto === Object.prototype || proto === null;
     }
 
+    function isCollectionPayload(value) {
+        return Array.isArray(value) || isPlainRecord(value);
+    }
+
+    function isNumericStorageValue(value) {
+        if (typeof value === 'number') return Number.isFinite(value);
+        return typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value));
+    }
+
+    function assertWorkoutRecoveryBackups(value) {
+        if (!Array.isArray(value) || value.length > 8) {
+            throw new AccountDataError('INVALID_BACKUP', 'fuelfire_workout_recovery_backups must be an array of at most 8 entries.', { key: 'fuelfire_workout_recovery_backups' });
+        }
+        const keys = new Set();
+        value.forEach((entry, index) => {
+            if (!isPlainRecord(entry) || Object.keys(entry).length !== 2 || Object.keys(entry).some((key) => key !== 'key' && key !== 'raw')) {
+                throw new AccountDataError('INVALID_BACKUP', `Workout recovery entry ${index + 1} must contain only key and raw.`, { key: 'fuelfire_workout_recovery_backups' });
+            }
+            if (typeof entry.key !== 'string' || !WORKOUT_RECOVERY_KEY_PATTERN.test(entry.key)) {
+                throw new AccountDataError('INVALID_BACKUP', `Workout recovery entry ${index + 1} has an invalid recovery key.`, { key: 'fuelfire_workout_recovery_backups' });
+            }
+            if (keys.has(entry.key)) {
+                throw new AccountDataError('INVALID_BACKUP', `Workout recovery entry ${index + 1} duplicates a recovery key.`, { key: 'fuelfire_workout_recovery_backups' });
+            }
+            keys.add(entry.key);
+            if (typeof entry.raw !== 'string') {
+                throw new AccountDataError('INVALID_BACKUP', `Workout recovery entry ${index + 1} raw value must remain a string.`, { key: 'fuelfire_workout_recovery_backups' });
+            }
+        });
+    }
+
+    function assertKnownStoreTypes(data) {
+        Object.entries(data).forEach(([key, value]) => {
+            if (key === 'workoutHistory.legacy') {
+                if (typeof value !== 'string') {
+                    throw new AccountDataError('INVALID_BACKUP', 'workoutHistory.legacy must remain an opaque raw string.', { key });
+                }
+                return;
+            }
+            if (key === 'fuelfire_workout_recovery_backups') {
+                assertWorkoutRecoveryBackups(value);
+                return;
+            }
+            if (NUMERIC_STORAGE_KEYS.has(key)) {
+                if (!isNumericStorageValue(value)) {
+                    throw new AccountDataError('INVALID_BACKUP', `Known scalar store "${key}" must contain a finite number or numeric string.`, { key });
+                }
+                return;
+            }
+            if (MARKER_STORAGE_KEYS.has(key)) {
+                if (typeof value !== 'string' && typeof value !== 'boolean') {
+                    throw new AccountDataError('INVALID_BACKUP', `Known marker store "${key}" must contain a string or boolean.`, { key });
+                }
+                return;
+            }
+            const shape = KNOWN_STORE_SHAPES[key];
+            let valid = true;
+            if (shape === 'collection') valid = isCollectionPayload(value);
+            else if (shape === 'array') valid = Array.isArray(value);
+            else if (shape === 'record') valid = isPlainRecord(value);
+            if (!valid) {
+                const expected = shape === 'collection' ? 'an array or object' : shape === 'array' ? 'an array' : 'an object';
+                throw new AccountDataError('INVALID_BACKUP', `Known store "${key}" must contain ${expected}.`, { key });
+            }
+            if (RECOVERY_KEYS.has(key) && !(typeof value === 'string' || isCollectionPayload(value))) {
+                throw new AccountDataError('INVALID_BACKUP', `Recovery key "${key}" must contain a string, array, or object.`, { key });
+            }
+        });
+    }
+
     function byteLength(value) {
         const text = typeof value === 'string' ? value : JSON.stringify(value);
         if (typeof TextEncoder === 'function') return new TextEncoder().encode(text).length;
@@ -174,7 +311,23 @@
         return JSON.parse(JSON.stringify(value));
     }
 
+    function parseOwnedValue(key, raw) {
+        if (RAW_VALUE_KEYS.has(key)) return raw;
+        if (RECOVERY_KEYS.has(key)) {
+            try {
+                const parsed = JSON.parse(raw);
+                return isCollectionPayload(parsed) ? parsed : raw;
+            } catch (error) {
+                return raw;
+            }
+        }
+        return parseStoredValue(raw);
+    }
+
     function toStorageValue(key, value) {
+        if (RAW_VALUE_KEYS.has(key) || (RECOVERY_KEYS.has(key) && typeof value === 'string')) return value;
+        if (NUMERIC_STORAGE_KEYS.has(key)) return String(value);
+        if (MARKER_STORAGE_KEYS.has(key)) return String(value);
         if (LEGACY_TEXT_KEYS.has(key)) {
             if (value === null || value === undefined) return '';
             return String(value);
@@ -188,7 +341,7 @@
         OWNED_KEYS.forEach((key) => {
             const raw = getItem(target, key);
             if (raw === null) return;
-            data[key] = parseStoredValue(raw);
+            data[key] = parseOwnedValue(key, raw);
         });
         return data;
     }
@@ -205,6 +358,7 @@
             exportedAt: exportedAt.toISOString(),
             data: readOwnedData(target),
         };
+        assertKnownStoreTypes(payload.data);
         assertSafeJsonValue(payload);
         const json = JSON.stringify(payload, null, 2);
         const bytes = byteLength(json);
@@ -261,6 +415,7 @@
                 throw new AccountDataError('SENSITIVE_DATA', `Backup contains a blocked storage key: ${key}.`);
             }
         });
+        assertKnownStoreTypes(payload.data);
         assertSafeJsonValue(payload);
         const normalized = cloneJson(payload);
         const bytes = byteLength(JSON.stringify(normalized));
@@ -292,8 +447,10 @@
 
     function restoreSnapshot(storage, snapshot) {
         OWNED_KEYS.forEach((key) => {
-            if (snapshot.has(key)) storage.setItem(key, snapshot.get(key));
-            else storage.removeItem(key);
+            if (getItem(storage, key) !== null) storage.removeItem(key);
+        });
+        snapshot.forEach((value, key) => {
+            storage.setItem(key, value);
         });
     }
 
@@ -536,10 +693,130 @@
         };
     }
 
-    function readRevenueCatStatus(storage = root?.localStorage) {
-        const target = ensureStorage(storage);
+    const INACTIVE_ENTITLEMENT_STATUSES = new Set(['inactive', 'expired', 'revoked', 'cancelled', 'canceled']);
+    const ACTIVE_ENTITLEMENT_STATUSES = new Set(['active', 'trial', 'trialing', 'subscribed']);
+
+    function expirationTimestamp(value) {
+        if (value === null || value === undefined || value === '') return null;
+        if (typeof value === 'number') {
+            if (!Number.isFinite(value)) return null;
+            return value < 1e12 ? value * 1000 : value;
+        }
+        const parsed = Date.parse(String(value));
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    function entitlementIsInactive(value) {
+        if (value === false) return true;
+        if (!isPlainRecord(value)) return false;
+        if (value.isActive === false || value.active === false || value.revoked === true) return true;
+        const status = typeof value.status === 'string' ? value.status.toLowerCase() : '';
+        if (INACTIVE_ENTITLEMENT_STATUSES.has(status)) return true;
+        const expiration = expirationTimestamp(value.expirationDate || value.expiresDate || value.expiresAt);
+        return expiration !== null && expiration <= Date.now();
+    }
+
+    function entitlementIsActive(value, assumeActive = false) {
+        if (entitlementIsInactive(value)) return false;
+        if (value === true) return true;
+        if (!isPlainRecord(value)) return false;
+        if (value.isActive === true || value.active === true) return true;
+        const status = typeof value.status === 'string' ? value.status.toLowerCase() : '';
+        if (ACTIVE_ENTITLEMENT_STATUSES.has(status)) return true;
+        const expiration = expirationTimestamp(value.expirationDate || value.expiresDate || value.expiresAt);
+        if (expiration !== null) return expiration > Date.now();
+        return assumeActive;
+    }
+
+    function buildEntitlementStatus(entitlements, options = {}) {
+        const entries = isPlainRecord(entitlements) ? entitlements : {};
+        const activeEntries = Object.entries(entries).filter(([, value]) => entitlementIsActive(value, options.assumeActive === true));
+        const names = activeEntries.map(([name]) => name);
+        const expirationDates = activeEntries
+            .map(([, value]) => isPlainRecord(value) ? (value.expirationDate || value.expiresDate || value.expiresAt || null) : null)
+            .filter(Boolean);
+        return {
+            available: options.available !== undefined ? options.available : false,
+            configured: options.configured !== undefined ? options.configured : false,
+            active: names.length > 0,
+            entitlementNames: names,
+            expirationDates,
+            source: options.source || 'cache',
+        };
+    }
+
+    function statusCandidate(rawStatus) {
+        if (!isPlainRecord(rawStatus)) return null;
+        if (isPlainRecord(rawStatus.status) && !rawStatus.entitlements && !rawStatus.activeEntitlements) {
+            return rawStatus.status;
+        }
+        return rawStatus;
+    }
+
+    function providerEntitlementData(rawStatus) {
+        const status = statusCandidate(rawStatus);
+        if (!status) return null;
+        const directActive = typeof status.active === 'boolean' ? status.active : null;
+        if (isPlainRecord(status.entitlements?.active)) {
+            return { status, entitlements: status.entitlements.active, assumeActive: true, directActive };
+        }
+        if (isPlainRecord(status.activeEntitlements)) {
+            return { status, entitlements: status.activeEntitlements, assumeActive: true, directActive };
+        }
+        if (isPlainRecord(status.active)) {
+            return { status, entitlements: status.active, assumeActive: true, directActive };
+        }
+        if (isPlainRecord(status.entitlements)) {
+            return { status, entitlements: status.entitlements, assumeActive: false, directActive };
+        }
+        const metadataKeys = new Set(['available', 'configured', 'active', 'entitlementNames', 'expirationDates', 'refreshError', 'status']);
+        const directEntries = Object.fromEntries(Object.entries(status).filter(([key]) => !metadataKeys.has(key)));
+        return { status, entitlements: directEntries, assumeActive: false, directActive };
+    }
+
+    function normalizeProviderStatus(rawStatus, api) {
+        const data = providerEntitlementData(rawStatus);
+        if (!data) return null;
+        const status = data.status;
+        const result = buildEntitlementStatus(data.entitlements, {
+            available: typeof status.available === 'boolean' ? status.available : true,
+            configured: typeof status.configured === 'boolean' ? status.configured : Boolean(api),
+            source: 'provider',
+            assumeActive: data.assumeActive,
+        });
+        if (data.directActive === false) {
+            result.active = false;
+            result.entitlementNames = [];
+            result.expirationDates = [];
+        }
+        if (!result.entitlementNames.length && data.directActive === true && Array.isArray(status.entitlementNames)) {
+            result.entitlementNames = status.entitlementNames.slice();
+            result.active = result.entitlementNames.length > 0;
+            result.expirationDates = Array.isArray(status.expirationDates) ? status.expirationDates.slice() : [];
+        }
+        return result;
+    }
+
+    function readProviderStatus(api) {
+        if (!api || typeof api.getStatus !== 'function') return null;
+        try {
+            const rawStatus = api.getStatus();
+            if (rawStatus && typeof rawStatus.then === 'function') return null;
+            return normalizeProviderStatus(rawStatus, api);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async function readProviderStatusAsync(api) {
+        if (!api || typeof api.getStatus !== 'function') return null;
+        const rawStatus = await api.getStatus();
+        return normalizeProviderStatus(rawStatus, api);
+    }
+
+    function readCachedRevenueCatStatus(storage, api) {
         let entitlements = {};
-        const raw = getItem(target, 'rc_entitlements');
+        const raw = getItem(storage, 'rc_entitlements');
         if (raw) {
             try {
                 const parsed = JSON.parse(raw);
@@ -548,31 +825,31 @@
                 entitlements = {};
             }
         }
-        const api = root?.__aiAccess;
-        const available = Boolean(api && (typeof api.refreshEntitlements === 'function' || typeof api.restorePurchases === 'function'));
-        const names = Object.keys(entitlements);
-        const expirationDates = names
-            .map((name) => entitlements[name]?.expirationDate || entitlements[name]?.expiresDate || null)
-            .filter(Boolean);
-        return {
-            available,
+        return buildEntitlementStatus(entitlements, {
+            available: Boolean(api && (typeof api.getStatus === 'function' || typeof api.refreshEntitlements === 'function' || typeof api.restorePurchases === 'function')),
             configured: Boolean(api),
-            active: names.length > 0,
-            entitlementNames: names,
-            expirationDates,
-        };
+            source: 'cache',
+        });
+    }
+
+    function readRevenueCatStatus(storage = root?.localStorage) {
+        const target = ensureStorage(storage);
+        const api = root?.__aiAccess;
+        return readProviderStatus(api) || readCachedRevenueCatStatus(target, api);
     }
 
     async function refreshRevenueCatStatus(options = {}) {
         const target = ensureStorage(options.storage || root?.localStorage);
         const api = options.api || root?.__aiAccess;
-        if (!api || typeof api.refreshEntitlements !== 'function') return readRevenueCatStatus(target);
+        if (!api) return readRevenueCatStatus(target);
         try {
-            await api.refreshEntitlements();
+            if (typeof api.refreshEntitlements === 'function') await api.refreshEntitlements();
+            const providerStatus = await readProviderStatusAsync(api);
+            return providerStatus || readCachedRevenueCatStatus(target, api);
         } catch (error) {
-            return { ...readRevenueCatStatus(target), refreshError: true };
+            const fallback = readProviderStatus(api) || readCachedRevenueCatStatus(target, api);
+            return { ...fallback, refreshError: true };
         }
-        return readRevenueCatStatus(target);
     }
 
     return Object.freeze({

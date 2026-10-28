@@ -14,12 +14,12 @@
     <script src="global-nav.js" defer></script>
     <style>
         :root {
-            --carolina-blue: #4B9CD3;
+            --carolina-blue: #064F87;
             --carolina-dark: #13294B;
-            --carolina-light: #7BAFD4;
+            --carolina-light: #3A7CA5;
             --light-bg: #F0F7FC;
             --card-bg: #F5FAFD;
-            --gradient-1: linear-gradient(135deg, #4B9CD3 0%, #3A7CA5 100%);
+            --gradient-1: linear-gradient(135deg, #064F87 0%, #13294B 100%);
         }
 
         body {
@@ -68,7 +68,7 @@
             justify-content: center;
             font-size: 2.5rem;
             margin: 0 auto 16px;
-            box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);
+            box-shadow: 0 4px 15px rgba(6, 79, 135, 0.3);
         }
 
         .user-name {
@@ -128,12 +128,12 @@
             border-radius: 16px;
             margin-bottom: 16px;
             color: white;
-            box-shadow: 0 8px 25px rgba(75, 156, 211, 0.3);
+            box-shadow: 0 8px 25px rgba(6, 79, 135, 0.3);
         }
 
         .status-badge {
             background: white;
-            color: var(--carolina-blue);
+            color: var(--carolina-dark);
             padding: 6px 12px;
             border-radius: 999px;
             font-size: 0.75rem;
@@ -141,8 +141,8 @@
         }
 
         .status-badge.inactive {
-            background: rgba(255,255,255,0.3);
-            color: white;
+            background: #E5EEF6;
+            color: var(--carolina-dark);
         }
 
         .subscription-info {
@@ -156,7 +156,6 @@
         }
 
         .subscription-details {
-            opacity: 0.9;
             font-size: 0.85rem;
         }
 
@@ -172,12 +171,12 @@
             width: 100%;
             margin-bottom: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(75, 156, 211, 0.3);
+            box-shadow: 0 4px 15px rgba(6, 79, 135, 0.3);
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(75, 156, 211, 0.4);
+            box-shadow: 0 6px 20px rgba(6, 79, 135, 0.4);
         }
 
         .action-btn.secondary {
@@ -194,13 +193,13 @@
 
         .action-btn.danger {
             background: white;
-            border: 2px solid #f44336;
-            color: #f44336;
+            border: 2px solid #8b1e2d;
+            color: #8b1e2d;
             box-shadow: none;
         }
 
         .action-btn.danger:hover {
-            background: #f44336;
+            background: #8b1e2d;
             color: white;
         }
 
@@ -263,7 +262,8 @@
             align-items: center;
             gap: 8px;
             color: var(--carolina-blue);
-            text-decoration: none;
+            text-decoration: underline;
+            text-underline-offset: 3px;
             margin-bottom: 24px;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -296,7 +296,7 @@
         .input-group select {
             padding: 12px;
             border-radius: 12px;
-            border: 1px solid #e0e8f0;
+            border: 2px solid #54708f;
             background: #f7fbff;
             font-size: 1rem;
             color: var(--carolina-dark);
@@ -307,7 +307,7 @@
         .input-group input:focus,
         .input-group select:focus {
             border-color: var(--carolina-blue);
-            box-shadow: 0 0 0 3px rgba(75, 156, 211, 0.15);
+            box-shadow: 0 0 0 3px rgba(6, 79, 135, 0.25);
         }
 
         .skip-link {
@@ -333,7 +333,8 @@
         }
 
         main:focus {
-            outline: none;
+            outline: 3px solid var(--carolina-dark);
+            outline-offset: 3px;
         }
 
         .section-title {
@@ -568,12 +569,12 @@
             <div class="form-grid">
                 <div class="input-group">
                     <label for="profileNameInput">Name</label>
-                    <input id="profileNameInput" name="name" type="text" placeholder="Your name" autocomplete="name" aria-describedby="profile-name-help">
+                    <input id="profileNameInput" name="name" type="text" placeholder="Your name" autocomplete="name" aria-describedby="profile-name-help profile-form-error">
                     <span id="profile-name-help" class="visually-hidden">Optional display name kept on this device.</span>
                 </div>
                 <div class="input-group">
                     <label for="profileGenderInput">Gender</label>
-                    <select id="profileGenderInput">
+                    <select id="profileGenderInput" aria-describedby="profile-form-error">
                         <option value="">Select</option>
                         <option value="female">Female</option>
                         <option value="male">Male</option>
@@ -583,12 +584,12 @@
                 </div>
                 <div class="input-group">
                     <label for="profileAgeInput">Age</label>
-                    <input id="profileAgeInput" name="age" type="number" min="0" max="120" step="1" inputmode="numeric" placeholder="Age" aria-describedby="profile-age-help">
+                    <input id="profileAgeInput" name="age" type="number" min="0" max="120" step="1" inputmode="numeric" placeholder="Age" aria-describedby="profile-age-help profile-form-error">
                     <span id="profile-age-help" class="visually-hidden">Optional age in years, from 0 to 120.</span>
                 </div>
                 <div class="input-group">
                     <label for="profileWeightInput">Weight (lbs)</label>
-                    <input id="profileWeightInput" name="weightLbs" type="number" min="0.1" max="1500" step="0.1" inputmode="decimal" placeholder="Weight" aria-describedby="profile-weight-help">
+                    <input id="profileWeightInput" name="weightLbs" type="number" min="0.1" max="1500" step="0.1" inputmode="decimal" placeholder="Weight" aria-describedby="profile-weight-help profile-form-error">
                     <span id="profile-weight-help" class="visually-hidden">Optional body weight in pounds, used for estimates.</span>
                 </div>
             </div>
@@ -633,7 +634,7 @@
             </div>
             <p id="subscription-status-message" class="backup-help">This page shows only entitlement information made available by the installed RevenueCat bridge.</p>
             <div class="dialog-actions" style="justify-content: stretch;">
-                <a class="action-btn secondary" id="manage-subscriptions-link" href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener noreferrer">Manage App Store subscriptions <span aria-hidden="true">(opens in new tab)</span></a>
+                <a class="action-btn secondary" id="manage-subscriptions-link" href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener noreferrer">Manage App Store subscriptions <span>(opens in new tab)</span></a>
                 <button class="action-btn secondary" id="restore-purchases-button" type="button">Restore purchases</button>
                 <button class="action-btn secondary" id="refresh-entitlements-button" type="button">Refresh entitlement status</button>
             </div>
@@ -711,7 +712,7 @@
         </a>
     </nav>
 
-    <dialog id="import-dialog" role="dialog" aria-modal="true" aria-labelledby="import-dialog-heading" aria-describedby="import-dialog-description">
+    <dialog id="import-dialog" role="dialog" aria-modal="true" aria-labelledby="import-dialog-heading" aria-describedby="import-dialog-description import-preview-detail">
         <h2 id="import-dialog-heading">Restore FuelFire backup?</h2>
         <p id="import-dialog-description">Review the backup before changing local data. Unrelated origin storage is preserved.</p>
         <p id="import-preview-detail" class="backup-help"></p>
@@ -731,7 +732,7 @@
         </details>
         <div id="delete-first-step">
             <label for="delete-confirmation-input">Type DELETE to continue</label>
-            <input id="delete-confirmation-input" type="text" autocomplete="off" spellcheck="false" aria-describedby="delete-dialog-description">
+            <input id="delete-confirmation-input" type="text" autocomplete="off" spellcheck="false" aria-describedby="delete-dialog-description delete-confirmation-error">
             <p id="delete-confirmation-error" class="error-message" role="alert" hidden>Type DELETE exactly to continue.</p>
         </div>
         <div id="delete-final-step" hidden>
@@ -879,7 +880,8 @@
                     return;
                 }
                 if (status.refreshError) message.textContent = 'RevenueCat could not be refreshed; the cached result is shown.';
-                else message.textContent = 'Status comes from the RevenueCat entitlement cache, not from local plan selections.';
+                else if (status.source === 'provider') message.textContent = 'Status comes from the installed RevenueCat entitlement API, not from local demo or plan selections.';
+                else message.textContent = 'Status comes from cached RevenueCat entitlement data; local demo or plan selections are not counted.';
                 label.textContent = status.active ? 'Active RevenueCat entitlement' : 'No active RevenueCat entitlement';
                 details.textContent = formatEntitlementDetails(status);
                 badge.textContent = status.active ? 'Active' : 'Not active';
@@ -947,6 +949,14 @@
                 $('choose-import-button').focus();
             }
 
+            function showAccessibleDialog(dialog) {
+                dialog.showModal();
+                // A shared modal manager may add aria-hidden while managing the
+                // stacking context. An open dialog must remain in the
+                // accessibility tree so role-based users can review it.
+                dialog.removeAttribute('aria-hidden');
+            }
+
             function openImportDialog(raw, fileName) {
                 try {
                     const preview = accountData.previewBackup(raw, localStorage);
@@ -955,7 +965,7 @@
                         ? preview.duplicateKeys.length + ' existing local record' + (preview.duplicateKeys.length === 1 ? '' : 's') + ' will be replaced if you choose merge or replace.'
                         : 'No matching owned records are currently stored.';
                     $('import-preview-detail').textContent = fileName + ': ' + preview.keys.length + ' owned key' + (preview.keys.length === 1 ? '' : 's') + '; ' + duplicateText;
-                    $('import-dialog').showModal();
+                    showAccessibleDialog($('import-dialog'));
                     $('cancel-import-button').focus();
                 } catch (error) {
                     setBackupError(error?.message || 'This backup could not be validated.');
@@ -1010,6 +1020,7 @@
                 $('delete-final-step').hidden = true;
                 $('delete-confirmation-input').value = '';
                 $('delete-confirmation-error').hidden = true;
+                $('delete-confirmation-input').removeAttribute('aria-invalid');
                 $('continue-delete-button').hidden = false;
                 $('continue-delete-button').disabled = true;
                 $('confirm-delete-button').hidden = true;
@@ -1018,7 +1029,7 @@
             function openDeleteDialog() {
                 deleteTrigger = $('delete-local-data-button');
                 resetDeleteDialog();
-                $('delete-data-dialog').showModal();
+                showAccessibleDialog($('delete-data-dialog'));
                 $('cancel-delete-button').focus();
             }
 
@@ -1033,9 +1044,11 @@
                 const input = $('delete-confirmation-input');
                 if (input.value !== 'DELETE') {
                     $('delete-confirmation-error').hidden = false;
+                    input.setAttribute('aria-invalid', 'true');
                     input.focus();
                     return;
                 }
+                input.removeAttribute('aria-invalid');
                 $('delete-dialog-heading').textContent = 'Final confirmation: delete local app data';
                 $('delete-first-step').hidden = true;
                 $('delete-final-step').hidden = false;
@@ -1079,6 +1092,21 @@
                     setError(error?.message || 'Account data could not be loaded.');
                 }
 
+                ['import-dialog', 'delete-data-dialog'].forEach((dialogId) => {
+                    const dialog = $(dialogId);
+                    const keepOpenDialogAccessible = () => {
+                        if (dialog.open) dialog.removeAttribute('aria-hidden');
+                    };
+                    dialog.addEventListener('toggle', keepOpenDialogAccessible);
+                    if (typeof MutationObserver === 'function') {
+                        new MutationObserver(keepOpenDialogAccessible).observe(dialog, {
+                            attributes: true,
+                            attributeFilter: ['aria-hidden'],
+                        });
+                    }
+                    keepOpenDialogAccessible();
+                });
+
                 $('edit-profile-button').addEventListener('click', editProfile);
                 $('profile-form').addEventListener('submit', saveProfileDetails);
                 $('reduce-motion-toggle').addEventListener('click', () => {
@@ -1104,6 +1132,7 @@
                 $('delete-confirmation-input').addEventListener('input', (event) => {
                     $('continue-delete-button').disabled = event.target.value !== 'DELETE';
                     $('delete-confirmation-error').hidden = true;
+                    event.target.removeAttribute('aria-invalid');
                 });
                 $('cancel-delete-button').addEventListener('click', closeDeleteDialog);
                 $('continue-delete-button').addEventListener('click', advanceDeleteDialog);
