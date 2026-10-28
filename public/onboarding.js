@@ -8,14 +8,14 @@
             description: 'Everything you need—workouts, nutrition, health stats—is one tap away on this quick-launch strip.',
         },
         {
-            selector: '#calorie-overview-card',
-            title: 'AI Calorie Command Center',
-            description: 'Tap here to log meals by voice, text, photo, or barcode. Anthropics AI breaks each entry into calories, macros, and updates this dashboard instantly.',
+            selector: '#home-summary-card',
+            title: 'Today at a glance',
+            description: 'Open the calorie tracker from this summary to review meals, macros, and your daily balance.',
         },
         {
             selector: '#quick-action-log-food',
             title: 'Log Food with AI',
-            description: 'Need to capture a meal fast? Open the AI logger to speak it, type it, or scan it—FuelFire handles the math for you.',
+            description: 'Capture a meal quickly with voice, text, photo, or barcode tools in the food logger.',
         },
         {
             selector: '#quick-action-quick-workout',
@@ -23,40 +23,15 @@
             description: 'Generate a brand-new routine in seconds. Perfect for hotel gyms, home setups, or when you just need to move now.',
         },
         {
-            selector: '#menu-create-workout',
-            title: 'Build Custom Programs',
-            description: 'Inside “Create Workout” you can craft multi-week plans, add form notes, and save them for future sessions.',
-            onBefore: () => setSidebarOpen(true),
-            onAfter: () => setSidebarOpen(false)
-        },
-        {
-            selector: '#menu-diet-creation',
-            title: 'Personalized Meal Plans',
-            description: 'Take the Enhanced Diet Quiz and get a 14-day plan with macros, recipes, and shopping lists tuned to your goals.',
-            onBefore: () => setSidebarOpen(true),
-            onAfter: () => setSidebarOpen(false)
-        },
-        {
-            selector: '#health-dashboard-card',
+            selector: '#health-today-card',
             title: 'Apple Health Dashboard',
-            description: 'Sync with Apple Health to see live steps, distance, heart rate trends, and active calories all in one place.',
-        },
-        {
-            selector: '#menu-workout-techniques',
-            title: 'Form & Technique Library',
-            description: 'Need coaching cues or demos? Every exercise has form notes, muscle focus, and safety tips right here.',
-            onBefore: () => setSidebarOpen(true),
-            onAfter: () => setSidebarOpen(false)
-        },
-        {
-            selector: '.hamburger',
-            title: 'Navigate Anytime',
-            description: 'Use the FuelFire menu to jump between workouts, meal plans, supplements, and health tools from any page.',
-            onBefore: () => setSidebarOpen(false)
+            description: 'Use the health dashboard link to review current Apple Health data and separate local activity.',
         }
     ];
 
     let currentStep = -1;
+    let tourReturnFocus = null;
+    let tourBackground = [];
     let overlay, highlight, tooltip, titleEl, descEl, stepEl, prevBtn, nextBtn, skipBtn;
 
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -99,8 +74,11 @@
 
     function startTour() {
         if (isNutritionGoalDialogVisible()) return;
+        tourReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         ensureOverlay();
+        setTourBackgroundInert(true);
         overlay.classList.add('onboard-visible');
+        overlay.setAttribute('aria-hidden', 'false');
         showStep(0);
         document.addEventListener('keydown', handleKeydown);
     }
@@ -120,6 +98,7 @@
             }
             #onboarding-overlay.onboard-visible {
                 opacity: 1;
+                pointer-events: auto;
             }
             #onboarding-overlay .onboard-highlight {
                 position: fixed;
@@ -208,12 +187,17 @@
 
         overlay = document.createElement('div');
         overlay.id = 'onboarding-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-labelledby', 'onboarding-title');
+        overlay.setAttribute('aria-describedby', 'onboarding-description');
+        overlay.setAttribute('aria-hidden', 'true');
         overlay.innerHTML = `
             <div class="onboard-highlight"></div>
-            <div class="onboard-tooltip">
-                <div class="onboard-step-indicator"></div>
-                <h3></h3>
-                <p></p>
+            <div class="onboard-tooltip" tabindex="-1">
+                <div class="onboard-step-indicator" role="status" aria-live="polite"></div>
+                <h3 id="onboarding-title"></h3>
+                <p id="onboarding-description"></p>
                 <div class="onboard-controls">
                     <button type="button" class="secondary" data-action="skip">Skip</button>
                     <div style="display:flex; gap:10px; flex:1;">
@@ -321,6 +305,8 @@
         } else {
             nextBtn.textContent = 'Next';
         }
+        overlay.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => nextBtn?.focus());
     }
 
     function completeTour() {
@@ -338,9 +324,13 @@
         localStorage.setItem(TOUR_KEY, 'done');
         if (overlay) {
             overlay.classList.remove('onboard-visible');
+            overlay.setAttribute('aria-hidden', 'true');
             setTimeout(() => overlay.remove(), 250);
         }
+        setTourBackgroundInert(false);
         setSidebarOpen(false);
+        if (tourReturnFocus?.isConnected) tourReturnFocus.focus();
+        tourReturnFocus = null;
         document.removeEventListener('keydown', handleKeydown);
     }
 
@@ -361,6 +351,7 @@
         currentStep = -1;
         const dismissedOverlay = overlay;
         overlay.classList.remove('onboard-visible');
+        overlay.setAttribute('aria-hidden', 'true');
         setTimeout(() => dismissedOverlay.remove(), 250);
         overlay = null;
         highlight = null;
@@ -372,6 +363,9 @@
         nextBtn = null;
         skipBtn = null;
         setSidebarOpen(false);
+        setTourBackgroundInert(false);
+        if (tourReturnFocus?.isConnected) tourReturnFocus.focus();
+        tourReturnFocus = null;
         document.removeEventListener('keydown', handleKeydown);
     }
 
@@ -379,6 +373,21 @@
         if (!overlay || !overlay.classList.contains('onboard-visible')) return;
         if (isNutritionGoalDialogVisible()) {
             dismissTour();
+            return;
+        }
+        if (event.key === 'Tab') {
+            const focusable = Array.from(tooltip?.querySelectorAll('button:not([disabled]), [tabindex]:not([tabindex="-1"])') || [])
+                .filter((element) => element.getClientRects().length > 0);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
             return;
         }
         if (event.key === 'ArrowRight' || event.key === ' ') {
@@ -398,6 +407,10 @@
         const dimmer = document.querySelector('div.overlay');
         if (!sidebar) return;
         const isOpen = sidebar.classList.contains('open');
+        if (typeof window.toggleSidebar === 'function' && isOpen !== shouldOpen) {
+            window.toggleSidebar(shouldOpen);
+            return;
+        }
         if (shouldOpen && !isOpen) {
             sidebar.classList.add('open');
             if (dimmer) dimmer.classList.add('show');
@@ -405,5 +418,22 @@
             sidebar.classList.remove('open');
             if (dimmer) dimmer.classList.remove('show');
         }
+    }
+
+    function setTourBackgroundInert(inert) {
+        if (inert) {
+            tourBackground = Array.from(document.body.children).filter((element) => element !== overlay);
+            tourBackground.forEach((element) => {
+                element.dataset.onboardingPreviousInert = String(Boolean(element.inert));
+                element.inert = true;
+            });
+            return;
+        }
+        tourBackground.forEach((element) => {
+            if (!element.isConnected) return;
+            element.inert = element.dataset.onboardingPreviousInert === 'true';
+            delete element.dataset.onboardingPreviousInert;
+        });
+        tourBackground = [];
     }
 })();

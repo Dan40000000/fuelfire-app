@@ -12,14 +12,16 @@ try {
 }
 
 // Toggle Sidebar Menu
-function toggleSidebar() {
+function toggleSidebar(forceOpen) {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.querySelector('.overlay');
     if (sidebar) {
-        sidebar.classList.toggle('open');
+        const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !sidebar.classList.contains('open');
+        sidebar.classList.toggle('open', shouldOpen);
     }
     if (overlay) {
-        overlay.classList.toggle('show');
+        const shouldShow = sidebar ? sidebar.classList.contains('open') : Boolean(forceOpen);
+        overlay.classList.toggle('show', shouldShow);
     }
 }
 
@@ -55,6 +57,160 @@ function replaceClickTargetWithButton(element) {
     return button;
 }
 
+function getFocusableElements(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((element) => !element.hidden && element.getClientRects().length > 0);
+}
+
+// Shared dialog behavior for the shell's custom overlays. Keeping this in one
+// place prevents each page from inventing a slightly different focus trap.
+function enhanceModalDialog(modal) {
+    if (!modal || modal.dataset.modalManaged === 'true') return modal;
+
+    modal.dataset.modalManaged = 'true';
+    if (!modal.getAttribute('role')) modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    if (!modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true');
+
+    const background = [];
+    let modalBranch = modal;
+    while (modalBranch && modalBranch.parentElement) {
+        Array.from(modalBranch.parentElement.children).forEach((sibling) => {
+            if (sibling !== modalBranch && sibling.tagName !== 'SCRIPT' && !background.includes(sibling)) {
+                background.push(sibling);
+            }
+        });
+        modalBranch = modalBranch.parentElement;
+        if (modalBranch === document.body) break;
+    }
+    let returnFocus = null;
+    let wasOpen = false;
+
+    const isVisible = () => modal.getAttribute('aria-hidden') !== 'true' && modal.style.display !== 'none';
+    const syncBackground = (inert) => background.forEach((element) => {
+        if (inert) {
+            if (!element.dataset.modalPreviousInert) element.dataset.modalPreviousInert = String(Boolean(element.inert));
+            element.inert = true;
+        } else if (element.dataset.modalPreviousInert) {
+            element.inert = element.dataset.modalPreviousInert === 'true';
+            delete element.dataset.modalPreviousInert;
+        }
+    });
+
+    modal.addEventListener('keydown', (event) => {
+        if (!isVisible()) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeModalDialog(modal);
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = getFocusableElements(modal);
+        if (!focusable.length) {
+            event.preventDefault();
+            modal.focus();
+            return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    modal._fuelFireModalState = {
+        background,
+        get returnFocus() { return returnFocus; },
+        set returnFocus(value) { returnFocus = value; },
+        get wasOpen() { return wasOpen; },
+        set wasOpen(value) { wasOpen = value; },
+        syncBackground
+    };
+    const syncExternalModalState = () => {
+        const isOpen = modal.style.display !== 'none' && modal.getAttribute('aria-hidden') !== 'true';
+        if (isOpen && !wasOpen) {
+            wasOpen = true;
+            syncBackground(true);
+            requestAnimationFrame(() => getFocusableElements(modal)[0]?.focus());
+        } else if (!isOpen && wasOpen) {
+            wasOpen = false;
+            syncBackground(false);
+            requestAnimationFrame(() => {
+                if (returnFocus?.isConnected) returnFocus.focus();
+            });
+        }
+    };
+    new MutationObserver(syncExternalModalState).observe(modal, {
+        attributes: true,
+        attributeFilter: ['style', 'aria-hidden']
+    });
+    syncExternalModalState();
+    return modal;
+}
+
+function openModalDialog(modal, trigger) {
+    if (!modal) return false;
+    enhanceModalDialog(modal);
+    const state = modal._fuelFireModalState;
+    state.returnFocus = trigger || (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    modal.setAttribute('aria-hidden', 'false');
+    modal.style.display = modal.dataset.modalDisplay || 'flex';
+    state.syncBackground(true);
+    state.wasOpen = true;
+    requestAnimationFrame(() => getFocusableElements(modal)[0]?.focus());
+    return true;
+}
+
+function closeModalDialog(modal) {
+    if (!modal) return false;
+    enhanceModalDialog(modal);
+    const state = modal._fuelFireModalState;
+    modal.setAttribute('aria-hidden', 'true');
+    modal.style.display = 'none';
+    state.syncBackground(false);
+    if (state.wasOpen) {
+        state.wasOpen = false;
+        requestAnimationFrame(() => {
+            if (state.returnFocus?.isConnected) state.returnFocus.focus();
+        });
+    }
+    return true;
+}
+
+function focusRouteScreen(screenId) {
+    const screen = screenId ? document.getElementById(screenId) : document.querySelector('.screen-content.active');
+    if (!screen) return false;
+    if (!screen.hasAttribute('tabindex')) screen.tabIndex = -1;
+    screen.focus({ preventScroll: true });
+    const heading = screen.querySelector('h1, h2, h3');
+    const title = heading?.textContent?.trim();
+    const announcer = document.getElementById('route-announcer') || (() => {
+        const element = document.createElement('div');
+        element.id = 'route-announcer';
+        element.setAttribute('role', 'status');
+        element.setAttribute('aria-live', 'polite');
+        element.className = 'visually-hidden';
+        document.body.appendChild(element);
+        return element;
+    })();
+    announcer.textContent = title ? `${title} screen` : 'Screen changed';
+    return true;
+}
+
+window.FuelFireModal = {
+    enhance: enhanceModalDialog,
+    open: openModalDialog,
+    close: closeModalDialog
+};
+window.focusRouteScreen = focusRouteScreen;
+window.focusActiveScreen = focusRouteScreen;
+
 function getBottomNavigationLabel(item, index) {
     const visibleLabel = item.querySelector('.nav-label')?.textContent?.trim();
     if (visibleLabel) return visibleLabel;
@@ -74,6 +230,10 @@ function enhanceNavigationSemantics() {
         sidebar.setAttribute('role', 'navigation');
         sidebar.setAttribute('aria-label', 'Main navigation');
         sidebar.querySelectorAll('.menu-item').forEach((item) => {
+            if (item.querySelector('a[href], button, input, select, textarea')) {
+                item.querySelectorAll('svg').forEach((icon) => icon.setAttribute('aria-hidden', 'true'));
+                return;
+            }
             const button = replaceClickTargetWithButton(item);
             button.querySelectorAll('svg').forEach((icon) => icon.setAttribute('aria-hidden', 'true'));
         });
@@ -100,9 +260,12 @@ function enhanceNavigationSemantics() {
         navigation.setAttribute('aria-label', 'Primary navigation');
         navigation.querySelectorAll('.nav-item').forEach((item, index) => {
             const label = getBottomNavigationLabel(item, index);
-            const button = replaceClickTargetWithButton(item);
+            const nativeTarget = item.matches('a[href], button')
+                ? item
+                : item.querySelector('a[href], button');
+            const button = nativeTarget || replaceClickTargetWithButton(item);
             button.setAttribute('aria-label', label);
-            button.querySelectorAll('svg').forEach((icon) => icon.setAttribute('aria-hidden', 'true'));
+            item.querySelectorAll('svg').forEach((icon) => icon.setAttribute('aria-hidden', 'true'));
         });
 
         const syncBottomCurrentPage = () => {
@@ -120,6 +283,35 @@ function enhanceNavigationSemantics() {
                 attributeFilter: ['class'],
             });
         }
+    });
+
+    document.querySelectorAll('.sidebar-group-toggle').forEach((toggle) => {
+        if (toggle.dataset.groupManaged === 'true') return;
+        const panelId = toggle.getAttribute('aria-controls');
+        const panel = panelId ? document.getElementById(panelId) : null;
+        if (!panel) return;
+        toggle.dataset.groupManaged = 'true';
+        toggle.type = 'button';
+        const syncGroup = () => {
+            const expanded = toggle.getAttribute('aria-expanded') === 'true';
+            panel.hidden = !expanded;
+            panel.setAttribute('aria-hidden', String(!expanded));
+        };
+        toggle.addEventListener('click', () => {
+            toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true'));
+            syncGroup();
+        });
+        syncGroup();
+    });
+}
+
+function enhanceInteractiveCards() {
+    document.querySelectorAll('.action-card[onclick]').forEach((card) => {
+        if (card.tagName === 'BUTTON' || card.tagName === 'A') return;
+        if (card.querySelector('a[href], button, input, select, textarea')) return;
+        const button = replaceClickTargetWithButton(card);
+        const label = button.querySelector('.action-title')?.textContent?.trim() || button.textContent.trim();
+        if (label) button.setAttribute('aria-label', label);
     });
 }
 
@@ -241,48 +433,48 @@ function enhanceSidebarFocusManagement() {
 
 // Ensure Book a Coach appears in all sidebars
 function ensureBookCoachLink() {
-    const menu = document.querySelector('.sidebar-menu');
-    if (!menu) return;
-    const existing = menu.querySelector('[data-nav="book-coach"]');
-    if (existing) return;
-    const item = document.createElement('div');
-    item.className = 'menu-item';
-    item.dataset.nav = 'book-coach';
-    item.onclick = () => { window.location.href = 'coaching-scheduler.html'; };
-    item.innerHTML = `
+    document.querySelectorAll('.sidebar-menu').forEach((menu) => {
+        const existing = Array.from(menu.querySelectorAll('.menu-item')).find((item) => {
+            const onclick = item.getAttribute('onclick') || '';
+            return item.dataset.nav === 'book-coach' || onclick.includes('coaching-scheduler.html');
+        });
+        if (existing) return;
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'menu-item';
+        item.dataset.nav = 'book-coach';
+        item.addEventListener('click', () => { window.location.href = 'coaching-scheduler.html'; });
+        item.innerHTML = `
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle; margin-right:8px;">
             <path d="M8 16L11 19L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
         </svg>
         Book a Coach
     `;
-    // Insert after Health Dashboard if present, else append
-    const healthItem = Array.from(menu.children).find(el => el.textContent && el.textContent.includes('Health Dashboard'));
-    if (healthItem && healthItem.nextSibling) {
-        menu.insertBefore(item, healthItem.nextSibling);
-    } else {
-        menu.appendChild(item);
-    }
+        // Insert after Health Dashboard if present, else append.
+        const healthItem = Array.from(menu.children).find(el => el.textContent && el.textContent.includes('Health Dashboard'));
+        if (healthItem && healthItem.nextSibling) menu.insertBefore(item, healthItem.nextSibling);
+        else menu.appendChild(item);
+    });
 }
 
 function ensureBookCoachBottomNav() {
-    const nav = document.querySelector('.bottom-nav');
-    if (!nav || nav.dataset.includeCoach !== 'true') return;
-
-    const hasCoachLink = Array.from(nav.querySelectorAll('.nav-item')).some((item) => {
+    document.querySelectorAll('.bottom-nav[data-include-coach="true"]').forEach((nav) => {
+        const hasCoachLink = Array.from(nav.querySelectorAll('.nav-item')).some((item) => {
         const onclick = item.getAttribute('onclick') || '';
         const href = item.querySelector('a')?.getAttribute('href') || '';
         return item.dataset.nav === 'book-coach' ||
             onclick.includes('coaching-scheduler.html') ||
             href.includes('coaching-scheduler.html');
-    });
-    if (hasCoachLink) return;
+        });
+        if (hasCoachLink) return;
 
-    const item = document.createElement('div');
-    item.className = 'nav-item';
-    item.dataset.nav = 'book-coach';
-    item.onclick = () => { window.location.href = 'coaching-scheduler.html'; };
-    item.innerHTML = `
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'nav-item';
+        item.dataset.nav = 'book-coach';
+        item.addEventListener('click', () => { window.location.href = 'coaching-scheduler.html'; });
+        item.innerHTML = `
         <div class="nav-glow"></div>
         <div class="nav-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -291,24 +483,25 @@ function ensureBookCoachBottomNav() {
             </svg>
         </div>
     `;
-    nav.appendChild(item);
+        nav.appendChild(item);
+    });
 }
 
 function ensureAccountBottomNav() {
-    const nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-
-    const hasAccount = Array.from(nav.querySelectorAll('.nav-item')).some((item) => {
+    document.querySelectorAll('.bottom-nav').forEach((nav) => {
+        const hasAccount = Array.from(nav.querySelectorAll('.nav-item')).some((item) => {
         const onclick = item.getAttribute('onclick') || '';
-        return item.dataset.nav === 'account' || onclick.includes('account.html');
-    });
-    if (hasAccount) return;
+        const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || '';
+        return item.dataset.nav === 'account' || onclick.includes('account.html') || href.includes('account.html');
+        });
+        if (hasAccount) return;
 
-    const item = document.createElement('div');
-    item.className = 'nav-item';
-    item.dataset.nav = 'account';
-    item.onclick = () => { window.location.href = 'account.html'; };
-    item.innerHTML = `
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'nav-item';
+        item.dataset.nav = 'account';
+        item.addEventListener('click', () => { window.location.href = 'account.html'; });
+        item.innerHTML = `
         <div class="nav-glow"></div>
         <div class="nav-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -317,7 +510,8 @@ function ensureAccountBottomNav() {
             </svg>
         </div>
     `;
-    nav.appendChild(item);
+        nav.appendChild(item);
+    });
 }
 
 // Attach a global exercise image fallback to prevent broken blue icons
@@ -349,6 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ensureAccountBottomNav();
     enhanceNavigationSemantics();
     enhanceSidebarFocusManagement();
+    enhanceInteractiveCards();
+    document.querySelectorAll('[role="dialog"]').forEach(enhanceModalDialog);
     scanExerciseImages();
 
     const observer = new MutationObserver((mutations) => {
@@ -362,6 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ensureAccountBottomNav();
                         enhanceNavigationSemantics();
                     }
+                    if (node.matches?.('.action-card[onclick]')) enhanceInteractiveCards();
                 }
             });
         });
