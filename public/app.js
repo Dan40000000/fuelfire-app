@@ -6436,11 +6436,14 @@ function loadProgressData() {
         startBodyFat: progress.startBodyFat ?? null,
         muscleMass: progress.muscleMass ?? null,
         startMuscleMass: progress.startMuscleMass ?? null,
-        monthlyWorkouts: progress.monthlyWorkouts ?? monthlyWorkouts,
-        lastMonthWorkouts: progress.lastMonthWorkouts ?? lastMonthWorkouts,
-        totalWorkouts: progress.totalWorkouts ?? history.length,
-        totalTime: progress.totalTime ?? (history.length ? totalMinutes / 60 : 0),
-        avgPerWeek: progress.avgPerWeek ?? (history.length ? (history.length / 4).toFixed(1) : null),
+        // These values are derived from the canonical workout history. Legacy
+        // fitnessProgress counters can be stale after imports, retries, or a
+        // partial migration and must not mask the records users actually have.
+        monthlyWorkouts,
+        lastMonthWorkouts,
+        totalWorkouts: history.length,
+        totalTime: history.length ? totalMinutes / 60 : 0,
+        avgPerWeek: history.length ? (history.length / 4).toFixed(1) : null,
         personalRecords: progress.personalRecords || {},
         workoutHistory: history
     };

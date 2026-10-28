@@ -11,6 +11,48 @@ try {
     // Older embedded webviews may expose a read-only history object.
 }
 
+// Keep inert ownership composable. Several pages have their own modal or
+// onboarding focus manager, so restoring a boolean from one manager can
+// otherwise undo a still-active manager's isolation.
+const fuelFireInertStates = new WeakMap();
+let fuelFireInertScopeId = 0;
+
+function createFuelFireInertScope(label = 'scope') {
+    const owner = `${label}-${++fuelFireInertScopeId}`;
+    const ownedElements = new Set();
+
+    const acquire = (element) => {
+        if (!element || element.nodeType !== 1) return;
+        let state = fuelFireInertStates.get(element);
+        if (!state) {
+            state = { baseInert: element.hasAttribute('inert'), owners: new Set() };
+            fuelFireInertStates.set(element, state);
+        }
+        state.owners.add(owner);
+        ownedElements.add(element);
+        element.inert = true;
+    };
+
+    const release = (element) => {
+        const state = fuelFireInertStates.get(element);
+        if (!state || !state.owners.delete(owner)) return;
+        ownedElements.delete(element);
+        if (state.owners.size) return;
+        element.inert = state.baseInert;
+        fuelFireInertStates.delete(element);
+    };
+
+    return {
+        acquire,
+        release,
+        releaseAll() {
+            Array.from(ownedElements).forEach(release);
+        },
+    };
+}
+
+window.FuelFireInert = { createScope: createFuelFireInertScope };
+
 // Toggle Sidebar Menu
 function toggleSidebar(forceOpen) {
     const sidebar = document.getElementById('sidebar');
@@ -67,7 +109,10 @@ function getFocusableElements(container) {
 // Shared dialog behavior for the shell's custom overlays. Keeping this in one
 // place prevents each page from inventing a slightly different focus trap.
 function enhanceModalDialog(modal) {
-    if (!modal || modal.dataset.modalManaged === 'true') return modal;
+    // Native dialogs already have browser-managed modality. Adding
+    // aria-hidden to a shown <dialog> removes every control from its a11y
+    // tree in Chromium, including controls that are visibly usable.
+    if (!modal || modal.tagName === 'DIALOG' || modal.dataset.modalOwner === 'page' || modal.dataset.modalManaged === 'true') return modal;
 
     modal.dataset.modalManaged = 'true';
     if (!modal.getAttribute('role')) modal.setAttribute('role', 'dialog');
@@ -75,6 +120,7 @@ function enhanceModalDialog(modal) {
     if (!modal.hasAttribute('aria-hidden')) modal.setAttribute('aria-hidden', 'true');
 
     const background = [];
+    const inertScope = createFuelFireInertScope('modal');
     let modalBranch = modal;
     while (modalBranch && modalBranch.parentElement) {
         Array.from(modalBranch.parentElement.children).forEach((sibling) => {
@@ -88,16 +134,15 @@ function enhanceModalDialog(modal) {
     let returnFocus = null;
     let wasOpen = false;
 
-    const isVisible = () => modal.getAttribute('aria-hidden') !== 'true' && modal.style.display !== 'none';
-    const syncBackground = (inert) => background.forEach((element) => {
-        if (inert) {
-            if (!element.dataset.modalPreviousInert) element.dataset.modalPreviousInert = String(Boolean(element.inert));
-            element.inert = true;
-        } else if (element.dataset.modalPreviousInert) {
-            element.inert = element.dataset.modalPreviousInert === 'true';
-            delete element.dataset.modalPreviousInert;
-        }
-    });
+    const isVisible = () => {
+        if (modal.hidden) return false;
+        const style = window.getComputedStyle(modal);
+        return style.display !== 'none' && style.visibility !== 'hidden' && modal.getClientRects().length > 0;
+    };
+    const syncBackground = (inert) => {
+        if (inert) background.forEach((element) => inertScope.acquire(element));
+        else inertScope.releaseAll();
+    };
 
     modal.addEventListener('keydown', (event) => {
         if (!isVisible()) return;
@@ -126,6 +171,7 @@ function enhanceModalDialog(modal) {
 
     modal._fuelFireModalState = {
         background,
+        inertScope,
         get returnFocus() { return returnFocus; },
         set returnFocus(value) { returnFocus = value; },
         get wasOpen() { return wasOpen; },
@@ -133,7 +179,11 @@ function enhanceModalDialog(modal) {
         syncBackground
     };
     const syncExternalModalState = () => {
-        const isOpen = modal.style.display !== 'none' && modal.getAttribute('aria-hidden') !== 'true';
+        const isOpen = isVisible();
+        const expectedAriaHidden = String(!isOpen);
+        if (modal.getAttribute('aria-hidden') !== expectedAriaHidden) {
+            modal.setAttribute('aria-hidden', expectedAriaHidden);
+        }
         if (isOpen && !wasOpen) {
             wasOpen = true;
             syncBackground(true);
@@ -146,9 +196,10 @@ function enhanceModalDialog(modal) {
             });
         }
     };
-    new MutationObserver(syncExternalModalState).observe(modal, {
+    new MutationObserver(syncExternalModalState).observe(document.body || modal.parentElement, {
         attributes: true,
-        attributeFilter: ['style', 'aria-hidden']
+        subtree: true,
+        attributeFilter: ['style', 'aria-hidden', 'class', 'hidden']
     });
     syncExternalModalState();
     return modal;
@@ -326,9 +377,7 @@ function enhanceFixedAppShell() {
     document.documentElement.classList.add('fixed-app-shell-root');
     document.body.classList.add('fixed-app-shell');
 
-    if (!content.hasAttribute('tabindex')) {
-        content.tabIndex = 0;
-    }
+    if (content.tabIndex !== 0) content.tabIndex = 0;
     if (!content.hasAttribute('aria-label')) {
         const pageTitle = header.querySelector('.header-title')?.textContent?.trim();
         content.setAttribute('aria-label', pageTitle ? `${pageTitle} content` : 'Page content');
@@ -370,6 +419,7 @@ function enhanceSidebarFocusManagement() {
         document.querySelector('.phone-container'),
         document.querySelector('.bottom-nav'),
     ].filter(Boolean);
+    const inertScope = createFuelFireInertScope('sidebar');
     let wasOpen = false;
     let returnFocus = trigger;
 
@@ -381,10 +431,12 @@ function enhanceSidebarFocusManagement() {
         const isOpen = sidebar.classList.contains('open');
         trigger.setAttribute('aria-expanded', String(isOpen));
         trigger.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
-        sidebar.inert = !isOpen;
+        if (isOpen) inertScope.release(sidebar);
+        else inertScope.acquire(sidebar);
         sidebar.setAttribute('aria-hidden', String(!isOpen));
         if (overlay) overlay.setAttribute('aria-hidden', 'true');
-        backgroundElements.forEach((element) => { element.inert = isOpen; });
+        if (isOpen) backgroundElements.forEach((element) => inertScope.acquire(element));
+        else backgroundElements.forEach((element) => inertScope.release(element));
 
         if (isOpen && !wasOpen) {
             returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : trigger;

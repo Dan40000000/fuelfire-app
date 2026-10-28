@@ -32,6 +32,7 @@
     let currentStep = -1;
     let tourReturnFocus = null;
     let tourBackground = [];
+    const tourInertScope = window.FuelFireInert?.createScope('onboarding');
     let overlay, highlight, tooltip, titleEl, descEl, stepEl, prevBtn, nextBtn, skipBtn;
 
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -423,16 +424,13 @@
     function setTourBackgroundInert(inert) {
         if (inert) {
             tourBackground = Array.from(document.body.children).filter((element) => element !== overlay);
-            tourBackground.forEach((element) => {
-                element.dataset.onboardingPreviousInert = String(Boolean(element.inert));
-                element.inert = true;
-            });
+            if (tourInertScope) tourBackground.forEach((element) => tourInertScope.acquire(element));
+            else tourBackground.forEach((element) => { element.inert = true; });
             return;
         }
-        tourBackground.forEach((element) => {
-            if (!element.isConnected) return;
-            element.inert = element.dataset.onboardingPreviousInert === 'true';
-            delete element.dataset.onboardingPreviousInert;
+        if (tourInertScope) tourInertScope.releaseAll();
+        else tourBackground.forEach((element) => {
+            if (element.isConnected) element.inert = false;
         });
         tourBackground = [];
     }
