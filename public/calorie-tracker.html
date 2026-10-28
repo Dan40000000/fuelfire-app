@@ -370,6 +370,15 @@
             min-width: 0;
         }
 
+        .edit-meal-error {
+            min-height: 18px;
+            margin: 0 0 8px;
+            color: #991b1b;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
         .edit-actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -563,6 +572,9 @@
                                 <span aria-hidden="true">⌨️</span><br>Type
                             </button>
                         </div>
+                        <button id="manual-food-log-trigger" type="button" aria-haspopup="dialog" aria-controls="smart-entry-modal" onclick="showSmartEntry({ mode: 'manual' })" style="width: 100%; background: #f8fafc; color: #172554; border: 2px solid #bfdbfe; padding: 12px 14px; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; text-align: center;">
+                            Log food manually (free)
+                        </button>
                         <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px;">
                             <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-bottom: 8px;">QUICK ADD FROM HISTORY:</div>
                             <div id="quick-adds" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px;">
@@ -1284,6 +1296,7 @@
                 </div>
             </div>
 
+            <div id="edit-meal-error" class="edit-meal-error" role="alert" aria-live="assertive"></div>
             <input type="hidden" id="edit-meal-index">
 
             <div class="edit-actions">
@@ -1336,6 +1349,8 @@
             if (manualError) manualError.textContent = message;
             const manualSaved = document.getElementById('manual-entry-saved');
             if (manualSaved) manualSaved.textContent = '';
+            const editError = document.getElementById('edit-meal-error');
+            if (editError) editError.textContent = message;
             if (typeof setSmartEntryStatus === 'function') setSmartEntryStatus(message, true);
 
             if (document.getElementById('photo-modal')?.style.display === 'block' && typeof announcePhotoError === 'function') {
@@ -7670,6 +7685,9 @@
                 document.getElementById('edit-serving').value = meal.serving || '1 serving';
                 setEditNutritionFields(multiplyNutrition(currentEditBaseNutrition, quantity));
                 document.getElementById('edit-meal-index').value = index;
+                const editError = document.getElementById('edit-meal-error');
+                if (editError) editError.textContent = '';
+                document.querySelectorAll('#edit-meal-modal [aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
                 const hint = document.getElementById('edit-unit-hint');
                 if (hint) {
                     hint.textContent = `Using ${formatMacro(currentEditBaseNutrition.calories)} cal per unit. If the package label is different, edit the macros once and Save.`;
@@ -7687,31 +7705,77 @@
 
             if (loggedMeals[today] && loggedMeals[today].meals[index]) {
                 const previousMeal = loggedMeals[today].meals[index];
-                // Update the meal
-	                    const editedQuantity = normalizeLoggedQuantity(document.getElementById('edit-quantity').value || 1);
-		                const editedCarbs = parseFloat(document.getElementById('edit-carbs').value) || 0;
-		                const editedFiber = parseFloat(document.getElementById('edit-fiber').value) || 0;
-                    const editedCalories = parseFloat(document.getElementById('edit-calories').value) || 0;
-                    const editedProtein = parseFloat(document.getElementById('edit-protein').value) || 0;
-                    const editedFat = parseFloat(document.getElementById('edit-fat').value) || 0;
-                    const editedSugar = parseFloat(document.getElementById('edit-sugar').value) || 0;
-                    const editedNutrition = {
-                        calories: editedCalories,
-                        protein: editedProtein,
-                        carbs: editedCarbs,
-                        fiber: editedFiber,
-                        netCarbs: Math.max(0, editedCarbs - editedFiber),
-                        fat: editedFat,
-                        sugar: editedSugar
-                    };
+                const errorNode = document.getElementById('edit-meal-error');
+                const nameInput = document.getElementById('edit-food-name');
+                const quantityInput = document.getElementById('edit-quantity');
+                const editNutritionFields = [
+                    ['edit-calories', 'Calories'],
+                    ['edit-protein', 'Protein'],
+                    ['edit-carbs', 'Carbs'],
+                    ['edit-fiber', 'Fiber'],
+                    ['edit-fat', 'Fat'],
+                    ['edit-sugar', 'Sugar'],
+                ];
+                const clearValidation = () => {
+                    document.querySelectorAll('#edit-meal-modal [aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
+                    if (errorNode) errorNode.textContent = '';
+                };
+                const failValidation = (message, field) => {
+                    clearValidation();
+                    if (errorNode) errorNode.textContent = message;
+                    if (field) {
+                        field.setAttribute('aria-invalid', 'true');
+                        requestAnimationFrame(() => field.focus());
+                    }
+                    return false;
+                };
 
-			                loggedMeals[today].meals[index] = {
-			                    ...previousMeal,
-			                    name: document.getElementById('edit-food-name').value,
-			                    ...editedNutrition,
-	                            quantity: editedQuantity,
-	                            serving: document.getElementById('edit-serving').value || '1 serving',
-	                            baseNutrition: buildBaseNutritionFromEditFields(editedQuantity),
+                clearValidation();
+                const editedName = String(nameInput?.value || '').replace(/\s+/g, ' ').trim();
+                if (!editedName) return failValidation('Food name is required.', nameInput);
+
+                const quantityRaw = String(quantityInput?.value ?? '').trim();
+                const editedQuantityValue = Number(quantityRaw);
+                if (!quantityRaw || !Number.isFinite(editedQuantityValue) || editedQuantityValue <= 0) {
+                    return failValidation('Quantity must be a finite number greater than 0.', quantityInput);
+                }
+
+                const editedNutritionValues = {};
+                for (const [id, label] of editNutritionFields) {
+                    const field = document.getElementById(id);
+                    const raw = String(field?.value ?? '').trim();
+                    const value = Number(raw);
+                    if (!raw || !Number.isFinite(value) || value < 0) {
+                        return failValidation(`${label} must be a finite number greater than or equal to 0.`, field);
+                    }
+                    editedNutritionValues[id] = value;
+                }
+
+                // Update the meal only after every field has passed validation.
+                const editedQuantity = editedQuantityValue;
+                const editedCarbs = editedNutritionValues['edit-carbs'];
+                const editedFiber = editedNutritionValues['edit-fiber'];
+                const editedCalories = editedNutritionValues['edit-calories'];
+                const editedProtein = editedNutritionValues['edit-protein'];
+                const editedFat = editedNutritionValues['edit-fat'];
+                const editedSugar = editedNutritionValues['edit-sugar'];
+                const editedNutrition = {
+                    calories: editedCalories,
+                    protein: editedProtein,
+                    carbs: editedCarbs,
+                    fiber: editedFiber,
+                    netCarbs: Math.max(0, editedCarbs - editedFiber),
+                    fat: editedFat,
+                    sugar: editedSugar
+                };
+
+                loggedMeals[today].meals[index] = {
+                    ...previousMeal,
+                    name: editedName,
+                    ...editedNutrition,
+                    quantity: editedQuantity,
+                    serving: document.getElementById('edit-serving').value || '1 serving',
+                    baseNutrition: buildBaseNutritionFromEditFields(editedQuantity),
                                 originalAiName: previousMeal.originalAiName || previousMeal.name,
                                 memoryAliases: Array.from(new Set([
                                     ...(previousMeal.memoryAliases || []),
@@ -7721,7 +7785,7 @@
                                     previousMeal.serving,
                                     previousMeal.dataSource
                                 ].filter(Boolean)))
-	                };
+                };
 
                 // Recalculate total calories
                 loggedMeals[today].totalCalories = loggedMeals[today].meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
