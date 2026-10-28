@@ -66,7 +66,7 @@ function signWebhook(body, timestamp = Math.floor(Date.now() / 1000)) {
     };
 }
 
-function loadPaywallBrowser({ fetchMock, storage = {} } = {}) {
+function loadPaywallBrowser({ fetchMock, storage = {}, location = {}, purchases = null } = {}) {
     const values = new Map(Object.entries(storage));
     const localStorage = {
         getItem(key) { return values.has(key) ? values.get(key) : null; },
@@ -81,8 +81,9 @@ function loadPaywallBrowser({ fetchMock, storage = {} } = {}) {
             protocol: 'https:',
             origin: 'https://fuelfire.test',
             href: 'https://fuelfire.test/',
+            ...location,
         },
-        Capacitor: { Plugins: {} },
+        Capacitor: { Plugins: purchases ? { Purchases: purchases } : {} },
     };
     const context = {
         window: browserWindow,
@@ -98,6 +99,54 @@ function loadPaywallBrowser({ fetchMock, storage = {} } = {}) {
     const source = fs.readFileSync(path.resolve('public/ai-paywall.js'), 'utf8');
     vm.runInNewContext(source, context, { filename: 'public/ai-paywall.js' });
     return { window: browserWindow, localStorage, values };
+}
+
+function loadFuelFireAuthBrowser({ fetchMock, storage = {}, sharedAccess = null } = {}) {
+    const values = new Map(Object.entries(storage));
+    const localStorage = {
+        getItem(key) { return values.has(key) ? values.get(key) : null; },
+        setItem(key, value) { values.set(key, String(value)); },
+        removeItem(key) { values.delete(key); },
+    };
+    const browserWindow = {
+        fetch: fetchMock,
+        FUELFIRE_API_BASE_URL: 'https://fuelfire.test',
+        ...(sharedAccess ? { __aiAccess: sharedAccess } : {}),
+    };
+    const context = {
+        window: browserWindow,
+        localStorage,
+        fetch: fetchMock,
+        console,
+        setTimeout,
+        clearTimeout,
+    };
+    const source = fs.readFileSync(path.resolve('public/fuelfire-auth.js'), 'utf8');
+    vm.runInNewContext(source, context, { filename: 'public/fuelfire-auth.js' });
+    return { window: browserWindow, localStorage, values };
+}
+
+function createRedisLedgerMock() {
+    const serializedEvents = [];
+    const eventIds = new Set();
+    const fetchMock = vi.fn(async (_url, request) => {
+        const command = JSON.parse(request.body);
+        if (command[0] === 'EVAL') {
+            const eventIdKey = command[4];
+            if (eventIds.has(eventIdKey)) {
+                return new Response(JSON.stringify({ result: 0 }), { status: 200 });
+            }
+            eventIds.add(eventIdKey);
+            serializedEvents.unshift(command[5]);
+            serializedEvents.splice(500);
+            return new Response(JSON.stringify({ result: 1 }), { status: 200 });
+        }
+        if (command[0] === 'LRANGE') {
+            return new Response(JSON.stringify({ result: serializedEvents.slice(0, 500) }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ result: null }), { status: 400 });
+    });
+    return { fetchMock, serializedEvents };
 }
 
 afterEach(restoreEnvironment);
@@ -434,7 +483,42 @@ describe('security release boundaries', () => {
         expect(fetchMock.mock.calls[0][0]).toBe('https://api.anthropic.com/v1/messages');
     });
 
+    it('keeps the same budget across all eight internal food hint alternatives', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.FOOD_AI_PROVIDER = 'claude';
+        process.env.CLAUDE_API_KEY = 'test-claude-key';
+        process.env.FUELFIRE_PROVIDER_BUDGET = '1';
+        process.env.FUELFIRE_PROVIDER_MAX_RETRIES = '1';
+        process.env.FUELFIRE_INTERNAL_API_TOKEN = 'internal-only-token';
+        const fetchMock = vi.fn().mockResolvedValue(new Response('temporary outage', { status: 503 }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        const response = await invokeApi(foodVisionHandler, {
+            headers: {
+                ...testHeaders(),
+                host: 'attacker.example',
+                'x-forwarded-host': 'attacker.example',
+            },
+            body: {
+                image: 'YWJj',
+                mimeType: 'image/jpeg',
+                imageContext: 'unlisted plated food',
+                imageContextAlternatives: Array.from({ length: 8 }, (_, index) => `unlisted food alternative ${index + 1}`),
+            },
+        });
+
+        expect(response.status).toBe(200);
+        expect(fetchMock).toHaveBeenCalledOnce();
+        expect(fetchMock.mock.calls[0][0]).toBe('https://api.anthropic.com/v1/messages');
+        expect(fetchMock.mock.calls.flat().join(' ')).not.toContain('attacker.example');
+
+        const visionSource = fs.readFileSync(path.resolve('api/ai-food-vision.js'), 'utf8');
+        expect(visionSource).not.toContain('/api/ai-food-parser');
+        expect(visionSource.match(/lookupFirstParserMatch\(req,/g)).toHaveLength(4);
+    });
+
     it('accepts an HMAC RevenueCat event once and treats retries as idempotent', async () => {
+        process.env.NODE_ENV = 'test';
         process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
         const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'fuelfire-ledger-'));
         process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH = path.join(tempDirectory, 'subscriptions.json');
@@ -472,7 +556,93 @@ describe('security release boundaries', () => {
         expect(JSON.stringify(stored)).not.toContain('should-not-store@example.com');
     });
 
+    it('fails closed for production subscription writes when durable Redis is missing or unavailable', async () => {
+        process.env.NODE_ENV = 'production';
+        delete process.env.FUELFIRE_REDIS_URL;
+        delete process.env.FUELFIRE_REDIS_TOKEN;
+        delete process.env.UPSTASH_REDIS_REST_URL;
+        delete process.env.UPSTASH_REDIS_REST_TOKEN;
+        process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
+        const body = {
+            api_version: '1.0',
+            event: {
+                id: 'production-ledger-missing',
+                type: 'INITIAL_PURCHASE',
+                app_user_id: 'fuelfire_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                product_id: 'Wellfit.Elite.Monthly',
+                transaction_id: 'transaction-production-1',
+                event_timestamp_ms: Date.now(),
+                store: 'APP_STORE',
+                environment: 'SANDBOX',
+            },
+        };
+        const signed = signWebhook(body);
+        const missing = await invokeApi(subscriptionsHandler, {
+            method: 'POST', body, headers: signed.headers,
+        });
+        expect(missing.status).toBe(503);
+        expect(missing.body.code).toBe('SUBSCRIPTION_LEDGER_UNAVAILABLE');
+
+        process.env.FUELFIRE_REDIS_URL = 'https://redis.test';
+        process.env.FUELFIRE_REDIS_TOKEN = 'redis-test-token';
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('store down', { status: 503 })));
+        const unavailable = await invokeApi(subscriptionsHandler, {
+            method: 'POST', body, headers: signed.headers,
+        });
+        expect(unavailable.status).toBe(503);
+        expect(unavailable.body.code).toBe('SUBSCRIPTION_LEDGER_UNAVAILABLE');
+    });
+
+    it('uses Redis atomics for durable subscription deduplication and a bounded event read', async () => {
+        process.env.NODE_ENV = 'production';
+        process.env.FUELFIRE_REDIS_URL = 'https://redis.test';
+        process.env.FUELFIRE_REDIS_TOKEN = 'redis-test-token';
+        process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
+        process.env.FUELFIRE_ADMIN_TOKEN = 'security-release-admin-token';
+        const { fetchMock } = createRedisLedgerMock();
+        vi.stubGlobal('fetch', fetchMock);
+        const body = {
+            api_version: '1.0',
+            event: {
+                id: 'redis-ledger-event-1',
+                type: 'INITIAL_PURCHASE',
+                app_user_id: 'fuelfire_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                product_id: 'Wellfit.Elite.Monthly',
+                transaction_id: 'transaction-redis-1',
+                event_timestamp_ms: Date.now(),
+                store: 'APP_STORE',
+                environment: 'SANDBOX',
+            },
+        };
+        const signed = signWebhook(body);
+        const first = await invokeApi(subscriptionsHandler, {
+            method: 'POST', body, headers: signed.headers,
+        });
+        const duplicate = await invokeApi(subscriptionsHandler, {
+            method: 'POST', body, headers: signed.headers,
+        });
+        const read = await invokeApi(subscriptionsHandler, {
+            method: 'GET',
+            headers: { 'x-fuelfire-admin-token': process.env.FUELFIRE_ADMIN_TOKEN },
+        });
+
+        expect(first.body).toMatchObject({ success: true, duplicate: false });
+        expect(duplicate.body).toMatchObject({ success: true, duplicate: true });
+        expect(read.status).toBe(200);
+        expect(read.body.events).toHaveLength(1);
+        const commands = fetchMock.mock.calls.map((call) => JSON.parse(call[1].body));
+        expect(commands[0][0]).toBe('EVAL');
+        expect(commands[0][1]).toContain('LTRIM');
+        expect(commands.at(-1)).toEqual([
+            'LRANGE',
+            expect.stringContaining(':events'),
+            '0',
+            '499',
+        ]);
+    });
+
     it('protects ledger reads and never returns browser PII telemetry', async () => {
+        process.env.NODE_ENV = 'test';
         process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH = path.join(os.tmpdir(), `fuelfire-empty-ledger-${process.pid}.json`);
         const denied = await invokeApi(subscriptionsHandler, { method: 'GET' });
         process.env.FUELFIRE_ADMIN_TOKEN = 'security-release-admin-token';
@@ -501,6 +671,157 @@ describe('security release boundaries', () => {
         expect(mealPlanPage).toContain("const sourceText = String(rawContent ?? '')");
         expect(mealPlanPage).toContain('let formatted = escapeHtml(sourceText)');
         expect(mealPlanSimplePage).toContain('parseMealPlanContent(escapeHtml(String(mealPlan)))');
+    });
+
+    it('waits for the installation session before photo and typed AI fetches on a Capacitor origin', async () => {
+        process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = 'security-release-session-secret';
+        const session = createInstallationSession({ now: Date.now() });
+        let releaseBootstrap;
+        const fetchMock = vi.fn((url) => {
+            if (String(url) === 'https://fuelfire-app.vercel.app/api/installation-session') {
+                return new Promise((resolve) => {
+                    releaseBootstrap = () => resolve({
+                        ok: true,
+                        json: async () => ({
+                            success: true,
+                            installationSessionToken: session.token,
+                            rcAppUserId: session.payload.rcAppUserId,
+                            expiresAt: session.expiresAt,
+                        }),
+                    });
+                });
+            }
+            return Promise.resolve({ ok: true, json: async () => ({ success: true }) });
+        });
+        const browser = loadPaywallBrowser({
+            fetchMock,
+            location: {
+                protocol: 'capacitor:',
+                origin: 'capacitor://localhost',
+                href: 'capacitor://localhost/index.html',
+            },
+        });
+
+        const photoRequest = browser.window.fetch('/api/ai-food-vision', {
+            method: 'POST',
+            body: JSON.stringify({ image: 'YWJj' }),
+        });
+        const typedRequest = browser.window.fetch('/api/ai-food-parser', {
+            method: 'POST',
+            body: JSON.stringify({ query: 'apple' }),
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(releaseBootstrap).toEqual(expect.any(Function));
+        expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/api/ai-food-')).length).toBe(0);
+
+        releaseBootstrap();
+        await Promise.all([photoRequest, typedRequest]);
+
+        const aiCalls = fetchMock.mock.calls.filter(([url]) => String(url).includes('/api/ai-food-'));
+        expect(aiCalls).toHaveLength(2);
+        aiCalls.forEach(([url, request]) => {
+            expect(String(url)).toMatch(/^https:\/\/fuelfire-app\.vercel\.app\/api\/ai-food-/);
+            expect(request.headers.get('X-FuelFire-Installation-Session')).toBe(session.token);
+            expect(request.headers.get('Authorization')).toBe(`Bearer ${session.token}`);
+        });
+        expect(fetchMock.mock.calls[0][0]).toBe('https://fuelfire-app.vercel.app/api/installation-session');
+    });
+
+    it('clears cached RevenueCat entitlements after an authoritative empty success but preserves them on error', async () => {
+        const active = { Premium_Access: { expires_date: null } };
+        const purchases = {
+            getCustomerInfo: vi.fn()
+                .mockResolvedValueOnce({ customerInfo: { entitlements: { active } } })
+                .mockRejectedValueOnce(new Error('RevenueCat unavailable'))
+                .mockResolvedValueOnce({ customerInfo: { entitlements: { active: {} } } }),
+        };
+        const browser = loadPaywallBrowser({
+            fetchMock: vi.fn().mockResolvedValue({ ok: false, status: 503 }),
+            purchases,
+        });
+
+        await browser.window.__aiAccess.refreshEntitlements();
+        expect(browser.window.__aiAccess.hasAccess()).toBe(true);
+        expect(browser.localStorage.getItem('rc_entitlements')).toContain('Premium_Access');
+
+        await browser.window.__aiAccess.refreshEntitlements();
+        expect(browser.window.__aiAccess.hasAccess()).toBe(true);
+        expect(browser.localStorage.getItem('rc_entitlements')).toContain('Premium_Access');
+
+        await browser.window.__aiAccess.refreshEntitlements();
+        expect(browser.window.__aiAccess.hasAccess()).toBe(false);
+        expect(browser.localStorage.getItem('rc_entitlements')).toBeNull();
+    });
+
+    it('awaits the installation session before the first FuelFire meal-plan request', async () => {
+        process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = 'security-release-session-secret';
+        const session = createInstallationSession();
+        let releaseBootstrap;
+        const fetchMock = vi.fn((url) => {
+            if (String(url).endsWith('/api/installation-session')) {
+                return new Promise((resolve) => {
+                    releaseBootstrap = () => resolve({
+                        ok: true,
+                        json: async () => ({
+                            success: true,
+                            installationSessionToken: session.token,
+                            rcAppUserId: session.rcAppUserId,
+                            expiresAt: session.expiresAt,
+                        }),
+                    });
+                });
+            }
+            return Promise.resolve({
+                ok: true,
+                json: async () => ({ success: true, content: 'meal plan' }),
+            });
+        });
+        const browser = loadFuelFireAuthBrowser({ fetchMock });
+        const pending = browser.window.fuelFireAuth.generateMealPlan(validQuizBody());
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(releaseBootstrap).toEqual(expect.any(Function));
+        expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/claude-meal-plan'))).toHaveLength(0);
+
+        releaseBootstrap();
+        await pending;
+        const mealPlanCall = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/api/claude-meal-plan'));
+        expect(mealPlanCall).toBeTruthy();
+        expect(mealPlanCall[1].headers['X-FuelFire-Installation-Session']).toBe(session.token);
+        expect(mealPlanCall[1].headers.Authorization).toBe(`Bearer ${session.token}`);
+    });
+
+    it('does not silently replace an expired FuelFire binding during an AI request', async () => {
+        process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = 'security-release-session-secret';
+        const expired = createInstallationSession({ now: Date.now() - (8 * 24 * 60 * 60 * 1000) });
+        const fetchMock = vi.fn((url) => {
+            if (String(url).endsWith('/api/installation-session')) {
+                return Promise.resolve({
+                    ok: false,
+                    status: 409,
+                    json: async () => ({ code: 'INSTALLATION_SESSION_RENEWAL_REQUIRED' }),
+                });
+            }
+            return Promise.resolve({ ok: true, json: async () => ({ success: true }) });
+        });
+        const browser = loadFuelFireAuthBrowser({
+            fetchMock,
+            storage: {
+                fuelfire_installation_session: JSON.stringify({
+                    token: expired.token,
+                    rcAppUserId: expired.rcAppUserId,
+                    expiresAt: expired.expiresAt,
+                }),
+                fuelfire_server_rc_app_user_id: expired.rcAppUserId,
+                rc_app_user_id: expired.rcAppUserId,
+            },
+        });
+
+        await expect(browser.window.fuelFireAuth.generateMealPlan(validQuizBody()))
+            .rejects.toMatchObject({ code: 'INSTALLATION_SESSION_RENEWAL_REQUIRED' });
+        expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/claude-meal-plan'))).toHaveLength(0);
+        expect(browser.localStorage.getItem('fuelfire_installation_session')).toContain(expired.token);
     });
 
     it('renews a browser session without changing its server-selected RevenueCat ID', async () => {

@@ -1,15 +1,11 @@
 # FuelFire Fitness App 🔥
 
-### Firebase (AI subscriptions backend)
-`api/subscriptions.js` will use Firestore if these env vars are set (otherwise it falls back to a local JSON file):
+### Subscription event ledger
+`api/subscriptions.js` uses the same durable Redis REST configuration as the production quota store. Set `FUELFIRE_REDIS_URL` and `FUELFIRE_REDIS_TOKEN` (or the supported `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` names) in the deployment environment. Production appends are atomic, deduplicated by authoritative event ID, and retain the newest 500 events; a missing or unavailable store returns `503` rather than acknowledging an event.
 
-```
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_CLIENT_EMAIL=service-account@your-project-id.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n
-```
+Firebase/Firestore is not a supported subscription-ledger backend in this deployment. The old Firebase path is intentionally absent because the serverless runtime does not include `firebase-admin`, and a local file is not durable or shared in production.
 
-Add them locally in a `.env` (see `.env.example`) and in your deploy settings (Vercel/Netlify/etc.). Keep the `\n` newline escapes in the private key. The paywall auto-logs subscription events to Firestore when these are present.
+For an explicit local or offline test harness only, set `FUELFIRE_SUBSCRIPTION_LEDGER_MODE=local` and optionally `FUELFIRE_SUBSCRIPTION_LEDGER_PATH` to select a JSON file. Local JSON is never selected by a production runtime.
 
 ### Stripe billing (Elite/Premium/Core subscriptions)
 - Create a Stripe account and enable payouts.
@@ -28,7 +24,7 @@ STRIPE_PRICE_ID_CORE=price_for_core
 ### Apple IAP via RevenueCat (optional) + Android Play Billing
 - Create products/entitlements in RevenueCat that mirror Elite/Premium/Core (and map to Apple/Google products).
 - Set `REVENUECAT_WEBHOOK_SECRET` if you want webhook auth, and point RevenueCat webhooks to `/api/revenuecat-webhook`.
-- Webhook events (purchase/renew/cancel/expire) write into the same subscription log store (Firestore or local JSON), so Account admin tables stay consistent across Stripe and Apple purchases.
+- Webhook events (purchase/renew/cancel/expire) write into the same subscription log store (durable Redis in production), so Account admin tables stay consistent across Stripe and Apple purchases.
 - Native → webview unlock: send `postMessage` with `{ type: 'RC_ENTITLEMENT', entitlement: 'premium', email, name, expiresAt }` or call `window.RCBridge.applyEntitlement(...)` from native to unlock the paywall and log the event. Script is loaded on pages that use AI paywall (`revenuecat-bridge.js`).
 - See `APP_STORE_IAP_SETUP.md` for a concise integration and testing checklist.
 

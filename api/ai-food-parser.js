@@ -3692,6 +3692,44 @@ Rules:
     });
 }
 
+// Vision fallback calls this entrypoint in-process so it inherits the caller's
+// AsyncLocalStorage provider budget. Authorization is still checked with the
+// original request headers; this is not a public or test-only bypass.
+export async function runFoodParserInProcess({ body = {}, headers = {}, socket } = {}) {
+    let statusCode = 200;
+    let responseBody = null;
+    const response = {
+        setHeader() {},
+        status(code) {
+            statusCode = code;
+            return this;
+        },
+        json(payload) {
+            responseBody = payload;
+            return this;
+        },
+        end() {
+            return this;
+        },
+    };
+
+    await handleFoodParserRequest({
+        method: 'POST',
+        url: '/api/ai-food-parser',
+        headers,
+        body,
+        socket,
+    }, response);
+
+    if (statusCode < 200 || statusCode >= 300) {
+        const error = new Error(responseBody?.error || 'Food parser lookup failed.');
+        error.status = statusCode;
+        error.response = responseBody;
+        throw error;
+    }
+    return responseBody;
+}
+
 export default function handler(req, res) {
     return runWithProviderBudget(() => handleFoodParserRequest(req, res));
 }

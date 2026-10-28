@@ -1,12 +1,11 @@
 import crypto from 'crypto';
+import { getRedisConfig, redisCommand } from './redis-rest.js';
 
 const DEFAULT_WINDOW_SECONDS = 60 * 60;
 const DEFAULT_SUBJECT_LIMIT = 20;
 const DEFAULT_IP_LIMIT = 60;
 const MAX_WINDOW_SECONDS = 24 * 60 * 60;
 const MAX_LIMIT = 1000;
-const REDIS_TIMEOUT_MS = 2500;
-
 let testStore = null;
 const localStore = new Map();
 
@@ -25,12 +24,6 @@ function boundedInteger(value, fallback, minimum, maximum) {
     const parsed = Number(value);
     if (!Number.isFinite(parsed)) return fallback;
     return Math.min(maximum, Math.max(minimum, Math.floor(parsed)));
-}
-
-function getRedisConfig() {
-    const url = String(process.env.FUELFIRE_REDIS_URL || process.env.UPSTASH_REDIS_REST_URL || '').trim();
-    const token = String(process.env.FUELFIRE_REDIS_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '').trim();
-    return { url: url.replace(/\/$/, ''), token };
 }
 
 function getQuotaConfig({ allowMemory = false } = {}) {
@@ -87,43 +80,25 @@ return 1
 `.trim();
 }
 
-function parseRedisResult(payload) {
-    if (Array.isArray(payload)) return payload[0]?.result;
-    return payload?.result;
-}
-
 async function consumeRedis({ config, keys, windowStart, cost }) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REDIS_TIMEOUT_MS);
-    try {
-        const response = await fetch(config.redis.url, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${config.redis.token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify([
-                'EVAL',
-                redisScript(),
-                '2',
-                keys.subject,
-                keys.ip,
-                String(windowStart),
-                String(cost),
-                String(config.subjectLimit),
-                String(config.ipLimit),
-                String(config.windowSeconds + 1),
-            ]),
-            signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`Quota store returned ${response.status}`);
-        const result = parseRedisResult(await response.json());
-        if (result === 1 || result === '1') return { allowed: true, store: 'redis' };
-        if (result === 0 || result === '0') return { allowed: false, reason: 'quota_exceeded', store: 'redis' };
-        throw new Error('Quota store returned an invalid result');
-    } finally {
-        clearTimeout(timeout);
-    }
+    const result = await redisCommand({
+        config: config.redis,
+        command: [
+            'EVAL',
+            redisScript(),
+            '2',
+            keys.subject,
+            keys.ip,
+            String(windowStart),
+            String(cost),
+            String(config.subjectLimit),
+            String(config.ipLimit),
+            String(config.windowSeconds + 1),
+        ],
+    });
+    if (result === 1 || result === '1') return { allowed: true, store: 'redis' };
+    if (result === 0 || result === '0') return { allowed: false, reason: 'quota_exceeded', store: 'redis' };
+    throw new Error('Quota store returned an invalid result');
 }
 
 function consumeLocal({ config, keys, windowStart, cost }) {

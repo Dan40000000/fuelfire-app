@@ -113,7 +113,30 @@ class FuelFireAuth {
         }
     }
 
+    async restoreSession() {
+        const sharedAccess = window.__aiAccess;
+        if (sharedAccess && typeof sharedAccess.restorePurchases === 'function') {
+            await sharedAccess.restorePurchases();
+            const restored = this.readInstallationSession();
+            if (restored && (!restored.expiresAt || Number(restored.expiresAt) > Date.now())) return restored;
+            const error = new Error('Secure installation session migration did not complete.');
+            error.code = 'INSTALLATION_SESSION_MIGRATION_REQUIRED';
+            throw error;
+        }
+
+        const migrated = await this.ensureSession({ explicitMigration: true });
+        if (migrated) return migrated;
+        const error = new Error('Secure installation session migration is unavailable.');
+        error.code = 'INSTALLATION_SESSION_MIGRATION_REQUIRED';
+        throw error;
+    }
+
     getRequestHeaders() {
+        const sharedAccess = window.__aiAccess;
+        if (sharedAccess && typeof sharedAccess.getRequestHeaders === 'function') {
+            return sharedAccess.getRequestHeaders();
+        }
+
         const headers = {};
         const accessToken = localStorage.getItem('fuelfire_ai_access_token') || '';
         const sessionToken = this.readInstallationSession()?.token || '';
@@ -194,9 +217,12 @@ class FuelFireAuth {
         const payloadKeys = Object.keys(body || {});
         console.log(`📦 Request payload keys [${context}]:`, payloadKeys);
 
-        // Bootstrap in the background. Header construction remains synchronous so
-        // mocked browser flows still send whatever credentials are already cached.
-        this.ensureSession().catch(() => {});
+        const session = await this.ensureSession();
+        if (!session) {
+            const error = new Error('Secure installation session renewal is required before generating a meal plan.');
+            error.code = 'INSTALLATION_SESSION_RENEWAL_REQUIRED';
+            throw error;
+        }
 
         const response = await fetch(CLAUDE_MEAL_PLAN_URL, {
             method: 'POST',

@@ -21,6 +21,7 @@
     const RC_MIGRATION_COMPLETE_KEY = 'fuelfire_rc_migration_complete';
     const PRODUCTION_API_ORIGIN = 'https://fuelfire-app.vercel.app';
     const AI_API_PATHS = new Set([
+        '/api/installation-session',
         '/api/accuracy-lab-session',
         '/api/ai-food-parser',
         '/api/ai-food-vision',
@@ -126,7 +127,9 @@
             try {
                 const requestFetch = nativeFetch || window.fetch?.bind(window);
                 if (!requestFetch) return null;
-                const response = await requestFetch('/api/installation-session', request);
+                const sessionUrl = resolveAiApiRequest('/api/installation-session');
+                if (!sessionUrl) return null;
+                const response = await requestFetch(sessionUrl, request);
                 if (!response.ok) return null;
                 const data = await response.json();
                 if (!data?.success
@@ -216,13 +219,21 @@
         if (!Purchases) return;
         try {
             const { customerInfo } = await Purchases.getCustomerInfo();
-            const active = customerInfo?.entitlements?.active || {};
-            if (Object.keys(active).length) {
-                rcEntitlements = active;
-                localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-            }
+            saveAuthoritativeEntitlements(customerInfo?.entitlements?.active);
         } catch (err) {
             console.warn('Failed to refresh RevenueCat entitlements', err);
+        }
+    }
+
+    function saveAuthoritativeEntitlements(active) {
+        if (!active || typeof active !== 'object' || Array.isArray(active)) {
+            throw new Error('RevenueCat returned invalid active entitlements.');
+        }
+        rcEntitlements = active;
+        if (Object.keys(active).length) {
+            localStorage.setItem('rc_entitlements', JSON.stringify(active));
+        } else {
+            localStorage.removeItem('rc_entitlements');
         }
     }
 
@@ -290,10 +301,7 @@
         try {
             const result = await Purchases.purchasePackage({ aPackage: pkg });
             const active = result?.customerInfo?.entitlements?.active || {};
-            if (Object.keys(active).length) {
-                rcEntitlements = active;
-                localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-            }
+            saveAuthoritativeEntitlements(active);
             logEvent({ action: 'purchase', plan: planKey, package: pkgId, entitlements: Object.keys(rcEntitlements) });
             alert('✅ Purchase complete.');
         } catch (err) {
@@ -333,38 +341,26 @@
                 // until RevenueCat has completed the link, then switch to the server ID.
                 const legacyRestored = await Purchases.restorePurchases();
                 const legacyActive = legacyRestored?.customerInfo?.entitlements?.active || {};
-                if (Object.keys(legacyActive).length) {
-                    rcEntitlements = legacyActive;
-                    localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-                }
+                saveAuthoritativeEntitlements(legacyActive);
                 const loginResult = await Purchases.logIn({ appUserID: session.rcAppUserId });
                 localStorage.setItem('rc_app_user_id', session.rcAppUserId);
                 localStorage.setItem(RC_MIGRATION_COMPLETE_KEY, '1');
                 localStorage.removeItem(RC_MIGRATION_REQUIRED_KEY);
                 const migrated = loginResult?.customerInfo?.entitlements?.active || {};
-                if (Object.keys(migrated).length) {
-                    rcEntitlements = migrated;
-                    localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-                }
+                saveAuthoritativeEntitlements(migrated);
                 const restored = await Purchases.restorePurchases();
                 const restoredActive = restored?.customerInfo?.entitlements?.active || {};
-                if (Object.keys(restoredActive).length) {
-                    rcEntitlements = restoredActive;
-                    localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-                }
+                saveAuthoritativeEntitlements(restoredActive);
                 logEvent({ action: 'restore_migrate', entitlements: Object.keys(rcEntitlements) });
-                alert(Object.keys(rcEntitlements).length ? 'Purchases restored and securely migrated.' : 'Restore completed. Existing access was kept while RevenueCat finishes verification.');
+                alert(Object.keys(rcEntitlements).length ? 'Purchases restored and securely migrated.' : 'Restore completed. No active purchases were found.');
                 return;
             }
 
             const { customerInfo } = await Purchases.restorePurchases();
             const active = customerInfo?.entitlements?.active || {};
-            if (Object.keys(active).length) {
-                rcEntitlements = active;
-                localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-            }
+            saveAuthoritativeEntitlements(active);
             logEvent({ action: 'restore', entitlements: Object.keys(active) });
-            alert(Object.keys(active).length ? 'Restored purchases.' : 'No active purchases were found. Existing access was kept.');
+            alert(Object.keys(active).length ? 'Restored purchases.' : 'No active purchases were found.');
         } catch (err) {
             console.error('Restore failed', err);
             alert('Restore failed. Please try again.');
@@ -397,10 +393,11 @@
         return false;
     }
 
-    function getAiRequestHeaders() {
+    function getAiRequestHeaders(sessionOverride) {
         const headers = {};
         const accessToken = localStorage.getItem(AI_ACCESS_TOKEN_KEY) || '';
-        const sessionToken = readInstallationSession()?.token || '';
+        const installationSession = arguments.length ? sessionOverride : readInstallationSession();
+        const sessionToken = installationSession?.token || '';
         if (accessToken) headers['X-FuelFire-Access-Token'] = accessToken;
         if (sessionToken) {
             headers['X-FuelFire-Installation-Session'] = sessionToken;
@@ -432,12 +429,13 @@
     function installAiFetchCredentials() {
         if (!nativeFetch || window.__fuelfireAiFetchCredentialsInstalled) return;
         window.__fuelfireAiFetchCredentialsInstalled = true;
-        window.fetch = function authenticatedAiFetch(input, init = {}) {
+        window.fetch = async function authenticatedAiFetch(input, init = {}) {
             const resolvedUrl = resolveAiApiRequest(input);
             if (!resolvedUrl) return nativeFetch(input, init);
 
+            const session = await ensureSession();
             const headers = new Headers(init.headers || input?.headers || {});
-            Object.entries(getAiRequestHeaders()).forEach(([name, value]) => headers.set(name, value));
+            Object.entries(getAiRequestHeaders(session)).forEach(([name, value]) => headers.set(name, value));
             const requestInput = typeof input === 'string' ? resolvedUrl : new Request(resolvedUrl, input);
             return nativeFetch(requestInput, { ...init, headers });
         };
