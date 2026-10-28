@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+// Run with the shared browser projects as well as the isolated local config.
+
 test('bridges both legacy keys once without rewriting their raw payloads', async ({ page }) => {
     await page.goto('/calorie-tracker.html');
     const result = await page.evaluate(() => {

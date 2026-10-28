@@ -142,7 +142,11 @@ test.describe('FuelFire account data audit regressions', () => {
         const dialog = page.getByRole('alertdialog', { name: 'Delete local app data?' });
         const confirmationInput = dialog.getByLabel('Type DELETE to continue');
         await confirmationInput.fill('no');
-        await dialog.getByRole('button', { name: 'Continue' }).click();
+        const continueButton = dialog.getByRole('button', { name: 'Continue' });
+        await expect(continueButton).toBeDisabled();
+        // Normal users cannot submit the disabled action. Also exercise the
+        // defensive handler against a synthetic/programmatic click.
+        await continueButton.dispatchEvent('click');
         await expect(confirmationInput).toHaveAttribute('aria-invalid', 'true');
         await expect(confirmationInput).toHaveAttribute('aria-describedby', /delete-confirmation-error/);
         await expect(page.locator('#delete-confirmation-error')).toBeVisible();

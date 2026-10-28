@@ -1,32 +1,22 @@
 # FuelFire Fitness App 🔥
 
-### Subscription event ledger
+## Subscription event ledger
+
 `api/subscriptions.js` uses the same durable Redis REST configuration as the production quota store. Set `FUELFIRE_REDIS_URL` and `FUELFIRE_REDIS_TOKEN` (or the supported `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` names) in the deployment environment. Production appends are atomic, deduplicated by authoritative event ID, and retain the newest 500 events; a missing or unavailable store returns `503` rather than acknowledging an event.
 
 Firebase/Firestore is not a supported subscription-ledger backend in this deployment. The old Firebase path is intentionally absent because the serverless runtime does not include `firebase-admin`, and a local file is not durable or shared in production.
 
 For an explicit local or offline test harness only, set `FUELFIRE_SUBSCRIPTION_LEDGER_MODE=local` and optionally `FUELFIRE_SUBSCRIPTION_LEDGER_PATH` to select a JSON file. Local JSON is never selected by a production runtime.
 
-### Stripe billing (Elite/Premium/Core subscriptions)
-- Create a Stripe account and enable payouts.
-- Create recurring prices in Stripe (e.g., Elite ~$96/mo, Premium $15/mo, Core $6/mo after the 20% uplift) and capture their price IDs.
-- Add these env vars (see `.env.example`):
-```
-STRIPE_SECRET_KEY=sk_live_or_test
-STRIPE_PUBLISHABLE_KEY=pk_live_or_test
-STRIPE_WEBHOOK_SECRET=whsec_from_dashboard
-STRIPE_PRICE_ID_PREMIUM=price_for_premium
-STRIPE_PRICE_ID_CORE=price_for_core
-```
-- Deploy the webhook endpoint `api/stripe-webhook.js` to your host and point a Stripe webhook at it for events: `checkout.session.completed`, `customer.subscription.created/updated/deleted`.
-- The paywall uses `/api/create-checkout-session` to start Stripe Checkout and `/api/stripe-config` to pull price IDs; successful webhooks post into the same subscription log store used by the Account page admin dashboard.
+## App Store purchases and RevenueCat events
 
-### Apple IAP via RevenueCat (optional) + Android Play Billing
-- Create products/entitlements in RevenueCat that mirror Elite/Premium/Core (and map to Apple/Google products).
-- Set `REVENUECAT_WEBHOOK_SECRET` if you want webhook auth, and point RevenueCat webhooks to `/api/revenuecat-webhook`.
-- Webhook events (purchase/renew/cancel/expire) write into the same subscription log store (durable Redis in production), so Account admin tables stay consistent across Stripe and Apple purchases.
-- Native → webview unlock: send `postMessage` with `{ type: 'RC_ENTITLEMENT', entitlement: 'premium', email, name, expiresAt }` or call `window.RCBridge.applyEntitlement(...)` from native to unlock the paywall and log the event. Script is loaded on pages that use AI paywall (`revenuecat-bridge.js`).
-- See `APP_STORE_IAP_SETUP.md` for a concise integration and testing checklist.
+The native app uses RevenueCat purchases and restore. Configure the products and entitlements in the store and RevenueCat dashboards; do not treat a browser plan selection as proof of payment.
+
+Set the installation-session signing secret and RevenueCat server key using deployment secret storage. Existing customer identities require the explicit Restore / migrate purchases flow before switching to the server-issued identity. Native entitlement messages must carry that bound customer ID; browser messages do not authorize server access or mutate the subscription ledger.
+
+Verified RevenueCat events go to `/api/subscriptions`. Webhook signing is required for this public event path, not optional; configure the matching signing secret and preserve the exact raw body. The separate administrator read path requires its own token and is not exposed in the consumer account page.
+
+The previously documented Stripe checkout and `/api/revenuecat-webhook` endpoints are not present in this checkout. They are not supported deployment instructions. Use [the reliability release checklist](RELIABILITY_RELEASE_CHECKLIST.md) and [native release checklist](NATIVE_RELEASE_CHECKLIST.md) before another candidate is distributed.
 
 A modern, responsive fitness tracking app with AI-powered meal planning using Claude AI.
 

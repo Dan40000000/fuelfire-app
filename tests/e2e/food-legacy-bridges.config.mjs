@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
     testDir: '.',
-    testMatch: 'food-legacy-bridges.e2e.js',
+    testMatch: 'food-legacy-bridges.spec.js',
     fullyParallel: false,
     reporter: 'line',
     outputDir: '/tmp/fuelfire-food-legacy-playwright-results',
