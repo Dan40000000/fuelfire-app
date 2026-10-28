@@ -33,9 +33,9 @@ function number(value) {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
-function servingGrams(value) {
+function servingMeasure(value) {
     const match = String(value || '').match(/(?:^|\(|\s)(\d+(?:\.\d+)?)\s*(g|ml)(?:\)|\s|$)/i);
-    return match ? Number(match[1]) : null;
+    return match ? { amount: Number(match[1]), unit: match[2].toLowerCase() } : null;
 }
 
 function productScore(product, query) {
@@ -60,30 +60,33 @@ function queryTokenCoverage(product, query) {
     return queryTokens.filter((token) => productTokens.has(token)).length / queryTokens.length;
 }
 
-function nutrientForServing(nutriments, key, grams) {
+function nutrientForServing(nutriments, key, measure) {
     const servingValue = number(nutriments?.[`${key}_serving`]);
     if (servingValue !== null) return servingValue;
-    const per100 = number(nutriments?.[`${key}_100g`]);
-    if (per100 !== null && grams !== null) return per100 * grams / 100;
+    if (!measure) return null;
+    const per100Key = measure.unit === 'ml' ? `${key}_100ml` : `${key}_100g`;
+    const per100 = number(nutriments?.[per100Key]);
+    if (per100 !== null) return per100 * measure.amount / 100;
     return null;
 }
 
 function normalizeProduct(product, score, query) {
     const nutriments = product?.nutriments || {};
-    const grams = servingGrams(product?.serving_size);
-    const calories = nutrientForServing(nutriments, 'energy-kcal', grams);
+    const serving = servingMeasure(product?.serving_size);
+    const servingAmount = serving?.amount ?? null;
+    const calories = nutrientForServing(nutriments, 'energy-kcal', serving);
     if (calories === null || calories <= 0) return null;
     const queryText = normalize(query);
-    if (/\b(shake|drink|beverage|milk|juice|soda)\b/.test(queryText) && (grams === null || grams < 100 || calories < 50)) {
+    if (/\b(shake|drink|beverage|milk|juice|soda)\b/.test(queryText) && (servingAmount === null || servingAmount < 100 || calories < 50)) {
         return null;
     }
-    if (/\bpizza\b/.test(queryText) && grams !== null && grams < 40) return null;
+    if (/\bpizza\b/.test(queryText) && serving?.unit === 'g' && servingAmount < 40) return null;
 
-    const carbs = nutrientForServing(nutriments, 'carbohydrates', grams) || 0;
-    const fiber = nutrientForServing(nutriments, 'fiber', grams) || 0;
-    const protein = nutrientForServing(nutriments, 'proteins', grams) || 0;
-    const fat = nutrientForServing(nutriments, 'fat', grams) || 0;
-    if (grams !== null && protein + carbs + fat > grams * 1.25) return null;
+    const carbs = nutrientForServing(nutriments, 'carbohydrates', serving) || 0;
+    const fiber = nutrientForServing(nutriments, 'fiber', serving) || 0;
+    const protein = nutrientForServing(nutriments, 'proteins', serving) || 0;
+    const fat = nutrientForServing(nutriments, 'fat', serving) || 0;
+    if (serving?.unit === 'g' && protein + carbs + fat > servingAmount * 1.25) return null;
     const name = [product?.brands, product?.product_name].filter(Boolean).join(' ').trim();
     if (!name) return null;
 
@@ -91,14 +94,14 @@ function normalizeProduct(product, score, query) {
         name,
         matchedItem: name,
         restaurant: product?.brands || null,
-        calories: Math.round(calories),
-        protein: Math.round(protein),
-        carbs: Math.round(carbs),
-        fiber: Math.round(fiber),
-        netCarbs: Math.max(0, Math.round(carbs - fiber)),
-        fat: Math.round(fat),
-        sugar: Math.round(nutrientForServing(nutriments, 'sugars', grams) || 0),
-        serving: String(product?.serving_size || (grams ? `${grams} g` : '1 serving')).slice(0, 100),
+        calories: Math.round(calories * 1000) / 1000,
+        protein: Math.round(protein * 1000) / 1000,
+        carbs: Math.round(carbs * 1000) / 1000,
+        fiber: Math.round(fiber * 1000) / 1000,
+        netCarbs: Math.max(0, Math.round((carbs - fiber) * 1000) / 1000),
+        fat: Math.round(fat * 1000) / 1000,
+        sugar: Math.round((nutrientForServing(nutriments, 'sugars', serving) || 0) * 1000) / 1000,
+        serving: String(product?.serving_size || (serving ? `${serving.amount} ${serving.unit}` : '1 serving')).slice(0, 100),
         quantity: 1,
         confidence: score >= 0.92 ? 'high' : 'medium',
         needsVerification: score < 0.92,

@@ -2,7 +2,7 @@
 <html lang="en" data-app-version="1.8.89">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Calorie Tracker - Well Fit</title>
     <link rel="stylesheet" href="styles.css">
     <script src="ai-paywall.js"></script>
@@ -11,6 +11,9 @@
     <script src="quick-food-entry.js"></script>
     <script src="food-personalization.js"></script>
     <script src="food-depth-capture.js"></script>
+    <script src="food-store.js"></script>
+    <script src="workout-store.js"></script>
+    <script src="activity-energy.js"></script>
     <style>
         .visually-hidden {
             position: absolute !important;
@@ -25,12 +28,14 @@
         }
 
         #photo-modal::backdrop,
-        #voice-modal::backdrop {
+        #voice-modal::backdrop,
+        #smart-entry-modal::backdrop {
             background: rgba(7, 20, 31, 0.78);
         }
 
         #photo-modal :focus-visible,
         #voice-modal :focus-visible,
+        #smart-entry-modal :focus-visible,
         #photo-log-trigger:focus-visible,
         #voice-log-trigger:focus-visible {
             outline: 3px solid #005fcc;
@@ -116,6 +121,72 @@
 
         .photo-inline-alert:empty {
             display: none;
+        }
+
+        #smart-entry-modal {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            max-width: none;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0;
+            border: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            overflow-y: auto;
+            box-sizing: border-box;
+            padding: 5vh 12px;
+        }
+
+        #smart-entry-modal .smart-entry-panel {
+            position: relative;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            box-sizing: border-box;
+        }
+
+        #smart-entry-modal input,
+        #smart-entry-modal select {
+            border-color: #64748b !important;
+        }
+
+        #smart-entry-modal .smart-entry-label {
+            display: block;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 800;
+            margin: 0 0 5px;
+        }
+
+        #smart-entry-modal .smart-entry-error {
+            color: #991b1b;
+            background: #fef2f2;
+            border: 1px solid #991b1b;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin: 8px 0;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        #smart-entry-modal .smart-entry-error:empty {
+            display: none;
+        }
+
+        @media (max-width: 420px) {
+            #smart-entry-modal {
+                padding: 12px 8px;
+            }
+
+            #smart-entry-modal .smart-entry-panel {
+                width: 100%;
+                padding: 18px;
+            }
         }
 
         .calorie-goal-edit-link {
@@ -395,7 +466,7 @@
                         <!-- Protein -->
                         <div style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <div style="font-weight: bold; color: #e74c3c;">🥩 Protein</div>
+                                <div style="font-weight: bold; color: #b42318;">🥩 Protein</div>
                                 <div style="font-size: 14px; color: #666;">
                                     <span id="protein-consumed">0</span>g / <span id="protein-target">150</span>g
                                 </div>
@@ -408,7 +479,7 @@
                         <!-- Carbs -->
                         <div style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <div style="font-weight: bold; color: #f39c12;">🍞 Carbs</div>
+                                <div style="font-weight: bold; color: #9a5b0a;">🍞 Carbs</div>
                                 <div style="font-size: 14px; color: #666;">
                                     <span id="carbs-consumed">0</span>g / <span id="carbs-target">200</span>g
                                 </div>
@@ -430,7 +501,7 @@
                         <!-- Fat -->
                         <div style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <div style="font-weight: bold; color: #27ae60;">🥑 Fat</div>
+                                <div style="font-weight: bold; color: #166534;">🥑 Fat</div>
                                 <div style="font-size: 14px; color: #666;">
                                     <span id="fat-consumed">0</span>g / <span id="fat-target">67</span>g
                                 </div>
@@ -443,7 +514,7 @@
                         <!-- Sugar -->
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <div style="font-weight: bold; color: #e74c3c;">🍭 Sugar</div>
+                                <div style="font-weight: bold; color: #b42318;">🍭 Sugar</div>
                                 <div style="font-size: 14px; color: #666;">
                                     <span id="sugar-consumed">0</span>g / <span id="sugar-target">25</span>g
                                 </div>
@@ -460,15 +531,15 @@
                         <div style="background: #f8f9ff; border-radius: 10px; padding: 15px; margin-top: 15px;">
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
                                 <div>
-                                    <div style="font-size: 20px; font-weight: bold; color: #e74c3c;" id="protein-percent">0%</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #b42318;" id="protein-percent">0%</div>
                                     <div style="font-size: 12px; color: #666;">Protein Goal</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 20px; font-weight: bold; color: #f39c12;" id="carbs-percent">0%</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #9a5b0a;" id="carbs-percent">0%</div>
                                     <div style="font-size: 12px; color: #666;">Carbs Goal</div>
                                 </div>
                                 <div>
-                                    <div style="font-size: 20px; font-weight: bold; color: #27ae60;" id="fat-percent">0%</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #166534;" id="fat-percent">0%</div>
                                     <div style="font-size: 12px; color: #666;">Fat Goal</div>
                                 </div>
                             </div>
@@ -488,7 +559,7 @@
                             <button id="voice-log-trigger" type="button" aria-haspopup="dialog" aria-controls="voice-modal" onclick="startVoiceLogging(this)" style="background: #334155; backdrop-filter: blur(10px); color: white; border: 2px solid #e2e8f0; padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s;">
                                 <span aria-hidden="true">🎤</span><br>Voice
                             </button>
-                            <button type="button" onclick="showSmartEntry()" style="background: #334155; backdrop-filter: blur(10px); color: white; border: 2px solid #e2e8f0; padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s;">
+                            <button type="button" aria-haspopup="dialog" aria-controls="smart-entry-modal" onclick="showSmartEntry({ mode: 'ai' })" style="background: #334155; backdrop-filter: blur(10px); color: white; border: 2px solid #e2e8f0; padding: 15px 8px; border-radius: 15px; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s;">
                                 <span aria-hidden="true">⌨️</span><br>Type
                             </button>
                         </div>
@@ -538,7 +609,7 @@
                     <div style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <h3 style="color: var(--primary); margin-bottom: 15px;">🍽️ Today's Meals</h3>
                         <div id="today-meals">
-                            <p style="text-align: center; color: #999; padding: 20px;">No meals logged yet today</p>
+                            <p style="text-align: center; color: #475569; padding: 20px;">No meals logged yet today</p>
                         </div>
                     </div>
                     
@@ -1048,23 +1119,26 @@
     </style>
 
     <!-- Smart Entry Modal -->
-    <div id="smart-entry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; overflow-y: auto;">
-        <div style="position: relative; top: 5vh; left: 50%; transform: translateX(-50%); background: white; border-radius: 20px; padding: 30px; width: 90%; max-width: 450px; margin-bottom: 5vh;">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">⌨️ Add Food</h3>
+    <dialog id="smart-entry-modal" role="dialog" aria-modal="true" aria-labelledby="smart-entry-title" aria-describedby="smart-entry-live-status">
+        <div class="smart-entry-panel">
+            <button id="smart-entry-close-button" type="button" class="dialog-close-button" onclick="closeSmartEntry()">Close</button>
+            <h2 id="smart-entry-title" style="color: var(--primary); margin: 0 0 20px;">⌨️ Add Food</h2>
+            <div id="smart-entry-live-status" role="status" aria-live="polite" style="min-height: 18px; color: #334155; font-size: 13px; margin-bottom: 8px;"></div>
             
             <!-- Tab buttons -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button id="ai-search-tab" onclick="showAISearch()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold;">🤖 AI Search</button>
-                <button id="manual-entry-tab" onclick="showManualEntry()" style="flex: 1; padding: 10px; background: #e0e0e0; color: #666; border: none; border-radius: 10px; font-weight: bold;">✏️ Manual Entry</button>
+                <button id="ai-search-tab" type="button" role="tab" aria-selected="true" aria-controls="ai-search-content" onclick="showAISearch()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold;">🤖 AI Search</button>
+                <button id="manual-entry-tab" type="button" role="tab" aria-selected="false" aria-controls="manual-entry-content" onclick="showManualEntry()" style="flex: 1; padding: 10px; background: #e0e0e0; color: #666; border: none; border-radius: 10px; font-weight: bold;">✏️ Manual Entry (free)</button>
             </div>
             
             <!-- AI Search Tab -->
             <div id="ai-search-content">
+                <label class="smart-entry-label" for="smart-search">Search food with AI</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="text" id="smart-search" placeholder="e.g. 'Big Mac with fries'" 
                            onkeypress="if(event.key==='Enter') searchFood(this.value)" 
                            style="flex: 1; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                    <button onclick="searchFood(document.getElementById('smart-search').value)" style="background: var(--primary); color: white; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold;">Search</button>
+                    <button type="button" onclick="searchFood(document.getElementById('smart-search').value)" style="background: var(--primary); color: white; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold;">Search</button>
                 </div>
                 
                 <!-- Quick suggestions -->
@@ -1082,26 +1156,37 @@
             </div>
             
             <!-- Manual Entry Tab -->
-            <div id="manual-entry-content" style="display: none;">
-                <input type="text" id="manual-food-name" placeholder="Food name" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
+            <div id="manual-entry-content" role="tabpanel" aria-labelledby="manual-entry-tab" style="display: none;">
+                <label class="smart-entry-label" for="manual-food-name">Food name</label>
+                <input type="text" id="manual-food-name" placeholder="Food name" autocomplete="off" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px;">
-                    <input type="number" id="manual-calories" placeholder="Calories" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
-	                    <input type="number" id="manual-protein" placeholder="Protein (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
-	                    <input type="number" id="manual-carbs" placeholder="Carbs (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
-	                    <input type="number" id="manual-fiber" placeholder="Fiber (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
-	                    <input type="number" id="manual-fat" placeholder="Fat (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
-	                    <input type="number" id="manual-sugar" placeholder="Sugar (g)" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;">
+                    <div><label class="smart-entry-label" for="manual-calories">Calories</label><input type="number" id="manual-calories" placeholder="0" min="0" step="any" inputmode="decimal" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;"></div>
+	                    <div><label class="smart-entry-label" for="manual-protein">Protein (g)</label><input type="number" id="manual-protein" placeholder="0" min="0" step="any" inputmode="decimal" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;"></div>
+	                    <div><label class="smart-entry-label" for="manual-carbs">Carbs (g)</label><input type="number" id="manual-carbs" placeholder="0" min="0" step="any" inputmode="decimal" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;"></div>
+	                    <div><label class="smart-entry-label" for="manual-fiber">Fiber (g)</label><input type="number" id="manual-fiber" placeholder="0" min="0" step="any" inputmode="decimal" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;"></div>
+	                    <div><label class="smart-entry-label" for="manual-fat">Fat (g)</label><input type="number" id="manual-fat" placeholder="0" min="0" step="any" inputmode="decimal" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;"></div>
+	                    <div><label class="smart-entry-label" for="manual-sugar">Sugar (g)</label><input type="number" id="manual-sugar" placeholder="0" min="0" step="any" inputmode="decimal" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; box-sizing: border-box;"></div>
                 </div>
 
-                <button onclick="addManualFood()" style="width: 100%; background: #4CAF50; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: bold;">Add Food</button>
+                <label class="smart-entry-label" for="manual-meal-type">Meal</label>
+                <select id="manual-meal-type" style="width: 100%; padding: 9px 10px; border: 1px solid #64748b; border-radius: 8px; font-size: 14px; margin-bottom: 10px;">
+                    <option value="breakfast">🌅 Breakfast</option>
+                    <option value="lunch">☀️ Lunch</option>
+                    <option value="dinner">🌙 Dinner</option>
+                    <option value="snack">🍿 Snack</option>
+                </select>
+                <div id="manual-entry-error" class="smart-entry-error" role="alert" aria-live="assertive"></div>
+                <div id="manual-entry-saved" role="status" aria-live="polite" style="min-height: 18px; color: #166534; font-size: 13px; font-weight: 700; margin-bottom: 8px;"></div>
+
+                <button type="button" onclick="addManualFood()" style="width: 100%; background: #166534; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: bold;">Add Food (offline/free)</button>
             </div>
             
-            <button onclick="closeSmartEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%;">
+            <button type="button" onclick="closeSmartEntry()" style="background: #6c757d; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; margin-top: 20px; width: 100%;">
                 Cancel
             </button>
         </div>
-    </div>
+    </dialog>
 
     <!-- Quick Add Manager Modal -->
     <div id="quick-add-manager-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; overflow-y: auto;">
@@ -1215,32 +1300,134 @@
 
     <script>
         // Helper function to get local date in YYYY-MM-DD format (not UTC)
-        function getLocalDateString() {
-            const now = new Date();
+        function getLocalDateString(value = new Date()) {
+            const now = value instanceof Date ? new Date(value.getTime()) : new Date(value);
+            if (Number.isNaN(now.getTime())) return getLocalDateString(new Date());
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
 
+        function readLoggedMeals() {
+            if (window.FuelFireFoodStore?.readLogs) {
+                const logs = window.FuelFireFoodStore.readLogs(localStorage);
+                if (window.FuelFireFoodStore.readLogs.lastError) {
+                    reportFoodStorageFailure(window.FuelFireFoodStore.readLogs.lastError, 'food log recovery');
+                }
+                return logs;
+            }
+            try {
+                const parsed = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+            } catch (error) {
+                console.warn('Food log storage could not be read:', error);
+                return {};
+            }
+        }
+
+        function reportFoodStorageFailure(error, context = 'food log') {
+            const detail = String(error?.message || '').trim();
+            const message = `Could not save this ${context}. Your existing data and form were kept. Try again.`;
+            window.foodStorageError = { message, detail };
+            console.error(message, error);
+
+            const manualError = document.getElementById('manual-entry-error');
+            if (manualError) manualError.textContent = message;
+            const manualSaved = document.getElementById('manual-entry-saved');
+            if (manualSaved) manualSaved.textContent = '';
+            if (typeof setSmartEntryStatus === 'function') setSmartEntryStatus(message, true);
+
+            if (document.getElementById('photo-modal')?.style.display === 'block' && typeof announcePhotoError === 'function') {
+                announcePhotoError(message);
+            } else if (document.getElementById('voice-modal')?.style.display === 'block' && typeof announceVoiceError === 'function') {
+                announceVoiceError(message);
+            }
+            return false;
+        }
+
+        function writeLoggedMeals(logs) {
+            try {
+                if (window.FuelFireFoodStore?.writeLogs) {
+                    const result = window.FuelFireFoodStore.writeLogs(logs, localStorage);
+                    if (result?.ok === false) return reportFoodStorageFailure(result.error);
+                    return true;
+                }
+                const serialized = JSON.stringify(logs || {});
+                localStorage.setItem('fuelfire_logged_meals', serialized);
+                if (localStorage.getItem('fuelfire_logged_meals') !== serialized) {
+                    throw new Error('Food log storage did not persist the complete update.');
+                }
+                return true;
+            } catch (error) {
+                return reportFoodStorageFailure(error);
+            }
+        }
+
+        function safeFoodStorageWrite(key, value, context = 'food setting') {
+            const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+            let previous = null;
+            let hadPrevious = false;
+            try {
+                hadPrevious = localStorage.getItem(key) !== null;
+                previous = localStorage.getItem(key);
+                localStorage.setItem(key, serialized);
+                if (localStorage.getItem(key) !== serialized) {
+                    throw new Error(`The ${context} did not persist completely.`);
+                }
+                return true;
+            } catch (error) {
+                try {
+                    if (hadPrevious) {
+                        localStorage.setItem(key, previous);
+                    } else if (typeof localStorage.removeItem === 'function') {
+                        localStorage.removeItem(key);
+                    }
+                } catch (restoreError) {
+                    console.error(`Could not restore ${context} after a failed save.`, restoreError);
+                }
+                return reportFoodStorageFailure(error, context);
+            }
+        }
+
+        function ensureLoggedMealsDay(logs, dateKey = getLocalDateString()) {
+            const day = logs[dateKey];
+            if (!day || typeof day !== 'object' || Array.isArray(day)) {
+                logs[dateKey] = { meals: [], totalCalories: 0 };
+            } else if (!Array.isArray(day.meals)) {
+                logs[dateKey] = { ...day, meals: [], totalCalories: 0 };
+            }
+            return logs[dateKey];
+        }
+
         // Active Calories Functions (for balance calculator)
         function getTodayWorkoutCalories() {
+            if (window.FuelFireWorkouts?.readHistory) {
+                const history = window.FuelFireWorkouts.readHistory(localStorage);
+                return Math.round(getTodayWorkoutCaloriesFromHistory(history));
+            }
             const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+            return Math.round(getTodayWorkoutCaloriesFromHistory(workoutHistory));
+        }
+
+        function getTodayWorkoutCaloriesFromHistory(workoutHistory) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             let totalWorkoutCalories = 0;
 
-            workoutHistory.forEach(workout => {
+            (Array.isArray(workoutHistory) ? workoutHistory : []).forEach(workout => {
                 const workoutDate = new Date(workout.date);
                 workoutDate.setHours(0, 0, 0, 0);
 
                 if (workoutDate.getTime() === today.getTime()) {
                     // Use calories from workout if available, otherwise estimate
-                    if (workout.calories) {
-                        totalWorkoutCalories += workout.calories;
+                    if (Number.isFinite(Number(workout.calories)) && Number(workout.calories) >= 0) {
+                        totalWorkoutCalories += Number(workout.calories);
                     } else {
-                        const duration = workout.duration || 45;
+                        const duration = Number.isFinite(Number(workout.duration)) && Number(workout.duration) >= 0
+                            ? Number(workout.duration)
+                            : 45;
                         let caloriesPerMinute = 5;
 
                         if (workout.type) {
@@ -1269,12 +1456,13 @@
 
             let totalManualCalories = 0;
 
-            entries.forEach(entry => {
+            (Array.isArray(entries) ? entries : []).forEach(entry => {
                 const entryDate = new Date(entry.date);
                 entryDate.setHours(0, 0, 0, 0);
 
                 if (entryDate.getTime() === today.getTime()) {
-                    totalManualCalories += entry.calories;
+                    const calories = Number(entry.calories);
+                    if (Number.isFinite(calories) && calories >= 0) totalManualCalories += calories;
                 }
             });
 
@@ -1288,6 +1476,9 @@
         }
 
         function getTotalActiveCalories() {
+            if (window.FuelFireEnergy?.getActiveCalories) {
+                return Math.round(window.FuelFireEnergy.getActiveCalories({ storage: localStorage, now: new Date() }) || 0);
+            }
             const appleHealthActive = getAppleHealthActiveCalories();
             const manualActive = getTodayManualCalories();
             const workoutActive = getTodayWorkoutCalories();
@@ -1347,6 +1538,24 @@
         async function postJsonWithFallback(path, payload, timeoutMs = 45000) {
             const endpoints = getApiEndpoints(path);
             let lastError = null;
+            let accessHeaders = {};
+
+            // The security bridge may refresh the short-lived AI session before
+            // a request. Keep this await outside the endpoint loop so an access
+            // failure is not hidden by a misleading fallback request.
+            if (typeof window.__aiAccess?.ensureSession === 'function') {
+                const session = await window.__aiAccess.ensureSession();
+                if (session?.headers && typeof session.headers === 'object') {
+                    accessHeaders = { ...session.headers };
+                }
+                if (session?.accessToken && !accessHeaders.Authorization && !accessHeaders.authorization) {
+                    accessHeaders.Authorization = `Bearer ${session.accessToken}`;
+                }
+            }
+            if (typeof window.__aiAccess?.getHeaders === 'function') {
+                const headers = await window.__aiAccess.getHeaders();
+                if (headers && typeof headers === 'object') accessHeaders = { ...accessHeaders, ...headers };
+            }
 
             for (const endpoint of endpoints) {
                 const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -1355,7 +1564,7 @@
                 try {
                     const response = await fetch(endpoint, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', ...accessHeaders },
                         body: JSON.stringify(payload),
                         signal: controller ? controller.signal : undefined
                     });
@@ -2525,8 +2734,9 @@
                 .filter(bundle => bundle?.id && Array.isArray(bundle?.foods) && bundle.foods.length)
                 .sort((a, b) => (b.count || 0) - (a.count || 0) || String(b.lastLoggedAt || '').localeCompare(String(a.lastLoggedAt || '')))
                 .slice(0, 40);
-            localStorage.setItem(SAVED_MEAL_BUNDLES_STORAGE_KEY, JSON.stringify(sorted));
+            if (!safeFoodStorageWrite(SAVED_MEAL_BUNDLES_STORAGE_KEY, sorted, 'saved meal bundle')) return false;
             renderSavedMealQuickAdds();
+            return true;
         }
 
         function getMealPatterns() {
@@ -2540,7 +2750,11 @@
         }
 
         function saveMealPatternState(patterns) {
-            localStorage.setItem(MEAL_PATTERNS_STORAGE_KEY, JSON.stringify((Array.isArray(patterns) ? patterns : []).slice(0, 60)));
+            return safeFoodStorageWrite(
+                MEAL_PATTERNS_STORAGE_KEY,
+                (Array.isArray(patterns) ? patterns : []).slice(0, 60),
+                'meal pattern'
+            );
         }
 
         function saveMealBundle(name, foods, mealType, aliases = []) {
@@ -2557,7 +2771,7 @@
             } else {
                 bundles.push(bundle);
             }
-            saveMealBundles(bundles);
+            if (!saveMealBundles(bundles)) return null;
             return bundle;
         }
 
@@ -2594,7 +2808,10 @@
             const index = bundles.findIndex(bundle => bundle.id === bundleId);
             if (index < 0) return;
             const bundle = bundles[index];
-            getFoodsFromSavedMeal(bundle).forEach(food => logFood(multiplySavedMealFood(food, bundle.mealType || 'snack')));
+            const logged = getFoodsFromSavedMeal(bundle)
+                .map(food => logFood(multiplySavedMealFood(food, bundle.mealType || 'snack')))
+                .every(Boolean);
+            if (!logged) return;
             bundles[index] = {
                 ...bundle,
                 count: (bundle.count || 0) + 1,
@@ -2611,10 +2828,16 @@
             if (!section || !container) return;
             const bundles = getSavedMealBundles().slice(0, 6);
             section.style.display = bundles.length ? 'block' : 'none';
-            container.innerHTML = bundles.map(bundle => {
+            container.replaceChildren();
+            bundles.forEach(bundle => {
                 const total = getFoodsFromSavedMeal(bundle).reduce((sum, food) => sum + Math.round(macroNumber(food.calories, 0) * normalizeLoggedQuantity(food.quantity || 1)), 0);
-                return `<button type="button" onclick="logSavedMealBundle('${escapeHtml(bundle.id)}')" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.35); padding: 8px 12px; border-radius: 18px; font-size: 12px; white-space: nowrap;">${escapeHtml(bundle.name)} (${total} cal)</button>`;
-            }).join('');
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.style.cssText = 'background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.35); padding: 8px 12px; border-radius: 18px; font-size: 12px; white-space: nowrap;';
+                button.textContent = `${bundle.name} (${total} cal)`;
+                button.addEventListener('click', () => logSavedMealBundle(bundle.id));
+                container.appendChild(button);
+            });
         }
 
         function recordMealCombination(foods, mealType) {
@@ -2646,7 +2869,7 @@
         function acceptMealSaveSuggestion() {
             if (!pendingMealSaveSuggestion) return;
             const name = document.getElementById('suggested-meal-name')?.value || pendingMealSaveSuggestion.suggestedName;
-            saveMealBundle(name, pendingMealSaveSuggestion.foods, pendingMealSaveSuggestion.mealType, ['usual meal']);
+            if (!saveMealBundle(name, pendingMealSaveSuggestion.foods, pendingMealSaveSuggestion.mealType, ['usual meal'])) return;
             pendingMealSaveSuggestion = null;
             renderMealSaveSuggestion();
         }
@@ -2711,9 +2934,10 @@
                     .filter(item => item && item.key && item.name)
                     .sort((a, b) => (b.count || 0) - (a.count || 0) || String(b.lastLoggedAt || '').localeCompare(String(a.lastLoggedAt || '')))
                     .slice(0, FOOD_MEMORY_MAX_ITEMS);
-                localStorage.setItem(FOOD_MEMORY_STORAGE_KEY, JSON.stringify(sorted));
+                return safeFoodStorageWrite(FOOD_MEMORY_STORAGE_KEY, sorted, 'food memory');
             } catch (error) {
                 console.warn('Could not save food memory:', error);
+                return false;
             }
         }
 
@@ -2751,7 +2975,8 @@
         function rememberLoggedFood(meal, extraAliases = [], options = {}) {
             const cleanName = stripLoggedQuantityPrefix(meal?.name || '');
             const key = normalizeFoodMemoryText(cleanName);
-            if (!key || key.length < 3 || !macroNumber(meal?.calories, 0)) return;
+            const mealCalories = Number(meal?.calories);
+            if (!key || key.length < 3 || !Number.isFinite(mealCalories) || mealCalories < 0) return;
 
             const inferredQuantity = normalizeLoggedQuantity(meal?.quantity || parseQuantityFromFoodQuery(meal?.name || ''));
             const baseNutrition = meal?.baseNutrition ? getMealBaseNutrition(meal) : buildBaseNutritionFromTotals(meal, inferredQuantity);
@@ -2803,7 +3028,7 @@
         function bootstrapFoodMemoryFromLoggedMeals() {
             if (getFoodMemoryItems().length > 0) return;
             try {
-                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const loggedMeals = readLoggedMeals();
                 const meals = Object.values(loggedMeals)
                     .flatMap(day => Array.isArray(day) ? day : (Array.isArray(day?.meals) ? day.meals : []))
                     .filter(Boolean)
@@ -3327,7 +3552,7 @@
 	                                </div>
                                 <div style="text-align: right;">
                                     <div style="font-weight: bold; color: var(--primary); font-size: 16px;" id="photo-food-cal-${index}">${Math.round(food.calories * (food.quantity || 1))}</div>
-                                    <div style="font-size: 10px; color: #999;">cal</div>
+                                    <div style="font-size: 10px; color: #475569;">cal</div>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 12px; font-size: 11px; color: #475569; border-top: 1px solid #94a3b8; padding-top: 6px; flex-wrap: wrap; align-items: center;">
@@ -3501,7 +3726,7 @@
             photoCommittedSessionId = photoLogSessionId;
 
             const today = getLocalDateString();
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const loggedMeals = readLoggedMeals();
 
             // Handle legacy/broken storage shape from older photo logging
             if (!loggedMeals[today]) {
@@ -3582,7 +3807,6 @@
 	                };
 
 	                loggedMeals[today].meals.push(meal);
-                    rememberLoggedFood(meal, meal.memoryAliases, { action: 'accepted' });
                 loggedPhotoFoods.push(meal);
                 totalLoggedCalories += meal.calories;
                 loggedCount += 1;
@@ -3590,7 +3814,12 @@
 
             const existingTotalCalories = Number(loggedMeals[today].totalCalories) || 0;
             loggedMeals[today].totalCalories = existingTotalCalories + totalLoggedCalories;
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) {
+                photoCommitInProgress = false;
+                photoCommittedSessionId = -1;
+                return;
+            }
+            loggedPhotoFoods.forEach(meal => rememberLoggedFood(meal, meal.memoryAliases, { action: 'accepted' }));
 
             const savedMealName = String(document.getElementById('photo-save-meal-name')?.value || '').trim();
             if (savedMealName) {
@@ -4539,7 +4768,7 @@
         }
 
         // Quick add common items (protein shakes, supplements, etc.)
-        function quickAddItem(name, calories, protein, carbs, fat) {
+        function quickAddItem(name, calories, protein, carbs, fat, trigger = null) {
             const food = {
                 name: name,
                 calories: calories,
@@ -4549,10 +4778,11 @@
                 sugar: 0
             };
 
-            logFood(food);
+            if (!logFood(food)) return;
 
             // Show success feedback
-            const btn = event.target.closest('button');
+            const btn = trigger?.currentTarget || trigger?.target?.closest('button') || document.activeElement;
+            if (!btn) return true;
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '✓ Added!';
             btn.style.transform = 'scale(0.95)';
@@ -4561,6 +4791,7 @@
                 btn.innerHTML = originalHTML;
                 btn.style.transform = 'scale(1)';
             }, 1000);
+            return true;
         }
 
         // Quick Add Management Functions
@@ -4576,7 +4807,7 @@
             // Initialize with default if empty
             if (!quickAdds || quickAdds.length === 0) {
                 quickAdds = getDefaultQuickAddItems();
-                localStorage.setItem('quickAddItems', JSON.stringify(quickAdds));
+                if (!safeFoodStorageWrite('quickAddItems', quickAdds, 'quick add defaults')) return;
             }
 
             const grid = document.getElementById('quick-add-grid');
@@ -4584,15 +4815,23 @@
 
             const colors = ['#9C27B0', '#f44336', '#2196F3', '#00BCD4', '#795548', '#FF9800', '#4CAF50', '#E91E63', '#3F51B5'];
 
-            grid.innerHTML = quickAdds.map((item, index) => {
+            grid.replaceChildren();
+            quickAdds.forEach((item, index) => {
                 const color = item.color || colors[index % colors.length];
-                return `
-                    <button onclick="quickAddItem('${item.name.replace(/'/g, "\\'")}', ${item.calories}, ${item.protein}, ${item.carbs}, ${item.fat})"
-                            style="background: linear-gradient(135deg, ${color}, ${color}dd); color: white; padding: 20px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 12px ${color}40; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.3;">
-                        ${item.name}
-                    </button>
-                `;
-            }).join('');
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.style.cssText = `background: linear-gradient(135deg, ${color}, ${color}dd); color: white; padding: 20px; border: none; border-radius: 15px; font-weight: bold; box-shadow: 0 3px 12px ${color}40; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.3;`;
+                button.textContent = String(item.name || 'Quick add');
+                button.addEventListener('click', event => quickAddItem(
+                    item.name,
+                    item.calories,
+                    item.protein,
+                    item.carbs,
+                    item.fat,
+                    event
+                ));
+                grid.appendChild(button);
+            });
         }
 
         function showQuickAddManager() {
@@ -4619,19 +4858,30 @@
             }
 
             const list = document.getElementById('quick-add-items-list');
-            list.innerHTML = quickAdds.map((item, index) => `
-                <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 12px; border-radius: 10px; border: 2px solid #e0e0e0;">
-                    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: var(--primary); font-size: 16px;">${item.name}</div>
-                            <div style="font-size: 11px; color: #666;">${item.calories} cal | ${item.protein}g P | ${item.carbs}g C | ${item.fat}g F</div>
-                        </div>
-                    </div>
-                    <button onclick="deleteQuickAddItem(${index})" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                        Delete
-                    </button>
-                </div>
-            `).join('');
+            list.replaceChildren();
+            quickAdds.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:white;padding:12px;border-radius:10px;border:2px solid #e0e0e0;';
+                const info = document.createElement('div');
+                info.style.cssText = 'display:flex;align-items:center;gap:10px;flex:1;';
+                const text = document.createElement('div');
+                text.style.flex = '1';
+                const name = document.createElement('div');
+                name.style.cssText = 'font-weight:bold;color:var(--primary);font-size:16px;';
+                name.textContent = String(item.name || 'Quick add');
+                const nutrition = document.createElement('div');
+                nutrition.style.cssText = 'font-size:11px;color:#666;';
+                nutrition.textContent = `${item.calories} cal | ${item.protein}g P | ${item.carbs}g C | ${item.fat}g F`;
+                text.append(name, nutrition);
+                info.appendChild(text);
+                const deleteButton = document.createElement('button');
+                deleteButton.type = 'button';
+                deleteButton.style.cssText = 'background:#dc3545;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;';
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteQuickAddItem(index));
+                row.append(info, deleteButton);
+                list.appendChild(row);
+            });
         }
 
         function addQuickAddItem() {
@@ -4660,7 +4910,7 @@
             if (!quickAdds) quickAdds = [];
 
             quickAdds.push(newItem);
-            localStorage.setItem('quickAddItems', JSON.stringify(quickAdds));
+            if (!safeFoodStorageWrite('quickAddItems', quickAdds, 'quick add item')) return;
 
             // Clear form
             document.getElementById('qa-name').value = '';
@@ -4678,7 +4928,7 @@
 
             let quickAdds = JSON.parse(localStorage.getItem('quickAddItems') || '[]');
             quickAdds.splice(index, 1);
-            localStorage.setItem('quickAddItems', JSON.stringify(quickAdds));
+            if (!safeFoodStorageWrite('quickAddItems', quickAdds, 'quick add item deletion')) return;
 
             loadQuickAddItemsList();
         }
@@ -4911,7 +5161,7 @@
 	                            meal: mealType
 	                        };
 
-                        logFood(foodToLog);
+                        if (!logFood(foodToLog)) return;
                         announceVoiceStatus(`Logged 1 item to ${mealType[0].toUpperCase() + mealType.slice(1)}: ${foodToLog.calories} calories, ${foodToLog.protein}g protein, ${foodToLog.carbs}g carbs, ${foodToLog.fat}g fat.`);
                         closeVoiceModal();
                     }, { background: '#166534' });
@@ -4928,7 +5178,7 @@
                         <div style="text-align: center;">
                             <div style="font-weight: bold; margin-bottom: 10px; color: #dc3545;">Product Not Found</div>
                             <div style="color: #666; font-size: 14px; margin-bottom: 15px;">
-                                Barcode: ${barcode}<br><br>
+                                Barcode: ${escapeHtml(barcode)}<br><br>
                                 This product isn't in our database yet.<br>
                                 Try using Voice or Manual entry instead.
                             </div>
@@ -4956,7 +5206,7 @@
             console.log('🍔 Logging food:', food);
             const today = getLocalDateString();
 
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
 
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], water: 0, totalCalories: 0 };
@@ -4989,14 +5239,15 @@
             };
 
             loggedMeals[today].meals.push(meal);
-            rememberLoggedFood(meal, meal.memoryAliases, { action: food.memoryAction || 'accepted' });
             loggedMeals[today].totalCalories = (loggedMeals[today].totalCalories || 0) + meal.calories;
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return false;
+            rememberLoggedFood(meal, meal.memoryAliases, { action: food.memoryAction || 'accepted' });
             console.log('✅ Food logged successfully');
 
             // Update the UI without reloading
             syncWithHomePage();
             loadTodaysMeals();
+            return true;
         }
 
         function cleanupVoiceModal() {
@@ -6199,6 +6450,7 @@
                     document.getElementById('voice-status').textContent = '🎤';
                 }
 
+                if (source === 'search') throw error;
                 return [];
             }
         }
@@ -6250,7 +6502,7 @@
             window.currentSource = source;
 
             if (foods.length === 0) {
-                resultsDiv.innerHTML = '<p style="color: #666;">No foods found</p>';
+                resultsDiv.innerHTML = '<p style="color: #475569;">No foods found</p>';
                 return;
             }
 
@@ -6274,6 +6526,16 @@
             html += '<div style="margin-bottom: 15px;">';
             foods.forEach((food, index) => {
                 const safeFoodName = escapeHtml(food.name || 'Food item');
+                const safeServing = escapeHtml(food.serving || '1 serving');
+                const safeSource = escapeHtml(food.source || '');
+                const safeCalories = escapeHtml(String(Number.isFinite(Number(food.calories)) ? Number(food.calories) : 0));
+                const safeProtein = escapeHtml(String(Number.isFinite(Number(food.protein)) ? Number(food.protein) : 0));
+                const safeCarbs = escapeHtml(String(Number.isFinite(Number(food.carbs)) ? Number(food.carbs) : 0));
+                const safeFiber = escapeHtml(String(Number.isFinite(Number(getFoodFiber(food))) ? Number(getFoodFiber(food)) : 0));
+                const safeNetCarbs = escapeHtml(String(Number.isFinite(Number(getFoodNetCarbs(food))) ? Number(getFoodNetCarbs(food)) : 0));
+                const safeFat = escapeHtml(String(Number.isFinite(Number(food.fat)) ? Number(food.fat) : 0));
+                const safeSugar = escapeHtml(String(Number.isFinite(Number(food.sugar)) ? Number(food.sugar) : 0));
+                const safeQuantity = escapeHtml(String(Number.isFinite(Number(food.quantity)) && Number(food.quantity) > 0 ? Number(food.quantity) : 1));
                 const confidenceBadge = (food.needsVerification || food.sourceType === 'estimate' || food.sourceType === 'aggregator')
                     ? '<span style="color: #f59e0b; margin-left: 5px;" title="Low confidence estimate">⚠️</span>'
                     : food.fromFoodMemory
@@ -6286,27 +6548,27 @@
                         <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
                             <input type="checkbox" class="manual-food-check" data-index="${index}"
                                    data-food-name="${safeFoodName}"
-                                   data-food-calories="${food.calories}"
-	                                   data-food-protein="${food.protein || 0}"
-	                                   data-food-carbs="${food.carbs || 0}"
-	                                   data-food-fiber="${getFoodFiber(food)}"
-	                                   data-food-net-carbs="${getFoodNetCarbs(food)}"
-		                                   data-food-fat="${food.fat || 0}"
-	                                   data-food-sugar="${food.sugar || 0}"
-                                       data-food-serving="${(food.serving || '1 serving').replace(/"/g, '&quot;')}"
+                                   data-food-calories="${safeCalories}"
+	                                   data-food-protein="${safeProtein}"
+	                                   data-food-carbs="${safeCarbs}"
+	                                   data-food-fiber="${safeFiber}"
+	                                   data-food-net-carbs="${safeNetCarbs}"
+		                                   data-food-fat="${safeFat}"
+	                                   data-food-sugar="${safeSugar}"
+                                       data-food-serving="${safeServing}"
                                    checked style="width: 20px; height: 20px; margin-top: 3px; flex-shrink: 0;">
                             <div style="flex: 1;">
 	                                <div style="font-size: 11px; color: #555; font-weight: 700; margin-bottom: 4px;">Food name ${confidenceBadge}</div>
-                                    <input type="text" class="manual-food-name-edit" data-index="${index}" value="${safeFoodName}"
+                                    <input id="manual-food-name-${index}" type="text" class="manual-food-name-edit" data-index="${index}" value="${safeFoodName}"
                                            aria-label="Food name"
                                            style="width: 100%; box-sizing: border-box; padding: 8px 9px; border: 1px solid #d7e4ef; border-radius: 8px; font-size: 14px; font-weight: 700; color: #111827; background: #fff;"
                                            onclick="event.stopPropagation();" onfocus="event.stopPropagation();">
-		                                <div style="font-size: 14px; color: #334155;">Calories: ${food.calories} | Protein: ${food.protein || 0}g | Carbohydrates: ${food.carbs || 0}g | Net carbohydrates: ${formatMacro(getFoodNetCarbs(food))}g | Fat: ${food.fat || 0}g | Sugar: ${food.sugar || 0}g</div>
-	                                ${food.serving ? `<div style="font-size: 12px; color: #999;">${food.serving}</div>` : ''}
-                                ${food.source ? `<div style="font-size: 11px; color: #aaa;">${food.source}</div>` : ''}
+		                                <div style="font-size: 14px; color: #334155;">Calories: ${safeCalories} | Protein: ${safeProtein}g | Carbohydrates: ${safeCarbs}g | Net carbohydrates: ${safeNetCarbs}g | Fat: ${safeFat}g | Sugar: ${safeSugar}g</div>
+	                                <div style="font-size: 12px; color: #475569;">${safeServing}</div>
+                                ${safeSource ? `<div style="font-size: 11px; color: #475569;">${safeSource}</div>` : ''}
                                 <div style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
-                                    <label style="font-size: 12px; color: #666;">Qty:</label>
-                                    <input type="number" class="manual-food-quantity" data-index="${index}" value="${food.quantity || 1}" min="0.25" step="0.25"
+                                    <label for="manual-food-quantity-${index}" style="font-size: 12px; color: #475569;">Qty:</label>
+                                    <input id="manual-food-quantity-${index}" type="number" class="manual-food-quantity" data-index="${index}" value="${safeQuantity}" min="0.25" step="0.25"
                                            style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px;"
                                            onclick="event.stopPropagation();">
                                 </div>
@@ -6336,10 +6598,8 @@
 
             // Show "Log Selected" button
             html += `
-                <div style="background: #4CAF50; color: white; padding: 12px; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center;"
-                     onclick="logSelectedFoods()">
-                    <div style="font-weight: bold;">✅ Log Selected Foods</div>
-                </div>
+                <button type="button" style="width: 100%; background: #166534; color: white; padding: 12px; border: 0; border-radius: 10px; margin-bottom: 12px; cursor: pointer; text-align: center; font-weight: bold;"
+                     onclick="logSelectedFoods()">✅ Log Selected Foods</button>
             `;
 
             resultsDiv.innerHTML = html;
@@ -6424,7 +6684,7 @@
                 }
             
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
@@ -6434,6 +6694,7 @@
             let totalProtein = 0;
             let totalCarbs = 0;
             let totalFat = 0;
+            const newlyLoggedMeals = [];
             
             selectedFoods.forEach(food => {
                 const meal = {
@@ -6462,7 +6723,7 @@
 	                };
 
 	                loggedMeals[today].meals.push(meal);
-                    rememberLoggedFood(meal, meal.memoryAliases, { action: food.memoryAction || 'accepted' });
+                    newlyLoggedMeals.push(meal);
                 totalCalories += food.calories;
                 totalProtein += food.protein || 0;
                 totalCarbs += food.carbs || 0;
@@ -6470,7 +6731,8 @@
             });
             
             loggedMeals[today].totalCalories += totalCalories;
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return;
+            newlyLoggedMeals.forEach(meal => rememberLoggedFood(meal, meal.memoryAliases, { action: 'accepted' }));
             const savedMealName = String(document.getElementById('typed-save-meal-name')?.value || '').trim();
             if (savedMealName) saveMealBundle(savedMealName, selectedFoods, mealType);
             recordMealCombination(selectedFoods, mealType);
@@ -6489,7 +6751,7 @@
             // Clear results and close the smart entry modal
             document.getElementById('food-results').innerHTML = '';
             document.getElementById('search-results').innerHTML = '';
-            document.getElementById('smart-entry-modal').style.display = 'none';
+            closeSmartEntry();
 
             alert(`✅ Logged ${selectedFoods.length} items (${totalCalories} calories)`);
 
@@ -6516,7 +6778,7 @@
             const type = types[parseInt(mealType)] || 'snack';
             
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
@@ -6527,6 +6789,7 @@
             let totalCarbs = 0; 
             let totalFat = 0;
             let totalSugar = 0;
+            const newlyLoggedMeals = [];
             
             // Log each food
             window.currentFoods.forEach(food => {
@@ -6556,8 +6819,8 @@
 	                };
 
 	                console.log('💾 Logging meal:', mealEntry);
-	                loggedMeals[today].meals.push(mealEntry);
-	                rememberLoggedFood(mealEntry, mealEntry.memoryAliases);
+                loggedMeals[today].meals.push(mealEntry);
+                    newlyLoggedMeals.push(mealEntry);
 
                 totalCalories += food.calories;
                 totalProtein += food.protein || 0;
@@ -6567,7 +6830,8 @@
             });
             
             loggedMeals[today].totalCalories += totalCalories;
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return;
+            newlyLoggedMeals.forEach(meal => rememberLoggedFood(meal, meal.memoryAliases));
             syncWithHomePage();
             
             // Close modals and refresh
@@ -6603,7 +6867,7 @@
             
             // Log the food
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
@@ -6627,10 +6891,9 @@
 	            };
 
             loggedMeals[today].meals.push(mealEntry);
-            rememberLoggedFood(mealEntry);
-            
             loggedMeals[today].totalCalories += calories;
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return;
+            rememberLoggedFood(mealEntry);
             syncWithHomePage();
             
             // Close modal and refresh
@@ -6644,35 +6907,134 @@
         }
         
         // Smart Entry
-        function showSmartEntry() {
-            document.getElementById('smart-entry-modal').style.display = 'block';
-            document.getElementById('smart-search').focus();
+        const FOOD_ENTRY_MODE_KEY = 'fuelfire_food_entry_mode';
+        let smartEntryOpener = null;
+
+        function setSmartEntryStatus(message, isError = false) {
+            const status = document.getElementById('smart-entry-live-status');
+            if (status) {
+                status.textContent = String(message || '');
+                status.style.color = isError ? '#991b1b' : '#334155';
+            }
+        }
+
+        function restoreSmartEntryFocus() {
+            const fallback = document.querySelector('[aria-controls="smart-entry-modal"]');
+            const target = isValidDialogOpener(smartEntryOpener) ? smartEntryOpener : fallback;
+            smartEntryOpener = null;
+            if (target && typeof target.focus === 'function') requestAnimationFrame(() => target.focus());
+        }
+
+        function resetSmartEntryState() {
+            const searchInput = document.getElementById('smart-search');
+            if (searchInput) searchInput.value = '';
+            const results = document.getElementById('search-results');
+            if (results) results.innerHTML = '';
+            const error = document.getElementById('manual-entry-error');
+            if (error) error.textContent = '';
+            const saved = document.getElementById('manual-entry-saved');
+            if (saved) saved.textContent = '';
+            setSmartEntryStatus('');
+        }
+
+        function showSmartEntry(options = {}) {
+            const modal = document.getElementById('smart-entry-modal');
+            if (!modal) return;
+            const requestedMode = options.mode === 'manual' || options.mode === 'ai'
+                ? options.mode
+                : (localStorage.getItem(FOOD_ENTRY_MODE_KEY) || 'ai');
+            if (!modal.open && modal.dataset.fallbackDialog !== 'true') {
+                smartEntryOpener = isValidDialogOpener(document.activeElement) ? document.activeElement : null;
+                openAccessibleDialog(
+                    modal,
+                    document.getElementById(requestedMode === 'manual' ? 'manual-food-name' : 'smart-search')
+                );
+            }
+            if (requestedMode === 'manual') showManualEntry();
+            else showAISearch();
         }
         
         function closeSmartEntry() {
-            document.getElementById('smart-entry-modal').style.display = 'none';
-            document.getElementById('smart-search').value = '';
-            document.getElementById('search-results').innerHTML = '';
+            const modal = document.getElementById('smart-entry-modal');
+            if (!modal) return;
+            if (modal.dataset.fallbackDialog === 'true') {
+                closeFallbackDialog(modal);
+                resetSmartEntryState();
+                restoreSmartEntryFocus();
+                return;
+            }
+            if (modal.open && typeof modal.close === 'function') {
+                modal.close();
+                return;
+            }
+            resetSmartEntryState();
+            restoreSmartEntryFocus();
         }
-        
+
+        document.getElementById('smart-entry-modal')?.addEventListener('cancel', (event) => {
+            event.preventDefault();
+            closeSmartEntry();
+        });
+        document.getElementById('smart-entry-modal')?.addEventListener('close', () => {
+            setFallbackDialogBackground(document.getElementById('smart-entry-modal'), false);
+            resetSmartEntryState();
+            restoreSmartEntryFocus();
+        });
+        installFallbackDialogKeyboard(document.getElementById('smart-entry-modal'), closeSmartEntry);
+
         async function searchFood(query) {
-            if (!query || query.length < 2) {
-                document.getElementById('search-results').innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Enter at least 2 characters to search</div>';
+            const normalizedQuery = String(query || '').trim();
+            window.currentFoodQuery = normalizedQuery;
+            if (normalizedQuery.length < 2) {
+                const results = document.getElementById('search-results');
+                if (results) {
+                    results.textContent = 'Enter at least 2 characters to search.';
+                }
                 return;
             }
 
             if (typeof requireAIAccess === 'function' && !requireAIAccess('AI typed food search')) {
-                document.getElementById('search-results').innerHTML = '';
+                document.getElementById('search-results').textContent = '';
                 return;
             }
             
             // Show loading
-            document.getElementById('search-results').innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">🤖 AI analyzing...</div>';
+            const resultsDiv = document.getElementById('search-results');
+            resultsDiv.textContent = 'AI analyzing…';
+            setSmartEntryStatus(`Looking up “${normalizedQuery}”…`);
             
             // Always use AI for better results
-            const results = await parseWithAI(query, 'search');
-            
-            displayFoodResults(results, 'search');
+            try {
+                const results = await parseWithAI(normalizedQuery, 'search');
+                displayFoodResults(results, 'search');
+                setSmartEntryStatus(results.length ? `Found ${results.length} food item${results.length === 1 ? '' : 's'}.` : 'No matching foods were returned.');
+            } catch (error) {
+                showFoodSearchFailure(normalizedQuery, error);
+            }
+        }
+
+        function showFoodSearchFailure(query, error) {
+            const results = document.getElementById('search-results');
+            if (!results) return;
+            results.replaceChildren();
+            const message = document.createElement('p');
+            message.setAttribute('role', 'alert');
+            message.style.cssText = 'color:#991b1b;background:#fef2f2;border:1px solid #991b1b;border-radius:8px;padding:10px;margin:0 0 10px;';
+            const detail = String(error?.message || 'The nutrition service did not respond.').trim();
+            message.textContent = `Couldn’t look up “${query}”. ${detail}`;
+            const actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;';
+            const retry = document.createElement('button');
+            retry.type = 'button';
+            retry.textContent = 'Retry';
+            retry.addEventListener('click', () => searchFood(query));
+            const manual = document.createElement('button');
+            manual.type = 'button';
+            manual.textContent = 'Manual Entry (free/offline)';
+            manual.addEventListener('click', () => showManualEntry());
+            actions.append(retry, manual);
+            results.append(message, actions);
+            setSmartEntryStatus('Lookup failed. Retry or use free offline manual entry.', true);
         }
         
         // Tab switching functions
@@ -6691,8 +7053,11 @@
             // Update tab buttons
             document.getElementById('ai-search-tab').style.background = 'var(--primary)';
             document.getElementById('ai-search-tab').style.color = 'white';
+            document.getElementById('ai-search-tab').setAttribute('aria-selected', 'true');
             document.getElementById('manual-entry-tab').style.background = '#e0e0e0';
             document.getElementById('manual-entry-tab').style.color = '#666';
+            document.getElementById('manual-entry-tab').setAttribute('aria-selected', 'false');
+            if (!safeFoodStorageWrite(FOOD_ENTRY_MODE_KEY, 'ai', 'food entry mode')) return;
 
             // Re-show search results div when switching back to AI
             const searchResults = document.getElementById('search-results');
@@ -6718,8 +7083,11 @@
             // Update tab buttons
             document.getElementById('manual-entry-tab').style.background = 'var(--primary)';
             document.getElementById('manual-entry-tab').style.color = 'white';
+            document.getElementById('manual-entry-tab').setAttribute('aria-selected', 'true');
             document.getElementById('ai-search-tab').style.background = '#e0e0e0';
             document.getElementById('ai-search-tab').style.color = '#666';
+            document.getElementById('ai-search-tab').setAttribute('aria-selected', 'false');
+            if (!safeFoodStorageWrite(FOOD_ENTRY_MODE_KEY, 'manual', 'food entry mode')) return;
 
             // Clear AI search results
             const searchResults = document.getElementById('search-results');
@@ -6735,6 +7103,7 @@
             }
 
             console.log('✅ Manual Entry tab active, AI content hidden');
+            requestAnimationFrame(() => document.getElementById('manual-food-name')?.focus());
         }
         
         function quickAddLearnedFood(index) {
@@ -6751,17 +7120,19 @@
                 const quickAddsDiv = document.getElementById('quick-adds');
                 if (!quickAddsDiv) return;
                 if (learnedFoods.length > 0) {
-                    quickAddsDiv.innerHTML = learnedFoods.map((item, index) => `
-                        <button onclick="quickAddLearnedFood(${index})"
-                                style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);
-                                       padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;">
-                            ${escapeHtml(item.name)} (${Math.round(item.calories || 0)}cal)
-                        </button>
-                    `).join('');
+                    quickAddsDiv.replaceChildren();
+                    learnedFoods.forEach((item, index) => {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.style.cssText = 'background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;';
+                        button.textContent = `${item.name} (${Math.round(item.calories || 0)}cal)`;
+                        button.addEventListener('click', () => quickAddLearnedFood(index));
+                        quickAddsDiv.appendChild(button);
+                    });
                     return;
                 }
 
-                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const loggedMeals = readLoggedMeals();
                 const foodCounts = {};
             
             // Count frequency of foods
@@ -6782,16 +7153,23 @@
                 return;
             }
             
-            quickAddsDiv.innerHTML = topFoods.map(([foodData, count]) => {
+            quickAddsDiv.replaceChildren();
+            topFoods.forEach(([foodData, count]) => {
                 const [name, calories, protein, carbs, fat] = foodData.split('|');
-                return `
-                    <button onclick="selectFood('${name}', ${calories}, ${protein}, ${carbs}, ${fat}, 'quick')" 
-                            style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); 
-                                   padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;">
-                        ${name} (${calories}cal)
-                    </button>
-                `;
-            }).join('');
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.style.cssText = 'background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 12px; border-radius: 20px; font-size: 12px; white-space: nowrap; cursor: pointer;';
+                button.textContent = `${name} (${calories}cal)`;
+                button.addEventListener('click', () => selectFood(
+                    name,
+                    Number(calories) || 0,
+                    Number(protein) || 0,
+                    Number(carbs) || 0,
+                    Number(fat) || 0,
+                    'quick'
+                ));
+                quickAddsDiv.appendChild(button);
+            });
             
             } catch (error) {
                 console.error('Error in loadQuickAdds:', error);
@@ -6874,7 +7252,7 @@
 	        function loadTodaysMeals() {
             try {
                 const today = getLocalDateString();
-                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const loggedMeals = readLoggedMeals();
                 const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
 
                 console.log('📅 Loading meals for:', today);
@@ -6962,7 +7340,7 @@
             // Update meals list with organized sections
             const mealsDiv = document.getElementById('today-meals');
             if (todayData.meals.length === 0) {
-                mealsDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No meals logged yet today</p>';
+                mealsDiv.innerHTML = '<p style="text-align: center; color: #475569; padding: 20px;">No meals logged yet today</p>';
             } else {
                 let mealsHTML = '';
                 
@@ -7002,7 +7380,7 @@
                             <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: start;">
                                     <div style="flex: 1;">
-                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(meal.name || 'Food item')}</div>
                                         <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
                                         <div style="font-size: 13px; margin-top: 5px;">
 	                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • Net ${formatMacro(getFoodNetCarbs(meal))}g • 🥑 ${Math.round(meal.fat || 0)}g fat • 🍭 ${Math.round(meal.sugar || 0)}g sugar
@@ -7055,7 +7433,7 @@
                             <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: start;">
                                     <div style="flex: 1;">
-                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(meal.name || 'Food item')}</div>
                                         <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
                                         <div style="font-size: 13px; margin-top: 5px;">
 	                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • Net ${formatMacro(getFoodNetCarbs(meal))}g • 🥑 ${Math.round(meal.fat || 0)}g fat • 🍭 ${Math.round(meal.sugar || 0)}g sugar
@@ -7108,7 +7486,7 @@
                             <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: start;">
                                     <div style="flex: 1;">
-                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(meal.name || 'Food item')}</div>
                                         <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
                                         <div style="font-size: 13px; margin-top: 5px;">
 	                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • Net ${formatMacro(getFoodNetCarbs(meal))}g • 🥑 ${Math.round(meal.fat || 0)}g fat • 🍭 ${Math.round(meal.sugar || 0)}g sugar
@@ -7161,7 +7539,7 @@
                             <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: start;">
                                     <div style="flex: 1;">
-                                        <div style="font-weight: bold; margin-bottom: 5px;">${meal.name}</div>
+                                        <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(meal.name || 'Food item')}</div>
                                         <div style="font-size: 12px; opacity: 0.9;">${time} ${meal.fromMealPlan ? '• From meal plan' : ''}</div>
                                         <div style="font-size: 13px; margin-top: 5px;">
 	                                            📊 ${meal.calories || 0} cal • 🥩 ${Math.round(meal.protein || 0)}g protein • 🍞 ${Math.round(meal.carbs || 0)}g carbs • Net ${formatMacro(getFoodNetCarbs(meal))}g • 🥑 ${Math.round(meal.fat || 0)}g fat • 🍭 ${Math.round(meal.sugar || 0)}g sugar
@@ -7202,7 +7580,7 @@
             // It's called after logging food to refresh the display
             try {
                 const today = getLocalDateString();
-                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const loggedMeals = readLoggedMeals();
                 const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
 
                 // Update the calories display
@@ -7225,22 +7603,26 @@
         }
         
         function loadWeeklyChart() {
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const loggedMeals = readLoggedMeals();
             const chartDiv = document.getElementById('weekly-chart');
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             const today = new Date();
-            const dayOfWeek = today.getDay();
+            const monday = new Date(today);
+            const mondayOffset = (today.getDay() + 6) % 7;
+            monday.setDate(today.getDate() - mondayOffset);
+            monday.setHours(12, 0, 0, 0);
+            const todayKey = getLocalDateString(today);
             
             let chartHTML = '';
             const maxCalories = 3000; // Max for chart scaling
             
             for (let i = 0; i < 7; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() - dayOfWeek + i + 1); // Start from Monday
-                const dateStr = date.toISOString().split('T')[0];
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                const dateStr = getLocalDateString(date);
                 const dayData = loggedMeals[dateStr] || { totalCalories: 0 };
-                const height = (dayData.totalCalories / maxCalories) * 100;
-                const isToday = dateStr === today.toISOString().split('T')[0];
+                const height = Math.min(100, Math.max(0, (Number(dayData.totalCalories) || 0) / maxCalories * 100));
+                const isToday = dateStr === todayKey;
                 
                 chartHTML += `
                     <div style="text-align: center; flex: 1;">
@@ -7248,7 +7630,7 @@
                             <div style="width: 30px; height: ${height}%; background: ${isToday ? 'var(--gradient-1)' : '#e0e0e0'}; border-radius: 5px 5px 0 0;"></div>
                         </div>
                         <div style="font-size: 12px; color: #666; margin-top: 5px;">${days[i]}</div>
-                        <div style="font-size: 11px; color: #999;">${dayData.totalCalories}</div>
+                        <div style="font-size: 11px; color: #475569;">${dayData.totalCalories}</div>
                     </div>
                 `;
             }
@@ -7259,14 +7641,14 @@
         function removeMeal(index) {
             if (confirm('Remove this meal?')) {
                 const today = getLocalDateString();
-                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+                const loggedMeals = readLoggedMeals();
 
                 if (loggedMeals[today] && loggedMeals[today].meals[index]) {
                     const removedCalories = loggedMeals[today].meals[index].calories;
                     loggedMeals[today].meals.splice(index, 1);
                     loggedMeals[today].totalCalories -= removedCalories;
 
-                    localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+                    if (!writeLoggedMeals(loggedMeals)) return;
                     syncWithHomePage();
                     loadTodaysMeals();
                 }
@@ -7275,7 +7657,7 @@
 
         function editMeal(index) {
             const today = getLocalDateString();
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const loggedMeals = readLoggedMeals();
 
             if (loggedMeals[today] && loggedMeals[today].meals[index]) {
                 const meal = loggedMeals[today].meals[index];
@@ -7300,7 +7682,7 @@
 
         function saveMealEdit() {
             const today = getLocalDateString();
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const loggedMeals = readLoggedMeals();
             const index = parseInt(document.getElementById('edit-meal-index').value);
 
             if (loggedMeals[today] && loggedMeals[today].meals[index]) {
@@ -7344,7 +7726,7 @@
                 // Recalculate total calories
                 loggedMeals[today].totalCalories = loggedMeals[today].meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
 
-                    localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+                    if (!writeLoggedMeals(loggedMeals)) return;
                     const updatedMeal = loggedMeals[today].meals[index];
                     const previousBase = getMealBaseNutrition(previousMeal);
                     const updatedBase = getMealBaseNutrition(updatedMeal);
@@ -7460,17 +7842,17 @@
             
             // Save to today's log
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
             }
             
             loggedMeals[today].meals.push(foodItem);
-            rememberLoggedFood(foodItem, [], { action: 'manual' });
             loggedMeals[today].totalCalories += calories;
             
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return;
+            rememberLoggedFood(foodItem, [], { action: 'manual' });
             syncWithHomePage();
             
             // Save to saved meals if requested
@@ -7488,7 +7870,7 @@
                     savedAt: new Date().toISOString()
                 };
                 savedMeals.push(savedMeal);
-                localStorage.setItem('fuelfire_saved_meals', JSON.stringify(savedMeals));
+                if (!safeFoodStorageWrite('fuelfire_saved_meals', savedMeals, 'saved manual meal')) return;
                 loadSavedMealsToSelect();
             }
 
@@ -7528,7 +7910,7 @@
                     
                     // Auto-save it to the proper storage location for future use
                     const newPlans = [tempPlan];
-                    localStorage.setItem('fuelfire_meal_plans', JSON.stringify(newPlans));
+                    if (!safeFoodStorageWrite('fuelfire_meal_plans', newPlans, 'meal plan import')) return;
                     console.log('💾 Auto-saved recent plan to fuelfire_meal_plans for future use');
                     
                     // Store it temporarily for this session too
@@ -7537,7 +7919,10 @@
                     const date = new Date().toLocaleDateString();
                     const goal = tempPlan.metadata?.goal || 'Recent';
                     const displayName = tempPlan.metadata?.customName || `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}`;
-                    selectElement.innerHTML += `<option value="0">${displayName}</option>`;
+                    const option = document.createElement('option');
+                    option.value = '0';
+                    option.textContent = displayName;
+                    selectElement.appendChild(option);
                     
                     document.getElementById('meal-plan-modal').style.display = 'block';
                     return;
@@ -7553,7 +7938,10 @@
                 const date = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
                 const goal = plan.metadata?.goal || 'Unknown Goal';
                 const displayName = plan.metadata?.customName || `${goal.charAt(0).toUpperCase() + goal.slice(1)} Plan - ${date}`;
-                selectElement.innerHTML += `<option value="${index}">${displayName}</option>`;
+                const option = document.createElement('option');
+                option.value = String(index);
+                option.textContent = displayName;
+                selectElement.appendChild(option);
             });
             
             document.getElementById('meal-plan-modal').style.display = 'block';
@@ -7601,7 +7989,10 @@
             
             // Add parsed meals to the select
             parsedMeals.forEach((meal, index) => {
-                mealSelect.innerHTML += `<option value="${index}">${meal.day} - ${meal.type}: ${meal.name} (${meal.calories} cal)</option>`;
+                const option = document.createElement('option');
+                option.value = String(index);
+                option.textContent = `${meal.day} - ${meal.type}: ${meal.name} (${meal.calories} cal)`;
+                mealSelect.appendChild(option);
             });
             
             // Store parsed meals globally for later use
@@ -7700,7 +8091,7 @@
             }
             
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
@@ -7723,10 +8114,10 @@
             };
             
             loggedMeals[today].meals.push(logEntry);
-            rememberLoggedFood(logEntry, [], { action: 'imported' });
             loggedMeals[today].totalCalories += selectedMealData.calories;
             
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return;
+            rememberLoggedFood(logEntry, [], { action: 'imported' });
             syncWithHomePage();
             
 	            alert(`✅ ${selectedMealData.name} logged as ${logAsType}!\n\n📊 ${selectedMealData.calories} calories\n🥩 ${selectedMealData.protein}g protein\n🍞 ${selectedMealData.carbs}g carbs\nNet ${formatMacro(getFoodNetCarbs(selectedMealData))}g\n🥑 ${selectedMealData.fat}g fat\n🍭 ${selectedMealData.sugar || 0}g sugar`);
@@ -7822,7 +8213,10 @@
             
             const categoryMeals = mealIdeas[category] || [];
             categoryMeals.forEach((meal, index) => {
-                mealSelect.innerHTML += `<option value="${index}">${meal.name} (${meal.calories} cal)</option>`;
+                const option = document.createElement('option');
+                option.value = String(index);
+                option.textContent = `${meal.name} (${meal.calories} cal)`;
+                mealSelect.appendChild(option);
             });
             
             document.getElementById('meal-ideas-list').style.display = 'block';
@@ -7847,7 +8241,7 @@
             }
             
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            let loggedMeals = readLoggedMeals();
             
             if (!loggedMeals[today]) {
                 loggedMeals[today] = { meals: [], totalCalories: 0 };
@@ -7868,10 +8262,10 @@
             };
             
             loggedMeals[today].meals.push(logEntry);
-            rememberLoggedFood(logEntry, [], { action: 'imported' });
             loggedMeals[today].totalCalories += selectedMealIdeaData.calories;
             
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            if (!writeLoggedMeals(loggedMeals)) return;
+            rememberLoggedFood(logEntry, [], { action: 'imported' });
             syncWithHomePage();
             
 	            alert(`✅ ${selectedMealIdeaData.name} logged as ${logAsType}!\n\n📊 ${selectedMealIdeaData.calories} calories\n🥩 ${selectedMealIdeaData.protein}g protein\n🍞 ${selectedMealIdeaData.carbs}g carbs\nNet ${formatMacro(getFoodNetCarbs(selectedMealIdeaData))}g\n🥑 ${selectedMealIdeaData.fat}g fat\n🍭 ${selectedMealIdeaData.sugar || 0}g sugar`);
@@ -7914,38 +8308,52 @@
         
         // Manual Food Entry - New version for the modal
         function addManualFood() {
-            const name = document.getElementById('manual-food-name').value;
-            const calories = parseInt(document.getElementById('manual-calories').value) || 0;
-	            const protein = parseInt(document.getElementById('manual-protein').value) || 0;
-	            const carbs = parseInt(document.getElementById('manual-carbs').value) || 0;
-	            const fiber = parseInt(document.getElementById('manual-fiber').value) || 0;
-	            const fat = parseInt(document.getElementById('manual-fat').value) || 0;
-            const sugar = parseInt(document.getElementById('manual-sugar').value) || 0;
+            const errorNode = document.getElementById('manual-entry-error');
+            const savedNode = document.getElementById('manual-entry-saved');
+            const nameInput = document.getElementById('manual-food-name');
+            const name = String(nameInput?.value || '').replace(/\s+/g, ' ').trim();
+            const errors = [];
+            const readNumber = (id, label, required = false) => {
+                const input = document.getElementById(id);
+                const raw = String(input?.value ?? '').trim();
+                if (!raw) {
+                    if (required) errors.push(`${label} is required.`);
+                    return 0;
+                }
+                const value = Number(raw);
+                if (!Number.isFinite(value) || value < 0) {
+                    errors.push(`${label} must be a finite number greater than or equal to 0.`);
+                    return 0;
+                }
+                return value;
+            };
 
-            if (!name) {
-                alert('Please enter a food name');
+            if (!name) errors.push('Food name is required.');
+            const calories = readNumber('manual-calories', 'Calories', true);
+            const protein = readNumber('manual-protein', 'Protein');
+            const carbs = readNumber('manual-carbs', 'Carbs');
+            const fiber = readNumber('manual-fiber', 'Fiber');
+            const fat = readNumber('manual-fat', 'Fat');
+            const sugar = readNumber('manual-sugar', 'Sugar');
+
+            if (errors.length) {
+                if (errorNode) errorNode.textContent = errors.join(' ');
+                if (savedNode) savedNode.textContent = '';
+                setSmartEntryStatus('Fix the highlighted manual entry fields.', true);
+                requestAnimationFrame(() => {
+                    const invalid = [nameInput, ...['manual-calories', 'manual-protein', 'manual-carbs', 'manual-fiber', 'manual-fat', 'manual-sugar'].map(id => document.getElementById(id))]
+                        .find(input => input && ((input === nameInput && !name) || (input.value !== '' && (!Number.isFinite(Number(input.value)) || Number(input.value) < 0))));
+                    (invalid || nameInput)?.focus();
+                });
                 return;
             }
 
-            if (!calories) {
-                alert('Please enter calories');
-                return;
-            }
-
-            // Ask for meal type
-            const mealType = prompt('Log as:\n1. Breakfast\n2. Lunch\n3. Dinner\n4. Snack\n\nEnter number (1-4):');
-            if (!mealType) return;
-
-            const types = ['', 'breakfast', 'lunch', 'dinner', 'snack'];
-            const type = types[parseInt(mealType)] || 'snack';
+            const type = document.getElementById('manual-meal-type')?.value || 'breakfast';
 
             // Log the food
             const today = getLocalDateString();
-            let loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-
-            if (!loggedMeals[today]) {
-                loggedMeals[today] = { meals: [], totalCalories: 0 };
-            }
+            let loggedMeals = readLoggedMeals();
+            const todayData = ensureLoggedMealsDay(loggedMeals, today);
 
             const manualMealEntry = {
                 name: name,
@@ -7964,11 +8372,11 @@
                 source: 'manual'
             };
 
-            loggedMeals[today].meals.push(manualMealEntry);
-            rememberLoggedFood(manualMealEntry, [], { action: 'manual' });
+            todayData.meals.push(manualMealEntry);
             
-            loggedMeals[today].totalCalories += calories;
-            localStorage.setItem('fuelfire_logged_meals', JSON.stringify(loggedMeals));
+            todayData.totalCalories = todayData.meals.reduce((sum, meal) => sum + Number(meal.calories || 0), 0);
+            if (!writeLoggedMeals(loggedMeals)) return;
+            rememberLoggedFood(manualMealEntry, [], { action: 'manual' });
             
             // Update UI
             syncWithHomePage();
@@ -7984,24 +8392,27 @@
 	            document.getElementById('manual-fiber').value = '';
 	            document.getElementById('manual-fat').value = '';
             document.getElementById('manual-sugar').value = '';
-            
-            // Close modal
-            closeSmartEntry();
-            
-            alert(`✅ Added ${name} (${calories} cal) to ${type}!`);
+            if (errorNode) errorNode.textContent = '';
+            if (savedNode) savedNode.textContent = `Saved ${name} (${calories} calories) to ${type}.`;
+            setSmartEntryStatus('Manual entry saved offline.', false);
+            document.getElementById('smart-entry-close-button')?.focus();
         }
         
         // Sync with home page overview
         function syncWithHomePage() {
             // This ensures the home page always shows current data when navigating back
             const today = getLocalDateString();
-            const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
+            const loggedMeals = readLoggedMeals();
             const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
 
             console.log('🔄 Syncing with home page:', todayData);
 
             // Trigger storage event to update other tabs/pages
-            window.localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
+            try {
+                window.localStorage.setItem('fuelfire_nutrition_updated', Date.now().toString());
+            } catch (error) {
+                console.warn('Nutrition update signal could not be written:', error);
+            }
             console.log('✅ Set fuelfire_nutrition_updated to', Date.now());
         }
 
@@ -8015,7 +8426,7 @@
                 console.log('New day detected - meals from previous days remain in storage');
             }
 
-            localStorage.setItem('fuelfire_last_active_date', today);
+            safeFoodStorageWrite('fuelfire_last_active_date', today, 'active date');
         }
 
         // Initialize

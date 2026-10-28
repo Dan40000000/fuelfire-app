@@ -21,7 +21,8 @@ function toFiniteNumber(value, fallback = 0) {
 function clampAndRound(value, min = 0, max = 5000) {
     const num = toFiniteNumber(value, 0);
     const clamped = Math.min(Math.max(num, min), max);
-    return Math.round(clamped);
+    // Preserve decimal per-unit nutrition until quantity scaling is complete.
+    return Math.round(clamped * 1000) / 1000;
 }
 
 function cleanText(value, fallback = '', maxLength = 140) {
