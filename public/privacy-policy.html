@@ -3,133 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Privacy Policy - Well Fit</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Privacy policy | FuelFire</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px 20px 100px 20px;
+        :root {
+            color-scheme: light;
+            --ink: #13294b;
+            --muted: #40566f;
+            --surface: #ffffff;
+            --page: #f0f7fc;
+            --link: #064f87;
+            --focus: #13294b;
         }
-        h1 { color: #4B9CD3; }
-        h2 { color: #13294B; margin-top: 30px; }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            background: var(--page);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.65;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 12px;
+            top: -100px;
+            z-index: 2;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: var(--ink);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .skip-link:focus { top: 12px; }
+
+        a {
+            color: var(--link);
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 3px;
+        }
+
+        .site-header,
+        main,
+        .site-footer {
+            width: min(100% - 32px, 760px);
+            margin-inline: auto;
+        }
+
+        .site-header { padding: 24px 0 8px; }
+
+        .site-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+        }
+
+        main { padding: 24px 0 72px; }
+        main:focus { outline: none; }
+        h1, h2 { color: var(--ink); line-height: 1.25; }
+        h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 5vw, 2.5rem); }
+        h2 { margin: 32px 0 10px; font-size: 1.35rem; }
+        p, ul { margin: 12px 0; }
+        li + li { margin-top: 8px; }
+        .updated { color: var(--muted); }
+
+        .notice {
+            padding: 14px 16px;
+            border-left: 4px solid var(--link);
+            background: var(--surface);
+        }
+
+        .site-footer {
+            padding: 20px 0 36px;
+            border-top: 1px solid #9db1c5;
+            color: var(--muted);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            margin-top: 8px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+            }
+        }
+
+        @media (forced-colors: active) {
+            :focus-visible { outline-color: Highlight; }
+        }
     </style>
 </head>
 <body>
-    <h1>Privacy Policy - Well Fit</h1>
-    <p><em>Last updated: September 16, 2025</em></p>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header">
+        <nav class="site-nav" aria-label="Site navigation">
+            <a href="index.html">FuelFire home</a>
+            <a href="account.html">My account</a>
+        </nav>
+    </header>
 
-    <h2>Overview</h2>
-    <p>Well Fit ("we", "our", or "us") respects your privacy. This policy describes how we handle your information.</p>
+    <main id="main-content" tabindex="-1">
+        <h1>FuelFire privacy policy</h1>
+        <p class="updated"><time datetime="2026-10-28">Last updated: October 28, 2026</time></p>
 
-    <h2>Information We Collect</h2>
-    <ul>
-        <li><strong>Fitness Data:</strong> Workout routines, exercises, and progress you enter</li>
-        <li><strong>Nutrition Data:</strong> Meal logs and dietary preferences you provide</li>
-        <li><strong>Photos:</strong> Food photos for AI analysis (processed, not stored)</li>
-        <li><strong>Device Data:</strong> Basic app usage statistics</li>
-    </ul>
+        <p class="notice">This page describes the behavior implemented in the current app. It does not promise cloud sync, provider retention periods, or any feature that the app has not implemented.</p>
 
-    <h2>How We Use Information</h2>
-    <ul>
-        <li>Provide personalized workout and meal recommendations</li>
-        <li>Track your fitness progress</li>
-        <li>Improve app functionality</li>
-        <li>Send important app updates</li>
-    </ul>
+        <section aria-labelledby="local-heading">
+            <h2 id="local-heading">Data kept on this device</h2>
+            <p>Profile details, completed workouts, food logs, saved plans, health summaries, settings, and unfinished workout or food drafts are stored in the app's device-local browser storage. A fresh install has no fabricated account history. The account page can export an allow-listed JSON backup and validate an import before changing local data.</p>
+            <p>The backup contains only FuelFire-owned data keys. It excludes credentials, access and session tokens, RevenueCat identifiers and entitlement cache, subscription-event records, and unrelated origin storage. Provider and authentication caches that are outside the allowlist remain on the device and are not deleted by the local-data action. Import supports an explicit merge or replace choice; canceling or rejecting a file does not erase local data. The app does not claim iCloud synchronization or automatic cross-device restore.</p>
+        </section>
 
-    <h2>Data Storage</h2>
-    <p>Your data is stored locally on your device and in your iCloud account (if enabled). We do not have access to your personal data.</p>
+        <section aria-labelledby="remote-heading">
+            <h2 id="remote-heading">Features that use remote services</h2>
+            <p>Local logging and viewing do not require a remote service. When you choose an AI feature, the relevant request can travel through a FuelFire server. Depending on the server configuration and feature, that request can be routed to Claude or Qwen for text or image analysis. Food photos, treadmill-console photos, typed food descriptions, and voice-derived text are sent only when you invoke the feature that needs them.</p>
+            <p>Server operators and AI providers may process a request to return a result. Retention, residency, and provider handling can depend on the active deployment and provider terms, so FuelFire does not make a blanket no-retention promise here. Review the applicable provider information before sending sensitive content.</p>
+            <p>Barcode lookup may also contact the Open Food Facts service. App Store purchase and entitlement operations use the installed RevenueCat/App Store bridge when it is available. The account page reports only the entitlement status exposed by that bridge; it does not invent a plan, renewal date, purchase history, or payment method.</p>
+        </section>
 
-    <h2>Third-Party Services</h2>
-    <p>We use OpenAI for food image analysis. Images are processed but not stored by OpenAI. Please review OpenAI's privacy policy for more information.</p>
+        <section aria-labelledby="health-heading">
+            <h2 id="health-heading">Health and device permissions</h2>
+            <p>If you enable a native health connection, the app can read the categories allowed by the operating-system permission and may cache the resulting summary locally for the health screens. You control those permissions in the operating system. Health data is not included in a remote request unless you choose a feature that sends relevant information.</p>
+        </section>
 
-    <h2>Data Sharing</h2>
-    <p>We do not sell, trade, or share your personal information with third parties.</p>
+        <section aria-labelledby="diagnostics-heading">
+            <h2 id="diagnostics-heading">Diagnostics</h2>
+            <p>Some enabled AI failure paths send a small, allow-listed technical diagnostic to the FuelFire server. Automatic diagnostics use bounded error codes, stages, counts, app/device metadata, and timing fields rather than food details or media. A user-initiated voice diagnostic report can include the transcript or alternatives needed to investigate that report. The diagnostic endpoint excludes raw audio, photos, authorization headers, account identifiers, and precise location.</p>
+        </section>
 
-    <h2>Security</h2>
-    <p>We implement appropriate security measures to protect your information. However, no method of electronic storage is 100% secure.</p>
+        <section aria-labelledby="choices-heading">
+            <h2 id="choices-heading">Your choices</h2>
+            <ul>
+                <li>Use local features without invoking an AI or health integration.</li>
+                <li>Review, export, import, or delete FuelFire-owned local data from <a href="account.html">My account</a>.</li>
+                <li>Manage or restore App Store purchases through the real App Store subscription page and the installed purchase bridge.</li>
+                <li>Use operating-system settings to revoke health or other native permissions.</li>
+            </ul>
+            <p>Deleting local app data does not cancel a subscription and does not remove RevenueCat or installation credentials. Those are intentionally outside the local-data deletion scope.</p>
+        </section>
 
-    <h2>Children's Privacy</h2>
-    <p>Our app is not intended for children under 13. We do not knowingly collect information from children under 13.</p>
+        <section aria-labelledby="sharing-heading">
+            <h2 id="sharing-heading">Sharing and security</h2>
+            <p>FuelFire does not sell local app records. Data is shared with a remote service only when needed for a feature you invoke, for the App Store/RevenueCat purchase flow, or for an enabled diagnostic path described above. Local storage and network transport can still be exposed by a compromised device, browser, account, provider, or deployment; no electronic storage or transmission method is guaranteed to be completely secure.</p>
+        </section>
 
-    <h2>Changes to This Policy</h2>
-    <p>We may update this privacy policy from time to time. Changes will be posted in the app.</p>
+        <section aria-labelledby="contact-heading">
+            <h2 id="contact-heading">Questions and changes</h2>
+            <p>For privacy questions, use the support or contact channel provided with the FuelFire distribution you installed. This policy may be updated when the app's storage, providers, or diagnostic behavior changes. The date above identifies the version shown in this build.</p>
+        </section>
+    </main>
 
-    <h2>Contact Us</h2>
-    <p>For questions about this privacy policy, please contact us through the app or via our GitHub repository.</p>
-
-    <h2>Your Rights</h2>
-    <p>You can:</p>
-    <ul>
-        <li>Access your data within the app</li>
-        <li>Delete your data by uninstalling the app</li>
-        <li>Export your data at any time</li>
-        <li>Opt-out of any data collection</li>
-    </ul>
-
-    <p>&copy; 2025 Well Fit. All rights reserved.</p>
-
-    <!-- Bottom Navigation Bar -->
-    <div class="bottom-nav">
-        <!-- Quick Workout -->
-        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
-                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
-                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
-                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
-                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
-                </svg>
-            </div>
-        </div>
-        <!-- Food Tracker -->
-        <div class="nav-item" onclick="showQuickFoodEntry()">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
-                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
-                </svg>
-            </div>
-        </div>
-        <!-- Home (Center, Larger) -->
-        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-        </div>
-        <!-- Health Dashboard -->
-        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
-                </svg>
-            </div>
-        </div>
-        <!-- Workout Techniques -->
-        <div class="nav-item" onclick="window.location.href='workout-techniques.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2" fill="none"/>
-                    <circle cx="12" cy="12" r="2" fill="white"/>
-                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <script src="global-nav.js"></script>
+    <footer class="site-footer">
+        <div>FuelFire</div>
+        <nav class="footer-links" aria-label="Legal information">
+            <a href="privacy-policy.html" aria-current="page">Privacy policy</a>
+            <a href="terms.html">Feature terms</a>
+            <a href="account.html">Account and local data</a>
+        </nav>
+    </footer>
 </body>
 </html>

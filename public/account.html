@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>My Account | FuelFire</title>
     <link rel="stylesheet" href="styles.css?v=24.0">
+    <script src="workout-store.js"></script>
+    <script src="food-store.js"></script>
+    <script src="activity-energy.js"></script>
+    <script src="account-data.js"></script>
     <script src="ai-paywall.js"></script>
     <script src="revenuecat-bridge.js"></script>
+    <script src="global-nav.js" defer></script>
     <style>
         :root {
             --carolina-blue: #4B9CD3;
@@ -199,71 +204,6 @@
             color: white;
         }
 
-        .payment-method {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: var(--light-bg);
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-1);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .card-info {
-            flex: 1;
-        }
-
-        .card-type {
-            font-weight: 600;
-            color: var(--carolina-dark);
-            margin-bottom: 4px;
-        }
-
-        .card-number {
-            color: #666;
-            font-size: 0.85rem;
-        }
-
-        .order-item {
-            padding: 16px;
-            background: var(--light-bg);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--carolina-blue);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .order-title {
-            font-weight: 700;
-            color: var(--carolina-dark);
-        }
-
-        .order-price {
-            color: var(--carolina-blue);
-            font-weight: 700;
-        }
-
-        .order-date {
-            color: #666;
-            font-size: 0.85rem;
-        }
-
         .setting-item {
             display: flex;
             justify-content: space-between;
@@ -284,37 +224,6 @@
         .setting-desc {
             color: #666;
             font-size: 0.85rem;
-        }
-
-        .toggle-switch {
-            width: 50px;
-            height: 28px;
-            background: #ddd;
-            border-radius: 999px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-switch.active {
-            background: var(--gradient-1);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .toggle-switch.active::after {
-            left: 25px;
         }
 
         .stats-grid {
@@ -401,160 +310,266 @@
             box-shadow: 0 0 0 3px rgba(75, 156, 211, 0.15);
         }
 
-        .plan-options {
-            display: grid;
-            gap: 12px;
+        .skip-link {
+            position: absolute;
+            left: 12px;
+            top: -48px;
+            z-index: 10001;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #13294B;
+            color: #fff;
+            font-weight: 700;
         }
 
-        .plan-card {
-            border: 2px solid var(--light-bg);
-            border-radius: 14px;
-            padding: 16px;
-            background: #f8fbff;
-            display: grid;
-            gap: 6px;
-            transition: border-color 0.2s ease, transform 0.2s ease;
+        .skip-link:focus {
+            top: 12px;
+            outline: 3px solid #13294B;
+            outline-offset: 3px;
+        }
+
+        .page-header {
+            margin-bottom: 8px;
+        }
+
+        main:focus {
+            outline: none;
+        }
+
+        .section-title {
+            margin-top: 0;
+        }
+
+        .empty-state {
+            margin: 0;
+            padding: 12px;
+            border: 1px dashed #54708f;
+            border-radius: 10px;
+            color: #27405c;
+            background: #f7fbff;
+        }
+
+        .status-message {
+            min-height: 1.4em;
+            margin: 12px 0 0;
+            color: #174a2c;
+            font-weight: 600;
+        }
+
+        .error-message {
+            min-height: 1.4em;
+            margin: 8px 0 0;
+            color: #8b1e2d;
+            font-weight: 700;
+        }
+
+        .setting-control {
+            min-width: 72px;
+            min-height: 44px;
+            border: 2px solid #13294B;
+            border-radius: 999px;
+            background: #fff;
+            color: #13294B;
+            font: inherit;
+            font-weight: 700;
             cursor: pointer;
         }
 
-        .plan-card:hover {
-            border-color: var(--carolina-blue);
-            transform: translateY(-2px);
+        .setting-control[aria-checked="true"] {
+            background: #13294B;
+            color: #fff;
         }
 
-        .plan-card.active {
-            border-color: var(--carolina-blue);
-            box-shadow: 0 4px 12px rgba(75, 156, 211, 0.18);
-            background: linear-gradient(145deg, #fafdff 0%, #eef7ff 100%);
+        .setting-control:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #13294B;
+            outline-offset: 3px;
         }
 
-        .plan-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
+        .setting-item {
+            gap: 16px;
         }
 
-        .plan-name {
-            font-weight: 800;
-            color: var(--carolina-dark);
-            font-size: 1.05rem;
+        .setting-item > div:first-child {
+            min-width: 0;
         }
 
-        .plan-price {
-            font-weight: 700;
-            color: var(--carolina-blue);
-        }
-
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(75, 156, 211, 0.12);
-            color: var(--carolina-dark);
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .plan-features {
-            margin: 6px 0 0;
-            padding-left: 16px;
-            color: #43536a;
-            line-height: 1.5;
-            font-size: 0.95rem;
-        }
-
-        .inline-note {
-            background: #f1f7fd;
-            border: 1px solid #d9e8f7;
-            border-radius: 10px;
-            padding: 12px;
+        .backup-help {
             color: #27405c;
-            font-size: 0.9rem;
-            margin: 12px 0 0;
+            line-height: 1.5;
         }
 
-        .admin-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        dialog {
+            width: min(92vw, 460px);
+            max-height: 85vh;
+            border: 0;
+            border-radius: 16px;
+            padding: 24px;
+            color: var(--carolina-dark);
+            box-shadow: 0 20px 60px rgba(19, 41, 75, 0.35);
+        }
+
+        dialog::backdrop {
+            background: rgba(19, 41, 75, 0.72);
+        }
+
+        dialog h2 {
+            margin-top: 0;
+            color: var(--carolina-dark);
+        }
+
+        .dialog-actions {
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
         }
 
-        .admin-card {
-            background: #f8fbff;
-            border: 1px solid #e0ebf7;
-            border-radius: 12px;
-            padding: 12px;
+        .dialog-actions button {
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 2px solid var(--carolina-dark);
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
         }
 
-        .admin-card .label {
-            font-size: 0.9rem;
-            color: #456;
+        .dialog-actions .primary-action {
+            background: var(--carolina-dark);
+            color: #fff;
         }
 
-        .admin-card .value {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--carolina-blue);
+        .dialog-actions .secondary-action {
+            background: #fff;
+            color: var(--carolina-dark);
         }
 
-        .table-wrapper {
-            overflow: auto;
-            border: 1px solid #e0e8f0;
-            border-radius: 12px;
+        .dialog-actions .danger-action {
+            background: #8b1e2d;
+            border-color: #8b1e2d;
+            color: #fff;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 520px;
+        .dialog-actions button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
-        th, td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #e8eef5;
-            font-size: 0.9rem;
-            color: #2b4059;
+        .dialog-list {
+            padding-left: 20px;
         }
 
-        th { text-align: left; background: #f5f9ff; }
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
 
-        .pill.solid {
-            background: #4B9CD3;
-            color: white;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        html.fuelfire-reduced-motion *,
+        html.fuelfire-reduced-motion *::before,
+        html.fuelfire-reduced-motion *::after {
+            scroll-behavior: auto !important;
+            animation: none !important;
+            transition: none !important;
+        }
+
+        @media (max-width: 440px) {
+            .container {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .section,
+            .profile-card {
+                padding: 18px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .setting-item {
+                align-items: flex-start;
+            }
+        }
+
+        @media (forced-colors: active) {
+            .setting-control,
+            .dialog-actions button,
+            .input-group input,
+            .input-group select {
+                border: 2px solid ButtonText;
+                background: ButtonFace;
+                color: ButtonText;
+            }
+
+            .skip-link:focus,
+            button:focus-visible,
+            a:focus-visible,
+            input:focus-visible,
+            select:focus-visible {
+                outline: 3px solid Highlight;
+            }
         }
     </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container">
-        <a href="index.html" class="back-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <header class="page-header">
+            <a href="index.html" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            Back to Dashboard
-        </a>
+                </svg>
+                Back to dashboard
+            </a>
 
-        <div class="header">
+            <div class="header">
             <h1>⚙️ My Account</h1>
-        </div>
+            </div>
+        </header>
+
+        <main id="main-content" tabindex="-1">
+        <p id="account-status" class="status-message" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p id="account-error" class="error-message" role="alert" aria-live="assertive" aria-atomic="true" hidden></p>
 
         <!-- Profile Card -->
-        <div class="profile-card">
-            <div class="avatar">👤</div>
-            <div class="user-name" id="userName">John Athlete</div>
-            <div class="user-email" id="userEmail">john.athlete@email.com</div>
-            <button class="edit-profile-btn" onclick="editProfile()">Edit Profile</button>
-        </div>
+        <section class="profile-card" aria-labelledby="profile-summary-heading">
+            <div class="avatar" aria-hidden="true">?</div>
+            <h2 class="user-name" id="profile-summary-heading">Your local profile</h2>
+            <p class="user-email" id="userEmail">No email is stored on this device.</p>
+            <button class="edit-profile-btn" id="edit-profile-button" type="button">Edit profile</button>
+        </section>
 
         <!-- Profile Details -->
-        <div class="section">
-            <div class="section-title">🧾 Profile Details</div>
+        <section class="section" aria-labelledby="profile-details-heading">
+            <h2 id="profile-details-heading" class="section-title">🧾 Profile details</h2>
+            <form id="profile-form" novalidate>
             <div class="form-grid">
                 <div class="input-group">
                     <label for="profileNameInput">Name</label>
-                    <input id="profileNameInput" type="text" placeholder="Your name" autocomplete="name">
+                    <input id="profileNameInput" name="name" type="text" placeholder="Your name" autocomplete="name" aria-describedby="profile-name-help">
+                    <span id="profile-name-help" class="visually-hidden">Optional display name kept on this device.</span>
                 </div>
                 <div class="input-group">
                     <label for="profileGenderInput">Gender</label>
@@ -568,600 +583,534 @@
                 </div>
                 <div class="input-group">
                     <label for="profileAgeInput">Age</label>
-                    <input id="profileAgeInput" type="number" min="0" max="110" placeholder="Age">
+                    <input id="profileAgeInput" name="age" type="number" min="0" max="120" step="1" inputmode="numeric" placeholder="Age" aria-describedby="profile-age-help">
+                    <span id="profile-age-help" class="visually-hidden">Optional age in years, from 0 to 120.</span>
                 </div>
                 <div class="input-group">
                     <label for="profileWeightInput">Weight (lbs)</label>
-                    <input id="profileWeightInput" type="number" min="0" step="0.1" placeholder="Weight">
+                    <input id="profileWeightInput" name="weightLbs" type="number" min="0.1" max="1500" step="0.1" inputmode="decimal" placeholder="Weight" aria-describedby="profile-weight-help">
+                    <span id="profile-weight-help" class="visually-hidden">Optional body weight in pounds, used for estimates.</span>
                 </div>
             </div>
-            <button class="action-btn" onclick="saveProfileDetails()">Save Profile</button>
-        </div>
+            <p id="profile-form-error" class="error-message" role="alert" aria-live="assertive" hidden></p>
+            <button class="action-btn" id="save-profile-button" type="submit">Save profile</button>
+            </form>
+        </section>
 
         <!-- Account Stats -->
-        <div class="section">
-            <div class="section-title">📊 Your Stats</div>
+        <section class="section" aria-labelledby="stats-heading">
+            <h2 id="stats-heading" class="section-title">📊 Local activity</h2>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">47</div>
-                    <div class="stat-label">Workouts</div>
+                    <div class="stat-value" id="workout-count">0</div>
+                    <div class="stat-label">Completed workouts</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Meal Plans</div>
+                    <div class="stat-value" id="meal-count">0</div>
+                    <div class="stat-label">Logged meals</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">3</div>
-                    <div class="stat-label">Active Plans</div>
+                    <div class="stat-value" id="meal-plan-count">0</div>
+                    <div class="stat-label">Saved meal plans</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">8</div>
-                    <div class="stat-label">Sessions</div>
+                    <div class="stat-value" id="saved-workout-count">0</div>
+                    <div class="stat-label">Saved workouts</div>
                 </div>
             </div>
-        </div>
+            <p id="activity-empty-state" class="empty-state">No local activity yet. Your counts will appear after you log a meal or complete a workout.</p>
+        </section>
 
         <!-- Subscription Section -->
-        <div class="section">
-        <div class="section-title">💎 Subscription</div>
-
-        <div class="subscription-status">
-            <div class="subscription-info">
-                <div class="subscription-plan" id="currentPlanLabel">Elite Plan</div>
-                <div class="subscription-details" id="currentPlanDetails">$96/month • Renews on Dec 15, 2025</div>
-            </div>
-            <span class="status-badge">ACTIVE</span>
-        </div>
-
-        <div class="plan-options">
-            <div class="plan-card active" id="plan-elite" onclick="selectPlan('elite')">
-                <div class="plan-header">
-                    <div>
-                        <div class="plan-name">Elite</div>
-                        <div class="plan-price">$96/month</div>
-                    </div>
-                    <span class="pill">1 free coaching session</span>
+        <section class="section" aria-labelledby="subscription-heading">
+            <h2 id="subscription-heading" class="section-title">💎 App Store subscription</h2>
+            <div class="subscription-status" aria-live="polite" aria-atomic="true">
+                <div class="subscription-info">
+                    <div class="subscription-plan" id="currentPlanLabel">RevenueCat entitlement status</div>
+                    <div class="subscription-details" id="currentPlanDetails">Checking the local entitlement cache…</div>
                 </div>
-                <ul class="plan-features">
-                    <li>All AI features (food logging, typed search, workouts)</li>
-                    <li>Unlimited meal/workout plans</li>
-                    <li>Includes 1 free coaching session (diet or workout) monthly</li>
-                </ul>
+                <span class="status-badge" id="subscription-status-badge">Checking</span>
             </div>
-
-            <div class="plan-card" id="plan-premium" onclick="selectPlan('premium')">
-                <div class="plan-header">
-                    <div>
-                        <div class="plan-name">Premium</div>
-                        <div class="plan-price">$15/month</div>
-                    </div>
-                    <span class="pill">AI unlimited</span>
-                </div>
-                <ul class="plan-features">
-                    <li>All AI features (food logging, typed search, workouts)</li>
-                    <li>Unlimited meal/workout plans</li>
-                    <li>No coaching sessions included</li>
-                </ul>
+            <p id="subscription-status-message" class="backup-help">This page shows only entitlement information made available by the installed RevenueCat bridge.</p>
+            <div class="dialog-actions" style="justify-content: stretch;">
+                <a class="action-btn secondary" id="manage-subscriptions-link" href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener noreferrer">Manage App Store subscriptions <span aria-hidden="true">(opens in new tab)</span></a>
+                <button class="action-btn secondary" id="restore-purchases-button" type="button">Restore purchases</button>
+                <button class="action-btn secondary" id="refresh-entitlements-button" type="button">Refresh entitlement status</button>
             </div>
+        </section>
 
-            <div class="plan-card" id="plan-core" onclick="selectPlan('core')">
-                <div class="plan-header">
-                    <div>
-                        <div class="plan-name">Core</div>
-                        <div class="plan-price">$6/month</div>
-                    </div>
-                    <span class="pill">Light</span>
-                </div>
-                <ul class="plan-features">
-                    <li>Up to 10 meal plans + 10 workout plans per month</li>
-                    <li>No AI food logging; basic features only</li>
-                    <li>No coaching sessions included</li>
-                </ul>
+        <!-- Local backup and restore -->
+        <section class="section" aria-labelledby="backup-heading">
+            <h2 id="backup-heading" class="section-title">💾 Local backup and restore</h2>
+            <p class="backup-help">Backups are JSON files made from FuelFire data stored on this device. Credentials, access and session tokens, RevenueCat identifiers and entitlement cache, subscription-event history, provider/authentication caches, and unrelated origin storage are excluded and remain on this device.</p>
+            <div class="dialog-actions" style="justify-content: stretch;">
+                <button class="action-btn" id="export-data-button" type="button">Export local data</button>
+                <button class="action-btn secondary" id="choose-import-button" type="button">Choose backup file</button>
             </div>
-        </div>
+            <label for="import-data-file" class="visually-hidden">FuelFire JSON backup file</label>
+            <input id="import-data-file" type="file" accept="application/json,.json" class="visually-hidden">
+            <p id="backup-status" class="status-message" role="status" aria-live="polite" aria-atomic="true"></p>
+            <p id="backup-error" class="error-message" role="alert" aria-live="assertive" aria-atomic="true" hidden></p>
+        </section>
 
-        <div class="inline-note">
-            Elite includes every AI feature plus one free monthly coaching session (diet or workout). Premium includes every AI feature and unlimited plans, but no free coaching session. Core is a light tier with capped plans and no AI food logging.
-        </div>
-
-            <button class="action-btn" onclick="confirmPlanSelection()">Save Plan Preference</button>
-            <button class="action-btn secondary" onclick="openBillingPortal()">Manage Billing</button>
-        </div>
-
-        <!-- Order History -->
-        <div class="section">
-            <div class="section-title">📦 Purchase History</div>
-
-            <div class="order-item">
-                <div class="order-header">
-                    <div class="order-title">Elite Muscle Building Plan</div>
-                    <div class="order-price">$199</div>
-                </div>
-                <div class="order-date">Purchased Nov 15, 2025</div>
-            </div>
-
-            <div class="order-item">
-                <div class="order-header">
-                    <div class="order-title">1-on-1 Coaching (4 Sessions)</div>
-                    <div class="order-price">$360</div>
-                </div>
-                <div class="order-date">Purchased Nov 8, 2025</div>
-            </div>
-
-            <div class="order-item">
-                <div class="order-header">
-                    <div class="order-title">Professional Fat Loss Protocol</div>
-                    <div class="order-price">$149</div>
-                </div>
-                <div class="order-date">Purchased Oct 22, 2025</div>
-            </div>
-
-            <button class="action-btn secondary" onclick="viewAllOrders()">View All Orders</button>
-        </div>
-
-        <!-- App Settings -->
-        <div class="section">
-            <div class="section-title">🔔 Settings</div>
-
+        <!-- Implemented settings only -->
+        <section class="section" aria-labelledby="settings-heading">
+            <h2 id="settings-heading" class="section-title">⚙️ Settings</h2>
             <div class="setting-item">
                 <div>
-                    <div class="setting-label">Push Notifications</div>
-                    <div class="setting-desc">Get reminders for workouts</div>
+                    <div class="setting-label" id="reduce-motion-label">Reduce motion</div>
+                    <div class="setting-desc" id="reduce-motion-description">Disable decorative transitions and animations on this page. Your choice is stored locally.</div>
                 </div>
-                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                <button class="setting-control" id="reduce-motion-toggle" type="button" role="switch" aria-labelledby="reduce-motion-label" aria-checked="false" aria-describedby="reduce-motion-description">Off</button>
             </div>
+        </section>
 
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label">Email Updates</div>
-                    <div class="setting-desc">Weekly progress reports</div>
-                </div>
-                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
-            </div>
+        <!-- Local data actions -->
+        <section class="section" aria-labelledby="local-data-heading">
+            <h2 id="local-data-heading" class="section-title">🧹 Local app data</h2>
+            <p class="backup-help">Delete the profile, activity history, food logs, saved plans, health summaries, settings, and workout/food drafts owned by FuelFire on this device. Provider/authentication caches, subscription-event history, RevenueCat identifiers and entitlement cache, unrelated origin storage, App Store subscriptions, and installation credentials remain untouched.</p>
+            <button class="action-btn danger" id="delete-local-data-button" type="button" aria-haspopup="dialog">Delete local app data</button>
+        </section>
+        </main>
 
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label">Dark Mode</div>
-                    <div class="setting-desc">Always on for this app</div>
-                </div>
-                <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
-            </div>
-
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label">Share Workouts</div>
-                    <div class="setting-desc">Allow public workout sharing</div>
-                </div>
-                <div class="toggle-switch" onclick="toggleSetting(this)"></div>
-            </div>
-        </div>
-
-        <!-- AI Access Admin (moved from separate page) -->
-        <div class="section">
-            <div class="section-title">🧠 AI Access Admin</div>
-            <div class="admin-cards" id="adminSummary">
-                <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">—</div></div>
-                <div class="admin-card"><div class="label">$1 Trials</div><div class="value">—</div></div>
-                <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">—</div></div>
-                <div class="admin-card"><div class="label">Users</div><div class="value">—</div></div>
-            </div>
-            <div class="table-wrapper" style="margin-top:12px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Plan</th>
-                            <th>Action</th>
-                            <th>Promo</th>
-                            <th>Expires</th>
-                            <th>Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminUserRows">
-                        <tr><td colspan="7" style="text-align:center; padding:14px; color:#64748b;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="table-wrapper" style="margin-top:12px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Plan</th>
-                            <th>Action</th>
-                            <th>Promo</th>
-                            <th>Expires</th>
-                            <th>When</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminEventRows">
-                        <tr><td colspan="7" style="text-align:center; padding:14px; color:#64748b;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Account Actions -->
-        <div class="section">
-            <div class="section-title">🔐 Account Actions</div>
-
-            <button class="action-btn secondary" onclick="changePassword()">Change Password</button>
-            <button class="action-btn secondary" onclick="exportData()">Export My Data</button>
-            <button class="action-btn danger" onclick="deleteAccount()">Delete Account</button>
-        </div>
-
-        <!-- App Info -->
-        <div style="text-align: center; color: #666; margin-top: 24px; font-size: 0.85rem;">
-            <div>FuelFire App v1.0.0</div>
-            <div style="margin-top: 8px;">
-                <a href="#" style="color: var(--carolina-blue); text-decoration: none; margin: 0 8px; font-weight: 600;">Privacy Policy</a>
-                <a href="#" style="color: var(--carolina-blue); text-decoration: none; margin: 0 8px; font-weight: 600;">Terms of Service</a>
-            </div>
-        </div>
+        <footer class="app-info" style="text-align: center; color: #27405c; margin-top: 24px; font-size: 0.85rem;">
+            <div>FuelFire</div>
+            <nav aria-label="Legal information" style="margin-top: 8px;">
+                <a href="privacy-policy.html" style="color: var(--carolina-dark); text-decoration: underline; margin: 0 8px; font-weight: 700;">Privacy policy</a>
+                <a href="terms.html" style="color: var(--carolina-dark); text-decoration: underline; margin: 0 8px; font-weight: 700;">Feature terms</a>
+            </nav>
+        </footer>
     </div>
 
     <!-- Bottom Navigation Bar -->
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="2" y="9" width="4" height="6" rx="1" fill="white"/>
-                    <rect x="18" y="9" width="4" height="6" rx="1" fill="white"/>
-                    <rect x="6" y="11" width="12" height="2" rx="1" fill="white"/>
-                    <circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/>
-                    <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
-                </svg>
-            </div>
+    <nav class="bottom-nav" aria-label="Primary navigation">
+        <a class="nav-item" data-nav="workout" href="workout-quiz.html" aria-label="Quick workout">
+            <span class="nav-glow" aria-hidden="true"></span>
+            <span class="nav-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect x="2" y="9" width="4" height="6" rx="1" fill="white"/><rect x="18" y="9" width="4" height="6" rx="1" fill="white"/><rect x="6" y="11" width="12" height="2" rx="1" fill="white"/><circle cx="4" cy="12" r="1.5" fill="#4B9CD3"/><circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/></svg></span>
+            <span class="nav-label">Quick workout</span>
+        </a>
+        <a class="nav-item" data-nav="food" href="calorie-tracker.html" aria-label="Log food">
+            <span class="nav-glow" aria-hidden="true"></span>
+            <span class="nav-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/><path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/></svg></span>
+            <span class="nav-label">Log food</span>
+        </a>
+        <a class="nav-item" data-nav="home" href="index.html" aria-label="Home">
+            <span class="nav-glow" aria-hidden="true"></span>
+            <span class="nav-icon" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142 20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 4 21.7893 3.58579 21.4142 3.21071 21 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="nav-label">Home</span>
+        </a>
+        <a class="nav-item" id="health-dashboard-button" data-nav="health" href="health-dashboard.html" aria-label="Health dashboard">
+            <span class="nav-glow" aria-hidden="true"></span>
+            <span class="nav-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 12.27 13.45 20.03L12 21.35Z" fill="white"/></svg></span>
+            <span class="nav-label">Health dashboard</span>
+        </a>
+        <a class="nav-item active" data-nav="account" href="account.html" aria-current="page" aria-label="Account">
+            <span class="nav-glow" aria-hidden="true"></span>
+            <span class="nav-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="5" stroke="white" stroke-width="2" fill="none"/><path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="white"/><path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <span class="nav-label">Account</span>
+        </a>
+    </nav>
+
+    <dialog id="import-dialog" role="dialog" aria-modal="true" aria-labelledby="import-dialog-heading" aria-describedby="import-dialog-description">
+        <h2 id="import-dialog-heading">Restore FuelFire backup?</h2>
+        <p id="import-dialog-description">Review the backup before changing local data. Unrelated origin storage is preserved.</p>
+        <p id="import-preview-detail" class="backup-help"></p>
+        <div class="dialog-actions">
+            <button id="cancel-import-button" class="secondary-action" type="button">Cancel</button>
+            <button id="merge-import-button" class="primary-action" type="button">Merge imported records</button>
+            <button id="replace-import-button" class="danger-action" type="button">Replace local data</button>
         </div>
-        <div class="nav-item" onclick="window.location.href='calorie-tracker.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
-                    <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
-                </svg>
-            </div>
+    </dialog>
+
+    <dialog id="delete-data-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-heading" aria-describedby="delete-dialog-description">
+        <h2 id="delete-dialog-heading">Delete local app data?</h2>
+        <p id="delete-dialog-description">This removes only the FuelFire-owned local profile, logs, plans, settings, health summaries, and workout/food drafts. It does not cancel an App Store subscription or remove RevenueCat and installation credentials.</p>
+        <details>
+            <summary>Show the exact local keys in scope</summary>
+            <ul id="delete-key-list" class="dialog-list"></ul>
+        </details>
+        <div id="delete-first-step">
+            <label for="delete-confirmation-input">Type DELETE to continue</label>
+            <input id="delete-confirmation-input" type="text" autocomplete="off" spellcheck="false" aria-describedby="delete-dialog-description">
+            <p id="delete-confirmation-error" class="error-message" role="alert" hidden>Type DELETE exactly to continue.</p>
         </div>
-        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.1);">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
+        <div id="delete-final-step" hidden>
+            <p><strong>Final confirmation:</strong> this local data removal cannot be undone unless you have a backup.</p>
         </div>
-        <div class="nav-item" id="health-dashboard-button" onclick="window.location.href='health-dashboard.html'">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
-                </svg>
-            </div>
+        <div class="dialog-actions">
+            <button id="cancel-delete-button" class="secondary-action" type="button">Cancel</button>
+            <button id="continue-delete-button" class="primary-action" type="button" disabled>Continue</button>
+            <button id="confirm-delete-button" class="danger-action" type="button" hidden>Delete local data</button>
         </div>
-        <div class="nav-item active" onclick="window.location.href='account.html'" style="transform: scale(1.15);">
-            <div class="nav-glow"></div>
-            <div class="nav-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="8" r="5" stroke="white" stroke-width="2" fill="none"/>
-                    <path d="M3 21C3 17 7 14 12 14C17 14 21 17 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="12" cy="12" r="2" fill="white"/>
-                    <path d="M12 2V12L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            </div>
-        </div>
-    </div>
+    </dialog>
 
     <script>
-        // Toggle switch functionality
-        function toggleSetting(element) {
-            element.classList.toggle('active');
-            const isActive = element.classList.contains('active');
-            const settingName = element.previousElementSibling.querySelector('.setting-label').textContent;
-            console.log(`${settingName} ${isActive ? 'enabled' : 'disabled'}`);
-        }
+        (() => {
+            const accountData = window.FuelFireAccountData;
+            const $ = (id) => document.getElementById(id);
+            let pendingImport = null;
+            let deleteTrigger = null;
 
-        // Edit Profile
-        function editProfile() {
-            const nameInput = document.getElementById('profileNameInput');
-            nameInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            nameInput?.focus();
-        }
-
-        function saveProfileDetails() {
-            const nameInput = document.getElementById('profileNameInput');
-            const genderInput = document.getElementById('profileGenderInput');
-            const ageInput = document.getElementById('profileAgeInput');
-            const weightInput = document.getElementById('profileWeightInput');
-
-            const name = nameInput.value.trim() || 'Athlete';
-            const gender = genderInput.value;
-            const age = ageInput.value.trim();
-            const weight = weightInput.value.trim();
-
-            document.getElementById('userName').textContent = name;
-
-            const avatar = document.querySelector('.avatar');
-            avatar.textContent = name ? name.charAt(0).toUpperCase() : '👤';
-
-            localStorage.setItem('userName', name);
-            localStorage.setItem('userGender', gender);
-            localStorage.setItem('userAge', age);
-            localStorage.setItem('userWeight', weight);
-
-            alert('✅ Profile updated');
-        }
-
-        let currentPlan = (localStorage.getItem('subscriptionPlan') || 'elite').toLowerCase();
-        let selectedPlan = currentPlan;
-        const PLAN_DETAILS = {
-            elite: {
-                label: 'Elite Plan',
-                priceText: '$96/month • Renews on Dec 15, 2025',
-                summary: 'All AI features + 1 free monthly coaching session (diet or workout)'
-            },
-            premium: {
-                label: 'Premium Plan',
-                priceText: '$15/month • Renews on Dec 15, 2025',
-                summary: 'All AI features and unlimited plans (no included coaching session)'
-            },
-            core: {
-                label: 'Core Plan',
-                priceText: '$6/month • Renews on Dec 15, 2025',
-                summary: 'Up to 10 meal + 10 workout plans per month (no AI food logging, no coaching)'
-            }
-        };
-
-        function selectPlan(plan) {
-            if (!PLAN_DETAILS[plan]) {
-                plan = 'elite';
-            }
-            selectedPlan = plan;
-            localStorage.setItem('selectedPlan', plan);
-            syncPlanUI();
-        }
-
-        function syncPlanUI() {
-            const eliteCard = document.getElementById('plan-elite');
-            const premiumCard = document.getElementById('plan-premium');
-            const coreCard = document.getElementById('plan-core');
-            eliteCard?.classList.toggle('active', selectedPlan === 'elite');
-            premiumCard?.classList.toggle('active', selectedPlan === 'premium');
-            coreCard?.classList.toggle('active', selectedPlan === 'core');
-
-            const currentPlanLabel = document.getElementById('currentPlanLabel');
-            const currentPlanDetails = document.getElementById('currentPlanDetails');
-            const details = PLAN_DETAILS[currentPlan];
-            if (details) {
-                currentPlanLabel.textContent = details.label;
-                currentPlanDetails.textContent = details.priceText;
+            function setStatus(message) {
+                const status = $('account-status');
+                if (status) status.textContent = String(message || '');
             }
 
-            const statusBadge = document.querySelector('.status-badge');
-            statusBadge.textContent = details ? `${details.label}` : 'ACTIVE';
-        }
-
-        function confirmPlanSelection() {
-            const details = PLAN_DETAILS[selectedPlan];
-            alert(`✅ Plan saved\n\n${details.label}\n${details.summary}`);
-            currentPlan = selectedPlan;
-            localStorage.setItem('subscriptionPlan', currentPlan);
-            syncPlanUI();
-        }
-
-        function openBillingPortal() {
-            alert('🔐 Billing Portal\n\nManage your payment methods, invoices, and receipts from your billing portal. (Placeholder flow)');
-        }
-
-        function submitPaymentForm() {
-            document.getElementById('paymentForm')?.requestSubmit();
-        }
-
-        function savePaymentMethod(event) {
-            event.preventDefault();
-            const name = document.getElementById('cardNameInput').value.trim();
-            const numberRaw = document.getElementById('cardNumberInput').value.replace(/\D/g, '');
-            const expiry = document.getElementById('cardExpiryInput').value.trim();
-            const cvc = document.getElementById('cardCvcInput').value.trim();
-
-            if (!name || numberRaw.length < 12 || !expiry || cvc.length < 3) {
-                alert('Please enter a valid card, expiry, and CVC.');
-                return;
+            function setError(message) {
+                const error = $('account-error');
+                if (!error) return;
+                error.textContent = String(message || '');
+                error.hidden = !message;
             }
 
-            const last4 = numberRaw.slice(-4);
-            const paymentList = document.getElementById('paymentMethodsList');
-            const card = document.createElement('div');
-            card.className = 'payment-method';
-            card.innerHTML = `
-                <div class="card-icon">💳</div>
-                <div class="card-info">
-                    <div class="card-type">Card •••• ${last4}</div>
-                    <div class="card-number">Expires ${expiry} • Added now</div>
-                </div>
-            `;
-            paymentList?.prepend(card);
-
-            event.target.reset();
-            alert('✅ Payment method added (mock).');
-        }
-
-        // View All Orders
-        function viewAllOrders() {
-            alert('📦 Order History\n\nShowing recent purchases:\n\n• Elite Muscle Building Plan - $199\n• 1-on-1 Coaching (4 Sessions) - $360\n• Professional Fat Loss Protocol - $149\n• Strength Foundations Program - $179\n• Elite Subscription - $96/mo\n\nTotal lifetime value: $983.99');
-        }
-
-        // Change Password
-        function changePassword() {
-            const confirmed = confirm('Change Password\n\nYou will receive a password reset link via email.\n\nSend reset link to john.athlete@email.com?');
-            if (confirmed) {
-                alert('✅ Password reset link sent!\n\nCheck your email and follow the instructions.');
+            function setBackupStatus(message) {
+                const status = $('backup-status');
+                if (status) status.textContent = String(message || '');
             }
-        }
 
-        // Export Data
-        function exportData() {
-            alert('📥 Export Your Data\n\nWe\'ll prepare a complete export of:\n\n✓ Profile information\n✓ Workout history\n✓ Meal plans\n✓ Progress photos\n✓ Measurements & stats\n✓ Purchase history\n\nYou\'ll receive a download link via email within 24 hours.\n\nCompliance with GDPR & CCPA.');
-        }
+            function setBackupError(message) {
+                const error = $('backup-error');
+                if (!error) return;
+                error.textContent = String(message || '');
+                error.hidden = !message;
+            }
 
-        // Delete Account
-        function deleteAccount() {
-            const confirmed = confirm('⚠️ DELETE ACCOUNT?\n\nThis will permanently delete:\n- Your profile\n- All workout data\n- All meal plans\n- Progress history\n- Active subscriptions will be cancelled\n\nThis action CANNOT be undone.\n\nAre you sure?');
+            function renderProfile() {
+                const profile = accountData.readProfile(localStorage);
+                const name = profile.name || 'Your local profile';
+                $('profile-summary-heading').textContent = name;
+                $('profileNameInput').value = profile.name || '';
+                $('profileGenderInput').value = profile.gender || '';
+                $('profileAgeInput').value = profile.age === null ? '' : String(profile.age);
+                $('profileWeightInput').value = profile.weightLbs === null ? '' : String(profile.weightLbs);
+                const avatar = document.querySelector('.avatar');
+                if (avatar) avatar.textContent = profile.name ? profile.name.charAt(0).toUpperCase() : '?';
+                const storedEmail = String(localStorage.getItem('userEmail') || '').trim();
+                $('userEmail').textContent = storedEmail || 'No email is stored on this device.';
+            }
 
-            if (confirmed) {
-                const finalConfirm = confirm('FINAL WARNING\n\nType your password to confirm account deletion.\n\nThis is your last chance to cancel!');
-                if (finalConfirm) {
-                    alert('❌ Account scheduled for deletion.\n\nYou have 30 days to log back in and reactivate.\n\nAfter 30 days, all data will be permanently deleted.');
+            function renderMetrics() {
+                const metrics = accountData.readMetrics(localStorage);
+                $('workout-count').textContent = String(metrics.workoutsCount);
+                $('meal-count').textContent = String(metrics.mealsCount);
+                $('meal-plan-count').textContent = String(metrics.mealPlansCount);
+                $('saved-workout-count').textContent = String(metrics.savedWorkoutsCount);
+                $('activity-empty-state').hidden = metrics.hasAnyData;
+            }
+
+            function applyReducedMotion(enabled) {
+                document.documentElement.classList.toggle('fuelfire-reduced-motion', enabled);
+                const toggle = $('reduce-motion-toggle');
+                if (toggle) {
+                    toggle.setAttribute('aria-checked', enabled ? 'true' : 'false');
+                    toggle.textContent = enabled ? 'On' : 'Off';
                 }
             }
-        }
 
-        // Load saved user data
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedName = localStorage.getItem('userName') || 'John Athlete';
-            const savedGender = localStorage.getItem('userGender') || '';
-            const savedAge = localStorage.getItem('userAge') || '';
-            const savedWeight = localStorage.getItem('userWeight') || '';
-
-            document.getElementById('userName').textContent = savedName;
-            document.getElementById('profileNameInput').value = savedName;
-            document.getElementById('profileGenderInput').value = savedGender;
-            document.getElementById('profileAgeInput').value = savedAge;
-            document.getElementById('profileWeightInput').value = savedWeight;
-
-            const avatar = document.querySelector('.avatar');
-            avatar.textContent = savedName ? savedName.charAt(0).toUpperCase() : '👤';
-
-            const storedPlan = localStorage.getItem('selectedPlan');
-            if (storedPlan === 'elite' || storedPlan === 'premium' || storedPlan === 'core') {
-                selectedPlan = storedPlan;
-            } else {
-                selectedPlan = 'elite'; // default/migrate old values
-                localStorage.setItem('selectedPlan', 'elite');
+            function renderSettings() {
+                applyReducedMotion(accountData.readSettings(localStorage).reducedMotion);
             }
-            syncPlanUI();
 
-            loadSubscriptionAdmin();
-        });
+            function editProfile() {
+                const nameInput = $('profileNameInput');
+                nameInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                nameInput?.focus();
+            }
 
-        async function loadSubscriptionAdmin() {
-            const summaryEl = document.getElementById('adminSummary');
-            const userRows = document.getElementById('adminUserRows');
-            const eventRows = document.getElementById('adminEventRows');
+            function clearProfileError() {
+                const error = $('profile-form-error');
+                if (error) {
+                    error.textContent = '';
+                    error.hidden = true;
+                }
+                ['profileNameInput', 'profileAgeInput', 'profileWeightInput'].forEach((id) => $(id)?.removeAttribute('aria-invalid'));
+            }
 
-            const fallbackEmpty = () => {
-                summaryEl.innerHTML = `
-                    <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">0</div></div>
-                    <div class="admin-card"><div class="label">$1 Trials</div><div class="value">0</div></div>
-                    <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">0</div></div>
-                    <div class="admin-card"><div class="label">Users</div><div class="value">0</div></div>`;
-                userRows.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No data</td></tr>';
-                eventRows.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No data</td></tr>';
-            };
-
-            try {
-                const resp = await fetch('/api/subscriptions');
-                if (!resp.ok) throw new Error('bad status');
-                const data = await resp.json();
-                const events = data.events || [];
-                const users = data.users || [];
-
-                const trials = events.filter(e => e.action === 'start_trial').length;
-                const promos = events.filter(e => e.action === 'promo').length;
-                const premium = events.filter(e => e.plan === 'premium').length;
-                const uniqueUsers = new Set(users.map(u => u.email || u.name || 'unknown')).size;
-
-                summaryEl.innerHTML = `
-                    <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">${premium}</div></div>
-                    <div class="admin-card"><div class="label">$1 Trials</div><div class="value">${trials}</div></div>
-                    <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">${promos}</div></div>
-                    <div class="admin-card"><div class="label">Users</div><div class="value">${uniqueUsers}</div></div>`;
-
-                userRows.innerHTML = users.map(u => {
-                    const expires = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : '—';
-                    const when = u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '';
-                    return `<tr>
-                        <td>${u.name || 'Unknown'}</td>
-                        <td>${u.email || '—'}</td>
-                        <td><span class="pill solid">${u.latestPlan || '—'}</span></td>
-                        <td>${u.latestAction || '—'}</td>
-                        <td>${u.promo || '—'}</td>
-                        <td>${expires}</td>
-                        <td>${when}</td>
-                    </tr>`;
-                }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No users yet</td></tr>';
-
-                eventRows.innerHTML = events.map(e => {
-                    const expires = e.expiresAt ? new Date(e.expiresAt).toLocaleDateString() : '—';
-                    const when = e.ts ? new Date(e.ts).toLocaleString() : '';
-                    return `<tr>
-                        <td>${e.user?.name || 'Unknown'}</td>
-                        <td>${e.user?.email || '—'}</td>
-                        <td><span class="pill solid">${e.plan || '—'}</span></td>
-                        <td>${e.action || '—'}</td>
-                        <td>${e.code || '—'}</td>
-                        <td>${expires}</td>
-                        <td>${when}</td>
-                    </tr>`;
-                }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No events yet</td></tr>';
-            } catch (err) {
-                console.warn('Subscription admin load failed, using local log if available.', err);
-                if (window.__aiAccess && __aiAccess.getEvents) {
-                    const events = __aiAccess.getEvents();
-                    const userMap = {};
-                    events.forEach(evt => {
-                        const email = (evt.user?.email || 'unknown').toLowerCase();
-                        if (!userMap[email]) {
-                            userMap[email] = { ...evt.user, email, latestPlan: evt.plan, latestAction: evt.action, promo: evt.code, expiresAt: evt.expiresAt, updatedAt: evt.ts };
-                        }
-                    });
-                    const users = Object.values(userMap);
-                    const trials = events.filter(e => e.action === 'start_trial').length;
-                    const promos = events.filter(e => e.action === 'promo').length;
-                    const premium = events.filter(e => e.plan === 'premium').length;
-                    const uniqueUsers = users.length;
-
-                    summaryEl.innerHTML = `
-                        <div class="admin-card"><div class="label">Elite / Unlimited</div><div class="value">${premium}</div></div>
-                        <div class="admin-card"><div class="label">$1 Trials</div><div class="value">${trials}</div></div>
-                        <div class="admin-card"><div class="label">Promo Unlocks</div><div class="value">${promos}</div></div>
-                        <div class="admin-card"><div class="label">Users</div><div class="value">${uniqueUsers}</div></div>`;
-
-                    userRows.innerHTML = users.map(u => {
-                        const expires = u.expiresAt ? new Date(u.expiresAt).toLocaleDateString() : '—';
-                        const when = u.updatedAt ? new Date(u.updatedAt).toLocaleString() : '';
-                        return `<tr>
-                            <td>${u.name || 'Unknown'}</td>
-                            <td>${u.email || '—'}</td>
-                            <td><span class="pill solid">${u.latestPlan || '—'}</span></td>
-                            <td>${u.latestAction || '—'}</td>
-                            <td>${u.promo || '—'}</td>
-                            <td>${expires}</td>
-                            <td>${when}</td>
-                        </tr>`;
-                    }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No users yet</td></tr>';
-
-                    eventRows.innerHTML = events.map(e => {
-                        const expires = e.expiresAt ? new Date(e.expiresAt).toLocaleDateString() : '—';
-                        const when = e.ts ? new Date(e.ts).toLocaleString() : '';
-                        return `<tr>
-                            <td>${e.user?.name || 'Unknown'}</td>
-                            <td>${e.user?.email || '—'}</td>
-                            <td><span class="pill solid">${e.plan || '—'}</span></td>
-                            <td>${e.action || '—'}</td>
-                            <td>${e.code || '—'}</td>
-                            <td>${expires}</td>
-                            <td>${when}</td>
-                        </tr>`;
-                    }).join('') || '<tr><td colspan="7" style="text-align:center; padding:12px; color:#64748b;">No events yet</td></tr>';
-                } else {
-                    fallbackEmpty();
+            function saveProfileDetails(event) {
+                event?.preventDefault();
+                clearProfileError();
+                const values = {
+                    name: $('profileNameInput').value,
+                    gender: $('profileGenderInput').value,
+                    age: $('profileAgeInput').value.trim(),
+                    weightLbs: $('profileWeightInput').value.trim(),
+                };
+                try {
+                    accountData.writeProfile(values, localStorage);
+                    renderProfile();
+                    setStatus('Profile saved on this device.');
+                    setError('');
+                } catch (error) {
+                    const message = error?.message || 'Profile could not be saved.';
+                    const formError = $('profile-form-error');
+                    formError.textContent = 'Error: ' + message;
+                    formError.hidden = false;
+                    const ageNumber = Number(values.age);
+                    const weightNumber = Number(values.weightLbs);
+                    const firstInvalid = values.age !== '' && (!Number.isFinite(ageNumber) || ageNumber < 0 || ageNumber > 120)
+                        ? $('profileAgeInput')
+                        : (values.weightLbs !== '' && (!Number.isFinite(weightNumber) || weightNumber <= 0 || weightNumber > 1500) ? $('profileWeightInput') : $('profileNameInput'));
+                    firstInvalid.setAttribute('aria-invalid', 'true');
+                    firstInvalid.focus();
                 }
             }
-        }
+
+            function formatEntitlementDetails(status) {
+                if (!status.entitlementNames.length) return 'No active RevenueCat entitlements were found in this build.';
+                const names = status.entitlementNames.join(', ');
+                const dates = status.expirationDates.map((date) => {
+                    const parsed = new Date(date);
+                    return Number.isNaN(parsed.getTime()) ? '' : ' through ' + parsed.toLocaleDateString();
+                }).filter(Boolean);
+                return 'Active entitlement' + (status.entitlementNames.length === 1 ? '' : 's') + ': ' + names + (dates[0] || '') + '.';
+            }
+
+            function renderRevenueCatStatus(status) {
+                const label = $('currentPlanLabel');
+                const details = $('currentPlanDetails');
+                const badge = $('subscription-status-badge');
+                const message = $('subscription-status-message');
+                if (!status.configured && !status.available) {
+                    label.textContent = 'RevenueCat unavailable';
+                    details.textContent = 'No RevenueCat bridge is available in this build.';
+                    badge.textContent = 'Unavailable';
+                    badge.classList.add('inactive');
+                    message.textContent = 'Subscription status cannot be verified here. Use the App Store subscription page if you need to manage billing.';
+                    return;
+                }
+                if (status.refreshError) message.textContent = 'RevenueCat could not be refreshed; the cached result is shown.';
+                else message.textContent = 'Status comes from the RevenueCat entitlement cache, not from local plan selections.';
+                label.textContent = status.active ? 'Active RevenueCat entitlement' : 'No active RevenueCat entitlement';
+                details.textContent = formatEntitlementDetails(status);
+                badge.textContent = status.active ? 'Active' : 'Not active';
+                badge.classList.toggle('inactive', !status.active);
+            }
+
+            async function refreshRevenueCatStatus() {
+                const button = $('refresh-entitlements-button');
+                if (button) button.disabled = true;
+                try {
+                    const status = await accountData.refreshRevenueCatStatus({ storage: localStorage });
+                    renderRevenueCatStatus(status);
+                } finally {
+                    if (button) button.disabled = false;
+                }
+            }
+
+            async function restorePurchases() {
+                const api = window.__aiAccess;
+                const button = $('restore-purchases-button');
+                if (!api || typeof api.restorePurchases !== 'function') {
+                    renderRevenueCatStatus(accountData.readRevenueCatStatus(localStorage));
+                    setStatus('Restore purchases is unavailable in this build.');
+                    return;
+                }
+                button.disabled = true;
+                try {
+                    await api.restorePurchases();
+                    await refreshRevenueCatStatus();
+                    setStatus('Restore request completed. Review the entitlement status above.');
+                } catch (error) {
+                    setError('Restore purchases failed. Try again when the App Store connection is available.');
+                } finally {
+                    button.disabled = false;
+                }
+            }
+
+            function downloadBackup() {
+                setBackupError('');
+                try {
+                    const backup = accountData.createBackup(localStorage);
+                    const blob = backup.blob || new Blob([backup.json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = backup.filename;
+                    link.textContent = 'Download FuelFire backup';
+                    link.className = 'visually-hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 0);
+                    setBackupStatus('Backup created (' + backup.bytes.toLocaleString() + ' bytes).');
+                    setStatus('Local backup downloaded.');
+                } catch (error) {
+                    setBackupError(error?.message || 'Backup could not be created.');
+                }
+            }
+
+            function closeImportDialog() {
+                const dialog = $('import-dialog');
+                if (dialog?.open) dialog.close();
+                pendingImport = null;
+                $('import-data-file').value = '';
+                $('choose-import-button').focus();
+            }
+
+            function openImportDialog(raw, fileName) {
+                try {
+                    const preview = accountData.previewBackup(raw, localStorage);
+                    pendingImport = { raw, fileName, preview };
+                    const duplicateText = preview.hasDuplicates
+                        ? preview.duplicateKeys.length + ' existing local record' + (preview.duplicateKeys.length === 1 ? '' : 's') + ' will be replaced if you choose merge or replace.'
+                        : 'No matching owned records are currently stored.';
+                    $('import-preview-detail').textContent = fileName + ': ' + preview.keys.length + ' owned key' + (preview.keys.length === 1 ? '' : 's') + '; ' + duplicateText;
+                    $('import-dialog').showModal();
+                    $('cancel-import-button').focus();
+                } catch (error) {
+                    setBackupError(error?.message || 'This backup could not be validated.');
+                    $('import-data-file').value = '';
+                }
+            }
+
+            async function handleImportFile(event) {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                if (file.size > accountData.MAX_BACKUP_BYTES) {
+                    setBackupError('Backup is too large. The limit is ' + accountData.MAX_BACKUP_BYTES.toLocaleString() + ' bytes.');
+                    event.target.value = '';
+                    return;
+                }
+                try {
+                    openImportDialog(await file.text(), file.name);
+                } catch (error) {
+                    setBackupError('The selected backup file could not be read.');
+                    event.target.value = '';
+                }
+            }
+
+            function restorePendingImport(mode) {
+                if (!pendingImport) return;
+                try {
+                    const result = accountData.restoreBackup(pendingImport.raw, localStorage, { mode, confirmed: true });
+                    closeImportDialog();
+                    renderProfile();
+                    renderMetrics();
+                    renderSettings();
+                    setBackupError('');
+                    setBackupStatus('Restored ' + result.restoredKeys.length + ' local record' + (result.restoredKeys.length === 1 ? '' : 's') + ' using ' + mode + '.');
+                    setStatus('Backup restored on this device.');
+                } catch (error) {
+                    setBackupError(error?.message || 'Restore failed; no changes were kept.');
+                }
+            }
+
+            function populateDeleteKeys() {
+                const list = $('delete-key-list');
+                accountData.OWNED_KEYS.forEach((key) => {
+                    const item = document.createElement('li');
+                    item.textContent = key;
+                    list.appendChild(item);
+                });
+            }
+
+            function resetDeleteDialog() {
+                $('delete-dialog-heading').textContent = 'Delete local app data?';
+                $('delete-first-step').hidden = false;
+                $('delete-final-step').hidden = true;
+                $('delete-confirmation-input').value = '';
+                $('delete-confirmation-error').hidden = true;
+                $('continue-delete-button').hidden = false;
+                $('continue-delete-button').disabled = true;
+                $('confirm-delete-button').hidden = true;
+            }
+
+            function openDeleteDialog() {
+                deleteTrigger = $('delete-local-data-button');
+                resetDeleteDialog();
+                $('delete-data-dialog').showModal();
+                $('cancel-delete-button').focus();
+            }
+
+            function closeDeleteDialog() {
+                const dialog = $('delete-data-dialog');
+                if (dialog?.open) dialog.close();
+                resetDeleteDialog();
+                deleteTrigger?.focus();
+            }
+
+            function advanceDeleteDialog() {
+                const input = $('delete-confirmation-input');
+                if (input.value !== 'DELETE') {
+                    $('delete-confirmation-error').hidden = false;
+                    input.focus();
+                    return;
+                }
+                $('delete-dialog-heading').textContent = 'Final confirmation: delete local app data';
+                $('delete-first-step').hidden = true;
+                $('delete-final-step').hidden = false;
+                $('continue-delete-button').hidden = true;
+                $('confirm-delete-button').hidden = false;
+                $('cancel-delete-button').focus();
+            }
+
+            function deleteLocalData() {
+                try {
+                    const result = accountData.deleteOwnedData(localStorage, { confirmed: true });
+                    closeDeleteDialog();
+                    renderProfile();
+                    renderMetrics();
+                    renderSettings();
+                    setStatus(result.deletedKeys.length ? 'FuelFire local app data deleted. App Store subscriptions were not changed.' : 'No FuelFire local app data was present.');
+                    setError('');
+                } catch (error) {
+                    setError(error?.message || 'Local data could not be deleted.');
+                }
+            }
+
+            window.editProfile = editProfile;
+            window.saveProfileDetails = saveProfileDetails;
+            window.exportData = downloadBackup;
+            window.deleteLocalData = openDeleteDialog;
+
+            window.addEventListener('DOMContentLoaded', () => {
+                if (!accountData) {
+                    setError('Account data tools are unavailable in this build.');
+                    return;
+                }
+                try {
+                    renderProfile();
+                    renderMetrics();
+                    renderSettings();
+                    populateDeleteKeys();
+                    renderRevenueCatStatus(accountData.readRevenueCatStatus(localStorage));
+                    refreshRevenueCatStatus();
+                } catch (error) {
+                    setError(error?.message || 'Account data could not be loaded.');
+                }
+
+                $('edit-profile-button').addEventListener('click', editProfile);
+                $('profile-form').addEventListener('submit', saveProfileDetails);
+                $('reduce-motion-toggle').addEventListener('click', () => {
+                    const enabled = $('reduce-motion-toggle').getAttribute('aria-checked') !== 'true';
+                    accountData.writeSettings({ reducedMotion: enabled }, localStorage);
+                    applyReducedMotion(enabled);
+                    setStatus('Reduce motion ' + (enabled ? 'enabled' : 'disabled') + '.');
+                });
+                $('export-data-button').addEventListener('click', downloadBackup);
+                $('choose-import-button').addEventListener('click', () => $('import-data-file').click());
+                $('import-data-file').addEventListener('change', handleImportFile);
+                $('cancel-import-button').addEventListener('click', closeImportDialog);
+                $('merge-import-button').addEventListener('click', () => restorePendingImport('merge'));
+                $('replace-import-button').addEventListener('click', () => restorePendingImport('replace'));
+                $('import-dialog').addEventListener('close', () => {
+                    pendingImport = null;
+                    $('import-data-file').value = '';
+                    $('choose-import-button').focus();
+                });
+                $('restore-purchases-button').addEventListener('click', restorePurchases);
+                $('refresh-entitlements-button').addEventListener('click', refreshRevenueCatStatus);
+                $('delete-local-data-button').addEventListener('click', openDeleteDialog);
+                $('delete-confirmation-input').addEventListener('input', (event) => {
+                    $('continue-delete-button').disabled = event.target.value !== 'DELETE';
+                    $('delete-confirmation-error').hidden = true;
+                });
+                $('cancel-delete-button').addEventListener('click', closeDeleteDialog);
+                $('continue-delete-button').addEventListener('click', advanceDeleteDialog);
+                $('confirm-delete-button').addEventListener('click', deleteLocalData);
+                $('delete-data-dialog').addEventListener('close', () => deleteTrigger?.focus());
+            });
+        })();
     </script>
 </body>
 </html>
