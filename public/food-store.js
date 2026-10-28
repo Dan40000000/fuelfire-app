@@ -3,6 +3,7 @@
 
     const STORAGE_KEY = 'fuelfire_logged_meals';
     const RECOVERY_BACKUP_KEY = `${STORAGE_KEY}_recovery_backup`;
+    const LEGACY_STORAGE_KEYS = ['fuelfire_calorie_log', 'dailyFoodLog'];
 
     function getStorage(storage) {
         if (storage && typeof storage.getItem === 'function' && typeof storage.setItem === 'function') {
@@ -28,12 +29,44 @@
     }
 
     function localDateKey(value = new Date()) {
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) {
+            return value.trim();
+        }
         const date = value instanceof Date ? new Date(value.getTime()) : new Date(value);
         if (Number.isNaN(date.getTime())) return localDateKey(new Date());
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    }
+
+    function hash(value) {
+        let result = 2166136261;
+        const text = String(value);
+        for (let index = 0; index < text.length; index += 1) {
+            result ^= text.charCodeAt(index);
+            result = Math.imul(result, 16777619);
+        }
+        return (result >>> 0).toString(36);
+    }
+
+    function stableSerialize(value) {
+        if (Array.isArray(value)) return `[${value.map(stableSerialize).join(',')}]`;
+        if (value && typeof value === 'object') {
+            return `{${Object.keys(value).sort().map(key => (
+                `${JSON.stringify(key)}:${stableSerialize(value[key])}`
+            )).join(',')}}`;
+        }
+        return JSON.stringify(value);
+    }
+
+    function mealDateValue(meal) {
+        const candidates = [meal?.timestamp, meal?.logged_at, meal?.loggedAt, meal?.date, meal?.time];
+        return candidates.find(value => value !== null && value !== undefined && String(value).trim() !== '') || new Date();
+    }
+
+    function mealDateKey(meal) {
+        return localDateKey(mealDateValue(meal));
     }
 
     function normalizeMeal(value) {
@@ -84,7 +117,7 @@
         value.forEach((meal) => {
             const normalized = normalizeMeal(meal);
             if (!normalized) return;
-            const key = localDateKey(meal?.date || meal?.time || meal?.loggedAt || new Date());
+            const key = mealDateKey(meal);
             grouped[key] ||= { meals: [], totalCalories: 0 };
             grouped[key].meals.push(normalized);
         });
@@ -111,6 +144,81 @@
             }
         });
         return normalized;
+    }
+
+    function extractLegacyMeals(value) {
+        if (Array.isArray(value)) return value;
+        if (!value || typeof value !== 'object') return [];
+        if (Array.isArray(value.meals)) return value.meals;
+        if (Array.isArray(value.entries)) return value.entries;
+        if (Array.isArray(value.logs)) return value.logs;
+        return [value];
+    }
+
+    function legacyMealId(meal, sourceKey, position) {
+        return `food-legacy-${hash(`${sourceKey}|${position}|${stableSerialize(meal)}`)}`;
+    }
+
+    function normalizeLegacyMeal(meal, sourceKey, position) {
+        const normalized = normalizeMeal(meal);
+        if (!normalized) return null;
+
+        const explicitId = cleanText(meal.id || meal.entryId || meal.logId);
+        const existingProvenance = meal.provenance && typeof meal.provenance === 'object'
+            ? meal.provenance
+            : {};
+        return {
+            ...normalized,
+            id: legacyMealId(meal, sourceKey, position),
+            legacySource: sourceKey,
+            provenance: {
+                ...existingProvenance,
+                source: sourceKey,
+                sourceKey,
+                legacyId: explicitId || null,
+                position,
+            },
+        };
+    }
+
+    function bridgeLegacyLogs(logs, storage) {
+        const target = getStorage(storage);
+        if (!target) return { ok: false, logs, error: new Error('Food log storage is unavailable.') };
+
+        const merged = { ...logs };
+        let changed = false;
+        LEGACY_STORAGE_KEYS.forEach((sourceKey) => {
+            let parsed;
+            try {
+                const raw = target.getItem(sourceKey);
+                if (!raw) return;
+                parsed = JSON.parse(raw);
+            } catch (error) {
+                return;
+            }
+
+            extractLegacyMeals(parsed).forEach((meal, position) => {
+                const normalized = normalizeLegacyMeal(meal, sourceKey, position);
+                if (!normalized) return;
+
+                const dayKey = mealDateKey(meal);
+                const day = merged[dayKey] && typeof merged[dayKey] === 'object'
+                    ? { ...merged[dayKey], meals: Array.isArray(merged[dayKey].meals) ? [...merged[dayKey].meals] : [] }
+                    : { meals: [] };
+                if (day.meals.some(existing => existing && existing.id === normalized.id)) return;
+
+                day.meals.push(normalized);
+                day.totalCalories = day.meals.reduce((total, item) => total + asFiniteNonNegative(item.calories), 0);
+                merged[dayKey] = day;
+                changed = true;
+            });
+        });
+
+        if (!changed) return { ok: true, logs: merged };
+        const result = writeLogs(merged, target);
+        return result.ok
+            ? { ok: true, logs: result.logs }
+            : { ok: false, logs: merged, error: result.error };
     }
 
     function preserveOriginal(storage, raw, reason) {
@@ -194,7 +302,13 @@
             readLogs.lastError = error instanceof Error ? error : new Error('Food log storage could not be read.');
             return {};
         }
-        if (!raw) return {};
+        if (!raw) {
+            const bridged = bridgeLegacyLogs({}, target);
+            if (!bridged.ok) {
+                readLogs.lastError = bridged.error || new Error('Food log legacy migration could not be persisted.');
+            }
+            return bridged.logs;
+        }
 
         let parsed;
         try {
@@ -217,8 +331,13 @@
                 readLogs.lastError = writeError instanceof Error
                     ? writeError
                     : new Error('Food log recovery could not be persisted.');
+                return {};
             }
-            return {};
+            const bridged = bridgeLegacyLogs({}, target);
+            if (!bridged.ok) {
+                readLogs.lastError = bridged.error || new Error('Food log legacy migration could not be persisted.');
+            }
+            return bridged.logs;
         }
 
         const normalized = normalizeLogs(parsed);
@@ -242,7 +361,13 @@
                     : new Error('Food log migration could not be persisted.');
             }
         }
-        return normalized;
+
+        if (readLogs.lastError) return normalized;
+        const bridged = bridgeLegacyLogs(normalized, target);
+        if (!bridged.ok) {
+            readLogs.lastError = bridged.error || new Error('Food log legacy migration could not be persisted.');
+        }
+        return bridged.logs;
     }
 
     function writeLogs(logs, storage) {
@@ -308,5 +433,6 @@
         getLocalDateKey: localDateKey,
         storageKey: STORAGE_KEY,
         recoveryBackupKey: RECOVERY_BACKUP_KEY,
+        legacyStorageKeys: [...LEGACY_STORAGE_KEYS],
     };
 })(typeof window !== 'undefined' ? window : globalThis);

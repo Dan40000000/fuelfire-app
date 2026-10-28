@@ -4388,7 +4388,26 @@ function complete75HardDay() {
 let dietQuizStep = 1;
 let dietData = {};
 let currentDietPlan = JSON.parse(localStorage.getItem('currentDietPlan') || 'null');
-let dailyFoodLog = JSON.parse(localStorage.getItem('dailyFoodLog') || '[]');
+
+function flattenCanonicalFoodLogs(logs) {
+    return Object.entries(logs || {}).flatMap(([dateKey, day]) => (
+        Array.isArray(day?.meals)
+            ? day.meals.map(meal => ({ ...meal, _foodLogDate: dateKey }))
+            : []
+    ));
+}
+
+function readCanonicalFoodLogs() {
+    const store = globalThis.FuelFireFoodStore;
+    if (!store || typeof store.readLogs !== 'function') return {};
+    const logs = store.readLogs(localStorage);
+    if (store.readLogs.lastError) {
+        console.warn('Food log migration could not be persisted yet:', store.readLogs.lastError);
+    }
+    return logs || {};
+}
+
+let dailyFoodLog = flattenCanonicalFoodLogs(readCanonicalFoodLogs());
 
 // Simple food database
 const foods = {
@@ -4445,18 +4464,47 @@ function addFood(mealType) {
 
 function selectFood(mealType, index) {
     const food = foods[mealType][index];
+    if (!food) return false;
+
+    const store = globalThis.FuelFireFoodStore;
+    if (!store || typeof store.readLogs !== 'function' || typeof store.writeLogs !== 'function' || typeof store.getLocalDateKey !== 'function') {
+        console.error('Could not save food: the canonical food store is unavailable.');
+        return false;
+    }
+
+    const timestamp = new Date().toISOString();
     const entry = {
         ...food,
         mealType,
-        timestamp: new Date().toISOString()
+        type: mealType,
+        timestamp
     };
-    
-    dailyFoodLog.push(entry);
-    localStorage.setItem('dailyFoodLog', JSON.stringify(dailyFoodLog));
-    
+
+    const logs = store.readLogs(localStorage);
+    if (store.readLogs.lastError) {
+        console.error('Could not save food: canonical food-store migration failed.', store.readLogs.lastError);
+        return false;
+    }
+
+    const dateKey = store.getLocalDateKey(timestamp);
+    const currentDay = logs[dateKey] && typeof logs[dateKey] === 'object' ? logs[dateKey] : {};
+    const result = store.writeLogs({
+        ...logs,
+        [dateKey]: {
+            ...currentDay,
+            meals: [...(Array.isArray(currentDay.meals) ? currentDay.meals : []), entry]
+        }
+    }, localStorage);
+    if (!result || result.ok === false) {
+        console.error('Could not save food: canonical food-store write failed.', result?.error);
+        return false;
+    }
+
+    dailyFoodLog = flattenCanonicalFoodLogs(result.logs);
     closeModal();
     loadDietTracker();
     showNotification(`Added ${food.name} to ${mealType}!`);
+    return true;
 }
 
 function closeModal() {
@@ -6079,9 +6127,19 @@ function showSelectedDiet(plan) {
 // Load diet tracker
 function loadDietTracker() {
     const content = document.getElementById('diet-tracker-content');
-    const todayLog = dailyFoodLog.filter(entry => {
-        return new Date(entry.timestamp).toDateString() === new Date().toDateString();
-    });
+    const logs = readCanonicalFoodLogs();
+    const store = globalThis.FuelFireFoodStore;
+    const todayKey = store && typeof store.getLocalDateKey === 'function'
+        ? store.getLocalDateKey(new Date())
+        : new Date().toISOString().slice(0, 10);
+    dailyFoodLog = flattenCanonicalFoodLogs(logs);
+    const todayLog = Array.isArray(logs[todayKey]?.meals)
+        ? logs[todayKey].meals.map(food => ({
+            ...food,
+            mealType: food.mealType || food.type || 'snack',
+            timestamp: food.timestamp || food.logged_at || food.loggedAt || food.date || `${todayKey}T12:00:00`
+        }))
+        : [];
     
     const totals = todayLog.reduce((acc, food) => {
         acc.calories += food.calories;
