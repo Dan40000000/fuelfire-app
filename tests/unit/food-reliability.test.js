@@ -1,25 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import vm from 'node:vm';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { lookupOpenFoodFacts } from '../../api/_lib/nutrition-evidence.js';
 import { sanitizeVisionFoods, calculateTotals } from '../../api/ai-food-vision.js';
+import '../../public/food-store.js';
 
-const foodStoreSource = fs.readFileSync(
-    path.resolve('public/food-store.js'),
-    'utf8',
-);
 const calorieTrackerSource = fs.readFileSync(
     path.resolve('public/calorie-tracker.html'),
     'utf8',
 );
 
 function loadFoodStore() {
-    const sandbox = { console };
-    vm.runInNewContext(foodStoreSource, sandbox, { filename: 'food-store.js' });
-    return sandbox.FuelFireFoodStore;
+    // Import the shipped module directly so coverage observes the same code
+    // instead of an uninstrumented VM copy. Storage remains explicit per test.
+    const store = globalThis.FuelFireFoodStore;
+    store.readLogs.lastError = null;
+    store.writeLogs.lastError = null;
+    return store;
 }
 
 function createStorage({ failOnSet } = {}) {
@@ -108,12 +107,12 @@ describe('food reliability contracts', () => {
 
         expect(store.readLogs(storage)).toEqual({});
         expect(storage.getItem(store.storageKey)).toBe(raw);
-        expect(store.readLogs.lastError?.message).toMatch(/recovery backup/i);
+        expect(store.readLogs.lastError?.message).toContain(`setItem failed for ${store.recoveryBackupKey}`);
 
         const failedWrite = store.writeLogs({}, storage);
         expect(failedWrite.ok).toBe(false);
         expect(storage.getItem(store.storageKey)).toBe(raw);
-        expect(store.writeLogs.lastError?.message).toMatch(/recovery backup/i);
+        expect(store.writeLogs.lastError?.message).toContain(`setItem failed for ${store.recoveryBackupKey}`);
     });
 
     it('permits normalization when the exact raw payload is already backed up', () => {
@@ -140,7 +139,7 @@ describe('food reliability contracts', () => {
         const logs = store.readLogs(storage);
         expect(logs[store.getLocalDateKey('2026-10-28T12:00:00Z')].meals[0].name).toBe('Migration draft');
         expect(storage.getItem(store.storageKey)).toBe(raw);
-        expect(store.readLogs.lastError?.message).toMatch(/migration|persist/i);
+        expect(store.readLogs.lastError?.message).toContain(`setItem failed for ${store.storageKey}`);
         expect(JSON.parse(storage.getItem(store.recoveryBackupKey))).toMatchObject({ original: raw });
     });
 
