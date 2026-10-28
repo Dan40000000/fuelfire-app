@@ -16,6 +16,8 @@ on:
       - 'ios/App/**'
       - 'scripts/run-ios-ui-tests.sh'
       - 'scripts/setup-ios-ui-tests.rb'
+      - 'scripts/validate-web.mjs'
+      - 'scripts/check-release-files.sh'
       - '.github/workflows/test.yml'
 
 permissions:
@@ -41,6 +43,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate shipped scripts and local assets
+        run: npm run build
 
       - name: Install Playwright Chromium and WebKit
         run: npx playwright install --with-deps chromium webkit
