@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Meal Plans - Well Fit</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="fuelfire-auth.js"></script>
     <script src="global-nav.js"></script>
     <script src="quick-food-entry.js"></script>
     <style>
@@ -372,6 +373,16 @@
             window.location.href = 'enhanced-diet-quiz.html';
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[character]));
+        }
+
         function loadMealPlans() {
             console.log('📋 Loading meal plans...');
 
@@ -407,6 +418,8 @@
             savedPlans.forEach((plan, index) => {
                 const createdDate = new Date(plan.createdAt || plan.metadata?.createdAt).toLocaleDateString();
                 const planName = plan.metadata?.customName || `Plan ${index + 1}`;
+                const safePlanName = escapeHtml(planName);
+                const safeGoal = escapeHtml(plan.metadata?.goal || 'Custom');
                 plansHTML += `
                     <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin: 10px 0; position: relative;">
                         <button onclick="renameMealPlan(${index}, event)" style="position: absolute; top: 10px; right: 100px; background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">
@@ -415,9 +428,9 @@
                         <button onclick="deleteMealPlan(${index}, event)" style="position: absolute; top: 10px; right: 10px; background: rgba(220, 53, 69, 0.9); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold;">
                             🗑️ Delete
                         </button>
-                        <h3 style="margin: 0 0 10px 0; padding-right: 180px;">${planName}</h3>
+                        <h3 style="margin: 0 0 10px 0; padding-right: 180px;">${safePlanName}</h3>
                         <p style="margin: 5px 0;">📅 Created: ${createdDate}</p>
-                        <p style="margin: 5px 0;">🎯 Goal: ${plan.metadata?.goal || 'Custom'}</p>
+                        <p style="margin: 5px 0;">🎯 Goal: ${safeGoal}</p>
                         <button onclick="viewMealPlan(${index})" style="background: white; color: #667eea; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 15px;">
                             👁️ VIEW PLAN
                         </button>
@@ -560,6 +573,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        ...(window.fuelFireAuth?.getRequestHeaders?.() || {}),
                     },
                     body: JSON.stringify({
                         imageUpload: true,

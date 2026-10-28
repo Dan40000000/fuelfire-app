@@ -3,11 +3,17 @@
 
 import { callClaude, getClaudeModel } from './_lib/anthropic.js';
 import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+import { requireAiAccess } from './_lib/security.js';
+import { createProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
     headers: ['Content-Type'],
 };
+
+const MAX_BODY_BYTES = 96 * 1024;
+const MAX_PROMPT_LENGTH = 64 * 1024;
 
 export default async function handler(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
@@ -20,27 +26,34 @@ export default async function handler(req, res) {
     }
 
     try {
-        const body = req.body || {};
-        const { prompt, userToken } = body;
-
-        // Validate user token (implement your auth logic here)
-        if (!userToken) {
-            return res.status(401).json({ error: 'Authentication required' });
+        if (!requireBodyLimit(req, res, MAX_BODY_BYTES)) return;
+        const body = getRequestBody(req);
+        if (!body || typeof body.prompt !== 'string' || !body.prompt.trim() || body.prompt.length > MAX_PROMPT_LENGTH) {
+            return res.status(400).json({
+                success: false,
+                error: 'A bounded prompt is required.',
+                code: 'INVALID_PROMPT_SCHEMA',
+            });
         }
+
+        const access = await requireAiAccess(req, res, { capability: 'planning' });
+        if (!access) return;
 
         if (!process.env.CLAUDE_API_KEY) {
             return res.status(500).json({
-                error: 'Claude API key missing',
-                message: 'Configure CLAUDE_API_KEY in environment variables',
+                success: false,
+                error: 'Meal-plan provider is not configured.',
+                code: 'PROVIDER_CONFIG_REQUIRED',
             });
         }
 
         // Call Claude AI API
         const result = await callClaude({
-            prompt,
+            prompt: body.prompt.trim(),
             maxTokens: 4000,
             temperature: 0.3,
             tags: ['meal-plan', 'single-endpoint'],
+            providerBudget: createProviderBudget({ limit: process.env.FUELFIRE_MEAL_PLAN_PROVIDER_BUDGET || 3 }),
         });
         const mealPlan = result.text;
 
@@ -51,21 +64,20 @@ export default async function handler(req, res) {
             success: true,
             mealPlan: formattedMealPlan,
             model: getClaudeModel(),
-            apiKeyRedacted: result.metadata.apiKey,
         });
 
     } catch (error) {
         console.error('Error generating meal plan:', error);
         res.status(500).json({
             error: 'Failed to generate meal plan',
-            message: error.message
+            message: 'Our AI chef is taking a quick break. Please try again in a moment.',
         });
     }
 }
 
 function formatMealPlan(rawMealPlan) {
     // Format the raw text response into structured HTML
-    let formatted = rawMealPlan;
+    let formatted = escapeHtml(rawMealPlan);
     
     // Convert markdown-style headers to HTML
     formatted = formatted.replace(/^# (.*$)/gm, '<h1>$1</h1>');
@@ -83,6 +95,16 @@ function formatMealPlan(rawMealPlan) {
     formatted = addStructuredSections(formatted);
     
     return formatted;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    }[character]));
 }
 
 function addStructuredSections(content) {

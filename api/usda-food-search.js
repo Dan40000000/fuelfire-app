@@ -1,11 +1,17 @@
 // USDA FoodData Central API Integration
 // Get your free API key at: https://fdc.nal.usda.gov/api-key-signup.html
 
+import { requireAiAccess } from './_lib/security.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
+
 export default async function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-FuelFire-Access-Token, X-FuelFire-Installation-Session, X-FuelFire-RC-App-User-ID'
+    );
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -16,40 +22,57 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { query } = req.method === 'POST' ? req.body : req.query;
+        let query;
+        if (req.method === 'POST') {
+            if (!requireBodyLimit(req, res, 16 * 1024)) return;
+            const body = getRequestBody(req);
+            query = body?.query;
+        } else {
+            query = req.query?.query;
+        }
         
-        if (!query || query.trim().length < 2) {
+        if (typeof query !== 'string' || query.trim().length < 2 || query.trim().length > 200) {
             return res.status(400).json({ error: 'Search query must be at least 2 characters' });
         }
+        query = query.trim();
+
+        const access = await requireAiAccess(req, res, { capability: 'ai_food' });
+        if (!access) return;
 
         // Check if API key is configured
         if (!process.env.USDA_API_KEY) {
-            console.warn('USDA_API_KEY not configured, using fallback data');
             return res.status(200).json({
                 success: true,
                 foods: getFallbackFoods(query),
-                source: 'fallback'
+                source: 'fallback',
+                message: 'Using local nutrition estimates.'
             });
         }
 
-        console.log(`🔍 Searching USDA for: "${query}"`);
-        
         // USDA FoodData Central API search
         const searchUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${process.env.USDA_API_KEY}`;
         
-        const searchResponse = await fetch(searchUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                query: query,
-                pageSize: 10,
-                dataType: ['Foundation', 'SR Legacy'],
-                sortBy: 'dataType.keyword',
-                sortOrder: 'asc'
-            })
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        let searchResponse;
+        try {
+            searchResponse = await fetch(searchUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query,
+                    pageSize: 10,
+                    dataType: ['Foundation', 'SR Legacy'],
+                    sortBy: 'dataType.keyword',
+                    sortOrder: 'asc'
+                }),
+                signal: controller.signal,
+            });
+        } finally {
+            clearTimeout(timeout);
+        }
 
         if (!searchResponse.ok) {
             throw new Error(`USDA API error: ${searchResponse.status}`);
@@ -101,8 +124,6 @@ export default async function handler(req, res) {
                 source: 'USDA'
             };
         });
-
-        console.log(`✅ Found ${foods.length} USDA foods for: "${query}"`);
 
         res.status(200).json({
             success: true,

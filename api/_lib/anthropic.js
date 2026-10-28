@@ -1,3 +1,5 @@
+import { createProviderBudget } from './provider-budget.js';
+
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const DEFAULT_MODEL = 'claude-sonnet-4-6';
 const FALLBACK_MODELS = ['claude-sonnet-4-20250514'];
@@ -35,10 +37,10 @@ export function getAnthropicApiKey() {
     return sanitizeApiKey(process.env.CLAUDE_API_KEY);
 }
 
-function redactKey(key) {
-    if (!key) return 'missing';
-    if (key.length <= 10) return '***';
-    return `${key.slice(0, 6)}...${key.slice(-4)}`;
+function getMaxRetries() {
+    const configured = Number(process.env.FUELFIRE_PROVIDER_MAX_RETRIES);
+    if (!Number.isFinite(configured)) return MAX_RETRIES;
+    return Math.min(MAX_RETRIES, Math.max(1, Math.floor(configured)));
 }
 
 function collectMessages(prompt, messages) {
@@ -72,6 +74,7 @@ export async function callClaude({
     tags,
     tools,
     tool_choice,
+    providerBudget,
 } = {}) {
     const apiKey = getAnthropicApiKey();
 
@@ -81,11 +84,14 @@ export async function callClaude({
 
     const requestMessages = collectMessages(prompt, messages);
     const modelCandidates = getModelCandidates();
+    const maxRetries = getMaxRetries();
+    const budget = providerBudget || createProviderBudget();
 
     let lastError;
     for (const model of modelCandidates) {
-        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
+                budget.consume('claude');
                 logAttempt({
                     attempt,
                     tags,
@@ -133,7 +139,7 @@ export async function callClaude({
                         break;
                     }
 
-                    if (isRetryable && attempt < MAX_RETRIES) {
+                    if (isRetryable && attempt < maxRetries) {
                         lastError = new Error(errorMessage);
                         const delay = RETRY_BASE_DELAY_MS * attempt;
                         logAttempt({ attempt, tags, message: `retrying in ${delay}ms due to ${response.status}` });
@@ -161,7 +167,6 @@ export async function callClaude({
                         raw: data,
                         metadata: {
                             model,
-                            apiKey: redactKey(apiKey),
                         },
                     };
                 }
@@ -175,12 +180,11 @@ export async function callClaude({
                     raw: data,
                     metadata: {
                         model,
-                        apiKey: redactKey(apiKey),
                     },
                 };
             } catch (error) {
                 lastError = error;
-                if (error.retryable !== false && attempt < MAX_RETRIES) {
+                if (error.retryable !== false && attempt < maxRetries) {
                     const delay = RETRY_BASE_DELAY_MS * attempt;
                     logAttempt({ attempt, tags, message: `caught ${error.message}. retrying in ${delay}ms` });
                     await sleep(delay);
@@ -210,4 +214,5 @@ export const anthropicConstants = {
     FALLBACK_MODELS,
     ANTHROPIC_VERSION,
     MAX_RETRIES,
+    getMaxRetries,
 };

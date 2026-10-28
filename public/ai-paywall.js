@@ -14,6 +14,11 @@
     // Entitlement identifiers from RevenueCat dashboard (case-sensitive)
     const RC_ENTITLEMENTS_FOR_AI = ['Premium_Access', 'Elite_access'];
     const AI_ACCESS_TOKEN_KEY = 'fuelfire_ai_access_token';
+    const INSTALLATION_SESSION_KEY = 'fuelfire_installation_session';
+    const SERVER_RC_APP_USER_ID_KEY = 'fuelfire_server_rc_app_user_id';
+    const LEGACY_RC_APP_USER_ID_KEY = 'fuelfire_legacy_rc_app_user_id';
+    const RC_MIGRATION_REQUIRED_KEY = 'fuelfire_rc_migration_required';
+    const RC_MIGRATION_COMPLETE_KEY = 'fuelfire_rc_migration_complete';
     const PRODUCTION_API_ORIGIN = 'https://fuelfire-app.vercel.app';
     const AI_API_PATHS = new Set([
         '/api/accuracy-lab-session',
@@ -23,12 +28,14 @@
         '/api/claude-meal-plan',
         '/api/generate-meal-plan',
         '/api/ai-workout-plan',
-        '/api/treadmill-vision'
+        '/api/treadmill-vision',
+        '/api/usda-food-search'
     ]);
     const nativeFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
     let rcReady = false;
     let rcEntitlements = {};
     let offeringsCache = null;
+    let installationSessionPromise = null;
 
     function readStatus() {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -64,28 +71,109 @@
         }
     }
 
-    function getUserContext() {
-        const name = localStorage.getItem('userName') || document.querySelector('#userName')?.textContent || 'Unknown User';
-        const email = document.querySelector('#userEmail')?.textContent || localStorage.getItem('userEmail') || 'unknown@example.com';
-        return { name, email };
-    }
-
     function logEvent(event) {
         const events = getEvents();
-        const ctx = getUserContext();
+        const safeEvent = {
+            action: typeof event?.action === 'string' ? event.action.slice(0, 80) : 'unknown',
+            ...(typeof event?.plan === 'string' ? { plan: event.plan.slice(0, 80) } : {}),
+            ...(typeof event?.package === 'string' ? { package: event.package.slice(0, 120) } : {}),
+            ts: new Date().toISOString(),
+        };
         events.unshift({
-            ...event,
-            user: ctx,
-            ts: new Date().toISOString()
+            ...safeEvent,
         });
         saveEvents(events.slice(0, 200)); // cap
+    }
 
-        // Fire-and-forget to backend
-        fetch('/api/subscriptions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...event, user: ctx })
-        }).catch(err => console.warn('Subscription log error', err));
+    function readInstallationSession() {
+        try {
+            const raw = localStorage.getItem(INSTALLATION_SESSION_KEY);
+            const session = raw ? JSON.parse(raw) : null;
+            return session && typeof session.token === 'string' && typeof session.rcAppUserId === 'string'
+                ? session
+                : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function rememberLegacyRevenueCatId({ preserveServerBinding = false } = {}) {
+        const currentId = localStorage.getItem('rc_app_user_id') || '';
+        const serverId = localStorage.getItem(SERVER_RC_APP_USER_ID_KEY) || '';
+        const candidate = currentId || (preserveServerBinding ? serverId : '');
+        if (candidate && (candidate !== serverId || preserveServerBinding) && !localStorage.getItem(LEGACY_RC_APP_USER_ID_KEY)) {
+            localStorage.setItem(LEGACY_RC_APP_USER_ID_KEY, candidate);
+        }
+        return localStorage.getItem(LEGACY_RC_APP_USER_ID_KEY) || '';
+    }
+
+    async function ensureSession({ explicitMigration = false } = {}) {
+        if (installationSessionPromise) return installationSessionPromise;
+        installationSessionPromise = (async () => {
+            const previousSession = readInstallationSession();
+            const legacyId = rememberLegacyRevenueCatId({
+                preserveServerBinding: explicitMigration || !previousSession?.token,
+            });
+            const body = previousSession?.token
+                ? { installationSessionToken: previousSession.token }
+                : {};
+            if (explicitMigration) body.explicitMigration = true;
+            const request = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            };
+            try {
+                const requestFetch = nativeFetch || window.fetch?.bind(window);
+                if (!requestFetch) return null;
+                const response = await requestFetch('/api/installation-session', request);
+                if (!response.ok) return null;
+                const data = await response.json();
+                if (!data?.success
+                    || typeof data.installationSessionToken !== 'string'
+                    || !/^fuelfire_[a-f0-9]{48}$/.test(data.rcAppUserId || '')) {
+                    return null;
+                }
+
+                const session = {
+                    token: data.installationSessionToken,
+                    rcAppUserId: data.rcAppUserId,
+                    expiresAt: data.expiresAt || null,
+                };
+                localStorage.setItem(INSTALLATION_SESSION_KEY, JSON.stringify(session));
+                localStorage.setItem(SERVER_RC_APP_USER_ID_KEY, session.rcAppUserId);
+
+                if (legacyId && legacyId !== session.rcAppUserId) {
+                    localStorage.setItem(RC_MIGRATION_REQUIRED_KEY, '1');
+                    localStorage.removeItem(RC_MIGRATION_COMPLETE_KEY);
+                } else if (!legacyId) {
+                    localStorage.setItem('rc_app_user_id', session.rcAppUserId);
+                }
+                return session;
+            } catch (error) {
+                console.warn('FuelFire installation session unavailable; server authorization remains authoritative.');
+                return null;
+            }
+        })();
+
+        try {
+            return await installationSessionPromise;
+        } finally {
+            installationSessionPromise = null;
+        }
+    }
+
+    function getServerRcAppUserId() {
+        return localStorage.getItem(SERVER_RC_APP_USER_ID_KEY) || readInstallationSession()?.rcAppUserId || '';
+    }
+
+    function isBoundCustomerId(appUserId) {
+        return Boolean(appUserId && getServerRcAppUserId() && appUserId === getServerRcAppUserId());
+    }
+
+    function migrationRequired() {
+        return localStorage.getItem(RC_MIGRATION_REQUIRED_KEY) === '1'
+            && localStorage.getItem(RC_MIGRATION_COMPLETE_KEY) !== '1';
     }
 
     function getPurchasesPlugin() {
@@ -94,14 +182,19 @@
 
     async function initRevenueCat() {
         if (rcReady) return true;
+        const session = await ensureSession();
+        if (!session) {
+            console.warn('RevenueCat is waiting for a server-issued installation session.');
+            return false;
+        }
         const Purchases = getPurchasesPlugin();
         if (!Purchases) {
             console.warn('RevenueCat Purchases plugin not available yet.');
             return false;
         }
         try {
-            const appUserID = localStorage.getItem('rc_app_user_id') || `anon_${Math.random().toString(36).slice(2)}`;
-            localStorage.setItem('rc_app_user_id', appUserID);
+            const legacyId = rememberLegacyRevenueCatId();
+            const appUserID = migrationRequired() && legacyId ? legacyId : session.rcAppUserId;
             await Purchases.configure({
                 apiKey: RC_KEY,
                 appUserID
@@ -123,8 +216,11 @@
         if (!Purchases) return;
         try {
             const { customerInfo } = await Purchases.getCustomerInfo();
-            rcEntitlements = customerInfo?.entitlements?.active || {};
-            localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            const active = customerInfo?.entitlements?.active || {};
+            if (Object.keys(active).length) {
+                rcEntitlements = active;
+                localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            }
         } catch (err) {
             console.warn('Failed to refresh RevenueCat entitlements', err);
         }
@@ -176,6 +272,10 @@
     }
 
     async function purchasePackage(planKey) {
+        if (migrationRequired()) {
+            alert('Restore/migrate your existing purchases before starting a new subscription on this installation.');
+            return;
+        }
         const Purchases = getPurchasesPlugin();
         if (!Purchases) {
             alert('In-app purchases are not available on this device/build.');
@@ -189,8 +289,11 @@
         }
         try {
             const result = await Purchases.purchasePackage({ aPackage: pkg });
-            rcEntitlements = result?.customerInfo?.entitlements?.active || {};
-            localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            const active = result?.customerInfo?.entitlements?.active || {};
+            if (Object.keys(active).length) {
+                rcEntitlements = active;
+                localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            }
             logEvent({ action: 'purchase', plan: planKey, package: pkgId, entitlements: Object.keys(rcEntitlements) });
             alert('✅ Purchase complete.');
         } catch (err) {
@@ -204,17 +307,64 @@
     }
 
     async function restorePurchases() {
-        const Purchases = getPurchasesPlugin();
-        if (!Purchases) {
-            alert('In-app purchases are not available on this device/build.');
-            return;
-        }
         try {
+            let session = await ensureSession();
+            if (!session) {
+                // An expired session cannot authorize a new identity silently. A
+                // user-selected restore is the only path that may issue one.
+                session = await ensureSession({ explicitMigration: true });
+            }
+            const Purchases = getPurchasesPlugin();
+            if (!session || !Purchases) {
+                alert('Secure restore is unavailable until this app can reach FuelFire. Existing access was kept.');
+                return;
+            }
+            if (!rcReady && !(await initRevenueCat())) {
+                alert('Secure restore is unavailable until RevenueCat is ready. Existing access was kept.');
+                return;
+            }
+            if (migrationRequired()) {
+                const legacyId = rememberLegacyRevenueCatId();
+                if (!session || !legacyId || typeof Purchases.logIn !== 'function') {
+                    alert('Restore/migration is not available until the app can securely bind this installation.');
+                    return;
+                }
+                // The user explicitly selected restore/migrate. Preserve the old customer
+                // until RevenueCat has completed the link, then switch to the server ID.
+                const legacyRestored = await Purchases.restorePurchases();
+                const legacyActive = legacyRestored?.customerInfo?.entitlements?.active || {};
+                if (Object.keys(legacyActive).length) {
+                    rcEntitlements = legacyActive;
+                    localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+                }
+                const loginResult = await Purchases.logIn({ appUserID: session.rcAppUserId });
+                localStorage.setItem('rc_app_user_id', session.rcAppUserId);
+                localStorage.setItem(RC_MIGRATION_COMPLETE_KEY, '1');
+                localStorage.removeItem(RC_MIGRATION_REQUIRED_KEY);
+                const migrated = loginResult?.customerInfo?.entitlements?.active || {};
+                if (Object.keys(migrated).length) {
+                    rcEntitlements = migrated;
+                    localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+                }
+                const restored = await Purchases.restorePurchases();
+                const restoredActive = restored?.customerInfo?.entitlements?.active || {};
+                if (Object.keys(restoredActive).length) {
+                    rcEntitlements = restoredActive;
+                    localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+                }
+                logEvent({ action: 'restore_migrate', entitlements: Object.keys(rcEntitlements) });
+                alert(Object.keys(rcEntitlements).length ? 'Purchases restored and securely migrated.' : 'Restore completed. Existing access was kept while RevenueCat finishes verification.');
+                return;
+            }
+
             const { customerInfo } = await Purchases.restorePurchases();
-            rcEntitlements = customerInfo?.entitlements?.active || {};
-            localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
-            logEvent({ action: 'restore', entitlements: Object.keys(rcEntitlements) });
-            alert('Restored purchases.');
+            const active = customerInfo?.entitlements?.active || {};
+            if (Object.keys(active).length) {
+                rcEntitlements = active;
+                localStorage.setItem('rc_entitlements', JSON.stringify(rcEntitlements));
+            }
+            logEvent({ action: 'restore', entitlements: Object.keys(active) });
+            alert(Object.keys(active).length ? 'Restored purchases.' : 'No active purchases were found. Existing access was kept.');
         } catch (err) {
             console.error('Restore failed', err);
             alert('Restore failed. Please try again.');
@@ -250,9 +400,12 @@
     function getAiRequestHeaders() {
         const headers = {};
         const accessToken = localStorage.getItem(AI_ACCESS_TOKEN_KEY) || '';
-        const revenueCatAppUserId = localStorage.getItem('rc_app_user_id') || '';
-        if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
-        if (revenueCatAppUserId) headers['X-FuelFire-RC-App-User-ID'] = revenueCatAppUserId;
+        const sessionToken = readInstallationSession()?.token || '';
+        if (accessToken) headers['X-FuelFire-Access-Token'] = accessToken;
+        if (sessionToken) {
+            headers['X-FuelFire-Installation-Session'] = sessionToken;
+            headers.Authorization = `Bearer ${sessionToken}`;
+        }
         return headers;
     }
 
@@ -317,7 +470,7 @@
                         <button id="ai-start-trial" style="width:100%;background:linear-gradient(135deg,#4B9CD3,#8e54e9);border:none;color:#fff;padding:14px;border-radius:12px;font-weight:800;cursor:pointer;">Start subscription</button>
                         <button id="ai-trial-1week" style="width:100%;background:#e8f4ff;border:1px solid #4B9CD3;color:#0b1a2b;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;">$1 · 48h food logging trial</button>
                         <button id="ai-voice-trial" style="width:100%;background:#f7f0ff;border:1px solid #8e54e9;color:#3a2950;padding:12px;border-radius:12px;font-weight:800;cursor:pointer;">AI voice add-on</button>
-                        <button id="ai-restore" style="width:100%;background:#0f172a;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px;border-radius:12px;font-weight:700;cursor:pointer;">Restore purchases</button>
+                        <button id="ai-restore" style="width:100%;background:#0f172a;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:12px;border-radius:12px;font-weight:700;cursor:pointer;">Restore / migrate purchases</button>
                     </div>
                     <div style="margin-top:8px;">
                         <label for="ai-promo-input" style="display:block;font-weight:700;font-size:0.9rem;margin-bottom:6px;">Have a promo?</label>
@@ -391,6 +544,10 @@
         saveStatus,
         getRequestHeaders: getAiRequestHeaders,
         getEvents,
+        ensureSession,
+        getServerRcAppUserId,
+        isBoundCustomerId,
+        migrationRequired,
         refreshEntitlements,
         purchasePackage,
         restorePurchases

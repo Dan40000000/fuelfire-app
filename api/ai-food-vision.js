@@ -2,6 +2,8 @@ import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
 import { callFoodAi, isFoodAiConfigured } from './_lib/food-ai-provider.js';
 import { buildHighImpactClarifyingQuestions, mergeClarifyingQuestions, sanitizeClarifyingQuestions, selectPhotoClarifyingQuestions } from './_lib/food-clarifications.js';
 import { requireAiAccess } from './_lib/security.js';
+import { runWithProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
@@ -2193,7 +2195,11 @@ Use numeric values without units. Use null only when a field is genuinely unread
     };
 }
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
+    return runWithProviderBudget(() => handleFoodVisionRequest(req, res));
+}
+
+async function handleFoodVisionRequest(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
         return;
     }
@@ -2203,12 +2209,21 @@ export default async function handler(req, res) {
         return;
     }
 
+    if (!requireBodyLimit(req, res, 12 * 1024 * 1024)) return;
+    const body = getRequestBody(req);
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            error: 'A JSON object body is required.',
+            code: 'INVALID_JSON_BODY',
+        });
+    }
+
     if (!await requireAiAccess(req, res, { capability: 'ai_food' })) {
         return;
     }
 
     try {
-        const body = req.body || {};
         const image = body.image;
         const mimeType = cleanText(body.mimeType, 'image/jpeg', 60);
         const preferWebSearch = body.forceWebSearch !== false;

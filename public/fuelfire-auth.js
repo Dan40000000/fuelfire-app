@@ -10,6 +10,9 @@ function normalizeBaseUrl(value) {
 
 const API_BASE_URL = normalizeBaseUrl(window.FUELFIRE_API_BASE_URL || DEFAULT_API_BASE_URL);
 const CLAUDE_MEAL_PLAN_URL = `${API_BASE_URL}/api/claude-meal-plan`;
+const INSTALLATION_SESSION_KEY = 'fuelfire_installation_session';
+const SERVER_RC_APP_USER_ID_KEY = 'fuelfire_server_rc_app_user_id';
+const LEGACY_RC_APP_USER_ID_KEY = 'fuelfire_legacy_rc_app_user_id';
 
 class FuelFireAuth {
     constructor() {
@@ -23,6 +26,7 @@ class FuelFireAuth {
         if (!sessionId) {
             this.createSession();
         }
+        this.ensureSession().catch(() => {});
     }
 
     // Create a simple session for tracking usage
@@ -48,6 +52,77 @@ class FuelFireAuth {
     getCurrentUser() {
         const userStr = localStorage.getItem('fuelfire_user');
         return userStr ? JSON.parse(userStr) : null;
+    }
+
+    readInstallationSession() {
+        try {
+            const raw = localStorage.getItem(INSTALLATION_SESSION_KEY);
+            const session = raw ? JSON.parse(raw) : null;
+            return session && typeof session.token === 'string' && typeof session.rcAppUserId === 'string'
+                ? session
+                : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async ensureSession({ explicitMigration = false } = {}) {
+        if (this.installationSessionPromise) return this.installationSessionPromise;
+        this.installationSessionPromise = (async () => {
+            const previous = this.readInstallationSession();
+            const currentRcId = localStorage.getItem('rc_app_user_id') || '';
+            const serverRcId = localStorage.getItem(SERVER_RC_APP_USER_ID_KEY) || '';
+            const preserveServerBinding = explicitMigration || !previous?.token;
+            const legacyCandidate = currentRcId || (preserveServerBinding ? serverRcId : '');
+            if (legacyCandidate
+                && (legacyCandidate !== serverRcId || preserveServerBinding)
+                && !localStorage.getItem(LEGACY_RC_APP_USER_ID_KEY)) {
+                localStorage.setItem(LEGACY_RC_APP_USER_ID_KEY, legacyCandidate);
+            }
+            const body = previous?.token
+                ? { installationSessionToken: previous.token }
+                : {};
+            if (explicitMigration) body.explicitMigration = true;
+            const response = await fetch(`${this.apiBaseUrl}/api/installation-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            if (!data?.success
+                || typeof data.installationSessionToken !== 'string'
+                || !/^fuelfire_[a-f0-9]{48}$/.test(data.rcAppUserId || '')) return null;
+            const session = {
+                token: data.installationSessionToken,
+                rcAppUserId: data.rcAppUserId,
+                expiresAt: data.expiresAt || null,
+            };
+            localStorage.setItem(INSTALLATION_SESSION_KEY, JSON.stringify(session));
+            localStorage.setItem(SERVER_RC_APP_USER_ID_KEY, session.rcAppUserId);
+            if (!localStorage.getItem(LEGACY_RC_APP_USER_ID_KEY)) {
+                localStorage.setItem('rc_app_user_id', session.rcAppUserId);
+            }
+            this.installationSession = session;
+            return session;
+        })();
+        try {
+            return await this.installationSessionPromise;
+        } finally {
+            this.installationSessionPromise = null;
+        }
+    }
+
+    getRequestHeaders() {
+        const headers = {};
+        const accessToken = localStorage.getItem('fuelfire_ai_access_token') || '';
+        const sessionToken = this.readInstallationSession()?.token || '';
+        if (accessToken) headers['X-FuelFire-Access-Token'] = accessToken;
+        if (sessionToken) {
+            headers['X-FuelFire-Installation-Session'] = sessionToken;
+            headers.Authorization = `Bearer ${sessionToken}`;
+        }
+        return headers;
     }
 
     // Track meal plan generation (for your usage monitoring)
@@ -119,10 +194,15 @@ class FuelFireAuth {
         const payloadKeys = Object.keys(body || {});
         console.log(`📦 Request payload keys [${context}]:`, payloadKeys);
 
+        // Bootstrap in the background. Header construction remains synchronous so
+        // mocked browser flows still send whatever credentials are already cached.
+        this.ensureSession().catch(() => {});
+
         const response = await fetch(CLAUDE_MEAL_PLAN_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...this.getRequestHeaders(),
             },
             body: JSON.stringify(body)
         });

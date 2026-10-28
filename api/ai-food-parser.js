@@ -6,6 +6,8 @@ import { callFoodAi, isFoodAiConfigured } from './_lib/food-ai-provider.js';
 import { lookupOpenFoodFacts } from './_lib/nutrition-evidence.js';
 import { buildHighImpactClarifyingQuestions, mergeClarifyingQuestions, sanitizeClarifyingQuestions } from './_lib/food-clarifications.js';
 import { requireAiAccess } from './_lib/security.js';
+import { runWithProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
@@ -3690,7 +3692,11 @@ Rules:
     });
 }
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
+    return runWithProviderBudget(() => handleFoodParserRequest(req, res));
+}
+
+async function handleFoodParserRequest(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
         return;
     }
@@ -3698,6 +3704,16 @@ export default async function handler(req, res) {
 
     if (!ensureMethod(req, res, ['POST'])) {
         return;
+    }
+
+    if (!requireBodyLimit(req, res, 256 * 1024)) return;
+    const body = getRequestBody(req);
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            error: 'A JSON object body is required.',
+            code: 'INVALID_JSON_BODY',
+        });
     }
 
     if (!await requireAiAccess(req, res, { capability: 'ai_food' })) {
@@ -3709,9 +3725,15 @@ export default async function handler(req, res) {
     let deadlineFallback;
 
     try {
-        const body = req.body || {};
         const rawQuery = typeof body.query === 'string' ? body.query : '';
         const originalQuery = rawQuery.trim();
+        if (originalQuery.length > 4000) {
+            return res.status(413).json({
+                success: false,
+                error: 'Food description is too long.',
+                code: 'QUERY_TOO_LARGE',
+            });
+        }
         const inputSource = normalizeInputSource(body.source);
         const voiceAlternatives = Array.isArray(body.alternatives)
             ? body.alternatives.map((value) => cleanText(value, '', 180)).filter(Boolean).slice(0, 5)

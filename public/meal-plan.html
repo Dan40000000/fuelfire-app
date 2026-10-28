@@ -297,6 +297,16 @@
                 });
             }
         }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[character]));
+        }
         
         // Function to receive and display meal plan data
         function displayMealPlan(mealPlan, metadata) {
@@ -307,11 +317,12 @@
             });
             
             // Set metadata
-            document.getElementById('plan-metadata').innerHTML = `
-                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
-                <strong>Goal:</strong> ${metadata.goal} | 
-                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
-            `;
+            const metadataValue = metadata || {};
+            document.getElementById('plan-metadata').textContent = [
+                `🎯 Generated: ${new Date(metadataValue.generatedAt || metadataValue.createdAt).toLocaleDateString()}`,
+                `Goal: ${String(metadataValue.goal || 'Custom')}`,
+                `Duration: ${String(metadataValue.planDuration || '2-week')}`,
+            ].join(' | ');
             
             // Process and display meal plan content
             if (!mealPlan || mealPlan.length === 0) {
@@ -433,16 +444,17 @@
         }
         
         function processMealPlanContent(rawContent) {
-            console.log('🔧 Processing meal plan content, length:', rawContent.length);
+            const sourceText = String(rawContent ?? '');
+            console.log('🔧 Processing meal plan content, length:', sourceText.length);
             
-            if (!rawContent || rawContent.trim() === '') {
+            if (!sourceText.trim()) {
                 return `<div style="text-align: center; padding: 40px; color: #666;">
                     <h3>⚠️ Empty meal plan</h3>
                     <p>No content received. Please try generating again.</p>
                 </div>`;
             }
             
-            let formatted = rawContent;
+            let formatted = escapeHtml(sourceText);
             
             // Clean up and format the content
             formatted = formatted

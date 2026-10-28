@@ -8,25 +8,15 @@
         }
     }
 
-    function logEvent(event) {
-        try {
-            fetch('/api/subscriptions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(event)
-            }).catch(() => {});
-        } catch (e) {
-            // ignore
-        }
-    }
-
     function applyEntitlement(payload = {}) {
         const rcAppUserId = payload.rcAppUserId || payload.appUserID || '';
-        if (rcAppUserId) localStorage.setItem('rc_app_user_id', String(rcAppUserId));
-        const plan = payload.entitlement || payload.plan || 'premium';
+        const isBound = window.__aiAccess?.isBoundCustomerId;
+        if (!rcAppUserId || typeof isBound !== 'function' || !isBound(String(rcAppUserId))) {
+            return { accepted: false, reason: 'unbound_revenuecat_identity' };
+        }
+        const plan = payload.entitlement || payload.plan || '';
+        if (!plan) return { accepted: false, reason: 'missing_entitlement' };
         const expiresAt = payload.expiresAt || null;
-        const email = payload.email || 'ios_user';
-        const name = payload.name || payload.userName || email || 'iOS User';
 
         const status = {
             plan,
@@ -34,20 +24,14 @@
             expiresAt: expiresAt ? new Date(expiresAt).getTime() : null
         };
         saveStatus(status);
-        logEvent({
-            action: 'revenuecat_entitlement',
-            plan,
-            expiresAt,
-            platform: 'apple_iap',
-            user: { email, name }
-        });
+        return { accepted: true };
     }
 
     window.RCBridge = {
         applyEntitlement
     };
 
-    // Allow native → webview postMessage with { type: 'RC_ENTITLEMENT', rcAppUserId, entitlement, email, name, expiresAt }
+    // Allow native → webview postMessage with { type: 'RC_ENTITLEMENT', rcAppUserId, entitlement, expiresAt }.
     window.addEventListener('message', (event) => {
         const data = event?.data || {};
         if (data.type === 'RC_ENTITLEMENT') {

@@ -1,4 +1,10 @@
 import crypto from 'crypto';
+import { getClientIp } from './request-security.js';
+import { consumeQuota } from './quota.js';
+import {
+    getInstallationSessionToken,
+    verifyInstallationSession,
+} from './installation-session.js';
 
 const PLANNING_ENTITLEMENTS = ['Core_Access', 'Core_access', 'core', 'Premium_Access', 'Premium_access', 'premium'];
 const AI_FOOD_ENTITLEMENTS = ['Elite_Access', 'Elite_access', 'elite', 'ai_food'];
@@ -241,7 +247,7 @@ function getRevenueCatApiKey() {
         || '';
 }
 
-function getRevenueCatAppUserId(req) {
+function getClientSuppliedRevenueCatAppUserId(req) {
     return normalizeHeaderValue(getHeader(req, 'x-revenuecat-app-user-id'))
         || normalizeHeaderValue(getHeader(req, 'x-fuelfire-rc-app-user-id'))
         || String(req?.body?.rcAppUserId || req?.body?.appUserID || '').trim();
@@ -354,23 +360,36 @@ export async function resolveAiAccess(req, options = {}) {
         return { allowed: true, source: 'disabled' };
     }
 
-    if (isAdminAuthorized(req)) return { allowed: true, source: 'admin', plan: 'owner_unlock' };
-    if (isInternalAuthorized(req)) return { allowed: true, source: 'internal', plan: 'service' };
-    if (isTestAuthorized(req)) return { allowed: true, source: 'test', plan: 'test' };
+    if (isAdminAuthorized(req)) return { allowed: true, source: 'admin', plan: 'owner_unlock', subject: 'admin' };
+    if (isInternalAuthorized(req)) return { allowed: true, source: 'internal', plan: 'service', subject: 'internal' };
+    if (isTestAuthorized(req)) return { allowed: true, source: 'test', plan: 'test', subject: 'test' };
 
-    const tokenPayload = verifyAccessToken(getAccessTokenFromRequest(req));
+    const sessionPayload = verifyInstallationSession(getInstallationSessionToken(req));
+    const suppliedAppUserId = getClientSuppliedRevenueCatAppUserId(req);
+    if (suppliedAppUserId && (!sessionPayload || suppliedAppUserId !== sessionPayload.rcAppUserId)) {
+        return { allowed: false, source: 'none', reason: 'installation_identity_mismatch' };
+    }
+
+    const accessToken = getAccessTokenFromRequest(req);
+    const tokenPayload = verifyAccessToken(accessToken);
     if (tokenPayload && isActiveExpiry(tokenPayload.expiresAt)) {
         if (planAllowsCapability(tokenPayload.plan, capability)) {
-            return { allowed: true, source: 'access_token', plan: normalizePlan(tokenPayload.plan), payload: tokenPayload };
+            return {
+                allowed: true,
+                source: 'access_token',
+                plan: normalizePlan(tokenPayload.plan),
+                payload: tokenPayload,
+                subject: tokenPayload.sub || tokenPayload.jti || crypto.createHash('sha256').update(accessToken).digest('hex'),
+            };
         }
         return { allowed: false, source: 'access_token', plan: normalizePlan(tokenPayload.plan), reason: 'plan_missing_capability', capability };
     }
 
-    const appUserId = getRevenueCatAppUserId(req);
+    const appUserId = sessionPayload?.rcAppUserId;
     if (appUserId) {
         const rc = await verifyRevenueCatAccess(appUserId);
         if (rc.active && planAllowsCapability(rc.plan, capability)) {
-            return { allowed: true, ...rc, plan: normalizePlan(rc.plan) };
+            return { allowed: true, ...rc, plan: normalizePlan(rc.plan), subject: appUserId };
         }
         if (rc.active) {
             return { allowed: false, ...rc, plan: normalizePlan(rc.plan), reason: 'plan_missing_capability', capability };
@@ -381,17 +400,38 @@ export async function resolveAiAccess(req, options = {}) {
 }
 
 export async function requireAiAccess(req, res, options = {}) {
+    const accessOptions = typeof options === 'string' ? { capability: options } : options || {};
     let denialReason = 'not_entitled';
     try {
-        const access = await resolveAiAccess(req, options);
-        if (access.allowed) return access;
+        const access = await resolveAiAccess(req, accessOptions);
+        if (access.allowed) {
+            const quota = await consumeQuota({
+                subject: access.subject || 'anonymous',
+                ip: getClientIp(req),
+                cost: accessOptions.quotaCost || 1,
+                allowMemory: access.source === 'test'
+                    && isTestAuthorized(req)
+                    && Boolean(process.env.FUELFIRE_AI_TEST_TOKEN),
+            });
+            if (!quota.allowed) {
+                const status = quota.reason === 'quota_exceeded' ? 429 : 503;
+                res.status(status).json({
+                    success: false,
+                    error: status === 429 ? 'Request quota exceeded.' : 'Request quota is not configured.',
+                    code: status === 429 ? 'REQUEST_QUOTA_EXCEEDED' : 'REQUEST_QUOTA_UNAVAILABLE',
+                });
+                return null;
+            }
+            return { ...access, quota };
+        }
         if (access.reason === 'plan_missing_capability') denialReason = 'plan_missing_capability';
+        if (access.reason === 'installation_identity_mismatch') denialReason = 'installation_identity_mismatch';
     } catch (error) {
         denialReason = 'verification_failed';
     }
 
     let reportId = null;
-    if (options.capability === 'ai_food') {
+    if (accessOptions.capability === 'ai_food') {
         // Access failures cannot use the authenticated diagnostics endpoint.
         // Record one bounded server-side reference without account, food, or URL query data.
         const pathname = String(req?.url || '').split('?')[0];
@@ -424,21 +464,7 @@ export async function requireAiAccess(req, res, options = {}) {
 }
 
 export function isSubscriptionEventAuthorized(req) {
-    if (isAdminAuthorized(req)) return true;
-
-    const expected = process.env.FUELFIRE_SUBSCRIPTION_EVENT_TOKEN
-        || process.env.SUBSCRIPTION_EVENT_TOKEN
-        || process.env.REVENUECAT_WEBHOOK_SECRET
-        || '';
-    if (!expected) return false;
-
-    const supplied = normalizeHeaderValue(getHeader(req, 'x-fuelfire-event-token'))
-        || normalizeHeaderValue(getHeader(req, 'x-subscription-event-token'))
-        || getBearerToken(req)
-        || normalizeHeaderValue(getHeader(req, 'authorization'));
-
-    const normalized = supplied.replace(/^Bearer\s+/i, '').trim();
-    return timingSafeEqualString(normalized, expected);
+    return isAdminAuthorized(req) || isInternalAuthorized(req);
 }
 
 export function getSafeUserContext(req) {

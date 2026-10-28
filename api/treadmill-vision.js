@@ -1,10 +1,17 @@
 import { callClaude } from './_lib/anthropic.js';
 import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+import { requireAiAccess } from './_lib/security.js';
+import { createProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
     headers: ['Content-Type'],
 };
+
+const MAX_BODY_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
 const SYSTEM_PROMPT = `You are FuelFire's AI workout logging assistant. You analyze treadmill console photos and return precise training metrics.
 
@@ -22,13 +29,25 @@ Rules:
 - Be explicit—if something is unreadable, say so in "notes" but leave the JSON field null.
 `;
 
-function stripBase64Prefix(data) {
-    if (!data) return data;
-    const commaIndex = data.indexOf(',');
-    if (commaIndex !== -1) {
-        return data.slice(commaIndex + 1);
+function normalizeImagePayload(imageBase64, mimeType) {
+    if (typeof imageBase64 !== 'string' || !imageBase64.trim()) return null;
+    let encoded = imageBase64.trim();
+    let resolvedMimeType = typeof mimeType === 'string' ? mimeType.trim().toLowerCase() : 'image/jpeg';
+    const dataUrlMatch = encoded.match(/^data:(image\/(?:jpeg|jpg|png|webp|gif));base64,([A-Za-z0-9+/]+={0,2})$/i);
+    if (dataUrlMatch) {
+        resolvedMimeType = dataUrlMatch[1].toLowerCase() === 'image/jpg' ? 'image/jpeg' : dataUrlMatch[1].toLowerCase();
+        encoded = dataUrlMatch[2];
     }
-    return data;
+    if (resolvedMimeType === 'image/jpg') resolvedMimeType = 'image/jpeg';
+    if (!ALLOWED_IMAGE_TYPES.has(resolvedMimeType) || !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) return null;
+    let decoded;
+    try {
+        decoded = Buffer.from(encoded, 'base64');
+    } catch {
+        return null;
+    }
+    if (!decoded.length || decoded.length > MAX_IMAGE_BYTES) return null;
+    return { encoded, mimeType: resolvedMimeType };
 }
 
 function parseNumber(value) {
@@ -147,7 +166,11 @@ export default async function handler(req, res) {
     }
 
     try {
-        const body = req.body || {};
+        if (!requireBodyLimit(req, res, MAX_BODY_BYTES)) return;
+        const body = getRequestBody(req);
+        if (!body) {
+            return res.status(400).json({ success: false, error: 'A JSON object body is required.', code: 'INVALID_JSON_BODY' });
+        }
         let { imageBase64, mimeType } = body;
 
         if (!imageBase64 || typeof imageBase64 !== 'string') {
@@ -157,17 +180,28 @@ export default async function handler(req, res) {
             });
         }
 
-        if (!process.env.CLAUDE_API_KEY) {
-            return res.status(200).json({
+        const normalizedImage = normalizeImagePayload(imageBase64, mimeType);
+        if (!normalizedImage) {
+            return res.status(400).json({
                 success: false,
-                error: 'Claude API key missing. Configure CLAUDE_API_KEY to enable treadmill photo logging.',
+                error: 'A bounded JPEG, PNG, WebP, or GIF image is required.',
+                code: 'INVALID_IMAGE_SCHEMA',
             });
         }
 
-        imageBase64 = stripBase64Prefix(imageBase64.trim());
-        mimeType = (mimeType && typeof mimeType === 'string' && mimeType.includes('/'))
-            ? mimeType
-            : 'image/jpeg';
+        const access = await requireAiAccess(req, res, { capability: 'planning' });
+        if (!access) return;
+
+        if (!process.env.CLAUDE_API_KEY) {
+            return res.status(503).json({
+                success: false,
+                error: 'Treadmill provider is not configured.',
+                code: 'PROVIDER_CONFIG_REQUIRED',
+            });
+        }
+
+        imageBase64 = normalizedImage.encoded;
+        mimeType = normalizedImage.mimeType;
 
         const messages = [
             {
@@ -208,6 +242,7 @@ Do not invent numbers—return null when unsure. JSON only.`,
             maxTokens: 800,
             temperature: 0,
             tags: ['treadmill-vision'],
+            providerBudget: createProviderBudget({ limit: process.env.FUELFIRE_TREADMILL_PROVIDER_BUDGET || 3 }),
         });
 
         let parsed;

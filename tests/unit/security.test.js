@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createInstallationSession } from '../../api/_lib/installation-session.js';
 import { planAllowsCapability, requireAiAccess, resolveAiAccess } from '../../api/_lib/security.js';
 
 describe('AI access plan compatibility', () => {
@@ -13,8 +14,11 @@ describe('AI access plan compatibility', () => {
 
     it('verifies a legacy Premium TestFlight user through RevenueCat', async () => {
         const originalApiKey = process.env.REVENUECAT_SECRET_API_KEY;
+        const originalSessionSecret = process.env.FUELFIRE_INSTALLATION_SESSION_SECRET;
         const originalFetch = global.fetch;
         process.env.REVENUECAT_SECRET_API_KEY = 'unit-test-secret';
+        process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = 'unit-test-session-secret';
+        const session = createInstallationSession();
         global.fetch = async () => new Response(JSON.stringify({
             subscriber: {
                 entitlements: {
@@ -27,10 +31,32 @@ describe('AI access plan compatibility', () => {
 
         try {
             const access = await resolveAiAccess({
-                headers: { 'x-fuelfire-rc-app-user-id': 'testflight-photo-user' },
+                headers: { authorization: `Bearer ${session.token}` },
                 body: {},
             }, { capability: 'ai_food' });
             expect(access).toMatchObject({ allowed: true, source: 'revenuecat', plan: 'legacy_premium' });
+        } finally {
+            global.fetch = originalFetch;
+            if (originalApiKey === undefined) delete process.env.REVENUECAT_SECRET_API_KEY;
+            else process.env.REVENUECAT_SECRET_API_KEY = originalApiKey;
+            if (originalSessionSecret === undefined) delete process.env.FUELFIRE_INSTALLATION_SESSION_SECRET;
+            else process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = originalSessionSecret;
+        }
+    });
+
+    it('does not authorize a caller-supplied RevenueCat ID without a signed installation session', async () => {
+        const originalApiKey = process.env.REVENUECAT_SECRET_API_KEY;
+        const originalFetch = global.fetch;
+        const fetchSpy = vi.fn();
+        process.env.REVENUECAT_SECRET_API_KEY = 'unit-test-secret';
+        global.fetch = fetchSpy;
+        try {
+            const access = await resolveAiAccess({
+                headers: { 'x-fuelfire-rc-app-user-id': 'testflight-photo-user' },
+                body: {},
+            }, { capability: 'ai_food' });
+            expect(access).toMatchObject({ allowed: false, reason: 'installation_identity_mismatch' });
+            expect(fetchSpy).not.toHaveBeenCalled();
         } finally {
             global.fetch = originalFetch;
             if (originalApiKey === undefined) delete process.env.REVENUECAT_SECRET_API_KEY;
