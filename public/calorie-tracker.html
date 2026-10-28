@@ -400,6 +400,7 @@
 
         .edit-save-btn {
             background: var(--primary);
+            color: #0f172a;
         }
 
         .edit-cancel-btn {
@@ -1138,19 +1139,19 @@
             <div id="smart-entry-live-status" role="status" aria-live="polite" style="min-height: 18px; color: #334155; font-size: 13px; margin-bottom: 8px;"></div>
             
             <!-- Tab buttons -->
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button id="ai-search-tab" type="button" role="tab" aria-selected="true" aria-controls="ai-search-content" onclick="showAISearch()" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold;">🤖 AI Search</button>
-                <button id="manual-entry-tab" type="button" role="tab" aria-selected="false" aria-controls="manual-entry-content" onclick="showManualEntry()" style="flex: 1; padding: 10px; background: #e0e0e0; color: #666; border: none; border-radius: 10px; font-weight: bold;">✏️ Manual Entry (free)</button>
+            <div role="tablist" aria-label="Food entry mode" aria-orientation="horizontal" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="ai-search-tab" type="button" role="tab" aria-selected="true" aria-controls="ai-search-content" tabindex="0" onclick="showAISearch()" style="flex: 1; padding: 10px; background: var(--primary); color: #0f172a; border: none; border-radius: 10px; font-weight: bold;">🤖 AI Search</button>
+                <button id="manual-entry-tab" type="button" role="tab" aria-selected="false" aria-controls="manual-entry-content" tabindex="-1" onclick="showManualEntry({ focusInput: false })" style="flex: 1; padding: 10px; background: #e0e0e0; color: #334155; border: none; border-radius: 10px; font-weight: bold;">✏️ Manual Entry (free)</button>
             </div>
             
             <!-- AI Search Tab -->
-            <div id="ai-search-content">
+            <div id="ai-search-content" role="tabpanel" aria-labelledby="ai-search-tab" aria-hidden="false">
                 <label class="smart-entry-label" for="smart-search">Search food with AI</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="text" id="smart-search" placeholder="e.g. 'Big Mac with fries'" 
                            onkeypress="if(event.key==='Enter') searchFood(this.value)" 
                            style="flex: 1; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                    <button type="button" onclick="searchFood(document.getElementById('smart-search').value)" style="background: var(--primary); color: white; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold;">Search</button>
+                    <button type="button" onclick="searchFood(document.getElementById('smart-search').value)" style="background: var(--primary); color: #0f172a; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold;">Search</button>
                 </div>
                 
                 <!-- Quick suggestions -->
@@ -1168,7 +1169,7 @@
             </div>
             
             <!-- Manual Entry Tab -->
-            <div id="manual-entry-content" role="tabpanel" aria-labelledby="manual-entry-tab" style="display: none;">
+            <div id="manual-entry-content" role="tabpanel" aria-labelledby="manual-entry-tab" aria-hidden="true" style="display: none;">
                 <label class="smart-entry-label" for="manual-food-name">Food name</label>
                 <input type="text" id="manual-food-name" placeholder="Food name" autocomplete="off" style="width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;">
 
@@ -5207,7 +5208,7 @@
                     setVoiceAction('Try Manual Entry', () => {
                         closeVoiceModal();
                         showSmartEntry();
-                        showManualEntry();
+                        showManualEntry({ focusInput: true });
                     }, { background: '#6c757d' });
                 }
 
@@ -6969,7 +6970,7 @@
                     document.getElementById(requestedMode === 'manual' ? 'manual-food-name' : 'smart-search')
                 );
             }
-            if (requestedMode === 'manual') showManualEntry();
+            if (requestedMode === 'manual') showManualEntry({ focusInput: true });
             else showAISearch();
         }
         
@@ -7050,7 +7051,7 @@
             const manual = document.createElement('button');
             manual.type = 'button';
             manual.textContent = 'Manual Entry (free/offline)';
-            manual.addEventListener('click', () => showManualEntry());
+            manual.addEventListener('click', () => showManualEntry({ focusInput: true }));
             actions.append(retry, manual);
             results.append(message, actions);
             setSmartEntryStatus('Lookup failed. Retry or use free offline manual entry.', true);
@@ -7062,20 +7063,26 @@
 
             const aiContent = document.getElementById('ai-search-content');
             const manualContent = document.getElementById('manual-entry-content');
+            const aiTab = document.getElementById('ai-search-tab');
+            const manualTab = document.getElementById('manual-entry-tab');
 
             // Show AI search with !important via cssText + reset position
             aiContent.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; position: relative !important; left: 0 !important; top: 0 !important;';
 
             // Hide manual entry
             manualContent.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
+            aiContent.setAttribute('aria-hidden', 'false');
+            manualContent.setAttribute('aria-hidden', 'true');
 
             // Update tab buttons
-            document.getElementById('ai-search-tab').style.background = 'var(--primary)';
-            document.getElementById('ai-search-tab').style.color = 'white';
-            document.getElementById('ai-search-tab').setAttribute('aria-selected', 'true');
-            document.getElementById('manual-entry-tab').style.background = '#e0e0e0';
-            document.getElementById('manual-entry-tab').style.color = '#666';
-            document.getElementById('manual-entry-tab').setAttribute('aria-selected', 'false');
+            aiTab.style.background = 'var(--primary)';
+            aiTab.style.color = '#0f172a';
+            aiTab.setAttribute('aria-selected', 'true');
+            aiTab.setAttribute('tabindex', '0');
+            manualTab.style.background = '#e0e0e0';
+            manualTab.style.color = '#334155';
+            manualTab.setAttribute('aria-selected', 'false');
+            manualTab.setAttribute('tabindex', '-1');
             if (!safeFoodStorageWrite(FOOD_ENTRY_MODE_KEY, 'ai', 'food entry mode')) return;
 
             // Re-show search results div when switching back to AI
@@ -7087,25 +7094,31 @@
             console.log('✅ AI Search tab active');
         }
         
-        function showManualEntry() {
+        function showManualEntry({ focusInput = true } = {}) {
             console.log('🔄 Switching to Manual Entry tab');
 
             const aiContent = document.getElementById('ai-search-content');
             const manualContent = document.getElementById('manual-entry-content');
+            const aiTab = document.getElementById('ai-search-tab');
+            const manualTab = document.getElementById('manual-entry-tab');
 
             // Hide AI search completely with !important via cssText + physically move off screen
             aiContent.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; position: absolute !important; left: -99999px !important; top: -99999px !important;';
 
             // Show manual entry
             manualContent.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important;';
+            aiContent.setAttribute('aria-hidden', 'true');
+            manualContent.setAttribute('aria-hidden', 'false');
 
             // Update tab buttons
-            document.getElementById('manual-entry-tab').style.background = 'var(--primary)';
-            document.getElementById('manual-entry-tab').style.color = 'white';
-            document.getElementById('manual-entry-tab').setAttribute('aria-selected', 'true');
-            document.getElementById('ai-search-tab').style.background = '#e0e0e0';
-            document.getElementById('ai-search-tab').style.color = '#666';
-            document.getElementById('ai-search-tab').setAttribute('aria-selected', 'false');
+            manualTab.style.background = 'var(--primary)';
+            manualTab.style.color = '#0f172a';
+            manualTab.setAttribute('aria-selected', 'true');
+            manualTab.setAttribute('tabindex', '0');
+            aiTab.style.background = '#e0e0e0';
+            aiTab.style.color = '#334155';
+            aiTab.setAttribute('aria-selected', 'false');
+            aiTab.setAttribute('tabindex', '-1');
             if (!safeFoodStorageWrite(FOOD_ENTRY_MODE_KEY, 'manual', 'food entry mode')) return;
 
             // Clear AI search results
@@ -7122,8 +7135,30 @@
             }
 
             console.log('✅ Manual Entry tab active, AI content hidden');
-            requestAnimationFrame(() => document.getElementById('manual-food-name')?.focus());
+            if (focusInput) requestAnimationFrame(() => document.getElementById('manual-food-name')?.focus());
         }
+
+        function moveSmartEntryTab(event) {
+            const tabs = [document.getElementById('ai-search-tab'), document.getElementById('manual-entry-tab')];
+            const currentIndex = tabs.indexOf(event.currentTarget);
+            if (currentIndex < 0) return;
+
+            let nextIndex = currentIndex;
+            if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+            else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+            else if (event.key === 'Home') nextIndex = 0;
+            else if (event.key === 'End') nextIndex = tabs.length - 1;
+            else return;
+
+            event.preventDefault();
+            if (nextIndex === 0) showAISearch();
+            else showManualEntry({ focusInput: false });
+            tabs[nextIndex].focus();
+        }
+
+        document.querySelectorAll('#smart-entry-modal [role="tab"]').forEach((tab) => {
+            tab.addEventListener('keydown', moveSmartEntryTab);
+        });
         
         function quickAddLearnedFood(index) {
             const item = getFoodMemoryItems()[index];
@@ -8546,7 +8581,7 @@
                             break;
                         case 'manual':
                             showSmartEntry();
-                            showManualEntry();
+                            showManualEntry({ focusInput: true });
                             break;
                     }
                 }, 500); // Small delay to ensure page is fully loaded
