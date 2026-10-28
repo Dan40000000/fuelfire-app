@@ -24,10 +24,11 @@ async function seedLocalData(page) {
 }
 
 test.describe('FuelFire account data audit regressions', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page, baseURL }) => {
+        const testOrigin = new URL(baseURL).origin;
         await page.route('**/*', async (route) => {
             const url = new URL(route.request().url());
-            if (url.hostname === '127.0.0.1' && url.port === '4291') await route.continue();
+            if (url.origin === testOrigin) await route.continue();
             else await route.abort('blockedbyclient');
         });
     });
