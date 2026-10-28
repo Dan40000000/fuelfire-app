@@ -2,8 +2,17 @@
     'use strict';
 
     const HISTORY_KEY = 'workoutHistory';
+    const HISTORY_LEGACY_KEY = `${HISTORY_KEY}.legacy`;
+    const RECOVERY_BACKUPS_KEY = 'fuelfire_workout_recovery_backups';
+    const MAX_RECOVERY_BACKUPS = 8;
     const DRAFT_KEY = 'fuelfire_workout_draft';
     const LEGACY_KEYS = ['recentWorkouts', 'fuelfire_tracked_workouts'];
+    const RECORD_FIELDS = new Set([
+        'id', 'sessionId', 'workoutId', 'workoutName', 'name', 'summary', 'type',
+        'date', 'startedAt', 'startTime', 'started', 'endedAt', 'completedAt', 'createdAt',
+        'duration', 'durationMinutes', 'calories', 'caloriesBurned', 'exercises',
+        'healthExported', 'healthExportedAt', 'healthWorkoutId'
+    ]);
 
     function getStorage(storage) {
         if (storage && typeof storage.getItem === 'function' && typeof storage.setItem === 'function') {
@@ -108,6 +117,11 @@
         return aliases[unit] || unit || fallback || 'lb';
     }
 
+    function isRecordShape(record) {
+        return Boolean(record && typeof record === 'object' && !Array.isArray(record) &&
+            Object.keys(record).some(key => RECORD_FIELDS.has(key)));
+    }
+
     function normalizeSet(set, fallbackIndex, exerciseUnit) {
         const raw = set && typeof set === 'object' ? set : { reps: set };
         const rawIndex = finiteNumber(raw.index ?? raw.setIndex ?? raw.set ?? raw.number);
@@ -181,7 +195,7 @@
     }
 
     function normalizeRecord(record, source, position, forCompletion = false) {
-        if (!record || typeof record !== 'object' || Array.isArray(record)) return null;
+        if (!isRecordShape(record)) return null;
         const raw = record;
         const startedAt = isoOrNull(raw.startedAt || raw.startTime || raw.started);
         const endedAt = isoOrNull(raw.endedAt || raw.completedAt || (forCompletion ? raw.date : null));
@@ -217,6 +231,21 @@
         if (key === 'fitnessProgress' && Array.isArray(value.workoutHistory)) return value.workoutHistory;
         if (Array.isArray(value.records)) return value.records;
         return [value];
+    }
+
+    function canonicalNeedsRecovery(canonicalRaw, canonicalValue) {
+        if (canonicalRaw === null || canonicalRaw === '') return false;
+        if (canonicalValue === null || typeof canonicalValue !== 'object') return true;
+
+        let records = canonicalValue;
+        if (Array.isArray(canonicalValue.records)) {
+            if (Object.keys(canonicalValue).some(key => key !== 'records')) return true;
+            records = canonicalValue.records;
+        } else if (!Array.isArray(canonicalValue)) {
+            records = [canonicalValue];
+        }
+
+        return records.some((record, position) => !normalizeRecord(record, HISTORY_KEY, position));
     }
 
     function sameSession(left, right) {
@@ -265,7 +294,90 @@
         return writeRaw(storage, HISTORY_KEY, serialized);
     }
 
+    function historyPayloadMatches(history, storage) {
+        return readRaw(storage, HISTORY_KEY) === JSON.stringify(history);
+    }
+
+    function recoveryError(message) {
+        const error = new Error(message);
+        error.code = 'WORKOUT_HISTORY_RECOVERY_FAILED';
+        error.recoverable = true;
+        error.readOnly = true;
+        return error;
+    }
+
+    function readRecoveryBackups(storage) {
+        const raw = readRaw(storage, RECOVERY_BACKUPS_KEY);
+        if (raw === null) return { valid: true, entries: [] };
+
+        const parsed = parseJson(raw);
+        if (!Array.isArray(parsed) || parsed.length > MAX_RECOVERY_BACKUPS) return { valid: false, entries: [] };
+
+        const keys = new Set();
+        const entries = [];
+        for (const entry of parsed) {
+            if (!entry || typeof entry !== 'object' || Array.isArray(entry) ||
+                typeof entry.key !== 'string' || typeof entry.raw !== 'string' ||
+                !entry.key.startsWith(`${HISTORY_LEGACY_KEY}.`) || keys.has(entry.key)) {
+                return { valid: false, entries: [] };
+            }
+            keys.add(entry.key);
+            entries.push({ ...entry });
+        }
+        return { valid: true, entries };
+    }
+
+    function recoveryBackupKey(raw, entries) {
+        const base = `${HISTORY_LEGACY_KEY}.${hash(raw)}`;
+        if (!entries.some(entry => entry.key === base)) return base;
+        let suffix = 2;
+        while (entries.some(entry => entry.key === `${base}.${suffix}`)) suffix += 1;
+        return `${base}.${suffix}`;
+    }
+
+    function preserveCanonicalRaw(canonicalRaw, storage) {
+        const fixedBackup = readRaw(storage, HISTORY_LEGACY_KEY);
+        if (fixedBackup === canonicalRaw) return { ok: true };
+
+        if (fixedBackup === null) {
+            if (writeRaw(storage, HISTORY_LEGACY_KEY, canonicalRaw)) return { ok: true };
+            return {
+                ok: false,
+                error: recoveryError('Unable to preserve original workout history before migration')
+            };
+        }
+
+        const backups = readRecoveryBackups(storage);
+        if (!backups.valid) {
+            return {
+                ok: false,
+                error: recoveryError('Unable to preserve original workout history in recovery backups')
+            };
+        }
+        if (backups.entries.some(entry => entry.raw === canonicalRaw)) return { ok: true };
+        if (backups.entries.length >= MAX_RECOVERY_BACKUPS) {
+            return {
+                ok: false,
+                error: recoveryError('Workout history recovery storage is full; history remains read-only')
+            };
+        }
+
+        const entry = {
+            key: recoveryBackupKey(canonicalRaw, backups.entries),
+            raw: canonicalRaw
+        };
+        const updated = JSON.stringify([...backups.entries, entry]);
+        if (!writeRaw(storage, RECOVERY_BACKUPS_KEY, updated)) {
+            return {
+                ok: false,
+                error: recoveryError('Unable to preserve original workout history in recovery backups')
+            };
+        }
+        return { ok: true };
+    }
+
     function readHistory(storage) {
+        readHistory.lastError = null;
         const canonicalRaw = readRaw(storage, HISTORY_KEY);
         const canonicalValue = parseJson(canonicalRaw);
         const allRecords = [];
@@ -296,12 +408,13 @@
             return 0;
         });
 
-        if (canonicalRaw !== null && canonicalValue === null) {
-            // Do not replace an unreadable canonical value until its original
-            // bytes are safely backed up. A quota failure must leave the
-            // corrupt record available for recovery.
-            if (!writeRaw(storage, `${HISTORY_KEY}.legacy`, canonicalRaw)) {
-                readHistory.lastError = new Error('Unable to back up corrupt workout history');
+        if (canonicalNeedsRecovery(canonicalRaw, canonicalValue)) {
+            // Do not replace a nonrepresentable canonical value until its
+            // original bytes are safely backed up. A quota failure must leave
+            // the original record available for recovery.
+            const backup = preserveCanonicalRaw(canonicalRaw, storage);
+            if (!backup.ok) {
+                readHistory.lastError = backup.error;
                 return allRecords;
             }
         }
@@ -356,8 +469,7 @@
             error.code = 'WORKOUT_HISTORY_PERSISTENCE_FAILED';
             throw error;
         }
-        const persisted = parseJson(readRaw(storage, HISTORY_KEY));
-        if (!Array.isArray(persisted) || !persisted.some(item => item && item.id === completed.id)) {
+        if (!historyPayloadMatches(history, storage)) {
             const error = new Error('Workout history persistence could not be verified');
             error.code = 'WORKOUT_HISTORY_PERSISTENCE_UNVERIFIED';
             throw error;
@@ -386,8 +498,7 @@
             error.code = 'WORKOUT_HEALTH_STATUS_PERSISTENCE_FAILED';
             throw error;
         }
-        const persisted = parseJson(readRaw(storage, HISTORY_KEY));
-        if (!Array.isArray(persisted) || !persisted.some(item => item && item.id === targetId && item.healthExported === true)) {
+        if (!historyPayloadMatches(history, storage)) {
             const error = new Error('Health export status persistence could not be verified');
             error.code = 'WORKOUT_HEALTH_STATUS_PERSISTENCE_UNVERIFIED';
             throw error;
@@ -417,6 +528,8 @@
 
     const api = {
         HISTORY_KEY,
+        HISTORY_LEGACY_KEY,
+        RECOVERY_BACKUPS_KEY,
         DRAFT_KEY,
         readHistory,
         normalizeRecord,

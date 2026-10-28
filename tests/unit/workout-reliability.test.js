@@ -36,6 +36,36 @@ function createNoopStorage(seed = {}) {
     };
 }
 
+function createSameIdTamperingStorage(seed = {}) {
+    const values = new Map(Object.entries(seed));
+    let tamperHistory = false;
+    let historyReadAfterWrite = 0;
+    return {
+        getItem: key => {
+            const value = values.has(key) ? values.get(key) : null;
+            if (key === 'workoutHistory' && tamperHistory) {
+                historyReadAfterWrite += 1;
+                if (historyReadAfterWrite > 1 && value !== null) {
+                    const parsed = JSON.parse(value);
+                    if (Array.isArray(parsed)) {
+                        return JSON.stringify(parsed.map(item => item && typeof item === 'object' ? { id: item.id } : item));
+                    }
+                }
+            }
+            return value;
+        },
+        setItem: (key, value) => {
+            values.set(key, String(value));
+            if (key === 'workoutHistory') {
+                const parsed = JSON.parse(String(value));
+                tamperHistory = Array.isArray(parsed) && parsed.length > 0;
+                historyReadAfterWrite = 0;
+            }
+        },
+        removeItem: key => values.delete(key)
+    };
+}
+
 describe('FuelFireWorkouts canonical storage', () => {
     it('migrates legacy stores, keeps unknown fields, and deduplicates one session', () => {
         const session = {
@@ -72,6 +102,114 @@ describe('FuelFireWorkouts canonical storage', () => {
         });
         expect(storage.getItem('recentWorkouts')).toContain('recent-copy');
         expect(JSON.parse(storage.getItem('workoutHistory'))).toHaveLength(2);
+    });
+
+    it('migrates a supported legacy object shape without dropping its unknown fields', () => {
+        const storage = createStorage({
+            recentWorkouts: JSON.stringify({
+                id: 'legacy-object',
+                workoutName: 'Object Session',
+                date: '2026-10-28T18:00:00.000Z',
+                customLegacyField: 'keep me'
+            })
+        });
+
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([
+            expect.objectContaining({
+                id: 'legacy-object',
+                workoutName: 'Object Session',
+                customLegacyField: 'keep me'
+            })
+        ]);
+    });
+
+    it('treats missing and empty canonical history as a normal empty history', () => {
+        expect(FuelFireWorkouts.readHistory(createStorage())).toEqual([]);
+
+        const storage = createStorage({ workoutHistory: '' });
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([]);
+        expect(storage.getItem('workoutHistory')).toBe('[]');
+        expect(storage.getItem('workoutHistory.legacy')).toBeNull();
+    });
+
+    it.each([
+        '"garbage"',
+        '42',
+        'true',
+        '{"unsupported":"object"}',
+        'null'
+    ])('backs up valid JSON with a nonrepresentable canonical shape: %s', raw => {
+        const storage = createStorage({ workoutHistory: raw });
+
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([]);
+        expect(storage.getItem('workoutHistory.legacy')).toBe(raw);
+        expect(storage.getItem('workoutHistory')).toBe('[]');
+    });
+
+    it('backs up canonical records that would otherwise be silently dropped', () => {
+        const raw = JSON.stringify([
+            { id: 'supported-record', workoutName: 'Supported', date: '2026-10-28T18:00:00.000Z' },
+            { unsupported: 'record bytes to preserve' }
+        ]);
+        const storage = createStorage({ workoutHistory: raw });
+
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([
+            expect.objectContaining({ id: 'supported-record', workoutName: 'Supported' })
+        ]);
+        expect(storage.getItem('workoutHistory.legacy')).toBe(raw);
+    });
+
+    it('does not overwrite a different fixed backup and keeps the new raw value in the bounded list', () => {
+        const raw = '42';
+        const existingBackup = 'previous original bytes';
+        const storage = createStorage({
+            workoutHistory: raw,
+            'workoutHistory.legacy': existingBackup
+        });
+
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([]);
+        expect(storage.getItem('workoutHistory.legacy')).toBe(existingBackup);
+        expect(JSON.parse(storage.getItem('fuelfire_workout_recovery_backups'))).toEqual([
+            expect.objectContaining({
+                key: expect.stringMatching(/^workoutHistory\.legacy\./),
+                raw
+            })
+        ]);
+    });
+
+    it('keeps canonical history read-only when the overflow backup hits quota', () => {
+        const raw = '42';
+        const existingBackup = 'previous original bytes';
+        const storage = createFailingStorage({
+            workoutHistory: raw,
+            'workoutHistory.legacy': existingBackup
+        }, ['fuelfire_workout_recovery_backups']);
+
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([]);
+        expect(storage.getItem('workoutHistory')).toBe(raw);
+        expect(storage.getItem('workoutHistory.legacy')).toBe(existingBackup);
+        expect(FuelFireWorkouts.readHistory.lastError).toMatchObject({
+            code: 'WORKOUT_HISTORY_RECOVERY_FAILED',
+            recoverable: true,
+            readOnly: true
+        });
+    });
+
+    it('does not grow the recovery backup list past its bound', () => {
+        const entries = Array.from({ length: 8 }, (_, index) => ({
+            key: `workoutHistory.legacy.existing-${index}`,
+            raw: `existing-${index}`
+        }));
+        const storage = createStorage({
+            workoutHistory: 'new original bytes',
+            'workoutHistory.legacy': 'first original bytes',
+            fuelfire_workout_recovery_backups: JSON.stringify(entries)
+        });
+
+        expect(FuelFireWorkouts.readHistory(storage)).toEqual([]);
+        expect(storage.getItem('workoutHistory')).toBe('new original bytes');
+        expect(JSON.parse(storage.getItem('fuelfire_workout_recovery_backups'))).toEqual(entries);
+        expect(FuelFireWorkouts.readHistory.lastError.code).toBe('WORKOUT_HISTORY_RECOVERY_FAILED');
     });
 
     it('preserves bodyweight and timed sets including blank planned rows', () => {
@@ -159,6 +297,16 @@ describe('FuelFireWorkouts canonical storage', () => {
             exercises: []
         }, storage)).toThrow(/persist|migrate|verif/i);
         expect(storage.getItem('workoutHistory')).toBeNull();
+    });
+
+    it('rejects a persisted payload that keeps the id but drops the rest of the history', () => {
+        const storage = createSameIdTamperingStorage();
+
+        expect(() => FuelFireWorkouts.completeSession({
+            id: 'partial-payload-session',
+            workoutName: 'Partial Payload',
+            exercises: []
+        }, storage)).toThrow(/verif/i);
     });
 
     it('reports draft persistence failures to callers', () => {
