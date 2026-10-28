@@ -390,6 +390,47 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(156, 39, 176, 0.4);
         }
+
+        .skip-link {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            z-index: 1000;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #13294B;
+            color: #fff;
+            transform: translateY(-150%);
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        a:focus-visible {
+            outline: 3px solid #13294B;
+            outline-offset: 2px;
+        }
+
+        .time-btn,
+        .location-btn,
+        .style-btn {
+            font: inherit;
+            color: inherit;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -399,131 +440,132 @@
             <div class="status-bar"></div>
 
             <div class="header">
-                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <button type="button" class="hamburger" aria-label="Open navigation menu" aria-controls="sidebar" aria-expanded="false" onclick="toggleSidebar()">☰</button>
                 <div class="header-title">⚡ Quick Workout</div>
             </div>
 
-            <div class="content">
+            <a class="skip-link" href="#main-content">Skip to main content</a>
+            <main class="content" id="main-content" tabindex="-1">
                 <div style="padding: 12px 20px 0;">
                     <button onclick="goBack()" style="background: #e8f4fa; border: 1px solid var(--carolina-light); color: var(--carolina-dark); padding: 8px 14px; border-radius: 12px; font-weight: 600; cursor: pointer;">← Back</button>
                 </div>
                 <div class="quiz-container">
                     <div class="quiz-header">
-                        <div class="quiz-title">⚡ Quick Workout Generator</div>
+                        <h1 class="quiz-title">⚡ Quick Workout Generator</h1>
                         <div class="quiz-subtitle">Customize your perfect workout in seconds</div>
                     </div>
 
                     <div id="quiz-section">
                         <!-- Question 1: Muscle Groups -->
                         <div class="question-card">
-                            <div class="question-title">What muscle groups do you want to train?</div>
+                        <h2 class="question-title">What muscle groups do you want to train?</h2>
                             <div class="muscle-group-grid">
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('full-body', event)">
-                                    <input type="checkbox" id="full-body" onchange="toggleMuscleGroup('full-body', event)">
-                                    <label for="full-body">Full Body</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('chest', event)">
-                                    <input type="checkbox" id="chest" onchange="toggleMuscleGroup('chest', event)">
-                                    <label for="chest">Chest</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('lats', event)">
-                                    <input type="checkbox" id="lats" onchange="toggleMuscleGroup('lats', event)">
-                                    <label for="lats">Lats</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('traps', event)">
-                                    <input type="checkbox" id="traps" onchange="toggleMuscleGroup('traps', event)">
-                                    <label for="traps">Traps</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('shoulders', event)">
-                                    <input type="checkbox" id="shoulders" onchange="toggleMuscleGroup('shoulders', event)">
-                                    <label for="shoulders">Shoulders</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('biceps', event)">
-                                    <input type="checkbox" id="biceps" onchange="toggleMuscleGroup('biceps', event)">
-                                    <label for="biceps">Biceps</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('triceps', event)">
-                                    <input type="checkbox" id="triceps" onchange="toggleMuscleGroup('triceps', event)">
-                                    <label for="triceps">Triceps</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('quads', event)">
-                                    <input type="checkbox" id="quads" onchange="toggleMuscleGroup('quads', event)">
-                                    <label for="quads">Quads</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('hamstrings', event)">
-                                    <input type="checkbox" id="hamstrings" onchange="toggleMuscleGroup('hamstrings', event)">
-                                    <label for="hamstrings">Hamstrings</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('glutes', event)">
-                                    <input type="checkbox" id="glutes" onchange="toggleMuscleGroup('glutes', event)">
-                                    <label for="glutes">Glutes</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('calves', event)">
-                                    <input type="checkbox" id="calves" onchange="toggleMuscleGroup('calves', event)">
-                                    <label for="calves">Calves</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('core', event)">
-                                    <input type="checkbox" id="core" onchange="toggleMuscleGroup('core', event)">
-                                    <label for="core">Core</label>
-                                </div>
-                                <div class="checkbox-option" onclick="toggleMuscleGroup('cardio', event)">
-                                    <input type="checkbox" id="cardio" onchange="toggleMuscleGroup('cardio', event)">
-                                    <label for="cardio">Cardio</label>
-                                </div>
+                                <label class="checkbox-option" for="full-body">
+                                    <input type="checkbox" id="full-body" onchange="toggleMuscleGroup('full-body', this)">
+                                    <span>Full Body</span>
+                                </label>
+                                <label class="checkbox-option" for="chest">
+                                    <input type="checkbox" id="chest" onchange="toggleMuscleGroup('chest', this)">
+                                    <span>Chest</span>
+                                </label>
+                                <label class="checkbox-option" for="lats">
+                                    <input type="checkbox" id="lats" onchange="toggleMuscleGroup('lats', this)">
+                                    <span>Lats</span>
+                                </label>
+                                <label class="checkbox-option" for="traps">
+                                    <input type="checkbox" id="traps" onchange="toggleMuscleGroup('traps', this)">
+                                    <span>Traps</span>
+                                </label>
+                                <label class="checkbox-option" for="shoulders">
+                                    <input type="checkbox" id="shoulders" onchange="toggleMuscleGroup('shoulders', this)">
+                                    <span>Shoulders</span>
+                                </label>
+                                <label class="checkbox-option" for="biceps">
+                                    <input type="checkbox" id="biceps" onchange="toggleMuscleGroup('biceps', this)">
+                                    <span>Biceps</span>
+                                </label>
+                                <label class="checkbox-option" for="triceps">
+                                    <input type="checkbox" id="triceps" onchange="toggleMuscleGroup('triceps', this)">
+                                    <span>Triceps</span>
+                                </label>
+                                <label class="checkbox-option" for="quads">
+                                    <input type="checkbox" id="quads" onchange="toggleMuscleGroup('quads', this)">
+                                    <span>Quads</span>
+                                </label>
+                                <label class="checkbox-option" for="hamstrings">
+                                    <input type="checkbox" id="hamstrings" onchange="toggleMuscleGroup('hamstrings', this)">
+                                    <span>Hamstrings</span>
+                                </label>
+                                <label class="checkbox-option" for="glutes">
+                                    <input type="checkbox" id="glutes" onchange="toggleMuscleGroup('glutes', this)">
+                                    <span>Glutes</span>
+                                </label>
+                                <label class="checkbox-option" for="calves">
+                                    <input type="checkbox" id="calves" onchange="toggleMuscleGroup('calves', this)">
+                                    <span>Calves</span>
+                                </label>
+                                <label class="checkbox-option" for="core">
+                                    <input type="checkbox" id="core" onchange="toggleMuscleGroup('core', this)">
+                                    <span>Core</span>
+                                </label>
+                                <label class="checkbox-option" for="cardio">
+                                    <input type="checkbox" id="cardio" onchange="toggleMuscleGroup('cardio', this)">
+                                    <span>Cardio</span>
+                                </label>
                             </div>
                         </div>
 
                         <!-- Question 2: Time -->
                         <div class="question-card">
-                            <div class="question-title">How much time do you have?</div>
+                            <h2 class="question-title">How much time do you have?</h2>
                             <div class="time-grid">
-                                <div class="time-btn" onclick="selectTime('15')">15 min</div>
-                                <div class="time-btn" onclick="selectTime('30')">30 min</div>
-                                <div class="time-btn" onclick="selectTime('45')">45 min</div>
-                                <div class="time-btn" onclick="selectTime('60')">60 min</div>
-                                <div class="time-btn" onclick="selectTime('75')">75 min</div>
-                                <div class="time-btn" onclick="selectTime('90')">90 min</div>
-                                <div class="time-btn" onclick="selectTime('120')">120 min</div>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('15', this)">15 min</button>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('30', this)">30 min</button>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('45', this)">45 min</button>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('60', this)">60 min</button>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('75', this)">75 min</button>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('90', this)">90 min</button>
+                                <button type="button" class="time-btn" aria-pressed="false" onclick="selectTime('120', this)">120 min</button>
                             </div>
                         </div>
 
                         <!-- Question 3: Location -->
                         <div class="question-card">
-                            <div class="question-title">Where are you working out?</div>
+                            <h2 class="question-title">Where are you working out?</h2>
                             <div class="location-grid">
-                                <div class="location-btn" onclick="selectLocation('home')">
+                                <button type="button" class="location-btn" aria-pressed="false" onclick="selectLocation('home', this)">
                                     <div class="location-icon">🏠</div>
                                     <div class="location-label">Home</div>
-                                </div>
-                                <div class="location-btn" onclick="selectLocation('gym')">
+                                </button>
+                                <button type="button" class="location-btn" aria-pressed="false" onclick="selectLocation('gym', this)">
                                     <div class="location-icon">🏋️</div>
                                     <div class="location-label">Gym</div>
-                                </div>
-                                <div class="location-btn" onclick="selectLocation('hotel')">
+                                </button>
+                                <button type="button" class="location-btn" aria-pressed="false" onclick="selectLocation('hotel', this)">
                                     <div class="location-icon">🏨</div>
                                     <div class="location-label">Hotel Gym</div>
-                                </div>
-                                <div class="location-btn" onclick="selectLocation('park')">
+                                </button>
+                                <button type="button" class="location-btn" aria-pressed="false" onclick="selectLocation('park', this)">
                                     <div class="location-icon">🌳</div>
                                     <div class="location-label">Park/Outdoor</div>
-                                </div>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Question 4: Style -->
                         <div class="question-card">
-                            <div class="question-title">What style of workout?</div>
+                            <h2 class="question-title">What style of workout?</h2>
                             <div class="style-grid">
-                                <div class="style-btn" onclick="selectStyle('routine')">
+                                <button type="button" class="style-btn" aria-pressed="false" onclick="selectStyle('routine', this)">
                                     <div class="style-icon">📋</div>
                                     <div class="style-label">Routine</div>
                                     <div class="style-desc">Classic proven exercises</div>
-                                </div>
-                                <div class="style-btn" onclick="selectStyle('unique')">
+                                </button>
+                                <button type="button" class="style-btn" aria-pressed="false" onclick="selectStyle('unique', this)">
                                     <div class="style-icon">🎨</div>
                                     <div class="style-label">Unique</div>
                                     <div class="style-desc">Creative & uncommon moves</div>
-                                </div>
+                                </button>
                             </div>
                         </div>
 
@@ -538,9 +580,10 @@
 
                     <div id="workout-result" class="workout-result">
                         <div class="workout-header">
-                            <div class="question-title" style="color: white; margin: 0;">Your Custom Workout 🔥</div>
+                            <h2 class="question-title" style="color: white; margin: 0;" tabindex="-1" id="result-heading">Your Custom Workout 🔥</h2>
                             <div class="workout-summary" id="workout-summary"></div>
                         </div>
+                        <div id="quiz-status" role="status" aria-live="polite" aria-atomic="true"></div>
                         <div id="workout-exercises"></div>
                         <button class="generate-btn" onclick="startWorkout()">
                             💪 Start Workout
@@ -556,7 +599,7 @@
                     <!-- Saved Templates Section -->
                     <div id="saved-templates-section" style="display: none;">
                         <div class="question-card">
-                            <div class="question-title">📚 Your Saved Workouts</div>
+                            <h2 class="question-title">📚 Your Saved Workouts</h2>
                             <div id="saved-templates-list"></div>
                             <button class="generate-btn" onclick="showQuiz()" style="margin-top: 20px;">
                                 ⚡ Create New Workout
@@ -564,12 +607,12 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
 
             <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
         <!-- Quick Workout -->
-        <div class="nav-item" onclick="window.location.href='workout-quiz.html'">
+        <button type="button" class="nav-item" aria-label="Quick Workout" onclick="window.location.href='workout-quiz.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -580,9 +623,9 @@
                     <circle cx="20" cy="12" r="1.5" fill="#4B9CD3"/>
                 </svg>
             </div>
-        </div>
+        </button>
         <!-- Food Tracker -->
-        <div class="nav-item" onclick="showQuickFoodEntry()">
+        <button type="button" class="nav-item" aria-label="Log Food" onclick="showQuickFoodEntry()">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -590,9 +633,9 @@
                     <path d="M12 3C12 3 16 8 16 12C16 14.2 14.2 16 12 16C9.8 16 8 14.2 8 12C8 8 12 3 12 3Z" stroke="white" stroke-width="2" fill="none"/>
                 </svg>
             </div>
-        </div>
+        </button>
         <!-- Home (Center, Larger) -->
-        <div class="nav-item" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
+        <button type="button" class="nav-item" aria-label="Home" onclick="window.location.href='index.html'" style="transform: scale(1.2);">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -600,18 +643,18 @@
                     <path d="M9 22V12H15V22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
-        </div>
+        </button>
         <!-- Health Dashboard -->
-        <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+        <button type="button" class="nav-item" aria-label="Health Dashboard" onclick="window.location.href='health-dashboard.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="white"/>
                 </svg>
             </div>
-        </div>
+        </button>
         <!-- Book a Coach -->
-        <div class="nav-item" onclick="window.location.href='coaching-scheduler.html'">
+        <button type="button" class="nav-item" aria-label="Book a Coach" onclick="window.location.href='coaching-scheduler.html'">
             <div class="nav-glow"></div>
             <div class="nav-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -619,7 +662,7 @@
                     <rect x="3" y="4" width="18" height="16" rx="3" stroke="white" stroke-width="2"/>
                 </svg>
             </div>
-        </div>
+        </button>
     </div>
         </div>
     </div>
@@ -718,6 +761,7 @@
     </div>
 
     <script src="workout-database.js"></script>
+    <script src="workout-store.js"></script>
     <script>
         const selections = {
             muscles: [],
@@ -725,6 +769,7 @@
             location: null,
             style: null
         };
+        let generatedWorkout = null;
 
         function escapeAttribute(value) {
             return (value || '').toString()
@@ -759,17 +804,22 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
+            const isOpen = sidebar.classList.toggle('open');
+            overlay.classList.toggle('show', isOpen);
+            const toggle = document.querySelector('.hamburger');
+            if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+            if (isOpen) {
+                const firstMenuItem = sidebar.querySelector('.menu-item');
+                if (firstMenuItem) {
+                    firstMenuItem.setAttribute('tabindex', '-1');
+                    firstMenuItem.focus();
+                }
+            } else if (toggle) {
+                toggle.focus();
+            }
         }
 
-        function toggleMuscleGroup(muscle, event) {
-            if (event && event.target.tagName !== 'INPUT') {
-                event.stopPropagation();
-                const checkbox = document.getElementById(muscle);
-                checkbox.checked = !checkbox.checked;
-            }
-
+        function toggleMuscleGroup(muscle, checkbox) {
             const index = selections.muscles.indexOf(muscle);
             const option = document.getElementById(muscle).closest('.checkbox-option');
 
@@ -784,24 +834,36 @@
             checkAllSelected();
         }
 
-        function selectTime(time) {
+        function selectTime(time, button) {
             selections.time = time;
-            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            button.classList.add('selected');
+            button.setAttribute('aria-pressed', 'true');
             checkAllSelected();
         }
 
-        function selectLocation(location) {
+        function selectLocation(location, button) {
             selections.location = location;
-            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
+            document.querySelectorAll('.location-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            button.classList.add('selected');
+            button.setAttribute('aria-pressed', 'true');
             checkAllSelected();
         }
 
-        function selectStyle(style) {
+        function selectStyle(style, button) {
             selections.style = style;
-            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected'));
-            event.target.classList.add('selected');
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            button.classList.add('selected');
+            button.setAttribute('aria-pressed', 'true');
             checkAllSelected();
         }
 
@@ -814,7 +876,8 @@
             const { muscles, time, location, style } = selections;
 
             // Get exercises from massive database
-            const workout = buildWorkout(muscles, time, location, style);
+            generatedWorkout = buildWorkout(muscles, time, location, style);
+            const workout = generatedWorkout;
 
             // Display workout
             const container = document.getElementById('workout-exercises');
@@ -874,6 +937,8 @@
             // Show result, hide quiz
             document.getElementById('quiz-section').style.display = 'none';
             document.getElementById('workout-result').classList.add('show');
+            document.getElementById('quiz-status').textContent = `Workout ready: ${workout.length} exercises generated.`;
+            document.getElementById('result-heading').focus();
         }
 
         function startOver() {
@@ -882,13 +947,15 @@
             selections.time = null;
             selections.location = null;
             selections.style = null;
+            generatedWorkout = null;
 
             // Uncheck all checkboxes
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('.checkbox-option').forEach(opt => opt.classList.remove('selected'));
-            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
-            document.querySelectorAll('.location-btn').forEach(btn => btn.classList.remove('selected'));
-            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.time-btn, .location-btn, .style-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.setAttribute('aria-pressed', 'false');
+            });
 
             // Hide result, show quiz
             document.getElementById('workout-result').classList.remove('show');
@@ -905,7 +972,11 @@
 
         function startWorkout() {
             const { muscles, time, location, style } = selections;
-            const workout = buildWorkout(muscles, time, location, style);
+            if (!generatedWorkout) {
+                generateWorkout();
+            }
+            const workout = generatedWorkout;
+            if (!Array.isArray(workout) || workout.length === 0) return;
             const formattedLocation = formatLocationLabel(location);
             const formattedMuscles = muscles.map(formatMuscleLabel).join(', ');
             const formattedStyle = formatStyleLabel(style);
@@ -913,6 +984,9 @@
 
             // Save workout to localStorage
             const workoutData = {
+                sessionId: `quick-${Date.now()}`,
+                workoutName: `${formattedLocation || 'Quick'} Workout`,
+                startedAt: new Date().toISOString(),
                 exercises: workout,
                 summary: summary,
                 muscles: muscles,
@@ -934,7 +1008,11 @@
         // Workout Template Management Functions
         function saveWorkoutTemplate() {
             const { muscles, time, location, style } = selections;
-            const workout = buildWorkout(muscles, time, location, style);
+            if (!generatedWorkout) {
+                generateWorkout();
+            }
+            const workout = generatedWorkout;
+            if (!Array.isArray(workout) || workout.length === 0) return;
             const formattedLocation = formatLocationLabel(location);
             const formattedMuscles = muscles.map(formatMuscleLabel).join(', ');
             const formattedStyle = formatStyleLabel(style);
@@ -1003,11 +1081,11 @@
                 html += `
                     <div class="template-card">
                         <div class="template-header">
-                            <div class="template-name">${template.name}</div>
+                            <div class="template-name">${escapeAttribute(template.name)}</div>
                             <div style="font-size: 24px;">💪</div>
                         </div>
                         <div class="template-meta">
-                            ${template.summary}
+                            ${escapeAttribute(template.summary)}
                         </div>
                         <div class="template-meta">
                             ${exerciseCount} exercises • Created ${date}
@@ -1038,6 +1116,9 @@
 
             // Save as current workout
             const workoutData = {
+                sessionId: `template-${template.id}-${Date.now()}`,
+                workoutName: template.name || 'Saved Workout',
+                startedAt: new Date().toISOString(),
                 exercises: template.exercises,
                 summary: template.summary,
                 muscles: template.muscles,
