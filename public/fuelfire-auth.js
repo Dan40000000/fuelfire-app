@@ -67,6 +67,13 @@ class FuelFireAuth {
     }
 
     async ensureSession({ explicitMigration = false } = {}) {
+        const sharedAccess = window.__aiAccess;
+        if (sharedAccess && typeof sharedAccess.ensureSession === 'function') {
+            const session = await sharedAccess.ensureSession({ explicitMigration });
+            if (session) this.installationSession = session;
+            return session;
+        }
+
         if (this.installationSessionPromise) return this.installationSessionPromise;
         this.installationSessionPromise = (async () => {
             const previous = this.readInstallationSession();

@@ -8,6 +8,10 @@ Firebase/Firestore is not a supported subscription-ledger backend in this deploy
 
 For an explicit local or offline test harness only, set `FUELFIRE_SUBSCRIPTION_LEDGER_MODE=local` and optionally `FUELFIRE_SUBSCRIPTION_LEDGER_PATH` to select a JSON file. Local JSON is never selected by a production runtime.
 
+### RevenueCat webhook raw body contract
+
+The webhook verifies captured request bytes before parsing JSON. The HMAC covers those exact UTF-8 bytes, including whitespace and numeric formatting; `JSON.stringify(req.body)` is not a valid substitute. The handler enforces a 128 KiB limit and returns `503 SUBSCRIPTION_RAW_BODY_UNAVAILABLE` when the runtime does not provide raw bytes. Deployment verification must confirm the Node request stream or an equivalent exact `rawBody` buffer is available. See [Vercel's raw-body guidance](https://vercel.com/kb/guide/how-do-i-get-the-raw-body-of-a-serverless-function).
+
 ## App Store purchases and RevenueCat events
 
 The native app uses RevenueCat purchases and restore. Configure the products and entitlements in the store and RevenueCat dashboards; do not treat a browser plan selection as proof of payment.

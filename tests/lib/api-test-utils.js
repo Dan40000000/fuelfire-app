@@ -53,6 +53,7 @@ export function getTestAuthHeaders() {
 export async function invokeApi(handler, {
     method = 'POST',
     body = {},
+    rawBody,
     headers = {},
     query = {},
 } = {}) {
@@ -62,6 +63,7 @@ export async function invokeApi(handler, {
     const req = {
         method,
         body,
+        rawBody,
         headers,
         query,
     };

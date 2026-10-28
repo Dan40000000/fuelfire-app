@@ -30,7 +30,7 @@ function timingSafeHexEqual(actual, expected) {
     return a.length === 32 && b.length === 32 && crypto.timingSafeEqual(a, b);
 }
 
-export function verifyRevenueCatWebhookSignature(req) {
+export function verifyRevenueCatWebhookSignature(req, { rawBody } = {}) {
     const secret = getWebhookSecret();
     const header = headerValue(req, 'x-revenuecat-webhook-signature')
         || headerValue(req, 'x-fuelfire-event-signature');
@@ -48,7 +48,8 @@ export function verifyRevenueCatWebhookSignature(req) {
         return { valid: false, reason: 'invalid_signature_timestamp' };
     }
 
-    const payload = getRequestRawBody(req);
+    const payload = getRequestRawBody(req, rawBody);
+    if (payload === null) return { valid: false, reason: 'raw_body_unavailable' };
     const expected = crypto.createHmac('sha256', secret)
         .update(`${timestamp}.${payload}`)
         .digest('hex');

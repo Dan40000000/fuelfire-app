@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import fs from 'fs';
+import http from 'http';
 import os from 'os';
 import path from 'path';
 import vm from 'vm';
@@ -54,8 +55,7 @@ function testHeaders() {
     return { 'x-fuelfire-ai-test-token': process.env.FUELFIRE_AI_TEST_TOKEN };
 }
 
-function signWebhook(body, timestamp = Math.floor(Date.now() / 1000)) {
-    const raw = JSON.stringify(body);
+function signWebhookRaw(raw, timestamp = Math.floor(Date.now() / 1000)) {
     const signature = crypto.createHmac('sha256', process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET)
         .update(`${timestamp}.${raw}`)
         .digest('hex');
@@ -64,6 +64,100 @@ function signWebhook(body, timestamp = Math.floor(Date.now() / 1000)) {
         timestamp,
         headers: { 'x-revenuecat-webhook-signature': `t=${timestamp},v1=${signature}` },
     };
+}
+
+function signWebhook(body, timestamp = Math.floor(Date.now() / 1000)) {
+    return signWebhookRaw(JSON.stringify(body), timestamp);
+}
+
+async function invokeRawHttp(handler, {
+    method = 'POST',
+    rawBody = '',
+    headers = {},
+    includeContentLength = true,
+    pathName = '/api/subscriptions',
+} = {}) {
+    let server;
+    try {
+        server = http.createServer((nodeReq, nodeRes) => {
+            let ended = false;
+            const finish = (payload = '') => {
+                if (ended) return;
+                ended = true;
+                nodeRes.statusCode = response.statusCode;
+                Object.entries(response.headers).forEach(([key, value]) => nodeRes.setHeader(key, value));
+                nodeRes.end(payload);
+            };
+            const response = {
+                statusCode: 200,
+                headers: {},
+                setHeader(key, value) {
+                    this.headers[key] = value;
+                },
+                status(code) {
+                    this.statusCode = code;
+                    return this;
+                },
+                json(payload) {
+                    finish(JSON.stringify(payload));
+                    return this;
+                },
+                end(payload = '') {
+                    finish(payload);
+                    return this;
+                },
+            };
+
+            Promise.resolve(handler(nodeReq, response))
+                .then(() => {
+                    if (!ended) finish();
+                })
+                .catch((error) => {
+                    if (!ended) {
+                        response.statusCode = 500;
+                        finish(JSON.stringify({ error: error.message }));
+                    }
+                });
+        });
+
+        await new Promise((resolve, reject) => {
+            server.once('error', reject);
+            server.listen(0, '127.0.0.1', resolve);
+        });
+        const address = server.address();
+        return await new Promise((resolve, reject) => {
+            const requestHeaders = {
+                'content-type': 'application/json',
+                ...headers,
+            };
+            if (includeContentLength) requestHeaders['content-length'] = Buffer.byteLength(rawBody);
+            const request = http.request({
+                hostname: '127.0.0.1',
+                port: address.port,
+                path: pathName,
+                method,
+                headers: requestHeaders,
+            }, (response) => {
+                const chunks = [];
+                response.on('data', (chunk) => chunks.push(chunk));
+                response.on('end', () => {
+                    const text = Buffer.concat(chunks).toString('utf8');
+                    let body = text;
+                    try {
+                        body = JSON.parse(text);
+                    } catch {
+                        // Preserve non-JSON diagnostics for a failed harness response.
+                    }
+                    resolve({ status: response.statusCode, headers: response.headers, body });
+                });
+                response.on('error', reject);
+            });
+            request.on('error', reject);
+            request.end(rawBody);
+        });
+    } finally {
+        if (server) await new Promise((resolve) => server.close(resolve));
+    }
 }
 
 function loadPaywallBrowser({ fetchMock, storage = {}, location = {}, purchases = null } = {}) {
@@ -123,6 +217,48 @@ function loadFuelFireAuthBrowser({ fetchMock, storage = {}, sharedAccess = null 
     };
     const source = fs.readFileSync(path.resolve('public/fuelfire-auth.js'), 'utf8');
     vm.runInNewContext(source, context, { filename: 'public/fuelfire-auth.js' });
+    return { window: browserWindow, localStorage, values };
+}
+
+function loadCombinedAuthBrowser({ fetchMock, storage = {}, location = {}, purchases = null } = {}) {
+    const values = new Map(Object.entries(storage));
+    const localStorage = {
+        getItem(key) { return values.has(key) ? values.get(key) : null; },
+        setItem(key, value) { values.set(key, String(value)); },
+        removeItem(key) { values.delete(key); },
+    };
+    const browserWindow = {
+        fetch: fetchMock,
+        FUELFIRE_API_BASE_URL: 'https://fuelfire-app.vercel.app',
+        location: {
+            search: '',
+            pathname: '/',
+            protocol: 'https:',
+            origin: 'https://fuelfire.test',
+            href: 'https://fuelfire.test/',
+            ...location,
+        },
+        Capacitor: { Plugins: purchases ? { Purchases: purchases } : {} },
+    };
+    const context = {
+        window: browserWindow,
+        localStorage,
+        fetch: fetchMock,
+        console,
+        URL,
+        URLSearchParams,
+        Headers,
+        Request,
+        setTimeout,
+        clearTimeout,
+    };
+    const paywallSource = fs.readFileSync(path.resolve('public/ai-paywall.js'), 'utf8');
+    const authSource = fs.readFileSync(path.resolve('public/fuelfire-auth.js'), 'utf8');
+    vm.runInNewContext(paywallSource, context, { filename: 'public/ai-paywall.js' });
+    // In a browser, bare fetch resolves to the current window.fetch. Keep the
+    // same relationship after the paywall installs its credential wrapper.
+    context.fetch = browserWindow.fetch;
+    vm.runInNewContext(authSource, context, { filename: 'public/fuelfire-auth.js' });
     return { window: browserWindow, localStorage, values };
 }
 
@@ -537,14 +673,15 @@ describe('security release boundaries', () => {
         };
         const signed = signWebhook(body);
         const first = await invokeApi(subscriptionsHandler, {
-            method: 'POST', body, headers: signed.headers,
+            method: 'POST', body, rawBody: signed.raw, headers: signed.headers,
         });
         const duplicate = await invokeApi(subscriptionsHandler, {
-            method: 'POST', body, headers: signed.headers,
+            method: 'POST', body, rawBody: signed.raw, headers: signed.headers,
         });
         const browser = await invokeApi(subscriptionsHandler, {
             method: 'POST',
             body: { action: 'purchase', plan: 'premium', user: { email: 'should-not-store@example.com' } },
+            rawBody: JSON.stringify({ action: 'purchase', plan: 'premium', user: { email: 'should-not-store@example.com' } }),
         });
         const stored = JSON.parse(fs.readFileSync(process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH, 'utf8'));
 
@@ -554,6 +691,88 @@ describe('security release boundaries', () => {
         expect(stored).toHaveLength(1);
         expect(stored[0]).toMatchObject({ eventId: 'rc-event-1', appUserId: body.event.app_user_id });
         expect(JSON.stringify(stored)).not.toContain('should-not-store@example.com');
+    });
+
+    it('verifies a pretty-printed RevenueCat signature over the real Node HTTP request bytes', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
+        const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'fuelfire-raw-webhook-'));
+        process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH = path.join(tempDirectory, 'subscriptions.json');
+        const body = {
+            api_version: '1.0',
+            event: {
+                id: 'rc-pretty-json-1',
+                type: 'INITIAL_PURCHASE',
+                app_user_id: 'fuelfire_cccccccccccccccccccccccccccccccccccccccccccccccc',
+                product_id: 'Wellfit.Elite.Monthly',
+                transaction_id: 'transaction-pretty-1',
+                event_timestamp_ms: 1700000000000,
+                store: 'APP_STORE',
+                environment: 'SANDBOX',
+            },
+        };
+        const rawBody = JSON.stringify(body, null, 2)
+            .replace(`"event_timestamp_ms": ${body.event.event_timestamp_ms}`, `"event_timestamp_ms": ${body.event.event_timestamp_ms}.00`);
+        const signed = signWebhookRaw(rawBody);
+        const response = await invokeRawHttp(subscriptionsHandler, {
+            rawBody,
+            headers: signed.headers,
+        });
+        const stored = JSON.parse(fs.readFileSync(process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH, 'utf8'));
+
+        expect(rawBody).not.toBe(JSON.stringify(body));
+        expect(response.status).toBe(200);
+        expect(response.body).toMatchObject({ success: true, duplicate: false });
+        expect(stored).toHaveLength(1);
+        expect(stored[0]).toMatchObject({ eventId: body.event.id, appUserId: body.event.app_user_id });
+    });
+
+    it('fails closed when a signed webhook has no exact raw body available', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
+        const body = {
+            api_version: '1.0',
+            event: {
+                id: 'rc-no-raw-body-1',
+                type: 'INITIAL_PURCHASE',
+                app_user_id: 'fuelfire_dddddddddddddddddddddddddddddddddddddddddddddddd',
+                product_id: 'Wellfit.Elite.Monthly',
+            },
+        };
+        const signed = signWebhook(body);
+        const response = await invokeApi(subscriptionsHandler, {
+            method: 'POST', body, headers: signed.headers,
+        });
+
+        expect(response.status).toBe(503);
+        expect(response.body.code).toBe('SUBSCRIPTION_RAW_BODY_UNAVAILABLE');
+    });
+
+    it('enforces the raw stream body limit when chunked length is unavailable', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
+        const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'fuelfire-raw-limit-'));
+        process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH = path.join(tempDirectory, 'subscriptions.json');
+        const body = {
+            api_version: '1.0',
+            event: {
+                id: 'rc-raw-limit-1',
+                type: 'INITIAL_PURCHASE',
+                app_user_id: 'fuelfire_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+                product_id: 'Wellfit.Elite.Monthly',
+            },
+        };
+        const rawBody = `${JSON.stringify(body)}${' '.repeat(128 * 1024)}`;
+        const signed = signWebhookRaw(rawBody);
+        const response = await invokeRawHttp(subscriptionsHandler, {
+            rawBody,
+            headers: signed.headers,
+            includeContentLength: false,
+        });
+
+        expect(response.status).toBe(413);
+        expect(response.body.code).toBe('REQUEST_BODY_TOO_LARGE');
+        expect(fs.existsSync(process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH)).toBe(false);
     });
 
     it('fails closed for production subscription writes when durable Redis is missing or unavailable', async () => {
@@ -578,7 +797,7 @@ describe('security release boundaries', () => {
         };
         const signed = signWebhook(body);
         const missing = await invokeApi(subscriptionsHandler, {
-            method: 'POST', body, headers: signed.headers,
+            method: 'POST', body, rawBody: signed.raw, headers: signed.headers,
         });
         expect(missing.status).toBe(503);
         expect(missing.body.code).toBe('SUBSCRIPTION_LEDGER_UNAVAILABLE');
@@ -587,7 +806,7 @@ describe('security release boundaries', () => {
         process.env.FUELFIRE_REDIS_TOKEN = 'redis-test-token';
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('store down', { status: 503 })));
         const unavailable = await invokeApi(subscriptionsHandler, {
-            method: 'POST', body, headers: signed.headers,
+            method: 'POST', body, rawBody: signed.raw, headers: signed.headers,
         });
         expect(unavailable.status).toBe(503);
         expect(unavailable.body.code).toBe('SUBSCRIPTION_LEDGER_UNAVAILABLE');
@@ -616,10 +835,10 @@ describe('security release boundaries', () => {
         };
         const signed = signWebhook(body);
         const first = await invokeApi(subscriptionsHandler, {
-            method: 'POST', body, headers: signed.headers,
+            method: 'POST', body, rawBody: signed.raw, headers: signed.headers,
         });
         const duplicate = await invokeApi(subscriptionsHandler, {
-            method: 'POST', body, headers: signed.headers,
+            method: 'POST', body, rawBody: signed.raw, headers: signed.headers,
         });
         const read = await invokeApi(subscriptionsHandler, {
             method: 'GET',
@@ -726,6 +945,120 @@ describe('security release boundaries', () => {
             expect(request.headers.get('Authorization')).toBe(`Bearer ${session.token}`);
         });
         expect(fetchMock.mock.calls[0][0]).toBe('https://fuelfire-app.vercel.app/api/installation-session');
+    });
+
+    it('coalesces combined paywall and FuelFire auth bootstrap into one stable RevenueCat session', async () => {
+        process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = 'security-release-session-secret';
+        const session = createInstallationSession();
+        let releaseBootstrap;
+        const purchases = {
+            configure: vi.fn().mockResolvedValue(undefined),
+            getCustomerInfo: vi.fn().mockResolvedValue({ customerInfo: { entitlements: { active: {} } } }),
+            addCustomerInfoUpdateListener: vi.fn(),
+        };
+        const fetchMock = vi.fn((url) => {
+            if (String(url) === 'https://fuelfire-app.vercel.app/api/installation-session') {
+                return new Promise((resolve) => {
+                    releaseBootstrap = () => resolve({
+                        ok: true,
+                        json: async () => ({
+                            success: true,
+                            installationSessionToken: session.token,
+                            rcAppUserId: session.rcAppUserId,
+                            expiresAt: session.expiresAt,
+                        }),
+                    });
+                });
+            }
+            if (String(url).endsWith('/api/claude-meal-plan')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => ({ success: true, content: 'meal plan' }),
+                });
+            }
+            return Promise.resolve({ ok: true, json: async () => ({ success: true }) });
+        });
+        const browser = loadCombinedAuthBrowser({
+            fetchMock,
+            purchases,
+            location: {
+                protocol: 'capacitor:',
+                origin: 'capacitor://localhost',
+                href: 'capacitor://localhost/index.html',
+            },
+        });
+        const pending = browser.window.fuelFireAuth.generateMealPlan(validQuizBody());
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(releaseBootstrap).toEqual(expect.any(Function));
+        expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/claude-meal-plan'))).toHaveLength(0);
+
+        releaseBootstrap();
+        await pending;
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const sessionCalls = fetchMock.mock.calls.filter(([url]) => String(url) === 'https://fuelfire-app.vercel.app/api/installation-session');
+        expect(sessionCalls).toHaveLength(1);
+        expect(JSON.parse(sessionCalls[0][1].body)).toEqual({});
+        expect(browser.window.__aiAccess.getServerRcAppUserId()).toBe(session.rcAppUserId);
+        expect(purchases.configure).toHaveBeenCalledWith(expect.objectContaining({ appUserID: session.rcAppUserId }));
+
+        const mealPlanCall = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/api/claude-meal-plan'));
+        expect(mealPlanCall).toBeTruthy();
+        expect(mealPlanCall[1].headers.get('X-FuelFire-Installation-Session')).toBe(session.token);
+        expect(mealPlanCall[1].headers.get('Authorization')).toBe(`Bearer ${session.token}`);
+    });
+
+    it('does not continue a combined-script AI request with an expired installation token', async () => {
+        process.env.FUELFIRE_INSTALLATION_SESSION_SECRET = 'security-release-session-secret';
+        const expired = createInstallationSession({ now: Date.now() - (8 * 24 * 60 * 60 * 1000) });
+        let releaseBootstrap;
+        const purchases = {
+            configure: vi.fn().mockResolvedValue(undefined),
+            getCustomerInfo: vi.fn(),
+            addCustomerInfoUpdateListener: vi.fn(),
+        };
+        const fetchMock = vi.fn((url) => {
+            if (String(url) === 'https://fuelfire-app.vercel.app/api/installation-session') {
+                return new Promise((resolve) => {
+                    releaseBootstrap = () => resolve({
+                        ok: false,
+                        status: 409,
+                        json: async () => ({ code: 'INSTALLATION_SESSION_RENEWAL_REQUIRED' }),
+                    });
+                });
+            }
+            return Promise.resolve({ ok: true, json: async () => ({ success: true }) });
+        });
+        const browser = loadCombinedAuthBrowser({
+            fetchMock,
+            purchases,
+            storage: {
+                fuelfire_installation_session: JSON.stringify({
+                    token: expired.token,
+                    rcAppUserId: expired.rcAppUserId,
+                    expiresAt: expired.expiresAt,
+                }),
+                fuelfire_server_rc_app_user_id: expired.rcAppUserId,
+                rc_app_user_id: expired.rcAppUserId,
+            },
+            location: {
+                protocol: 'capacitor:',
+                origin: 'capacitor://localhost',
+                href: 'capacitor://localhost/index.html',
+            },
+        });
+        const pending = browser.window.fuelFireAuth.generateMealPlan(validQuizBody());
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(releaseBootstrap).toEqual(expect.any(Function));
+        releaseBootstrap();
+
+        await expect(pending).rejects.toMatchObject({ code: 'INSTALLATION_SESSION_RENEWAL_REQUIRED' });
+        expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/claude-meal-plan'))).toHaveLength(0);
+        expect(fetchMock.mock.calls.filter(([url]) => String(url) === 'https://fuelfire-app.vercel.app/api/installation-session')).toHaveLength(1);
+        expect(browser.localStorage.getItem('fuelfire_server_rc_app_user_id')).toBe(expired.rcAppUserId);
+        expect(purchases.configure).not.toHaveBeenCalled();
     });
 
     it('clears cached RevenueCat entitlements after an authoritative empty success but preserves them on error', async () => {

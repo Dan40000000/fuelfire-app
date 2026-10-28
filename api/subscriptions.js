@@ -2,7 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { isInternalAuthorized, requireAdmin } from './_lib/security.js';
-import { requireBodyLimit, getRequestBody } from './_lib/request-security.js';
+import {
+    captureRequestRawBody,
+    requireBodyLimit,
+    getRequestBody,
+} from './_lib/request-security.js';
 import { getRedisConfig, redisCommand } from './_lib/redis-rest.js';
 import {
     normalizeAuthoritativeSubscriptionEvent,
@@ -10,7 +14,13 @@ import {
 } from './_lib/subscription-events.js';
 
 const MAX_EVENTS = 500;
+const MAX_SUBSCRIPTION_BODY_BYTES = 128 * 1024;
 const LEDGER_PREFIX = 'fuelfire:subscriptions:v1';
+
+// RevenueCat signatures cover the exact request bytes. Vercel's legacy Node
+// API body parser must stay disabled so the handler can capture those bytes
+// before any JSON parsing occurs.
+export const config = { api: { bodyParser: false } };
 
 const APPEND_EVENT_SCRIPT = `
 local event_id_key = KEYS[2]
@@ -133,6 +143,23 @@ function ledgerUnavailable(res) {
     });
 }
 
+function rawBodyUnavailable(res) {
+    return res.status(503).json({
+        success: false,
+        error: 'Subscription webhook raw body unavailable.',
+        code: 'SUBSCRIPTION_RAW_BODY_UNAVAILABLE',
+    });
+}
+
+function bodyTooLarge(res) {
+    return res.status(413).json({
+        success: false,
+        error: 'Request body is too large.',
+        code: 'REQUEST_BODY_TOO_LARGE',
+        maxBytes: MAX_SUBSCRIPTION_BODY_BYTES,
+    });
+}
+
 function administratorSummary(events) {
     const userMap = {};
     events.forEach((evt) => {
@@ -176,13 +203,14 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-        if (!requireBodyLimit(req, res, 128 * 1024)) return;
-        const body = getRequestBody(req);
-        if (!body) {
-            return res.status(400).json({ error: 'A JSON object body is required.', code: 'INVALID_JSON_BODY' });
+        if (!requireBodyLimit(req, res, MAX_SUBSCRIPTION_BODY_BYTES)) return;
+        const rawCapture = await captureRequestRawBody(req, { maxBytes: MAX_SUBSCRIPTION_BODY_BYTES });
+        if (!rawCapture.ok) {
+            if (rawCapture.reason === 'body_too_large') return bodyTooLarge(res);
+            return rawBodyUnavailable(res);
         }
 
-        const signature = verifyRevenueCatWebhookSignature(req);
+        const signature = verifyRevenueCatWebhookSignature(req, { rawBody: rawCapture.rawBody });
         const internal = isInternalAuthorized(req);
         if (!signature.valid && !internal) {
             return res.status(401).json({
@@ -190,6 +218,11 @@ export default async function handler(req, res) {
                 error: 'A verified subscription event is required.',
                 code: 'SUBSCRIPTION_EVENT_UNAUTHORIZED',
             });
+        }
+
+        const body = getRequestBody(req, rawCapture.rawBody);
+        if (!body) {
+            return res.status(400).json({ error: 'A JSON object body is required.', code: 'INVALID_JSON_BODY' });
         }
 
         const event = normalizeAuthoritativeSubscriptionEvent(body, {

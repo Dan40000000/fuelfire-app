@@ -44,7 +44,75 @@ export function requireBodyLimit(req, res, maxBytes = DEFAULT_BODY_LIMIT_BYTES) 
     return true;
 }
 
-export function getRequestBody(req) {
+function rawBodyToBuffer(value) {
+    if (Buffer.isBuffer(value)) return value;
+    if (typeof value === 'string') return Buffer.from(value, 'utf8');
+    if (value instanceof Uint8Array) return Buffer.from(value);
+    return null;
+}
+
+function rawBodyToText(value) {
+    const buffer = rawBodyToBuffer(value);
+    return buffer ? buffer.toString('utf8') : null;
+}
+
+export async function captureRequestRawBody(req, { maxBytes = DEFAULT_BODY_LIMIT_BYTES } = {}) {
+    const limit = Number.isFinite(Number(maxBytes)) ? Math.max(1, Number(maxBytes)) : DEFAULT_BODY_LIMIT_BYTES;
+    const suppliedRawBody = rawBodyToBuffer(req?.rawBody) || rawBodyToBuffer(req?.body);
+    if (suppliedRawBody) {
+        if (suppliedRawBody.length > limit) {
+            return { ok: false, reason: 'body_too_large', bytes: suppliedRawBody.length, maxBytes: limit };
+        }
+        return { ok: true, rawBody: suppliedRawBody.toString('utf8'), source: 'provided' };
+    }
+
+    if (typeof req?.text === 'function') {
+        try {
+            const rawBody = await req.text();
+            const buffer = rawBodyToBuffer(rawBody);
+            if (!buffer) return { ok: false, reason: 'raw_body_unavailable' };
+            if (buffer.length > limit) {
+                return { ok: false, reason: 'body_too_large', bytes: buffer.length, maxBytes: limit };
+            }
+            return { ok: true, rawBody: buffer.toString('utf8'), source: 'request_text' };
+        } catch {
+            return { ok: false, reason: 'raw_body_unavailable' };
+        }
+    }
+
+    if (!req || typeof req[Symbol.asyncIterator] !== 'function') {
+        return { ok: false, reason: 'raw_body_unavailable' };
+    }
+
+    const chunks = [];
+    let bytes = 0;
+    try {
+        for await (const chunk of req) {
+            const buffer = rawBodyToBuffer(chunk);
+            if (!buffer) return { ok: false, reason: 'raw_body_unavailable' };
+            bytes += buffer.length;
+            if (bytes > limit) {
+                return { ok: false, reason: 'body_too_large', bytes, maxBytes: limit };
+            }
+            chunks.push(buffer);
+        }
+    } catch {
+        return { ok: false, reason: 'raw_body_unavailable' };
+    }
+
+    return { ok: true, rawBody: Buffer.concat(chunks).toString('utf8'), source: 'request_stream' };
+}
+
+export function getRequestBody(req, rawBody) {
+    if (rawBody !== undefined) {
+        try {
+            const parsed = JSON.parse(String(rawBody));
+            return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+        } catch {
+            return null;
+        }
+    }
+
     const body = req?.body;
     return body && typeof body === 'object' && !Array.isArray(body) ? body : null;
 }
@@ -73,14 +141,9 @@ export function getClientIp(req) {
     return candidate.length <= 128 ? candidate : 'unknown';
 }
 
-export function getRequestRawBody(req) {
-    if (Buffer.isBuffer(req?.rawBody)) return req.rawBody.toString('utf8');
-    if (typeof req?.rawBody === 'string') return req.rawBody;
-    try {
-        return JSON.stringify(req?.body ?? {});
-    } catch {
-        return '';
-    }
+export function getRequestRawBody(req, rawBodyOverride) {
+    if (rawBodyOverride !== undefined) return rawBodyToText(rawBodyOverride);
+    return rawBodyToText(req?.rawBody) ?? rawBodyToText(req?.body);
 }
 
 export function isValidString(value, { min = 1, max = 1000 } = {}) {

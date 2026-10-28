@@ -21,7 +21,6 @@
     const RC_MIGRATION_COMPLETE_KEY = 'fuelfire_rc_migration_complete';
     const PRODUCTION_API_ORIGIN = 'https://fuelfire-app.vercel.app';
     const AI_API_PATHS = new Set([
-        '/api/installation-session',
         '/api/accuracy-lab-session',
         '/api/ai-food-parser',
         '/api/ai-food-vision',
@@ -108,8 +107,19 @@
         return localStorage.getItem(LEGACY_RC_APP_USER_ID_KEY) || '';
     }
 
-    async function ensureSession({ explicitMigration = false } = {}) {
+    function hasUsableInstallationSession(session) {
+        if (!session) return false;
+        if (!session.expiresAt) return true;
+        const expiresAt = Number(session.expiresAt);
+        return Number.isFinite(expiresAt) && expiresAt > Date.now();
+    }
+
+    async function ensureSession({ explicitMigration = false, reuseCurrent = false } = {}) {
         if (installationSessionPromise) return installationSessionPromise;
+        if (reuseCurrent && !explicitMigration) {
+            const currentSession = readInstallationSession();
+            if (hasUsableInstallationSession(currentSession)) return currentSession;
+        }
         installationSessionPromise = (async () => {
             const previousSession = readInstallationSession();
             const legacyId = rememberLegacyRevenueCatId({
@@ -125,11 +135,8 @@
                 body: JSON.stringify(body),
             };
             try {
-                const requestFetch = nativeFetch || window.fetch?.bind(window);
-                if (!requestFetch) return null;
-                const sessionUrl = resolveAiApiRequest('/api/installation-session');
-                if (!sessionUrl) return null;
-                const response = await requestFetch(sessionUrl, request);
+                if (!nativeFetch) return null;
+                const response = await nativeFetch(resolveInstallationSessionUrl(), request);
                 if (!response.ok) return null;
                 const data = await response.json();
                 if (!data?.success
@@ -426,6 +433,13 @@
         }
     }
 
+    function resolveInstallationSessionUrl() {
+        if (/^https?:$/i.test(window.location.protocol)) {
+            return new URL('/api/installation-session', window.location.origin).href;
+        }
+        return `${PRODUCTION_API_ORIGIN}/api/installation-session`;
+    }
+
     function installAiFetchCredentials() {
         if (!nativeFetch || window.__fuelfireAiFetchCredentialsInstalled) return;
         window.__fuelfireAiFetchCredentialsInstalled = true;
@@ -433,7 +447,7 @@
             const resolvedUrl = resolveAiApiRequest(input);
             if (!resolvedUrl) return nativeFetch(input, init);
 
-            const session = await ensureSession();
+            const session = await ensureSession({ reuseCurrent: true });
             const headers = new Headers(init.headers || input?.headers || {});
             Object.entries(getAiRequestHeaders(session)).forEach(([name, value]) => headers.set(name, value));
             const requestInput = typeof input === 'string' ? resolvedUrl : new Request(resolvedUrl, input);
