@@ -14,15 +14,30 @@ import {
     shouldPreferHintLookupBeforeVision,
     shouldUseVisionNutritionWithoutParser,
 } from '../api/ai-food-vision.js';
-import { getTestAuthHeaders, invokeApi, loadEnvFile } from './lib/api-test-utils.js';
+import { ensureTestAuthEnv, getTestAuthHeaders, invokeApi } from './lib/api-test-utils.js';
 
-loadEnvFile('.env.local');
+// This is an offline contract suite, not a live-provider or production-quota
+// probe. Never load developer credentials and use only the token-gated test
+// quota store. Production handlers still fail closed without durable storage.
+process.env.NODE_ENV = 'test';
+delete process.env.VERCEL_ENV;
+delete process.env.FUELFIRE_REDIS_URL;
+delete process.env.FUELFIRE_REDIS_TOKEN;
+delete process.env.UPSTASH_REDIS_REST_URL;
+delete process.env.UPSTASH_REDIS_REST_TOKEN;
+ensureTestAuthEnv();
 delete process.env.CLAUDE_API_KEY;
 delete process.env.ANTHROPIC_API_KEY;
 delete process.env.FOOD_AI_API_KEY;
 delete process.env.HF_TOKEN;
 delete process.env.HUGGING_FACE_HUB_TOKEN;
 delete process.env.FOOD_AI_BASE_URL;
+
+// Even inherited shell credentials must never turn this free suite into an
+// external request. All handler calls below run in-process with local fixtures.
+globalThis.fetch = async () => {
+    throw new Error('External network requests are disabled in the offline food regression suite.');
+};
 
 const outputDir = process.env.AI_FOOD_REGRESSION_OUTPUT_DIR || 'output/test-results';
 fs.mkdirSync(outputDir, { recursive: true });
@@ -665,6 +680,8 @@ async function runVoiceCase(testCase) {
         name: testCase.name,
         query: testCase.query,
         pass,
+        responseStatus: response.status,
+        responseCode: response.body?.code || null,
         expected: testCase.expected,
         actual: totals,
         checks,
