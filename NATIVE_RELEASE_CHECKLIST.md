@@ -6,7 +6,8 @@ upload, payment, or production mutation.
 
 ## Automated checks
 
-Run from the repository root with Node 22 or newer:
+Run from the repository root with Node 22.12 or newer. Android validation also
+requires JDK 21; CI provisions Temurin 21 in the native-validation workflow.
 
 ```sh
 npm ci

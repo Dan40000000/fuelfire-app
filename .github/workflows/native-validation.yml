@@ -36,6 +36,12 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Set up JDK 21 for Android validation
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
       - name: Install JavaScript dependencies
         run: npm ci
 
