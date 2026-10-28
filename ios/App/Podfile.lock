@@ -1,11 +1,11 @@
 PODS:
-  - Capacitor (7.6.5):
+  - Capacitor (7.6.10):
     - CapacitorCordova
   - CapacitorCamera (7.0.5):
     - Capacitor
   - CapacitorCommunitySpeechRecognition (7.0.1):
     - Capacitor
-  - CapacitorCordova (7.6.5)
+  - CapacitorCordova (7.6.10)
   - CapacitorMlkitBarcodeScanning (7.5.0):
     - Capacitor
     - GoogleMLKit/BarcodeScanning (= 7.0.0)
@@ -106,10 +106,10 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
 SPEC CHECKSUMS:
-  Capacitor: fa6393e8023cd0f4740c9a22bc73720c049fffa2
+  Capacitor: 6f16b88ca74aa4989d59b02844658455bdab9af2
   CapacitorCamera: fdbf24f93bc44ca13c4209866368a1972349d3d2
   CapacitorCommunitySpeechRecognition: b133f6f6ba84316639fc2fd1760a6d7ab99fb23b
-  CapacitorCordova: 2b36392a7292c3c451dcae154185ee8804d7b6b3
+  CapacitorCordova: 33313bf8891d44741970e16534be781ff3caa00a
   CapacitorMlkitBarcodeScanning: ef67c921ac0d3943157a20c72744ab3d5b8a92fb
   CapgoCapacitorHealth: e2f3d6a9e786c5aca34d7a70865e4f8292389df0
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7

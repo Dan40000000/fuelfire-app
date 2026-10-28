@@ -30,6 +30,7 @@
 		D3B166D01FF6BDDA9E211D69 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		DAF5C676389D64F10A44D655 /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5357E9BEC6ECFD1C3B28B77A /* Pods_App.framework */; };
 		E434DFE730C735ADC4D00263 /* AppLaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FAA966F86AC9EE43853D0E1 /* AppLaunchUITests.swift */; };
+		F0D000000000000000000005 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F0D000000000000000000006 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,8 +38,8 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 7B6224645387D4489819A194;
-			remoteInfo = AppUITestHost;
+			remoteGlobalIDString = 504EC3031FED79650016851F;
+			remoteInfo = App;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -52,6 +53,7 @@
 		A14F10000000000000000002 /* CapacitorHealthTotalsPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapacitorHealthTotalsPlugin.swift; sourceTree = "<group>"; };
 		F0D000000000000000000003 /* FoodDepthCapturePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodDepthCapturePlugin.swift; sourceTree = "<group>"; };
 		F0D000000000000000000004 /* FoodDepthCaptureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodDepthCaptureViewController.swift; sourceTree = "<group>"; };
+		F0D000000000000000000006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				A14F10000000000000000002 /* CapacitorHealthTotalsPlugin.swift */,
 				F0D000000000000000000003 /* FoodDepthCapturePlugin.swift */,
 				F0D000000000000000000004 /* FoodDepthCaptureViewController.swift */,
+				F0D000000000000000000006 /* PrivacyInfo.xcprivacy */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -279,6 +282,7 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
+				F0D000000000000000000005 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,8 +415,8 @@
 /* Begin PBXTargetDependency section */
 		27D1AAF9027214E8FAD89CCF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = AppUITestHost;
-			target = 7B6224645387D4489819A194 /* AppUITestHost */;
+			name = App;
+			target = 504EC3031FED79650016851F /* App */;
 			targetProxy = 9ABFC9277565A5AFB41670C9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -450,7 +454,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = AppUITestHost;
+				TEST_TARGET_NAME = App;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -637,7 +641,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = AppUITestHost;
+				TEST_TARGET_NAME = App;
 			};
 			name = Debug;
 		};

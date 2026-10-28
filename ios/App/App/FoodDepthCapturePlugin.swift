@@ -112,6 +112,10 @@ public class FoodDepthCapturePlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
+        // Claim the call before requesting permission. A permission prompt is
+        // asynchronous, so without this guard two callers could both present
+        // a capture controller when the prompt completes.
+        pendingCall = call
         let capabilities = FoodDepthCaptureCapabilities.current()
         guard capabilities.captureSupported else {
             rejectUnsupported(
@@ -129,9 +133,11 @@ public class FoodDepthCapturePlugin: CAPPlugin, CAPBridgedPlugin {
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 self?.performOnMain {
+                    guard let self, self.pendingCall === call else { return }
+
                     guard granted else {
                         let currentCapabilities = FoodDepthCaptureCapabilities.current()
-                        self?.rejectUnsupported(
+                        self.rejectUnsupported(
                             call,
                             capabilities: currentCapabilities,
                             code: "CAMERA_PERMISSION_DENIED",
@@ -139,7 +145,18 @@ public class FoodDepthCapturePlugin: CAPPlugin, CAPBridgedPlugin {
                         )
                         return
                     }
-                    self?.presentCapture(call, capabilities: capabilities)
+
+                    let currentCapabilities = FoodDepthCaptureCapabilities.current()
+                    guard currentCapabilities.captureSupported else {
+                        self.rejectUnsupported(
+                            call,
+                            capabilities: currentCapabilities,
+                            code: "UNSUPPORTED",
+                            reason: self.unsupportedReason(for: currentCapabilities)
+                        )
+                        return
+                    }
+                    self.presentCapture(call, capabilities: currentCapabilities)
                 }
             }
         case .denied, .restricted:
@@ -163,8 +180,24 @@ public class FoodDepthCapturePlugin: CAPPlugin, CAPBridgedPlugin {
         _ call: CAPPluginCall,
         capabilities: FoodDepthCaptureCapabilities
     ) {
+        guard pendingCall === call else { return }
+
         guard let presentingViewController = bridge?.viewController else {
-            call.reject("Unable to present the food depth capture view.", "PRESENTATION_FAILED")
+            rejectPresentationFailure(
+                call,
+                message: "Unable to present the food depth capture view."
+            )
+            return
+        }
+
+        guard presentingViewController.presentedViewController == nil,
+              !presentingViewController.isBeingDismissed,
+              !presentingViewController.isBeingPresented,
+              presentingViewController.transitionCoordinator == nil else {
+            rejectPresentationFailure(
+                call,
+                message: "The app is already presenting another screen. Try food depth capture again."
+            )
             return
         }
 
@@ -179,7 +212,40 @@ public class FoodDepthCapturePlugin: CAPPlugin, CAPBridgedPlugin {
         pendingCall = call
         captureViewController = viewController
         viewController.modalPresentationStyle = .fullScreen
-        presentingViewController.present(viewController, animated: true)
+        presentingViewController.present(viewController, animated: true) { [weak self, weak viewController, weak presentingViewController] in
+            guard let self, let viewController, let presentingViewController else { return }
+            guard self.pendingCall === call,
+                  self.captureViewController === viewController else {
+                return
+            }
+
+            guard viewController.presentingViewController === presentingViewController else {
+                self.rejectPresentationFailure(
+                    call,
+                    message: "The food depth capture screen could not be presented. Try again."
+                )
+                return
+            }
+        }
+
+        // UIKit normally invokes the presentation completion block, but a
+        // presentation rejected during a transition can leave it unresolved.
+        // Re-check after the animation window so that the bridge call cannot
+        // remain pending and a subsequent retry is possible.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self, weak viewController, weak presentingViewController] in
+            guard let self, let viewController, let presentingViewController,
+                  self.pendingCall === call,
+                  self.captureViewController === viewController else {
+                return
+            }
+            guard viewController.presentingViewController === presentingViewController else {
+                self.rejectPresentationFailure(
+                    call,
+                    message: "The food depth capture screen could not be presented. Try again."
+                )
+                return
+            }
+        }
     }
 
     private func finishCapture(_ outcome: FoodDepthCaptureOutcome) {
@@ -214,12 +280,33 @@ public class FoodDepthCapturePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    private func rejectPresentationFailure(_ call: CAPPluginCall, message: String) {
+        guard pendingCall === call else { return }
+
+        pendingCall = nil
+        captureViewController = nil
+        let data: [String: Any] = [
+            "supported": true,
+            "cancelled": false,
+            "capabilities": FoodDepthCaptureCapabilities.current().dictionary,
+            "error": [
+                "code": "PRESENTATION_FAILED",
+                "message": message
+            ]
+        ]
+        call.reject(message, "PRESENTATION_FAILED", nil, data)
+    }
+
     private func rejectUnsupported(
         _ call: CAPPluginCall,
         capabilities: FoodDepthCaptureCapabilities,
         code: String,
         reason: String
     ) {
+        guard pendingCall === call else { return }
+
+        pendingCall = nil
+        captureViewController = nil
         let data: [String: Any] = [
             "supported": false,
             "cancelled": false,

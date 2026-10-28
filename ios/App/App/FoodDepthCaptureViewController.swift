@@ -69,7 +69,9 @@ final class FoodDepthCaptureViewController: UIViewController, ARSessionDelegate 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         guard !isFinishing,
-              isBeingDismissed || navigationController?.isBeingDismissed == true else {
+              (isBeingDismissed
+                || navigationController?.isBeingDismissed == true
+                || presentingViewController == nil) else {
             return
         }
         isFinishing = true

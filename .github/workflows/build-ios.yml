@@ -2,6 +2,12 @@ name: Build iOS App
 
 on:
   workflow_dispatch:
+    inputs:
+      signed_archive:
+        description: 'Run the protected signed archive/export check'
+        required: true
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -9,57 +15,149 @@ on:
       - 'ios/**'
       - 'src/**'
       - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
       - 'capacitor.config.json'
+      - 'scripts/verify-ios-archive.sh'
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  unsigned-build:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.signed_archive != true }}
     runs-on: macos-latest
-    
+    timeout-minutes: 30
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Sync Capacitor
-      run: npx cap sync ios
-    
-    - name: Install CocoaPods dependencies
-      run: |
-        cd ios/App
-        pod install
-    
-    - name: Build iOS App
-      run: |
-        cd ios/App
-        xcodebuild -workspace App.xcworkspace \
-          -scheme App \
-          -configuration Release \
-          -sdk iphoneos \
-          -derivedDataPath build \
-          -archivePath build/App.xcarchive \
-          archive \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO
-    
-    - name: Create IPA (unsigned)
-      run: |
-        cd ios/App
-        mkdir -p build/Payload
-        cp -r build/App.xcarchive/Products/Applications/App.app build/Payload/
-        cd build
-        zip -r App-unsigned.ipa Payload
-    
-    - name: Upload IPA
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-ios-unsigned
-        path: ios/App/build/App-unsigned.ipa
-        retention-days: 7
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Guard newly tracked release files and secrets
+        run: bash scripts/check-release-files.sh
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Install CocoaPods dependencies
+        run: pod install --project-directory=ios/App
+
+      - name: Build unsigned iOS archive
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath ios/App/build \
+            -archivePath ios/App/build/App.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Verify unsigned archive metadata and privacy manifests
+        run: bash scripts/verify-ios-archive.sh ios/App/build/App.xcarchive
+
+      - name: Create IPA (unsigned)
+        run: |
+          mkdir -p ios/App/build/Payload
+          cp -R ios/App/build/App.xcarchive/Products/Applications/App.app ios/App/build/Payload/
+          (cd ios/App/build && zip -qr App-unsigned.ipa Payload)
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-ios-unsigned
+          path: ios/App/build/App-unsigned.ipa
+          retention-days: 7
+
+  signed-archive-check:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.signed_archive == true }}
+    runs-on: macos-latest
+    environment: ios-release
+    timeout-minutes: 35
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Guard newly tracked release files and secrets
+        run: bash scripts/check-release-files.sh
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync Capacitor and CocoaPods
+        run: |
+          npx cap sync ios
+          pod install --project-directory=ios/App
+
+      - name: Install protected signing assets
+        env:
+          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          IOS_SIGNING_CERTIFICATE_P12_B64: ${{ secrets.IOS_SIGNING_CERTIFICATE_P12_B64 }}
+          IOS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.IOS_SIGNING_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_B64: ${{ secrets.IOS_PROVISIONING_PROFILE_B64 }}
+        run: bash scripts/install-ios-signing-assets.sh
+
+      - name: Build signed archive
+        env:
+          IOS_CODE_SIGN_IDENTITY: ${{ secrets.IOS_CODE_SIGN_IDENTITY }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          : "${IOS_TEAM_ID:?IOS_TEAM_ID is required}"
+          code_sign_identity="${IOS_CODE_SIGN_IDENTITY:-Apple Distribution}"
+          xcodebuild -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath ios/App/build-signed \
+            -archivePath ios/App/build-signed/App.xcarchive \
+            archive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="${IOS_TEAM_ID}" \
+            CODE_SIGN_IDENTITY="${code_sign_identity}" \
+            PROVISIONING_PROFILE_SPECIFIER="${IOS_PROVISIONING_PROFILE_NAME}"
+
+      - name: Render protected export options
+        env:
+          IOS_PROVISIONING_PROFILE_NAME: ${{ env.IOS_PROVISIONING_PROFILE_NAME }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: bash scripts/render-ios-export-options.sh "${RUNNER_TEMP}/fuelfire-export-options.plist"
+
+      - name: Export signed app for manual review
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath ios/App/build-signed/App.xcarchive \
+            -exportPath "${RUNNER_TEMP}/fuelfire-export" \
+            -exportOptionsPlist "${RUNNER_TEMP}/fuelfire-export-options.plist"
+
+      - name: Verify signed archive and entitlements
+        run: bash scripts/verify-ios-archive.sh --require-signed ios/App/build-signed/App.xcarchive
+
+      - name: Remove ephemeral signing assets
+        if: ${{ always() }}
+        run: |
+          if [[ -n "${IOS_SIGNING_KEYCHAIN:-}" ]]; then
+            security delete-keychain "${IOS_SIGNING_KEYCHAIN}" >/dev/null 2>&1 || true
+          fi
+          if [[ -n "${IOS_PROVISIONING_PROFILE_UUID:-}" ]]; then
+            rm -f "${HOME}/Library/MobileDevice/Provisioning Profiles/${IOS_PROVISIONING_PROFILE_UUID}.mobileprovision"
+          fi
