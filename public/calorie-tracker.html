@@ -2715,6 +2715,10 @@
                 input.dataset.editClearBound = 'true';
 
                 input.addEventListener('focus', () => {
+                    if (input.getAttribute('aria-invalid') === 'true') {
+                        input.select();
+                        return;
+                    }
                     input.dataset.previousValue = input.value;
                     input.value = '';
                 });
