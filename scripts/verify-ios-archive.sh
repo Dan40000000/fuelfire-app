@@ -32,9 +32,12 @@ script_root="$(cd "$(dirname "$0")/.." && pwd)"
 app_path="${archive_path}/Products/Applications/App.app"
 info_plist="${app_path}/Info.plist"
 pod_lock="${script_root}/ios/App/Podfile.lock"
+capacitor_info="${app_path}/Frameworks/Capacitor.framework/Info.plist"
 
 [[ -d "${app_path}" ]] || { echo "Archive does not contain App.app" >&2; exit 1; }
 [[ -f "${info_plist}" ]] || { echo "Archive App.app is missing Info.plist" >&2; exit 1; }
+[[ -f "${capacitor_info}" ]] || { echo "Archive is missing the embedded Capacitor framework metadata" >&2; exit 1; }
+embedded_capacitor_version="$(plutil -extract CFBundleShortVersionString raw -o - "${capacitor_info}")"
 
 plutil -lint "${info_plist}" >/dev/null
 bundle_id="$(plutil -extract CFBundleIdentifier raw -o - "${info_plist}" 2>/dev/null || true)"
@@ -55,10 +58,10 @@ for key in "${required_keys[@]}"; do
     || { echo "Archive Info.plist is missing required usage metadata: ${key}" >&2; exit 1; }
 done
 
-node - "${script_root}/package-lock.json" "${pod_lock}" <<'NODE'
+node - "${script_root}/package-lock.json" "${pod_lock}" "${embedded_capacitor_version}" <<'NODE'
 const fs = require('node:fs');
 
-const [lockPath, podLockPath] = process.argv.slice(2);
+const [lockPath, podLockPath, embeddedVersion] = process.argv.slice(2);
 const minimum = [7, 6, 9];
 const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
 const packages = lock.packages || {};
@@ -83,6 +86,13 @@ for (const name of names) {
     console.error(`Capacitor dependency below the patched minimum: ${name}`);
     process.exit(1);
   }
+}
+
+// Source locks alone cannot establish which runtime was actually archived.
+// Verify the framework carried by this candidate and reject stale artifacts.
+if (!atLeast(embeddedVersion) || embeddedVersion !== packages['node_modules/@capacitor/ios'].version) {
+  console.error('Embedded Capacitor runtime is affected or does not match the locked candidate.');
+  process.exit(1);
 }
 
 const podLock = fs.readFileSync(podLockPath, 'utf8');

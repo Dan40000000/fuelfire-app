@@ -73,6 +73,9 @@ describe('native release configuration', () => {
         const archiveVerifier = read('scripts/verify-ios-archive.sh');
         expect(archiveVerifier).toContain('PrivacyInfo.xcprivacy');
         expect(archiveVerifier).toContain('--require-signed');
+        expect(archiveVerifier).toContain('Frameworks/Capacitor.framework/Info.plist');
+        expect(archiveVerifier).toContain('!atLeast(embeddedVersion)');
+        expect(archiveVerifier).toContain("embeddedVersion !== packages['node_modules/@capacitor/ios'].version");
         expect(read('ios/App/App/PrivacyInfo.xcprivacy')).toContain('NSPrivacyAccessedAPITypes');
     });
 
