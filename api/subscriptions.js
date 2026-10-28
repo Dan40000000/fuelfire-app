@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { isInternalAuthorized, requireAdmin } from './_lib/security.js';
 import {
     captureRequestRawBody,
-    requireBodyLimit,
+    requireContentLengthLimit,
     getRequestBody,
 } from './_lib/request-security.js';
 import { getRedisConfig, redisCommand } from './_lib/redis-rest.js';
@@ -16,11 +16,6 @@ import {
 const MAX_EVENTS = 500;
 const MAX_SUBSCRIPTION_BODY_BYTES = 128 * 1024;
 const LEDGER_PREFIX = 'fuelfire:subscriptions:v1';
-
-// RevenueCat signatures cover the exact request bytes. Vercel's legacy Node
-// API body parser must stay disabled so the handler can capture those bytes
-// before any JSON parsing occurs.
-export const config = { api: { bodyParser: false } };
 
 const APPEND_EVENT_SCRIPT = `
 local event_id_key = KEYS[2]
@@ -203,7 +198,9 @@ export default async function handler(req, res) {
     }
 
     if (method === 'POST') {
-        if (!requireBodyLimit(req, res, MAX_SUBSCRIPTION_BODY_BYTES)) return;
+        // Capture the stream before touching req.body. Vercel's Node helper
+        // exposes req.body through a lazy getter that can consume the stream.
+        if (!requireContentLengthLimit(req, res, MAX_SUBSCRIPTION_BODY_BYTES)) return;
         const rawCapture = await captureRequestRawBody(req, { maxBytes: MAX_SUBSCRIPTION_BODY_BYTES });
         if (!rawCapture.ok) {
             if (rawCapture.reason === 'body_too_large') return bodyTooLarge(res);

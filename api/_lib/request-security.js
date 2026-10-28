@@ -30,9 +30,24 @@ export function getRequestBodyBytes(req) {
 
 export function requireBodyLimit(req, res, maxBytes = DEFAULT_BODY_LIMIT_BYTES) {
     const limit = Number.isFinite(Number(maxBytes)) ? Math.max(1, Number(maxBytes)) : DEFAULT_BODY_LIMIT_BYTES;
-    const contentLength = Number(headerValue(req, 'content-length'));
+    if (!requireContentLengthLimit(req, res, limit)) return false;
     const bodyBytes = getRequestBodyBytes(req);
-    if ((Number.isFinite(contentLength) && contentLength > limit) || bodyBytes > limit) {
+    if (bodyBytes > limit) {
+        res.status(413).json({
+            success: false,
+            error: 'Request body is too large.',
+            code: 'REQUEST_BODY_TOO_LARGE',
+            maxBytes: limit,
+        });
+        return false;
+    }
+    return true;
+}
+
+export function requireContentLengthLimit(req, res, maxBytes = DEFAULT_BODY_LIMIT_BYTES) {
+    const limit = Number.isFinite(Number(maxBytes)) ? Math.max(1, Number(maxBytes)) : DEFAULT_BODY_LIMIT_BYTES;
+    const contentLength = Number(headerValue(req, 'content-length'));
+    if (Number.isFinite(contentLength) && contentLength > limit) {
         res.status(413).json({
             success: false,
             error: 'Request body is too large.',
@@ -56,14 +71,48 @@ function rawBodyToText(value) {
     return buffer ? buffer.toString('utf8') : null;
 }
 
+function getProvidedRawBody(req) {
+    let current = req;
+    while (current) {
+        const descriptor = Object.getOwnPropertyDescriptor(current, 'rawBody');
+        if (descriptor) {
+            return Object.prototype.hasOwnProperty.call(descriptor, 'value')
+                ? rawBodyToBuffer(descriptor.value)
+                : null;
+        }
+        current = Object.getPrototypeOf(current);
+    }
+    return null;
+}
+
 export async function captureRequestRawBody(req, { maxBytes = DEFAULT_BODY_LIMIT_BYTES } = {}) {
     const limit = Number.isFinite(Number(maxBytes)) ? Math.max(1, Number(maxBytes)) : DEFAULT_BODY_LIMIT_BYTES;
-    const suppliedRawBody = rawBodyToBuffer(req?.rawBody) || rawBodyToBuffer(req?.body);
-    if (suppliedRawBody) {
+    const suppliedRawBody = getProvidedRawBody(req);
+    if (suppliedRawBody !== null) {
         if (suppliedRawBody.length > limit) {
             return { ok: false, reason: 'body_too_large', bytes: suppliedRawBody.length, maxBytes: limit };
         }
         return { ok: true, rawBody: suppliedRawBody.toString('utf8'), source: 'provided' };
+    }
+
+    if (req && typeof req[Symbol.asyncIterator] === 'function') {
+        const chunks = [];
+        let bytes = 0;
+        try {
+            for await (const chunk of req) {
+                const buffer = rawBodyToBuffer(chunk);
+                if (!buffer) return { ok: false, reason: 'raw_body_unavailable' };
+                bytes += buffer.length;
+                if (bytes > limit) {
+                    return { ok: false, reason: 'body_too_large', bytes, maxBytes: limit };
+                }
+                chunks.push(buffer);
+            }
+        } catch {
+            return { ok: false, reason: 'raw_body_unavailable' };
+        }
+
+        return { ok: true, rawBody: Buffer.concat(chunks).toString('utf8'), source: 'request_stream' };
     }
 
     if (typeof req?.text === 'function') {
@@ -80,27 +129,7 @@ export async function captureRequestRawBody(req, { maxBytes = DEFAULT_BODY_LIMIT
         }
     }
 
-    if (!req || typeof req[Symbol.asyncIterator] !== 'function') {
-        return { ok: false, reason: 'raw_body_unavailable' };
-    }
-
-    const chunks = [];
-    let bytes = 0;
-    try {
-        for await (const chunk of req) {
-            const buffer = rawBodyToBuffer(chunk);
-            if (!buffer) return { ok: false, reason: 'raw_body_unavailable' };
-            bytes += buffer.length;
-            if (bytes > limit) {
-                return { ok: false, reason: 'body_too_large', bytes, maxBytes: limit };
-            }
-            chunks.push(buffer);
-        }
-    } catch {
-        return { ok: false, reason: 'raw_body_unavailable' };
-    }
-
-    return { ok: true, rawBody: Buffer.concat(chunks).toString('utf8'), source: 'request_stream' };
+    return { ok: false, reason: 'raw_body_unavailable' };
 }
 
 export function getRequestBody(req, rawBody) {
@@ -143,7 +172,7 @@ export function getClientIp(req) {
 
 export function getRequestRawBody(req, rawBodyOverride) {
     if (rawBodyOverride !== undefined) return rawBodyToText(rawBodyOverride);
-    return rawBodyToText(req?.rawBody) ?? rawBodyToText(req?.body);
+    return rawBodyToText(getProvidedRawBody(req));
 }
 
 export function isValidString(value, { min = 1, max = 1000 } = {}) {

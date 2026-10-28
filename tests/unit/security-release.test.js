@@ -714,13 +714,25 @@ describe('security release boundaries', () => {
         const rawBody = JSON.stringify(body, null, 2)
             .replace(`"event_timestamp_ms": ${body.event.event_timestamp_ms}`, `"event_timestamp_ms": ${body.event.event_timestamp_ms}.00`);
         const signed = signWebhookRaw(rawBody);
-        const response = await invokeRawHttp(subscriptionsHandler, {
+        let bodyTouched = false;
+        const response = await invokeRawHttp(async (req, res) => {
+            Object.defineProperty(req, 'body', {
+                configurable: true,
+                get() {
+                    bodyTouched = true;
+                    req.resume();
+                    throw new Error('lazy Vercel body helper must not be accessed');
+                },
+            });
+            return subscriptionsHandler(req, res);
+        }, {
             rawBody,
             headers: signed.headers,
         });
         const stored = JSON.parse(fs.readFileSync(process.env.FUELFIRE_SUBSCRIPTION_LEDGER_PATH, 'utf8'));
 
         expect(rawBody).not.toBe(JSON.stringify(body));
+        expect(bodyTouched).toBe(false);
         expect(response.status).toBe(200);
         expect(response.body).toMatchObject({ success: true, duplicate: false });
         expect(stored).toHaveLength(1);
@@ -728,7 +740,8 @@ describe('security release boundaries', () => {
     });
 
     it('fails closed when a signed webhook has no exact raw body available', async () => {
-        process.env.NODE_ENV = 'test';
+        process.env.NODE_ENV = 'production';
+        process.env.VERCEL_ENV = 'production';
         process.env.FUELFIRE_SUBSCRIPTION_EVENT_SECRET = 'security-release-event-secret';
         const body = {
             api_version: '1.0',
