@@ -34,6 +34,41 @@ test('bridges both legacy keys once without rewriting their raw payloads', async
     expect(result.recovery).toBeNull();
 });
 
+test('does not resurrect a deleted legacy meal after reload', async ({ page }) => {
+    await page.goto('/calorie-tracker.html');
+    const first = await page.evaluate(() => {
+        localStorage.clear();
+        localStorage.setItem('fuelfire_calorie_log', JSON.stringify([{ name: 'Delete after import', calories: 100, date: '2026-10-28' }]));
+        localStorage.setItem('dailyFoodLog', JSON.stringify([{ name: 'Keep after import', calories: 200, date: '2026-10-28' }]));
+        const logs = FuelFireFoodStore.readLogs(localStorage);
+        return {
+            names: Object.values(logs).flatMap(day => day.meals).map(meal => meal.name),
+            marker: JSON.parse(localStorage.getItem(FuelFireFoodStore.legacyImportedIdsKey)),
+        };
+    });
+    expect(first.names).toHaveLength(2);
+    expect(first.marker).toHaveLength(2);
+
+    await page.evaluate(() => {
+        const canonical = JSON.parse(localStorage.getItem(FuelFireFoodStore.storageKey));
+        const day = canonical['2026-10-28'];
+        day.meals = day.meals.filter(meal => meal.name !== 'Delete after import');
+        day.totalCalories = day.meals.reduce((total, meal) => total + meal.calories, 0);
+        if (!FuelFireFoodStore.writeLogs(canonical, localStorage).ok) throw new Error('canonical delete did not persist');
+    });
+
+    const afterDelete = await page.evaluate(() => Object.values(FuelFireFoodStore.readLogs(localStorage)).flatMap(day => day.meals).map(meal => meal.name));
+    expect(afterDelete).toEqual(['Keep after import']);
+
+    await page.reload();
+    const afterReload = await page.evaluate(() => ({
+        names: Object.values(FuelFireFoodStore.readLogs(localStorage)).flatMap(day => day.meals).map(meal => meal.name),
+        marker: JSON.parse(localStorage.getItem(FuelFireFoodStore.legacyImportedIdsKey)),
+    }));
+    expect(afterReload.names).toEqual(['Keep after import']);
+    expect(afterReload.marker).toHaveLength(2);
+});
+
 test('renders literal meal text inertly and writes the clicked meal to canonical storage', async ({ page }) => {
     await page.addInitScript(() => {
         window.__alerts = [];

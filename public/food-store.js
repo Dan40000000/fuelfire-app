@@ -4,6 +4,7 @@
     const STORAGE_KEY = 'fuelfire_logged_meals';
     const RECOVERY_BACKUP_KEY = `${STORAGE_KEY}_recovery_backup`;
     const LEGACY_STORAGE_KEYS = ['fuelfire_calorie_log', 'dailyFoodLog'];
+    const LEGACY_IMPORTED_IDS_KEY = 'fuelfire_food_legacy_imported_ids';
 
     function getStorage(storage) {
         if (storage && typeof storage.getItem === 'function' && typeof storage.setItem === 'function') {
@@ -181,44 +182,136 @@
         };
     }
 
+    function migrationError(message, cause) {
+        const detail = cause instanceof Error && cause.message ? `: ${cause.message}` : '';
+        const error = new Error(`${message}${detail}`);
+        error.code = 'FOOD_LEGACY_MIGRATION_FAILED';
+        error.recoverable = true;
+        error.readOnly = true;
+        if (cause) error.cause = cause;
+        return error;
+    }
+
+    function readLegacyImportedIds(storage) {
+        let raw;
+        try {
+            raw = storage.getItem(LEGACY_IMPORTED_IDS_KEY);
+        } catch (error) {
+            return { ok: false, error: migrationError('Unable to read the food legacy migration ledger', error) };
+        }
+        if (raw === null) return { ok: true, raw: null, ids: [] };
+
+        let parsed;
+        try {
+            parsed = JSON.parse(raw);
+        } catch (error) {
+            return { ok: false, error: migrationError('The food legacy migration ledger is malformed; legacy data was kept', error) };
+        }
+        if (!Array.isArray(parsed) || parsed.some(id => typeof id !== 'string' || id.length === 0) || new Set(parsed).size !== parsed.length) {
+            return { ok: false, error: migrationError('The food legacy migration ledger is invalid; legacy data was kept') };
+        }
+        return { ok: true, raw, ids: parsed };
+    }
+
+    function restoreMigrationState(storage, canonicalRaw, importedIdsRaw) {
+        const expectedCanonical = canonicalRaw === undefined ? null : canonicalRaw;
+        const expectedImportedIds = importedIdsRaw === undefined ? null : importedIdsRaw;
+        try {
+            if (typeof storage.removeItem !== 'function') throw new Error('Storage cannot remove partial migration writes.');
+            // Clear both changed keys first so persistent quota cannot prevent
+            // restoring the exact pre-migration bytes.
+            storage.removeItem(STORAGE_KEY);
+            storage.removeItem(LEGACY_IMPORTED_IDS_KEY);
+            if (storage.getItem(STORAGE_KEY) !== null || storage.getItem(LEGACY_IMPORTED_IDS_KEY) !== null) {
+                throw new Error('Storage did not clear partial migration writes.');
+            }
+            if (expectedCanonical !== null) storage.setItem(STORAGE_KEY, expectedCanonical);
+            if (expectedImportedIds !== null) storage.setItem(LEGACY_IMPORTED_IDS_KEY, expectedImportedIds);
+            if (storage.getItem(STORAGE_KEY) !== expectedCanonical || storage.getItem(LEGACY_IMPORTED_IDS_KEY) !== expectedImportedIds) {
+                throw new Error('Storage did not restore the exact pre-migration bytes.');
+            }
+            return { ok: true };
+        } catch (error) {
+            return { ok: false, error };
+        }
+    }
+
     function bridgeLegacyLogs(logs, storage) {
         const target = getStorage(storage);
-        if (!target) return { ok: false, logs, error: new Error('Food log storage is unavailable.') };
+        if (!target) return { ok: false, logs, error: migrationError('Food log storage is unavailable.') };
+
+        const imported = readLegacyImportedIds(target);
+        if (!imported.ok) return { ok: false, logs, error: imported.error };
+
+        let canonicalBefore;
+        try {
+            canonicalBefore = target.getItem(STORAGE_KEY);
+        } catch (error) {
+            return { ok: false, logs, error: migrationError('Unable to read canonical food logs; legacy data was kept', error) };
+        }
 
         const merged = { ...logs };
+        const importedIds = new Set(imported.ids);
+        const idsToMark = [];
         let changed = false;
-        LEGACY_STORAGE_KEYS.forEach((sourceKey) => {
+        for (const sourceKey of LEGACY_STORAGE_KEYS) {
+            let raw;
             let parsed;
             try {
-                const raw = target.getItem(sourceKey);
-                if (!raw) return;
+                raw = target.getItem(sourceKey);
+                if (raw === null || raw === '') continue;
                 parsed = JSON.parse(raw);
             } catch (error) {
-                return;
+                return { ok: false, logs, error: migrationError(`Unable to read legacy food logs from ${sourceKey}; raw data was kept`, error) };
             }
 
             extractLegacyMeals(parsed).forEach((meal, position) => {
                 const normalized = normalizeLegacyMeal(meal, sourceKey, position);
                 if (!normalized) return;
+                if (importedIds.has(normalized.id)) return;
 
                 const dayKey = mealDateKey(meal);
                 const day = merged[dayKey] && typeof merged[dayKey] === 'object'
                     ? { ...merged[dayKey], meals: Array.isArray(merged[dayKey].meals) ? [...merged[dayKey].meals] : [] }
                     : { meals: [] };
-                if (day.meals.some(existing => existing && existing.id === normalized.id)) return;
+                if (day.meals.some(existing => existing && existing.id === normalized.id)) {
+                    idsToMark.push(normalized.id);
+                    return;
+                }
 
                 day.meals.push(normalized);
                 day.totalCalories = day.meals.reduce((total, item) => total + asFiniteNonNegative(item.calories), 0);
                 merged[dayKey] = day;
                 changed = true;
+                idsToMark.push(normalized.id);
             });
-        });
+        }
 
-        if (!changed) return { ok: true, logs: merged };
-        const result = writeLogs(merged, target);
-        return result.ok
-            ? { ok: true, logs: result.logs }
-            : { ok: false, logs: merged, error: result.error };
+        if (!changed && !idsToMark.length) return { ok: true, logs: merged };
+
+        const result = changed ? writeLogs(merged, target) : { ok: true, logs: merged };
+        if (!result.ok) {
+            return {
+                ok: false,
+                logs: merged,
+                error: migrationError('Food legacy canonical migration could not be persisted; original data was kept', result.error),
+            };
+        }
+
+        const nextImportedIds = [...imported.ids, ...idsToMark];
+        const serializedImportedIds = JSON.stringify(nextImportedIds);
+        try {
+            target.setItem(LEGACY_IMPORTED_IDS_KEY, serializedImportedIds);
+            if (target.getItem(LEGACY_IMPORTED_IDS_KEY) !== serializedImportedIds) {
+                throw new Error('Food legacy migration ledger did not persist.');
+            }
+            return { ok: true, logs: result.logs };
+        } catch (error) {
+            const rollback = restoreMigrationState(target, canonicalBefore, imported.raw);
+            const failure = migrationError('Food legacy migration was rolled back; original data was kept', error);
+            if (!rollback.ok) failure.rollbackError = rollback.error;
+            return { ok: false, logs: result.logs, error: failure };
+        }
     }
 
     function preserveOriginal(storage, raw, reason) {
@@ -434,5 +527,6 @@
         storageKey: STORAGE_KEY,
         recoveryBackupKey: RECOVERY_BACKUP_KEY,
         legacyStorageKeys: [...LEGACY_STORAGE_KEYS],
+        legacyImportedIdsKey: LEGACY_IMPORTED_IDS_KEY,
     };
 })(typeof window !== 'undefined' ? window : globalThis);

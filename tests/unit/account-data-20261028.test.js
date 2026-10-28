@@ -116,6 +116,7 @@ describe('FuelFire account data contract', () => {
         expect(accountData.MAX_BACKUP_BYTES).toBeGreaterThanOrEqual(5 * 1024 * 1024);
         expect(accountData.OWNED_KEYS).toContain('fuelfire_workout_draft');
         expect(accountData.OWNED_KEYS).toContain('fuelfire_logged_meals_recovery_backup');
+        expect(accountData.OWNED_KEYS).toContain('fuelfire_food_legacy_imported_ids');
         expect(accountData.OWNED_KEYS).toContain('workoutHistory.legacy');
         expect(accountData.OWNED_KEYS).toContain('fuelfire_workout_recovery_backups');
         expect(accountData.OWNED_KEYS).toContain('healthData');
@@ -304,6 +305,7 @@ describe('FuelFire account data contract', () => {
             'workoutTemplates',
             'fuelfire_workout_drafts',
             'fuelfire_food_drafts',
+            'fuelfire_food_legacy_imported_ids',
         ]);
         const numericKeys = new Set(['fuelfire_hydration_goal_oz', 'stepGoal']);
         const markerKeys = new Set(['fuelfire_onboarding_v1']);
@@ -332,6 +334,8 @@ describe('FuelFire account data contract', () => {
                 source.setItem(key, json([{ key: 'workoutHistory.legacy.abc123', raw: '{corrupt}' }]));
             } else if (numericKeys.has(key)) {
                 source.setItem(key, key === 'stepGoal' ? '12000' : '96.5');
+            } else if (key === 'fuelfire_food_legacy_imported_ids') {
+                source.setItem(key, json(['food-legacy-mature-account']));
             } else if (markerKeys.has(key)) {
                 source.setItem(key, 'done');
             } else if (legacyTextKeys.has(key)) {

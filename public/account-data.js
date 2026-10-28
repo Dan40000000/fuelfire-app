@@ -17,6 +17,7 @@
         'workoutHistory.legacy',
         'fuelfire_logged_meals',
         'fuelfire_logged_meals_recovery_backup',
+        'fuelfire_food_legacy_imported_ids',
         'fuelfire_workout_recovery_backups',
         'fuelfire_meal_plans',
         'fuelfire_saved_meal_plans',
@@ -131,6 +132,7 @@
         fuelfire_food_draft: 'record',
         fuelfire_food_entry_draft: 'record',
         fuelfire_food_drafts: 'array',
+        fuelfire_food_legacy_imported_ids: 'array',
     });
     const LEGACY_TEXT_KEYS = new Set([
         'userName',
@@ -223,6 +225,12 @@
         });
     }
 
+    function assertFoodLegacyImportedIds(value) {
+        if (!Array.isArray(value) || value.some(id => typeof id !== 'string' || id.length === 0) || new Set(value).size !== value.length) {
+            throw new AccountDataError('INVALID_BACKUP', 'fuelfire_food_legacy_imported_ids must be a unique array of non-empty strings.', { key: 'fuelfire_food_legacy_imported_ids' });
+        }
+    }
+
     function assertKnownStoreTypes(data) {
         Object.entries(data).forEach(([key, value]) => {
             if (key === 'workoutHistory.legacy') {
@@ -233,6 +241,10 @@
             }
             if (key === 'fuelfire_workout_recovery_backups') {
                 assertWorkoutRecoveryBackups(value);
+                return;
+            }
+            if (key === 'fuelfire_food_legacy_imported_ids') {
+                assertFoodLegacyImportedIds(value);
                 return;
             }
             if (NUMERIC_STORAGE_KEYS.has(key)) {
