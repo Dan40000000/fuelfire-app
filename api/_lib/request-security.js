@@ -95,6 +95,39 @@ export async function captureRequestRawBody(req, { maxBytes = DEFAULT_BODY_LIMIT
         return { ok: true, rawBody: suppliedRawBody.toString('utf8'), source: 'provided' };
     }
 
+    if (req && typeof req.on === 'function') {
+        // Vercel restores a consumed IncomingMessage by forwarding data/end
+        // listeners and read() to a PassThrough. Its original async iterator
+        // can still see the consumed/destroyed state and incorrectly yield an
+        // empty body. Read the restored event stream instead.
+        if (req.readableEnded && !Object.prototype.hasOwnProperty.call(req, 'read')) {
+            return { ok: false, reason: 'raw_body_unavailable' };
+        }
+        return new Promise(resolve => {
+            const chunks = [];
+            let bytes = 0;
+            let settled = false;
+            const finish = result => {
+                if (settled) return;
+                settled = true;
+                resolve(result);
+            };
+            req.on('error', () => finish({ ok: false, reason: 'raw_body_unavailable' }));
+            req.on('aborted', () => finish({ ok: false, reason: 'raw_body_unavailable' }));
+            req.on('data', chunk => {
+                if (settled) return;
+                const buffer = rawBodyToBuffer(chunk);
+                if (!buffer) return finish({ ok: false, reason: 'raw_body_unavailable' });
+                bytes += buffer.length;
+                if (bytes > limit) return finish({ ok: false, reason: 'body_too_large', bytes, maxBytes: limit });
+                chunks.push(buffer);
+            });
+            req.on('end', () => finish({
+                ok: true, rawBody: Buffer.concat(chunks).toString('utf8'), source: 'request_stream',
+            }));
+        });
+    }
+
     if (req && typeof req[Symbol.asyncIterator] === 'function') {
         const chunks = [];
         let bytes = 0;
