@@ -40,6 +40,16 @@ bash scripts/check-release-files.sh --base e0603264bd42dc89f5d16217cbab6047fc56a
 
 The accuracy command scores stored fixture predictions, not live food recognition. The offline regression suite blocks external network requests. A live accuracy run requires explicit consent flags, a case cap, and a cost budget.
 
+Recorded local results on October 28, 2026:
+
+- 295 unit and contract tests passed across 25 files.
+- 135 desktop/mobile Chromium browser tests passed, with one expected desktop-only skip and no retries.
+- All 44 offline food regressions and all 13 stored accuracy fixtures passed.
+- All 70 shipped JavaScript and inline scripts passed the build gate; the dependency audit reported zero vulnerabilities, and the release-file guard passed.
+- The combined iOS simulator target compiled after native sync; its embedded Capacitor framework reports 7.6.10. Archive metadata tests reject missing, affected, and mismatched runtimes, but those synthetic tests are not signed-archive acceptance.
+
+The final browser run includes free offline food entry, decimal and zero values, preserved failed forms, inert external text, legacy migration and deletion, saved-workout recovery, bodyweight/timed sets, canonical counters, account backup/restore, deletion scope, and an open-manual-dialog serious/critical accessibility scan. Webhook tests also reproduce Vercel's restored request stream while keeping the other API helpers enabled.
+
 An updated iOS simulator app compiled successfully on this Mac. Native UI execution is blocked because Xcode does not offer the available FuelFire simulator as a test destination. Bundled Playwright WebKit exits with `Segmentation fault: 11` before creating a page. Android compilation needs a local JDK; none is installed here, and CI now provisions JDK 21. These are unpassed gates, not successful native tests.
 
 ## Signed candidate and physical iPhone acceptance
