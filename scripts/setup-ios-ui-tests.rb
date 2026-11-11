@@ -12,43 +12,13 @@ deployment_target = app_target.build_configurations
                               .compact
                               .first || '16.0'
 
-host_target = project.targets.find { |target| target.name == 'AppUITestHost' }
-host_target ||= project.new_target(:application, 'AppUITestHost', :ios, deployment_target)
-
-app_target.source_build_phase.files_references.each do |file|
-  next if host_target.source_build_phase.files_references.include?(file)
-
-  host_target.source_build_phase.add_file_reference(file)
-end
-
-app_target.resources_build_phase.files_references.each do |file|
-  next if host_target.resources_build_phase.files_references.include?(file)
-
-  host_target.resources_build_phase.add_file_reference(file)
-end
-
-
-host_target.build_configurations.each do |configuration|
-  settings = configuration.build_settings
-  settings['CODE_SIGN_STYLE'] = 'Automatic'
-  settings['CURRENT_PROJECT_VERSION'] = '1'
-  settings['DEVELOPMENT_TEAM'] = '978QLBBDP9'
-  settings['INFOPLIST_FILE'] = 'App/Info.plist'
-  settings['IPHONEOS_DEPLOYMENT_TARGET'] = deployment_target
-  settings['MARKETING_VERSION'] = '1.0'
-  settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.wellfit.app.uitesthost'
-  settings['PRODUCT_NAME'] = 'Well Fit UI Test Host'
-  settings['SWIFT_VERSION'] = '5.0'
-  settings['TARGETED_DEVICE_FAMILY'] = '1,2'
-end
-
 ui_target = project.targets.find { |target| target.name == 'AppUITests' }
 unless ui_target
   ui_target = project.new_target(:ui_test_bundle, 'AppUITests', :ios, deployment_target)
 end
 
 ui_target.dependencies.each(&:remove_from_project)
-ui_target.add_dependency(host_target)
+ui_target.add_dependency(app_target)
 
 tests_group = project.main_group.find_subpath('AppUITests', true)
 tests_group.set_source_tree('<group>')
@@ -68,15 +38,15 @@ ui_target.build_configurations.each do |configuration|
   settings['PRODUCT_NAME'] = '$(TARGET_NAME)'
   settings['SWIFT_VERSION'] = '5.0'
   settings['TARGETED_DEVICE_FAMILY'] = '1,2'
-  settings['TEST_TARGET_NAME'] = 'AppUITestHost'
+  settings['TEST_TARGET_NAME'] = app_target.name
 end
 
 project.save
 
 scheme = Xcodeproj::XCScheme.new
-scheme.add_build_target(host_target)
+scheme.add_build_target(app_target)
 scheme.add_test_target(ui_target)
-scheme.set_launch_target(host_target)
+scheme.set_launch_target(app_target)
 scheme.save_as(project_path, 'AppUITests', true)
 
 puts 'AppUITests target and shared scheme are configured.'

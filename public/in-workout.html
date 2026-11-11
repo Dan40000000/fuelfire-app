@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="global-nav.js"></script>
     <script src="health-sync.js"></script>
+    <script src="workout-store.js"></script>
     <style>
         .workout-header {
             background: var(--gradient-1);
@@ -302,6 +303,42 @@
             color: #666;
             margin-top: 5px;
         }
+
+        .skip-link {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            z-index: 1000;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #13294B;
+            color: #fff;
+            transform: translateY(-150%);
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        a:focus-visible {
+            outline: 3px solid #13294B;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -311,20 +348,21 @@
             <div class="status-bar"></div>
 
             <div class="header">
-                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                <button type="button" class="hamburger" aria-label="Open navigation menu" aria-controls="sidebar" aria-expanded="false" onclick="toggleSidebar()">☰</button>
                 <div class="header-title">💪 Active Workout</div>
             </div>
 
-            <div class="content">
+            <a class="skip-link" href="#main-content">Skip to main content</a>
+            <main class="content" id="main-content" tabindex="0" aria-label="Active workout content">
                 <!-- Workout Header -->
                 <div class="workout-header">
-                    <div class="workout-title" id="workout-title">Loading...</div>
+                <h1 class="workout-title" id="workout-title">Loading...</h1>
                     <div class="workout-meta" id="workout-meta"></div>
-                    <div class="timer-display" id="timer">00:00</div>
-                    <div class="progress-bar">
+                    <div class="timer-display" id="timer" role="timer" aria-live="off" aria-label="Workout elapsed time">00:00</div>
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Workout exercise progress">
                         <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
                     </div>
-                    <div class="progress-text" id="progress-text">0 of 0 exercises completed</div>
+                    <div class="progress-text" id="progress-text" role="status" aria-live="polite">0 of 0 exercises completed</div>
                 </div>
 
                 <!-- Exercise Trackers -->
@@ -332,7 +370,7 @@
 
                 <!-- Finish Workout Section -->
                 <div class="finish-workout-section" id="finish-section" style="display: none;">
-                    <h3 style="margin-top: 0; color: var(--dark);">Complete Your Workout</h3>
+                    <h2 style="margin-top: 0; color: var(--dark);">Complete Your Workout</h2>
 
                     <!-- Auto-Calculated Calories Display -->
                     <div style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(69, 160, 73, 0.1)); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px solid rgba(76, 175, 80, 0.3);">
@@ -354,11 +392,11 @@
                         Cancel Workout
                     </button>
                 </div>
-            </div>
+            </main>
 
             <!-- Bottom Navigation -->
             <div class="bottom-nav">
-                <div class="nav-item" onclick="window.location.href='index.html'">
+                <button type="button" class="nav-item" aria-label="Home" onclick="window.location.href='index.html'">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -366,8 +404,8 @@
                         </svg>
                     </div>
                     <div class="nav-label">Home</div>
-                </div>
-                <div class="nav-item" onclick="showLogFoodMenu()">
+                </button>
+                <button type="button" class="nav-item" aria-label="Log Food" onclick="showLogFoodMenu()">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -376,8 +414,8 @@
                     </div>
                     <div class="nav-label">Log Food</div>
                     <div class="nav-glow"></div>
-                </div>
-                <div class="nav-item active" onclick="window.location.href='workout-quiz.html'">
+                </button>
+                <button type="button" class="nav-item active" aria-label="Workout" onclick="window.location.href='workout-quiz.html'">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="1" y="8" width="5" height="8" rx="1.5" fill="currentColor"/>
@@ -388,15 +426,15 @@
                         </svg>
                     </div>
                     <div class="nav-label">Workout</div>
-                </div>
-                <div class="nav-item" onclick="window.location.href='health-dashboard.html'">
+                </button>
+                <button type="button" class="nav-item" aria-label="Health Dashboard" onclick="window.location.href='health-dashboard.html'">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" fill="none"/>
                         </svg>
                     </div>
                     <div class="nav-label">Health</div>
-                </div>
+                </button>
             </div>
         </div>
     </div>
@@ -493,16 +531,85 @@
         let timerInterval = null;
         let healthSyncEnabled = false;
         let exerciseStates = [];
+        let completionInFlight = false;
+
+        function getWorkoutStore() {
+            return window.FuelFireWorkouts || null;
+        }
+
+        function readWorkoutDraft() {
+            const store = getWorkoutStore();
+            if (store && typeof store.readDraft === 'function') {
+                return store.readDraft(localStorage);
+            }
+            // Standalone fallback for this page while the shared store script is unavailable.
+            try {
+                return JSON.parse(localStorage.getItem('fuelfire_workout_draft') || 'null');
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function saveWorkoutDraft(draft) {
+            const store = getWorkoutStore();
+            try {
+                if (store && typeof store.saveDraft === 'function') {
+                    return store.saveDraft(draft, localStorage);
+                }
+                // Standalone fallback for this page while the shared store script is unavailable.
+                localStorage.setItem('fuelfire_workout_draft', JSON.stringify({ ...draft, version: 1, updatedAt: new Date().toISOString() }));
+                return draft;
+            } catch (error) {
+                const status = document.getElementById('progress-text');
+                if (status) status.textContent = 'Draft could not be saved. Your workout is still open; try again.';
+                console.error('Workout draft persistence failed:', error);
+                return null;
+            }
+        }
+
+        function clearWorkoutDraft() {
+            const store = getWorkoutStore();
+            if (store && typeof store.clearDraft === 'function') {
+                store.clearDraft(localStorage);
+            } else {
+                localStorage.removeItem('fuelfire_workout_draft');
+            }
+        }
+
+        function parseOptionalNumber(value) {
+            if (value === null || value === undefined || value === '') return null;
+            const parsed = Number.parseFloat(value);
+            return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+        }
+
+        function isTimedExercise(exercise) {
+            const unit = String(exercise?.unit || '').toLowerCase();
+            const target = String(exercise?.reps || '').toLowerCase();
+            return unit === 'seconds' || unit === 'time' || /(?:sec|second|min|minute)/.test(target);
+        }
+
+        function isBodyweightExercise(exercise) {
+            const suggested = String(exercise?.suggestedWeight || '').toLowerCase();
+            const unit = String(exercise?.unit || '').toLowerCase();
+            return unit === 'bodyweight' || /bodyweight|\bbw\b/.test(suggested);
+        }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.querySelector('.overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
+            const isOpen = sidebar.classList.toggle('open');
+            overlay.classList.toggle('show', isOpen);
+            const toggle = document.querySelector('.hamburger');
+            if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+            if (isOpen) {
+                const firstMenuItem = sidebar.querySelector('.menu-item');
+                if (firstMenuItem) firstMenuItem.focus();
+            } else if (toggle) {
+                toggle.focus();
+            }
         }
 
         function initWorkout() {
-            // Get workout data from localStorage
             const storedWorkout = localStorage.getItem('currentWorkout');
             if (!storedWorkout) {
                 alert('No workout found. Please create a workout first.');
@@ -510,20 +617,56 @@
                 return;
             }
 
-            workoutData = JSON.parse(storedWorkout);
+            try {
+                workoutData = JSON.parse(storedWorkout);
+            } catch (error) {
+                alert('This workout could not be restored. Please create it again.');
+                window.location.href = 'workout-quiz.html';
+                return;
+            }
+
+            if (!workoutData || !Array.isArray(workoutData.exercises) || workoutData.exercises.length === 0) {
+                alert('This workout has no exercises. Please create it again.');
+                window.location.href = 'workout-quiz.html';
+                return;
+            }
+
+            const draft = readWorkoutDraft();
+            const sessionId = workoutData.sessionId || draft?.sessionId || `quick-${Date.now()}`;
+            const restoredStart = workoutData.startedAt || draft?.startedAt;
+            const parsedStart = restoredStart ? Date.parse(restoredStart) : NaN;
+            startTime = Number.isFinite(parsedStart) ? parsedStart : Date.now();
+            workoutData.sessionId = sessionId;
+            workoutData.startedAt = new Date(startTime).toISOString();
+            workoutData.workoutName = workoutData.workoutName || 'Quick Workout';
+            localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
 
             // Set title and meta
-            document.getElementById('workout-title').textContent = 'Your Workout';
-            document.getElementById('workout-meta').textContent = workoutData.summary;
+            document.getElementById('workout-title').textContent = workoutData.workoutName;
+            document.getElementById('workout-meta').textContent = workoutData.summary || `${workoutData.exercises.length} exercises`;
 
             // Initialize exercise states
-            exerciseStates = workoutData.exercises.map(() => ({ completed: false, sets: [] }));
+            exerciseStates = workoutData.exercises.map((exercise, index) => ({
+                ...(draft?.exercises?.[index] || {}),
+                name: exercise.name,
+                completed: Boolean(draft?.exercises?.[index]?.completed),
+                sets: Array.isArray(draft?.exercises?.[index]?.sets) ? draft.exercises[index].sets : [],
+                notes: draft?.exercises?.[index]?.notes || ''
+            }));
 
             // Render exercises
             renderExercises();
+            restoreDraftFields();
+            attachDraftListeners();
+            saveWorkoutDraft({
+                sessionId,
+                startedAt: workoutData.startedAt,
+                workoutName: workoutData.workoutName,
+                summary: workoutData.summary,
+                exercises: collectExerciseEntries()
+            });
 
             // Start timer
-            startTime = Date.now();
             startTimer();
 
             // Update progress
@@ -584,14 +727,17 @@
                 const safeRest = escapeAttribute(exercise.rest || '');
                 const needsLocationHint = Boolean(originalLocation && exercise.baseLocation && exercise.baseLocation !== originalLocation);
                 const locationLabel = needsLocationHint ? escapeAttribute(formatLocationLabel(exercise.baseLocation)) : '';
+                const timed = isTimedExercise(exercise);
+                const bodyweight = isBodyweightExercise(exercise);
+                const weightStep = bodyweight ? '0.1' : '0.1';
 
                 html += `
                     <div class="exercise-tracker" id="exercise-${index}">
                         <div class="exercise-header">
-                            <div class="exercise-name">${safeName}</div>
-                            <div class="exercise-number">${index + 1}</div>
+                            <h2 class="exercise-name" style="margin: 0;">${safeName}</h2>
+                            <div class="exercise-number" aria-hidden="true">${index + 1}</div>
                         </div>
-                        <div class="exercise-target">
+                        <div class="exercise-target" id="exercise-target-${index}">
                             Target: ${safeSets} • ${safeReps} • ${safeRest} rest
                             ${exercise.focus ? `<br><strong style="font-size: 12px; color: var(--primary-dark);">Focus:</strong> <span style="font-size: 12px; color: var(--primary-dark);">${escapeAttribute(exercise.focus)}</span>` : ''}
                             ${needsLocationHint ? `<br><strong style="font-size: 12px; color: #888;">Setup:</strong> <span style="font-size: 12px; color: #888;">${locationLabel}</span>` : ''}
@@ -612,26 +758,34 @@
                 // Generate input fields for each set
                 for (let i = 0; i < numSets; i++) {
                     html += `
-                        <div class="set-label">Set ${i + 1}</div>
+                        <div class="set-label" id="set-label-${index}-${i}">Set ${i + 1}</div>
                         <div class="set-row">
+                            ${timed ? `
+                                <div class="input-group">
+                                    <label class="input-label" for="duration-${index}-${i}">Duration (seconds), ${safeName}, set ${i + 1}</label>
+                                    <input type="number" class="set-input" id="duration-${index}-${i}" min="0" step="1" inputmode="numeric" aria-describedby="set-label-${index}-${i}" placeholder="0">
+                                </div>
+                            ` : `
+                                <div class="input-group">
+                                    <label class="input-label" for="weight-${index}-${i}">Weight, ${safeName}, set ${i + 1}</label>
+                                    <input type="number" class="set-input" id="weight-${index}-${i}" min="0" step="${weightStep}" inputmode="decimal" aria-describedby="set-label-${index}-${i}" placeholder="${bodyweight ? '0' : '0'}">
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label" for="reps-${index}-${i}">Reps, ${safeName}, set ${i + 1}</label>
+                                    <input type="number" class="set-input" id="reps-${index}-${i}" min="0" step="1" inputmode="numeric" aria-describedby="set-label-${index}-${i}" placeholder="0">
+                                </div>
+                                <div class="input-group">
+                                    <label class="input-label" for="unit-${index}-${i}">Unit, ${safeName}, set ${i + 1}</label>
+                                    <select class="set-input" id="unit-${index}-${i}" aria-describedby="set-label-${index}-${i}">
+                                        <option value="lb">lb</option>
+                                        <option value="kg">kg</option>
+                                        <option value="bodyweight">Bodyweight</option>
+                                    </select>
+                                </div>
+                            `}
                             <div class="input-group">
-                                <label class="input-label">Weight</label>
-                                <input type="number"
-                                       class="set-input"
-                                       id="weight-${index}-${i}"
-                                       placeholder="0"
-                                       min="0"
-                                       step="5"
-                                       oninput="updateProgress()">
-                            </div>
-                            <div class="input-group">
-                                <label class="input-label">Reps</label>
-                                <input type="number"
-                                       class="set-input"
-                                       id="reps-${index}-${i}"
-                                       placeholder="0"
-                                       min="0"
-                                       oninput="updateProgress()">
+                                <label class="input-label" for="completed-${index}-${i}">Completed, ${safeName}, set ${i + 1}</label>
+                                <input type="checkbox" class="set-input" id="completed-${index}-${i}" aria-describedby="set-label-${index}-${i}">
                             </div>
                         </div>
                     `;
@@ -640,9 +794,10 @@
                 // Add notes field for the exercise
                 html += `
                         <div style="margin-top: 15px;">
-                            <label class="input-label" style="display: block; margin-bottom: 8px;">📝 Notes (optional)</label>
+                            <label class="input-label" for="notes-${index}" style="display: block; margin-bottom: 8px;">📝 Notes for ${safeName} (optional)</label>
                             <textarea
                                 id="notes-${index}"
+                                aria-describedby="exercise-target-${index}"
                                 placeholder="How did it feel? Any adjustments?"
                                 style="width: 100%; min-height: 60px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: inherit; resize: vertical;"
                             ></textarea>
@@ -658,20 +813,94 @@
             document.getElementById('finish-section').style.display = 'block';
         }
 
+        function collectExerciseEntries() {
+            return workoutData.exercises.map((exercise, exerciseIndex) => {
+                const numSets = parseInt(exercise.sets, 10) || 3;
+                const timed = isTimedExercise(exercise);
+                const sets = [];
+
+                for (let setIndex = 0; setIndex < numSets; setIndex += 1) {
+                    const durationSeconds = timed ? parseOptionalNumber(document.getElementById(`duration-${exerciseIndex}-${setIndex}`)?.value) : null;
+                    const weight = timed ? null : parseOptionalNumber(document.getElementById(`weight-${exerciseIndex}-${setIndex}`)?.value);
+                    const reps = timed ? null : parseOptionalNumber(document.getElementById(`reps-${exerciseIndex}-${setIndex}`)?.value);
+                    const unit = timed ? 'seconds' : (document.getElementById(`unit-${exerciseIndex}-${setIndex}`)?.value || (isBodyweightExercise(exercise) ? 'bodyweight' : 'lb'));
+                    const completed = Boolean(document.getElementById(`completed-${exerciseIndex}-${setIndex}`)?.checked);
+
+                    sets.push({
+                        index: setIndex + 1,
+                        weight,
+                        reps,
+                        durationSeconds,
+                        unit,
+                        completed
+                    });
+                }
+
+                return {
+                    id: exercise.id,
+                    name: exercise.name,
+                    notes: document.getElementById(`notes-${exerciseIndex}`)?.value || '',
+                    completed: sets.some(set => set.completed),
+                    sets
+                };
+            });
+        }
+
+        function restoreDraftFields() {
+            exerciseStates.forEach((state, exerciseIndex) => {
+                (state.sets || []).forEach(set => {
+                    const setIndex = Math.max(0, Number(set.index || 1) - 1);
+                    const durationInput = document.getElementById(`duration-${exerciseIndex}-${setIndex}`);
+                    const weightInput = document.getElementById(`weight-${exerciseIndex}-${setIndex}`);
+                    const repsInput = document.getElementById(`reps-${exerciseIndex}-${setIndex}`);
+                    const unitInput = document.getElementById(`unit-${exerciseIndex}-${setIndex}`);
+                    const completedInput = document.getElementById(`completed-${exerciseIndex}-${setIndex}`);
+
+                    if (durationInput && set.durationSeconds !== null && set.durationSeconds !== undefined) durationInput.value = set.durationSeconds;
+                    if (weightInput && set.weight !== null && set.weight !== undefined) weightInput.value = set.weight;
+                    if (repsInput && set.reps !== null && set.reps !== undefined) repsInput.value = set.reps;
+                    if (unitInput && set.unit) unitInput.value = set.unit;
+                    if (completedInput) completedInput.checked = Boolean(set.completed);
+                });
+                const notesInput = document.getElementById(`notes-${exerciseIndex}`);
+                if (notesInput) notesInput.value = state.notes || '';
+            });
+        }
+
+        function attachDraftListeners() {
+            const container = document.getElementById('exercise-list');
+            if (!container || container.dataset.draftListenersAttached === 'true') return;
+            const save = () => {
+                saveWorkoutDraft({
+                    sessionId: workoutData.sessionId,
+                    startedAt: workoutData.startedAt,
+                    workoutName: workoutData.workoutName,
+                    summary: workoutData.summary,
+                    exercises: collectExerciseEntries()
+                });
+                updateProgress();
+            };
+            container.addEventListener('input', save);
+            container.addEventListener('change', save);
+            container.dataset.draftListenersAttached = 'true';
+        }
+
         function updateProgress() {
-            // Progress based on number of exercises with at least one set logged
             let completed = 0;
             const total = workoutData.exercises.length;
 
             workoutData.exercises.forEach((exercise, index) => {
                 const numSets = parseInt(exercise.sets) || 3;
                 let hasData = false;
+                const timed = isTimedExercise(exercise);
 
                 for (let i = 0; i < numSets; i++) {
-                    const weight = document.getElementById(`weight-${index}-${i}`)?.value;
-                    const reps = document.getElementById(`reps-${index}-${i}`)?.value;
+                    const weight = parseOptionalNumber(document.getElementById(`weight-${index}-${i}`)?.value);
+                    const reps = parseOptionalNumber(document.getElementById(`reps-${index}-${i}`)?.value);
+                    const durationSeconds = parseOptionalNumber(document.getElementById(`duration-${index}-${i}`)?.value);
+                    const checked = document.getElementById(`completed-${index}-${i}`)?.checked;
 
-                    if (weight && reps && parseInt(weight) > 0 && parseInt(reps) > 0) {
+                    if (checked || (timed ? durationSeconds !== null : (reps !== null || weight !== null))) {
                         hasData = true;
                         break;
                     }
@@ -682,6 +911,7 @@
 
             const percentage = total > 0 ? (completed / total) * 100 : 0;
             document.getElementById('progress-fill').style.width = percentage + '%';
+            document.querySelector('.progress-bar').setAttribute('aria-valuenow', String(Math.round(percentage)));
             document.getElementById('progress-text').textContent = `${completed} of ${total} exercises logged`;
 
             // Update calorie estimate
@@ -689,12 +919,19 @@
         }
 
         function calculateWorkoutCalories() {
-            // Get user's weight from profile
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            const userWeight = userProfile.weight || 170; // Default to 170 lbs if not set
+            // Use the canonical profile (weight is stored in pounds). Unknown profile data
+            // stays unknown so the UI never presents a fabricated calorie estimate.
+            let userProfile = {};
+            try {
+                userProfile = JSON.parse(localStorage.getItem('fuelfire_user_profile') || localStorage.getItem('userProfile') || '{}');
+            } catch (error) {
+                userProfile = {};
+            }
+            const userWeight = parseOptionalNumber(userProfile.weight);
+            if (userWeight === null) return null;
 
             // Calculate workout duration in minutes
-            const duration = Math.floor((Date.now() - startTime) / 1000 / 60);
+            const duration = Math.max(0, Math.floor((Date.now() - startTime) / 1000 / 60));
 
             // Calculate total volume (weight × reps for all sets)
             let totalVolume = 0;
@@ -704,11 +941,17 @@
                 const numSets = parseInt(exercise.sets) || 3;
 
                 for (let i = 0; i < numSets; i++) {
-                    const weight = parseInt(document.getElementById(`weight-${exerciseIndex}-${i}`)?.value) || 0;
-                    const reps = parseInt(document.getElementById(`reps-${exerciseIndex}-${i}`)?.value) || 0;
+                    const weight = parseOptionalNumber(document.getElementById(`weight-${exerciseIndex}-${i}`)?.value);
+                    const reps = parseOptionalNumber(document.getElementById(`reps-${exerciseIndex}-${i}`)?.value);
+                    const durationSeconds = parseOptionalNumber(document.getElementById(`duration-${exerciseIndex}-${i}`)?.value);
+                    const completed = Boolean(document.getElementById(`completed-${exerciseIndex}-${i}`)?.checked);
 
-                    if (weight > 0 && reps > 0) {
-                        totalVolume += (weight * reps);
+                    if (weight !== null && reps !== null) {
+                        const unit = document.getElementById(`unit-${exerciseIndex}-${i}`)?.value || 'lb';
+                        const pounds = unit === 'kg' ? weight * 2.20462 : weight;
+                        totalVolume += pounds * reps;
+                        totalSets++;
+                    } else if (durationSeconds !== null || completed) {
                         totalSets++;
                     }
                 }
@@ -718,12 +961,11 @@
             // Weightlifting (vigorous) has MET value of 6.0
             // Formula: (MET * 3.5 * weight_kg * duration) / 200
 
-            const effectiveDuration = Math.max(duration, 1); // Minimum 1 minute
             const weightKg = userWeight * 0.453592; // Convert lbs to kg
             const MET = 6.0; // MET value for vigorous weight training
 
             // Base calories from MET formula
-            const baseCals = (MET * 3.5 * weightKg * effectiveDuration) / 200;
+            const baseCals = (MET * 3.5 * weightKg * duration) / 200;
 
             // Volume bonus: more weight lifted = more calories
             const volumeBonus = totalVolume * 0.01; // 1 calorie per 100 lbs lifted
@@ -735,7 +977,7 @@
 
             console.log(`📊 Calorie Calculation:
                 User Weight: ${userWeight} lbs (${weightKg.toFixed(1)} kg)
-                Duration: ${effectiveDuration} min
+                Duration: ${duration} min
                 MET Value: ${MET}
                 Total Volume: ${totalVolume} lbs (${totalSets} sets)
                 Base Calories: ${Math.round(baseCals)}
@@ -750,11 +992,12 @@
             const calories = calculateWorkoutCalories();
             const calorieEl = document.getElementById('estimated-calories');
             if (calorieEl) {
-                calorieEl.textContent = calories.toLocaleString();
+                calorieEl.textContent = calories === null ? '--' : calories.toLocaleString();
             }
         }
 
         function startTimer() {
+            clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
                 const minutes = Math.floor(elapsed / 60);
@@ -766,73 +1009,84 @@
         }
 
         async function finishWorkout() {
+            if (completionInFlight || !workoutData) return;
+
             // Calculate calories burned automatically
             const caloriesBurned = calculateWorkoutCalories();
-            const duration = Math.floor((Date.now() - startTime) / 1000 / 60); // minutes
+            const endedAt = new Date();
+            const duration = Math.max(0, Math.floor((endedAt.getTime() - startTime) / 1000 / 60));
 
             // Confirmation dialog with calorie estimate
-            if (!confirm(`Are you sure you want to finish your workout?\n\nDuration: ${duration} minutes\nEstimated Calories: ${caloriesBurned}\n\n(Based on workout intensity, volume, and your body weight)`)) {
+            const caloriesLabel = caloriesBurned === null ? 'unknown' : caloriesBurned;
+            if (!confirm(`Are you sure you want to finish your workout?\n\nDuration: ${duration} minutes\nEstimated Calories: ${caloriesLabel}\n\n(Based on workout intensity, volume, and your body weight)`)) {
                 return;
             }
 
-            // Collect all exercise data, filtering out zero values
-            const exercisesWithData = [];
-
-            workoutData.exercises.forEach((exercise, exerciseIndex) => {
-                const numSets = parseInt(exercise.sets) || 3;
-                const sets = [];
-
-                // Collect only sets with valid data (non-zero weight and reps)
-                for (let i = 0; i < numSets; i++) {
-                    const weight = parseInt(document.getElementById(`weight-${exerciseIndex}-${i}`)?.value) || 0;
-                    const reps = parseInt(document.getElementById(`reps-${exerciseIndex}-${i}`)?.value) || 0;
-
-                    // Only save sets with non-zero weight and reps
-                    if (weight > 0 && reps > 0) {
-                        sets.push({ weight, reps });
-                    }
-                }
-
-                // Get notes for this exercise
-                const notes = document.getElementById(`notes-${exerciseIndex}`)?.value || '';
-
-                // Only include exercise if it has at least one valid set
-                if (sets.length > 0) {
-                    exercisesWithData.push({
-                        name: exercise.name,
-                        sets: sets,
-                        notes: notes,
-                        completed: true
-                    });
-                }
-            });
-
-            // Check if any exercises were logged
-            if (exercisesWithData.length === 0) {
-                if (!confirm('No exercises logged with weight/reps. Save workout anyway?')) {
-                    return;
-                }
+            completionInFlight = true;
+            const finishButton = document.querySelector('.finish-workout-btn');
+            if (finishButton) {
+                finishButton.disabled = true;
+                finishButton.setAttribute('aria-busy', 'true');
             }
 
-            // Save workout to history
-            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-
             const completedWorkout = {
-                date: new Date().toISOString(),
-                duration: duration,
+                id: workoutData.sessionId,
+                workoutName: workoutData.workoutName || 'Quick Workout',
+                date: endedAt.toISOString(),
+                startedAt: new Date(startTime).toISOString(),
+                endedAt: endedAt.toISOString(),
+                duration,
                 calories: caloriesBurned,
-                summary: workoutData.summary,
-                exercises: exercisesWithData
+                source: 'fuelfire',
+                exercises: collectExerciseEntries(),
+                healthExported: false,
+                healthExportedAt: null,
+                healthWorkoutId: null
             };
 
-            workoutHistory.unshift(completedWorkout);
-            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+            const store = getWorkoutStore();
+            let savedWorkout;
+            try {
+                savedWorkout = store && typeof store.completeSession === 'function'
+                    ? store.completeSession(completedWorkout, localStorage)
+                    : (() => {
+                        // Standalone fallback for this page while the shared store script is unavailable.
+                        const history = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+                        const existingIndex = history.findIndex(item => item && item.id === completedWorkout.id);
+                        if (existingIndex === -1) history.unshift(completedWorkout);
+                        else history[existingIndex] = { ...history[existingIndex], ...completedWorkout };
+                        const serialized = JSON.stringify(history);
+                        localStorage.setItem('workoutHistory', serialized);
+                        const persisted = JSON.parse(localStorage.getItem('workoutHistory') || 'null');
+                        if (!Array.isArray(persisted) || !persisted.some(item => item && item.id === completedWorkout.id)) {
+                            const error = new Error('Workout history persistence could not be verified');
+                            error.code = 'WORKOUT_HISTORY_PERSISTENCE_UNVERIFIED';
+                            throw error;
+                        }
+                        return completedWorkout;
+                    })();
+            } catch (error) {
+                completionInFlight = false;
+                if (finishButton) {
+                    finishButton.disabled = false;
+                    finishButton.removeAttribute('aria-busy');
+                }
+                const status = document.getElementById('progress-text');
+                if (status) status.textContent = 'Workout could not be saved. Your draft was kept; try again.';
+                alert('Workout could not be saved. Your progress is still available to retry.');
+                console.error('Workout completion persistence failed:', error);
+                return;
+            }
 
             // Write workout to Apple Health if available
             if (window.logWorkoutToAppleHealth) {
                 try {
-                    const success = await window.logWorkoutToAppleHealth('strength_training', duration, caloriesBurned);
-                    if (success) {
+                    const exportResult = await window.logWorkoutToAppleHealth('strength_training', duration, caloriesBurned || 0);
+                    if (exportResult && store && typeof store.markHealthExported === 'function') {
+                        const healthWorkoutId = typeof exportResult === 'object'
+                            ? (exportResult.id || exportResult.uuid || exportResult.healthWorkoutId)
+                            : null;
+                        store.markHealthExported(savedWorkout.id, { healthWorkoutId }, localStorage);
                         console.log('✅ Workout logged to Apple Health');
                     }
                 } catch (error) {
@@ -842,18 +1096,21 @@
 
             // Clear current workout
             localStorage.removeItem('currentWorkout');
+            clearWorkoutDraft();
 
             // Stop timer
             clearInterval(timerInterval);
 
             // Redirect to success page or home
-            alert(`Workout completed!\n${duration} minutes\n${caloriesBurned} calories burned\n${exercisesWithData.length} exercises logged`);
+            const loggedExerciseCount = completedWorkout.exercises.filter(exercise => exercise.sets.some(set => set.completed || set.weight !== null || set.reps !== null || set.durationSeconds !== null)).length;
+            alert(`Workout completed!\n${duration} minutes\n${caloriesBurned === null ? 'Calories not estimated' : `${caloriesBurned} calories burned`}\n${loggedExerciseCount} exercises logged`);
             window.location.href = 'index.html';
         }
 
         function cancelWorkout() {
             if (confirm('Are you sure you want to cancel this workout? All progress will be lost.')) {
                 localStorage.removeItem('currentWorkout');
+                clearWorkoutDraft();
                 clearInterval(timerInterval);
                 window.location.href = 'workout-quiz.html';
             }

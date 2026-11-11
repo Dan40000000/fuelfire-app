@@ -13,7 +13,9 @@ This suite answers four separate questions instead of hiding them inside one fin
 npm run test:accuracy
 ```
 
-This uses fixture predictions only. It makes zero AI calls and writes `latest.json`, `latest.md`, and `latest.html` under `output/accuracy`.
+This uses stored fixture predictions only. It makes zero AI calls, does not load local provider credentials, and writes `latest.json`, `latest.md`, and `latest.html` under `output/accuracy`. A passing fixture score is not evidence of live photo, speech, or nutrition accuracy. The report identifies its evidence type and selected/scored case counts.
+
+Missing predictions, empty selections, duplicate case IDs, invalid ground truth, and incomplete selected runs cannot produce a passing release gate.
 
 The gate fails on:
 
@@ -40,38 +42,39 @@ Defaults:
 - $0.03 assumed for voice and $0.05 for photo in the TestFlight Lab;
 - the CLI uses $0.05 per call unless overridden.
 
-The cost is a conservative guardrail, not provider billing data. The hard call count is authoritative. To test a TestFlight export:
+Live execution requires explicit `--allow-live=true`. The call cap counts submitted cases, not individual provider requests: retries and multi-stage analysis can make multiple upstream calls within a case. The spend estimate is not a billing guarantee; use the server-side provider budget/quota and provider-account spending controls as well. To evaluate a separately prepared accuracy dataset:
 
 ```bash
 node tests/accuracy/run-food-accuracy.mjs \
   --mode=live \
+  --allow-live=true \
   --dataset=/path/to/well-fit-food-accuracy-export.json \
   --max-live-calls=5 \
   --max-estimated-cost-usd=0.25 \
   --gate=false
 ```
 
-## TestFlight Accuracy Lab
+## Physical iPhone verification
 
-The Lab is intentionally absent from normal navigation. From Account, tap `Well Fit Pro v1.1` seven times. A short-lived server authorization is required in addition to AI entitlement.
+The supported automated entry point is the CLI above. There is no hidden Accuracy Lab shortcut in the current account screen. An ordinary account backup is not an accuracy dataset and must not be sent to a model for evaluation.
 
 Voice workflow:
 
-1. Select a challenge phrase or enter a custom intended phrase.
+1. Select a challenge phrase and record the intended phrase separately from the recognized text.
 2. Run it three times on the same physical iPhone.
-3. The native plugin requests a final top-five result, preserving the raw best transcript and alternatives.
+3. Record the app's recognized text and available alternatives without silently correcting the prediction.
 4. Analyze the unmodified transcript through the production voice parser.
-5. Verify the correct food names, count, calories, and macros, then save.
+5. Prepare a dataset case with the original prediction and independently verified food names, count, calories, and macros.
 
 Photo workflow:
 
 1. Photograph the meal, package, or Nutrition Facts panel.
 2. Record brand, label visibility, amount pictured, and a scale reference when available.
-3. The Lab sends the compressed image through the production vision endpoint.
+3. Test the app's photo flow and retain the original prediction separately from corrections.
 4. Correct the ground truth from a label, official source, measured recipe, or documented estimate.
-5. Save the original model response and verified truth as separate values.
+5. Use local JPEG, PNG, or WebP files inside the dataset directory, at most 8 MiB per image. Parent-directory escapes and nonimage files are rejected by the runner. Do not include people, receipts, addresses, or other identifying background information.
 
-Lab cases are stored in a dedicated IndexedDB database. They do not change meal logs or learned-food memory. Compressed photos remain on the device until deletion or explicit export. No audio is retained.
+Run evaluation against a dedicated synthetic/test profile, not a person's production meal history or learned-food memory. Sharing a dataset or submitting it live is an explicit action. Do not claim camera/microphone permission, background recovery, or native bridge verification from a CLI-only result.
 
 ## Dataset growth target
 
@@ -94,4 +97,4 @@ Do not duplicate one image to inflate the count. Use different devices, lighting
 
 `food-accuracy.schema.json` is the canonical interchange format. Exports include inputs, original predictions, verified truth, metrics, and provenance. They must never include AI access tokens, RevenueCat IDs, email, health records, or complete meal history.
 
-Import is JSON-only, version checked, and local. Review imported cases before running them live. Live reruns remain subject to the session budget.
+Datasets are JSON-only and version checked. Review every case and image before live submission. Keep ground truth, capture conditions, provider/model version, latency, and original prediction separate. Compare cold-memory and learned-memory runs rather than combining them into a single apparent accuracy percentage. A run that exhausts its case/spend cap is incomplete and cannot pass a release gate.

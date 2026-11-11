@@ -487,6 +487,16 @@
             
             setTimeout(() => toast.remove(), 3000);
         }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[character]));
+        }
         
         function displayMealPlan(mealPlan, metadata) {
             console.log('📋 Displaying meal plan:', {
@@ -502,11 +512,12 @@
             }
 
             // Set metadata
-            document.getElementById('plan-metadata').innerHTML = `
-                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} |
-                <strong>Goal:</strong> ${metadata.goal} |
-                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
-            `;
+            const metadataValue = metadata || {};
+            document.getElementById('plan-metadata').textContent = [
+                `🎯 Generated: ${new Date(metadataValue.generatedAt || metadataValue.createdAt).toLocaleDateString()}`,
+                `Goal: ${String(metadataValue.goal || 'Custom')}`,
+                `Duration: ${String(metadataValue.planDuration || '2-week')}`,
+            ].join(' | ');
             
             if (!mealPlan || mealPlan.length === 0) {
                 document.getElementById('meal-plan-content').innerHTML = `
@@ -520,7 +531,7 @@
             }
             
             // Parse the meal plan content into structured data
-            const structuredContent = parseMealPlanContent(mealPlan);
+            const structuredContent = parseMealPlanContent(escapeHtml(String(mealPlan)));
             
             // Generate beautiful HTML using the structured data
             const content = generateBeautifulMealPlanHTML(structuredContent);

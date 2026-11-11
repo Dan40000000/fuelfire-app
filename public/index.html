@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -12,6 +12,9 @@
     <script src="revenuecat-bridge.js"></script>
     <script src="daily-quotes.js?v=20251104.5"></script>
     <script src="health-sync.js"></script>
+    <script src="activity-energy.js"></script>
+    <script src="workout-store.js"></script>
+    <script src="food-store.js"></script>
     <script src="global-nav.js"></script>
     <script src="quick-food-entry.js"></script>
     <script src="workout-database.js"></script>
@@ -101,6 +104,7 @@
 </head>
 <body class="home-app-shell">
     <div id="hydration-status" data-hydration-status role="status" aria-live="polite" aria-atomic="true" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;"></div>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="phone-container">
         <div class="screen">
             <!-- Status Bar -->
@@ -115,7 +119,7 @@
                 <div class="header-title">FuelFire</div>
             </div>
             
-            <div class="content" tabindex="0" aria-label="Dashboard content">
+            <main id="main-content" class="content" tabindex="0" aria-label="Dashboard content">
                 <!-- HOME SCREEN -->
                 <div class="screen-content home-content active" id="home">
                     <div style="padding: 20px;">
@@ -141,7 +145,7 @@
                     <div id="quote-banner" style="background: white; padding: 30px 25px; border-radius: 25px; margin-bottom: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.15); position: relative; display: block; animation: slideDown 0.5s ease; border: 3px solid var(--carolina-blue);">
                         <div style="text-align: center; margin-bottom: 15px;">
                             <div style="font-size: 32px; margin-bottom: 5px;">💪</div>
-                            <div style="font-size: 16px; font-weight: bold; color: var(--carolina-blue); letter-spacing: 1px; text-transform: uppercase;">Daily Motivation</div>
+                            <div style="font-size: 16px; font-weight: bold; color: #176b9d; letter-spacing: 1px; text-transform: uppercase;">Daily Motivation</div>
                         </div>
                         <button onclick="closeQuoteBanner(event)" style="position: absolute; top: 15px; right: 15px; background: var(--light-bg); border: 2px solid var(--carolina-blue); color: var(--carolina-blue); width: 35px; height: 35px; border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">✕</button>
                         <div style="font-size: 20px; font-weight: 600; font-style: italic; line-height: 1.7; text-align: center; padding: 0 30px 0 10px; color: var(--dark);" id="daily-quote">Loading quote...</div>
@@ -154,7 +158,7 @@
                     </div>
 
                     <!-- Today's Overview -->
-                    <div id="home-summary-card" style="background: var(--gradient-1); color: white; padding: 35px 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(75, 156, 211, 0.3); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);" onclick="window.location.href='calorie-tracker.html'" ontouchstart="">
+                    <a id="home-summary-card" class="home-summary-card" href="calorie-tracker.html" aria-label="Today's overview. Open calorie tracker." style="display: block; background: var(--gradient-1); color: white; padding: 35px 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 25px rgba(75, 156, 211, 0.3); touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1); text-decoration: none;">
                         <h2 style="font-size: 24px; margin-bottom: 20px; text-align: center;">Today's Overview</h2>
 
                         <!-- Calories - Featured on top -->
@@ -190,11 +194,11 @@
                         <div style="margin-top: 25px; font-size: 14px; opacity: 0.9; text-align: center; font-weight: 600;">
                             Tap to log meals →
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Apple Health Stats -->
-                    <div id="health-today-card" style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer;" onclick="window.location.href='health-dashboard.html'">
-                        <h3 style="color: var(--primary); margin-bottom: 15px; text-align: center; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <section id="health-today-card" class="health-today-card" aria-labelledby="health-today-title" style="background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 id="health-today-title" style="color: var(--primary); margin-bottom: 15px; text-align: center; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
                             </svg>
@@ -242,9 +246,10 @@
                             </div>
                         </div>
                         <div style="margin-top: 15px; text-align: center; font-size: 12px; color: var(--primary); font-weight: 600;">
-                            Tap for full health dashboard →
+                            <a class="health-card-link" href="health-dashboard.html">View full health dashboard →</a>
                         </div>
-                    </div>
+                        <div id="home-health-data-status" role="status" aria-live="polite" style="margin-top: 8px; text-align: center; font-size: 11px; color: #5d7182;"></div>
+                    </section>
 
                     <!-- Home Hydration Tracker -->
                     <div class="home-hydration-card" style="background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border-radius: 20px; padding: 18px; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(37, 99, 235, 0.28);">
@@ -358,13 +363,10 @@
                     <!-- Recent Activity -->
                     <div style="margin-bottom: 20px;">
                         <h3 style="color: var(--dark); margin-bottom: 15px; font-size: 18px;">🏆 Recent Activity</h3>
-                        <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid #4CAF50;">
-                            <div style="font-weight: bold; color: var(--dark);">New Personal Record!</div>
-                            <div style="color: #666; font-size: 14px;">Bench Press: 225 lbs - Yesterday</div>
-                        </div>
-                        <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--carolina-blue);">
-                            <div style="font-weight: bold; color: var(--dark);">Nutrition Goal Met</div>
-                            <div style="color: #666; font-size: 14px;">Hit protein target 5 days straight</div>
+                        <div id="recent-activity-list" role="status" aria-live="polite" style="display: grid; gap: 10px;">
+                            <div class="recent-activity-empty" style="background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--carolina-blue); color: #4b5563;">
+                                Log a meal or complete a workout to see recent activity here.
+                            </div>
                         </div>
                     </div>
                     </div>
@@ -1761,7 +1763,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
 
         <!-- Quick Chest Blast -->
@@ -2707,7 +2709,7 @@
     </div>
 
     <!-- NUTRITION GOAL SETTER MODAL -->
-    <div id="nutrition-goal-modal" role="dialog" aria-modal="true" aria-labelledby="nutrition-goal-modal-title" aria-hidden="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+    <div id="nutrition-goal-modal" data-modal-owner="page" role="dialog" aria-modal="true" aria-labelledby="nutrition-goal-modal-title" aria-hidden="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 25px; padding: 30px; max-width: 450px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out;">
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 id="nutrition-goal-modal-title" style="color: var(--primary); margin: 0 0 10px 0; font-size: 24px;">🎯 Set Your Nutrition Goals</h2>
@@ -2889,6 +2891,11 @@
                 </svg>
                 Health Dashboard
             </div>
+            <div class="sidebar-group" data-sidebar-group="reference">
+                <button id="sidebar-reference-toggle" class="sidebar-group-toggle" type="button" aria-expanded="false" aria-controls="sidebar-reference">
+                    <span>More</span>
+                </button>
+                <div id="sidebar-reference" class="sidebar-submenu" hidden aria-hidden="true">
             <div class="menu-item" onclick="window.location.href='fat-loss.html'">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
                     <path d="M12 4C7 4 4 8 4 12C4 17 8 20 12 20C16 20 20 17 20 12C20 8 17 4 12 4Z" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -2931,6 +2938,8 @@
                     <path d="M8 10V14M8 14L6 20M8 14L10 20M8 14L12 12M12 12L10 6M12 12L14 6M12 12L16 14M16 14L14 20M16 14L18 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 Workout Techniques
+            </div>
+                </div>
             </div>
             <div class="menu-item" onclick="showScreen('progress')" ontouchstart="" style="touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
@@ -3351,6 +3360,7 @@
 
         let nutritionGoalReturnFocus = null;
         let nutritionGoalInertElements = [];
+        const nutritionGoalInertScope = window.FuelFireInert?.createScope('nutrition-goals');
 
         function getNutritionGoalModalFocusableElements() {
             const modal = document.getElementById('nutrition-goal-modal');
@@ -3371,14 +3381,16 @@
             if (shouldInert) {
                 if (nutritionGoalInertElements.length) return;
                 nutritionGoalInertElements = Array.from(modal.parentElement.children).filter((element) => {
-                    if (element === modal || element.hasAttribute('inert')) return false;
-                    element.setAttribute('inert', '');
+                    if (element === modal) return false;
+                    if (nutritionGoalInertScope) nutritionGoalInertScope.acquire(element);
+                    else element.setAttribute('inert', '');
                     return true;
                 });
                 return;
             }
 
-            nutritionGoalInertElements.forEach((element) => element.removeAttribute('inert'));
+            if (nutritionGoalInertScope) nutritionGoalInertScope.releaseAll();
+            else nutritionGoalInertElements.forEach((element) => element.removeAttribute('inert'));
             nutritionGoalInertElements = [];
         }
 
@@ -3436,10 +3448,14 @@
                 const activeElement = document.activeElement;
                 const fallback = document.getElementById('nutrition-goals-edit');
                 if (!nutritionGoalReturnFocus) {
+                    const canRestoreFocus = activeElement instanceof HTMLElement && activeElement.matches(
+                        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                    );
                     nutritionGoalReturnFocus = activeElement instanceof HTMLElement &&
                         activeElement !== document.body &&
                         activeElement !== document.documentElement &&
-                        !modal.contains(activeElement)
+                        !modal.contains(activeElement) &&
+                        canRestoreFocus
                         ? activeElement
                         : fallback;
                 }
@@ -3768,7 +3784,7 @@
         // Load journey stats
         function loadJourneyStats() {
             // Workouts completed
-            const workouts = JSON.parse(localStorage.getItem('fuelfire_tracked_workouts') || '[]');
+            const workouts = readHomeWorkouts();
             const workoutsEl = document.getElementById('workouts-completed');
             if (workoutsEl) workoutsEl.textContent = workouts.length;
 
@@ -3776,6 +3792,52 @@
             const streak = calculateWorkoutStreak(workouts);
             const streakEl = document.getElementById('current-streak');
             if (streakEl) streakEl.textContent = streak;
+        }
+
+        function readHomeWorkouts() {
+            if (window.FuelFireWorkouts && typeof window.FuelFireWorkouts.readHistory === 'function') {
+                try {
+                    const history = window.FuelFireWorkouts.readHistory(localStorage);
+                    return Array.isArray(history) ? history : [];
+                } catch (error) {
+                    console.warn('Unable to read canonical workout history:', error);
+                }
+            }
+            // Standalone shell fallback until the shared workout-store loads.
+            try {
+                const legacy = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+                return Array.isArray(legacy) ? legacy : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function readHomeFoodLogs() {
+            if (!window.FuelFireFoodStore || typeof window.FuelFireFoodStore.readLogs !== 'function') return {};
+            try {
+                return window.FuelFireFoodStore.readLogs(localStorage) || {};
+            } catch (error) {
+                console.warn('Unable to read canonical food logs:', error);
+                return {};
+            }
+        }
+
+        function getHomeEnergySummary(healthData = null) {
+            if (!window.FuelFireEnergy || typeof window.FuelFireEnergy.getActivitySummary !== 'function') return null;
+            let workouts = readHomeWorkouts();
+            let manualEntries = [];
+            try {
+                manualEntries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
+            } catch (error) {
+                manualEntries = [];
+            }
+            return window.FuelFireEnergy.getActivitySummary({
+                storage: localStorage,
+                healthData,
+                workouts,
+                manualEntries,
+                now: new Date()
+            });
         }
 
         // Calculate workout streak
@@ -3816,6 +3878,8 @@
             loadBodyFatStats();
             loadJourneyStats();
             loadHomeHealthData();
+            updateHomeFoodCalories();
+            renderRecentActivity();
 
             // Start real-time health data polling (every 2 minutes)
             startHealthDataPolling();
@@ -3889,6 +3953,10 @@
         async function loadHomeHealthData() {
             try {
                 updateHomeBaseCaloriesFromStorage();
+                // Establish an explicit missing/stale state before cached or
+                // native data arrives. Local activity can still render from
+                // the canonical history while Health is unavailable.
+                updateHomeHealthUI(null);
 
                 // First, load cached data for instant display
                 const cached = localStorage.getItem('healthData');
@@ -3923,12 +3991,14 @@
             if (!baseCaloriesEl) return;
 
             const baseCalories = getBaseCaloriesEstimate({});
-            const fallback = Math.round(baseCalories || 0);
-            const finalValue = Number.isFinite(fallback) && fallback > 0 ? fallback : 2000;
-            baseCaloriesEl.textContent = finalValue.toLocaleString();
+            const finalValue = Math.round(Number(baseCalories));
+            baseCaloriesEl.textContent = Number.isFinite(finalValue) && finalValue > 0 ? finalValue.toLocaleString() : '--';
         }
 
         function getStoredUserProfile() {
+            if (window.FuelFireEnergy && typeof window.FuelFireEnergy.resolveProfile === 'function') {
+                return window.FuelFireEnergy.resolveProfile(localStorage, null);
+            }
             let profile = {};
             let legacyProfile = {};
             try {
@@ -3945,11 +4015,9 @@
         }
 
         function getLatestKnownWeight(healthData = {}) {
-            if (healthData && healthData.weight !== undefined && healthData.weight !== null) {
-                const weight = Number(healthData.weight);
-                if (!Number.isNaN(weight) && weight > 0) {
-                    return weight;
-                }
+            if (window.FuelFireEnergy && typeof window.FuelFireEnergy.resolveProfile === 'function') {
+                const resolved = window.FuelFireEnergy.resolveProfile(localStorage, healthData);
+                return Number.isFinite(Number(resolved.weightLbs)) ? Number(resolved.weightLbs) : 0;
             }
 
             const profile = getStoredUserProfile();
@@ -3979,12 +4047,19 @@
         }
 
         function getUserMetrics(healthData = {}) {
-            const profile = getStoredUserProfile();
+            const profile = window.FuelFireEnergy && typeof window.FuelFireEnergy.resolveProfile === 'function'
+                ? window.FuelFireEnergy.resolveProfile(localStorage, healthData)
+                : getStoredUserProfile();
             const weightLbs = getLatestKnownWeight(healthData);
 
             let heightInches = 0;
             if (profile) {
-                if (profile.height !== undefined && profile.height !== null) {
+                if (profile.heightInches !== undefined && profile.heightInches !== null) {
+                    const value = Number(profile.heightInches);
+                    if (!Number.isNaN(value) && value > 0) {
+                        heightInches = value;
+                    }
+                } else if (profile.height !== undefined && profile.height !== null) {
                     const value = Number(profile.height);
                     if (!Number.isNaN(value) && value > 0) {
                         heightInches = value;
@@ -4051,66 +4126,63 @@
         }
 
         function getBaseCaloriesEstimate(healthData = {}) {
-            if (healthData && typeof healthData.bmr === 'number' && healthData.bmr > 0) {
-                localStorage.setItem('fuelfire_last_bmr', String(Math.round(healthData.bmr)));
-                return healthData.bmr;
+            const summary = getHomeEnergySummary(healthData);
+            if (summary && Number.isFinite(summary.bmr) && summary.bmr >= 0) {
+                if (summary.bmr > 0) localStorage.setItem('fuelfire_last_bmr', String(Math.round(summary.bmr)));
+                return summary.bmr;
             }
 
             const metrics = getUserMetrics(healthData);
             let bmr = computeBmrFromMetrics(metrics);
-
-            if (!bmr && metrics.weightLbs > 0) {
-                // If height or age missing, use smart defaults
-                const assumedHeight = metrics.heightInches > 0 ? metrics.heightInches : 70;
-                const assumedAge = metrics.age > 0 ? metrics.age : 30;
-                bmr = computeBmrFromMetrics({
-                    weightLbs: metrics.weightLbs,
-                    heightInches: assumedHeight,
-                    age: assumedAge,
-                    sex: metrics.sex || 'male'
-                });
-            }
-
-            if (!bmr) {
-                const cached = parseInt(localStorage.getItem('fuelfire_last_bmr') || '0', 10);
-                if (cached > 0) {
-                    return cached;
-                }
-                return 2000;
-            }
-
-            localStorage.setItem('fuelfire_last_bmr', String(bmr));
-            return bmr;
+            if (bmr > 0) localStorage.setItem('fuelfire_last_bmr', String(bmr));
+            return bmr || 0;
         }
 
         function updateHomeHealthUI(data) {
+            const healthData = data && typeof data === 'object' ? data : {};
+
             // Update steps display
             const stepsEl = document.getElementById('home-steps');
-            if (stepsEl && data.steps !== undefined) {
-                stepsEl.textContent = data.steps.toLocaleString();
+            const steps = Number(healthData.steps);
+            if (stepsEl && Number.isFinite(steps) && steps >= 0) {
+                stepsEl.textContent = steps.toLocaleString();
             }
 
             // Update base calories (BMR)
             const baseCaloriesEl = document.getElementById('home-base-calories');
             if (baseCaloriesEl) {
                 const baseCalories = getBaseCaloriesEstimate(data);
-                baseCaloriesEl.textContent = Math.round(baseCalories || 0).toLocaleString();
+                const roundedBase = Math.round(Number(baseCalories));
+                baseCaloriesEl.textContent = Number.isFinite(roundedBase) && roundedBase > 0 ? roundedBase.toLocaleString() : '--';
             }
 
-            // Update active calories (Apple Health + Manual + Workouts)
+            // Reconcile health, local, and manually entered activity without
+            // counting an exported FuelFire session twice.
+            const energySummary = getHomeEnergySummary(data);
             const activeCaloriesEl = document.getElementById('home-active-calories');
-            if (activeCaloriesEl && data.activeEnergy !== undefined) {
-                const appleHealthActive = data.activeEnergy || 0;
-                const manualActive = getTodayManualCalories();
-                const workoutActive = getTodayWorkoutCalories();
-                const totalActive = appleHealthActive + manualActive + workoutActive;
-                activeCaloriesEl.textContent = totalActive.toLocaleString();
+            const energyStatusEl = document.getElementById('home-health-data-status');
+            if (activeCaloriesEl && energySummary) {
+                const hasVisibleActivity = Boolean(energySummary.hasActivity);
+                activeCaloriesEl.textContent = hasVisibleActivity
+                    ? Math.round(energySummary.activeCalories).toLocaleString()
+                    : '--';
+                activeCaloriesEl.setAttribute('aria-label', energySummary.healthStatus === 'stale'
+                    ? 'Active calories unavailable because Apple Health data is stale'
+                    : !energySummary.hasActivity
+                        ? 'Active calories unavailable because current Health energy is not available'
+                        : `${Math.round(energySummary.activeCalories)} active calories`);
+                if (energyStatusEl) {
+                    energyStatusEl.textContent = energySummary.healthStatus === 'stale'
+                        ? 'Apple Health data is from an earlier day. Local and manual activity remain separate.'
+                        : energySummary.healthStatus === 'missing'
+                            ? 'Apple Health is not connected. Local and manual activity are shown when available.'
+                            : energySummary.hasActivity
+                                ? 'Activity data is current.'
+                                : 'Apple Health is connected, but today\'s active energy is unavailable.';
+                }
             }
 
-            // Sync workout calories to daily calorie budget
-            if (data.caloriesBurned && data.caloriesBurned > 0) {
-                syncWorkoutCaloriesToDailyBudget(data.caloriesBurned);
-            }
+            if (energySummary) syncWorkoutCaloriesToDailyBudget(energySummary);
 
             // Update the home calories display with food calories
             updateHomeFoodCalories();
@@ -4119,6 +4191,7 @@
             if (typeof updateHydrationUI === 'function') {
                 updateHydrationUI();
             }
+            renderRecentActivity();
         }
 
         // Hydration tracker
@@ -4222,13 +4295,11 @@
             announceHydrationTotal(updated);
         }
 
-        // Sync workout calories from Apple Health to daily calorie budget
-        function syncWorkoutCaloriesToDailyBudget(caloriesBurned) {
+        // Persist the reconciled energy model without relabeling total energy
+        // as a local workout. Existing nutrition records remain untouched.
+        function syncWorkoutCaloriesToDailyBudget(energySummary) {
             try {
-                // Get today's date key
                 const today = getLocalDateString();
-
-                // Get or create daily nutrition data
                 let dailyNutrition = JSON.parse(localStorage.getItem('dailyNutrition') || '{}');
 
                 if (!dailyNutrition[today]) {
@@ -4237,110 +4308,40 @@
                         protein: 0,
                         carbs: 0,
                         fat: 0,
-                        meals: [],
-                        workoutCaloriesBurned: 0
+                        meals: []
                     };
                 }
 
-                // Store workout calories separately (don't double-count)
-                dailyNutrition[today].workoutCaloriesBurned = caloriesBurned;
-
-                // Save back to localStorage
+                dailyNutrition[today].activeCalories = energySummary.hasActivity
+                    ? Math.round(energySummary.activeCalories)
+                    : null;
+                dailyNutrition[today].restingCalories = energySummary.bmr === null ? null : Math.round(energySummary.bmr);
+                dailyNutrition[today].energyStatus = energySummary.healthStatus;
+                dailyNutrition[today].energyUpdatedAt = new Date().toISOString();
                 localStorage.setItem('dailyNutrition', JSON.stringify(dailyNutrition));
-
-                console.log(`✅ Synced ${caloriesBurned} workout calories from Apple Health`);
             } catch (error) {
-                console.error('Error syncing workout calories:', error);
+                console.error('Error syncing activity energy:', error);
             }
         }
 
-        // Helper functions for getting today's manual and workout calories
+        // Helper functions for today's canonical activity records. Calories are
+        // never estimated from duration here; an explicit zero stays zero.
         function getTodayWorkoutCalories() {
-            const workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            let totalWorkoutCalories = 0;
-
-            workoutHistory.forEach(workout => {
-                const workoutDate = new Date(workout.date);
-                workoutDate.setHours(0, 0, 0, 0);
-
-                if (workoutDate.getTime() === today.getTime()) {
-                    const storedCalories = Number(workout.calories);
-                    if (Number.isFinite(storedCalories) && storedCalories > 0) {
-                        totalWorkoutCalories += storedCalories;
-                        return;
-                    }
-                    const duration = workout.duration || 45;
-                    let caloriesPerMinute = 5;
-
-                    if (workout.type) {
-                        const type = workout.type.toLowerCase();
-                        if (type.includes('chest') || type.includes('back') || type.includes('legs')) {
-                            caloriesPerMinute = 7;
-                        } else if (type.includes('cardio') || type.includes('hiit')) {
-                            caloriesPerMinute = 10;
-                        } else if (type.includes('arms') || type.includes('core')) {
-                            caloriesPerMinute = 5;
-                        }
-                    }
-
-                    totalWorkoutCalories += duration * caloriesPerMinute;
-                }
-            });
-
-            return Math.round(totalWorkoutCalories);
+            const summary = getHomeEnergySummary(null);
+            return summary ? Math.round(summary.reconciledWorkoutCalories) : 0;
         }
 
         function getTodayManualCalories() {
-            const entries = JSON.parse(localStorage.getItem('fuelfire_active_calories') || '[]');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            let totalManualCalories = 0;
-
-            entries.forEach(entry => {
-                const entryDate = new Date(entry.date);
-                entryDate.setHours(0, 0, 0, 0);
-
-                if (entryDate.getTime() === today.getTime()) {
-                    totalManualCalories += entry.calories;
-                }
-            });
-
-            return totalManualCalories;
+            const summary = getHomeEnergySummary(null);
+            return summary ? Math.round(summary.manualCalories) : 0;
         }
 
         // Calculate total calories burned using HR data (more accurate) or fallback to BMR + activity
         async function calculateTotalCaloriesBurned(healthData) {
-            try {
-                // Try to get user profile for BMR calculation
-                const metrics = getUserMetrics(healthData);
-                const age = metrics.age || 30;
-                const sex = metrics.sex || 'male';
-
-                // If we have heart rate data, use HR-based calculation (more accurate)
-                const weightKgForHR = metrics.weightLbs ? metrics.weightLbs * 0.453592 : 75;
-
-                if (healthData.heartRate && healthData.heartRate > 0 && weightKgForHR > 0) {
-                    const hrCalories = calculateHRBasedCalories(healthData.heartRate, age, weightKgForHR, sex);
-                    console.log(`💓 Using HR-based calorie calculation: ${hrCalories} cal`);
-                    return hrCalories;
-                }
-
-                // Fallback: BMR + activity multiplier
-                const bmr = getBaseCaloriesEstimate(healthData);
-                const activityMultiplier = getActivityMultiplier(healthData.steps || 0);
-                const totalCalories = Math.round(bmr * activityMultiplier);
-
-                console.log(`📊 Using BMR + activity calculation: ${totalCalories} cal (BMR: ${bmr}, multiplier: ${activityMultiplier})`);
-                return totalCalories;
-
-            } catch (error) {
-                console.error('Error calculating calories:', error);
-                return 2000; // Default fallback
-            }
+            const summary = getHomeEnergySummary(healthData);
+            return summary && Number.isFinite(summary.totalCaloriesBurned)
+                ? summary.totalCaloriesBurned
+                : null;
         }
 
         // HR-based calorie calculation (Keytel formula)
@@ -4383,6 +4384,34 @@
             return 1.9;                          // Extremely active (10k+ steps)
         }
 
+        function persistHomeWorkout(workout) {
+            const canonicalWorkout = {
+                ...workout,
+                source: 'fuelfire',
+                startedAt: workout.startedAt || new Date(new Date(workout.date || Date.now()).getTime() - (Number(workout.duration) || 0) * 60000).toISOString(),
+                endedAt: workout.endedAt || workout.date || new Date().toISOString(),
+                duration: Number.isFinite(Number(workout.duration)) ? Number(workout.duration) : 0,
+                healthExported: Boolean(workout.healthExported),
+                exercises: Array.isArray(workout.exercises) ? workout.exercises : []
+            };
+            if (window.FuelFireWorkouts && typeof window.FuelFireWorkouts.completeSession === 'function') {
+                try {
+                    window.FuelFireWorkouts.completeSession(canonicalWorkout, localStorage);
+                    return canonicalWorkout;
+                } catch (error) {
+                    console.warn('Canonical workout store unavailable; using migration fallback:', error);
+                }
+            }
+            try {
+                const history = readHomeWorkouts();
+                history.unshift(canonicalWorkout);
+                localStorage.setItem('workoutHistory', JSON.stringify(history));
+            } catch (error) {
+                console.warn('Unable to persist workout history:', error);
+            }
+            return canonicalWorkout;
+        }
+
         // Helper function to get local date in YYYY-MM-DD format (matches calorie-tracker.html)
         function getLocalDateString() {
             const now = new Date();
@@ -4396,29 +4425,29 @@
         function updateHomeFoodCalories() {
             try {
                 const today = getLocalDateString();
-                console.log('🏠 updateHomeFoodCalories called for date:', today);
-
-                // Read from same source as calorie-tracker.html
-                const loggedMeals = JSON.parse(localStorage.getItem('fuelfire_logged_meals') || '{}');
-                const todayData = loggedMeals[today] || { meals: [], totalCalories: 0 };
-
-                console.log('📊 Today data:', todayData);
-                console.log('📊 Total calories from data:', todayData.totalCalories);
+                const loggedMeals = readHomeFoodLogs();
+                const normalized = window.FuelFireFoodStore && typeof window.FuelFireFoodStore.normalizeLogs === 'function'
+                    ? window.FuelFireFoodStore.normalizeLogs(loggedMeals)
+                    : loggedMeals;
+                const todayData = Array.isArray(normalized)
+                    ? { meals: normalized.filter((meal) => String(meal?.date || '').slice(0, 10) === today) }
+                    : (normalized?.[today] || { meals: [], totalCalories: 0 });
+                const meals = Array.isArray(todayData.meals) ? todayData.meals : [];
 
                 // Calculate macros from logged meals
                 let totalProtein = 0;
                 let totalCarbs = 0;
                 let totalFat = 0;
 
-                if (todayData.meals && Array.isArray(todayData.meals)) {
-                    todayData.meals.forEach(meal => {
-                        totalProtein += meal.protein || 0;
-                        totalCarbs += meal.carbs || 0;
-                        totalFat += meal.fat || 0;
-                    });
-                }
-
-                console.log('📈 Calculated - Protein:', totalProtein, 'Carbs:', totalCarbs, 'Fat:', totalFat);
+                meals.forEach(meal => {
+                    totalProtein += Number(meal?.protein) || 0;
+                    totalCarbs += Number(meal?.carbs) || 0;
+                    totalFat += Number(meal?.fat) || 0;
+                });
+                const storedCalories = Number(todayData.totalCalories);
+                const totalCalories = Number.isFinite(storedCalories)
+                    ? storedCalories
+                    : meals.reduce((sum, meal) => sum + (Number(meal?.calories) || 0), 0);
 
                 // Update displays ONLY if elements exist
                 const homeCalories = document.getElementById('home-calories');
@@ -4427,41 +4456,74 @@
                 const homeFat = document.getElementById('home-fat');
 
                 if (homeCalories) {
-                    homeCalories.textContent = Math.round(todayData.totalCalories || 0).toLocaleString();
-                    console.log('✅ Set home-calories to:', homeCalories.textContent);
+                    homeCalories.textContent = Math.round(totalCalories).toLocaleString();
                 }
                 if (homeProtein) {
                     homeProtein.textContent = Math.round(totalProtein) + 'g';
-                    console.log('✅ Set home-protein to:', homeProtein.textContent);
                 }
                 if (homeCarbs) {
                     homeCarbs.textContent = Math.round(totalCarbs) + 'g';
-                    console.log('✅ Set home-carbs to:', homeCarbs.textContent);
                 }
                 if (homeFat) {
                     homeFat.textContent = Math.round(totalFat) + 'g';
-                    console.log('✅ Set home-fat to:', homeFat.textContent);
                 }
 
                 // Update deficit/surplus
-                updateDeficitSurplus(todayData.totalCalories || 0);
+                updateDeficitSurplus(totalCalories);
             } catch (error) {
-                console.error('❌ Error updating home food calories:', error);
+                console.error('Error updating home food calories:', error);
             }
+        }
+
+        function renderRecentActivity() {
+            const list = document.getElementById('recent-activity-list');
+            if (!list) return;
+            const entries = readHomeWorkouts()
+                .filter((workout) => workout && (workout.date || workout.startedAt || workout.endedAt))
+                .map((workout) => ({
+                    date: new Date(workout.date || workout.startedAt || workout.endedAt),
+                    title: workout.workoutName || workout.type || 'Workout',
+                    detail: Number.isFinite(Number(workout.calories)) ? `${Math.round(Number(workout.calories))} calories` : 'Completed'
+                }))
+                .filter((entry) => !Number.isNaN(entry.date.getTime()))
+                .sort((a, b) => b.date - a.date)
+                .slice(0, 5);
+
+            list.replaceChildren();
+            if (!entries.length) {
+                const empty = document.createElement('div');
+                empty.className = 'recent-activity-empty';
+                empty.style.cssText = 'background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--carolina-blue); color: #4b5563;';
+                empty.textContent = 'Log a meal or complete a workout to see recent activity here.';
+                list.appendChild(empty);
+                return;
+            }
+
+            entries.forEach((entry) => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background: var(--card-bg); padding: 15px; border-radius: 15px; border-left: 4px solid var(--carolina-blue);';
+                const title = document.createElement('div');
+                title.style.cssText = 'font-weight: bold; color: var(--dark);';
+                title.textContent = entry.title;
+                const detail = document.createElement('div');
+                detail.style.cssText = 'color: #4b5563; font-size: 14px;';
+                detail.textContent = `${entry.detail} · ${entry.date.toLocaleDateString()}`;
+                card.append(title, detail);
+                list.appendChild(card);
+            });
         }
 
         // Calculate BMR (Basal Metabolic Rate) using Mifflin-St Jeor equation
         function calculateBMR() {
             const metrics = getUserMetrics();
             const base = computeBmrFromMetrics({
-                weightLbs: metrics.weightLbs || 180,
-                heightInches: metrics.heightInches || 70,
-                age: metrics.age || 30,
+                weightLbs: metrics.weightLbs,
+                heightInches: metrics.heightInches,
+                age: metrics.age,
                 sex: metrics.sex || 'male'
-            }) || 2000;
+            }) || 0;
 
-            // Apply moderate activity multiplier by default for TDEE-style estimate
-            return Math.round(base * 1.55);
+            return base;
         }
 
         async function updateDeficitSurplus(caloriesConsumed) {
@@ -4471,16 +4533,26 @@
 
                 if (!amountEl || !labelEl) return;
 
-                // Get values from the home page display (simple and accurate)
-                const baseCalText = document.getElementById('home-base-calories')?.textContent || '0';
-                const activeCalText = document.getElementById('home-active-calories')?.textContent || '0';
+                const summary = getHomeEnergySummary(JSON.parse(localStorage.getItem('healthData') || 'null'));
+                if (!summary || summary.bmr === null || summary.healthStatus === 'stale' || !summary.hasActivity) {
+                    amountEl.textContent = '--';
+                    labelEl.textContent = summary?.healthStatus === 'stale'
+                        ? 'HEALTH DATA STALE'
+                        : summary?.healthStatus === 'current' && !summary.hasActivity
+                            ? 'ACTIVE ENERGY UNAVAILABLE'
+                            : 'CONNECT HEALTH';
+                    const formulaEl = document.getElementById('balance-formula');
+                    if (formulaEl) formulaEl.textContent = summary?.healthStatus === 'current' && !summary.hasActivity
+                        ? 'Today\'s active energy is unavailable; balance is not estimated'
+                        : 'Connect Apple Health or add a profile to calculate balance';
+                    return;
+                }
 
-                // Parse the numbers (remove commas and convert to number)
-                const baseCal = parseInt(baseCalText.replace(/,/g, '').replace(/[^\d]/g, '')) || 0;
-                const activeCal = parseInt(activeCalText.replace(/,/g, '').replace(/[^\d]/g, '')) || 0;
+                const baseCal = Math.round(summary.bmr);
+                const activeCal = Math.round(summary.activeCalories);
 
                 // Simple formula: Consumed - (Base + Active) = Balance
-                const totalBurned = baseCal + activeCal;
+                const totalBurned = summary.totalCaloriesBurned;
                 const balance = caloriesConsumed - totalBurned;
                 const absBalance = Math.abs(balance);
 
@@ -4525,6 +4597,7 @@
         if (originalShowScreen) {
             window.showScreen = function(screenId) {
                 originalShowScreen(screenId);
+                if (typeof window.focusRouteScreen === 'function') window.focusRouteScreen(screenId);
                 if (screenId === 'progress') {
                     displayNutritionGoals();
                     loadWeightStats();
@@ -5270,7 +5343,6 @@
             const speedMatch = pace.match(/(\d+(?:\.\d+)?)\s*mph/i);
             const inclineMatch = incline.match(/(-?\d+(?:\.\d+)?)\s*%/);
 
-            let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
             const workout = {
                 id: Date.now().toString(),
                 workoutName: `${type.charAt(0).toUpperCase() + type.slice(1)} Session`,
@@ -5297,8 +5369,7 @@
                 }
             };
 
-            workoutHistory.unshift(workout);
-            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+            persistHomeWorkout(workout);
 
             let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts') || '[]');
             recentWorkouts.unshift(workout);
@@ -5508,9 +5579,7 @@
                 workout.metrics = machineData.metrics;
             }
 
-            let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-            workoutHistory.unshift(workout);
-            localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
+            persistHomeWorkout(workout);
 
             let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts') || '[]');
             recentWorkouts.unshift(workout);

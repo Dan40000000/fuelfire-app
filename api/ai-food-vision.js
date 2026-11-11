@@ -2,6 +2,9 @@ import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
 import { callFoodAi, isFoodAiConfigured } from './_lib/food-ai-provider.js';
 import { buildHighImpactClarifyingQuestions, mergeClarifyingQuestions, sanitizeClarifyingQuestions, selectPhotoClarifyingQuestions } from './_lib/food-clarifications.js';
 import { requireAiAccess } from './_lib/security.js';
+import { runWithProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
+import { runFoodParserInProcess } from './ai-food-parser.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
@@ -21,7 +24,8 @@ function toFiniteNumber(value, fallback = 0) {
 function clampAndRound(value, min = 0, max = 5000) {
     const num = toFiniteNumber(value, 0);
     const clamped = Math.min(Math.max(num, min), max);
-    return Math.round(clamped);
+    // Preserve decimal per-unit nutrition until quantity scaling is complete.
+    return Math.round(clamped * 1000) / 1000;
 }
 
 function cleanText(value, fallback = '', maxLength = 140) {
@@ -1821,52 +1825,18 @@ function buildParserBackedResponse(parserResult, source, lookupQuery, notes = ''
     };
 }
 
-function deriveBaseUrl(req) {
-    const explicit = cleanText(process.env.APP_BASE_URL || '', '', 200);
-    if (explicit && /^https?:\/\//i.test(explicit)) return explicit;
-
-    const forwardedProto = cleanText(req?.headers?.['x-forwarded-proto'] || '', '', 10) || 'https';
-    const forwardedHost = cleanText(String(req?.headers?.['x-forwarded-host'] || '').split(',')[0], '', 200);
-    if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
-
-    const host = cleanText(String(req?.headers?.host || '').split(',')[0], '', 200);
-    if (host) return `${forwardedProto}://${host}`;
-
-    const productionUrl = cleanText(process.env.VERCEL_PROJECT_PRODUCTION_URL || '', '', 200);
-    if (productionUrl) return `https://${productionUrl}`;
-
-    const vercelUrl = cleanText(process.env.VERCEL_URL || '', '', 200);
-    if (vercelUrl) return `https://${vercelUrl}`;
-
-    return 'https://fuelfire-app.vercel.app';
-}
-
-async function lookupViaFoodParser(baseUrl, query, memoryHints = [], locationContext = null, callerAuthorization = '') {
-    const headers = { 'Content-Type': 'application/json' };
-    if (process.env.FUELFIRE_INTERNAL_API_TOKEN) {
-        headers['X-FuelFire-Internal-Token'] = process.env.FUELFIRE_INTERNAL_API_TOKEN;
-    } else if (callerAuthorization) {
-        headers.Authorization = callerAuthorization;
-    }
-
-    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/ai-food-parser`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
+async function lookupViaFoodParser(request, query, memoryHints = [], locationContext = null) {
+    return runFoodParserInProcess({
+        headers: request?.headers || {},
+        socket: request?.socket,
+        body: {
             query,
             forceWebSearch: false,
             source: 'photo',
             foodMemoryHints: sanitizeFoodMemoryHints(memoryHints),
-            locationContext: sanitizeLocationContext(locationContext)
-        })
+            locationContext: sanitizeLocationContext(locationContext),
+        },
     });
-
-    if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Food parser lookup failed (${response.status}): ${text.slice(0, 200)}`);
-    }
-
-    return response.json();
 }
 
 function scoreParserMatch(parserResult, lookupQuery) {
@@ -1898,12 +1868,12 @@ function scoreParserMatch(parserResult, lookupQuery) {
     return score;
 }
 
-async function lookupFirstParserMatch(baseUrl, lookupQueries, memoryHints = [], locationContext = null, callerAuthorization = '') {
+async function lookupFirstParserMatch(request, lookupQueries, memoryHints = [], locationContext = null) {
     let bestMatch = null;
 
     for (const lookupQuery of lookupQueries) {
         try {
-            const parserResult = await lookupViaFoodParser(baseUrl, lookupQuery, memoryHints, locationContext, callerAuthorization);
+            const parserResult = await lookupViaFoodParser(request, lookupQuery, memoryHints, locationContext);
             if (parserResult?.success && Array.isArray(parserResult.foods) && parserResult.foods.length > 0) {
                 const score = scoreParserMatch(parserResult, lookupQuery);
                 if (!bestMatch || score > bestMatch.score) {
@@ -2192,7 +2162,11 @@ Use numeric values without units. Use null only when a field is genuinely unread
     };
 }
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
+    return runWithProviderBudget(() => handleFoodVisionRequest(req, res));
+}
+
+async function handleFoodVisionRequest(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
         return;
     }
@@ -2202,12 +2176,21 @@ export default async function handler(req, res) {
         return;
     }
 
+    if (!requireBodyLimit(req, res, 12 * 1024 * 1024)) return;
+    const body = getRequestBody(req);
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            error: 'A JSON object body is required.',
+            code: 'INVALID_JSON_BODY',
+        });
+    }
+
     if (!await requireAiAccess(req, res, { capability: 'ai_food' })) {
         return;
     }
 
     try {
-        const body = req.body || {};
         const image = body.image;
         const mimeType = cleanText(body.mimeType, 'image/jpeg', 60);
         const preferWebSearch = body.forceWebSearch !== false;
@@ -2235,9 +2218,6 @@ export default async function handler(req, res) {
         ]
             .filter(Boolean)
             .join(' | ');
-        const baseUrl = deriveBaseUrl(req);
-        const callerAuthorization = cleanText(req?.headers?.authorization || '', '', 2048);
-
         if (!image || typeof image !== 'string') {
             return res.status(400).json({ error: 'Image data required' });
         }
@@ -2271,7 +2251,7 @@ export default async function handler(req, res) {
         }
 
         if (!foodAiResponse && preferWebSearch && hintLookupQueries.length) {
-            const hintMatch = await lookupFirstParserMatch(baseUrl, hintLookupQueries, foodMemoryHints, locationContext, callerAuthorization);
+            const hintMatch = await lookupFirstParserMatch(req, hintLookupQueries, foodMemoryHints, locationContext);
             if (hintMatch) {
                 return res.status(200).json(buildParserBackedResponse(
                     hintMatch.parserResult,
@@ -2306,7 +2286,7 @@ export default async function handler(req, res) {
 
         if (parsedPayload.error) {
             if (preferWebSearch && hintLookupQueries.length) {
-                const hintMatch = await lookupFirstParserMatch(baseUrl, hintLookupQueries, foodMemoryHints, locationContext, callerAuthorization);
+                const hintMatch = await lookupFirstParserMatch(req, hintLookupQueries, foodMemoryHints, locationContext);
                 if (hintMatch) {
                     return res.status(200).json(buildParserBackedResponse(
                         hintMatch.parserResult,
@@ -2327,7 +2307,7 @@ export default async function handler(req, res) {
 
         if (!foods.length) {
             if (preferWebSearch && hintLookupQueries.length) {
-                const hintMatch = await lookupFirstParserMatch(baseUrl, hintLookupQueries, foodMemoryHints, locationContext, callerAuthorization);
+                const hintMatch = await lookupFirstParserMatch(req, hintLookupQueries, foodMemoryHints, locationContext);
                 if (hintMatch) {
                     return res.status(200).json(buildParserBackedResponse(
                         hintMatch.parserResult,
@@ -2367,7 +2347,7 @@ export default async function handler(req, res) {
         const shouldLookupNutrition = shouldLookupPhotoNutrition(foods, parsedPayload, imageContext);
         if (preferWebSearch && shouldLookupNutrition && lookupQueries.length && !shouldTrustVisibleLabel) {
             try {
-                const lookupMatch = await lookupFirstParserMatch(baseUrl, lookupQueries, foodMemoryHints, locationContext, callerAuthorization);
+                const lookupMatch = await lookupFirstParserMatch(req, lookupQueries, foodMemoryHints, locationContext);
                 if (lookupMatch?.parserResult?.success && Array.isArray(lookupMatch.parserResult.foods) && lookupMatch.parserResult.foods.length > 0) {
                     const reconciledFoods = reconcileParserNutritionWithVision(foods, lookupMatch.parserResult.foods);
                     if (reconciledFoods) {

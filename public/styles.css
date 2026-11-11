@@ -738,6 +738,27 @@ body {
     transition: all 0.3s ease;
 }
 
+button.action-card {
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.health-card-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    color: var(--primary-dark);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .action-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 15px 35px rgba(75, 156, 211, 0.2);
@@ -826,6 +847,39 @@ body {
     background: rgba(255,255,255,0.1);
     border-left: 4px solid #fff;
     padding-left: 35px;
+}
+
+.sidebar-group-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 13px 25px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-group-toggle::after {
+    content: '＋';
+    font-size: 18px;
+    line-height: 1;
+}
+
+.sidebar-group-toggle[aria-expanded="true"]::after {
+    content: '−';
+}
+
+.sidebar-submenu {
+    padding: 0;
+}
+
+.sidebar-submenu[hidden] {
+    display: none;
 }
 
 .menu-item.active {
@@ -1033,6 +1087,49 @@ body {
 .nav-item:focus-visible {
     outline: 3px solid #fff;
     outline-offset: -3px;
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid var(--carolina-dark);
+    outline-offset: 3px;
+}
+
+.header > button.hamburger:focus-visible,
+.sidebar .menu-item:focus-visible,
+.sidebar .sidebar-group-toggle:focus-visible,
+.bottom-nav .nav-item:focus-visible {
+    outline-color: #fff;
+}
+
+.skip-link {
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    z-index: 13000;
+    transform: translateY(-180%);
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #13294b;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 
 .nav-item:active {
@@ -1459,5 +1556,39 @@ body.home-app-shell #logFoodModal {
     .nav-glow {
         animation: none !important;
         transition: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .content {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .hero-title {
+        font-size: 22px;
+    }
+
+    .brand-logo {
+        font-size: 40px;
+    }
+
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .home-summary-card,
+    .health-today-card {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
     }
 }

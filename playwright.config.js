@@ -49,5 +49,15 @@ export default defineConfig({
                 hasTouch: true,
             },
         },
+        {
+            name: 'mobile-webkit',
+            use: {
+                browserName: 'webkit',
+                viewport: { width: 390, height: 844 },
+                deviceScaleFactor: 3,
+                isMobile: true,
+                hasTouch: true,
+            },
+        },
     ],
 });

@@ -2147,6 +2147,336 @@ function escapeAttribute(value) {
         .replace(/>/g, '&gt;');
 }
 
+// Workout history and draft access is intentionally centralized here. The shared
+// script is the normal runtime path; the small local fallback only keeps this
+// page usable in standalone tests before the shell adds that script.
+let appTrackerSession = null;
+let appTrackerCompletionInFlight = false;
+
+function getAppWorkoutStore() {
+    return window.FuelFireWorkouts || null;
+}
+
+function readAppWorkoutHistory() {
+    const store = getAppWorkoutStore();
+    if (store && typeof store.readHistory === 'function') {
+        return store.readHistory(localStorage);
+    }
+    // Standalone fallback for this page while the shared store script is unavailable.
+    try {
+        const parsed = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function completeAppWorkout(record) {
+    const store = getAppWorkoutStore();
+    if (store && typeof store.completeSession === 'function') {
+        return store.completeSession(record, localStorage);
+    }
+    // Standalone fallback for this page while the shared store script is unavailable.
+    let history = readAppWorkoutHistory();
+    const existingIndex = history.findIndex(item => item && item.id && item.id === record.id);
+    const saved = { ...record, source: 'fuelfire' };
+    if (existingIndex === -1) history.unshift(saved);
+    else history[existingIndex] = { ...history[existingIndex], ...saved };
+    const serialized = JSON.stringify(history);
+    localStorage.setItem('workoutHistory', serialized);
+    const persisted = JSON.parse(localStorage.getItem('workoutHistory') || 'null');
+    if (!Array.isArray(persisted) || !persisted.some(item => item && item.id === saved.id)) {
+        const error = new Error('Workout history persistence could not be verified');
+        error.code = 'WORKOUT_HISTORY_PERSISTENCE_UNVERIFIED';
+        throw error;
+    }
+    return saved;
+}
+
+function markAppWorkoutHealthExported(id, details = {}) {
+    const store = getAppWorkoutStore();
+    if (store && typeof store.markHealthExported === 'function') {
+        return store.markHealthExported(id, details, localStorage);
+    }
+    const history = readAppWorkoutHistory();
+    const index = history.findIndex(item => item && item.id === id);
+    if (index === -1) return null;
+    history[index] = {
+        ...history[index],
+        healthExported: true,
+        healthExportedAt: details.healthExportedAt || new Date().toISOString(),
+        healthWorkoutId: details.healthWorkoutId || history[index].healthWorkoutId || null
+    };
+    localStorage.setItem('workoutHistory', JSON.stringify(history));
+    return history[index];
+}
+
+function readAppWorkoutDraft() {
+    const store = getAppWorkoutStore();
+    if (store && typeof store.readDraft === 'function') return store.readDraft(localStorage);
+    // Standalone fallback for this page while the shared store script is unavailable.
+    try {
+        return JSON.parse(localStorage.getItem('fuelfire_workout_draft') || 'null');
+    } catch (error) {
+        return null;
+    }
+}
+
+function saveAppWorkoutDraft(draft) {
+    const store = getAppWorkoutStore();
+    try {
+        if (store && typeof store.saveDraft === 'function') return store.saveDraft(draft, localStorage);
+        // Standalone fallback for this page while the shared store script is unavailable.
+        const serialized = JSON.stringify({ ...draft, version: 1, updatedAt: new Date().toISOString() });
+        localStorage.setItem('fuelfire_workout_draft', serialized);
+        if (localStorage.getItem('fuelfire_workout_draft') !== serialized) {
+            const error = new Error('Workout draft persistence could not be verified');
+            error.code = 'WORKOUT_DRAFT_PERSISTENCE_UNVERIFIED';
+            throw error;
+        }
+        return draft;
+    } catch (error) {
+        const status = document.querySelector('[data-workout-draft-status]');
+        if (status) status.textContent = 'Draft could not be saved. Your workout is still open; try again.';
+        console.error('Workout draft persistence failed:', error);
+        return null;
+    }
+}
+
+function clearAppWorkoutDraft() {
+    const store = getAppWorkoutStore();
+    if (store && typeof store.clearDraft === 'function') store.clearDraft(localStorage);
+    else localStorage.removeItem('fuelfire_workout_draft');
+}
+
+function appOptionalNumber(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const number = Number.parseFloat(value);
+    return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+function appExerciseIsTimed(exercise) {
+    const unit = String(exercise?.unit || '').toLowerCase();
+    const reps = String(exercise?.reps || exercise?.targetReps || '').toLowerCase();
+    return unit === 'seconds' || unit === 'time' || /(?:sec|second|min|minute)/.test(reps);
+}
+
+function appExerciseIsBodyweight(exercise) {
+    const unit = String(exercise?.unit || '').toLowerCase();
+    const weight = String(exercise?.suggestedWeight || exercise?.weight || '').toLowerCase();
+    return unit === 'bodyweight' || /bodyweight|^bw$/.test(weight);
+}
+
+function appSetCount(exercise) {
+    if (Array.isArray(exercise?.sets)) return Math.max(1, exercise.sets.length);
+    const parsed = Number.parseInt(exercise?.sets, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 3;
+}
+
+function appWorkoutId(workout, day) {
+    return String(workout?.id || workout?.sessionId || workout?.workoutName || workout?.name || `workout-${day}`);
+}
+
+function beginAppTrackerSession(workout, day, exercises, source) {
+    const workoutId = appWorkoutId(workout, day);
+    const workoutName = workout?.workoutName || workout?.name || 'Workout';
+    if (appTrackerSession && appTrackerSession.workoutId === workoutId && appTrackerSession.day === day) {
+        return appTrackerSession;
+    }
+
+    const draft = readAppWorkoutDraft();
+    const draftMatches = draft && draft.workoutId === workoutId && draft.day === day;
+    const startedAt = workout?.startedAt || (draftMatches && draft.startedAt) || new Date().toISOString();
+    appTrackerSession = {
+        workoutId,
+        day,
+        source,
+        sessionId: workout?.sessionId || (draftMatches && draft.sessionId) || `app-${workoutId}-${day}-${Date.now()}`,
+        startedAt,
+        workoutName,
+        exercises,
+        calories: appOptionalNumber(workout?.calories)
+    };
+    return appTrackerSession;
+}
+
+function collectAppTrackerExercises(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('[data-tracker-exercise]')).map(exerciseContainer => {
+        const exerciseIndex = Number.parseInt(exerciseContainer.dataset.trackerExercise, 10);
+        const sets = Array.from(exerciseContainer.querySelectorAll('[data-tracker-set]')).map(setContainer => {
+            const getField = field => setContainer.querySelector(`[data-tracker-field="${field}"]`);
+            const durationInput = getField('durationSeconds');
+            const weightInput = getField('weight');
+            const repsInput = getField('reps');
+            const unitInput = getField('unit');
+            return {
+                index: Number.parseInt(setContainer.dataset.trackerSet, 10),
+                weight: weightInput ? appOptionalNumber(weightInput.value) : null,
+                reps: repsInput ? appOptionalNumber(repsInput.value) : null,
+                durationSeconds: durationInput ? appOptionalNumber(durationInput.value) : null,
+                unit: unitInput ? unitInput.value : (durationInput ? 'seconds' : 'lb'),
+                completed: Boolean(getField('completed')?.checked)
+            };
+        });
+        return {
+            id: exerciseContainer.dataset.exerciseId || `exercise-${exerciseIndex}`,
+            name: exerciseContainer.dataset.exerciseName || `Exercise ${exerciseIndex + 1}`,
+            notes: exerciseContainer.querySelector('[data-tracker-notes]')?.value || '',
+            completed: sets.some(set => set.completed),
+            sets
+        };
+    });
+}
+
+function saveAppTrackerDraftFrom(container) {
+    if (!appTrackerSession || !container) return;
+    saveAppWorkoutDraft({
+        ...appTrackerSession,
+        exercises: collectAppTrackerExercises(container)
+    });
+}
+
+function restoreAppTrackerDraft(container) {
+    const draft = readAppWorkoutDraft();
+    if (!draft || !appTrackerSession || draft.sessionId !== appTrackerSession.sessionId || !Array.isArray(draft.exercises)) return;
+    draft.exercises.forEach((draftExercise, exerciseIndex) => {
+        const exerciseContainer = container.querySelector(`[data-tracker-exercise="${exerciseIndex}"]`);
+        if (!exerciseContainer) return;
+        (draftExercise.sets || []).forEach(draftSet => {
+            const setContainer = exerciseContainer.querySelector(`[data-tracker-set="${draftSet.index}"]`);
+            if (!setContainer) return;
+            ['weight', 'reps', 'durationSeconds', 'unit'].forEach(field => {
+                const input = setContainer.querySelector(`[data-tracker-field="${field}"]`);
+                if (input && draftSet[field] !== null && draftSet[field] !== undefined) input.value = draftSet[field];
+            });
+            const completed = setContainer.querySelector('[data-tracker-field="completed"]');
+            if (completed) completed.checked = Boolean(draftSet.completed);
+        });
+        const notes = exerciseContainer.querySelector('[data-tracker-notes]');
+        if (notes) notes.value = draftExercise.notes || '';
+    });
+    const workoutNotes = container.querySelector('[data-workout-notes]');
+    if (workoutNotes && draft.notes) workoutNotes.value = draft.notes;
+}
+
+function renderAppTrackerFields(container, workout, day, exercises, options = {}) {
+    const prefix = options.prefix || 'app';
+    const includeComplete = options.includeComplete !== false;
+    const programLabel = options.programLabel || '';
+    const session = beginAppTrackerSession(workout, day, exercises, options.source || 'saved');
+    const safeWorkoutName = escapeAttribute(session.workoutName);
+    const safeDay = escapeAttribute(day || 'Workout');
+    let html = `
+        <button type="button" onclick="closeWorkoutTracker()" style="background: white; color: var(--carolina-blue); border: 2px solid var(--carolina-blue); padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px;">
+            <span aria-hidden="true">←</span> Back
+        </button>
+        <div style="background: var(--gradient-1); color: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; text-align: center;">
+            <h2 style="font-size: 18px; margin: 0 0 5px 0; font-weight: 700;">${safeWorkoutName}</h2>
+            <p style="opacity: 0.95; margin: 0; font-size: 13px;">${safeDay}${programLabel ? ` • ${escapeAttribute(programLabel)}` : ''} • ${exercises.length} exercises</p>
+        </div>
+        <div data-tracker-root="true" data-tracker-session-id="${escapeAttribute(session.sessionId)}" data-tracker-started-at="${escapeAttribute(session.startedAt)}" data-tracker-workout-name="${safeWorkoutName}">
+            <div data-workout-draft-status role="status" aria-live="polite" aria-atomic="true"></div>
+    `;
+
+    exercises.forEach((exercise, exerciseIndex) => {
+        const safeName = escapeAttribute(exercise.name || `Exercise ${exerciseIndex + 1}`);
+        const timed = appExerciseIsTimed(exercise);
+        const bodyweight = appExerciseIsBodyweight(exercise);
+        const setCount = appSetCount(exercise);
+        const defaultUnit = timed ? 'seconds' : (bodyweight ? 'bodyweight' : (exercise.unit || 'lb'));
+        html += `
+            <section class="exercise-container" data-tracker-exercise="${exerciseIndex}" data-exercise-id="${escapeAttribute(exercise.id || '')}" data-exercise-name="${safeName}" style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3 class="exercise-name" style="margin: 0; color: var(--dark); font-size: 15px;">${exerciseIndex + 1}. ${safeName}</h3>
+                    <span style="background: var(--primary); color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">${setCount} sets</span>
+                </div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Target: ${escapeAttribute(exercise.reps || exercise.targetReps || '')}${exercise.rest ? ` • Rest: ${escapeAttribute(exercise.rest)}` : ''}</div>
+                ${exercise.notes ? `<div style="font-size: 11px; color: #666; margin-bottom: 12px;">${escapeAttribute(exercise.notes)}</div>` : ''}
+                <div style="display: grid; gap: 8px;">
+        `;
+        for (let setIndex = 1; setIndex <= setCount; setIndex += 1) {
+            const setId = `${prefix}-${exerciseIndex}-${setIndex}`;
+            html += `
+                    <div class="set-inputs" data-tracker-set="${setIndex}" style="display: grid; grid-template-columns: 45px ${timed ? '1fr' : '1fr 1fr 1fr'} 32px; gap: 6px; align-items: end;">
+                        <div class="set-label" style="font-size: 11px; font-weight: 700; color: var(--primary-dark);">Set ${setIndex}</div>
+            `;
+            if (timed) {
+                html += `
+                        <div class="input-group">
+                            <label for="duration-${setId}" style="font-size: 10px; color: #666;">Duration seconds, ${safeName}, set ${setIndex}</label>
+                            <input id="duration-${setId}" data-tracker-field="durationSeconds" type="number" min="0" step="1" inputmode="numeric" aria-label="Duration seconds, ${safeName}, set ${setIndex}" style="width: 100%; padding: 8px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
+                        </div>
+                `;
+            } else {
+                html += `
+                        <div class="input-group">
+                            <label for="weight-${setId}" style="font-size: 10px; color: #666;">Weight, ${safeName}, set ${setIndex}</label>
+                            <input id="weight-${setId}" data-tracker-field="weight" type="number" min="0" step="0.1" inputmode="decimal" aria-label="Weight, ${safeName}, set ${setIndex}" placeholder="${bodyweight ? 'Bodyweight' : '0'}" style="width: 100%; padding: 8px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
+                        </div>
+                        <div class="input-group">
+                            <label for="reps-${setId}" style="font-size: 10px; color: #666;">Reps, ${safeName}, set ${setIndex}</label>
+                            <input id="reps-${setId}" data-tracker-field="reps" type="number" min="0" step="1" inputmode="numeric" aria-label="Reps, ${safeName}, set ${setIndex}" placeholder="${escapeAttribute(exercise.targetReps || exercise.reps || '0')}" style="width: 100%; padding: 8px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
+                        </div>
+                        <div class="input-group">
+                            <label for="unit-${setId}" style="font-size: 10px; color: #666;">Unit, ${safeName}, set ${setIndex}</label>
+                            <select id="unit-${setId}" data-tracker-field="unit" aria-label="Unit, ${safeName}, set ${setIndex}" style="width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="lb"${defaultUnit === 'lb' ? ' selected' : ''}>lb</option>
+                                <option value="kg"${defaultUnit === 'kg' ? ' selected' : ''}>kg</option>
+                                <option value="bodyweight"${defaultUnit === 'bodyweight' ? ' selected' : ''}>Bodyweight</option>
+                            </select>
+                        </div>
+                `;
+            }
+            html += `
+                        <div class="input-group">
+                            <label for="completed-${setId}" style="font-size: 10px; color: #666;">Done, ${safeName}, set ${setIndex}</label>
+                            <input id="completed-${setId}" data-tracker-field="completed" type="checkbox" aria-label="Completed, ${safeName}, set ${setIndex}" style="width: 20px; height: 20px; cursor: pointer; justify-self: center;">
+                        </div>
+                    </div>
+            `;
+        }
+        html += `
+                </div>
+                <label for="notes-${prefix}-${exerciseIndex}" style="display: block; font-size: 10px; color: #666; margin-top: 12px;">Notes for ${safeName}</label>
+                <textarea id="notes-${prefix}-${exerciseIndex}" data-tracker-notes="true" aria-label="Notes for ${safeName}" placeholder="How did it feel?" style="width: 100%; min-height: 56px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font: inherit; resize: vertical;"></textarea>
+            </section>
+        `;
+    });
+
+    html += `
+            ${options.includeNotes ? '<label for="workout-notes" style="display: block; font-weight: 700; margin: 15px 0 6px;">Workout notes</label><textarea id="workout-notes" data-workout-notes="true" aria-label="Workout notes" placeholder="How did the workout feel?" style="width: 100%; min-height: 70px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font: inherit; resize: vertical;"></textarea>' : ''}
+            ${includeComplete ? '<button type="button" class="tracker-complete" onclick="completeWorkout()" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none; padding: 14px 24px; border-radius: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; font-size: 15px;">✅ Complete Workout</button>' : ''}
+        </div>
+    `;
+    container.innerHTML = html;
+    restoreAppTrackerDraft(container);
+    if (container.dataset.appDraftListenersAttached !== 'true') {
+        const save = () => saveAppTrackerDraftFrom(container);
+        container.addEventListener('input', save);
+        container.addEventListener('change', save);
+        container.dataset.appDraftListenersAttached = 'true';
+    }
+    saveAppTrackerDraftFrom(container);
+    return session;
+}
+
+async function saveCompletedAppWorkout(record) {
+    const savedWorkout = completeAppWorkout(record);
+    if (window.logWorkoutToAppleHealth) {
+        try {
+            const result = await window.logWorkoutToAppleHealth('strength_training', record.duration, record.calories || 0);
+            if (result) {
+                const healthWorkoutId = typeof result === 'object' ? (result.id || result.uuid || result.healthWorkoutId) : null;
+                markAppWorkoutHealthExported(savedWorkout.id, { healthWorkoutId });
+            }
+        } catch (error) {
+            console.error('Error logging workout to Apple Health:', error);
+        }
+    }
+    return savedWorkout;
+}
+
 function formatLocationLabel(loc) {
     const labels = {
         home: 'Home Setup',
@@ -2516,85 +2846,28 @@ function displayWorkoutTracker(workout, selectedDay = null) {
     const displayDay = selectedDay || selectedWorkoutDay || today;
     selectedWorkoutDay = displayDay; // Store for future use
 
-    let trackerHTML = `
-        <button onclick="closeWorkoutTracker()" style="background: white; color: var(--carolina-blue); border: 2px solid var(--carolina-blue); padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px;">
-            <span>←</span> Back
-        </button>
-
-        <div style="background: var(--gradient-1); color: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; text-align: center;">
-            <h2 style="font-size: 18px; margin: 0 0 5px 0; font-weight: 700;">${workout.workoutName || workout.name || 'Your Workout'}</h2>
-            <p style="opacity: 0.95; margin: 0; font-size: 13px;">${displayDay} - Let's crush this session! 💪</p>
-        </div>
-    `;
-
     // Add selected day's workout details
     const todaysWorkout = getTodaysWorkout(displayDay, workout);
-    
-    if (todaysWorkout) {
-        trackerHTML += `
-            <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);">
-                <h3 style="color: var(--dark); margin-bottom: 12px; font-size: 15px; font-weight: 700;">🎯 ${todaysWorkout.name}</h3>
-                <div style="display: grid; gap: 12px;">
-        `;
-
-        // Add exercises
-        todaysWorkout.exercises.forEach((exercise, index) => {
-            trackerHTML += `
-                <div style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h4 style="color: var(--dark); font-size: 13px; margin: 0; font-weight: 700;">
-                            <span style="color: var(--carolina-blue); margin-right: 4px;">${index + 1}.</span>${exercise.name}
-                        </h4>
-                        <span style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; box-shadow: 0 2px 6px rgba(79,172,254,0.25);">
-                            ${exercise.sets} × ${exercise.reps}
-                        </span>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 30px 1fr 1fr 30px; gap: 4px; align-items: center;">
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px;">Set</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px; text-align: center;">Wt</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px; text-align: center;">Reps</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 10px; text-align: center;">✓</div>
-            `;
-
-            // Add input rows for each set
-            for (let set = 1; set <= parseInt(exercise.sets); set++) {
-                trackerHTML += `
-                    <div style="text-align: center; font-weight: bold; font-size: 11px;">${set}</div>
-                    <input type="number" placeholder="${exercise.suggestedWeight || '0'}"
-                           style="padding: 4px 2px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 11px; width: 100%;">
-                    <input type="number" placeholder="${exercise.targetReps || exercise.reps.split('-')[1]}"
-                           style="padding: 4px 2px; border: 1px solid #ddd; border-radius: 6px; text-align: center; background: white; font-size: 11px; width: 100%;">
-                    <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer; justify-self: center;">
-                `;
-            }
-
-            trackerHTML += `
-                    </div>
-                </div>
-            `;
-        });
-
-        trackerHTML += `
-                </div>
-
-                <button onclick="completeWorkout()" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none; padding: 14px 24px; border-radius: 15px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 15px; font-size: 15px; box-shadow: 0 4px 15px rgba(67,233,123,0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(67,233,123,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(67,233,123,0.3)'">
-                    ✅ Complete Workout
-                </button>
-            </div>
-        `;
-    } else {
-        trackerHTML += `
+    if (!todaysWorkout || !Array.isArray(todaysWorkout.exercises) || todaysWorkout.exercises.length === 0) {
+        container.innerHTML = `
+            <button type="button" onclick="closeWorkoutTracker()" style="background: white; color: var(--carolina-blue); border: 2px solid var(--carolina-blue); padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 15px;">← Back</button>
             <div style="background: var(--card-bg); padding: 40px; border-radius: 20px; text-align: center;">
-                <div style="font-size: 48px; margin-bottom: 20px;">😴</div>
-                <h3 style="color: var(--dark); margin-bottom: 10px;">Rest Day</h3>
-                <p style="color: var(--primary-dark);">No workout scheduled for today. Rest and recover!</p>
-                <p style="color: #666; font-size: 14px; margin-top: 20px;">Your next workout is tomorrow.</p>
+                <div style="font-size: 48px; margin-bottom: 20px;" aria-hidden="true">😴</div>
+                <h2 style="color: var(--dark); margin-bottom: 10px;">Rest Day</h2>
+                <p style="color: var(--primary-dark);">No workout scheduled for ${escapeAttribute(displayDay)}. Rest and recover!</p>
             </div>
         `;
+        return;
     }
 
-    container.innerHTML = trackerHTML;
+    renderAppTrackerFields(container, {
+        ...workout,
+        workoutName: workout.workoutName || workout.name || 'Your Workout'
+    }, displayDay, todaysWorkout.exercises, {
+        prefix: 'saved',
+        source: 'saved',
+        programLabel: todaysWorkout.name && todaysWorkout.name !== workout.workoutName ? todaysWorkout.name : ''
+    });
 }
 
 // Close workout tracker and return to saved workouts
@@ -2603,6 +2876,10 @@ function closeWorkoutTracker() {
     if (container) {
         container.innerHTML = ''; // Clear workout content
     }
+    const modalContainer = document.getElementById('tracker-content');
+    if (modalContainer) modalContainer.innerHTML = '';
+    const modal = document.getElementById('workout-tracker');
+    if (modal) modal.style.display = 'none';
 
     // Show the fitness dashboard sections again
     const trackWorkoutsScreen = document.getElementById('track-workouts');
@@ -2617,6 +2894,7 @@ function closeWorkoutTracker() {
     // Clear current workout data
     currentWorkoutData = null;
     selectedWorkoutDay = null;
+    appTrackerSession = null;
 
     // Navigate back to saved workouts
     showScreen('saved-workouts');
@@ -2647,6 +2925,24 @@ function checkIfWorkoutDay(day, workout) {
 
 // Get today's workout details
 function getTodaysWorkout(day, workout) {
+    // Manual multi-day plans must resolve the selected day before any generic
+    // split fallback. This preserves the exact exercises saved for that day.
+    if (workout?.weeklySchedule?.[day]) {
+        const dayWorkout = workout.weeklySchedule[day];
+        return {
+            name: dayWorkout.name || day,
+            exercises: (dayWorkout.exercises || []).map(exercise => ({
+                ...exercise,
+                name: exercise.name || 'Exercise',
+                sets: exercise.sets || 3,
+                reps: exercise.reps || exercise.targetReps || '10',
+                rest: exercise.rest || '60-90 sec',
+                suggestedWeight: exercise.suggestedWeight || exercise.weight || (appExerciseIsBodyweight(exercise) ? 'Bodyweight' : '0'),
+                notes: exercise.notes || `${exercise.equipment || ''}${exercise.primaryMuscles ? ` | Targets: ${exercise.primaryMuscles.join(', ')}` : ''}`
+            }))
+        };
+    }
+
     // Check if it's a preset workout with stored program data
     if (workout.id && workoutPrograms[workout.id]) {
         const program = workoutPrograms[workout.id];
@@ -2811,29 +3107,61 @@ function getTodaysWorkout(day, workout) {
     return null;
 }
 
-// Complete workout function
-function completeWorkout() {
-    if (!currentWorkoutData) {
-        alert('Great job completing your workout! 💪');
-        showScreen('home');
+// Complete workout function for saved, manual, and program trackers.
+async function completeWorkout() {
+    if (appTrackerCompletionInFlight || !appTrackerSession) return;
+    const container = document.getElementById('workout-tracker-content');
+    if (!container) return;
+
+    if (!confirm('Mark this workout as completed?')) return;
+
+    appTrackerCompletionInFlight = true;
+    const button = container.querySelector('.tracker-complete');
+    if (button) {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+    }
+
+    const endedAt = new Date();
+    const startedAt = new Date(appTrackerSession.startedAt);
+    const duration = Number.isFinite(startedAt.getTime())
+        ? Math.max(0, Math.floor((endedAt.getTime() - startedAt.getTime()) / 60000))
+        : 0;
+    const completedWorkout = {
+        id: appTrackerSession.sessionId,
+        programId: currentWorkoutData?.id || null,
+        workoutName: appTrackerSession.workoutName,
+        date: endedAt.toISOString(),
+        startedAt: appTrackerSession.startedAt,
+        endedAt: endedAt.toISOString(),
+        duration,
+        calories: appTrackerSession.calories,
+        source: 'fuelfire',
+        day: appTrackerSession.day,
+        exercises: collectAppTrackerExercises(container),
+        healthExported: false,
+        healthExportedAt: null,
+        healthWorkoutId: null
+    };
+
+    try {
+        await saveCompletedAppWorkout(completedWorkout);
+        // The shared store has verified the history write before this point.
+        clearAppWorkoutDraft();
+    } catch (error) {
+        appTrackerCompletionInFlight = false;
+        if (button) {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+        }
+        const status = container.querySelector('[data-workout-draft-status]');
+        if (status) status.textContent = 'Workout could not be saved. Your draft was kept; try again.';
+        alert('Workout could not be saved. Your progress is still available to retry.');
+        console.error('Workout completion persistence failed:', error);
         return;
     }
 
-    // Create workout history entry
-    const completedWorkout = {
-        id: Date.now().toString(),
-        workoutName: currentWorkoutData.workoutName || currentWorkoutData.name || 'Workout',
-        date: new Date().toISOString(),
-        duration: 60, // Default duration
-        day: selectedWorkoutDay,
-        completed: true
-    };
-
-    // Save to workout history
-    let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-    workoutHistory.unshift(completedWorkout); // Add to beginning
-    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-
+    appTrackerCompletionInFlight = false;
     alert('🎉 Workout completed and saved to history! Great job!');
     closeWorkoutTracker();
     showScreen('track-workouts');
@@ -2979,59 +3307,25 @@ function startWorkoutNow() {
 
     // Show the workout tracker modal with the actual exercises
     if (workout && workout.exercises && workout.exercises.length > 0) {
-        // Populate the tracker with exercises
         const trackerContent = document.getElementById('tracker-content');
         const trackerTitle = document.getElementById('tracker-title');
-
-        trackerTitle.textContent = workout.workoutName || workout.name || 'Your Workout';
-
-        let html = `
-            <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
-                <h3 style="margin: 0 0 5px 0;">${workout.workoutName || workout.name}</h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 14px;">${workout.duration || 'Custom'} ${workout.duration ? 'minutes' : ''} • ${workout.exercises.length} exercises</p>
-            </div>
-        `;
-
-        workout.exercises.forEach((exercise, index) => {
-            html += `
-                <div style="background: var(--card-bg); padding: 12px; border-radius: 12px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h4 style="color: var(--dark); margin: 0; font-size: 15px;">
-                            ${index + 1}. ${exercise.name}
-                        </h4>
-                        <span style="background: var(--gradient-1); color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px;">
-                            ${exercise.sets} × ${exercise.reps}
-                        </span>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 35px 1fr 1fr 40px; gap: 6px; align-items: center; margin-bottom: 6px;">
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px;">Set</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Wt</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">Reps</div>
-                        <div style="font-weight: bold; color: var(--primary-dark); font-size: 11px; text-align: center;">✓</div>
-                    </div>
-            `;
-
-            // Add input rows for each set
-            for (let set = 1; set <= parseInt(exercise.sets); set++) {
-                html += `
-                    <div style="display: grid; grid-template-columns: 35px 1fr 1fr 40px; gap: 6px; align-items: center; margin-bottom: 5px;">
-                        <div style="text-align: center; font-weight: bold; font-size: 12px;">${set}</div>
-                        <input type="number" placeholder="lbs"
-                               style="padding: 6px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 13px;">
-                        <input type="number" placeholder="${exercise.reps}"
-                               style="padding: 6px 4px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-size: 13px;">
-                        <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer; justify-self: center;">
-                    </div>
-                `;
-            }
-
-            html += `</div>`;
+        if (!trackerContent || !trackerTitle) return;
+        const startedAt = workout.startedAt || new Date().toISOString();
+        const sessionWorkout = {
+            ...workout,
+            sessionId: workout.sessionId || `quick-app-${Date.now()}`,
+            startedAt,
+            workoutName: workout.workoutName || workout.name || 'Your Workout'
+        };
+        currentWorkoutData = sessionWorkout;
+        currentWorkoutProgramId = sessionWorkout.id || null;
+        trackerTitle.textContent = sessionWorkout.workoutName;
+        renderAppTrackerFields(trackerContent, sessionWorkout, 'Quick', sessionWorkout.exercises, {
+            prefix: 'modal',
+            source: 'quick',
+            includeComplete: false,
+            includeNotes: true
         });
-
-        trackerContent.innerHTML = html;
-
-        // Show the tracker modal
         document.getElementById('workout-tracker').style.display = 'block';
     } else {
         alert('⚠️ This workout does not have any exercises. Please try generating a new workout or building a custom one.');
@@ -3550,58 +3844,23 @@ function deleteSavedWorkout(workoutId) {
 function showWorkoutTracker(programId, day, workout) {
     currentWorkoutProgramId = programId;
     const program = workoutPrograms[programId];
-    document.getElementById('tracker-title').textContent = `${day} - ${workout.name}`;
-    
-    let trackerHTML = `
-        <div style="background: var(--gradient-1); color: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; text-align: center;">
-            <h3 style="margin: 0 0 10px 0;">${workout.name}</h3>
-            <p style="opacity: 0.9; margin: 0;">${program.name} • ${workout.exercises.length} exercises</p>
-        </div>
-        
-        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px;">
-            <h4 style="color: var(--dark); margin-bottom: 15px;">💪 Today's Exercises</h4>
-    `;
-    
-    workout.exercises.forEach((exercise, index) => {
-        trackerHTML += `
-            <div class="exercise-container" style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h5 class="exercise-name" style="margin: 0; color: var(--dark);">${exercise.name}</h5>
-                    <span style="background: var(--primary); color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">${exercise.sets} sets</span>
-                </div>
-                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Target: ${exercise.reps} • Rest: ${exercise.rest}</div>
-                <div style="font-size: 11px; color: #888; margin-bottom: 15px;">${exercise.notes}</div>
-                
-                <!-- Set tracking -->
-                <div style="display: grid; grid-template-columns: repeat(${exercise.sets}, 1fr); gap: 8px;">
-        `;
-        
-        for (let i = 1; i <= parseInt(exercise.sets); i++) {
-            trackerHTML += `
-                <div class="set-inputs" style="text-align: center;">
-                    <div style="font-size: 10px; color: #666; margin-bottom: 5px;">Set ${i}</div>
-                    <input type="number" placeholder="Reps" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; text-align: center; margin-bottom: 4px;">
-                    <input type="number" placeholder="Lbs" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; text-align: center;">
-                </div>
-            `;
-        }
-        
-        trackerHTML += `
-                </div>
-            </div>
-        `;
+    const container = document.getElementById('tracker-content');
+    const title = document.getElementById('tracker-title');
+    if (!container || !title) return;
+    const sessionWorkout = {
+        ...workout,
+        id: programId,
+        workoutName: `${program?.name || workout.name || 'Workout'} - ${day}`
+    };
+    currentWorkoutData = sessionWorkout;
+    title.textContent = sessionWorkout.workoutName;
+    renderAppTrackerFields(container, sessionWorkout, day, workout.exercises || [], {
+        prefix: 'program',
+        source: 'program',
+        includeComplete: false,
+        includeNotes: true,
+        programLabel: program?.name || ''
     });
-    
-    trackerHTML += `
-        </div>
-        
-        <div style="background: var(--card-bg); border-radius: 20px; padding: 20px;">
-            <h4 style="color: var(--dark); margin-bottom: 15px;">📝 Workout Notes</h4>
-            <textarea placeholder="How did the workout feel? Any notes for next time?" style="width: 100%; height: 80px; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; resize: none;"></textarea>
-        </div>
-    `;
-    
-    document.getElementById('tracker-content').innerHTML = trackerHTML;
     document.getElementById('workout-tracker').style.display = 'block';
 }
 
@@ -3703,68 +3962,67 @@ function close75HardTracker() {
     document.getElementById('75hard-tracker').style.display = 'none';
 }
 
-function finishWorkout() {
-    if (confirm('Mark this workout as completed?')) {
-        // Collect workout data
-        const trackerTitle = document.getElementById('tracker-title').textContent;
-        const exercises = [];
-        const notes = document.querySelector('#tracker-content textarea').value;
-        
-        // Get all exercise data from inputs
-        const exerciseContainers = document.querySelectorAll('#tracker-content .exercise-container');
-        exerciseContainers.forEach((container, index) => {
-            const exerciseName = container.querySelector('.exercise-name').textContent;
-            const sets = [];
-            
-            container.querySelectorAll('.set-inputs').forEach((setDiv, setIndex) => {
-                const reps = setDiv.querySelector('input[placeholder="Reps"]').value;
-                const weight = setDiv.querySelector('input[placeholder="Lbs"]').value;
-                
-                if (reps || weight) {
-                    sets.push({
-                        set: setIndex + 1,
-                        reps: parseInt(reps) || 0,
-                        weight: parseInt(weight) || 0
-                    });
-                }
-            });
-            
-            if (sets.length > 0) {
-                exercises.push({
-                    name: exerciseName,
-                    sets: sets
-                });
-            }
-        });
-        
-        // Create workout history entry
-        const completedWorkout = {
-            id: Date.now().toString(),
-            programId: currentWorkoutProgramId,
-            workoutName: trackerTitle,
-            date: new Date().toISOString(),
-            duration: Math.floor(Math.random() * 30) + 45, // Random duration 45-75 min
-            exercises: exercises,
-            notes: notes,
-            completed: true
-        };
-        
-        // Save to workout history
-        let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-        workoutHistory.unshift(completedWorkout); // Add to beginning
-        localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-        
-        alert('🎉 Workout completed and saved to history! Great job!');
-        closeWorkoutTracker();
-        showScreen('track-workouts');
+async function finishWorkout() {
+    if (appTrackerCompletionInFlight || !appTrackerSession) return;
+    const container = document.getElementById('tracker-content');
+    if (!container || !confirm('Mark this workout as completed?')) return;
+
+    appTrackerCompletionInFlight = true;
+    const finishButton = document.querySelector('#workout-tracker button[onclick="finishWorkout()"]');
+    if (finishButton) {
+        finishButton.disabled = true;
+        finishButton.setAttribute('aria-busy', 'true');
     }
+
+    const endedAt = new Date();
+    const startedAt = new Date(appTrackerSession.startedAt);
+    const duration = Number.isFinite(startedAt.getTime())
+        ? Math.max(0, Math.floor((endedAt.getTime() - startedAt.getTime()) / 60000))
+        : 0;
+    const completedWorkout = {
+        id: appTrackerSession.sessionId,
+        programId: currentWorkoutProgramId,
+        workoutName: appTrackerSession.workoutName || document.getElementById('tracker-title')?.textContent || 'Workout',
+        date: endedAt.toISOString(),
+        startedAt: appTrackerSession.startedAt,
+        endedAt: endedAt.toISOString(),
+        duration,
+        calories: appTrackerSession.calories,
+        source: 'fuelfire',
+        exercises: collectAppTrackerExercises(container),
+        notes: container.querySelector('[data-workout-notes]')?.value || '',
+        healthExported: false,
+        healthExportedAt: null,
+        healthWorkoutId: null
+    };
+
+    try {
+        await saveCompletedAppWorkout(completedWorkout);
+        // The shared store has verified the history write before this point.
+        clearAppWorkoutDraft();
+    } catch (error) {
+        appTrackerCompletionInFlight = false;
+        if (finishButton) {
+            finishButton.disabled = false;
+            finishButton.removeAttribute('aria-busy');
+        }
+        const status = container.querySelector('[data-workout-draft-status]');
+        if (status) status.textContent = 'Workout could not be saved. Your draft was kept; try again.';
+        alert('Workout could not be saved. Your progress is still available to retry.');
+        console.error('Workout completion persistence failed:', error);
+        return;
+    }
+
+    appTrackerCompletionInFlight = false;
+    alert('🎉 Workout completed and saved to history! Great job!');
+    closeWorkoutTracker();
+    showScreen('track-workouts');
 }
 
 let currentWorkoutProgramId = null;
 
 function loadWorkoutHistory() {
-    const rawHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-    const workoutHistory = rawHistory.map(entry => ({
+    const workoutHistory = readAppWorkoutHistory().map(entry => ({
         ...entry,
         exercises: Array.isArray(entry.exercises) ? entry.exercises : []
     }));
@@ -3887,12 +4145,25 @@ function loadWorkoutHistory() {
         const timeAgo = getTimeAgo(date);
         const programInfo = workoutPrograms[workout.programId] || { name: 'Custom Workout' };
         const exerciseCount = Array.isArray(workout.exercises) ? workout.exercises.length : 0;
+        const exerciseDetails = Array.isArray(workout.exercises) ? workout.exercises.map(exercise => {
+            const sets = Array.isArray(exercise.sets) ? exercise.sets : [];
+            const setText = sets.map(set => {
+                const parts = [`Set ${set.index ?? set.set ?? ''}`];
+                if (set.weight !== null && set.weight !== undefined) parts.push(`${set.weight} ${set.unit || 'lb'}`);
+                if (set.reps !== null && set.reps !== undefined) parts.push(`${set.reps} reps`);
+                if (set.durationSeconds !== null && set.durationSeconds !== undefined) parts.push(`${set.durationSeconds}s`);
+                if (set.completed) parts.push('completed');
+                return parts.join(' • ');
+            }).join('<br>');
+            return `<li><strong>${escapeAttribute(exercise.name || 'Exercise')}</strong>${setText ? `<br>${setText}` : ''}${exercise.notes ? `<br><em>${escapeAttribute(exercise.notes)}</em>` : ''}</li>`;
+        }).join('') : '';
         
         html += `
             <div class="workout-history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--lighter-bg); border-radius: 15px; margin-bottom: 10px; animation-delay: ${index * 0.1}s;">
                 <div>
-                    <div style="font-weight: bold; color: var(--dark);">${getWorkoutIcon(workout.programId)} ${workout.workoutName}</div>
+                    <div style="font-weight: bold; color: var(--dark);">${getWorkoutIcon(workout.programId)} ${escapeAttribute(workout.workoutName || workout.name || 'Workout')}</div>
                     <div style="color: #666; font-size: 12px;">${timeAgo} • ${workout.duration} min • ${programInfo.name}</div>
+                    ${exerciseDetails ? `<details style="margin-top: 8px;"><summary>View per-set details</summary><ul style="margin: 6px 0 0 18px; padding: 0; font-size: 12px; color: #666;">${exerciseDetails}</ul></details>` : ''}
                 </div>
                 <div style="text-align: right;">
                     <div style="color: var(--primary); font-weight: bold;">${exerciseCount} exercises</div>
@@ -3965,13 +4236,14 @@ function generateProgressCharts(history) {
         if (data.length > 0) {
             const maxWeight = Math.max(...data.map(d => d.weight));
             const improvement = data.length > 1 ? data[data.length - 1].weight - data[0].weight : 0;
+            const chartSummary = data.map(point => `${new Date(point.date).toLocaleDateString()}: ${point.weight} lb`).join(', ');
             
             chartsHTML += `
-                <div style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
+                <div role="img" aria-label="${escapeAttribute(`${exercise} progress. ${chartSummary}`)}" style="background: var(--lighter-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;">
                     <h5 style="color: var(--dark); margin-bottom: 10px;">🏋️ ${exercise} Progress</h5>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span style="font-size: 12px; color: #666;">Last ${data.length} workouts</span>
-                        <span style="font-size: 12px; color: #666;">Current: ${data[data.length - 1]?.weight || 0} lbs</span>
+                        <span style="font-size: 12px; color: #666;">Current: ${data[data.length - 1].weight} lbs</span>
                     </div>
                     <div style="display: flex; align-items: end; height: 60px; gap: 4px;">
                         ${data.map(point => {
@@ -3982,6 +4254,9 @@ function generateProgressCharts(history) {
                     <div style="font-size: 10px; color: #666; margin-top: 5px;">
                         ${improvement > 0 ? `+${improvement} lbs improvement` : improvement < 0 ? `${improvement} lbs change` : 'No change'}
                     </div>
+                    <ul style="margin: 8px 0 0 18px; padding: 0; font-size: 11px; color: #666;">
+                        ${data.map(point => `<li>${escapeAttribute(new Date(point.date).toLocaleDateString())}: ${point.weight} lbs</li>`).join('')}
+                    </ul>
                 </div>
             `;
         }
@@ -3993,8 +4268,8 @@ function generateProgressCharts(history) {
 function generateWeeklyChart(history) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const thisWeek = getThisWeekWorkouts(history);
-    
-    let chartHTML = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 15px;">';
+    const chartSummary = days.map((day, index) => `${day}: ${thisWeek[index] || 0}`).join(', ');
+    let chartHTML = `<div role="img" aria-label="${escapeAttribute(`Weekly activity. ${chartSummary}`)}" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 15px;">`;
     
     days.forEach((day, index) => {
         const workoutCount = thisWeek[index] || 0;
@@ -4080,27 +4355,13 @@ function getTimeAgo(date) {
 }
 
 function getPRs(workout) {
-    const prs = [];
-    const exercises = Array.isArray(workout.exercises) ? workout.exercises : [];
-    exercises.forEach(exercise => {
-        const sets = Array.isArray(exercise.sets) ? exercise.sets : [];
-        const weights = sets
-            .map(set => {
-                const raw = typeof set === 'object' ? set.weight : set;
-                const num = parseFloat(raw);
-                return Number.isFinite(num) ? num : 0;
-            })
-            .filter(value => value > 0);
-        if (weights.length === 0) {
-            return;
-        }
-        const maxWeight = Math.max(...weights);
-        if (maxWeight > 200) { // Arbitrary PR threshold
-            prs.push(`${maxWeight} lbs PR`);
-        }
-    });
-    
-    return prs.length > 0 ? prs[0] : 'Completed';
+    const explicitRecords = Array.isArray(workout?.personalRecords)
+        ? workout.personalRecords
+        : (workout?.personalRecord ? [workout.personalRecord] : []);
+    return explicitRecords
+        .filter(record => record !== null && record !== undefined && String(record).trim() !== '')
+        .map(record => String(record))
+        .join(', ');
 }
 
 function complete75HardDay() {
@@ -4127,7 +4388,26 @@ function complete75HardDay() {
 let dietQuizStep = 1;
 let dietData = {};
 let currentDietPlan = JSON.parse(localStorage.getItem('currentDietPlan') || 'null');
-let dailyFoodLog = JSON.parse(localStorage.getItem('dailyFoodLog') || '[]');
+
+function flattenCanonicalFoodLogs(logs) {
+    return Object.entries(logs || {}).flatMap(([dateKey, day]) => (
+        Array.isArray(day?.meals)
+            ? day.meals.map(meal => ({ ...meal, _foodLogDate: dateKey }))
+            : []
+    ));
+}
+
+function readCanonicalFoodLogs() {
+    const store = globalThis.FuelFireFoodStore;
+    if (!store || typeof store.readLogs !== 'function') return {};
+    const logs = store.readLogs(localStorage);
+    if (store.readLogs.lastError) {
+        console.warn('Food log migration could not be persisted yet:', store.readLogs.lastError);
+    }
+    return logs || {};
+}
+
+let dailyFoodLog = flattenCanonicalFoodLogs(readCanonicalFoodLogs());
 
 // Simple food database
 const foods = {
@@ -4184,18 +4464,47 @@ function addFood(mealType) {
 
 function selectFood(mealType, index) {
     const food = foods[mealType][index];
+    if (!food) return false;
+
+    const store = globalThis.FuelFireFoodStore;
+    if (!store || typeof store.readLogs !== 'function' || typeof store.writeLogs !== 'function' || typeof store.getLocalDateKey !== 'function') {
+        console.error('Could not save food: the canonical food store is unavailable.');
+        return false;
+    }
+
+    const timestamp = new Date().toISOString();
     const entry = {
         ...food,
         mealType,
-        timestamp: new Date().toISOString()
+        type: mealType,
+        timestamp
     };
-    
-    dailyFoodLog.push(entry);
-    localStorage.setItem('dailyFoodLog', JSON.stringify(dailyFoodLog));
-    
+
+    const logs = store.readLogs(localStorage);
+    if (store.readLogs.lastError) {
+        console.error('Could not save food: canonical food-store migration failed.', store.readLogs.lastError);
+        return false;
+    }
+
+    const dateKey = store.getLocalDateKey(timestamp);
+    const currentDay = logs[dateKey] && typeof logs[dateKey] === 'object' ? logs[dateKey] : {};
+    const result = store.writeLogs({
+        ...logs,
+        [dateKey]: {
+            ...currentDay,
+            meals: [...(Array.isArray(currentDay.meals) ? currentDay.meals : []), entry]
+        }
+    }, localStorage);
+    if (!result || result.ok === false) {
+        console.error('Could not save food: canonical food-store write failed.', result?.error);
+        return false;
+    }
+
+    dailyFoodLog = flattenCanonicalFoodLogs(result.logs);
     closeModal();
     loadDietTracker();
     showNotification(`Added ${food.name} to ${mealType}!`);
+    return true;
 }
 
 function closeModal() {
@@ -5818,9 +6127,19 @@ function showSelectedDiet(plan) {
 // Load diet tracker
 function loadDietTracker() {
     const content = document.getElementById('diet-tracker-content');
-    const todayLog = dailyFoodLog.filter(entry => {
-        return new Date(entry.timestamp).toDateString() === new Date().toDateString();
-    });
+    const logs = readCanonicalFoodLogs();
+    const store = globalThis.FuelFireFoodStore;
+    const todayKey = store && typeof store.getLocalDateKey === 'function'
+        ? store.getLocalDateKey(new Date())
+        : new Date().toISOString().slice(0, 10);
+    dailyFoodLog = flattenCanonicalFoodLogs(logs);
+    const todayLog = Array.isArray(logs[todayKey]?.meals)
+        ? logs[todayKey].meals.map(food => ({
+            ...food,
+            mealType: food.mealType || food.type || 'snack',
+            timestamp: food.timestamp || food.logged_at || food.loggedAt || food.date || `${todayKey}T12:00:00`
+        }))
+        : [];
     
     const totals = todayLog.reduce((acc, food) => {
         acc.calories += food.calories;
@@ -6148,28 +6467,44 @@ function getWorkoutIcon(programId) {
 
 // Progress & Analytics Functions
 function loadProgressData() {
-    const progress = JSON.parse(localStorage.getItem('fitnessProgress')) || {
-        currentWeight: 175,
-        startWeight: 180,
-        bodyFat: 18.5,
-        startBodyFat: 21,
-        muscleMass: 42,
-        startMuscleMass: 39,
-        monthlyWorkouts: 28,
-        lastMonthWorkouts: 20,
-        totalWorkouts: 47,
-        totalTime: 38,
-        avgPerWeek: 3.2,
-        personalRecords: {
-            benchPress: { weight: 225, increase: 10, date: '3 days ago' },
-            squat: { weight: 315, increase: 25, date: '1 week ago' },
-            deadlift: { weight: 405, increase: 20, date: '2 weeks ago' },
-            shoulderPress: { weight: 135, increase: 5, date: '5 days ago' }
-        },
-        workoutHistory: []
+    let progress = {};
+    try {
+        const stored = JSON.parse(localStorage.getItem('fitnessProgress') || 'null');
+        if (stored && typeof stored === 'object' && !Array.isArray(stored)) progress = stored;
+    } catch (error) {
+        progress = {};
+    }
+
+    const history = readAppWorkoutHistory();
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const monthlyWorkouts = history.filter(workout => new Date(workout.date) >= monthStart).length;
+    const lastMonthWorkouts = history.filter(workout => {
+        const date = new Date(workout.date);
+        return date >= previousMonthStart && date < monthStart;
+    }).length;
+    const totalMinutes = history.reduce((sum, workout) => sum + (Number.isFinite(Number(workout.duration)) ? Number(workout.duration) : 0), 0);
+
+    return {
+        ...progress,
+        currentWeight: progress.currentWeight ?? null,
+        startWeight: progress.startWeight ?? null,
+        bodyFat: progress.bodyFat ?? null,
+        startBodyFat: progress.startBodyFat ?? null,
+        muscleMass: progress.muscleMass ?? null,
+        startMuscleMass: progress.startMuscleMass ?? null,
+        // These values are derived from the canonical workout history. Legacy
+        // fitnessProgress counters can be stale after imports, retries, or a
+        // partial migration and must not mask the records users actually have.
+        monthlyWorkouts,
+        lastMonthWorkouts,
+        totalWorkouts: history.length,
+        totalTime: history.length ? totalMinutes / 60 : 0,
+        avgPerWeek: history.length ? (history.length / 4).toFixed(1) : null,
+        personalRecords: progress.personalRecords || {},
+        workoutHistory: history
     };
-    
-    return progress;
 }
 
 function updateProgressDisplay() {
@@ -6177,9 +6512,11 @@ function updateProgressDisplay() {
     
     // Update weight stats
     if (document.getElementById('current-weight')) {
-        document.getElementById('current-weight').textContent = progress.currentWeight;
-        const weightChange = progress.currentWeight - progress.startWeight;
-        const weightChangeText = weightChange < 0 ? `${weightChange} lbs from start` : `+${weightChange} lbs from start`;
+        document.getElementById('current-weight').textContent = progress.currentWeight ?? '—';
+        const weightChange = Number.isFinite(Number(progress.currentWeight)) && Number.isFinite(Number(progress.startWeight))
+            ? Number(progress.currentWeight) - Number(progress.startWeight)
+            : null;
+        const weightChangeText = weightChange === null ? '—' : (weightChange < 0 ? `${weightChange} lbs from start` : `+${weightChange} lbs from start`);
         const weightChangeEl = document.getElementById('weight-change');
         if (weightChangeEl) {
             weightChangeEl.textContent = weightChangeText;
@@ -6188,9 +6525,11 @@ function updateProgressDisplay() {
 
     // Update body fat
     if (document.getElementById('body-fat')) {
-        document.getElementById('body-fat').textContent = progress.bodyFat;
-        const fatChange = progress.bodyFat - progress.startBodyFat;
-        const fatChangeText = fatChange < 0 ? `${fatChange.toFixed(1)}% from start` : `+${fatChange.toFixed(1)}% from start`;
+        document.getElementById('body-fat').textContent = progress.bodyFat ?? '—';
+        const fatChange = Number.isFinite(Number(progress.bodyFat)) && Number.isFinite(Number(progress.startBodyFat))
+            ? Number(progress.bodyFat) - Number(progress.startBodyFat)
+            : null;
+        const fatChangeText = fatChange === null ? '—' : (fatChange < 0 ? `${fatChange.toFixed(1)}% from start` : `+${fatChange.toFixed(1)}% from start`);
         const bodyfatChangeEl = document.getElementById('bodyfat-change');
         if (bodyfatChangeEl) {
             bodyfatChangeEl.textContent = fatChangeText;
@@ -6199,9 +6538,11 @@ function updateProgressDisplay() {
 
     // Update monthly workouts
     if (document.getElementById('monthly-workouts')) {
-        document.getElementById('monthly-workouts').textContent = progress.monthlyWorkouts;
-        const workoutChange = progress.monthlyWorkouts - progress.lastMonthWorkouts;
-        const workoutChangeText = workoutChange > 0 ? `+${workoutChange} from last month` : `${workoutChange} from last month`;
+        document.getElementById('monthly-workouts').textContent = progress.monthlyWorkouts ?? '—';
+        const workoutChange = Number.isFinite(Number(progress.monthlyWorkouts)) && Number.isFinite(Number(progress.lastMonthWorkouts))
+            ? Number(progress.monthlyWorkouts) - Number(progress.lastMonthWorkouts)
+            : null;
+        const workoutChangeText = workoutChange === null ? '—' : (workoutChange > 0 ? `+${workoutChange} from last month` : `${workoutChange} from last month`);
         const workoutChangeEl = document.getElementById('workout-change');
         if (workoutChangeEl) {
             workoutChangeEl.textContent = workoutChangeText;
@@ -6211,9 +6552,10 @@ function updateProgressDisplay() {
 
 function updateProgressData() {
     // Prompt user for updated stats
-    const currentWeight = prompt('Enter current weight (lbs):', '175');
-    const bodyFat = prompt('Enter body fat percentage:', '18.5');
-    const workoutsThisMonth = prompt('Workouts completed this month:', '28');
+    const existing = loadProgressData();
+    const currentWeight = prompt('Enter current weight (lbs):', existing.currentWeight ?? '');
+    const bodyFat = prompt('Enter body fat percentage:', existing.bodyFat ?? '');
+    const workoutsThisMonth = prompt('Workouts completed this month:', existing.monthlyWorkouts ?? '');
     
     if (currentWeight && bodyFat && workoutsThisMonth) {
         const progress = loadProgressData();
@@ -6232,28 +6574,26 @@ function updateProgressData() {
 }
 
 function logWorkout(workoutData) {
-    const progress = loadProgressData();
-    
-    // Add to workout history
-    progress.workoutHistory.push({
-        date: new Date().toISOString(),
-        type: workoutData.type || 'General',
-        duration: workoutData.duration || 45,
+    const endedAt = new Date().toISOString();
+    const duration = appOptionalNumber(workoutData.duration) ?? 0;
+    const record = {
+        id: workoutData.id || `manual-${Date.now()}`,
+        workoutName: workoutData.workoutName || `${workoutData.type || 'General'} Workout`,
+        date: workoutData.date || endedAt,
+        startedAt: workoutData.startedAt || null,
+        endedAt: workoutData.endedAt || endedAt,
+        duration,
+        calories: appOptionalNumber(workoutData.calories),
+        source: 'fuelfire',
         exercises: workoutData.exercises || [],
-        notes: workoutData.notes || ''
-    });
-    
-    // Update totals
-    progress.totalWorkouts++;
-    progress.monthlyWorkouts++;
-    progress.totalTime += (workoutData.duration || 45) / 60;
-    progress.avgPerWeek = (progress.totalWorkouts / 4).toFixed(1);
-    
-    // Save to localStorage
-    localStorage.setItem('fitnessProgress', JSON.stringify(progress));
-    
-    // Update display
+        notes: workoutData.notes || '',
+        healthExported: false,
+        healthExportedAt: null,
+        healthWorkoutId: null
+    };
+    const saved = completeAppWorkout(record);
     updateProgressDisplay();
+    return saved;
 }
 
 // Track Workouts Functions
@@ -6351,21 +6691,13 @@ function saveWorkout() {
 }
 
 function saveRecentWorkout(workoutData) {
-    let recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
-    
-    recentWorkouts.unshift({
-        ...workoutData,
-        date: new Date().toISOString()
-    });
-    
-    // Keep only last 10 workouts
-    recentWorkouts = recentWorkouts.slice(0, 10);
-    
-    localStorage.setItem('recentWorkouts', JSON.stringify(recentWorkouts));
+    // Legacy recentWorkouts remains a migration source owned by the shared
+    // store; new app writes go through the canonical history only.
+    return readAppWorkoutHistory().slice(0, 10);
 }
 
 function loadRecentWorkouts() {
-    const recentWorkouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const recentWorkouts = readAppWorkoutHistory().slice(0, 10);
     const container = document.getElementById('recent-workouts');
     
     if (recentWorkouts.length === 0) {
@@ -6383,14 +6715,14 @@ function loadRecentWorkouts() {
             <div style="background: var(--lighter-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div>
-                        <strong style="color: var(--dark);">${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} Workout</strong>
+                        <strong style="color: var(--dark);">${escapeAttribute(workout.workoutName || workout.type || 'Workout')}</strong>
                         <div style="color: #666; font-size: 12px;">${dateStr} at ${timeStr}</div>
                     </div>
                     <div style="color: var(--primary); font-weight: bold;">${workout.duration} min</div>
                 </div>
                 ${workout.exercises.length > 0 ? `
                     <div style="font-size: 14px; color: #666;">
-                        ${workout.exercises.map(ex => `• ${ex.name} ${ex.sets ? `(${ex.sets}x${ex.reps})` : ''}`).join('<br>')}
+                        ${workout.exercises.map(ex => `• ${escapeAttribute(ex.name || 'Exercise')} ${Array.isArray(ex.sets) ? `(${ex.sets.length} sets)` : (ex.sets ? `(${escapeAttribute(ex.sets)}x${escapeAttribute(ex.reps || '')})` : '')}`).join('<br>')}
                     </div>
                 ` : ''}
                 ${workout.notes ? `<div style="font-size: 12px; color: #888; margin-top: 5px; font-style: italic;">"${workout.notes}"</div>` : ''}
@@ -6403,7 +6735,7 @@ function loadRecentWorkouts() {
 
 // Comprehensive Fitness Dashboard Functions
 function updateDashboardStats() {
-    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const workouts = readAppWorkoutHistory();
     
     // Calculate streak
     let streak = 0;
@@ -6435,7 +6767,7 @@ function updateDashboardStats() {
 function generateWorkoutCalendar() {
     if (!document.getElementById('workout-calendar')) return;
     
-    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const workouts = readAppWorkoutHistory();
     const calendar = document.getElementById('workout-calendar');
     const monthLabel = document.getElementById('calendar-month');
     
@@ -6506,7 +6838,7 @@ function generateWeeklyChart() {
     if (!document.getElementById('weekly-chart')) return;
     
     const chart = document.getElementById('weekly-chart');
-    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const workouts = readAppWorkoutHistory();
     
     chart.innerHTML = '';
     
@@ -6591,16 +6923,8 @@ function saveQuickWorkout() {
         completed: true
     };
 
-    // Save to workoutHistory (for calendar, charts, and dashboard)
-    let workoutHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
-    workoutHistory.unshift(workoutData);
-    localStorage.setItem('workoutHistory', JSON.stringify(workoutHistory));
-
-    // Also log to progress data
+    // Canonical history is the only new workout write.
     logWorkout(workoutData);
-
-    // Save to recent workouts (for quick access)
-    saveRecentWorkout(workoutData);
 
     // Update dashboard to show the new workout
     updateFitnessDashboard();
@@ -6671,7 +6995,7 @@ function updateFitnessDashboard() {
 function loadRecentWorkoutsDashboard() {
     if (!document.getElementById('recent-workouts-dashboard')) return;
     
-    const workouts = JSON.parse(localStorage.getItem('recentWorkouts')) || [];
+    const workouts = readAppWorkoutHistory();
     const container = document.getElementById('recent-workouts-dashboard');
     
     if (workouts.length === 0) {
@@ -6687,7 +7011,7 @@ function loadRecentWorkoutsDashboard() {
         html += `
             <div style="background: var(--lighter-bg); padding: 12px; border-radius: 10px; margin-bottom: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                    <span style="font-weight: bold; color: var(--dark);">${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}</span>
+                    <span style="font-weight: bold; color: var(--dark);">${escapeAttribute(workout.workoutName || workout.type || 'Workout')}</span>
                     <span style="color: var(--primary); font-weight: bold;">${workout.duration} min</span>
                 </div>
                 <div style="font-size: 12px; color: #666;">${timeAgo}</div>
@@ -6710,7 +7034,7 @@ function updateRunningFocusCard() {
         return;
     }
 
-    const history = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    const history = readAppWorkoutHistory();
     const runningWorkouts = history.filter(isRunningWorkout);
 
     if (runningWorkouts.length === 0) {

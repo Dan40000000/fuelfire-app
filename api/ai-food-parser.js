@@ -6,6 +6,8 @@ import { callFoodAi, isFoodAiConfigured } from './_lib/food-ai-provider.js';
 import { lookupOpenFoodFacts } from './_lib/nutrition-evidence.js';
 import { buildHighImpactClarifyingQuestions, mergeClarifyingQuestions, sanitizeClarifyingQuestions } from './_lib/food-clarifications.js';
 import { requireAiAccess } from './_lib/security.js';
+import { runWithProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
@@ -2249,7 +2251,8 @@ function toFiniteNumber(value, fallback = 0) {
 function clampAndRound(value, min = 0, max = 5000) {
     const num = toFiniteNumber(value, 0);
     const clamped = Math.min(Math.max(num, min), max);
-    return Math.round(clamped);
+    // Keep fractional nutrition values until the final quantity scaling pass.
+    return Math.round(clamped * 1000) / 1000;
 }
 
 function cleanText(value, fallback, maxLength = 120) {
@@ -3689,7 +3692,49 @@ Rules:
     });
 }
 
-export default async function handler(req, res) {
+// Vision fallback calls this entrypoint in-process so it inherits the caller's
+// AsyncLocalStorage provider budget. Authorization is still checked with the
+// original request headers; this is not a public or test-only bypass.
+export async function runFoodParserInProcess({ body = {}, headers = {}, socket } = {}) {
+    let statusCode = 200;
+    let responseBody = null;
+    const response = {
+        setHeader() {},
+        status(code) {
+            statusCode = code;
+            return this;
+        },
+        json(payload) {
+            responseBody = payload;
+            return this;
+        },
+        end() {
+            return this;
+        },
+    };
+
+    await handleFoodParserRequest({
+        method: 'POST',
+        url: '/api/ai-food-parser',
+        headers,
+        body,
+        socket,
+    }, response);
+
+    if (statusCode < 200 || statusCode >= 300) {
+        const error = new Error(responseBody?.error || 'Food parser lookup failed.');
+        error.status = statusCode;
+        error.response = responseBody;
+        throw error;
+    }
+    return responseBody;
+}
+
+export default function handler(req, res) {
+    return runWithProviderBudget(() => handleFoodParserRequest(req, res));
+}
+
+async function handleFoodParserRequest(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
         return;
     }
@@ -3697,6 +3742,16 @@ export default async function handler(req, res) {
 
     if (!ensureMethod(req, res, ['POST'])) {
         return;
+    }
+
+    if (!requireBodyLimit(req, res, 256 * 1024)) return;
+    const body = getRequestBody(req);
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            error: 'A JSON object body is required.',
+            code: 'INVALID_JSON_BODY',
+        });
     }
 
     if (!await requireAiAccess(req, res, { capability: 'ai_food' })) {
@@ -3708,9 +3763,15 @@ export default async function handler(req, res) {
     let deadlineFallback;
 
     try {
-        const body = req.body || {};
         const rawQuery = typeof body.query === 'string' ? body.query : '';
         const originalQuery = rawQuery.trim();
+        if (originalQuery.length > 4000) {
+            return res.status(413).json({
+                success: false,
+                error: 'Food description is too long.',
+                code: 'QUERY_TOO_LARGE',
+            });
+        }
         const inputSource = normalizeInputSource(body.source);
         const voiceAlternatives = Array.isArray(body.alternatives)
             ? body.alternatives.map((value) => cleanText(value, '', 180)).filter(Boolean).slice(0, 5)

@@ -1,0 +1,73 @@
+name: Native validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'capacitor.config.json'
+      - 'ios/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/check-release-files.sh'
+      - 'scripts/run-ios-ui-tests.sh'
+      - 'scripts/setup-ios-ui-tests.rb'
+      - 'scripts/verify-ios-archive.sh'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  native-compile-and-smoke:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Guard newly tracked release files and secrets
+        run: bash scripts/check-release-files.sh
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Set up JDK 21 for Android validation
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Sync native dependencies
+        run: |
+          npx cap sync ios
+          npx cap sync android
+          pod install --project-directory=ios/App
+
+      - name: Compile iOS simulator target
+        run: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "${RUNNER_TEMP}/fuelfire-ios-derived-data" \
+            build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run iOS launch and resume smoke tests
+        run: npm run test:ios:ui
+
+      - name: Compile Android debug target
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon

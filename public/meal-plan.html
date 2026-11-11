@@ -6,6 +6,7 @@
     <title>Your AI Meal Plan - FuelFire</title>
     <link rel="stylesheet" href="styles.css">
     <script src="global-nav.js"></script>
+    <script src="food-store.js"></script>
     <style>
         body {
             margin: 0;
@@ -278,6 +279,9 @@
     </div>
 
     <script>
+        const mealPlanRecords = new Map();
+        let mealPlanRecordSequence = 0;
+
         function goBack() {
             window.location.href = 'meal-plans.html';
         }
@@ -297,6 +301,84 @@
                 });
             }
         }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[character]));
+        }
+
+        function decodeEscapedMealText(value) {
+            return String(value ?? '')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;|&#x27;/gi, "'")
+                .replace(/&amp;/g, '&');
+        }
+
+        function registerMealPlanRecord(data, name, nutritionText) {
+            const id = `meal-record-${mealPlanRecordSequence += 1}`;
+            mealPlanRecords.set(id, {
+                data: { ...data },
+                name,
+                nutritionText
+            });
+            return id;
+        }
+
+        function registerMealPlanText(text) {
+            const id = `meal-text-${mealPlanRecordSequence += 1}`;
+            mealPlanRecords.set(id, { text });
+            return id;
+        }
+
+        function clearElementChildren(element) {
+            while (element.firstChild) element.removeChild(element.firstChild);
+        }
+
+        function hydrateMealPlanRecords() {
+            document.querySelectorAll('#meal-plan-content [data-meal-record-id]').forEach((list) => {
+                const record = mealPlanRecords.get(list.dataset.mealRecordId);
+                if (!record || !record.data) return;
+
+                clearElementChildren(list);
+                const mealItem = document.createElement('li');
+                mealItem.style.cssText = 'margin-bottom: 8px;';
+                const mealName = document.createElement('strong');
+                mealName.textContent = record.name;
+                mealItem.appendChild(mealName);
+
+                const nutritionItem = document.createElement('li');
+                nutritionItem.style.cssText = 'color: #666; font-size: 14px;';
+                nutritionItem.textContent = record.nutritionText;
+
+                const actionItem = document.createElement('li');
+                actionItem.style.cssText = 'margin-top: 10px;';
+                const logButton = document.createElement('button');
+                logButton.type = 'button';
+                logButton.dataset.mealRecordId = list.dataset.mealRecordId;
+                logButton.style.cssText = 'background: #4CAF50; color: white; border: none; padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;';
+                logButton.textContent = '📝 Log to Tracker';
+                logButton.addEventListener('click', () => logMealToTracker({ ...record.data }));
+                actionItem.appendChild(logButton);
+
+                list.append(mealItem, nutritionItem, actionItem);
+            });
+
+            document.querySelectorAll('#meal-plan-content [data-meal-text-id]').forEach((list) => {
+                const record = mealPlanRecords.get(list.dataset.mealTextId);
+                if (!record) return;
+                clearElementChildren(list);
+                const item = document.createElement('li');
+                item.textContent = record.text;
+                list.appendChild(item);
+            });
+        }
         
         // Function to receive and display meal plan data
         function displayMealPlan(mealPlan, metadata) {
@@ -307,11 +389,15 @@
             });
             
             // Set metadata
-            document.getElementById('plan-metadata').innerHTML = `
-                🎯 <strong>Generated:</strong> ${new Date(metadata.generatedAt || metadata.createdAt).toLocaleDateString()} | 
-                <strong>Goal:</strong> ${metadata.goal} | 
-                <strong>Duration:</strong> ${metadata.planDuration || '2-week'}
-            `;
+            const metadataValue = metadata || {};
+            document.getElementById('plan-metadata').textContent = [
+                `🎯 Generated: ${new Date(metadataValue.generatedAt || metadataValue.createdAt).toLocaleDateString()}`,
+                `Goal: ${String(metadataValue.goal || 'Custom')}`,
+                `Duration: ${String(metadataValue.planDuration || '2-week')}`,
+            ].join(' | ');
+
+            mealPlanRecords.clear();
+            mealPlanRecordSequence = 0;
             
             // Process and display meal plan content
             if (!mealPlan || mealPlan.length === 0) {
@@ -336,6 +422,7 @@
             `;
             
             document.getElementById('meal-plan-content').innerHTML = saveButtonHtml + processedContent;
+            hydrateMealPlanRecords();
             
             // Restore checkbox states after content is loaded
             restoreCheckboxStates();
@@ -358,41 +445,34 @@
         
         // Helper function to format meal content with bullet points and log button
         function formatMealWithBullets(content, mealType, dayNum) {
-            const parts = content.split('-');
+            const rawContent = decodeEscapedMealText(content);
+            const parts = rawContent.split('-');
             if (parts.length >= 2) {
                 const meal = parts[0].trim();
                 const nutritionText = parts.slice(1).join('-').trim();
                 
                 // Parse nutrition info
-                const calories = nutritionText.match(/Cal:\s*(\d+)/i)?.[1] || '0';
-                const protein = nutritionText.match(/P:\s*(\d+)g/i)?.[1] || '0';
-                const carbs = nutritionText.match(/C:\s*(\d+)g/i)?.[1] || '0';
-                const fat = nutritionText.match(/F:\s*(\d+)g/i)?.[1] || '0';
+                const calories = Number(nutritionText.match(/Cal:\s*(\d+(?:\.\d+)?)/i)?.[1] || 0);
+                const protein = Number(nutritionText.match(/P:\s*(\d+(?:\.\d+)?)g/i)?.[1] || 0);
+                const carbs = Number(nutritionText.match(/C:\s*(\d+(?:\.\d+)?)g/i)?.[1] || 0);
+                const fat = Number(nutritionText.match(/F:\s*(\d+(?:\.\d+)?)g/i)?.[1] || 0);
                 
                 // Create meal data object
                 const mealData = {
                     name: meal,
                     type: mealType,
-                    calories: parseInt(calories),
-                    protein: parseInt(protein),
-                    carbs: parseInt(carbs),
-                    fat: parseInt(fat),
+                    calories: Number.isFinite(calories) ? calories : 0,
+                    protein: Number.isFinite(protein) ? protein : 0,
+                    carbs: Number.isFinite(carbs) ? carbs : 0,
+                    fat: Number.isFinite(fat) ? fat : 0,
                     day: dayNum
                 };
-                
-                return `<ul style="margin: 0; padding-left: 20px;">
-                    <li style="margin-bottom: 8px;"><strong>${meal}</strong></li>
-                    <li style="color: #666; font-size: 14px;">${nutritionText}</li>
-                    <li style="margin-top: 10px;">
-                        <button onclick='logMealToTracker(${JSON.stringify(mealData)})' 
-                                style="background: #4CAF50; color: white; border: none; padding: 5px 12px; 
-                                       border-radius: 15px; font-size: 12px; cursor: pointer;">
-                            📝 Log to Tracker
-                        </button>
-                    </li>
-                </ul>`;
+
+                const recordId = registerMealPlanRecord(mealData, meal, nutritionText);
+                return `<ul data-meal-record-id="${recordId}" style="margin: 0; padding-left: 20px;"></ul>`;
             }
-            return `<ul style="margin: 0; padding-left: 20px;"><li>${content.trim()}</li></ul>`;
+            const textId = registerMealPlanText(rawContent.trim());
+            return `<ul data-meal-text-id="${textId}" style="margin: 0; padding-left: 20px;"></ul>`;
         }
         
         // Helper function to format shopping lists with checkboxes
@@ -433,24 +513,20 @@
         }
         
         function processMealPlanContent(rawContent) {
-            console.log('🔧 Processing meal plan content, length:', rawContent.length);
+            const sourceText = String(rawContent ?? '');
+            console.log('🔧 Processing meal plan content, length:', sourceText.length);
             
-            if (!rawContent || rawContent.trim() === '') {
+            if (!sourceText.trim()) {
                 return `<div style="text-align: center; padding: 40px; color: #666;">
                     <h3>⚠️ Empty meal plan</h3>
                     <p>No content received. Please try generating again.</p>
                 </div>`;
             }
             
-            let formatted = rawContent;
+            let formatted = escapeHtml(sourceText);
             
             // Clean up and format the content
             formatted = formatted
-                // Convert headers
-                .replace(/^# (.*$)/gm, '<h1 style="color: #4B9CD3; text-align: center; font-size: 32px; margin: 30px 0;">$1</h1>')
-                .replace(/^## (.*$)/gm, '<h2 style="text-align: center; font-size: 26px; margin: 35px 0 25px 0; font-weight: bold; text-decoration: underline; color: #28a745;">$1</h2>')
-                .replace(/^### (Day \d+):?/gm, '<h3 style="text-align: center; font-size: 22px; margin: 30px 0 20px 0; font-weight: bold; text-decoration: underline; color: #333;">DAY $1</h3>')
-                
                 // Format meals with centered headers and bullet points
                 .replace(/(### Day (\d+):?[\s\S]*?)\*\*🍳 Breakfast:\*\*(.*?)(?=\*\*🥗|\*\*🍽️|\*\*🍎|###|##|$)/gs, function(match, daySection, dayNum, content) {
                     const formatted = formatMealWithBullets(content, 'breakfast', dayNum);
@@ -486,6 +562,11 @@
                         <div style="padding: 0 20px;">${formatted}</div>
                     </div>`;
                 })
+
+                // Convert headers after meal sections have been parsed
+                .replace(/^# (.*$)/gm, '<h1 style="color: #4B9CD3; text-align: center; font-size: 32px; margin: 30px 0;">$1</h1>')
+                .replace(/^## (.*$)/gm, '<h2 style="text-align: center; font-size: 26px; margin: 35px 0 25px 0; font-weight: bold; text-decoration: underline; color: #28a745;">$1</h2>')
+                .replace(/^### (Day \d+):?/gm, '<h3 style="text-align: center; font-size: 22px; margin: 30px 0 20px 0; font-weight: bold; text-decoration: underline; color: #333;">DAY $1</h3>')
                 
                 // Format day totals
                 .replace(/\*\*Day Total:\*\*(.*?)(?=###|##|$)/gs, '<div style="background: #f0f8ff; border-radius: 8px; padding: 12px; margin: 25px 0; text-align: center;"><strong style="font-size: 14px;">Daily Total:$1</strong></div>')
@@ -596,7 +677,7 @@
             if (!planName) return;
             
             // Extract structured meal data from content
-            const mealData = extractMealDataFromPlan(currentPlanContent);
+            const mealData = extractMealDataFromPlan();
             
             const planData = {
                 id: Date.now().toString(),
@@ -615,46 +696,54 @@
         }
         
         // Extract meal data from the meal plan content
-        function extractMealDataFromPlan(htmlContent) {
-            const meals = [];
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-            
-            // Find all meal buttons to extract data
-            const buttons = tempDiv.querySelectorAll('button[onclick*="logMealToTracker"]');
-            buttons.forEach(button => {
-                try {
-                    const onclickAttr = button.getAttribute('onclick');
-                    const mealDataMatch = onclickAttr.match(/logMealToTracker\((.*?)\)/);
-                    if (mealDataMatch) {
-                        const mealData = JSON.parse(mealDataMatch[1]);
-                        meals.push(mealData);
-                    }
-                } catch (e) {
-                    console.log('Error parsing meal data:', e);
-                }
-            });
-            
-            return meals;
+        function extractMealDataFromPlan() {
+            return Array.from(document.querySelectorAll('#meal-plan-content button[data-meal-record-id]'))
+                .map(button => mealPlanRecords.get(button.dataset.mealRecordId)?.data)
+                .filter(Boolean)
+                .map(mealData => ({ ...mealData }));
         }
         
         // Log meal to calorie tracker (simplified version)
         function logMealToTracker(mealData) {
+            if (!mealData || typeof mealData !== 'object') return false;
             console.log('📝 Logging meal to tracker:', mealData);
             
             // Add current date and time
             const now = new Date();
             const logEntry = {
                 ...mealData,
+                type: mealData.type || mealData.mealType || 'snack',
                 date: now.toDateString(),
                 time: now.toTimeString().split(' ')[0],
-                logged_at: now.toISOString()
+                logged_at: now.toISOString(),
+                timestamp: now.toISOString()
             };
-            
-            // Save to localStorage for calorie tracker
-            let trackerData = JSON.parse(localStorage.getItem('fuelfire_calorie_log') || '[]');
-            trackerData.push(logEntry);
-            localStorage.setItem('fuelfire_calorie_log', JSON.stringify(trackerData));
+
+            const store = window.FuelFireFoodStore;
+            if (!store || typeof store.readLogs !== 'function' || typeof store.writeLogs !== 'function' || typeof store.getLocalDateKey !== 'function') {
+                console.error('Could not save meal: the canonical food store is unavailable.');
+                return false;
+            }
+
+            const logs = store.readLogs(localStorage);
+            if (store.readLogs.lastError) {
+                console.error('Could not save meal: canonical food-store migration failed.', store.readLogs.lastError);
+                return false;
+            }
+
+            const dateKey = store.getLocalDateKey(logEntry.logged_at);
+            const currentDay = logs[dateKey] && typeof logs[dateKey] === 'object' ? logs[dateKey] : {};
+            const result = store.writeLogs({
+                ...logs,
+                [dateKey]: {
+                    ...currentDay,
+                    meals: [...(Array.isArray(currentDay.meals) ? currentDay.meals : []), logEntry]
+                }
+            }, localStorage);
+            if (!result || result.ok === false) {
+                console.error('Could not save meal: canonical food-store write failed.', result?.error);
+                return false;
+            }
             
             // Show confirmation
             alert(`✅ ${mealData.name} logged to calorie tracker!\n\n📊 ${mealData.calories} calories\n🥩 ${mealData.protein}g protein\n🍞 ${mealData.carbs}g carbs\n🥑 ${mealData.fat}g fat`);
@@ -664,6 +753,7 @@
             if (openTracker) {
                 window.open('calorie-tracker.html', '_blank');
             }
+            return true;
         }
         
         // Check if meal plan data was passed

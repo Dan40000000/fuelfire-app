@@ -257,7 +257,12 @@ class HealthSync {
     dismissAppleWatchPrompt() {
         localStorage.setItem('fuelfire_watch_prompt_dismissed_at', String(Date.now()));
         const prompt = document.getElementById('apple-watch-connect-prompt');
-        if (prompt) prompt.remove();
+        if (prompt) {
+            if (window.FuelFireModal && typeof window.FuelFireModal.close === 'function') {
+                window.FuelFireModal.close(prompt);
+            }
+            prompt.remove();
+        }
     }
 
     async connectAppleHealth() {
@@ -326,6 +331,10 @@ class HealthSync {
             </div>`;
 
         document.body.appendChild(overlay);
+        if (window.FuelFireModal && typeof window.FuelFireModal.enhance === 'function') {
+            window.FuelFireModal.enhance(overlay);
+            overlay.setAttribute('aria-hidden', 'false');
+        }
         const connectButton = overlay.querySelector('#apple-watch-connect-now');
         const laterButton = overlay.querySelector('#apple-watch-connect-later');
         const message = overlay.querySelector('#apple-watch-connect-message');
@@ -342,7 +351,13 @@ class HealthSync {
                     throw new Error('Well Fit could not read Apple Health data. Check Health > Sharing > Apps > Well Fit, then try again.');
                 }
                 connectButton.textContent = 'Connected';
-                setTimeout(() => overlay.remove(), 500);
+                setTimeout(() => {
+                    if (window.FuelFireModal && typeof window.FuelFireModal.close === 'function') {
+                        window.FuelFireModal.close(overlay);
+                    } else {
+                        overlay.remove();
+                    }
+                }, 500);
             } catch (error) {
                 message.textContent = error?.message || 'Could not connect to Apple Health. Please try again.';
                 message.style.display = 'block';
@@ -356,6 +371,9 @@ class HealthSync {
     }
 
     getStoredUserProfile() {
+        if (typeof window !== 'undefined' && window.FuelFireEnergy && typeof window.FuelFireEnergy.resolveProfile === 'function') {
+            return window.FuelFireEnergy.resolveProfile(localStorage, null);
+        }
         let profile = {};
         let legacyProfile = {};
         try {
@@ -735,7 +753,7 @@ class HealthSync {
     }
 
     async getTodayCaloriesBurned() {
-        if (!this.isAvailable) return 0;
+        if (!this.isAvailable) return null;
 
         try {
             const totals = await this.getAggregatedTotals();
@@ -745,45 +763,12 @@ class HealthSync {
                 return rounded;
             }
         } catch (error) {
-            console.warn('⚠️ Aggregated active energy unavailable, falling back to derived estimate:', error);
+            console.warn('⚠️ Aggregated active energy unavailable:', error);
         }
-
-        try {
-            // Get steps, weight, and height for calculation
-            const steps = await this.getTodaySteps();
-            const weightFromHealth = await this.getWeight();
-            const profileMetrics = this.getProfileMetricsFromStorage();
-
-            const heightCm = (() => {
-                if (profileMetrics.heightInches) {
-                    return profileMetrics.heightInches * 2.54;
-                }
-                const storedProfile = profileMetrics.profile || {};
-                const candidate = Number(storedProfile.heightCm || storedProfile.height_cm || storedProfile.height);
-                if (Number.isFinite(candidate) && candidate > 0) {
-                    return candidate;
-                }
-                return 170;
-            })();
-
-            const weightLbs = weightFromHealth || profileMetrics.weightLbs;
-            const weightKg = weightLbs ? (weightLbs / 2.20462) : 80;
-
-            // Calculate active calories from steps
-            // Formula: Stride length = Height × 0.43
-            //          Distance (km) = (Steps × Stride length) / 100000
-            //          Active Calories = Distance × Weight × 1.036
-
-            const strideLength = heightCm * 0.43; // in cm
-            const distanceKm = (steps * strideLength) / 100000;
-            const activeCalories = distanceKm * weightKg * 1.036;
-
-            console.log(`🔥 Active calories (fallback) from steps: ${Math.round(activeCalories)} (${steps} steps, ${weightKg.toFixed(1)}kg, ${heightCm}cm)`);
-            return Math.round(activeCalories);
-        } catch (error) {
-            console.error('❌ Error calculating calories:', error);
-            return 0;
-        }
+        // Do not convert unavailable Health energy into a fabricated zero or a
+        // step-based estimate. The reconciliation layer needs to distinguish
+        // missing permission/data from a verified current zero.
+        return null;
     }
 
     async getTodayWorkouts() {
@@ -800,12 +785,26 @@ class HealthSync {
                 startDate: today.toISOString(),
                 endDate: new Date().toISOString()
             });
-            console.log(`💪 Today's workouts: ${workouts.length}`);
-            return Array.isArray(workouts) ? workouts : [];
+            const normalized = Array.isArray(workouts) ? workouts.map(workout => this.normalizeHealthWorkout(workout)) : [];
+            console.log(`💪 Today's workouts: ${normalized.length}`);
+            return normalized;
         } catch (error) {
             console.error('❌ Error fetching workouts:', error);
             return [];
         }
+    }
+
+    normalizeHealthWorkout(workout) {
+        const source = workout && typeof workout === 'object' ? workout : {};
+        const originID = source.originID || source.originId || source.origin_id || source.uuid || source.workoutId || source.id || null;
+        return {
+            ...source,
+            originID: originID ? String(originID) : null,
+            source: source.source || 'apple-health',
+            sourceName: source.sourceName || source.provider || 'Apple Health',
+            startDate: source.startDate || source.startedAt || source.date || null,
+            endDate: source.endDate || source.endedAt || source.date || null
+        };
     }
 
     async getDistance() {
@@ -971,10 +970,10 @@ class HealthSync {
                 weight = null;
             }
 
-            const hasMetricsForBmr = weight && profileMetrics.heightInches && profileMetrics.age;
+            const hasMetricsForBmr = weight > 0 && profileMetrics.heightInches > 0 && profileMetrics.age > 0;
             let bmr = hasMetricsForBmr
                 ? this.calculateBMR(weight, profileMetrics.heightInches, profileMetrics.age, profileMetrics.sex)
-                : 0;
+                : null;
 
             if (!hasMetricsForBmr) {
                 console.log('⚠️ Missing metrics for BMR calculation.', {
@@ -984,31 +983,25 @@ class HealthSync {
                 });
             }
 
-            if (!bmr || !Number.isFinite(bmr) || bmr <= 0) {
-                const cachedBmr = parseInt(localStorage.getItem('fuelfire_last_bmr') || '0', 10);
-                if (cachedBmr > 0) {
-                    bmr = cachedBmr;
-                    console.log(`📦 Using cached BMR from storage: ${cachedBmr}`);
-                } else if (weight) {
-                    const assumedHeight = profileMetrics.heightInches || 70;
-                    const assumedAge = profileMetrics.age || 30;
-                    bmr = this.calculateBMR(weight, assumedHeight, assumedAge, profileMetrics.sex);
-                    console.log(`🧮 Estimated fallback BMR using assumptions: ${bmr}`);
-                }
+            if (!Number.isFinite(bmr) || bmr <= 0) {
+                bmr = null;
             }
 
-            if (bmr && Number.isFinite(bmr) && bmr > 0) {
+            if (bmr !== null) {
                 localStorage.setItem('fuelfire_last_bmr', String(Math.round(bmr)));
             }
 
-            const totalCaloriesBurned = activeEnergy + (bmr || 0);
+            const totalCaloriesBurned = Number.isFinite(activeEnergy)
+                ? activeEnergy + (bmr || 0)
+                : null;
 
             if (weight && Number.isFinite(weight) && weight > 0) {
                 try {
                     const profile = { ...(profileMetrics.profile || {}) };
-                    const storedWeight = Number(profile.weight);
+                    const storedWeight = Number(profile.weightLbs ?? profile.weight);
                     if (!Number.isFinite(storedWeight) || Math.abs(storedWeight - weight) > 0.01) {
                         profile.weight = Math.round(weight * 10) / 10;
+                        profile.weightLbs = profile.weight;
                         profile.updatedAt = new Date().toISOString();
                         profile.weightSource = 'apple-health';
                         localStorage.setItem('fuelfire_user_profile', JSON.stringify(profile));
@@ -1020,6 +1013,13 @@ class HealthSync {
                 }
             }
 
+            const syncTime = new Date().toISOString();
+            const localDate = this.getLocalDateKey(new Date());
+            const dataDate = aggregatedTotals?.date || localDate;
+            const parsedDataDate = dataDate ? new Date(dataDate) : null;
+            const healthDataDate = parsedDataDate && !Number.isNaN(parsedDataDate.getTime())
+                ? this.getLocalDateKey(parsedDataDate)
+                : dataDate;
             const data = {
                 steps,
                 heartRate: heartRateSummary,
@@ -1031,7 +1031,11 @@ class HealthSync {
                 distanceMeters: aggregatedTotals?.distanceMeters ?? null,
                 weight: weight ?? null,
                 sleep: sleepHours,
-                syncTime: new Date().toISOString(),
+                syncTime,
+                dataDate,
+                healthDataDate,
+                localDate,
+                healthStatus: healthDataDate === localDate ? 'current' : 'stale',
                 aggregatedTotals: aggregatedTotals || null
             };
 
@@ -1080,15 +1084,19 @@ class HealthSync {
                 console.warn('Workout HealthKit bridge is unavailable.');
                 return false;
             }
-            const result = await totalsPlugin.saveWorkout({
+            const payload = {
                 type: workoutData.type || 'other',
                 startDate: workoutData.startDate || new Date().toISOString(),
                 endDate: workoutData.endDate || new Date().toISOString(),
-                calories: Number(workoutData.calories) || 0,
-                distance: Number(workoutData.distance) || 0,
-                duration: Number(workoutData.duration) || 0
-            });
+                calories: Number.isFinite(Number(workoutData.calories)) ? Number(workoutData.calories) : 0,
+                distance: Number.isFinite(Number(workoutData.distance)) ? Number(workoutData.distance) : 0,
+                duration: Number.isFinite(Number(workoutData.duration)) ? Number(workoutData.duration) : 0
+            };
+            const sourceIdentifier = workoutData.originID || workoutData.originId || workoutData.origin_id;
+            if (sourceIdentifier) payload.originID = String(sourceIdentifier);
+            const result = await totalsPlugin.saveWorkout(payload);
             if (result?.saved === false) return false;
+            this.lastWrittenWorkoutResult = result || null;
             console.log('✅ Workout written to Apple Health');
             return true;
         } catch (error) {

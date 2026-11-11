@@ -5,6 +5,7 @@ const defaultHeaders = [
     'X-FuelFire-Admin-Token',
     'X-FuelFire-AI-Test-Token',
     'X-FuelFire-Internal-Token',
+    'X-FuelFire-Installation-Session',
     'X-FuelFire-RC-App-User-ID',
     'X-RevenueCat-App-User-ID',
 ];

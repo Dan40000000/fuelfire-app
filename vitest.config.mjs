@@ -12,9 +12,15 @@ export default defineConfig({
             reporter: ['text', 'json-summary', 'html'],
             reportsDirectory: 'output/coverage',
             include: [
+                // Keep this as an explicit, reviewable core-module scope. This
+                // is not a whole-application coverage claim.
                 'api/_lib/http.js',
                 'api/_lib/security.js',
                 'api/ai-food-vision.js',
+                'public/workout-store.js',
+                'public/food-store.js',
+                'public/activity-energy.js',
+                'public/account-data.js',
                 'public/workout-calorie-estimator.mjs',
             ],
         },

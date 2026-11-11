@@ -3,6 +3,8 @@
 !api/**
 !public
 !public/**
+!scripts
+!scripts/validate-web.mjs
 !package.json
 !package-lock.json
 !vercel.json

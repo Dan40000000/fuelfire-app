@@ -2,13 +2,47 @@
 // This routes all user requests through your Claude Pro account
 // Last updated: July 25, 2025 - Added better error handling
 
-import { callClaude, getClaudeModel } from './_lib/anthropic.js';
+import { callClaude } from './_lib/anthropic.js';
 import { applyCors, handleCorsPreflight, ensureMethod } from './_lib/http.js';
+import { requireAiAccess } from './_lib/security.js';
+import { createProviderBudget } from './_lib/provider-budget.js';
+import { getRequestBody, requireBodyLimit } from './_lib/request-security.js';
 
 const corsOptions = {
     methods: ['POST', 'OPTIONS'],
     headers: ['Content-Type', 'Authorization'],
 };
+
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function validateQuizData(quizData) {
+    if (!quizData || typeof quizData !== 'object' || Array.isArray(quizData)) return false;
+    try {
+        if (Buffer.byteLength(JSON.stringify(quizData), 'utf8') > 64 * 1024) return false;
+    } catch {
+        return false;
+    }
+    return Object.values(quizData).every((value) => {
+        if (typeof value === 'string') return value.length <= 500;
+        if (Array.isArray(value)) return value.length <= 50 && value.every((item) => typeof item === 'string' && item.length <= 200);
+        return value === null || typeof value === 'number' || typeof value === 'boolean' || typeof value === 'undefined';
+    });
+}
+
+function validateImageData(imageData) {
+    if (typeof imageData !== 'string' || imageData.length > MAX_IMAGE_BYTES * 2) return null;
+    const match = imageData.match(/^data:(image\/(?:jpeg|jpg|png|webp|gif));base64,([A-Za-z0-9+/]+={0,2})$/i);
+    if (!match) return null;
+    let decoded;
+    try {
+        decoded = Buffer.from(match[2], 'base64');
+    } catch {
+        return null;
+    }
+    if (!decoded.length || decoded.length > MAX_IMAGE_BYTES) return null;
+    return { imageData, mediaType: match[1].toLowerCase() === 'image/jpg' ? 'image/jpeg' : match[1].toLowerCase(), bytes: decoded.length };
+}
 
 export default async function handler(req, res) {
     if (handleCorsPreflight(req, res, corsOptions)) {
@@ -21,25 +55,52 @@ export default async function handler(req, res) {
     }
 
     try {
-        const body = req.body || {};
-        const { quizData, userId, imageUpload, image, images, imageCount, phase } = body;
+        if (!requireBodyLimit(req, res, MAX_BODY_BYTES)) return;
+        const body = getRequestBody(req);
+        if (!body) {
+            return res.status(400).json({ success: false, error: 'A JSON object body is required.', code: 'INVALID_JSON_BODY' });
+        }
+        const { quizData, imageUpload, image, images, phase } = body;
 
-        if (!process.env.CLAUDE_API_KEY) {
-            console.error('❌ CLAUDE_API_KEY not found in environment variables');
-            throw new Error('API configuration error - Claude API key not configured');
+        const imageArray = imageUpload === true
+            ? (Array.isArray(images) ? images : image ? [image] : [])
+            : [];
+        if (imageUpload === true) {
+            if (!imageArray.length || imageArray.length > 5) {
+                return res.status(400).json({ success: false, error: 'One to five meal-plan images are required.', code: 'INVALID_IMAGE_SCHEMA' });
+            }
+            const validatedImages = imageArray.map(validateImageData);
+            if (validatedImages.some((item) => !item)
+                || validatedImages.reduce((total, item) => total + item.bytes, 0) > 8 * 1024 * 1024) {
+                return res.status(400).json({ success: false, error: 'Meal-plan images must be valid, bounded data URLs.', code: 'INVALID_IMAGE_SCHEMA' });
+            }
+        } else if (!validateQuizData(quizData)) {
+            return res.status(400).json({ success: false, error: 'Valid quiz data is required.', code: 'INVALID_QUIZ_SCHEMA' });
         }
 
-        console.log(`🔑 Claude API key present. Using model: ${getClaudeModel()}`);
+        const access = await requireAiAccess(req, res, {
+            capability: imageUpload === true ? 'meal_import' : 'planning',
+        });
+        if (!access) return;
+
+        if (!process.env.CLAUDE_API_KEY) {
+            return res.status(503).json({
+                success: false,
+                error: 'Meal-plan provider is not configured.',
+                code: 'PROVIDER_CONFIG_REQUIRED',
+            });
+        }
+
+        const providerBudget = createProviderBudget({ limit: process.env.FUELFIRE_MEAL_PLAN_PROVIDER_BUDGET || 10 });
 
         // Handle image upload (single or multiple)
-        if (imageUpload && (image || images)) {
-            const imageArray = images || [image];
-            console.log(`📷 Processing ${imageArray.length} uploaded meal plan image(s) for user: ${userId || 'anonymous'}`);
+        if (imageUpload === true) {
+            console.log(`📷 Processing ${imageArray.length} uploaded meal plan image(s)`);
 
             // Extract meal plan from image(s)
-            const extractedMealPlan = await extractMealPlanFromImages(imageArray, { userId });
+            const extractedMealPlan = await extractMealPlanFromImages(imageArray, { providerBudget });
 
-            console.log(`✅ Successfully extracted meal plan from ${imageArray.length} image(s) for user: ${userId || 'anonymous'}`);
+            console.log(`✅ Successfully extracted meal plan from ${imageArray.length} image(s)`);
 
             return res.status(200).json({
                 success: true,
@@ -51,17 +112,12 @@ export default async function handler(req, res) {
                     goal: 'uploaded',
                     source: 'uploaded_photos',
                     imageCount: imageArray.length,
-                    userId: userId || 'anonymous'
                 }
             });
         }
 
         // Regular quiz-based generation
-        if (!quizData) {
-            return res.status(400).json({ error: 'Quiz data is required' });
-        }
-
-        console.log(`🎯 Generating complete meal plan for user: ${userId || 'anonymous'}`);
+        console.log('🎯 Generating complete meal plan');
         console.log(`📊 Quiz data includes: ${Object.keys(quizData).join(', ')}`);
         console.log('🚀 Dispatching segmented meal plan prompts...');
 
@@ -72,6 +128,7 @@ export default async function handler(req, res) {
                 prompt: legacyPrompt,
                 maxTokens: 4000,
                 tags: ['meal-plan', 'legacy'],
+                providerBudget,
             });
 
             return res.status(200).json({
@@ -82,7 +139,6 @@ export default async function handler(req, res) {
                     generatedAt: new Date().toISOString(),
                     planDuration: '14-day',
                     goal: quizData.goal,
-                    userId: userId || 'anonymous',
                     mode: 'legacy',
                 },
             });
@@ -93,10 +149,10 @@ export default async function handler(req, res) {
 
         try {
             [week1, week2, shopping1, shopping2, title] = await Promise.all([
-                generateWeek1(quizData).catch(e => { console.error('❌ Week1 failed:', e); throw e; }),
-                generateWeek2(quizData).catch(e => { console.error('❌ Week2 failed:', e); throw e; }),
-                generateWeek1ShoppingList(quizData).catch(e => { console.error('❌ Shopping1 failed:', e); throw e; }),
-                generateWeek2ShoppingList(quizData).catch(e => { console.error('❌ Shopping2 failed:', e); throw e; }),
+                generateWeek1(quizData, providerBudget).catch(e => { console.error('❌ Week1 failed:', e); throw e; }),
+                generateWeek2(quizData, providerBudget).catch(e => { console.error('❌ Week2 failed:', e); throw e; }),
+                generateWeek1ShoppingList(quizData, providerBudget).catch(e => { console.error('❌ Shopping1 failed:', e); throw e; }),
+                generateWeek2ShoppingList(quizData, providerBudget).catch(e => { console.error('❌ Shopping2 failed:', e); throw e; }),
                 generateTitle(quizData).catch(e => { console.error('❌ Title failed:', e); throw e; })
             ]);
 
@@ -122,7 +178,7 @@ export default async function handler(req, res) {
         // Combine all parts
         const completeMealPlan = `${title}\n\n${week1}\n\n${shopping1}\n\n${week2}\n\n${shopping2}`;
 
-        console.log(`✅ Successfully generated complete meal plan for user: ${userId || 'anonymous'}`);
+        console.log('✅ Successfully generated complete meal plan');
         console.log(`📏 Complete meal plan length: ${completeMealPlan.length} characters`);
 
         res.status(200).json({
@@ -133,7 +189,6 @@ export default async function handler(req, res) {
                 generatedAt: new Date().toISOString(),
                 planDuration: '2-week',
                 goal: quizData.goal,
-                userId: userId || 'anonymous'
             }
         });
 
@@ -143,7 +198,6 @@ export default async function handler(req, res) {
         res.status(500).json({
             error: 'Failed to generate meal plan',
             message: 'Our AI chef is taking a quick break. Please try again in a moment!',
-            details: error.message // Always show error details for debugging
         });
     }
 }
@@ -153,7 +207,7 @@ async function callClaudeText(options) {
     return text;
 }
 
-async function extractMealPlanFromImage(imageData, { userId } = {}) {
+async function extractMealPlanFromImage(imageData, { providerBudget } = {}) {
     const [header, base64] = imageData.split(',');
     const mediaTypeMatch = header.match(/data:image\/(.*?);/);
     const mediaType = mediaTypeMatch ? mediaTypeMatch[1] : 'jpeg';
@@ -211,11 +265,12 @@ Important:
     return await callClaudeText({
         messages: [{ role: 'user', content }],
         maxTokens: 4000,
-        tags: ['meal-plan', 'image-extract', userId ? `user:${userId}` : undefined].filter(Boolean),
+        tags: ['meal-plan', 'image-extract'],
+        providerBudget,
     });
 }
 
-async function extractMealPlanFromImages(imageDataArray, { userId } = {}) {
+async function extractMealPlanFromImages(imageDataArray, { providerBudget } = {}) {
     // Build content array with prompt text first, then all images
     const content = [
         {
@@ -283,7 +338,8 @@ Important:
     return await callClaudeText({
         messages: [{ role: 'user', content }],
         maxTokens: 4000,
-        tags: ['meal-plan', 'image-batch', `count:${imageDataArray.length}`, userId ? `user:${userId}` : undefined].filter(Boolean),
+        tags: ['meal-plan', 'image-batch', `count:${imageDataArray.length}`],
+        providerBudget,
     });
 }
 
@@ -292,7 +348,7 @@ async function generateTitle(quizData) {
     return `# 🔥 ${title}`;
 }
 
-async function generateWeek1(quizData) {
+async function generateWeek1(quizData, providerBudget) {
     const userInfo = `User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
 Allergies: ${quizData.allergies?.join(', ') || 'None'}
 Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
@@ -320,10 +376,11 @@ Include ALL 7 days. ALWAYS specify exact quantities for every ingredient. Keep m
         prompt,
         maxTokens: 4000,
         tags: ['meal-plan', 'week1'],
+        providerBudget,
     });
 }
 
-async function generateWeek2(quizData) {
+async function generateWeek2(quizData, providerBudget) {
     const userInfo = `User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
 Allergies: ${quizData.allergies?.join(', ') || 'None'}
 Preferences: ${quizData.meats?.slice(0,3).join(', ') || 'All meats'}`;
@@ -351,10 +408,11 @@ Include ALL 7 days (Days 8-14). ALWAYS specify exact quantities for every ingred
         prompt,
         maxTokens: 4000,
         tags: ['meal-plan', 'week2'],
+        providerBudget,
     });
 }
 
-async function generateWeek1ShoppingList(quizData) {
+async function generateWeek1ShoppingList(quizData, providerBudget) {
     const prompt = `Create a shopping list for Week 1 (Days 1-7) of a meal plan.
 
 User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
@@ -375,10 +433,11 @@ Format each category with specific items and quantities. Keep it practical.`;
         prompt,
         maxTokens: 2000,
         tags: ['meal-plan', 'shopping', 'week1'],
+        providerBudget,
     });
 }
 
-async function generateWeek2ShoppingList(quizData) {
+async function generateWeek2ShoppingList(quizData, providerBudget) {
     const prompt = `Create a shopping list for Week 2 (Days 8-14) of a meal plan.
 
 User: ${quizData.age}yo ${quizData.gender}, ${quizData.weight}lbs, goal: ${quizData.goal}
@@ -399,6 +458,7 @@ Format each category with specific items and quantities. Keep it practical.`;
         prompt,
         maxTokens: 2000,
         tags: ['meal-plan', 'shopping', 'week2'],
+        providerBudget,
     });
 }
 

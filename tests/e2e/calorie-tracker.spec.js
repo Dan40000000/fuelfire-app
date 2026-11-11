@@ -1,7 +1,7 @@
 import path from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { expectInsideViewport, localDateKey, seedPaidAiAccess } from './helpers.js';
+import { expectInsideViewport, localDateKey, seedPaidAiAccess, TEST_INSTALLATION_CUSTOMER_ID, TEST_INSTALLATION_TOKEN } from './helpers.js';
 
 const fixtureDir = path.resolve(process.cwd(), 'tests/fixtures');
 
@@ -940,7 +940,7 @@ test('photo flow sends brand and portion context before displaying mocked result
     await page.evaluate(() => window.closePhotoModal());
 });
 
-test('photo requests include the RevenueCat user needed by the production AI gate', async ({ page }) => {
+test('photo requests use an installation binding instead of a caller-selected RevenueCat ID', async ({ page }) => {
     let requestHeaders;
     await page.addInitScript(() => {
         localStorage.setItem('rc_app_user_id', 'testflight-photo-user');
@@ -972,7 +972,12 @@ test('photo requests include the RevenueCat user needed by the production AI gat
     await page.getByRole('button', { name: 'Analyze Food' }).click();
 
     await expect(page.locator('#photo-results')).toBeVisible();
-    expect(requestHeaders['x-fuelfire-rc-app-user-id']).toBe('testflight-photo-user');
+    expect(requestHeaders['x-fuelfire-rc-app-user-id']).toBeUndefined();
+    expect(requestHeaders['x-fuelfire-installation-session']).toBe(TEST_INSTALLATION_TOKEN);
+    expect(requestHeaders.authorization).toBe(`Bearer ${TEST_INSTALLATION_TOKEN}`);
+    expect(await page.evaluate(() => localStorage.getItem('fuelfire_server_rc_app_user_id'))).toBe(TEST_INSTALLATION_CUSTOMER_ID);
+    // A new binding must not silently overwrite an existing customer's ID.
+    expect(await page.evaluate(() => localStorage.getItem('rc_app_user_id'))).toBe('testflight-photo-user');
 });
 
 test('photo authorization errors stop the loading state and return to retry controls', async ({ page }) => {

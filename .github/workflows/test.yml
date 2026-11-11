@@ -16,6 +16,8 @@ on:
       - 'ios/App/**'
       - 'scripts/run-ios-ui-tests.sh'
       - 'scripts/setup-ios-ui-tests.rb'
+      - 'scripts/validate-web.mjs'
+      - 'scripts/check-release-files.sh'
       - '.github/workflows/test.yml'
 
 permissions:
@@ -28,6 +30,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Guard newly tracked release files and secrets
+        run: bash scripts/check-release-files.sh
 
       - uses: actions/setup-node@v4
         with:
@@ -37,8 +44,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Validate shipped scripts and local assets
+        run: npm run build
+
+      - name: Install Playwright Chromium and WebKit
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Run unit, contract, AI fixture, browser, visual, and accessibility tests
         run: npm run test:ci
@@ -89,6 +99,9 @@ jobs:
 
       - name: Sync Capacitor and CocoaPods
         run: npx cap sync ios
+
+      - name: Install CocoaPods dependencies
+        run: pod install --project-directory=ios/App
 
       - name: Run native launch and resume tests
         run: npm run test:ios:ui

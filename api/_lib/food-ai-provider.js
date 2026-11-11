@@ -1,3 +1,5 @@
+import { createProviderBudget, getProviderBudget } from './provider-budget.js';
+
 const ANTHROPIC_BASE_URL = 'https://api.anthropic.com/v1';
 const ANTHROPIC_VERSION = '2023-06-01';
 const DEFAULT_CLAUDE_MODEL = 'claude-sonnet-5';
@@ -99,6 +101,12 @@ function requestTimeoutMs() {
     const configured = Number(process.env.FOOD_AI_TIMEOUT_MS);
     if (!Number.isFinite(configured)) return DEFAULT_TIMEOUT_MS;
     return Math.max(5000, Math.min(120000, Math.round(configured)));
+}
+
+function getMaxRetries() {
+    const configured = Number(process.env.FUELFIRE_PROVIDER_MAX_RETRIES);
+    if (!Number.isFinite(configured)) return MAX_RETRIES;
+    return Math.min(MAX_RETRIES, Math.max(1, Math.floor(configured)));
 }
 
 function getClaudeConfig(modality = 'text', tier = 'primary') {
@@ -206,15 +214,17 @@ function providerError(config, status, statusText, errorText) {
 
 async function callConfiguredProvider(config, options) {
     const request = buildProviderRequest(config, options);
+    const maxRetries = getMaxRetries();
     let lastError;
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
         options.signal?.throwIfAborted();
         const controller = new AbortController();
         const onAbort = () => controller.abort();
         options.signal?.addEventListener('abort', onAbort, { once: true });
         const timeout = setTimeout(() => controller.abort(), requestTimeoutMs());
         try {
+            options.providerBudget.consume(config.provider);
             const response = await fetch(request.endpoint, {
                 method: 'POST',
                 headers: request.headers,
@@ -231,7 +241,7 @@ async function callConfiguredProvider(config, options) {
                 }
 
                 const error = providerError(config, response.status, response.statusText, errorText);
-                if (error.retryable && attempt < MAX_RETRIES) {
+                if (error.retryable && attempt < maxRetries) {
                     lastError = error;
                     const retryAfter = Number(response.headers.get('retry-after'));
                     const delay = Number.isFinite(retryAfter) && retryAfter > 0
@@ -245,7 +255,7 @@ async function callConfiguredProvider(config, options) {
 
             const data = await response.json();
             if (config.provider === 'claude' && data?.stop_reason === 'max_tokens') {
-                if (attempt < MAX_RETRIES) {
+                if (attempt < maxRetries) {
                     request.body.max_tokens = Math.min(8192, Math.max(2400, request.body.max_tokens * 2));
                     continue;
                 }
@@ -274,7 +284,13 @@ async function callConfiguredProvider(config, options) {
             };
         } catch (error) {
             if (options.signal?.aborted) throw options.signal.reason;
-            const normalizedError = error?.name === 'AbortError'
+            const normalizedError = error?.code === 'PROVIDER_BUDGET_EXHAUSTED'
+                ? Object.assign(error, {
+                    provider: config.provider,
+                    providerCode: 'PROVIDER_BUDGET_EXHAUSTED',
+                    retryable: false,
+                })
+                : error?.name === 'AbortError'
                 ? Object.assign(new Error(`Food AI provider timed out after ${requestTimeoutMs()}ms.`), {
                     provider: config.provider,
                     providerCode: 'FOOD_AI_TIMEOUT',
@@ -288,7 +304,7 @@ async function callConfiguredProvider(config, options) {
                         retryable: true
                     });
             lastError = normalizedError;
-            if (normalizedError.retryable && attempt < MAX_RETRIES) {
+            if (normalizedError.retryable && attempt < maxRetries) {
                 await sleep(RETRY_BASE_DELAY_MS * attempt, options.signal);
                 continue;
             }
@@ -320,14 +336,26 @@ export async function callFoodAi({
     tags = [],
     tier = 'primary',
     allowDegradedFallback = true,
-    signal
+    signal,
+    providerBudget,
 } = {}) {
     if (!prompt || typeof prompt !== 'string') {
         throw new Error('Food AI prompt is required.');
     }
 
     signal?.throwIfAborted();
-    const options = { prompt, image, mimeType, maxTokens, temperature, json, thinking, tags, signal };
+    const options = {
+        prompt,
+        image,
+        mimeType,
+        maxTokens,
+        temperature,
+        json,
+        thinking,
+        tags,
+        signal,
+        providerBudget: providerBudget || getProviderBudget() || createProviderBudget(),
+    };
     const primary = getFoodAiConfig(modality, { tier });
     const fallback = primary.provider === 'claude' ? getFoodAiFallbackConfig(modality) : null;
 
@@ -374,5 +402,6 @@ export const foodAiConstants = {
     DEFAULT_QWEN_VISION_MODEL,
     DEFAULT_QWEN_TEXT_MODEL,
     MAX_RETRIES,
-    DEFAULT_TIMEOUT_MS
+    DEFAULT_TIMEOUT_MS,
+    getMaxRetries,
 };
