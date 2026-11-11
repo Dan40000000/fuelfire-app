@@ -15,6 +15,15 @@ function validate(files) {
 }
 afterEach(() => directories.splice(0).forEach(directory => fs.rmSync(directory, { recursive: true, force: true })));
 describe('static app build gate', () => {
+    it('includes the build entry point in Vercel uploads without including signing helpers', () => {
+        const ignoreFile = path.resolve('.vercelignore');
+        const ignored = filename => spawnSync('git', [
+            '-c', `core.excludesFile=${ignoreFile}`,
+            'check-ignore', '--no-index', filename,
+        ], { encoding: 'utf8' });
+        expect(ignored('scripts/validate-web.mjs').status).toBe(1);
+        expect(ignored('scripts/install-ios-signing-assets.sh').status).toBe(0);
+    });
     it('checks classic, module and inline scripts without executing them', () => {
         const result = validate({
             'index.html': '<script src="app.js?v=1"></script><script>window.loaded = true;</script>',
